@@ -1,19 +1,22 @@
 <?php
+/**
+ * Conexion — wrapper backward-compatible para la BD de e-commerce.
+ *
+ * Delega a Database::conectar(Database::ECOMMERCE) para mantener
+ * un único punto de configuración de credenciales.
+ *
+ * Todos los modelos que llaman Conexion::conectar() siguen funcionando sin cambios.
+ */
+require_once __DIR__ . '/../config/Database.php';
 
-class Conexion{
-
-	static public function conectar(){
-
-		$link = new PDO("mysql:host=localhost;dbname=egsequip_ecomerce",
-						"egsequip_bdecome",
-						"Qlf24011607",
-						array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-		                      PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8")
-						); 
-
-		return $link;
-
-	}
-
-
+class Conexion
+{
+    /**
+     * Retorna la conexión PDO a egsequip_ecomerce (e-commerce / productos).
+     * @return PDO
+     */
+    public static function conectar()
+    {
+        return Database::conectar(Database::ECOMMERCE);
+    }
 }

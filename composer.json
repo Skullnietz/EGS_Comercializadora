@@ -1,0 +1,32 @@
+{
+  "name": "egs/panel",
+  "description": "EGS Equipo de Cómputo — Panel de Administración Backend",
+  "type": "project",
+  "keywords": ["erp", "crm", "panel", "php"],
+  "require": {
+    "php": ">=7.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "EGS\\Config\\":       "config/",
+      "EGS\\Modelos\\":      "modelos/",
+      "EGS\\Controladores\\": "controladores/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "EGS\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": []
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "minimum-stability": "stable"
+}

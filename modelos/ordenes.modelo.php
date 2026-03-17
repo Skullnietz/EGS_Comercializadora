@@ -574,7 +574,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -715,7 +714,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -835,7 +833,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -952,7 +949,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 		
 
@@ -1003,7 +999,7 @@ class ModeloOrdenes{
 
 
 
-			$stmt -> bindParam(":".$itemDos, $valorUno, PDO::PARAM_STR);
+			$stmt -> bindParam(":".$itemUno, $valorUno, PDO::PARAM_STR);
 
 
 
@@ -2256,7 +2252,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -2293,7 +2288,6 @@ class ModeloOrdenes{
 
 		$stmt->bindParam(":totalInversion", $datos["totalInversiones"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":partidas", $datos["listatOrdenesNuevas"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":estado", $datos["estado"], PDO::PARAM_STR);
 
@@ -2373,7 +2367,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -2424,7 +2417,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -2477,7 +2469,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -2551,7 +2542,7 @@ class ModeloOrdenes{
 
 		$stmt->bindParam(":id_empresa", $datos["empresa"], PDO::PARAM_INT);
 
-		$stmt->bindParam(":estado", $datos["estado"], PDO::PARAM_INT);
+		$stmt->bindParam(":estado", $datos["estado"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":pagos", $datos["pago"], PDO::PARAM_STR);
 
@@ -2591,7 +2582,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 		
 
@@ -2826,7 +2816,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -2879,7 +2868,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -3064,7 +3052,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -3115,7 +3102,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 
@@ -3388,11 +3374,11 @@ class ModeloOrdenes{
 
 
 
-		$stmt->bindParam(":marcaDelEquipo", $datos["marcaDelEquipo"], PDO::PARAM_INT);
+		$stmt->bindParam(":marcaDelEquipo", $datos["marcaDelEquipo"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":modeloDelEquipo", $datos["modeloDelEquipo"], PDO::PARAM_INT);
+		$stmt->bindParam(":modeloDelEquipo", $datos["modeloDelEquipo"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":numeroDeSerieDelEquipo", $datos["numeroDeSerieDelEquipo"], PDO::PARAM_INT);
+		$stmt->bindParam(":numeroDeSerieDelEquipo", $datos["numeroDeSerieDelEquipo"], PDO::PARAM_STR);
 
 		$stmt -> bindParam(":id", $datos["id"], PDO::PARAM_INT);
 
@@ -3418,7 +3404,6 @@ class ModeloOrdenes{
 
 
 
-		$stmt->close();
 
 
 

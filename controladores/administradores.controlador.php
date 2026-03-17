@@ -366,11 +366,6 @@ class ControladorAdministradores{
 						$valor = $_POST["editarEmail"];
 
 						$respuestaAadmin = ModeloAdministradores::mdlMostrarAdministradores($tabla, $item, $valor);
-						foreach ($respuestaAadmin as $key => $value1) {
-							
-							 
-							
-						}
 						
 		
 						//if (password_verify($_POST["editarPassword"], $value1["password"])) {

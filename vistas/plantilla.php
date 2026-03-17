@@ -1,13 +1,5 @@
-<script src="vistas/bower_components/jquery/dist/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+<?php $jsVer = '1.2.0'; ?>
 <!DOCTYPE html>
-<style>
-  .choices__list--dropdown {
-    z-index: 9999 !important;
-  }
-</style>
 <html lang="es">
 
 <head>
@@ -17,9 +9,50 @@
 
   <link rel="icon" href="vistas/img/plantilla/icono.png">
 
-  <!-- Tell the browser to be responsive to screen width -->
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0" />
-  <!--<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">-->
+  <!-- Viewport para responsividad móvil -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  <!-- Estilos globales + indicador de carga AJAX -->
+  <style>
+    .choices__list--dropdown { z-index: 9999 !important; }
+
+    /* ── Barra de carga AJAX global ── */
+    #ajax-loading-bar {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      z-index: 99999;
+      background: linear-gradient(90deg, #3c8dbc, #00c0ef, #3c8dbc);
+      background-size: 200% 100%;
+      animation: ajaxBarSlide 1.2s linear infinite;
+    }
+    #ajax-loading-bar.active { display: block; }
+    @keyframes ajaxBarSlide {
+      0%   { background-position:  200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Responsividad tablas en móvil ── */
+    @media (max-width: 767px) {
+      .dataTables_wrapper { overflow-x: auto; }
+      .box-body { padding: 8px; }
+      .table > thead > tr > th,
+      .table > tbody > tr > td { white-space: nowrap; }
+    }
+
+    /* ── Sidebar colapsado en pantallas pequeñas ── */
+    @media (max-width: 992px) {
+      .content-wrapper { margin-left: 0 !important; transition: margin-left 0.3s; }
+    }
+  </style>
+
+  <!-- jQuery 3.6.0 — debe cargarse antes que Bootstrap y demás plugins -->
+  <script src="vistas/bower_components/jquery/dist/jquery-3.6.0.min.js"></script>
+  <!-- Moment.js — requerido por bootstrap-datetimepicker -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <!-- Bootstrap DateTimePicker -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
   <!-- Bootstrap 3.3.7 -->
   <link rel="stylesheet" href="vistas/bower_components/bootstrap/dist/css/bootstrap.min.css">
   <!-- Font Awesome -->
@@ -64,9 +97,6 @@
 
   <!-- bootstrap datepicker -->
   <link rel="stylesheet" href="vistas/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
-
-  <!-- Dropzone -->
-  <link rel="stylesheet" href="vistas/plugins/dropzone/dropzone.css">
 
   <!-- Dropzone -->
   <link rel="stylesheet" href="vistas/plugins/dropzone/dropzone.css">
@@ -132,7 +162,7 @@
   <script src="vistas/plugins/dropzone/dropzone.js"></script>
 
   <!-- daterangepicker http://www.daterangepicker.com/-->
-  <script src="vistas/bower_components/moment/min/moment.min.js"></script>
+  <!-- moment.js ya cargado desde CDN en <head> — no se repite -->
   <script src="vistas/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
 
   <script src="vistas/plugins/bardcode/codigo.js"></script>
@@ -145,9 +175,10 @@
 
 <body class="hold-transition skin-blue sidebar-collapse sidebar-mini login-page">
 
-  <?php
+  <!-- Barra de carga AJAX global — controlada por ajaxStart/ajaxStop en plantilla.js -->
+  <div id="ajax-loading-bar"></div>
 
-  session_start();
+  <?php
 
   if (isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok" || (isset($_GET["ruta"]) && $_GET["ruta"] == "validar-cotizacion")) {
 
@@ -171,89 +202,19 @@
     CONTENIDO
     =============================================*/
 
+    /*=============================================
+     ROUTER DINÁMICO
+     Reemplaza el bloque if/elseif de ~70 comparaciones.
+     Las rutas permitidas se gestionan en config/routes.php.
+     =============================================*/
+    require_once '../config/Router.php';
+    $router = new Router(require '../config/routes.php');
+
     if (isset($_GET["ruta"])) {
 
-      if (
-        $_GET["ruta"] == "inicio" ||
-        //$_GET["ruta"]== "comercio" ||
-        //$_GET["ruta"]== "slide" ||
-        $_GET["ruta"] == "categorias" ||
-        $_GET["ruta"] == "subcategorias" ||
-        $_GET["ruta"] == "productos" ||
-        $_GET["ruta"] == "banner" ||
-        $_GET["ruta"] == "ventas" ||
-        $_GET["ruta"] == "visitas" ||
-        $_GET["ruta"] == "usuarios" ||
-        $_GET["ruta"] == "perfiles" ||
-        $_GET["ruta"] == "perfil" ||
-        $_GET["ruta"] == "almacen" ||
-        $_GET["ruta"] == "categoriasp" ||
-        $_GET["ruta"] == "ingreso" ||
-        $_GET["ruta"] == "proveedor" ||
-        $_GET["ruta"] == "venta" ||
-        $_GET["ruta"] == "cliente" ||
-        $_GET["ruta"] == "consultacompras" ||
-        $_GET["ruta"] == "historial-cotizaciones" ||
-        $_GET["ruta"] == "crm" ||
-        $_GET["ruta"] == "asesores" ||
-        $_GET["ruta"] == "ventasR" ||
-        $_GET["ruta"] == "ticketR" ||
-        $_GET["ruta"] == "empresas" ||
-        $_GET["ruta"] == "reportes" ||
-        $_GET["ruta"] == "reportePorFecheOrdenes" ||
-        $_GET["ruta"] == "tecnicos" ||
-        $_GET["ruta"] == "CorteTotal" ||
-        $_GET["ruta"] == "corteStatus" ||
-        $_GET["ruta"] == "clientes" ||
-        $_GET["ruta"] == "pedidos" ||
-        $_GET["ruta"] == "creararventa" ||
-        $_GET["ruta"] == "stock" ||
-        $_GET["ruta"] == "ventasD" ||
-        $_GET["ruta"] == "pedidosPrueba" ||
-        $_GET["ruta"] == "EstadoOrden" ||
-        $_GET["ruta"] == "infoOrden" ||
-        $_GET["ruta"] == "AgregarPedido" ||
-        $_GET["ruta"] == "infopedido" ||
-        $_GET["ruta"] == "infoCliente" ||
-        $_GET["ruta"] == "crearTicket" ||
-        $_GET["ruta"] == "tickets" ||
-        $_GET["ruta"] == "infoTicket" ||
-        $_GET["ruta"] == "ordenes" ||
-        $_GET["ruta"] == "ordenes/2" ||
-        $_GET["ruta"] == "comisiones" ||
-        $_GET["ruta"] == "comisionesDos" ||
-        $_GET["ruta"] == "lasordenes" ||
-        $_GET["ruta"] == "objetivos" ||
-        $_GET["ruta"] == "createobjetivo" ||
-        $_GET["ruta"] == "listaobjetivos" ||
-        $_GET["ruta"] == "objetivosventas" ||
-        $_GET["ruta"] == "objetivoselectronica" ||
-        $_GET["ruta"] == "objetivosimpresoras" ||
-        $_GET["ruta"] == "objetivossistemas" ||
-        $_GET["ruta"] == "metas" ||
-        $_GET["ruta"] == "preguntas" ||
-        $_GET["ruta"] == "productoswoocommerce" ||
-        $_GET["ruta"] == "categoriasOrden" ||
-        $_GET["ruta"] == "pantallacitas" ||
-        $_GET["ruta"] == "objetivosventasext" ||
-        $_GET["ruta"] == "almacenes" ||
-        $_GET["ruta"] == "crearcita" ||
-        $_GET["ruta"] == "ordenesnew" ||
-        $_GET["ruta"] == "listacitas" ||
-        $_GET["ruta"] == "ordenesentornoprueba" ||
-        $_GET["ruta"] == "pedidosentornodeprueba" ||
-        $_GET["ruta"] == "cotizacion" ||
-        $_GET["ruta"] == "peticionmaterial" ||
-        $_GET["ruta"] == "Historialdecliente" ||
-        $_GET["ruta"] == "peticionorden" ||
-        $_GET["ruta"] == "busquedamaterial" ||
-        $_GET["ruta"] == "listaPeticionesM" ||
-        $_GET["ruta"] == "salir" ||
-        $_GET["ruta"] == "validar-cotizacion"
-      ) {
+      if ($router->isAllowed($_GET["ruta"])) {
 
         include_once "modulos/" . $_GET["ruta"] . ".php";
-
 
       } else {
 
@@ -282,34 +243,34 @@
 
   ?>
 
-  <script src="vistas/js/plantilla.js"></script>
-  <script src="vistas/js/gestorComercio.js"></script>
-  <script src="vistas/js/gestorCategorias.js"></script>
-  <script src="vistas/js/gestorSubCategorias.js"></script>
-  <script src="vistas/js/gestorProductos.js"></script>
-  <script src="vistas/js/gestorVentas.js"></script>
-  <script src="vistas/js/gestorVentasR.js"></script>
-  <script src="vistas/js/gestorVisitas.js"></script>
-  <script src="vistas/js/gestorUsuarios.js"></script>
-  <script src="vistas/js/gestorAdministradores.js"></script>
-  <script src="vistas/js/gestorNotificaciones.js"></script>
-  <script src="vistas/js/gestorAsesores.js"></script>
-  <script src="vistas/js/gestorEmpresas.js"></script>
-  <script src="vistas/js/gestorOrdenes.js?v=<?= time() ?>"></script>
-  <script src="vistas/js/gestorTecnicos.js"></script>
-  <script src="vistas/js/reporteGrafica.js"></script>
-  <script src="vistas/js/CorteTotal.js"></script>
-  <script src="vistas/js/gestorClientes.js"></script>
-  <script src="vistas/js/ventasDinamicas.js"></script>
-  <script src="vistas/js/gestorStockApuntoDeAgotarse.js"></script>
-  <script src="vistas/js/gestorStockAlerta.js"></script>
-  <script src="vistas/js/infoOrden.js"></script>
-  <script src="vistas/js/gestorBanner.js"></script>
-  <script src="vistas/js/gestor.ticket.stock.js"></script>
-  <script src="vistas/js/gestor.pedidos.js"></script>
-  <script src="vistas/js/gestor.comisiones.js"></script>
-  <script src="vistas/js/gestor.crm.js"></script>
-  <script src="vistas/js/almacenes.js"></script>
+  <script src="vistas/js/plantilla.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorComercio.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorCategorias.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorSubCategorias.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorProductos.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorVentas.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorVentasR.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorVisitas.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorUsuarios.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorAdministradores.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorNotificaciones.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorAsesores.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorEmpresas.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorOrdenes.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorTecnicos.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/reporteGrafica.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/CorteTotal.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorClientes.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/ventasDinamicas.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorStockApuntoDeAgotarse.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorStockAlerta.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/infoOrden.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorBanner.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestor.ticket.stock.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestor.pedidos.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestor.comisiones.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestor.crm.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/almacenes.js?v=<?= $jsVer ?>"></script>
 
 
 </body>

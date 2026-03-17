@@ -7,7 +7,25 @@
       "Bash(git push:*)",
       "Bash(php -r \":*)",
       "Bash(grep -n \"AND estado = ''autorización\" \"C:/Users/black/Desktop/EGS/modelos/ordenes.modelo.php\")",
-      "Bash(php \"C:/Users/black/Desktop/EGS/fix_bug.php\")"
+      "Bash(php \"C:/Users/black/Desktop/EGS/fix_bug.php\")",
+      "Bash(php \"C:/Users/black/Desktop/EGS/fix_all_bugs.php\")",
+      "Bash(php \"C:/Users/black/Desktop/EGS/fix_admin.php\")",
+      "Bash(php -l modelos/ordenes.modelo.php)",
+      "Bash(php -l controladores/administradores.controlador.php)",
+      "Bash(php -l vistas/plantilla.php)",
+      "Bash(php -l controladores/plantilla.controlador.php)",
+      "Bash(php -l index.php)",
+      "Bash(php -l controladores/ordenes.controlador.php)",
+      "Bash(find \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\js\" -type f -name \"*.js\" -exec ls -lh {})",
+      "Bash(find \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\js\" -type f -name \"*.js\" ! -path \"*/public/*\" -exec wc -l {})",
+      "Bash(php -l vistas/js/plantilla.js)",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/config/Database.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/config/Router.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/config/routes.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/modelos/conexion.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/modelos/conexionWordpress.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/plantilla.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/index.php\")"
     ]
   }
 }

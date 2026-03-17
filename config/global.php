@@ -1,19 +1,17 @@
-<?php 
-//Ip de la pc servidor de base de datos
-define("DB_HOST","localhost");
+<?php
+/**
+ * global.php — Constantes globales del sistema EGS.
+ *
+ * Lee los valores desde variables de entorno (.env cargado en index.php).
+ * Si la variable no está disponible, usa el valor de fallback.
+ */
 
-//Nombre de la base de datos
-define("DB_NAME", "egsequip_dbsistema");
+// ── Base de datos del sistema de ventas (usado por config/Conexion.php — mysqli) ──
+define('DB_HOST',     getenv('DB_SISTEMA_HOST') ?: 'localhost');
+define('DB_NAME',     getenv('DB_SISTEMA_NAME') ?: 'egsequip_dbsistema');
+define('DB_USERNAME', getenv('DB_SISTEMA_USER') ?: 'egsequip_sistema');
+define('DB_PASSWORD', getenv('DB_SISTEMA_PASS') ?: '{#k%ER.PJD0?');
+define('DB_ENCODE',   'utf8');
 
-//Usuario de la base de datos
-define("DB_USERNAME", "egsequip_sistema");
-
-//Contraseña del usuario de la base de datos
-define("DB_PASSWORD", "{#k%ER.PJD0?");
-
-//definimos la codificación de los caracteres
-define("DB_ENCODE","utf8");
-
-//Definimos una constante como nombre del proyecto
-define("PRO_NOMBRE","ITVentas");
-?>
+// ── Nombre del proyecto ────────────────────────────────────────────────────────
+define('PRO_NOMBRE', getenv('APP_NAME') ?: 'ITVentas');

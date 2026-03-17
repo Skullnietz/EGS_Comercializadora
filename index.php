@@ -1,6 +1,11 @@
 <?php
 
-
+/* ── Cargar variables de entorno (.env) PRIMERO que cualquier otra cosa ──────
+ * Esto garantiza que Database.php, global.php y todo el sistema
+ * tengan acceso a las credenciales antes de usarlas.
+ * Si .env no existe, el sistema usa los valores de fallback de Database.php.
+ */
+require_once "config/env.php";
 
 require_once "controladores/plantilla.controlador.php";
 
@@ -65,7 +70,6 @@ require_once "controladores/citas.controlador.php";
 
 
 require_once "controladores/almacenes.controlador.php";
-require_once "controladores/pedidos.controlador.php";
 require_once "controladores/peticionmaterial.controlador.php";
 require_once "controladores/cotizaciones.controlador.php";
 /////////////////////////////////////////////////////////////// 

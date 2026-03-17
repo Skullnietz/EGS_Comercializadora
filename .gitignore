@@ -1,15 +1,32 @@
-# Archivos grandes / binarios pesados
+# ── Archivos grandes / binarios pesados ───────────────────────────────────────
 vistas/img/cabeceras/cabeceras.zip
 
-# Dependencias
+# ── Dependencias ──────────────────────────────────────────────────────────────
 vendor/
 node_modules/
 
-# Variables de entorno
+# ── Variables de entorno (⚠️ contienen contraseñas de producción) ─────────────
 .env
 .env.local
+.env.production
+# .env.example SÍ se versiona — es la plantilla sin valores reales
 
-# Caché y temporales
+# ── Logs y debug ──────────────────────────────────────────────────────────────
+debug_log.txt
+*.log
+/logs/
+
+# ── Caché y temporales ────────────────────────────────────────────────────────
 *.cache
 *.tmp
-*.log
+
+# ── PDFs generados por TCPDF ──────────────────────────────────────────────────
+/extensiones/tcpdf/pdf/*.pdf
+
+# ── IDE / editores ────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db
