@@ -1,0 +1,381 @@
+/* 
+ * Custom Styles for a Modern Look
+ */
+
+/* General Body and Content Wrapper */
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.content-wrapper {
+    background-color: #f4f6f9;
+}
+
+/* Modern Small Boxes */
+.small-box {
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.small-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.small-box .inner {
+    padding: 20px;
+}
+
+.small-box h3 {
+    font-size: 2.2rem;
+    font-weight: 600;
+}
+
+.small-box p {
+    font-size: 1rem;
+}
+
+.small-box .icon {
+    top: 15px;
+    right: 15px;
+    font-size: 60px;
+    transition: all 0.3s ease;
+}
+
+.small-box:hover .icon {
+    transform: scale(1.1);
+}
+
+.small-box-footer {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 8px 0;
+}
+
+/* New Color Palette for Small Boxes */
+.bg-aqua {
+    background-color: #17a2b8 !important;
+    color: #fff;
+}
+
+.bg-green {
+    background-color: #28a745 !important;
+    color: #fff;
+}
+
+.bg-yellow {
+    background-color: #ffc107 !important;
+    color: #212529;
+}
+
+.bg-red {
+    background-color: #dc3545 !important;
+    color: #fff;
+}
+
+.bg-black {
+    background-color: #343a40 !important;
+    color: #fff;
+}
+
+
+/* Modern Content Boxes */
+.box {
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-top: none;
+    margin-bottom: 20px;
+    background: #fff;
+}
+
+.box.box-danger {
+    border-left: 3px solid #dc3545;
+}
+
+.box .box-header {
+    border-bottom: 1px solid #f4f4f4;
+    padding: 15px;
+}
+
+.box .box-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Users List in Boxes */
+.users-list>li {
+    width: 25%;
+    padding: 15px;
+    text-align: center;
+}
+
+.users-list>li img {
+    border-radius: 10px;
+    height: 100px !important;
+    width: auto !important;
+    max-width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    object-fit: contain;
+}
+
+.users-list>li img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.users-list>li a.users-list-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.box-footer {
+    border-top: 1px solid #e3e6f0;
+    background-color: #f8f9fc;
+}
+
+/*
+ * Styles for Ordenes Page - V2 (More Vibrant)
+ */
+
+/* Main container and header */
+.content-header h1 {
+    font-weight: 700;
+    font-size: 1.9rem;
+    color: #2c3e50;
+}
+
+/* 'Última Entrega' Box */
+#ultimaenentrega {
+    background: linear-gradient(to right, #6dd5ed, #2193b0);
+    padding: 20px;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px;
+    border: none;
+    color: #fff;
+}
+
+#ultimaenentrega h5 {
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+#ultimaenentrega .btn-success {
+    background-color: #fff;
+    color: #2193b0;
+    border: none;
+}
+
+/* DataTables Modernization */
+#datatableordenes_wrapper {
+    padding: 20px;
+    background: #fff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+}
+
+#datatableordenes {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0;
+}
+
+#datatableordenes thead th {
+    background-color: #4e73df;
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    padding: 15px;
+    text-align: left;
+}
+
+#datatableordenes thead th:first-child {
+    border-top-left-radius: 0.5rem;
+}
+
+#datatableordenes thead th:last-child {
+    border-top-right-radius: 0.5rem;
+}
+
+#datatableordenes tbody td {
+    padding: 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e3e6f0;
+    color: #5a5c69;
+}
+
+#datatableordenes tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+#datatableordenes tbody tr:hover {
+    background-color: #f8f9fc;
+}
+
+#datatableordenes tbody tr:last-child td {
+    border-bottom: none;
+}
+
+#datatableordenes tbody td h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: #2c3e50;
+}
+
+/* Row with delay */
+.atraso {
+    background-color: #fbe9e7 !important;
+    border-left: 4px solid #ff5252;
+}
+
+.atraso td {
+    font-weight: 600;
+}
+
+/* DataTables Controls */
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+    font-weight: 600;
+    color: #5a5c69;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.5em 1em;
+    margin-left: 5px;
+    border-radius: 0.35rem;
+    border: 1px solid #d1d3e2;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #4e73df;
+    color: #fff !important;
+    border-color: #4e73df;
+}
+
+/* General Button Styles */
+.btn {
+    border-radius: 0.35rem;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.btn-warning {
+    background-color: #f6c23e;
+    border-color: #f6c23e;
+    color: #fff;
+}
+
+.btn-danger {
+    background-color: #e74a3b;
+    border-color: #e74a3b;
+}
+
+.btn-success {
+    background-color: #1cc88a;
+    border-color: #1cc88a;
+}
+
+/* Modal Styles */
+.modal-content {
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: none;
+}
+
+.modal-header {
+    background: linear-gradient(to right, #4e73df, #224abe);
+    color: #fff;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+    border-bottom: none;
+    padding: 20px;
+}
+
+.modal-header .modal-title {
+    font-weight: 600;
+}
+
+.modal-header .close {
+    color: #fff;
+    opacity: 1;
+    text-shadow: none;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-body .form-control {
+    border-radius: 0.35rem;
+    border: 1px solid #d1d3e2;
+    padding: 20px 15px;
+}
+
+.modal-body .input-group-addon {
+    border-radius: 0.35rem;
+    border: 1px solid #d1d3e2;
+    background-color: #f8f9fc;
+}
+
+/* Badge Styles for Orders */
+.badge-revision {
+    color: #0c5460;
+    background: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+/* Info Blue */
+.badge-supervision {
+    color: #4a148c;
+    background: #e1bee7;
+    border-color: #ce93d8;
+}
+
+/* Purple */
+.badge-sin-reparacion {
+    color: #721c24;
+    background: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* Dark Red */
+.badge-revision-garantia {
+    color: #856404;
+    background: #fff3cd;
+    border-color: #ffeeba;
+}
+
+/* Yellow */
+.badge-garantia {
+    color: #155724;
+    background: #d4edda;
+    border-color: #c3e6cb;
+}
+
+/* Green */
+.badge-entregado {
+    color: #383d41;
+    background: #e2e3e5;
+    border-color: #d6d8db;
+}
+
+/* Light Gray */

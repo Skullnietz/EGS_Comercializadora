@@ -1,0 +1,17 @@
+{
+    "name": "lenovo/lenovo",
+    "autoload": {
+        "psr-4": {
+            "Lenovo\\Lenovo\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "JoseEManuelChavez",
+            "email": "cjose2544@gmail.com"
+        }
+    ],
+    "require": {
+        "automattic/woocommerce": "^3.0"
+    }
+}

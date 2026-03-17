@@ -1,0 +1,14 @@
+.env
+*.log
+*.zip
+.git.zip
+node_modules/
+vendor/
+storage/
+cache/
+tmp/
+uploads/
+backup/
+backups/
+.git/
+vistas/img

@@ -1,0 +1,37 @@
+/* CSS Document */
+body {
+	margin: 9px; padding: 0;
+	background-image: url(../img/fondo.png);
+	background-repeat: repeat;
+	padding-bottom: 1px;
+	font-size: 11px;
+	
+}
+body, td, th {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:16px;
+
+}
+a:link    { color: #0B55C4; text-decoration: none; }
+a:visited { color: #0B55C4; text-decoration: none; }
+a:hover   { text-decoration: underline; }
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+@page {
+    size: A4;
+    margin: 0;
+}
+@page {
+    size: A4;
+    margin: 0;
+}
+@media print {
+    html, body {
+       width: 210mm;
+       height: 297mm; }
+    }
+
+
