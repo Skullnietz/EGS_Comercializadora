@@ -40,7 +40,7 @@ foreach ($conteoPorTec as $id => $cnt) {
     }
 }
 
-usort($ranking, fn($a, $b) => $b['entregas'] - $a['entregas']);
+usort($ranking, function($a, $b) { return $b['entregas'] - $a['entregas']; });
 $ranking     = array_slice($ranking, 0, 6);
 $maxEntregas = max(1, $ranking[0]['entregas'] ?? 1);
 
