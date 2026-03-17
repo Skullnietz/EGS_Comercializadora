@@ -1,0 +1,720 @@
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A quien corresponda
+    [id_vendedor] => 20
+    [empresa] => cartuchos
+    [productos] => [{"descripcion":"- Incremento de memoria Ram 8gb. - Recuperación de sistema. - Mantenimiento general. - Reparación de ventilador.","cantidad":1,"precio":2923,"total":"2923.00"}]
+    [impuesto] => 467.68
+    [neto] => 2923.00
+    [total] => 3390.68
+    [asunto] => Servicio Tecnico.
+    [vigencia] => Validez 30 días
+    [observaciones] => 
+    [descuento_porcentaje] => 0
+    [codigo_qr] => a44067911a2e8fd3d17fda3637e8b66d
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"CAMBIO DE FUSOR, REPARACION DE GOMAS Y MANTENIMIENTO A IMPRESORA HP COLOR LASER JET M652","cantidad":1,"precio":11115.51,"total":"11115.51"}]
+    [impuesto] => 1778.48
+    [neto] => 11115.51
+    [total] => 12893.99
+    [asunto] => COTIZACION
+    [vigencia] => Validez 8 días
+    [observaciones] => GARANTIA 30 DIAS .
+    [descuento_porcentaje] => 0
+    [codigo_qr] => c9d3850ada5ef4e7cacad56b025d426c
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"CAMBIO DE FUSOR , REPARACION DE GOMAS Y MANTENIMIENTO A IMPRESORA HP COLOR LASER JET M652","cantidad":1,"precio":11115.51,"total":"11115.51"}]
+    [impuesto] => 1778.48
+    [neto] => 11115.51
+    [total] => 12893.99
+    [asunto] => COTIZACION
+    [vigencia] => Validez 8 días
+    [observaciones] => GARANTIA 30 DIAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 469df809e04d92d6279cd3ac5962cba9
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"MANTENIMIENTO, CAMBIO DE GOMAS DE BANDEJA BAJA A IMPRESORA HP COLOR LASER JET M652","cantidad":1,"precio":2864,"total":"2864.00"}]
+    [impuesto] => 458.24
+    [neto] => 2864.00
+    [total] => 3322.24
+    [asunto] => COTRIZACION
+    [vigencia] => Validez 8 días
+    [observaciones] => GARANTIA 30 DIAS PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => d564f5da553e884ea1ca5b56924a5b46
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"MANTENIMIENTO , CAMBIO DE GOMAS DE BANDEJA BAJA A IMPRESORA HP COLOR LASER JET M652","cantidad":1,"precio":2864,"total":"2864.00"}]
+    [impuesto] => 458.24
+    [neto] => 2864.00
+    [total] => 3322.24
+    [asunto] => COTIZACION
+    [vigencia] => Validez 8 días
+    [observaciones] => GARANTIA 30 DIAS PIEZAS TOTALMENTE NUEVAS
+    [descuento_porcentaje] => 0
+    [codigo_qr] => fbd538991946842d67f7676e96456f91
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"KIT DE CORREA DE TRANSFERENCIA A IMPRESORA HP COLOR LASER JET M652","cantidad":1,"precio":6113.79,"total":"6113.79"}]
+    [impuesto] => 978.21
+    [neto] => 6113.79
+    [total] => 7092.00
+    [asunto] => COTIZACION
+    [vigencia] => Validez 8 días
+    [observaciones] => GARANTIA 30 DIAS PIEZAS TOTALMENTE NUEVAS
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 1d83f4399ecf115735424769d4633515
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"MANTENIMIENTO, CAMBIO DE GOMAS DE BANDEJA BAJA.","cantidad":1,"precio":2864,"total":"2864.00"}]
+    [impuesto] => 458.24
+    [neto] => 2864.00
+    [total] => 3322.24
+    [asunto] =>  COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 8 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => a640ba95624e67eebbf88a54a98378a0
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"MANTENIMIENTO, CAMBIO DE GOMAS DE BANDEJA BAJA.","cantidad":1,"precio":2864,"total":"2864.00"}]
+    [impuesto] => 458.24
+    [neto] => 2864.00
+    [total] => 3322.24
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 30 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 9c071534734b1306d6d3e320e3e90081
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"CAMBIO DE FUSOR, REPARACIÓN DE GOMAS Y MANTENIMIENTO.","cantidad":1,"precio":11115.52,"total":"11115.52"}]
+    [impuesto] => 1778.48
+    [neto] => 11115.52
+    [total] => 12894.00
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 30 días
+    [observaciones] => 
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 72d39d18bc0f958433c9871ef1b7d161
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"KIT DE CORREA DE TRANSFERENCIA.","cantidad":1,"precio":6113.79,"total":"6113.79"}]
+    [impuesto] => 978.21
+    [neto] => 6113.79
+    [total] => 7092.00
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 464586e404391e4296c43b19d6ffbc0f
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"MANTENIMIENTO, CAMBIO DE GOMAS DE BANDEJA BAJA.","cantidad":1,"precio":2864,"total":"2864.00"}]
+    [impuesto] => 458.24
+    [neto] => 2864.00
+    [total] => 3322.24
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => cc9268ef0b0c8c22bc18d5d1f02039ac
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 
+    [empresa] => loce
+    [productos] => [{"descripcion":"MANTENIMIENTO, CAMBIO DE GOMAS DE BANDEJA BAJA.","cantidad":1,"precio":2864,"total":"2864.00"}]
+    [impuesto] => 458.24
+    [neto] => 2864.00
+    [total] => 3322.24
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => e52631f3cf1201c9e457de6c4e4d90b7
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"CAMBIO DE FUSOR, REPARACIÓN DE GOMAS Y MANTENIMIENTO.","cantidad":1,"precio":11115.51,"total":"11115.51"}]
+    [impuesto] => 1778.48
+    [neto] => 11115.51
+    [total] => 12893.99
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => c6fbf9038bddf54fad668ab3556c4bef
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORREPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"Tarjeta Gráfica Amd Soyo Rx 560 4g 128bit Gddr5 Radeon Rx560","cantidad":1,"precio":2428,"total":"2428.00"}]
+    [impuesto] => 388.48
+    [neto] => 2428.00
+    [total] => 2816.48
+    [asunto] => COTIZACIÓN DE PIEZAS.
+    [vigencia] => Validez 08 días
+    [observaciones] => PIEZAS TOTALMENTE NUEVAS, 
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 32e93480dc5ebd39b699fada5cc3ff2c
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"Ventilador Dell Emc Poweredge R740 / R740xd N5t36","cantidad":1,"precio":1799,"total":"1799.00"}]
+    [impuesto] => 287.84
+    [neto] => 1799.00
+    [total] => 2086.84
+    [asunto] => COTIZACIÓN DE PIEZAS.
+    [vigencia] => Validez 08 días
+    [observaciones] => PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 1ba709da6da074674a58e89ccd5fe405
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"Ventilador Dell Emc Poweredge R740 / R740xd N5t36.","cantidad":2,"precio":1799,"total":"3598.00"}]
+    [impuesto] => 575.68
+    [neto] => 3598.00
+    [total] => 4173.68
+    [asunto] => COTIZACIÓN DE PIEZAS.
+    [vigencia] => Validez 08 días
+    [observaciones] => PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 60b126d415463d30f3b001043ac1ab94
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORREPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"Tarjeta Gráfica Amd Soyo Rx 560 4g 128bit Gddr5 Radeon Rx560.","cantidad":1,"precio":2428,"total":"2428.00"}]
+    [impuesto] => 388.48
+    [neto] => 2428.00
+    [total] => 2816.48
+    [asunto] => COTIZACIÓN DE PIEZAS.
+    [vigencia] => Validez 08 días
+    [observaciones] => PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => fd6085ce230204bf27058ff1425060bf
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"Ventilador Dell Emc Poweredge R740 / R740xd N5t36.","cantidad":1,"precio":1799,"total":"1799.00"}]
+    [impuesto] => 287.84
+    [neto] => 1799.00
+    [total] => 2086.84
+    [asunto] => COTIZACIÓN DE PIEZAS.
+    [vigencia] => Validez 08 días
+    [observaciones] => PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 2cda9cada623d8155a71d5a046626af2
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"Ventilador Dell Emc Poweredge R740 / R740xd N5t36.","cantidad":2,"precio":1799,"total":"3598.00"}]
+    [impuesto] => 575.68
+    [neto] => 3598.00
+    [total] => 4173.68
+    [asunto] => COTIZACIÓN DE PIEZAS.
+    [vigencia] => Validez 08 días
+    [observaciones] => PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => a81474454866d04929ecb1c061b27d60
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"Ventilador Dell Emc Poweredge R740 / R740xd N5t36.","cantidad":1,"precio":1799,"total":"1799.00"}]
+    [impuesto] => 287.84
+    [neto] => 1799.00
+    [total] => 2086.84
+    [asunto] => COTIZACIÓN DE PIEZAS.
+    [vigencia] => Validez 08 días
+    [observaciones] => PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => c3096777296ef7c205ec21427b055f5d
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"MANTENIMIENTO, CAMBIO DE GOMAS DE BANDEJA BAJA.","cantidad":1,"precio":2864,"total":"2864.00"}]
+    [impuesto] => 458.24
+    [neto] => 2864.00
+    [total] => 3322.24
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 8874b99ff9fd285ec9231c4dd2219988
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"MANTENIMIENTO, CAMBIO DE GOMAS DE BANDEJA BAJA.","cantidad":0,"precio":0,"total":"0.00"}]
+    [impuesto] => 0.00
+    [neto] => 0.00
+    [total] => 0.00
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => d96b452960568c58b9b28ca0375a39aa
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"KIT DE CORREA DE TRANSFERENCIA.","cantidad":1,"precio":6113.79,"total":"6113.79"}]
+    [impuesto] => 978.21
+    [neto] => 6113.79
+    [total] => 7092.00
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => adef14c086ca459e33afd4518bb6fdf7
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"CAMBIO DE FUSOR, REPARACIÓN DE GOMAS Y MANTENIMIENTO.","cantidad":1,"precio":11115.51,"total":"11115.51"}]
+    [impuesto] => 1778.48
+    [neto] => 11115.51
+    [total] => 12893.99
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 8e4e07a7dbd0fec25f3ab5aea4262605
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"KIT DE CORREA DE TRANSFERENCIA.","cantidad":2,"precio":6113.79,"total":"12227.58"}]
+    [impuesto] => 1956.41
+    [neto] => 12227.58
+    [total] => 14183.99
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => c5f1b32c2c5ea3025b2345a21c0fb06e
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A QUIEN CORRESPONDA.
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"MANTENIMIENTO, CAMBIO DE GOMAS DE BANDEJA BAJA.","cantidad":2,"precio":2864,"total":"5728.00"}]
+    [impuesto] => 916.48
+    [neto] => 5728.00
+    [total] => 6644.48
+    [asunto] => COTIZACIÓN DE REPARACIÓN A IMPRESORA HP COLOR LASERJET M652.
+    [vigencia] => Validez 08 días
+    [observaciones] => GARANTÍA 30 DÍAS, PIEZAS TOTALMENTE NUEVAS.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => fc6b28bd68080968fd1feda18a728d7f
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => egs
+    [productos] => [{"descripcion":"REPARACION DE BANDEJA MULTIPROPOSITO","cantidad":1,"precio":2413.79,"total":"2413.79"},{"descripcion":"(BRAZOS FRACTURADOS)","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"CAMBIO DE KIT DE GOMAS BANDEJA 2 Y BANDEJA EXTERNA","cantidad":1,"precio":0,"total":"0.00"},{"descripcion":" O CHAROLA Y MANTENIMIENTO","cantidad":0,"precio":0,"total":"0.00"}]
+    [impuesto] => 386.21
+    [neto] => 2413.79
+    [total] => 2800.00
+    [asunto] => COTIZACION REPARACION DE IMPRESORA
+    [vigencia] => Validez 30 días
+    [observaciones] => LAS REFACCIONES AQUI MENCIONADAS SON TOTALMENTE NUEVAS , CON UNA GARANTIA DE 60 DIAS A PARTIR DE LA FECHA DE ENTREGA.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => b803ec893e4fa6fd4720fb7a67ecd83f
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"REPARACION DE BANDEJA MULTIPROPOSITO","cantidad":1,"precio":2413.79,"total":"2413.79"},{"descripcion":"(BRAZOS FRACTURADOS)","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"CAMBIO DE KIT DE GOMAS BANDEJA 2 Y BANDEJA EXTERNA","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"O CHAROLA Y MANTENIMIENTO 0","cantidad":0,"precio":0,"total":"0.00"}]
+    [impuesto] => 386.21
+    [neto] => 2413.79
+    [total] => 2800.00
+    [asunto] => COTIZACION REPARACION DE IMPRESORA
+    [vigencia] => Validez 30 días
+    [observaciones] => LAS REFACCIONES AQUI MENCIONADAS SON TOTALMENTE NUEVAS , CON UNA GARANTIA DE 60 DIAS A PARTIR DE LA FECHA DE ENTREGA DEL PRODUCTO.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => c74b87575e5036143e88f13ff9cad291
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"CAMBIO DE KIT DE GOMAS Y MANTENIMIENTO A ","cantidad":1,"precio":2068.96,"total":"2068.96"},{"descripcion":"IMPRESORA HP COLOR LASERJET ENTERPRISE ","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"M652 CON N/S: KCG060","cantidad":0,"precio":0,"total":"0.00"}]
+    [impuesto] => 331.03
+    [neto] => 2068.96
+    [total] => 2399.99
+    [asunto] => COTIZACION IMPRESORAS 
+    [vigencia] => Validez 30 días
+    [observaciones] => LAS REFACCIONES AQUI MENCIONADAS SON TOTALMENTE NUEVAS , CON UNA GARANTIA DE 60 DIAS A PARTIR DE LA FECHA DE ENTREGA DEL PRODUCTO.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 836e77f4e8c6f176ebd6a2ed75e32e84
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"REPARACION DE BANDEJA MULTIPROPOSITO","cantidad":1,"precio":2413.79,"total":"2413.79"},{"descripcion":"(BRAZOS FRACTURADOS)","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"CAMBIO DE KIT DE GOMAS BANDEJA 2 Y BANDEJA EXTERNA ","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"O CHAROLA Y MANTENIMIENTO A IMPRESORA  HP COLOR","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":" LASERJET ENTERPRISE M652 CON N/S: KCG060","cantidad":1,"precio":0,"total":"0.00"}]
+    [impuesto] => 386.21
+    [neto] => 2413.79
+    [total] => 2800.00
+    [asunto] => COTIZACION REPARACION DE IMPRESORA
+    [vigencia] => Validez 30 días
+    [observaciones] => LAS REFACCIONES AQUI MENCIONADAS SON TOTALMENTE NUEVAS , CON UNA GARANTIA DE 60 DIAS A PARTIR DE LA FECHA DE ENTREGA DEL PRODUCTO.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => ddc0acdd5b21c46bce03f6cccee43bc6
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 9
+    [empresa] => loce
+    [productos] => [{"descripcion":"REPARACION DE BANDEJA MULTIPROPOSITO","cantidad":1,"precio":2413.79,"total":"2413.79"},{"descripcion":"(BRAZOS FRACTURADOS) ","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"CAMBIO DE KIT DE GOMAS BANDEJA 2 Y BANDEJA EXTERNA","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"O CHAROLA Y MANTENIMIENTO A IMPRESORA HP COLOR","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"LASERJET ENTERPRISE M652 CON N/S: KCG060","cantidad":0,"precio":0,"total":"0.00"}]
+    [impuesto] => 386.21
+    [neto] => 2413.79
+    [total] => 2800.00
+    [asunto] => COTIZACION REPARACION DE IMPRESORA
+    [vigencia] => Validez 30 días
+    [observaciones] => LAS REFACCIONES AQUI MENCIONADAS SON TOTALMENTE NUEVAS , CON UNA GARANTIA DE 60 DIAS A PARTIR DELA FECHA DE ENTREGA DEL PRODUCTO.
+    [descuento_porcentaje] => 0
+    [codigo_qr] => f8ca2ca170a974f6fd4828d6926f0001
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 10
+    [empresa] => loce
+    [productos] => [{"descripcion":"PROCESADOR CORE I5 MODELO 10400 CON TARJETA MADRE","cantidad":1,"precio":5684,"total":"5684.00"},{"descripcion":"MODELO H510M ","cantidad":0,"precio":0,"total":"0.00"},{"descripcion":"GABINETE ATX EVOTEC CON PUENTE DE 500 WTS","cantidad":1,"precio":530,"total":"530.00"},{"descripcion":"MEMORIA RAM 16 GB DDR4 ","cantidad":1,"precio":1440,"total":"1440.00"},{"descripcion":"UNIDAD DE ESTADO SOLIDO DE 480 GB ","cantidad":1,"precio":1749,"total":"1749.00"},{"descripcion":"KIT DE TECLADO Y MOUSE ","cantidad":1,"precio":289,"total":"289.00"}]
+    [impuesto] => 1550.72
+    [neto] => 9692.00
+    [total] => 11242.72
+    [asunto] => EQUIPO ENSAMBLE TOTALMENTE NUEVO
+    [vigencia] => Validez 8 días
+    [observaciones] => 1 AÑO DE GARANTIA 
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 424239634317effe2f11dc10b11cff45
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => MOSTRADOR
+    [id_vendedor] => 13
+    [empresa] => egs
+    [productos] => [{"descripcion":"PROCESADOR RYZEN 5600 GT ","cantidad":1,"precio":2350,"total":"2350.00"},{"descripcion":"TARJETA MADRE PARA RYZEN 5","cantidad":1,"precio":1437,"total":"1437.00"},{"descripcion":"GABINETE  ATX ","cantidad":1,"precio":530,"total":"530.00"},{"descripcion":"MEMORIA  RAM 16 GB ","cantidad":1,"precio":1440,"total":"1440.00"},{"descripcion":"UNIDAD DE ESTADO SOLIDO 480 ","cantidad":1,"precio":1749,"total":"1749.00"},{"descripcion":"KIT TECLADO Y MOUSE ","cantidad":1,"precio":289,"total":"289.00"}]
+    [impuesto] => 1247.20
+    [neto] => 7795.00
+    [total] => 9042.20
+    [asunto] => EQUIPO ENSAMBLE TOTALMENTE NUEVO
+    [vigencia] => Validez 8 días 
+    [observaciones] => 1 AÑO DE GARANTIA
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 0fe4a137a0e1026340efb33f68328cad
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 6104
+    [nombre_cliente] => SECRETARIA DE EDUCACION PUBLICA
+    [id_vendedor] => 19
+    [empresa] => toluca
+    [productos] => [{"descripcion":"GABINETE","cantidad":3,"precio":596.55,"total":"1789.65"},{"descripcion":"FUENTE DE PODER ","cantidad":3,"precio":318.51,"total":"955.53"},{"descripcion":"PROCESADOR CORE I5 DE 3 GEN ","cantidad":3,"precio":3297,"total":"9891.00"},{"descripcion":"MEMORIA RAM DE 16 GB ","cantidad":3,"precio":1528.01,"total":"4584.03"},{"descripcion":"TECLADO MOUSE ","cantidad":3,"precio":164.24,"total":"492.72"}]
+    [impuesto] => 2834.07
+    [neto] => 17712.93
+    [total] => 20547.00
+    [asunto] => COTIZACION
+    [vigencia] => Validez 30 días
+    [observaciones] => SUJETO A CAMBIOS SIN PREVIO AVISO 
+    [descuento_porcentaje] => 0
+    [codigo_qr] => 770a0eff3e758cd846dac00fec80f376
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 6104
+    [nombre_cliente] => SECRETARIA DE EDUCACION PUBLICA
+    [id_vendedor] => 19
+    [empresa] => toluca
+    [productos] => [{"descripcion":"GABINETE","cantidad":3,"precio":596.55,"total":"1789.65"},{"descripcion":"FUENTE DE PODER ","cantidad":3,"precio":318.51,"total":"955.53"},{"descripcion":"PROCESADOR CORE I5 DE 3 GEN ","cantidad":3,"precio":3297,"total":"9891.00"},{"descripcion":"MEMORIA RAM DE 16 GB ","cantidad":3,"precio":1528.01,"total":"4584.03"},{"descripcion":"TECLADO MOUSE ","cantidad":3,"precio":164.24,"total":"492.72"}]
+    [impuesto] => 2834.07
+    [neto] => 17712.93
+    [total] => 20547.00
+    [asunto] => COTIZACION 
+    [vigencia] => Validez 30 días
+    [observaciones] => SUJETO A CAMBIOS  SIN PREVIO AVISO
+    [descuento_porcentaje] => 0
+    [codigo_qr] => f67230667f98f08e06277616c21e2d03
+)
+
+-----------------------------------
+DEBUG MODELO (mdlIngresarCotizacion):
+Tabla: cotizaciones
+Datos: Array
+(
+    [id_cliente] => 
+    [nombre_cliente] => A quien corresponda.
+    [id_vendedor] => 9
+    [empresa] => egs
+    [productos] => [{"descripcion":"REPARACION DE TARJETA MADRE backlight","cantidad":1,"precio":2500,"total":"2500.00"},{"descripcion":"Mantenimiento general.","cantidad":1,"precio":0,"total":"0.00"}]
+    [impuesto] => 400.00
+    [neto] => 2500.00
+    [total] => 2900.00
+    [asunto] => Cotización de Orden Número: 15171
+    [vigencia] => Validez 08 días
+    [observaciones] => Garantía de 30 días sobre trabajo realizado. El mantenimiento se estaría realizando sin costo.
+    [descuento_porcentaje] => 
+    [codigo_qr] => b417812378d038f084c6850c16a86aca
+)
+
+-----------------------------------

@@ -1,0 +1,78 @@
+<?php
+
+require_once "conexion.php";
+
+class ModeloCitas
+{
+
+	/*=============================================
+	MOSTRAR CITAS
+	=============================================*/
+	static public function mdlMostrarCitas($tabla, $item, $valor)
+	{
+
+		if ($item != null) {
+
+			$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE $item = :$item");
+			$stmt->bindParam(":" . $item, $valor, PDO::PARAM_STR);
+			$stmt->execute();
+			return $stmt->fetch();
+
+		} else {
+
+			$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla");
+			$stmt->execute();
+			return $stmt->fetchAll();
+
+		}
+
+		$stmt = null;
+
+	}
+
+	/*=============================================
+	CREAR CITA
+	=============================================*/
+	static public function mdlIngresarCita($tabla, $datos)
+	{
+
+		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(title, description, start, end, color, id_orden) VALUES (:title, :description, :start, :end, :color, :id_orden)");
+
+		$stmt->bindParam(":title", $datos["title"], PDO::PARAM_STR);
+		$stmt->bindParam(":description", $datos["description"], PDO::PARAM_STR);
+		$stmt->bindParam(":start", $datos["start"], PDO::PARAM_STR);
+		$stmt->bindParam(":end", $datos["end"], PDO::PARAM_STR);
+		$stmt->bindParam(":color", $datos["color"], PDO::PARAM_STR);
+		$stmt->bindParam(":id_orden", $datos["id_orden"], PDO::PARAM_INT);
+
+		if ($stmt->execute()) {
+			$stmt = null;
+			return "ok";
+		} else {
+			$errorInfo = $stmt->errorInfo();
+			$stmt = null;
+			return "error: " . implode(" - ", $errorInfo);
+		}
+
+	}
+
+	/*=============================================
+	ELIMINAR CITA
+	=============================================*/
+	static public function mdlEliminarCita($tabla, $datos)
+	{
+
+		$stmt = Conexion::conectar()->prepare("DELETE FROM $tabla WHERE id = :id");
+		$stmt->bindParam(":id", $datos, PDO::PARAM_INT);
+
+		if ($stmt->execute()) {
+			$stmt = null;
+			return "ok";
+		} else {
+			$stmt = null;
+			return "error";
+		}
+
+	}
+
+}

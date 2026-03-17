@@ -1,0 +1,15 @@
+# Archivos grandes / binarios pesados
+vistas/img/cabeceras/cabeceras.zip
+
+# Dependencias
+vendor/
+node_modules/
+
+# Variables de entorno
+.env
+.env.local
+
+# Caché y temporales
+*.cache
+*.tmp
+*.log

@@ -1,0 +1,2 @@
+
+$mostrarAlmacenes -> mostrarTablaAlmacenes();
