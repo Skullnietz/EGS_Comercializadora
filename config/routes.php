@@ -27,7 +27,6 @@ return [
 
     /* ── Órdenes de servicio ────────────────────── */
     'ordenes',
-    'ordenes/2',
     'ordenesnew',
     'lasordenes',
     'EstadoOrden',
@@ -38,11 +37,8 @@ return [
     'ventas',
     'ventasR',
     'ventasD',
-    'venta',
     'creararventa',
     'CorteTotal',
-    'corteStatus',
-    'consultacompras',
 
     /* ── Pedidos ────────────────────────────────── */
     'pedidos',
@@ -84,7 +80,6 @@ return [
     'listacitas',
 
     /* ── Inventario y almacenes ─────────────────── */
-    'almacen',
     'almacenes',
     'peticionmaterial',
     'listaPeticionesM',
@@ -94,7 +89,6 @@ return [
     'tickets',
     'crearTicket',
     'infoTicket',
-    'ticketR',
 
     /* ── Administración ─────────────────────────── */
     'perfiles',
@@ -106,7 +100,6 @@ return [
     'reportePorFecheOrdenes',
 
     /* ── Proveedores / compras ──────────────────── */
-    'proveedor',
     'categoriasp',
     'ingreso',
 

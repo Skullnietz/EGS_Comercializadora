@@ -1,4 +1,5 @@
 # ── Archivos grandes / binarios pesados ───────────────────────────────────────
+*.zip
 vistas/img/cabeceras/cabeceras.zip
 
 # ── Dependencias ──────────────────────────────────────────────────────────────

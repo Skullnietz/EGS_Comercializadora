@@ -18,11 +18,13 @@ RewriteEngine On
 # Routing limpio: /inicio → index.php?ruta=inicio
 RewriteRule ^([-a-zA-Z0-9/]+)$ index.php?ruta=$1
 
-# Redirigir HTTP → HTTPS
+# Redirigir HTTP → HTTPS  (solo en producción — se omite en localhost/127.0.0.1)
 RewriteCond %{HTTPS} off
+RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1|.*\.test)$ [NC]
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Redirigir www → sin www
+# Redirigir www → sin www  (solo en producción)
+RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1|.*\.test)$ [NC]
 RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 

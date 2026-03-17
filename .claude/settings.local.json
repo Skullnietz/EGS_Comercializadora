@@ -25,7 +25,11 @@
       "Bash(php -l \"C:/Users/black/Desktop/EGS/modelos/conexion.php\")",
       "Bash(php -l \"C:/Users/black/Desktop/EGS/modelos/conexionWordpress.php\")",
       "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/plantilla.php\")",
-      "Bash(php -l \"C:/Users/black/Desktop/EGS/index.php\")"
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/index.php\")",
+      "Bash(grep -l \"require_once.*conexion\" /c/Users/black/Desktop/EGS/modelos/*.modelo.php)",
+      "Bash(grep -l \"require.*conexion\\\\|Conexion::\\\\|ConexionWP::\" /c/Users/black/Desktop/EGS/modelos/*.ajax.php)",
+      "Bash(ls /c/Users/black/Desktop/EGS/modelos/*.ajax.php)",
+      "Bash(ls /c/Users/black/Desktop/EGS/modelos/*.php)"
     ]
   }
 }

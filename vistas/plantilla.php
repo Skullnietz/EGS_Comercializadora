@@ -207,8 +207,8 @@
      Reemplaza el bloque if/elseif de ~70 comparaciones.
      Las rutas permitidas se gestionan en config/routes.php.
      =============================================*/
-    require_once '../config/Router.php';
-    $router = new Router(require '../config/routes.php');
+    require_once 'config/Router.php';
+    $router = new Router(require 'config/routes.php');
 
     if (isset($_GET["ruta"])) {
 
