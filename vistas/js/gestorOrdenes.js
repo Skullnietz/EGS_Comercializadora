@@ -635,7 +635,7 @@ $('.tablaOrdenes tbody').on("click", ".btnEditarOrden", function(){
 
 				$.ajax({
 
-					url:"ajax/tecnicos.ajax.php",
+					url:"ajax/Tecnicos.ajax.php",
 					method: "POST",
 					data: datosTecnico,
 					cache: false,
