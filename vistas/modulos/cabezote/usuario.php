@@ -1,72 +1,69 @@
 <!--=====================================
-USUARIOS
-======================================-->	
+USUARIOS — MENÚ MODERNO
+======================================-->
+<?php
+$_fotoUser = (!empty($_SESSION["foto"]))
+    ? htmlspecialchars($_SESSION["foto"])
+    : "vistas/img/perfiles/default/anonymous.png";
+$_nombreUser = htmlspecialchars($_SESSION["nombre"] ?? "Usuario");
+$_rolUser    = htmlspecialchars(ucfirst($_SESSION["perfil"] ?? ""));
+?>
 
 <!-- user-menu -->
 <li class="dropdown user user-menu">
 
-	<!-- dropdown-toggle -->
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-	
-		<?php
+  <!-- ── Trigger ── -->
+  <a href="#" class="dropdown-toggle egs-user-trigger" data-toggle="dropdown">
+    <span class="egs-avatar-wrap">
+      <img src="<?= $_fotoUser ?>" class="user-image egs-avatar-sm" alt="<?= $_nombreUser ?>">
+      <span class="egs-online-pulse"></span>
+    </span>
+    <span class="hidden-xs egs-trigger-name"><?= $_nombreUser ?></span>
+    <i class="fa-solid fa-chevron-down hidden-xs egs-chevron"></i>
+  </a>
 
-		if($_SESSION["foto"] == ""){
+  <!-- ── Dropdown ── -->
+  <ul class="dropdown-menu egs-user-dropdown">
 
-			echo '<img src="vistas/img/perfiles/default/anonymous.png" class="user-image" alt="User Image">';
+    <!-- Cabecera con gradiente -->
+    <li class="egs-udrop-header">
+      <div class="egs-udrop-avatar-wrap">
+        <img src="<?= $_fotoUser ?>" class="egs-udrop-avatar" alt="<?= $_nombreUser ?>">
+        <span class="egs-udrop-dot"></span>
+      </div>
+      <div class="egs-udrop-info">
+        <span class="egs-udrop-name"><?= $_nombreUser ?></span>
+        <span class="egs-udrop-role"><?= $_rolUser ?></span>
+      </div>
+    </li>
 
-		}else{
+    <!-- Links rápidos -->
+    <li style="padding:0">
+      <ul class="egs-udrop-nav">
+        <li>
+          <a href="index.php?ruta=perfiles">
+            <span class="egs-udrop-icon"><i class="fa-solid fa-circle-user"></i></span>
+            Mi Cuenta
+          </a>
+        </li>
+        <li>
+          <a href="index.php?ruta=preguntas">
+            <span class="egs-udrop-icon"><i class="fa-solid fa-circle-question"></i></span>
+            Ayuda
+          </a>
+        </li>
+      </ul>
+    </li>
 
-			echo '<img src="'.$_SESSION["foto"].'" class="user-image" alt="User Image">';
+    <!-- Pie — Cerrar sesión -->
+    <li class="egs-udrop-footer">
+      <a href="index.php?ruta=salir" class="egs-btn-logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        Cerrar sesión
+      </a>
+    </li>
 
-		}
-
-
-		?>	
-		
-		<span class="hidden-xs"><?php echo $_SESSION["nombre"]; ?></span>
-	
-	</a>
-	<!-- dropdown-toggle -->
-
-	<!-- dropdown-menu -->
-	<ul class="dropdown-menu">
-
-		<li class="user-header">
-		
-			<?php
-
-			if($_SESSION["foto"] == ""){
-
-				echo '<img src="vistas/img/perfiles/default/anonymous.png" class="user-image" alt="User Image">';
-
-			}else{
-
-				echo '<img src="'.$_SESSION["foto"].'" class="user-image" alt="User Image">';
-
-			}
-
-
-			?>	
-
-			<p>
-			<?php echo $_SESSION["nombre"]; ?>
-			<h4 style="color:white"><?php echo $_SESSION["perfil"]; ?></h4>
-			</p>
-		
-		</li>
-
-		<li class="user-footer">
-	
-			
-			<div class="pull-right">
-			
-				<a href="index.php?ruta=salir" class="btn btn-default btn-flat">Salir</a>
-			
-			</div>
-		</li>
-
-	</ul>
-	<!-- dropdown-menu -->
+  </ul>
 
 </li>
-<!-- user-menu -->
+<!-- /user-menu -->

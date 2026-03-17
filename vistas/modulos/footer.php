@@ -1,7 +1,11 @@
- <!-- main-footer -->
+<!-- main-footer -->
 <footer class="main-footer">
-
-<strong>Copyright &copy; 2021<a href="#"> COMERCIALIZADORA EGS</a>.</strong> Todos los derechos reservados.
-<br><strong><a href="vistas/files/politicas/POLÍTICAS.PDF">Consulta las políticas de seguridad de información de Comercializadora EGS</a></strong>
+  <strong>Copyright &copy; <?= date('Y') ?> &mdash; <a href="#">Comercializadora EGS</a>.</strong>
+  Todos los derechos reservados.
+  <span class="pull-right hidden-xs">
+    <a href="vistas/files/politicas/POLÍTICAS.PDF" style="color:#aaa;font-size:11px">
+      <i class="fa-solid fa-shield-halved"></i> Políticas de seguridad
+    </a>
+  </span>
 </footer>
 <!-- main-footer -->

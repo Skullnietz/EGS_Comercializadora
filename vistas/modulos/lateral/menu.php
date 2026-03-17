@@ -1,8 +1,27 @@
 <style>
-  span {
-    font-weight: bold;
-  }
+  .sidebar-menu span { font-weight: 600; }
 </style>
+
+<?php
+$_fotoSidebar = (!empty($_SESSION["foto"]))
+    ? htmlspecialchars($_SESSION["foto"])
+    : "vistas/img/perfiles/default/anonymous.png";
+?>
+
+<!-- ── User Panel ── -->
+<div class="user-panel egs-sidebar-user">
+  <div class="pull-left image">
+    <img src="<?= $_fotoSidebar ?>" class="img-circle" alt="Usuario">
+  </div>
+  <div class="pull-left info">
+    <p><?= htmlspecialchars($_SESSION["nombre"] ?? "Usuario") ?></p>
+    <a href="#">
+      <i class="fa-solid fa-circle" style="color:#28d16c;font-size:7px;vertical-align:middle"></i>
+      &nbsp;En línea
+    </a>
+  </div>
+</div>
+
 <ul class="sidebar-menu">
 
   <?php

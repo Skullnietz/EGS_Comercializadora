@@ -34,7 +34,7 @@
 		 <!-- Sidebar toggle button-->
 
     <a href="#" id="sbar" class="sidebar-toggle" data-toggle="push-menu" role="button">
-        <i class="fas fa-arrow-circle-right"></i>
+        <i class="fa-solid fa-bars"></i>
       </a>
 
 		<!-- navbar-custom-menu -->
