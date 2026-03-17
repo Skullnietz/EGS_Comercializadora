@@ -1,8 +1,12 @@
-/* 
- * Custom Styles for a Modern Look
+/*
+ * EGS Custom Styles — Compatible con Bootstrap 3.3.7 + AdminLTE 2.4.8
+ * Regla de oro: NO sobreescribir padding/sizing global de Bootstrap.
+ *               Solo shadow, radius, color y modernización visual.
  */
 
-/* General Body and Content Wrapper */
+/* ══════════════════════════════════════════════════
+   1. BASE LAYOUT
+══════════════════════════════════════════════════ */
 body {
     font-family: 'Source Sans Pro', sans-serif;
 }
@@ -11,149 +15,158 @@ body {
     background-color: #f4f6f9;
 }
 
-/* Modern Small Boxes */
+/* ══════════════════════════════════════════════════
+   2. SMALL-BOX  (AdminLTE component)
+   — hover elevación, no se toca el padding ni sizing
+══════════════════════════════════════════════════ */
 .small-box {
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
+    border-radius: 8px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.09);
+    transition: transform .25s ease, box-shadow .25s ease;
     overflow: hidden;
 }
 
 .small-box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.small-box .inner {
-    padding: 20px;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.14);
 }
 
 .small-box h3 {
     font-size: 2.2rem;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .small-box p {
     font-size: 1rem;
+    font-weight: 500;
 }
 
 .small-box .icon {
     top: 15px;
     right: 15px;
     font-size: 60px;
-    transition: all 0.3s ease;
+    transition: transform .25s ease;
 }
 
 .small-box:hover .icon {
-    transform: scale(1.1);
+    transform: scale(1.08);
 }
 
 .small-box-footer {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0,0,0,.10);
     padding: 8px 0;
+    font-size: 12px;
 }
 
-/* New Color Palette for Small Boxes */
-.bg-aqua {
-    background-color: #17a2b8 !important;
-    color: #fff;
-}
+/* ══════════════════════════════════════════════════
+   3. COLORES DE FONDO  (AdminLTE bg-*)
+   — paleta modernizada, con !important para ganar al skin
+══════════════════════════════════════════════════ */
+.bg-aqua  { background-color: #17a2b8 !important; color: #fff !important; }
+.bg-green { background-color: #28a745 !important; color: #fff !important; }
+.bg-red   { background-color: #dc3545 !important; color: #fff !important; }
+.bg-black { background-color: #2c3e50 !important; color: #fff !important; }
 
-.bg-green {
-    background-color: #28a745 !important;
-    color: #fff;
-}
+/* Amarillo: texto oscuro — mejor legibilidad */
+.bg-yellow { background-color: #f39c12 !important; color: #fff !important; }
 
-.bg-yellow {
-    background-color: #ffc107 !important;
-    color: #212529;
-}
-
-.bg-red {
-    background-color: #dc3545 !important;
-    color: #fff;
-}
-
-.bg-black {
-    background-color: #343a40 !important;
-    color: #fff;
-}
-
-
-/* Modern Content Boxes */
+/* ══════════════════════════════════════════════════
+   4. BOX  (AdminLTE component)
+   — CRÍTICO: NO sobreescribir border-top para respetar
+     box-primary, box-success, box-danger, box-warning
+══════════════════════════════════════════════════ */
 .box {
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-top: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.07);
+    /* border-top NO se toca — AdminLTE lo usa para indicadores de tipo */
     margin-bottom: 20px;
     background: #fff;
 }
 
+/* box-danger: borde lateral moderno EN ADICIÓN al borde top */
 .box.box-danger {
     border-left: 3px solid #dc3545;
 }
 
 .box .box-header {
-    border-bottom: 1px solid #f4f4f4;
-    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 14px 16px;
+}
+
+.box .box-header.with-border {
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .box .box-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-/* Users List in Boxes */
-.users-list>li {
-    width: 25%;
-    padding: 15px;
-    text-align: center;
-}
-
-.users-list>li img {
-    border-radius: 10px;
-    height: 100px !important;
-    width: auto !important;
-    max-width: 100%;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    object-fit: contain;
-}
-
-.users-list>li img:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
-.users-list>li a.users-list-name {
-    font-size: 1rem;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 700;
     color: #333;
 }
 
 .box-footer {
-    border-top: 1px solid #e3e6f0;
-    background-color: #f8f9fc;
+    border-top: 1px solid #f0f0f0;
+    background-color: #fafbfc;
+    border-radius: 0 0 8px 8px;
+    padding: 10px 16px;
 }
 
-/*
- * Styles for Ordenes Page - V2 (More Vibrant)
- */
+/* ══════════════════════════════════════════════════
+   5. USERS LIST
+══════════════════════════════════════════════════ */
+.users-list > li {
+    width: 25%;
+    padding: 12px;
+    text-align: center;
+}
 
-/* Main container and header */
+.users-list > li img {
+    border-radius: 10px;
+    height: 90px !important;
+    width: auto !important;
+    max-width: 100%;
+    box-shadow: 0 3px 8px rgba(0,0,0,.10);
+    transition: transform .25s ease, box-shadow .25s ease;
+    cursor: pointer;
+    object-fit: contain;
+}
+
+.users-list > li img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 18px rgba(0,0,0,.18);
+}
+
+.users-list > li a.users-list-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* ══════════════════════════════════════════════════
+   6. CONTENT HEADER
+══════════════════════════════════════════════════ */
 .content-header h1 {
     font-weight: 700;
-    font-size: 1.9rem;
+    font-size: 1.75rem;
     color: #2c3e50;
 }
 
-/* 'Última Entrega' Box */
+.content-header .breadcrumb {
+    background: transparent !important;
+    font-size: 12px;
+}
+
+.content-header .breadcrumb > li + li:before {
+    color: #bbb;
+}
+
+/* ══════════════════════════════════════════════════
+   7. ÚLTIMA ENTREGA (componente específico órdenes)
+══════════════════════════════════════════════════ */
 #ultimaenentrega {
     background: linear-gradient(to right, #6dd5ed, #2193b0);
     padding: 20px;
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.10);
     margin-bottom: 25px;
     border: none;
     color: #fff;
@@ -163,7 +176,7 @@ body {
     font-weight: 700;
     color: #fff;
     margin: 0;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    text-shadow: 1px 1px 2px rgba(0,0,0,.2);
 }
 
 #ultimaenentrega .btn-success {
@@ -172,12 +185,14 @@ body {
     border: none;
 }
 
-/* DataTables Modernization */
+/* ══════════════════════════════════════════════════
+   8. DATATABLES  (scoped a #datatableordenes)
+══════════════════════════════════════════════════ */
 #datatableordenes_wrapper {
-    padding: 20px;
+    padding: 16px;
     background: #fff;
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    border-radius: 10px;
+    box-shadow: 0 3px 14px rgba(0,0,0,.07);
 }
 
 #datatableordenes {
@@ -187,35 +202,30 @@ body {
 }
 
 #datatableordenes thead th {
-    background-color: #4e73df;
+    background-color: #1a3152;
     color: #fff;
     font-weight: 700;
     border: none;
-    padding: 15px;
+    padding: 12px 14px;
     text-align: left;
 }
 
-#datatableordenes thead th:first-child {
-    border-top-left-radius: 0.5rem;
-}
-
-#datatableordenes thead th:last-child {
-    border-top-right-radius: 0.5rem;
-}
+#datatableordenes thead th:first-child { border-top-left-radius:  6px; }
+#datatableordenes thead th:last-child  { border-top-right-radius: 6px; }
 
 #datatableordenes tbody td {
-    padding: 15px;
+    padding: 12px 14px;
     vertical-align: middle;
-    border-bottom: 1px solid #e3e6f0;
-    color: #5a5c69;
+    border-bottom: 1px solid #edf0f7;
+    color: #555;
 }
 
 #datatableordenes tbody tr {
-    transition: background-color 0.2s ease;
+    transition: background-color .15s ease;
 }
 
 #datatableordenes tbody tr:hover {
-    background-color: #f8f9fc;
+    background-color: #f4f7fe;
 }
 
 #datatableordenes tbody tr:last-child td {
@@ -223,620 +233,636 @@ body {
 }
 
 #datatableordenes tbody td h3 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     margin: 0;
     color: #2c3e50;
 }
 
-/* Row with delay */
 .atraso {
-    background-color: #fbe9e7 !important;
-    border-left: 4px solid #ff5252;
+    background-color: #fdf0ef !important;
+    border-left: 4px solid #e74a3b;
 }
 
-.atraso td {
-    font-weight: 600;
-}
+.atraso td { font-weight: 600; }
 
-/* DataTables Controls */
+/* Paginación DataTables */
 .dataTables_wrapper .dataTables_length label,
 .dataTables_wrapper .dataTables_filter label {
     font-weight: 600;
-    color: #5a5c69;
+    color: #555;
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button {
-    padding: 0.5em 1em;
-    margin-left: 5px;
-    border-radius: 0.35rem;
-    border: 1px solid #d1d3e2;
+    padding: 4px 10px;
+    margin-left: 3px;
+    border-radius: 5px;
+    border: 1px solid #dde1f0 !important;
+    transition: background .15s;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: #4e73df;
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: #1a3152 !important;
     color: #fff !important;
-    border-color: #4e73df;
+    border-color: #1a3152 !important;
 }
 
-/* General Button Styles */
+/* ══════════════════════════════════════════════════
+   9. BOTONES
+   — CRÍTICO: NO sobreescribir padding ni tamaño global.
+     Bootstrap 3 tiene 5 tamaños; tocar padding aquí rompe
+     btn-xs, btn-sm, btn-flat, btn-box-tool en todo el sistema.
+     Solo aplicamos radius, color y transición segura.
+══════════════════════════════════════════════════ */
+
+/* Radio y transición: SEGURO — no altera sizing */
 .btn {
-    border-radius: 0.35rem;
-    padding: 10px 20px;
+    border-radius: 5px;
     font-weight: 600;
-    transition: all 0.2s;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: opacity .15s ease, background-color .15s ease,
+                border-color .15s ease, box-shadow .15s ease;
 }
 
+/* Hover suave: solo sombra, NO transform (evita saltos en tablas) */
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 3px 10px rgba(0,0,0,.12);
 }
 
-.btn-primary {
-    background-color: #4e73df;
-    border-color: #4e73df;
+/* Excepción: transform SOLO en botones de acción principal grandes */
+.btn-primary:not(.btn-xs):not(.btn-sm):not(.btn-flat):not(.btn-block):hover,
+.btn-success:not(.btn-xs):not(.btn-sm):not(.btn-flat):not(.btn-block):hover,
+.btn-danger:not(.btn-xs):not(.btn-sm):not(.btn-flat):not(.btn-block):hover {
+    transform: translateY(-1px);
 }
 
-.btn-warning {
-    background-color: #f6c23e;
-    border-color: #f6c23e;
-    color: #fff;
+/* Paleta de colores actualizada */
+.btn-primary             { background-color: #1a3152; border-color: #1a3152; color: #fff; }
+.btn-primary:hover,
+.btn-primary:focus       { background-color: #152845; border-color: #152845; color: #fff; }
+
+.btn-warning             { background-color: #f39c12; border-color: #f39c12; color: #fff; }
+.btn-warning:hover,
+.btn-warning:focus       { background-color: #d68910; border-color: #d68910; color: #fff; }
+
+.btn-danger              { background-color: #e74a3b; border-color: #e74a3b; }
+.btn-danger:hover,
+.btn-danger:focus        { background-color: #d13b2d; border-color: #d13b2d; }
+
+.btn-success             { background-color: #1aab6d; border-color: #1aab6d; }
+.btn-success:hover,
+.btn-success:focus       { background-color: #15915c; border-color: #15915c; }
+
+/* btn-flat y btn-box-tool: no shadow extra */
+.btn-flat, .btn-box-tool {
+    box-shadow: none !important;
+    border-radius: 3px;
 }
 
-.btn-danger {
-    background-color: #e74a3b;
-    border-color: #e74a3b;
-}
-
-.btn-success {
-    background-color: #1cc88a;
-    border-color: #1cc88a;
-}
-
-/* Modal Styles */
+/* ══════════════════════════════════════════════════
+   10. MODALES  (Bootstrap 3 compatible)
+══════════════════════════════════════════════════ */
 .modal-content {
-    border-radius: 0.75rem;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
     border: none;
+    overflow: hidden;
 }
 
 .modal-header {
-    background: linear-gradient(to right, #4e73df, #224abe);
+    background: linear-gradient(135deg, #1a3152, #2e5ca0);
     color: #fff;
-    border-top-left-radius: 0.75rem;
-    border-top-right-radius: 0.75rem;
     border-bottom: none;
-    padding: 20px;
+    padding: 18px 20px;
+    border-radius: 0; /* overflow:hidden en modal-content se encarga */
 }
 
 .modal-header .modal-title {
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
 }
 
+/* CRÍTICO: el .close debe ser visible sobre el fondo oscuro */
 .modal-header .close {
-    color: #fff;
+    color: rgba(255,255,255,.8) !important;
     opacity: 1;
     text-shadow: none;
+    font-size: 20px;
+    font-weight: 700;
+    transition: color .15s;
+}
+
+.modal-header .close:hover {
+    color: #fff !important;
 }
 
 .modal-body {
-    padding: 25px;
+    padding: 22px;
 }
 
+/* form-control: solo border y radius, NO padding (Bootstrap lo gestiona) */
 .modal-body .form-control {
-    border-radius: 0.35rem;
-    border: 1px solid #d1d3e2;
-    padding: 20px 15px;
+    border-radius: 5px;
+    border-color: #d1d3e2;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.modal-body .form-control:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 3px rgba(78,115,223,.15);
 }
 
 .modal-body .input-group-addon {
-    border-radius: 0.35rem;
-    border: 1px solid #d1d3e2;
+    border-radius: 5px;
+    border-color: #d1d3e2;
     background-color: #f8f9fc;
 }
 
-/* Badge Styles for Orders */
-.badge-revision {
-    color: #0c5460;
-    background: #d1ecf1;
-    border-color: #bee5eb;
+.modal-footer {
+    border-top: 1px solid #f0f0f0;
+    padding: 14px 20px;
 }
 
-/* Info Blue */
-.badge-supervision {
-    color: #4a148c;
-    background: #e1bee7;
-    border-color: #ce93d8;
+/* ══════════════════════════════════════════════════
+   11. BADGES DE ESTADO — ÓRDENES
+══════════════════════════════════════════════════ */
+.badge-revision         { color: #0c5460; background: #d1ecf1; }
+.badge-supervision      { color: #4a148c; background: #e1bee7; }
+.badge-sin-reparacion   { color: #721c24; background: #f8d7da; }
+.badge-revision-garantia{ color: #856404; background: #fff3cd; }
+.badge-garantia         { color: #155724; background: #d4edda; }
+.badge-entregado        { color: #383d41; background: #e2e3e5; }
+
+/* ══════════════════════════════════════════════════
+   12. INFO-BOX  (AdminLTE component)
+══════════════════════════════════════════════════ */
+.info-box {
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease;
 }
 
-/* Purple */
-.badge-sin-reparacion {
-    color: #721c24;
-    background: #f8d7da;
-    border-color: #f5c6cb;
+.info-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 24px rgba(0,0,0,.13);
 }
 
-/* Dark Red */
-.badge-revision-garantia {
-    color: #856404;
-    background: #fff3cd;
-    border-color: #ffeeba;
+.info-box-icon {
+    border-radius: 10px 0 0 10px;
+    width: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
 }
 
-/* Yellow */
-.badge-garantia {
-    color: #155724;
-    background: #d4edda;
-    border-color: #c3e6cb;
+.info-box-content {
+    padding: 10px 14px;
 }
 
-/* Green */
-.badge-entregado {
-    color: #383d41;
-    background: #e2e3e5;
-    border-color: #d6d8db;
-}
+/* ╔══════════════════════════════════════════════════════╗
+   ║  MODERNIZACIÓN UI — EGS 2025                        ║
+   ║  Header · Sidebar · User Menu · Footer              ║
+   ║  Bootstrap 3 + AdminLTE 2 compatible                ║
+   ╚══════════════════════════════════════════════════════╝ */
 
-/* Light Gray */
-
-/* ╔══════════════════════════════════════════════════════════════╗
-   ║   MODERNIZACIÓN UI — EGS 2025                               ║
-   ║   Header · Sidebar · User Menu · Footer                     ║
-   ╚══════════════════════════════════════════════════════════════╝ */
-
-/* ─────────────────────────────────────────
-   HEADER / NAVBAR
-───────────────────────────────────────── */
+/* ══════════════════════════════════════════════════
+   13. HEADER / NAVBAR
+══════════════════════════════════════════════════ */
 .main-header {
-  box-shadow: 0 2px 18px rgba(0,0,0,.22) !important;
-  position: sticky !important;
-  top: 0;
-  z-index: 1030;
+    box-shadow: 0 2px 16px rgba(0,0,0,.20) !important;
 }
 
 .main-header .navbar {
-  background: linear-gradient(90deg, #0f1c2e 0%, #1a3152 100%) !important;
-  min-height: 56px;
-  border: none !important;
+    background: linear-gradient(90deg, #0f1c2e 0%, #1a3152 100%) !important;
+    min-height: 56px;
+    border: none !important;
 }
 
 .main-header .logo {
-  background: #0f1c2e !important;
-  border-bottom: none !important;
-  border-right: 1px solid rgba(255,255,255,.06) !important;
-  transition: background .2s;
+    background: #0f1c2e !important;
+    border-bottom: none !important;
+    border-right: 1px solid rgba(255,255,255,.06) !important;
+    transition: background .2s;
 }
 
 .main-header .logo:hover {
-  background: #0c1826 !important;
+    background: #0b1520 !important;
 }
 
-/* Hamburger toggle */
+/* Toggle hamburger */
 .main-header .sidebar-toggle {
-  color: rgba(255,255,255,.7) !important;
-  font-size: 17px;
-  padding: 18px 20px !important;
-  border: none !important;
-  transition: color .2s, background .2s;
+    color: rgba(255,255,255,.70) !important;
+    font-size: 17px;
+    padding: 18px 20px !important;
+    border: none !important;
+    transition: color .2s, background .2s;
 }
 
 .main-header .sidebar-toggle:hover {
-  background: rgba(255,255,255,.07) !important;
-  color: #fff !important;
+    background: rgba(255,255,255,.07) !important;
+    color: #fff !important;
 }
 
-/* Nav items en header */
+/* Nav items en navbar */
 .navbar-custom-menu .navbar-nav > li > a {
-  color: rgba(255,255,255,.75) !important;
-  transition: color .2s, background .2s;
-  padding-top: 16px;
-  padding-bottom: 16px;
+    color: rgba(255,255,255,.75) !important;
+    transition: color .15s, background .15s;
+    padding-top: 16px;
+    padding-bottom: 16px;
 }
 
 .navbar-custom-menu .navbar-nav > li > a:hover {
-  color: #fff !important;
-  background: rgba(255,255,255,.08) !important;
+    color: #fff !important;
+    background: rgba(255,255,255,.08) !important;
 }
 
-/* Badge de notificaciones */
+/* Badge notificaciones */
 .navbar-custom-menu .label-warning {
-  background: #f6c23e !important;
-  font-size: 9px !important;
-  padding: 2px 5px !important;
-  border-radius: 10px !important;
+    background: #f39c12 !important;
+    font-size: 9px !important;
+    padding: 2px 5px !important;
+    border-radius: 10px !important;
 }
 
-
-/* ─────────────────────────────────────────
-   USER MENU DROPDOWN
-───────────────────────────────────────── */
+/* ══════════════════════════════════════════════════
+   14. USER MENU DROPDOWN
+   — Clases egs-* propias para no interferir con AdminLTE
+══════════════════════════════════════════════════ */
 
 /* Trigger */
 .egs-user-trigger {
-  display: flex !important;
-  align-items: center;
-  gap: 9px;
-  padding: 10px 14px !important;
-  border-radius: 8px !important;
-  margin: 8px 6px !important;
-  transition: background .2s !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    margin: 8px 4px !important;
+    transition: background .2s !important;
 }
 
 .egs-user-trigger:hover {
-  background: rgba(255,255,255,.10) !important;
+    background: rgba(255,255,255,.10) !important;
 }
 
 .egs-avatar-wrap {
-  position: relative;
-  display: inline-block;
-  flex-shrink: 0;
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
 }
 
 .egs-avatar-sm {
-  width: 34px !important;
-  height: 34px !important;
-  border-radius: 50% !important;
-  border: 2px solid rgba(255,255,255,.35) !important;
-  object-fit: cover;
-  margin: 0 !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    border: 2px solid rgba(255,255,255,.30) !important;
+    object-fit: cover;
+    margin: 0 !important;
 }
 
 .egs-online-pulse {
-  position: absolute;
-  bottom: 1px;
-  right: 1px;
-  width: 9px;
-  height: 9px;
-  background: #28d16c;
-  border-radius: 50%;
-  border: 2px solid #0f1c2e;
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 9px;
+    height: 9px;
+    background: #2ed881;
+    border-radius: 50%;
+    border: 2px solid #0f1c2e;
 }
 
 .egs-trigger-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255,255,255,.85);
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,.85);
 }
 
 .egs-chevron {
-  font-size: 9px !important;
-  opacity: .55;
-  transition: transform .25s;
+    font-size: 9px !important;
+    opacity: .50;
+    transition: transform .25s;
 }
 
 .egs-user-trigger[aria-expanded="true"] .egs-chevron {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 
-/* Dropdown panel */
+/* Panel dropdown */
 .egs-user-dropdown {
-  width: 260px !important;
-  border: none !important;
-  border-radius: 14px !important;
-  box-shadow: 0 12px 45px rgba(0,0,0,.20), 0 2px 8px rgba(0,0,0,.12) !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  margin-top: 6px !important;
-  right: 0 !important;
-  left: auto !important;
+    width: 260px !important;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 14px 45px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.10) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin-top: 6px !important;
+    right: 0 !important;
+    left: auto !important;
 }
 
-/* Cabecera con gradiente */
+/* Cabecera gradiente */
 .egs-udrop-header {
-  background: linear-gradient(135deg, #0f1c2e 0%, #1e3a6e 100%) !important;
-  min-height: auto !important;
-  padding: 18px 16px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 13px !important;
+    background: linear-gradient(135deg, #0f1c2e 0%, #1e3d72 100%) !important;
+    min-height: auto !important;
+    padding: 18px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 13px !important;
 }
 
 .egs-udrop-avatar-wrap {
-  position: relative;
-  flex-shrink: 0;
+    position: relative;
+    flex-shrink: 0;
 }
 
 .egs-udrop-avatar {
-  width: 50px !important;
-  height: 50px !important;
-  border-radius: 50% !important;
-  border: 3px solid rgba(255,255,255,.30) !important;
-  object-fit: cover;
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    border: 3px solid rgba(255,255,255,.28) !important;
+    object-fit: cover;
 }
 
 .egs-udrop-dot {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 11px;
-  height: 11px;
-  background: #28d16c;
-  border-radius: 50%;
-  border: 2px solid #0f1c2e;
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 11px;
+    height: 11px;
+    background: #2ed881;
+    border-radius: 50%;
+    border: 2px solid #0f1c2e;
 }
 
 .egs-udrop-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .egs-udrop-name {
-  display: block;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    display: block;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .egs-udrop-role {
-  display: inline-block;
-  background: rgba(255,255,255,.15);
-  color: rgba(255,255,255,.85);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .6px;
-  padding: 3px 9px;
-  border-radius: 20px;
+    display: inline-block;
+    background: rgba(255,255,255,.14);
+    color: rgba(255,255,255,.85);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    padding: 2px 8px;
+    border-radius: 20px;
 }
 
 /* Links rápidos */
 .egs-udrop-nav {
-  list-style: none !important;
-  margin: 0 !important;
-  padding: 6px 0 !important;
-  background: #fff;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 6px 0 !important;
+    background: #fff !important;
 }
 
 .egs-udrop-nav > li > a {
-  display: flex !important;
-  align-items: center !important;
-  gap: 11px !important;
-  padding: 10px 18px !important;
-  color: #444 !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  transition: background .15s, color .15s !important;
-  text-decoration: none !important;
-  border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    padding: 10px 16px !important;
+    color: #444 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    transition: background .12s !important;
+    text-decoration: none !important;
+    /* Reset Bootstrap link styles */
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .egs-udrop-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: #f0f4ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #4e73df;
-  font-size: 13px;
-  flex-shrink: 0;
-  transition: background .15s;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: #eef1ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a3152;
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: background .12s;
 }
 
 .egs-udrop-nav > li > a:hover {
-  background: #f4f7fe !important;
-  color: #1a3152 !important;
+    background: #f4f7fd !important;
+    color: #1a3152 !important;
 }
 
 .egs-udrop-nav > li > a:hover .egs-udrop-icon {
-  background: #dce8ff;
+    background: #dbe4ff;
 }
 
-/* Footer — logout */
+/* Footer logout */
 .egs-udrop-footer {
-  padding: 10px 14px !important;
-  background: #fafafa !important;
-  border-top: 1px solid #f0f0f0 !important;
+    padding: 10px 14px !important;
+    background: #f9fafb !important;
+    border-top: 1px solid #eef0f5 !important;
 }
 
 .egs-btn-logout {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  padding: 9px 0 !important;
-  background: #fff !important;
-  color: #e53935 !important;
-  border: 1.5px solid #ffcdd2 !important;
-  border-radius: 9px !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  transition: background .15s, border-color .15s, color .15s !important;
-  text-decoration: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding: 9px 0 !important;
+    background: #fff !important;
+    color: #e53935 !important;
+    border: 1.5px solid #fad5d3 !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    transition: background .15s, border-color .15s, color .15s !important;
+    text-decoration: none !important;
 }
 
 .egs-btn-logout:hover {
-  background: #ffebee !important;
-  border-color: #e57373 !important;
-  color: #b71c1c !important;
+    background: #fef0ef !important;
+    border-color: #e57373 !important;
+    color: #b71c1c !important;
+    text-decoration: none !important;
 }
 
-
-/* ─────────────────────────────────────────
-   SIDEBAR
-───────────────────────────────────────── */
+/* ══════════════════════════════════════════════════
+   15. SIDEBAR
+══════════════════════════════════════════════════ */
 .main-sidebar,
 .main-sidebar .sidebar {
-  background: #0f1c2e !important;
+    background: #0f1c2e !important;
 }
 
-/* User panel en sidebar */
+/* User panel */
 .egs-sidebar-user {
-  padding: 14px 12px 12px !important;
-  border-bottom: 1px solid rgba(255,255,255,.07) !important;
-  margin-bottom: 4px !important;
+    padding: 14px 12px 12px !important;
+    border-bottom: 1px solid rgba(255,255,255,.07) !important;
+    margin-bottom: 4px !important;
 }
 
 .egs-sidebar-user .pull-left.image img {
-  width: 38px !important;
-  height: 38px !important;
-  border-radius: 50% !important;
-  border: 2px solid rgba(255,255,255,.25) !important;
-  object-fit: cover;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    border: 2px solid rgba(255,255,255,.22) !important;
+    object-fit: cover;
 }
 
 .egs-sidebar-user .pull-left.info p {
-  color: rgba(255,255,255,.88) !important;
-  font-weight: 700 !important;
-  font-size: 13px !important;
-  margin: 0 0 2px !important;
-  line-height: 1.3;
+    color: rgba(255,255,255,.88) !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    margin: 0 0 2px !important;
+    line-height: 1.3;
 }
 
 .egs-sidebar-user .pull-left.info a {
-  color: rgba(255,255,255,.4) !important;
-  font-size: 11px !important;
-  text-decoration: none !important;
+    color: rgba(255,255,255,.38) !important;
+    font-size: 11px !important;
+    text-decoration: none !important;
 }
 
 /* Items del menú */
 .sidebar-menu > li > a {
-  color: rgba(255,255,255,.65) !important;
-  border-left: 3px solid transparent !important;
-  padding: 11px 14px 11px 20px !important;
-  font-size: 13px;
-  transition: all .2s;
+    color: rgba(255,255,255,.62) !important;
+    border-left: 3px solid transparent !important;
+    padding: 11px 14px 11px 20px !important;
+    font-size: 13px;
+    transition: color .18s, background .18s, border-color .18s;
 }
 
 .sidebar-menu > li > a:hover,
 .sidebar-menu > li:hover > a {
-  color: #fff !important;
-  background: rgba(255,255,255,.06) !important;
-  border-left-color: #4e73df !important;
+    color: #fff !important;
+    background: rgba(255,255,255,.055) !important;
+    border-left-color: #4e8edf !important;
 }
 
 .sidebar-menu > li.active > a {
-  color: #fff !important;
-  background: linear-gradient(90deg, rgba(78,115,223,.28), rgba(78,115,223,.06)) !important;
-  border-left-color: #4e73df !important;
-  font-weight: 600;
+    color: #fff !important;
+    background: linear-gradient(90deg,
+        rgba(78,142,223,.30) 0%,
+        rgba(78,142,223,.06) 100%) !important;
+    border-left-color: #4e8edf !important;
+    font-weight: 700;
 }
 
-.sidebar-menu > li > a > i,
-.sidebar-menu > li > a > .fa-solid,
-.sidebar-menu > li > a > .fas {
-  color: rgba(255,255,255,.45);
-  margin-right: 9px;
-  width: 18px;
-  text-align: center;
-  transition: color .2s;
+/* Íconos */
+.sidebar-menu > li > a > i {
+    color: rgba(255,255,255,.40) !important;
+    margin-right: 9px;
+    width: 18px;
+    text-align: center;
+    transition: color .18s;
 }
 
 .sidebar-menu > li.active > a > i,
-.sidebar-menu > li.active > a > .fa-solid,
 .sidebar-menu > li:hover > a > i {
-  color: #8eaaff;
-}
-
-/* Treeview submenu */
-.treeview-menu {
-  background: rgba(0,0,0,.18) !important;
-  padding: 4px 0 !important;
-}
-
-.treeview-menu > li > a {
-  color: rgba(255,255,255,.50) !important;
-  font-size: 12.5px;
-  padding: 7px 5px 7px 38px !important;
-  transition: color .2s;
-}
-
-.treeview-menu > li > a:hover {
-  color: rgba(255,255,255,.9) !important;
-  background: transparent !important;
-}
-
-.treeview-menu > li > a > i {
-  color: rgba(255,255,255,.3);
-  margin-right: 7px;
+    color: rgba(255,255,255,.85) !important;
 }
 
 /* Flecha treeview */
 .sidebar-menu .pull-right-container > .pull-right {
-  color: rgba(255,255,255,.3) !important;
+    color: rgba(255,255,255,.28) !important;
 }
 
-/* Scrollbar custom */
-.sidebar::-webkit-scrollbar { width: 4px; }
+/* Submenús treeview */
+.treeview-menu {
+    background: rgba(0,0,0,.18) !important;
+    padding: 4px 0 !important;
+}
+
+.treeview-menu > li > a {
+    color: rgba(255,255,255,.48) !important;
+    font-size: 12.5px;
+    padding: 7px 5px 7px 38px !important;
+    transition: color .15s;
+}
+
+.treeview-menu > li > a:hover {
+    color: rgba(255,255,255,.88) !important;
+    background: transparent !important;
+}
+
+.treeview-menu > li > a > i {
+    color: rgba(255,255,255,.28) !important;
+    margin-right: 7px;
+}
+
+/* Scrollbar fino */
+.sidebar::-webkit-scrollbar       { width: 3px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
 .sidebar::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.12);
-  border-radius: 4px;
+    background: rgba(255,255,255,.10);
+    border-radius: 3px;
 }
 
-
-/* ─────────────────────────────────────────
-   FOOTER
-───────────────────────────────────────── */
+/* ══════════════════════════════════════════════════
+   16. FOOTER
+══════════════════════════════════════════════════ */
 .main-footer {
-  background: #fff !important;
-  border-top: 1px solid #e8ecf4 !important;
-  color: #9aa3b2 !important;
-  font-size: 12px !important;
-  padding: 11px 20px !important;
+    background: #fff !important;
+    border-top: 1px solid #eaecf4 !important;
+    color: #999 !important;
+    font-size: 12px !important;
+    padding: 11px 20px !important;
 }
 
 .main-footer a {
-  color: #4e73df !important;
-  font-weight: 500;
+    color: #1a3152 !important;
+    font-weight: 500;
 }
 
 .main-footer a:hover {
-  color: #2e59d9 !important;
+    color: #2e5ca0 !important;
+    text-decoration: underline !important;
 }
 
-
-/* ─────────────────────────────────────────
-   INFO-BOX modernización
-───────────────────────────────────────── */
-.info-box {
-  border-radius: 10px !important;
-  box-shadow: 0 3px 12px rgba(0,0,0,.09) !important;
-  overflow: hidden !important;
-  transition: transform .2s, box-shadow .2s;
+/* ══════════════════════════════════════════════════
+   17. SKIN-BLUE OVERRIDES  (mayor especificidad)
+   — Necesarios para ganar al skin CSS de AdminLTE
+══════════════════════════════════════════════════ */
+.skin-blue .main-header .navbar {
+    background: linear-gradient(90deg, #0f1c2e, #1a3152) !important;
 }
-
-.info-box:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 22px rgba(0,0,0,.14) !important;
+.skin-blue .main-header .logo {
+    background: #0f1c2e !important;
+    border-right: 1px solid rgba(255,255,255,.06) !important;
 }
-
-.info-box-icon {
-  border-radius: 10px 0 0 10px !important;
-  font-size: 42px !important;
-  line-height: 90px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+.skin-blue .main-header .logo:hover {
+    background: #0b1520 !important;
 }
-
-/* ─────────────────────────────────────────
-   BREADCRUMB modernización
-───────────────────────────────────────── */
-.content-header .breadcrumb {
-  background: transparent !important;
-  font-size: 12px;
+.skin-blue .main-sidebar {
+    background: #0f1c2e !important;
 }
-
-.content-header .breadcrumb > li + li:before {
-  color: #bbb;
+.skin-blue .sidebar-menu > li.header {
+    background: transparent !important;
+    color: rgba(255,255,255,.25) !important;
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
 }
-
-/* ─────────────────────────────────────────
-   FIX: skin-blue override completo
-───────────────────────────────────────── */
-.skin-blue .main-header .navbar { background: linear-gradient(90deg, #0f1c2e, #1a3152) !important; }
-.skin-blue .main-header .logo  { background: #0f1c2e !important; border-right: 1px solid rgba(255,255,255,.06) !important; }
-.skin-blue .main-header .logo:hover { background: #0c1826 !important; }
-.skin-blue .main-sidebar { background: #0f1c2e !important; }
-.skin-blue .sidebar-menu > li.header { background: transparent !important; color: rgba(255,255,255,.28) !important; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
-.skin-blue .treeview-menu { background: rgba(0,0,0,.2) !important; }
+.skin-blue .treeview-menu {
+    background: rgba(0,0,0,.18) !important;
+}
+.skin-blue .sidebar-menu > li.active > a {
+    border-left-color: #4e8edf !important;
+}
