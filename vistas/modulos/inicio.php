@@ -24,106 +24,75 @@ PÁGINA DE INICIO
 
   <!-- content -->
   <section class="content">
-    
-    <!-- row -->
-    <div class="row">
 
-       <?php
+    <?php if ($_SESSION["perfil"] == "administrador"): ?>
 
-        if($_SESSION["perfil"] == "administrador"){
-
-        include "inicio/superioresAdmin.php";
-
-        }else if ($_SESSION["perfil"] == "vendedor"){
-          
-          include "inicio/superiorVendedor.php";
-
-        }else if ($_SESSION["perfil"] == "tecnico") {
-          
-          include_once "inicio/superiorTecnicos.php";
-
-        }
-
-      
-      ?>
-
-    </div>
-    <!-- row -->
-
-    <!-- row -->
-    <div class="row">
-         <?php
-
-         if($_SESSION["perfil"] == "administrador"){
-
-          echo '<div class="col-lg-6">';
-       
-          include "inicio/asesores-caja.php";
-
-          echo '</div>';
-
-          }else if ($_SESSION["perfil"] == "tecnico") {
-            
-            echo '<div class="col-lg-6">';
-       
-              include "inicio/ordenes-caja.php";
-
-            echo '</div>';
-
-
-          }else if ($_SESSION["perfil"] == "vendedor") {
-            echo '<div class="col-lg-6">';
-       
-              include "inicio/ordenes-AUT-caja.php";
-
-            echo '</div>';
-          }
-
-        ?>
-
-     
-
-
-        
-         <?php
-
-          if($_SESSION["perfil"] == "administrador"){
-
-            echo ' <div class="col-lg-6 col-md-6">';
-         
-            include "inicio/tecnicos-caja.php";
-
-            echo '</div>'; 
-
-          }else if($_SESSION["perfil"] == "tecnico") {
-            
-            echo ' <div class="col-lg-6">';
-         
-            include "inicio/ordenesEnRev.php";
-
-            echo '</div>'; 
-
-          }    
-
-        ?>
-
-       <div class="col-lg-12">
-
-        <?php
-
-        //include "inicio/productos-recientes.php";
-
-       
-
-        ?>
-        
-
+      <!-- ── Fila 1: KPIs superiores ── -->
+      <div class="row">
+        <?php include "inicio/superioresAdmin.php"; ?>
       </div>
 
-    </div>
-    <!-- row -->
+      <!-- ── Fila 2: Alertas críticas del mes ── -->
+      <?php include "inicio/alertas-criticas.php"; ?>
 
- </section>
+      <!-- ── Fila 3: Gráfico de ventas + Top Técnicos ── -->
+      <div class="row">
+        <div class="col-lg-8">
+          <?php include "inicio/grafico-ventas.php"; ?>
+        </div>
+        <div class="col-lg-4">
+          <?php include "inicio/top-tecnicos.php"; ?>
+        </div>
+      </div>
+
+      <!-- ── Fila 4: Últimas órdenes + Productos más vendidos ── -->
+      <div class="row">
+        <div class="col-lg-8">
+          <?php include "inicio/ultimas-ordenes.php"; ?>
+        </div>
+        <div class="col-lg-4">
+          <?php include "inicio/productos-mas-vendidos.php"; ?>
+        </div>
+      </div>
+
+      <!-- ── Fila 5: Asesores + Técnicos ── -->
+      <div class="row">
+        <div class="col-lg-6">
+          <?php include "inicio/asesores-caja.php"; ?>
+        </div>
+        <div class="col-lg-6">
+          <?php include "inicio/tecnicos-caja.php"; ?>
+        </div>
+      </div>
+
+    <?php elseif ($_SESSION["perfil"] == "vendedor"): ?>
+
+      <div class="row">
+        <?php include "inicio/superiorVendedor.php"; ?>
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <?php include "inicio/ordenes-AUT-caja.php"; ?>
+        </div>
+      </div>
+
+    <?php elseif ($_SESSION["perfil"] == "tecnico"): ?>
+
+      <div class="row">
+        <?php include_once "inicio/superiorTecnicos.php"; ?>
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <?php include "inicio/ordenes-caja.php"; ?>
+        </div>
+        <div class="col-lg-6">
+          <?php include "inicio/ordenesEnRev.php"; ?>
+        </div>
+      </div>
+
+    <?php endif; ?>
+
+  </section>
   <!-- content -->
 
 </div>

@@ -12,7 +12,7 @@ if(isset($_GET["fechaInicial"])){
 
 }
 
-	$respuesta = ControladorVentas::ctrRangoFechasVentas($fechaInicial, $fechaFinal);
+	$respuesta = ControladorVentas::ctrRangoFechasVentas($fechaInicial, $fechaFinal, "id_empresa", $_SESSION["empresa"]);
 
 	foreach ($respuesta as $key => $value) {
 		
