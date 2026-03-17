@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(php -r \":*)",
+      "Bash(grep -n \"AND estado = ''autorización\" \"C:/Users/black/Desktop/EGS/modelos/ordenes.modelo.php\")",
+      "Bash(php \"C:/Users/black/Desktop/EGS/fix_bug.php\")"
+    ]
+  }
+}

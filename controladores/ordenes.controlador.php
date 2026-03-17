@@ -64,11 +64,9 @@ class controladorOrdenes{
 		return $respuesta;
 
 	}
-	static public function ctrMostrarHistorial( $tabla, $valor){
+	static public function ctrMostrarHistorial($tabla, $valor){
 
-		$tabla = "ordenes";
 
-		
 
 		$respuesta = ModeloOrdenes::mdlMostrarHistorial($tabla, $valor);
 

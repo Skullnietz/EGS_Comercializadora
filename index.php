@@ -130,7 +130,6 @@ require_once "modelos/categorias.orden.modelo.php";
 
 require_once "modelos/almacenes.modelo.php";
 require_once "modelos/peticionmaterial.modelo.php";
-require_once "modelos/peticionmaterial.modelo.php";
 require_once "modelos/cotizacion.modelo.php";
 /////////////////////////modelos siste ventas//////////////////////////////////////
 
@@ -153,7 +152,6 @@ require_once "modelos/Articulo.php";
 require_once "extensiones/vendor/autoload.php";
 
 require_once "extensiones/PHPMailer/PHPMailerAutoload.php";
-require_once "extensiones/vendor/autoload.php";
 
 $plantilla = new ControladorPlantilla();
 

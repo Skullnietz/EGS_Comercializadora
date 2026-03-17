@@ -205,13 +205,13 @@ class ControladorAdministradores{
 					           "foto"=>$ruta,
 					           "estado" => 1);
 
+
+					$respuesta = ModeloAdministradores::mdlIngresarPerfil($tabla, $datos);
+
 				}
 
-				
-				$respuesta = ModeloAdministradores::mdlIngresarPerfil($tabla, $datos);
-				
-			
-				if($respuesta == "ok"){
+
+				if(isset($respuesta) && $respuesta == "ok"){
 
 					echo '<script>
 
@@ -286,6 +286,8 @@ class ControladorAdministradores{
 				=============================================*/
 
 				$ruta = $_POST["fotoActual"];
+
+				$directorio = "vistas/img/perfiles/";
 
 				if(isset($_FILES["editarFoto"]["tmp_name"]) && !empty($_FILES["editarFoto"]["tmp_name"])){
 
@@ -370,8 +372,7 @@ class ControladorAdministradores{
 							
 						}
 						
-						var_dump($value1[5]);
-						
+		
 						//if (password_verify($_POST["editarPassword"], $value1["password"])) {
 
 							$encriptar = crypt($_POST["editarPassword"], '$2a$07$asxx54ahjppf45sd87a5a4dDDGsystemdev$');

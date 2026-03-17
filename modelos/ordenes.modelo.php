@@ -20,11 +20,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -46,11 +44,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -72,11 +68,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 // TODAS LAS COMISIONES DEL MES  1ERA QUINCENA (ADMINSTRADOR)
@@ -97,11 +91,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 // COMISIONES DEL MES TECNICO Y VENDEDOR 2DA QUINCENA
@@ -122,11 +114,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 // TODAS LAS COMISIONES DEL MES  2DA QUINCENA (ADMINSTRADOR)
@@ -147,11 +137,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 	
@@ -175,11 +163,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 	// MANDAR ULTIMA ORDEN EN REGISTRARSE
@@ -200,11 +186,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 	static public function mdlMostrarOrdenesNew($tabla, $campo, $empresa){
@@ -224,11 +208,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -259,11 +241,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 		/*=============================================
@@ -289,11 +269,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -349,11 +327,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 
 
@@ -373,7 +349,7 @@ class ModeloOrdenes{
 
 
 
-		if($item != null){
+		if($itemOrdenes != null){
 
 
 
@@ -415,11 +391,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 
 
@@ -478,11 +452,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 
 
@@ -560,7 +532,7 @@ class ModeloOrdenes{
 
 		$stmt->bindParam(":partidaOcho", $datos["partida8"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioOcho", $datos["precio6"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioOcho", $datos["precio8"], PDO::PARAM_INT);
 
 		$stmt->bindParam(":partidaNueve", $datos["partida9"], PDO::PARAM_STR);
 
@@ -604,7 +576,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -746,7 +717,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -784,7 +754,6 @@ class ModeloOrdenes{
 
 		$stmt->bindParam(":totalInversion", $datos["totalInversiones"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":partidas", $datos["listatOrdenesNuevas"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaUno", $datos["partidaUno"], PDO::PARAM_STR);
 
@@ -868,7 +837,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -918,11 +886,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 
 
@@ -990,7 +956,6 @@ class ModeloOrdenes{
 
 		
 
-		$stmt = null;
 
 	}
 
@@ -1680,11 +1645,10 @@ class ModeloOrdenes{
 
 
 
-			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha like '%$fechaFinal%'  AND estado = 'autorización (AUT' AND $item = :$item ORDER BY id DESC");
+			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha like '%$fechaFinal%'  AND estado = 'autorización (AUT' AND $itemEmpresa = :itemEmpresa ORDER BY id DESC");
 
 
 
-			$stmt -> bindParam(":fecha", $fechaFinal, PDO::PARAM_STR);
 
 			$stmt -> bindParam(":".$itemEmpresa, $valorEmpresa, PDO::PARAM_STR);
 
@@ -1996,11 +1960,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -2030,11 +1992,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -2298,7 +2258,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -2416,7 +2375,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -2468,7 +2426,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -2522,7 +2479,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -2554,11 +2510,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 
 
@@ -2579,9 +2533,7 @@ class ModeloOrdenes{
 
 		return $stmt -> fetchAll();
 
-		$stmt -> close();
 
-		$stmt = null;
 
 
 
@@ -2643,7 +2595,6 @@ class ModeloOrdenes{
 
 		
 
-		$stmt = null;
 
 	}	
 
@@ -2671,11 +2622,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -2701,11 +2650,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -2731,11 +2678,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 	
@@ -2761,11 +2706,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 	
@@ -2785,11 +2728,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 	
@@ -2809,11 +2750,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -2835,11 +2774,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 
 
@@ -2891,7 +2828,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -2945,7 +2881,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -3077,11 +3012,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -3133,7 +3066,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -3185,7 +3117,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
@@ -3433,11 +3364,9 @@ class ModeloOrdenes{
 
 
 
-		$stmt -> close();
 
 
 
-		$stmt = null;
 
 	}
 
@@ -3491,7 +3420,6 @@ class ModeloOrdenes{
 
 		$stmt->close();
 
-		$stmt = null;
 
 
 
