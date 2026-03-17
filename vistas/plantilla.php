@@ -1,4 +1,4 @@
-<?php $jsVer = '1.2.1'; ?>
+<?php $jsVer = '1.2.2'; ?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -55,8 +55,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
   <!-- Bootstrap 3.3.7 -->
   <link rel="stylesheet" href="vistas/bower_components/bootstrap/dist/css/bootstrap.min.css">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="vistas/bower_components/font-awesome/css/all.min.css">
+  <!-- Font Awesome 6 Free (CDN) — reemplaza FA5 local; incluye v4-shims para compatibilidad con clases antiguas fa fa-* -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+  <!-- v4-shims: convierte las clases FA4 (fa fa-*) a FA6 automáticamente -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/v4-shims.min.css"
+        integrity="sha512-kQgMSFqZKW1rLaEZAIiJTVSQIX0kPi0Y3D3KdmAQY7ZjGhvCJO1XYU8NHpS6bkSRbW5oc5mVMhCUjbFaHdoFg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
   <!-- Ionicons -->
   <link rel="stylesheet" href="vistas/bower_components/Ionicons/css/ionicons.min.css">
   <!-- Theme style -->

@@ -22,10 +22,10 @@ function _estadoBadge($estado) {
 <div class="box box-default">
 
   <div class="box-header with-border">
-    <h3 class="box-title"><i class="fa fa-list-alt" style="margin-right:6px"></i>Últimas Órdenes</h3>
+    <h3 class="box-title"><i class="fa-solid fa-rectangle-list" style="margin-right:6px"></i>Últimas Órdenes</h3>
     <div class="box-tools pull-right">
       <button type="button" class="btn btn-box-tool" data-widget="collapse">
-        <i class="fa fa-minus"></i>
+        <i class="fa-solid fa-minus"></i>
       </button>
     </div>
   </div>
@@ -63,7 +63,7 @@ function _estadoBadge($estado) {
                 <td><?= htmlspecialchars(substr($o['fecha_ingreso'] ?? '', 0, 10)) ?></td>
                 <td>
                   <a href="index.php?ruta=ordenes" class="btn btn-xs btn-default" title="Ver órdenes">
-                    <i class="fa fa-eye"></i>
+                    <i class="fa-solid fa-eye"></i>
                   </a>
                 </td>
               </tr>
@@ -76,7 +76,7 @@ function _estadoBadge($estado) {
 
   <div class="box-footer text-right">
     <a href="index.php?ruta=ordenes" class="btn btn-sm btn-primary">
-      Ver todas las órdenes <i class="fa fa-arrow-circle-right"></i>
+      Ver todas las órdenes <i class="fa-solid fa-circle-arrow-right"></i>
     </a>
   </div>
 

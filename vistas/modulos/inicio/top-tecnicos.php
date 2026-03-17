@@ -53,10 +53,10 @@ TOP TÉCNICOS DEL MES
 <div class="box box-solid">
 
   <div class="box-header with-border" style="background:#3c8dbc;color:#fff;">
-    <h3 class="box-title"><i class="fa fa-trophy" style="margin-right:6px"></i>Top Técnicos del Mes</h3>
+    <h3 class="box-title"><i class="fa-solid fa-trophy" style="margin-right:6px"></i>Top Técnicos del Mes</h3>
     <div class="box-tools pull-right">
       <button type="button" class="btn btn-box-tool" data-widget="collapse" style="color:#fff">
-        <i class="fa fa-minus"></i>
+        <i class="fa-solid fa-minus"></i>
       </button>
     </div>
   </div>
@@ -65,7 +65,7 @@ TOP TÉCNICOS DEL MES
 
     <?php if (empty($ranking) || $ranking[0]['entregas'] === 0): ?>
       <p class="text-muted text-center" style="padding:20px 0">
-        <i class="fa fa-info-circle"></i> Sin entregas registradas este mes.
+        <i class="fa-solid fa-circle-info"></i> Sin entregas registradas este mes.
       </p>
     <?php else: ?>
       <?php foreach ($ranking as $i => $tec): ?>
@@ -77,7 +77,7 @@ TOP TÉCNICOS DEL MES
           <div style="display:flex;justify-content:space-between;margin-bottom:3px">
             <span>
               <?php if ($i === 0): ?>
-                <i class="fa fa-star text-yellow"></i>&nbsp;
+                <i class="fa-solid fa-star" style="color:#f39c12"></i>&nbsp;
               <?php endif; ?>
               <strong><?= htmlspecialchars($tec['nombre']) ?></strong>
             </span>
@@ -93,7 +93,7 @@ TOP TÉCNICOS DEL MES
   </div>
 
   <div class="box-footer text-center">
-    <a href="index.php?ruta=tecnicos">Ver todos los técnicos <i class="fa fa-arrow-circle-right"></i></a>
+    <a href="index.php?ruta=tecnicos">Ver todos los técnicos <i class="fa-solid fa-circle-arrow-right"></i></a>
   </div>
 
 </div>

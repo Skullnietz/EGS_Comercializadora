@@ -43,7 +43,7 @@ ALERTAS CRÍTICAS
   <!-- Pendientes del mes -->
   <div class="col-lg-3 col-sm-6">
     <div class="info-box <?= $colorPendientes ?>">
-      <span class="info-box-icon"><i class="fa fa-clock-o"></i></span>
+      <span class="info-box-icon"><i class="fa-solid fa-hourglass-half"></i></span>
       <div class="info-box-content">
         <span class="info-box-text">Pendientes del Mes</span>
         <span class="info-box-number"><?= number_format($pendientesMes) ?></span>
@@ -60,7 +60,7 @@ ALERTAS CRÍTICAS
   <!-- Ingresadas hoy -->
   <div class="col-lg-3 col-sm-6">
     <div class="info-box bg-aqua">
-      <span class="info-box-icon"><i class="fa fa-calendar-plus-o"></i></span>
+      <span class="info-box-icon"><i class="fa-solid fa-file-circle-plus"></i></span>
       <div class="info-box-content">
         <span class="info-box-text">Ingresadas Hoy</span>
         <span class="info-box-number"><?= $totalHoy ?></span>
@@ -77,7 +77,7 @@ ALERTAS CRÍTICAS
   <!-- Entregadas hoy -->
   <div class="col-lg-3 col-sm-6">
     <div class="info-box bg-green">
-      <span class="info-box-icon"><i class="fa fa-check-circle"></i></span>
+      <span class="info-box-icon"><i class="fa-solid fa-circle-check"></i></span>
       <div class="info-box-content">
         <span class="info-box-text">Entregadas Hoy</span>
         <span class="info-box-number"><?= $totalEntHoy ?></span>
@@ -96,7 +96,7 @@ ALERTAS CRÍTICAS
   <!-- Eficiencia del mes -->
   <div class="col-lg-3 col-sm-6">
     <div class="info-box <?= $colorEfic ?>">
-      <span class="info-box-icon"><i class="fa fa-line-chart"></i></span>
+      <span class="info-box-icon"><i class="fa-solid fa-gauge-high"></i></span>
       <div class="info-box-content">
         <span class="info-box-text">Eficiencia del Mes</span>
         <span class="info-box-number"><?= $eficiencia ?>%</span>
