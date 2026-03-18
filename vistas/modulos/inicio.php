@@ -423,8 +423,13 @@ PÁGINA DE INICIO
           <h2 style="margin:0 0 4px;color:#fff;font-size:22px;font-weight:800;letter-spacing:-.02em">
             Hola, <?php echo htmlspecialchars($_SESSION["nombre"]); ?>
           </h2>
+          <?php
+            $diasEs  = array('Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado');
+            $mesesEs = array('','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre');
+            $_fechaHoy = $diasEs[date('w')].' '.date('j').' de '.$mesesEs[intval(date('n'))].', '.date('Y');
+          ?>
           <p style="margin:0;color:rgba(255,255,255,.7);font-size:13px;font-weight:400">
-            <?php echo date("l j \d\e F, Y"); ?> &mdash; Aquí está tu resumen comercial del día
+            <?php echo $_fechaHoy; ?> &mdash; Aquí está tu resumen comercial del día
           </p>
         </div>
       </div>

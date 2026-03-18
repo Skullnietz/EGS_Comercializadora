@@ -4,12 +4,15 @@
     ═══════════════════════════════════════════════════ */
 
 $_pipe_idAsesor = isset($_crm_idAsesor) ? $_crm_idAsesor : 0;
+$_pipe_todas = array();
 
-$_pipe_todas = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
-    "id_empresa", $_SESSION["empresa"],
-    "id_Asesor", $_pipe_idAsesor
-);
-if (!is_array($_pipe_todas)) $_pipe_todas = array();
+try {
+    $_pipe_todas = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
+        "id_empresa", $_SESSION["empresa"],
+        "id_Asesor", $_pipe_idAsesor
+    );
+    if (!is_array($_pipe_todas)) $_pipe_todas = array();
+} catch (Exception $e) { $_pipe_todas = array(); }
 
 $_pipe_grupos = array(
     'AUT'  => array('label'=>'Por Autorizar', 'icon'=>'fa-hourglass-half', 'color'=>'#f59e0b', 'items'=>array()),

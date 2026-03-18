@@ -4,46 +4,72 @@
     ═══════════════════════════════════════════════════ */
 
 // ── Identificar asesor en sesión ──
-$_crm_asesor = Controladorasesores::ctrMostrarAsesoresEleg("correo", $_SESSION["email"]);
-$_crm_idAsesor = isset($_crm_asesor["id"]) ? $_crm_asesor["id"] : 0;
+$_crm_idAsesor = 0;
+try {
+    $_crm_asesor = Controladorasesores::ctrMostrarAsesoresEleg("correo", $_SESSION["email"]);
+    if (is_array($_crm_asesor) && isset($_crm_asesor["id"])) {
+        $_crm_idAsesor = intval($_crm_asesor["id"]);
+    }
+} catch (Exception $e) { $_crm_idAsesor = 0; }
 
 // ── Ventas del mes (entregadas) ──
-$_crm_ordEntregadas = controladorOrdenes::ctrMostrarOrdenesSumaAsesor($_crm_idAsesor);
 $_crm_totalEntregado = 0;
-if (is_array($_crm_ordEntregadas)) {
-    foreach ($_crm_ordEntregadas as $o) {
-        $_crm_totalEntregado += floatval($o["total"]);
-    }
-}
-
-// ── Conteo de órdenes entregadas ──
-$_crm_cntEntregadas = controladorOrdenes::ctrListarOrdenesAsesor($_crm_idAsesor);
 $_crm_numEntregadas = 0;
-if (is_array($_crm_cntEntregadas)) {
-    foreach ($_crm_cntEntregadas as $v) {
-        $_crm_numEntregadas = intval($v[0]);
+try {
+    $_crm_ordEntregadas = controladorOrdenes::ctrMostrarOrdenesSumaAsesor($_crm_idAsesor);
+    if (is_array($_crm_ordEntregadas)) {
+        foreach ($_crm_ordEntregadas as $o) {
+            $_crm_totalEntregado += floatval(isset($o["total"]) ? $o["total"] : 0);
+        }
     }
-}
+} catch (Exception $e) {}
 
-// ── Órdenes pendientes de autorización ──
-$_crm_ordAUT = controladorOrdenes::ctrlMostrarOrdenesPorEstadoEmpresayTecnico(
-    "Pendiente de autorización (AUT",
-    "id_empresa", $_SESSION["empresa"],
-    "id_Asesor", $_crm_idAsesor
-);
-$_crm_numAUT = is_array($_crm_ordAUT) ? count($_crm_ordAUT) : 0;
+try {
+    $_crm_cntEntregadas = controladorOrdenes::ctrListarOrdenesAsesor($_crm_idAsesor);
+    if (is_array($_crm_cntEntregadas)) {
+        foreach ($_crm_cntEntregadas as $v) {
+            $_crm_numEntregadas = intval($v[0]);
+        }
+    }
+} catch (Exception $e) {}
+
+// ── Órdenes pendientes de autorización (método NO static) ──
+$_crm_ordAUT = array();
+$_crm_numAUT = 0;
+try {
+    $_crm_ctrlOrd = new controladorOrdenes();
+    $_crm_ordAUT = $_crm_ctrlOrd->ctrlMostrarOrdenesPorEstadoEmpresayTecnico(
+        "Pendiente de autorización (AUT",
+        "id_empresa", $_SESSION["empresa"],
+        "id_Asesor", $_crm_idAsesor
+    );
+    if (is_array($_crm_ordAUT)) {
+        $_crm_numAUT = count($_crm_ordAUT);
+    } else {
+        $_crm_ordAUT = array();
+    }
+} catch (Exception $e) { $_crm_ordAUT = array(); }
 
 // ── Clientes nuevos del mes ──
-$_crm_clientes = ControladorUsuarios::ctrMostrarTotalUsuariosMesAsesor("id", $_crm_idAsesor);
-$_crm_numClientes = is_array($_crm_clientes) ? count($_crm_clientes) : 0;
+$_crm_numClientes = 0;
+try {
+    $_crm_clientes = ControladorUsuarios::ctrMostrarTotalUsuariosMesAsesor("id", $_crm_idAsesor);
+    $_crm_numClientes = is_array($_crm_clientes) ? count($_crm_clientes) : 0;
+} catch (Exception $e) {}
 
 // ── Entradas del mes ──
-$_crm_entradas = ControladorOrdenes::ctrMostrarOrdenesEntradaAsesor($_crm_idAsesor);
-$_crm_numEntradas = is_array($_crm_entradas) ? count($_crm_entradas) : 0;
+$_crm_numEntradas = 0;
+try {
+    $_crm_entradas = controladorOrdenes::ctrMostrarOrdenesEntradaAsesor($_crm_idAsesor);
+    $_crm_numEntradas = is_array($_crm_entradas) ? count($_crm_entradas) : 0;
+} catch (Exception $e) {}
 
 // ── Cotizaciones del vendedor ──
-$_crm_cotizaciones = ControladorCotizaciones::ctrMostrarCotizaciones("id_vendedor", $_crm_idAsesor);
-if (!is_array($_crm_cotizaciones)) $_crm_cotizaciones = array();
+$_crm_cotizaciones = array();
+try {
+    $_crm_cotizaciones = CotizacionesControlador::ctrMostrarCotizaciones("id_vendedor", $_crm_idAsesor);
+    if (!is_array($_crm_cotizaciones)) $_crm_cotizaciones = array();
+} catch (Exception $e) { $_crm_cotizaciones = array(); }
 $_crm_numCotizaciones = count($_crm_cotizaciones);
 
 // ── Tasa de conversión (entregadas / ingresadas) ──

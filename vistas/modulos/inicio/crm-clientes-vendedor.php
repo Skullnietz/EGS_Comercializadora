@@ -4,9 +4,12 @@
     ═══════════════════════════════════════════════════ */
 
 $_cli_idAsesor = isset($_crm_idAsesor) ? $_crm_idAsesor : 0;
+$_cli_todos = array();
 
-$_cli_todos = ControladorClientes::ctrMostrarClientesTabla("id_Asesor", $_cli_idAsesor);
-if (!is_array($_cli_todos)) $_cli_todos = array();
+try {
+    $_cli_todos = ControladorClientes::ctrMostrarClientesTabla("id_Asesor", $_cli_idAsesor);
+    if (!is_array($_cli_todos)) $_cli_todos = array();
+} catch (Exception $e) { $_cli_todos = array(); }
 
 $_cli_total = count($_cli_todos);
 $_cli_mostrar = array_slice($_cli_todos, 0, 8);
@@ -35,7 +38,7 @@ $_cli_grads = array(
         <div class="crm-empty">
           <i class="fa-solid fa-users"></i>
           <strong>Sin clientes asignados</strong>
-          <a href="index.php?ruta=clientes" style="font-size:12px;color:var(--crm-accent);font-weight:600;text-decoration:none">
+          <a href="index.php?ruta=clientes" style="font-size:12px;color:#6366f1;font-weight:600;text-decoration:none">
             <i class="fa-solid fa-plus"></i> Agregar cliente
           </a>
         </div>
@@ -46,12 +49,10 @@ $_cli_grads = array(
         $nombre = isset($cli["nombre"]) ? $cli["nombre"] : "Sin nombre";
         $email = isset($cli["correo"]) ? $cli["correo"] : (isset($cli["email"]) ? $cli["email"] : "");
         $tel = isset($cli["telefono"]) ? $cli["telefono"] : "";
-        $compras = isset($cli["compras"]) ? intval($cli["compras"]) : 0;
         $iniciales = mb_strtoupper(mb_substr($nombre, 0, 2));
         $grad = $_cli_grads[$idx % count($_cli_grads)];
-        $link = "index.php?ruta=infoCliente&idCliente=" . $cli["id"];
       ?>
-        <a href="<?php echo $link; ?>" class="crm-client">
+        <div class="crm-client">
           <div class="crm-client-av" style="background:<?php echo $grad; ?>">
             <?php echo $iniciales; ?>
           </div>
@@ -67,21 +68,12 @@ $_cli_grads = array(
               <?php endif; ?>
             </div>
           </div>
-          <div style="flex-shrink:0">
-            <?php if ($compras > 0): ?>
-              <span class="crm-badge" style="background:#f0fdf4;color:#16a34a">
-                <?php echo $compras; ?> compra<?php echo $compras > 1 ? 's' : ''; ?>
-              </span>
-            <?php else: ?>
-              <span class="crm-badge" style="background:#fef3c7;color:#92400e">Nuevo</span>
-            <?php endif; ?>
-          </div>
-        </a>
+        </div>
       <?php endforeach; ?>
 
       <?php if ($_cli_total > 8): ?>
         <div style="text-align:center;padding:14px;border-top:1px solid #f1f5f9">
-          <a href="index.php?ruta=clientes" style="color:var(--crm-accent);font-size:12px;font-weight:600;text-decoration:none">
+          <a href="index.php?ruta=clientes" style="color:#6366f1;font-size:12px;font-weight:600;text-decoration:none">
             Ver los <?php echo $_cli_total; ?> clientes <i class="fa-solid fa-arrow-right" style="font-size:10px"></i>
           </a>
         </div>

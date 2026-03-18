@@ -3,7 +3,7 @@
     CRM — Cotizaciones recientes del vendedor
     ═══════════════════════════════════════════════════ */
 
-$_cot_lista = isset($_crm_cotizaciones) ? $_crm_cotizaciones : array();
+$_cot_lista = isset($_crm_cotizaciones) && is_array($_crm_cotizaciones) ? $_crm_cotizaciones : array();
 $_cot_vigentes = array();
 $_cot_vencidas = array();
 $hoy = date("Y-m-d");
@@ -36,7 +36,7 @@ foreach ($_cot_lista as $c) {
       <div class="crm-empty">
         <i class="fa-solid fa-file-circle-plus"></i>
         <strong>Sin cotizaciones</strong>
-        <a href="index.php?ruta=cotizacion" style="font-size:12px;color:var(--crm-accent);font-weight:600;text-decoration:none">
+        <a href="index.php?ruta=cotizacion" style="font-size:12px;color:#6366f1;font-weight:600;text-decoration:none">
           <i class="fa-solid fa-plus"></i> Crear cotización
         </a>
       </div>
@@ -46,16 +46,16 @@ foreach ($_cot_lista as $c) {
     <!-- Summary strip -->
     <div style="display:flex;border-bottom:1px solid #f1f5f9">
       <div style="flex:1;padding:16px 20px;text-align:center;border-right:1px solid #f1f5f9">
-        <div style="font-size:22px;font-weight:800;color:var(--crm-text);letter-spacing:-.02em">
+        <div style="font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-.02em">
           $<?php echo number_format($_cot_totalMonto, 0); ?>
         </div>
-        <div style="font-size:11px;color:var(--crm-muted);font-weight:500">Total cotizado</div>
+        <div style="font-size:11px;color:#94a3b8;font-weight:500">Total cotizado</div>
       </div>
       <div style="flex:1;padding:16px 20px;text-align:center">
-        <div style="font-size:22px;font-weight:800;color:var(--crm-text);letter-spacing:-.02em">
+        <div style="font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-.02em">
           <?php echo count($_cot_lista); ?>
         </div>
-        <div style="font-size:11px;color:var(--crm-muted);font-weight:500">Cotizaciones</div>
+        <div style="font-size:11px;color:#94a3b8;font-weight:500">Cotizaciones</div>
       </div>
     </div>
 
@@ -65,8 +65,8 @@ foreach ($_cot_lista as $c) {
         $vigencia = isset($cot["vigencia"]) ? $cot["vigencia"] : "";
         $vencida = (!empty($vigencia) && $vigencia < $hoy);
         $totalCot = floatval(isset($cot["total"]) ? $cot["total"] : 0);
-        $nombreCli = isset($cot["nombre_cliente"]) ? $cot["nombre_cliente"] : "Sin nombre";
-        $asunto = isset($cot["asunto"]) ? $cot["asunto"] : "";
+        $nombreCli = isset($cot["nombre_cliente"]) ? $cot["nombre_cliente"] : (isset($cot["cliente"]) ? $cot["cliente"] : "Sin nombre");
+        $asunto = isset($cot["asunto"]) ? $cot["asunto"] : (isset($cot["descripcion"]) ? $cot["descripcion"] : "");
       ?>
         <div class="crm-cot-row">
           <div style="width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;
@@ -74,10 +74,10 @@ foreach ($_cot_lista as $c) {
             <i class="fa-solid <?php echo $vencida ? 'fa-clock' : 'fa-file-circle-check'; ?>"></i>
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:600;color:var(--crm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            <div style="font-size:13px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
               <?php echo htmlspecialchars($nombreCli); ?>
             </div>
-            <div style="font-size:11px;color:var(--crm-muted)">
+            <div style="font-size:11px;color:#94a3b8">
               <?php echo !empty($asunto) ? htmlspecialchars(mb_substr($asunto, 0, 28)) : 'Sin asunto'; ?>
               <?php if (!empty($vigencia)): ?>
                 &middot; <span style="color:<?php echo $vencida ? '#ef4444' : '#64748b'; ?>">
@@ -86,20 +86,12 @@ foreach ($_cot_lista as $c) {
               <?php endif; ?>
             </div>
           </div>
-          <div style="font-weight:700;font-size:13px;color:var(--crm-text);flex-shrink:0">
+          <div style="font-weight:700;font-size:13px;color:#0f172a;flex-shrink:0">
             $<?php echo number_format($totalCot, 0); ?>
           </div>
         </div>
       <?php endforeach; ?>
     </div>
-
-    <?php if (count($_cot_lista) > 10): ?>
-      <div style="text-align:center;padding:12px;border-top:1px solid #f1f5f9">
-        <a href="index.php?ruta=historial-cotizaciones" style="color:var(--crm-accent);font-size:12px;font-weight:600;text-decoration:none">
-          Ver todas <i class="fa-solid fa-arrow-right" style="font-size:10px"></i>
-        </a>
-      </div>
-    <?php endif; ?>
 
   <?php endif; ?>
 </div>

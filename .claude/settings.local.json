@@ -63,7 +63,11 @@
       "Bash(php -l vistas/modulos/inicio/crm-pendientes-vendedor.php)",
       "Bash(php -l vistas/modulos/inicio/crm-cotizaciones-vendedor.php)",
       "Bash(php -l vistas/modulos/inicio/crm-clientes-vendedor.php)",
-      "Bash(php -l vistas/modulos/inicio/crm-acciones-rapidas.php)"
+      "Bash(php -l vistas/modulos/inicio/crm-acciones-rapidas.php)",
+      "Bash(php -r \"echo password_hash\\(''C3S4r2026@'', PASSWORD_BCRYPT\\) . PHP_EOL;\")",
+      "Bash(php -r \"echo crypt\\(''C3S4r2026@'', ''%s''\\) . PHP_EOL;\")",
+      "Bash(php -r \"echo crypt\\(''C3S4r2026'', chr\\(36\\).''2a''.chr\\(36\\).''07''.chr\\(36\\).''asxx54ahjppf45sd87a5a4dDDGsystemdev''.chr\\(36\\)\\) . PHP_EOL;\")",
+      "Bash(php -r \"echo crypt\\(''C3S4r2026@'', chr\\(36\\).''2a''.chr\\(36\\).''07''.chr\\(36\\).''asxx54ahjppf45sd87a5a4dDDGsystemdev''.chr\\(36\\)\\) . PHP_EOL;\")"
     ]
   }
 }
