@@ -55,7 +55,15 @@
       "Bash(php -l vistas/modulos/cabezote.php)",
       "Bash(php -l vistas/modulos/cabezote/faq.php)",
       "Bash(php -l vistas/modulos/cabezote/notificaciones.php)",
-      "Bash(php -l vistas/modulos/cabezote/usuario.php)"
+      "Bash(php -l vistas/modulos/cabezote/usuario.php)",
+      "Bash(find /c/Users/black/Desktop/EGS -name *.sql -o -name *.md)",
+      "Bash(php -l vistas/modulos/inicio.php)",
+      "Bash(php -l vistas/modulos/inicio/crm-kpis-vendedor.php)",
+      "Bash(php -l vistas/modulos/inicio/crm-pipeline-vendedor.php)",
+      "Bash(php -l vistas/modulos/inicio/crm-pendientes-vendedor.php)",
+      "Bash(php -l vistas/modulos/inicio/crm-cotizaciones-vendedor.php)",
+      "Bash(php -l vistas/modulos/inicio/crm-clientes-vendedor.php)",
+      "Bash(php -l vistas/modulos/inicio/crm-acciones-rapidas.php)"
     ]
   }
 }
