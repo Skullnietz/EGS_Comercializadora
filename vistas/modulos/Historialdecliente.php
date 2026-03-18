@@ -1,369 +1,367 @@
 <?php
-if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor"){
-
-  echo '<script>
-
-  window.location = "inicio";
-
-  </script>';
-
-  return;
-
+if ($_SESSION["perfil"] != "administrador" && $_SESSION["perfil"] != "vendedor") {
+    echo '<script>window.location = "inicio";</script>';
+    return;
 }
 
+$_hc_idCliente   = isset($_GET["idCliente"]) ? intval($_GET["idCliente"]) : 0;
+$_hc_nombreCli   = isset($_GET["nombreCliente"]) ? htmlspecialchars($_GET["nombreCliente"]) : "Cliente";
+
+// ── Datos del cliente ──
+$_hc_cliente = null;
+try {
+    $_hc_cliente = ControladorClientes::ctrMostrarClientes("id", $_hc_idCliente);
+} catch (Exception $e) {}
+
+$_hc_email = (is_array($_hc_cliente) && isset($_hc_cliente["correo"])) ? $_hc_cliente["correo"] : "";
+$_hc_tel1  = (is_array($_hc_cliente) && isset($_hc_cliente["telefono"])) ? trim($_hc_cliente["telefono"]) : "";
+$_hc_tel2  = (is_array($_hc_cliente) && isset($_hc_cliente["telefonoDos"])) ? trim($_hc_cliente["telefonoDos"]) : "";
+
+$_hc_t1clean = preg_replace('/\D/', '', $_hc_tel1);
+$_hc_t2clean = preg_replace('/\D/', '', $_hc_tel2);
+$_hc_t1ok = (strlen($_hc_t1clean) === 10);
+$_hc_t2ok = (strlen($_hc_t2clean) === 10) && ($_hc_t2clean !== $_hc_t1clean);
+
+// ── Órdenes del cliente ──
+$_hc_ordenes = array();
+try {
+    $_hc_ordenes = controladorOrdenes::ctrMostrarHistorial("ordenes", $_hc_idCliente);
+    if (!is_array($_hc_ordenes)) $_hc_ordenes = array();
+} catch (Exception $e) { $_hc_ordenes = array(); }
+
+// ── Pedidos del cliente ──
+$_hc_pedidos = array();
+try {
+    $_hc_pedidos = ControladorPedidos::ctrMostrarHistorial("pedidos", $_hc_idCliente);
+    if (!is_array($_hc_pedidos)) $_hc_pedidos = array();
+} catch (Exception $e) { $_hc_pedidos = array(); }
+
+// ── Estadísticas rápidas ──
+$_hc_totalGastado = 0;
+$_hc_entregadas = 0;
+$_hc_pendientes = 0;
+$_hc_primeraFecha = null;
+foreach ($_hc_ordenes as $o) {
+    $_hc_totalGastado += floatval(isset($o["total"]) ? $o["total"] : 0);
+    $est = isset($o["estado"]) ? $o["estado"] : "";
+    if (strpos($est, "Ent") !== false) $_hc_entregadas++;
+    elseif (strpos($est, "can") === false) $_hc_pendientes++;
+    $fi = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
+    if (!empty($fi) && ($_hc_primeraFecha === null || $fi < $_hc_primeraFecha)) $_hc_primeraFecha = $fi;
+}
+$_hc_antiguedad = "";
+if ($_hc_primeraFecha) {
+    try {
+        $diff = (new DateTime($_hc_primeraFecha))->diff(new DateTime());
+        if ($diff->y > 0) $_hc_antiguedad = $diff->y . " año" . ($diff->y > 1 ? "s" : "");
+        elseif ($diff->m > 0) $_hc_antiguedad = $diff->m . " mes" . ($diff->m > 1 ? "es" : "");
+        else $_hc_antiguedad = $diff->d . " día" . ($diff->d > 1 ? "s" : "");
+    } catch (Exception $e) {}
+}
 ?>
-<script>
-    $(document).ready(function(){
-       
-    $('#myModal').modal('toggle');
-    $('#ORDEN').hide();
-    $('#PEDIDO').hide();
-    $( "#btnPEDIDO" ).click(function() {
-  $('#PEDIDO').show();
-  $('#ORDEN').hide();
-  $('#myModal').modal('toggle');
-});
-$( "#btnORDEN" ).click(function() {
-  $('#ORDEN').show();
-  $('#PEDIDO').hide();
-  $('#myModal').modal('toggle');
-});
-$( "#btnAMBOS" ).click(function() {
-  $('#PEDIDO').show();
-  $('#ORDEN').show();
-  $('#myModal').modal('toggle');
-});
 
-    $('#datatableh').DataTable({
-        "language": {
-        "decimal": ",",
-        "thousands": ".",
-        "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-        "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-        "infoPostFix": "",
-        "infoFiltered": "(filtrado de un total de _MAX_ registros)",
-        "loadingRecords": "Cargando...",
-        "lengthMenu": "Mostrar _MENU_ registros",
-        "paginate": {
-            "first": "Primero",
-            "last": "Último",
-            "next": "Siguiente",
-            "previous": "Anterior"
-        },
-        "processing": "Procesando...",
-        "search": "Buscar:",
-        "searchPlaceholder": "Término de búsqueda",
-        "zeroRecords": "No se encontraron resultados",
-        "emptyTable": "Ningún dato disponible en esta tabla",
-        "aria": {
-            "sortAscending":  ": Activar para ordenar la columna de manera ascendente",
-            "sortDescending": ": Activar para ordenar la columna de manera descendente"
-        },
-        //only works for built-in buttons, not for custom buttons
-        "buttons": {
-            "create": "Nuevo",
-            "edit": "Cambiar",
-            "remove": "Borrar",
-            "copy": "Copiar",
-            "csv": "fichero CSV",
-            "excel": "tabla Excel",
-            "pdf": "documento PDF",
-            "print": "Imprimir",
-            "colvis": "Visibilidad columnas",
-            "collection": "Colección",
-            "upload": "Seleccione fichero...."
-        },
-        "select": {
-            "rows": {
-                _: '%d filas seleccionadas',
-                0: 'clic fila para seleccionar',
-                1: 'una fila seleccionada'
-            }
-        }
-    } } );
-    $('#datatablep').DataTable({
-        "language": {
-        "decimal": ",",
-        "thousands": ".",
-        "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-        "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-        "infoPostFix": "",
-        "infoFiltered": "(filtrado de un total de _MAX_ registros)",
-        "loadingRecords": "Cargando...",
-        "lengthMenu": "Mostrar _MENU_ registros",
-        "paginate": {
-            "first": "Primero",
-            "last": "Último",
-            "next": "Siguiente",
-            "previous": "Anterior"
-        },
-        "processing": "Procesando...",
-        "search": "Buscar:",
-        "searchPlaceholder": "Término de búsqueda",
-        "zeroRecords": "No se encontraron resultados",
-        "emptyTable": "Ningún dato disponible en esta tabla",
-        "aria": {
-            "sortAscending":  ": Activar para ordenar la columna de manera ascendente",
-            "sortDescending": ": Activar para ordenar la columna de manera descendente"
-        },
-        //only works for built-in buttons, not for custom buttons
-        "buttons": {
-            "create": "Nuevo",
-            "edit": "Cambiar",
-            "remove": "Borrar",
-            "copy": "Copiar",
-            "csv": "fichero CSV",
-            "excel": "tabla Excel",
-            "pdf": "documento PDF",
-            "print": "Imprimir",
-            "colvis": "Visibilidad columnas",
-            "collection": "Colección",
-            "upload": "Seleccione fichero...."
-        },
-        "select": {
-            "rows": {
-                _: '%d filas seleccionadas',
-                0: 'clic fila para seleccionar',
-                1: 'una fila seleccionada'
-            }
-        }
-    } } );
-  });
-</script>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.11.5/datatables.min.css"/>
- 
-<script src="https://cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"></script>
+<style>
+.hc-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 3px rgba(15,23,42,.06),0 4px 14px rgba(15,23,42,.04);overflow:hidden;margin-bottom:20px}
+.hc-card-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid #f1f5f9}
+.hc-card-title{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#0f172a;margin:0}
+.hc-card-title i{font-size:15px;color:#6366f1;opacity:.85}
+.hc-stat{text-align:center;padding:18px 12px;border-right:1px solid #f1f5f9}
+.hc-stat:last-child{border-right:none}
+.hc-stat-val{font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-.02em}
+.hc-stat-lbl{font-size:11px;color:#94a3b8;font-weight:500;margin-top:2px}
+.hc-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.hc-tab-bar{display:flex;gap:4px;background:#f1f5f9;border-radius:8px;padding:3px}
+.hc-tab{padding:6px 16px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b}
+.hc-tab.active{background:#6366f1;color:#fff}
+.hc-table{width:100%;border-collapse:separate;border-spacing:0}
+.hc-table thead th{padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#94a3b8;background:#f8fafc;border-bottom:1px solid #e2e8f0}
+.hc-table tbody tr{transition:background .12s}
+.hc-table tbody tr:hover{background:#f8fafc}
+.hc-table tbody td{padding:11px 14px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.hc-table tbody tr:last-child td{border-bottom:none}
+.hc-empty{text-align:center;padding:40px 20px;color:#94a3b8}
+.hc-empty i{font-size:32px;margin-bottom:10px;display:block;opacity:.4}
+</style>
+
 <div class="content-wrapper">
-	
-	<section class="content-header">
 
-		
-		<h2><center>Historial de cliente: <?php echo $_GET["nombreCliente"] ?></center></h2>
-		
-		<button class="btn btn-primary" style="border-radius:15px" data-toggle="modal" data-target="#myModal">
+  <section class="content-header">
+    <h1 style="font-weight:800;font-size:20px;color:#0f172a">
+      <i class="fa-solid fa-clock-rotate-left" style="color:#6366f1;margin-right:6px"></i>
+      Historial: <?php echo $_hc_nombreCli; ?>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="index.php?ruta=inicio"><i class="fa-solid fa-gauge"></i> Inicio</a></li>
+      <li><a href="index.php?ruta=clientes">Clientes</a></li>
+      <li class="active"><?php echo $_hc_nombreCli; ?></li>
+    </ol>
+  </section>
 
-	          
+  <section class="content">
 
-	          BUSCAR POR
-
-
-
-	        </button>
-		
-		<ol class="breadcrumb">
-		
-			<li><a href="#"><i class="fas fa-dashboard"></i></a></li>
-
-			<li class="active">Cliente </li>
-
-		</ol>
-
-	</section>
-
-
-
-	<div class="content">
-		
-		<div class="row" id="ORDEN">
-		    
-			
-			<div class="col-8">
-
-				<div class="box box-success">
-					
-
-					<div class="box-header whith-border"><h3>Ordenes del cliente</h3></div>
-
-					<div class="box-body">
-					    
-					    
-						
-						<div class="box">
-						    <table id="datatableh" class="table stripe ordenes order-table display compact cell-border hover row-border" style="width:100%">
-					        <thead>
-            <tr>
-                <th>#</th>
-                <th>Orden</th>
-                <th>Asesor</th>
-                <th>Imagenes</th>
-                <th>Marca</th>
-                <th>Modelo</th>
-                <th>N/Serie</th>
-                <th>Estado</th>
-                <th>Total</th>
-                <th>Ingreso</th>
-                <th></th>
-            </tr>
-                        </thead>
-                        <tbody>
-            <?php 
-
-		
-			$valor = $_GET["idCliente"];
-			$ordenes = ControladorOrdenes::ctrMostrarHistorial($tabla, $valor);
-/*LINK DE IMPRESION DE EDITAR ORDEN https://backend.comercializadoraegs.com/index.php?ruta=infoOrden&idOrden=5240&empresa=1&asesor=9&cliente=2726&tecnico=4&pedido=0*/
-
-			foreach ($ordenes as $key => $value) {
-			    
-				echo ' 
-				<tr>
-                <td>'.($key+1).'</td>
-                <td> <b>'.$value["id"].'</b></td>';
-$id_perfil = $value["id_Asesor"];    
-$nombreasesor = ControladorClientes::ctrMostrarAsesor($tabla, $id_perfil);  
-foreach ($nombreasesor as $val){ 
-            echo '<td>'.$val["nombre"].'</td>';
-            } 
-                
-                echo'<td>';
-                $AlbumDeImagenes = json_decode($value["multimedia"], true);
-  $i = 0;
-  foreach ($AlbumDeImagenes as $key => $valueImagenes) {
-     echo '<img class="img-thumbnail" width="100px" src="'.$valueImagenes["foto"].'">';
-      if (++$i == 2) break;
-  }
-                if($value["marcaDelEquipo"]==""){
-                    echo '</td><td style="background-color:#EF9A9A;">S/N</td>';  
-                }else{
-                 echo '</td><td >'.$value["marcaDelEquipo"].'</td>';   
-                }
-                if($value["numeroDeSerieDelEquipo"]==""){
-                    echo '<td style="background-color:#EF9A9A;">S/N</td>';  
-                }else{
-                 echo '<td>'.$value["modeloDelEquipo"].'</td>';   
-                }
-                if($value["modeloDelEquipo"]==""){
-                    echo '<td style="background-color:#EF9A9A;">S/N</td>';  
-                }else{
-                 echo '<td>'.$value["numeroDeSerieDelEquipo"].'</td>';   
-                }
-                echo '
-                <td>'.$value["estado"].'</td>
-                <td>'.$value["total"].'</td>
-                <td>'.$value["fecha_ingreso"].'</td>
-                <td><a class="btn btn-warning" href="index.php?ruta=infoOrden&idOrden='.$value["id"].'&empresa='.$value["id_empresa"].'&asesor='.$value["id_Asesor"].'&cliente='.$value["id_usuario"].'&tecnico='.$value["id_tecnico"].'&tecnicodos='.$value["id_tecnicoDos"].'&pedido='.$value["id_pedido"].'"><i class="fas fa-eye" target="_blank"></i></a></td>
-                </tr>';
-			}
-
-		?>
-            
-					 </tbody>       
-					    </table>
-							
-
-
-
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="row" id="PEDIDO">
-		    
-			
-			<div class="col-8">
-
-				<div class="box box-primary">
-					
-
-					<div class="box-header whith-border"><h3>Pedidos del cliente</h3></div>
-
-					<div class="box-body">
-					    
-					    
-						
-						<div class="box">
-						    <table id="datatablep" class="table stripe ordenes order-table display compact cell-border hover row-border" style="width:100%">
-					        <thead>
-            <tr>
-                <th>#</th>
-                <th>Pedido</th>
-                <th>Asesor</th>
-                <th>Orden</th>
-                <th>Estado</th>
-                <th>Productos</th>
-                <th>Adeudo</th>
-                <th>Total</th>
-                <th></th>
-            </tr>
-                        </thead>
-                        <tbody>
-            <?php 
-
-		
-			$valoru = $_GET["idCliente"];
-			$pedidos = ControladorPedidos::ctrMostrarHistorial($tabla, $valoru);
-/*LINK DE IMPRESION DE EDITAR ORDEN https://backend.comercializadoraegs.com/index.php?ruta=infopedido&idPedido=2411&empresa=1&asesor=34&cliente=2974*/
-			foreach ($pedidos as $keyp => $valu) {
-				echo ' 
-				<tr>
-                <td>'.($keyp+1).'</td>
-                <td><b>'.$valu["id"].'</b></td>
-                ';
-                $id_perfil = $valu["id_Asesor"];    
-$nombreasesor = ControladorClientes::ctrMostrarAsesor($tabla, $id_perfil);  
-foreach ($nombreasesor as $val){ 
-            echo '<td>'.$val["nombre"].'</td>';
-            }
-                if($valu["id_orden"]=="0"){
-                    echo '<td style="background-color:#EF9A9A;">S/O</td>';  
-                }else{
-                 echo '<td>Orden: <b>'.$valu["id_orden"].'</b></td>';   
-                }
-                echo '
-                <td>'.$valu["estado"].'</td><td>';
-                $Productos = json_decode($valu["productos"], true);
-  $i = 0;
-  foreach ($Productos as $key => $valueProductos) {
-     echo '<div>'.$valueProductos["Descripcion"].'</div>';
-      if (++$i == 1) break;
-  }
-  echo '</td><td>'.$valu["adeudo"].'</td><td>'.$valu["total"].'</td><td><a class="btn btn-warning" href="index.php?ruta=infopedido&idPedido='.$valu["id"].'&empresa='.$valu["id_empresa"].'&asesor='.$valu["id_Asesor"].'&cliente='.$valu["id_cliente"].'"><i class="fas fa-eye" target="_blank"></i></a></td>';
-			}
-
-		?>
-            
-					 </tbody>       
-					    </table>
-							
-
-
-
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-<!-- Modal HTML -->
-        <div id="myModal" class="modal fade">
-            <div class="modal-dialog modal-login">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <center><h3 class="modal-title">BUSCAR HISTORIAL DE</h3></center>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        
-                            <div class="form-group">
-                                <button id="btnORDEN" class="btn btn-success btn-block btn-lg"><i class="fas fa-clipboard-list"></i><h3>ORDENES</h3> </button>
-                            </div>
-                            <div class="form-group">
-                                <button id="btnPEDIDO" class="btn btn-primary btn-block btn-lg"><i class="fas fa-box-open"></i><h3>PEDIDOS</h3> </button>
-                            </div>
-                            <div class="form-group">
-                                <button id="btnAMBOS" class="btn btn-warning btn-block btn-lg"><i class="fas fa-history"></i> <h3>TODOS LOS REGISTROS</h3></button>
-                            </div>
-                            
-                        
-                    </div>
-                    
-                </div>
-            </div>
+    <!-- ══ FICHA DEL CLIENTE ══ -->
+    <div class="hc-card">
+      <div style="padding:22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <!-- Avatar -->
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#818cf8);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,.25)">
+          <?php echo mb_strtoupper(mb_substr($_hc_nombreCli, 0, 2)); ?>
         </div>
+        <!-- Info -->
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:18px;font-weight:800;color:#0f172a;margin-bottom:4px"><?php echo $_hc_nombreCli; ?></div>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#64748b">
+            <?php if (!empty($_hc_email)): ?>
+              <span><i class="fa-solid fa-envelope" style="margin-right:4px;color:#94a3b8"></i><?php echo htmlspecialchars($_hc_email); ?></span>
+            <?php endif; ?>
+            <?php if ($_hc_t1ok): ?>
+              <span><i class="fa-solid fa-phone" style="margin-right:4px;color:#94a3b8"></i><?php echo htmlspecialchars($_hc_tel1); ?></span>
+            <?php endif; ?>
+            <?php if ($_hc_t2ok): ?>
+              <span><i class="fa-solid fa-phone" style="margin-right:4px;color:#94a3b8"></i><?php echo htmlspecialchars($_hc_tel2); ?></span>
+            <?php endif; ?>
+            <?php if (!empty($_hc_antiguedad)): ?>
+              <span><i class="fa-solid fa-calendar" style="margin-right:4px;color:#94a3b8"></i>Cliente desde hace <?php echo $_hc_antiguedad; ?></span>
+            <?php endif; ?>
+          </div>
+        </div>
+        <!-- Actions -->
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <?php if ($_hc_t1ok):
+            $waMsg = urlencode("Hola " . $_hc_nombreCli . ", le contactamos de EGS. ¿En qué podemos ayudarle?");
+          ?>
+            <a href="https://wa.me/52<?php echo $_hc_t1clean; ?>?text=<?php echo $waMsg; ?>" target="_blank"
+               style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;background:#25d366;color:#fff;font-size:12px;font-weight:600;text-decoration:none;transition:background .15s">
+              <i class="fa-brands fa-whatsapp"></i> WhatsApp
+            </a>
+          <?php endif; ?>
+          <?php if ($_hc_t2ok): ?>
+            <a href="https://wa.me/52<?php echo $_hc_t2clean; ?>?text=<?php echo $waMsg; ?>" target="_blank"
+               style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;background:#128c7e;color:#fff;font-size:12px;font-weight:600;text-decoration:none;transition:background .15s">
+              <i class="fa-brands fa-whatsapp"></i> Tel. 2
+            </a>
+          <?php endif; ?>
+          <a href="index.php?ruta=clientes" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;background:#f1f5f9;color:#475569;font-size:12px;font-weight:600;text-decoration:none;border:1px solid #e2e8f0">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+          </a>
+        </div>
+      </div>
 
+      <!-- Stats strip -->
+      <div style="display:flex;border-top:1px solid #f1f5f9">
+        <div class="hc-stat" style="flex:1">
+          <div class="hc-stat-val" style="color:#6366f1">$<?php echo number_format($_hc_totalGastado, 0); ?></div>
+          <div class="hc-stat-lbl">Total acumulado</div>
+        </div>
+        <div class="hc-stat" style="flex:1">
+          <div class="hc-stat-val"><?php echo count($_hc_ordenes); ?></div>
+          <div class="hc-stat-lbl">Órdenes</div>
+        </div>
+        <div class="hc-stat" style="flex:1">
+          <div class="hc-stat-val" style="color:#22c55e"><?php echo $_hc_entregadas; ?></div>
+          <div class="hc-stat-lbl">Entregadas</div>
+        </div>
+        <div class="hc-stat" style="flex:1">
+          <div class="hc-stat-val" style="color:#f59e0b"><?php echo $_hc_pendientes; ?></div>
+          <div class="hc-stat-lbl">Pendientes</div>
+        </div>
+        <div class="hc-stat" style="flex:1">
+          <div class="hc-stat-val"><?php echo count($_hc_pedidos); ?></div>
+          <div class="hc-stat-lbl">Pedidos</div>
+        </div>
+      </div>
+    </div>
 
+    <!-- ══ TABS: Órdenes / Pedidos ══ -->
+    <div class="hc-card">
+      <div class="hc-card-head">
+        <h4 class="hc-card-title"><i class="fa-solid fa-list-check"></i> Registros</h4>
+        <div class="hc-tab-bar" id="hcTabs">
+          <button type="button" class="hc-tab active" data-tab="ordenes">
+            <i class="fa-solid fa-clipboard-list" style="margin-right:4px"></i>Órdenes (<?php echo count($_hc_ordenes); ?>)
+          </button>
+          <button type="button" class="hc-tab" data-tab="pedidos">
+            <i class="fa-solid fa-box-open" style="margin-right:4px"></i>Pedidos (<?php echo count($_hc_pedidos); ?>)
+          </button>
+        </div>
+      </div>
 
+      <!-- Órdenes Tab -->
+      <div id="hcTabOrdenes">
+        <?php if (empty($_hc_ordenes)): ?>
+          <div class="hc-empty">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <strong style="display:block;color:#0f172a;font-size:14px">Sin órdenes registradas</strong>
+          </div>
+        <?php else: ?>
+          <div class="table-responsive">
+            <table class="hc-table">
+              <thead>
+                <tr>
+                  <th>Orden</th>
+                  <th>Equipo</th>
+                  <th>Estado</th>
+                  <th style="text-align:right">Total</th>
+                  <th>Ingreso</th>
+                  <th style="text-align:center">Antigüedad</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($_hc_ordenes as $o):
+                  $est = isset($o["estado"]) ? $o["estado"] : "";
+                  $total = floatval(isset($o["total"]) ? $o["total"] : 0);
+                  $fi = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
+                  $marca = isset($o["marcaDelEquipo"]) ? $o["marcaDelEquipo"] : "";
+                  $modelo = isset($o["modeloDelEquipo"]) ? $o["modeloDelEquipo"] : "";
+                  $equipo = trim($marca . " " . $modelo);
+                  if (empty($equipo)) $equipo = "—";
 
+                  // Antigüedad
+                  $dias = 0;
+                  if (!empty($fi)) {
+                      try { $dias = max(0, (new DateTime($fi))->diff(new DateTime())->days); } catch(Exception $e){}
+                  }
+
+                  // Badge color
+                  if (strpos($est, "Ent") !== false) { $bc='#f0fdf4'; $btc='#16a34a'; $elbl='Entregada'; }
+                  elseif (strpos($est, "can") !== false) { $bc='#fef2f2'; $btc='#dc2626'; $elbl='Cancelada'; }
+                  elseif (strpos($est, "AUT") !== false) { $bc='#fef3c7'; $btc='#92400e'; $elbl='Pend. Autorización'; }
+                  elseif (strpos($est, "ok") !== false) { $bc='#dbeafe'; $btc='#1d4ed8'; $elbl='Aceptada'; }
+                  elseif (strpos($est, "Terminada") !== false || strpos($est, "ter") !== false) { $bc='#ecfeff'; $btc='#0e7490'; $elbl='Terminada'; }
+                  else { $bc='#f1f5f9'; $btc='#475569'; $elbl = mb_substr($est, 0, 20); }
+
+                  // Link
+                  $link = 'index.php?ruta=infoOrden&idOrden='.$o["id"]
+                      .'&empresa='.(isset($o["id_empresa"]) ? $o["id_empresa"] : '')
+                      .'&asesor='.(isset($o["id_Asesor"]) ? $o["id_Asesor"] : '')
+                      .'&cliente='.(isset($o["id_usuario"]) ? $o["id_usuario"] : '')
+                      .'&tecnico='.(isset($o["id_tecnico"]) ? $o["id_tecnico"] : '')
+                      .'&tecnicodos='.(isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : '')
+                      .'&pedido='.(isset($o["id_pedido"]) ? $o["id_pedido"] : '');
+                ?>
+                <tr>
+                  <td><span style="font-weight:700;color:#6366f1">#<?php echo $o["id"]; ?></span></td>
+                  <td>
+                    <div style="font-weight:600"><?php echo htmlspecialchars($equipo); ?></div>
+                    <?php if (!empty($o["numeroDeSerieDelEquipo"])): ?>
+                      <div style="font-size:10px;color:#94a3b8">S/N: <?php echo htmlspecialchars($o["numeroDeSerieDelEquipo"]); ?></div>
+                    <?php endif; ?>
+                  </td>
+                  <td><span class="hc-badge" style="background:<?php echo $bc; ?>;color:<?php echo $btc; ?>"><?php echo $elbl; ?></span></td>
+                  <td style="text-align:right;font-weight:700">$<?php echo number_format($total, 0); ?></td>
+                  <td style="font-size:12px;color:#64748b"><?php echo !empty($fi) ? date("d/m/Y", strtotime($fi)) : "—"; ?></td>
+                  <td style="text-align:center">
+                    <span style="font-weight:700;font-size:12px;color:<?php echo $dias > 30 ? '#ef4444' : ($dias > 15 ? '#f59e0b' : '#64748b'); ?>">
+                      <?php echo $dias; ?>d
+                    </span>
+                  </td>
+                  <td style="text-align:center">
+                    <a href="<?php echo $link; ?>" target="_blank"
+                       style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#6366f1;color:#fff;font-size:12px;text-decoration:none;transition:background .15s"
+                       onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        <?php endif; ?>
+      </div>
+
+      <!-- Pedidos Tab -->
+      <div id="hcTabPedidos" style="display:none">
+        <?php if (empty($_hc_pedidos)): ?>
+          <div class="hc-empty">
+            <i class="fa-solid fa-box-open"></i>
+            <strong style="display:block;color:#0f172a;font-size:14px">Sin pedidos registrados</strong>
+          </div>
+        <?php else: ?>
+          <div class="table-responsive">
+            <table class="hc-table">
+              <thead>
+                <tr>
+                  <th>Pedido</th>
+                  <th>Orden</th>
+                  <th>Producto</th>
+                  <th>Estado</th>
+                  <th style="text-align:right">Adeudo</th>
+                  <th style="text-align:right">Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($_hc_pedidos as $p):
+                  $pEst = isset($p["estado"]) ? $p["estado"] : "";
+                  $pTotal = floatval(isset($p["total"]) ? $p["total"] : 0);
+                  $pAdeudo = floatval(isset($p["adeudo"]) ? $p["adeudo"] : 0);
+                  $pOrden = isset($p["id_orden"]) ? $p["id_orden"] : "0";
+
+                  $pProd = "—";
+                  if (!empty($p["productos"])) {
+                      $prods = json_decode($p["productos"], true);
+                      if (is_array($prods) && !empty($prods)) {
+                          $pProd = isset($prods[0]["Descripcion"]) ? mb_substr($prods[0]["Descripcion"], 0, 35) : "—";
+                          if (count($prods) > 1) $pProd .= " +" . (count($prods) - 1);
+                      }
+                  }
+
+                  $pLink = 'index.php?ruta=infopedido&idPedido='.$p["id"]
+                      .'&empresa='.(isset($p["id_empresa"]) ? $p["id_empresa"] : '')
+                      .'&asesor='.(isset($p["id_Asesor"]) ? $p["id_Asesor"] : '')
+                      .'&cliente='.(isset($p["id_cliente"]) ? $p["id_cliente"] : '');
+                ?>
+                <tr>
+                  <td><span style="font-weight:700;color:#8b5cf6">#<?php echo $p["id"]; ?></span></td>
+                  <td>
+                    <?php if ($pOrden != "0" && !empty($pOrden)): ?>
+                      <span style="font-weight:600">Orden #<?php echo $pOrden; ?></span>
+                    <?php else: ?>
+                      <span style="color:#94a3b8;font-size:12px">Sin orden</span>
+                    <?php endif; ?>
+                  </td>
+                  <td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?php echo htmlspecialchars($pProd); ?></td>
+                  <td>
+                    <span class="hc-badge" style="background:#f1f5f9;color:#475569"><?php echo htmlspecialchars(mb_substr($pEst, 0, 20)); ?></span>
+                  </td>
+                  <td style="text-align:right;font-weight:600;color:<?php echo $pAdeudo > 0 ? '#ef4444' : '#22c55e'; ?>">
+                    $<?php echo number_format($pAdeudo, 0); ?>
+                  </td>
+                  <td style="text-align:right;font-weight:700">$<?php echo number_format($pTotal, 0); ?></td>
+                  <td style="text-align:center">
+                    <a href="<?php echo $pLink; ?>" target="_blank"
+                       style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#8b5cf6;color:#fff;font-size:12px;text-decoration:none;transition:background .15s"
+                       onmouseover="this.style.background='#7c3aed'" onmouseout="this.style.background='#8b5cf6'">
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        <?php endif; ?>
+      </div>
+
+    </div>
+
+  </section>
+</div>
+
+<script>
+$(function(){
+  $('#hcTabs').on('click', '.hc-tab', function(){
+    var tab = $(this).data('tab');
+    $('#hcTabs .hc-tab').removeClass('active').css({background:'transparent',color:'#64748b'});
+    $(this).addClass('active').css({background:'#6366f1',color:'#fff'});
+    if (tab === 'ordenes') {
+      $('#hcTabOrdenes').show();
+      $('#hcTabPedidos').hide();
+    } else {
+      $('#hcTabOrdenes').hide();
+      $('#hcTabPedidos').show();
+    }
+  });
+});
+</script>

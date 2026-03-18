@@ -69,7 +69,8 @@
       "Bash(php -r \"echo crypt\\(''C3S4r2026'', chr\\(36\\).''2a''.chr\\(36\\).''07''.chr\\(36\\).''asxx54ahjppf45sd87a5a4dDDGsystemdev''.chr\\(36\\)\\) . PHP_EOL;\")",
       "Bash(php -r \"echo crypt\\(''C3S4r2026@'', chr\\(36\\).''2a''.chr\\(36\\).''07''.chr\\(36\\).''asxx54ahjppf45sd87a5a4dDDGsystemdev''.chr\\(36\\)\\) . PHP_EOL;\")",
       "Bash(grep -r Push.create C:UsersblackDesktopEGS --include=*.js)",
-      "Bash(grep -r \"notificaciones.php\\\\|cabezote/notificaciones\" C:UsersblackDesktopEGSvistas --include=*.php)"
+      "Bash(grep -r \"notificaciones.php\\\\|cabezote/notificaciones\" C:UsersblackDesktopEGSvistas --include=*.php)",
+      "Bash(php -l vistas/modulos/Historialdecliente.php)"
     ]
   }
 }
