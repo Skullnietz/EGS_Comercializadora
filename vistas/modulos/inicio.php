@@ -59,9 +59,9 @@ PÁGINA DE INICIO
   <!-- content -->
   <section class="content">
 
-    <?php if ($_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "tecnico"): ?>
+    <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "tecnico"): ?>
       <!-- ══════════════════════════════════════════════════════
-           CRM DESIGN SYSTEM — Compartido entre Vendedor y Técnico
+           CRM DESIGN SYSTEM — Compartido entre Admin, Vendedor y Técnico
       ══════════════════════════════════════════════════════ -->
       <style>
       /* ─── Tokens ─── */
@@ -323,97 +323,90 @@ PÁGINA DE INICIO
 
     <?php if ($_SESSION["perfil"] == "administrador"): ?>
 
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 1 — Resumen General del Mes
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#3c8dbc;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-chart-pie"></i> &nbsp;Resumen General del Mes</h4>
-          <small>Totales acumulados del periodo actual</small>
+      <!-- ══ WELCOME BANNER ADMIN ══ -->
+      <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#334155 100%);border-radius:var(--crm-radius,14px);padding:28px 30px;margin-bottom:24px;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-20px;top:-20px;width:180px;height:180px;border-radius:50%;background:rgba(99,102,241,.12)"></div>
+        <div style="position:absolute;right:60px;bottom:-40px;width:120px;height:120px;border-radius:50%;background:rgba(99,102,241,.08)"></div>
+        <div style="position:relative;z-index:1">
+          <h2 style="margin:0 0 4px;color:#fff;font-size:22px;font-weight:800;letter-spacing:-.02em">
+            <i class="fa-solid fa-shield-halved" style="margin-right:8px;opacity:.7"></i>
+            Hola, <?php echo htmlspecialchars($_SESSION["nombre"]); ?>
+          </h2>
+          <?php
+            $diasEs  = array('Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado');
+            $mesesEs = array('','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre');
+            $_fechaAdmin = $diasEs[date('w')].' '.date('j').' de '.$mesesEs[intval(date('n'))].', '.date('Y');
+          ?>
+          <p style="margin:0;color:rgba(255,255,255,.55);font-size:13px;font-weight:400">
+            <?php echo $_fechaAdmin; ?> &mdash; Panel de administración general
+          </p>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN 1: KPIs ══ -->
+      <?php include "inicio/admin-kpis.php"; ?>
+
+      <!-- ══ SECCIÓN 2: Pipeline General ══ -->
+      <div class="crm-section">
+        <div class="crm-section-icon" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">
+          <i class="fa-solid fa-diagram-project"></i>
+        </div>
+        <div>
+          <h3>Pipeline General</h3>
+          <p>Flujo completo de órdenes de la empresa por estado</p>
+        </div>
+      </div>
+      <?php include "inicio/admin-pipeline.php"; ?>
+
+      <!-- ══ SECCIÓN 3: Últimas Órdenes + Acciones Rápidas ══ -->
+      <div class="crm-section">
+        <div class="crm-section-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
+          <i class="fa-solid fa-list-check"></i>
+        </div>
+        <div>
+          <h3>Actividad Reciente</h3>
+          <p>Últimas órdenes registradas y acciones rápidas</p>
         </div>
       </div>
       <div class="row">
-        <?php include "inicio/superioresAdmin.php"; ?>
-      </div>
-
-      <hr class="dash-divider">
-
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 2 — Estado del Día
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#f39c12;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-bolt"></i> &nbsp;Estado del Día</h4>
-          <small>Órdenes pendientes, ingresos y eficiencia del mes en curso</small>
+        <div class="col-lg-8 col-md-7 col-xs-12">
+          <?php include "inicio/admin-ultimas-ordenes.php"; ?>
+        </div>
+        <div class="col-lg-4 col-md-5 col-xs-12">
+          <?php include "inicio/admin-acciones-rapidas.php"; ?>
         </div>
       </div>
 
-      <?php include "inicio/alertas-criticas.php"; ?>
-
-      <hr class="dash-divider">
-
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 3 — Análisis y Rendimiento
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#00a65a;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-chart-line"></i> &nbsp;Análisis y Rendimiento</h4>
-          <small>Histórico de ventas y ranking de técnicos del mes</small>
+      <!-- ══ SECCIÓN 4: Análisis y Rendimiento ══ -->
+      <div class="crm-section">
+        <div class="crm-section-icon" style="background:linear-gradient(135deg,#8b5cf6,#06b6d4)">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div>
+          <h3>Análisis y Rendimiento</h3>
+          <p>Histórico de ventas y ranking de técnicos del mes</p>
         </div>
       </div>
       <div class="row dash-row-equal">
         <div class="col-lg-8 col-md-8 col-xs-12">
-          <?php include "inicio/grafico-ventas.php"; ?>
+          <?php include "inicio/admin-grafico-ventas.php"; ?>
         </div>
         <div class="col-lg-4 col-md-4 col-xs-12">
-          <?php include "inicio/top-tecnicos.php"; ?>
+          <?php include "inicio/admin-top-tecnicos.php"; ?>
         </div>
       </div>
 
-      <hr class="dash-divider">
-
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 4 — Actividad Reciente
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#605ca8;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-list-check"></i> &nbsp;Actividad Reciente</h4>
-          <small>Últimas órdenes registradas y productos con mayor demanda</small>
+      <!-- ══ SECCIÓN 5: Equipo ══ -->
+      <div class="crm-section">
+        <div class="crm-section-icon" style="background:linear-gradient(135deg,#22c55e,#06b6d4)">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <div>
+          <h3>Equipo</h3>
+          <p>Asesores y técnicos registrados en la empresa</p>
         </div>
       </div>
-      <div class="row dash-row-equal">
-        <div class="col-lg-7 col-md-7 col-xs-12">
-          <?php include "inicio/ultimas-ordenes.php"; ?>
-        </div>
-        <div class="col-lg-5 col-md-5 col-xs-12">
-          <?php include "inicio/productos-mas-vendidos.php"; ?>
-        </div>
-      </div>
-
-      <hr class="dash-divider">
-
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 5 — Equipo
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#dd4b39;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-users"></i> &nbsp;Equipo</h4>
-          <small>Asesores y técnicos registrados en la empresa</small>
-        </div>
-      </div>
-      <div class="row dash-row-equal">
-        <div class="col-lg-6 col-md-6 col-xs-12">
-          <?php include "inicio/asesores-caja.php"; ?>
-        </div>
-        <div class="col-lg-6 col-md-6 col-xs-12">
-          <?php include "inicio/tecnicos-caja.php"; ?>
-        </div>
-      </div>
+      <?php include "inicio/admin-equipo.php"; ?>
 
     <?php elseif ($_SESSION["perfil"] == "vendedor"): ?>
 

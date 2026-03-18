@@ -80,7 +80,15 @@
       "Bash(php \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\temp_hash.php\")",
       "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio.php\")",
       "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\\\\tec-dashboard.php\")",
-      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\Historialdecliente.php\")"
+      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\Historialdecliente.php\")",
+      "Bash(ls -la /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/controladores/*.php)",
+      "Bash(ls /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/controladores/*.php)",
+      "Bash(wc -l /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/**/*.php)",
+      "Bash(xxd)",
+      "Bash(powershell -Command \"Get-Content README.md | Set-Content -Encoding UTF8 README_utf8.md\")",
+      "Bash(powershell -Command \":*)",
+      "Bash(powershell -Command \"$content = Get-Content README.md -Raw -Encoding Unicode; $utf8NoBom = New-Object System.Text.UTF8Encoding $false; $path = \\(Get-Location\\).Path + ''''\\\\README_utf8.md''''; [System.IO.File]::WriteAllText\\($path, $content, $utf8NoBom\\)\")",
+      "Bash(php -l \"$f\")"
     ]
   }
 }
