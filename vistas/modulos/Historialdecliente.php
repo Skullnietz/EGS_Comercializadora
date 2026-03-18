@@ -260,10 +260,14 @@ if ($_hc_primeraFecha) {
                     <?php if (!empty($imgEquipo)): ?>
                       <img src="<?php echo htmlspecialchars($imgEquipo); ?>" alt="Equipo"
                            style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid #e2e8f0;cursor:pointer"
-                           onclick="window.open(this.src,'_blank')">
+                           onclick="window.open(this.src,'_blank')"
+                           onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';">
+                      <div style="display:none;width:44px;height:44px;border-radius:8px;background:#f1f5f9;align-items:center;justify-content:center;color:#cbd5e1;font-size:16px;border:1px solid #e2e8f0">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                      </div>
                     <?php else: ?>
                       <div style="width:44px;height:44px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:16px;border:1px solid #e2e8f0">
-                        <i class="fa-solid fa-image"></i>
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
                       </div>
                     <?php endif; ?>
                   </td>

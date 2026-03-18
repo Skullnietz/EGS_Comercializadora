@@ -50,7 +50,7 @@ try {
     if (is_array($r)) $_tec_AUT = $r;
 } catch (Exception $e) {}
 
-// ── Filtrar solo del mes ──
+// ── Filtrar solo del mes (para KPI eficiencia) ──
 $_tec_limite = date("Y-m-d", strtotime("-1 month"));
 
 function _tecFiltrarMes($arr, $limite) {
@@ -66,10 +66,10 @@ $_tec_TER_mes = _tecFiltrarMes($_tec_TER, $_tec_limite);
 $_tec_ENT_mes = _tecFiltrarMes($_tec_ENT, $_tec_limite);
 
 // ── Totales ──
-$_tec_totalActivas = count($_tec_REV) + count($_tec_OK); // trabajo pendiente real (sin filtro mes)
+$_tec_totalActivas = count($_tec_REV) + count($_tec_OK);
 $_tec_totalMes = count($_tec_REV_mes) + count($_tec_OK_mes) + count($_tec_TER_mes) + count($_tec_ENT_mes);
 
-// ── Eficiencia: entregadas / (entregadas+terminadas+ok+rev) del mes ──
+// ── Eficiencia: entregadas / total del mes ──
 $_tec_eficiencia = $_tec_totalMes > 0
     ? round((count($_tec_ENT_mes) / $_tec_totalMes) * 100, 1) : 0;
 
@@ -107,6 +107,63 @@ function _tecDias($fecha) {
     try { return max(0, (new DateTime($fecha))->diff(new DateTime())->days); }
     catch (Exception $e) { return 0; }
 }
+
+// ── Helper: render imagen con fallback onerror ──
+function _tecImgTag($src, $w, $h, $radius) {
+    $fallback = "this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';";
+    $html = '<img src="' . htmlspecialchars($src) . '" onerror="' . $fallback . '" style="width:'.$w.'px;height:'.$h.'px;border-radius:'.$radius.'px;object-fit:cover;flex-shrink:0;border:1px solid #e2e8f0">';
+    $html .= '<div style="display:none;width:'.$w.'px;height:'.$h.'px;border-radius:'.$radius.'px;background:#f1f5f9;align-items:center;justify-content:center;color:#cbd5e1;font-size:'.round($w*0.35).'px;flex-shrink:0"><i class="fa-solid fa-screwdriver-wrench"></i></div>';
+    return $html;
+}
+
+function _tecImgPlaceholder($w, $h, $radius) {
+    return '<div style="width:'.$w.'px;height:'.$h.'px;border-radius:'.$radius.'px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:'.round($w*0.35).'px;flex-shrink:0"><i class="fa-solid fa-screwdriver-wrench"></i></div>';
+}
+
+// ══════════════════════════════════════════
+// PIPELINE: Pre-calcular datos por periodo
+// ══════════════════════════════════════════
+$_tec_allOrders = array_merge($_tec_REV, $_tec_OK, $_tec_AUT, $_tec_TER, $_tec_ENT);
+
+$_tec_pipe_cortes = array(
+    '1m'  => date("Y-m-d", strtotime("-1 month")),
+    '3m'  => date("Y-m-d", strtotime("-3 months")),
+    '6m'  => date("Y-m-d", strtotime("-6 months")),
+    '12m' => date("Y-m-d", strtotime("-12 months")),
+);
+
+function _tecPipeClasificar($est) {
+    if (strpos($est, "REV") !== false || strpos($est, "revisión") !== false) return 'REV';
+    if (strpos($est, "AUT") !== false) return 'AUT';
+    if (strpos($est, "Aceptado") !== false || strpos($est, "ok") !== false) return 'OK';
+    if (strpos($est, "Terminada") !== false || strpos($est, "ter") !== false) return 'TER';
+    if (strpos($est, "Entregado") !== false || strpos($est, "Ent") !== false) return 'ENT';
+    return 'REV';
+}
+
+$_tec_pipe_data = array();
+foreach ($_tec_pipe_cortes as $periodo => $corte) {
+    $_tec_pipe_data[$periodo] = array('REV'=>0, 'OK'=>0, 'AUT'=>0, 'TER'=>0, 'ENT'=>0, 'total'=>0);
+    foreach ($_tec_allOrders as $ord) {
+        $fi = isset($ord["fecha_ingreso"]) ? substr($ord["fecha_ingreso"], 0, 10) : "";
+        if ($fi >= $corte) {
+            $est = isset($ord["estado"]) ? $ord["estado"] : "";
+            $clave = _tecPipeClasificar($est);
+            $_tec_pipe_data[$periodo][$clave]++;
+            $_tec_pipe_data[$periodo]['total']++;
+        }
+    }
+}
+
+$_tec_pipe_default = $_tec_pipe_data['1m'];
+
+$_tec_stages_def = array(
+    'REV' => array('label'=>'Revisión',    'icon'=>'fa-magnifying-glass', 'color'=>'#ef4444'),
+    'OK'  => array('label'=>'Aceptadas',   'icon'=>'fa-circle-check',     'color'=>'#3b82f6'),
+    'AUT' => array('label'=>'AUT',         'icon'=>'fa-hourglass-half',   'color'=>'#8b5cf6'),
+    'TER' => array('label'=>'Terminadas',  'icon'=>'fa-flag-checkered',   'color'=>'#f59e0b'),
+    'ENT' => array('label'=>'Entregadas',  'icon'=>'fa-handshake',        'color'=>'#22c55e'),
+);
 ?>
 
 <!-- ══════════════════════════════════════════
@@ -159,7 +216,7 @@ function _tecDias($fecha) {
 </div>
 
 <!-- ══════════════════════════════════════════
-     PIPELINE (estado del trabajo)
+     PIPELINE con filtro de periodo
 ══════════════════════════════════════════ -->
 <div class="crm-section">
   <div class="crm-section-icon" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">
@@ -167,61 +224,119 @@ function _tecDias($fecha) {
   </div>
   <div>
     <h3>Mi Flujo de Trabajo</h3>
-    <p>Estado actual de todas tus órdenes asignadas</p>
+    <p>Estado actual de tus órdenes asignadas</p>
   </div>
 </div>
-
-<?php
-$_tec_pipe = array(
-    array('label'=>'Revisión',  'icon'=>'fa-magnifying-glass', 'color'=>'#ef4444', 'count'=>count($_tec_REV)),
-    array('label'=>'Aceptadas', 'icon'=>'fa-circle-check',     'color'=>'#3b82f6', 'count'=>count($_tec_OK)),
-    array('label'=>'AUT',       'icon'=>'fa-hourglass-half',    'color'=>'#8b5cf6', 'count'=>count($_tec_AUT)),
-    array('label'=>'Terminadas','icon'=>'fa-flag-checkered',    'color'=>'#f59e0b', 'count'=>count($_tec_TER)),
-    array('label'=>'Entregadas','icon'=>'fa-handshake',         'color'=>'#22c55e', 'count'=>count($_tec_ENT)),
-);
-$_tec_pipeTotal = 0;
-foreach ($_tec_pipe as $p) $_tec_pipeTotal += $p['count'];
-?>
 
 <div class="crm-card" style="margin-bottom:20px">
   <div class="crm-card-head">
     <h4 class="crm-card-title"><i class="fa-solid fa-diagram-project"></i> Pipeline</h4>
-    <span class="crm-badge" style="background:#f1f5f9;color:#475569"><?php echo $_tec_pipeTotal; ?> órdenes</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="crm-badge" id="tecPipeBadge" style="background:#f1f5f9;color:#475569;margin-right:4px">
+        <?php echo $_tec_pipe_default['total']; ?> órdenes
+      </span>
+      <!-- Selector de periodo -->
+      <div style="display:inline-flex;background:#f1f5f9;border-radius:8px;padding:2px;gap:2px" id="tecPipeFilter">
+        <button type="button" class="tec-pipe-btn active" data-period="1m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:#6366f1;color:#fff">
+          Mes
+        </button>
+        <button type="button" class="tec-pipe-btn" data-period="3m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">
+          3M
+        </button>
+        <button type="button" class="tec-pipe-btn" data-period="6m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">
+          6M
+        </button>
+        <button type="button" class="tec-pipe-btn" data-period="12m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">
+          Año
+        </button>
+      </div>
+    </div>
   </div>
   <div class="crm-card-body">
-    <?php if ($_tec_pipeTotal > 0): ?>
-      <!-- Track bar -->
-      <div class="crm-pipe-track">
-        <?php foreach ($_tec_pipe as $p):
-          if ($p['count'] === 0) continue;
-          $pct = max(4, round(($p['count'] / $_tec_pipeTotal) * 100));
-        ?>
-          <div style="background:<?php echo $p['color']; ?>;width:<?php echo $pct; ?>%"></div>
-        <?php endforeach; ?>
-      </div>
-      <!-- Stage cards -->
-      <div class="crm-pipe-stages">
-        <?php foreach ($_tec_pipe as $p):
-          $pct = $_tec_pipeTotal > 0 ? round(($p['count'] / $_tec_pipeTotal) * 100, 1) : 0;
-        ?>
-          <div class="crm-pipe-stage">
-            <div class="crm-pipe-stage-icon" style="background:<?php echo $p['color']; ?>">
-              <i class="fa-solid <?php echo $p['icon']; ?>"></i>
-            </div>
-            <div class="crm-pipe-stage-num"><?php echo $p['count']; ?></div>
-            <div class="crm-pipe-stage-lbl"><?php echo $p['label']; ?></div>
-            <div style="font-size:10px;color:#94a3b8;margin-top:2px"><?php echo $pct; ?>%</div>
+
+    <!-- Track bar -->
+    <div class="crm-pipe-track" id="tecPipeTrack">
+      <?php foreach ($_tec_stages_def as $k => $s):
+        $cnt = $_tec_pipe_default[$k];
+        $pct = $_tec_pipe_default['total'] > 0 ? max(4, round(($cnt / $_tec_pipe_default['total']) * 100)) : 0;
+      ?>
+        <div id="tecTrack_<?php echo $k; ?>" style="background:<?php echo $s['color']; ?>;width:<?php echo $cnt > 0 ? $pct : 0; ?>%;transition:width .4s cubic-bezier(.4,0,.2,1)"></div>
+      <?php endforeach; ?>
+    </div>
+
+    <!-- Stage cards -->
+    <div class="crm-pipe-stages" id="tecPipeStages">
+      <?php foreach ($_tec_stages_def as $k => $s):
+        $cnt = $_tec_pipe_default[$k];
+        $pct = $_tec_pipe_default['total'] > 0 ? round(($cnt / $_tec_pipe_default['total']) * 100, 1) : 0;
+      ?>
+        <div class="crm-pipe-stage" id="tecStage_<?php echo $k; ?>">
+          <div class="crm-pipe-stage-icon" style="background:<?php echo $s['color']; ?>">
+            <i class="fa-solid <?php echo $s['icon']; ?>"></i>
           </div>
-        <?php endforeach; ?>
-      </div>
-    <?php else: ?>
+          <div class="crm-pipe-stage-num" id="tecNum_<?php echo $k; ?>"><?php echo $cnt; ?></div>
+          <div class="crm-pipe-stage-lbl"><?php echo $s['label']; ?></div>
+          <div class="crm-pipe-stage-pct" id="tecPct_<?php echo $k; ?>" style="font-size:10px;color:#94a3b8;margin-top:2px"><?php echo $pct; ?>%</div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+
+    <!-- Empty state -->
+    <div id="tecPipeEmpty" style="display:none">
       <div class="crm-empty">
         <i class="fa-solid fa-inbox"></i>
-        <strong>Sin órdenes asignadas</strong>
+        <strong>Sin órdenes en este periodo</strong>
+        <span style="font-size:12px">Prueba con un rango más amplio</span>
       </div>
-    <?php endif; ?>
+    </div>
+
   </div>
 </div>
+
+<script>
+(function(){
+  var tecPipeData = <?php echo json_encode($_tec_pipe_data); ?>;
+  var stages = ['REV','OK','AUT','TER','ENT'];
+
+  $('#tecPipeFilter').on('click', '.tec-pipe-btn', function(){
+    var $btn   = $(this);
+    var period = $btn.data('period');
+    var data   = tecPipeData[period];
+    if (!data) return;
+
+    // Activar botón
+    $('#tecPipeFilter .tec-pipe-btn').css({ background: 'transparent', color: '#64748b' }).removeClass('active');
+    $btn.css({ background: '#6366f1', color: '#fff' }).addClass('active');
+
+    var total = data.total;
+    $('#tecPipeBadge').text(total + ' órdenes');
+
+    if (total === 0) {
+      $('#tecPipeTrack, #tecPipeStages').hide();
+      $('#tecPipeEmpty').show();
+      return;
+    } else {
+      $('#tecPipeTrack, #tecPipeStages').show();
+      $('#tecPipeEmpty').hide();
+    }
+
+    for (var i = 0; i < stages.length; i++) {
+      var k   = stages[i];
+      var cnt = data[k] || 0;
+      var pct = total > 0 ? Math.round((cnt / total) * 1000) / 10 : 0;
+      var tw  = cnt > 0 ? Math.max(4, Math.round((cnt / total) * 100)) : 0;
+
+      $('#tecNum_' + k).text(cnt);
+      $('#tecPct_' + k).text(pct + '%');
+      $('#tecTrack_' + k).css('width', tw + '%');
+    }
+  });
+})();
+</script>
 
 <!-- ══════════════════════════════════════════
      ÓRDENES EN REVISIÓN (prioridad máxima)
@@ -268,7 +383,6 @@ foreach ($_tec_pipe as $p) $_tec_pipeTotal += $p['count'];
               </tr></thead>
               <tbody>
                 <?php
-                // Ordenar: más antiguos primero (urgentes)
                 usort($_tec_REV, function($a, $b) {
                     return strtotime(isset($a["fecha_ingreso"]) ? $a["fecha_ingreso"] : "now")
                          - strtotime(isset($b["fecha_ingreso"]) ? $b["fecha_ingreso"] : "now");
@@ -289,9 +403,9 @@ foreach ($_tec_pipe as $p) $_tec_pipeTotal += $p['count'];
                 <tr>
                   <td style="padding:6px 4px;width:44px">
                     <?php if (!empty($img)): ?>
-                      <img src="<?php echo htmlspecialchars($img); ?>" style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid #e2e8f0">
+                      <?php echo _tecImgTag($img, 40, 40, 8); ?>
                     <?php else: ?>
-                      <div style="width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:14px"><i class="fa-solid fa-image"></i></div>
+                      <?php echo _tecImgPlaceholder(40, 40, 8); ?>
                     <?php endif; ?>
                   </td>
                   <td><span style="font-weight:700;color:#6366f1">#<?php echo $o["id"]; ?></span>
@@ -431,7 +545,6 @@ foreach ($_tec_pipe as $p) $_tec_pipeTotal += $p['count'];
     <?php else: ?>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:16px">
         <?php
-        // Ordenar más antiguos primero
         usort($_tec_OK, function($a, $b) {
             return strtotime(isset($a["fecha_ingreso"]) ? $a["fecha_ingreso"] : "now")
                  - strtotime(isset($b["fecha_ingreso"]) ? $b["fecha_ingreso"] : "now");
@@ -453,9 +566,9 @@ foreach ($_tec_pipe as $p) $_tec_pipeTotal += $p['count'];
              onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)';this.style.transform='translateY(-1px)'"
              onmouseout="this.style.boxShadow='none';this.style.transform='none'">
             <?php if (!empty($img)): ?>
-              <img src="<?php echo htmlspecialchars($img); ?>" style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid #e2e8f0">
+              <?php echo _tecImgTag($img, 52, 52, 8); ?>
             <?php else: ?>
-              <div style="width:52px;height:52px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:18px;flex-shrink:0"><i class="fa-solid fa-image"></i></div>
+              <?php echo _tecImgPlaceholder(52, 52, 8); ?>
             <?php endif; ?>
             <div style="flex:1;min-width:0">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -520,9 +633,9 @@ foreach ($_tec_pipe as $p) $_tec_pipeTotal += $p['count'];
             <a href="<?php echo _tecLink($o); ?>" target="_blank" style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f8fafc;text-decoration:none;transition:background .12s"
                onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
               <?php if (!empty($img)): ?>
-                <img src="<?php echo htmlspecialchars($img); ?>" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid #e2e8f0">
+                <?php echo _tecImgTag($img, 36, 36, 6); ?>
               <?php else: ?>
-                <div style="width:36px;height:36px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:12px;flex-shrink:0"><i class="fa-solid fa-image"></i></div>
+                <?php echo _tecImgPlaceholder(36, 36, 6); ?>
               <?php endif; ?>
               <div style="flex:1;min-width:0">
                 <div style="font-size:13px;font-weight:700;color:#6366f1">#<?php echo $o["id"]; ?> <span style="font-weight:500;color:#0f172a"><?php echo htmlspecialchars($equipo); ?></span></div>
@@ -563,9 +676,9 @@ foreach ($_tec_pipe as $p) $_tec_pipeTotal += $p['count'];
             <a href="<?php echo _tecLink($o); ?>" target="_blank" style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f8fafc;text-decoration:none;transition:background .12s"
                onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
               <?php if (!empty($img)): ?>
-                <img src="<?php echo htmlspecialchars($img); ?>" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid #e2e8f0">
+                <?php echo _tecImgTag($img, 36, 36, 6); ?>
               <?php else: ?>
-                <div style="width:36px;height:36px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:12px;flex-shrink:0"><i class="fa-solid fa-image"></i></div>
+                <?php echo _tecImgPlaceholder(36, 36, 6); ?>
               <?php endif; ?>
               <div style="flex:1;min-width:0">
                 <div style="font-size:13px;font-weight:700;color:#22c55e">#<?php echo $o["id"]; ?> <span style="font-weight:500;color:#0f172a"><?php echo htmlspecialchars($equipo); ?></span></div>

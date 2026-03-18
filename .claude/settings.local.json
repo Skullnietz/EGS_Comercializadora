@@ -78,7 +78,9 @@
       "Bash(php -r 'echo crypt\\(\"\"3R1K2026\"\", \"\"\\\\$2a\\\\$07\\\\$asxx54ahjppf45sd87a5a4dDDGsystemdev\"\"\\);')",
       "Bash(php C:UsersblackDesktopEGStemp_hash.php)",
       "Bash(php \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\temp_hash.php\")",
-      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio.php\")"
+      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio.php\")",
+      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\\\\tec-dashboard.php\")",
+      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\Historialdecliente.php\")"
     ]
   }
 }
