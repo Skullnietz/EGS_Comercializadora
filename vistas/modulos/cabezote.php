@@ -246,6 +246,25 @@ body.skin-blue .sidebar-menu > li > a:hover {
 body.skin-blue .treeview-menu {
   background: rgba(0,0,0,.2) !important;
 }
+
+/* ── Fix: ocultar el segundo toggle que AdminLTE genera en sidebar-mini ── */
+.main-sidebar .sidebar-toggle,
+.sidebar-mini .sidebar > .sidebar-menu > li.header + li > a[data-toggle="push-menu"] {
+  display: none !important;
+}
+
+/* ── Fix: user-panel sidebar-mini — solo muestra avatar, oculta texto ── */
+body.sidebar-mini.sidebar-collapse .egs-sidebar-user .pull-left.info {
+  display: none !important;
+}
+body.sidebar-mini.sidebar-collapse .egs-sidebar-user {
+  padding: 10px 8px !important;
+  text-align: center;
+}
+body.sidebar-mini.sidebar-collapse .egs-sidebar-user .pull-left.image {
+  float: none !important;
+  display: block;
+}
 </style>
 
 <!-- main-header -->
