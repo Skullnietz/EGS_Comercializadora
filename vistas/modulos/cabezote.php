@@ -16,7 +16,7 @@ html body .main-header .navbar {
   box-shadow: 0 1px 0 rgba(255,255,255,.05), 0 4px 16px rgba(0,0,0,.25) !important;
 }
 
-/* ── 2. Logo: vacío, solo fondo ── */
+/* ── 2. Logo: fondo oscuro + texto ── */
 body .main-header .logo,
 body.skin-blue .main-header .logo,
 html body.skin-blue .main-header .logo {
@@ -24,11 +24,13 @@ html body.skin-blue .main-header .logo {
   border-right: 1px solid rgba(255,255,255,.06) !important;
   border-bottom: none !important;
 }
-/* Ocultar TODA imagen dentro del logo */
-.main-header .logo .logo-mini,
-.main-header .logo .logo-lg,
+/* Ocultar imágenes viejas del logo pero mantener spans */
 .main-header .logo img {
   display: none !important;
+}
+.main-header .logo .logo-mini,
+.main-header .logo .logo-lg {
+  display: block !important;
 }
 
 /* ── 3. Sidebar toggle (hamburger) ── */
@@ -299,15 +301,24 @@ html body.skin-blue .main-header .logo {
 /* ══════════════════════════════════════════
    LOGO TEXTO
 ══════════════════════════════════════════ */
-.main-header .logo .egs-logo-text {
-  color: #e2e8f0 !important;
-  font-size: 18px !important;
-  font-weight: 800 !important;
-  letter-spacing: 1px !important;
+html body .main-header .logo .egs-logo-text,
+body.skin-blue .main-header .logo .egs-logo-text {
+  color: #f1f5f9 !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
   text-decoration: none !important;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.3);
 }
-.main-header .logo .egs-logo-text .egs-logo-dot {
+html body .main-header .logo .egs-logo-text .egs-logo-dot {
   color: #6366f1;
+  font-weight: 900;
+}
+/* Mini sidebar: logo más compacto */
+body.sidebar-collapse .main-header .logo .egs-logo-text {
+  font-size: 18px !important;
+  letter-spacing: 1px !important;
 }
 
 /* ══════════════════════════════════════════
