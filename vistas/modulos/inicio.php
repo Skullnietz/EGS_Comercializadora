@@ -346,31 +346,31 @@ PÁGINA DE INICIO
       <!-- ══ SECCIÓN 1: KPIs ══ -->
       <?php include "inicio/admin-kpis.php"; ?>
 
-      <!-- ══ SECCIÓN 2: Pipeline General ══ -->
+      <!-- ══ SECCIÓN 2: Pipeline de Negocio ══ -->
       <div class="crm-section">
         <div class="crm-section-icon" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">
           <i class="fa-solid fa-diagram-project"></i>
         </div>
         <div>
-          <h3>Pipeline General</h3>
-          <p>Flujo completo de órdenes de la empresa por estado</p>
+          <h3>Pipeline de Negocio</h3>
+          <p>Flujo del servicio: Diagnóstico → Autorización → Reparación → Entrega</p>
         </div>
       </div>
       <?php include "inicio/admin-pipeline.php"; ?>
 
-      <!-- ══ SECCIÓN 3: Últimas Órdenes + Acciones Rápidas ══ -->
+      <!-- ══ SECCIÓN 3: Últimos Movimientos + Acciones Rápidas ══ -->
       <div class="crm-section">
         <div class="crm-section-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
-          <i class="fa-solid fa-list-check"></i>
+          <i class="fa-solid fa-clock-rotate-left"></i>
         </div>
         <div>
-          <h3>Actividad Reciente</h3>
-          <p>Últimas órdenes registradas y acciones rápidas</p>
+          <h3>Últimos Movimientos</h3>
+          <p>Observaciones recientes en órdenes de servicio</p>
         </div>
       </div>
       <div class="row">
         <div class="col-lg-8 col-md-7 col-xs-12">
-          <?php include "inicio/admin-ultimas-ordenes.php"; ?>
+          <?php include "inicio/admin-ultimos-movimientos.php"; ?>
         </div>
         <div class="col-lg-4 col-md-5 col-xs-12">
           <?php include "inicio/admin-acciones-rapidas.php"; ?>
@@ -384,7 +384,7 @@ PÁGINA DE INICIO
         </div>
         <div>
           <h3>Análisis y Rendimiento</h3>
-          <p>Histórico de ventas y ranking de técnicos del mes</p>
+          <p>Ventas por periodo y eficiencia real de técnicos del mes</p>
         </div>
       </div>
       <div class="row dash-row-equal">
