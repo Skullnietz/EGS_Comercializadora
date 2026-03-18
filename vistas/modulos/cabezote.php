@@ -1,84 +1,158 @@
 <!-- ── Estilos del header inyectados aquí para ganar a CUALQUIER skin ── -->
 <style>
-/* ── Navbar: slate-900 Tailwind, nuclear override ── */
+
+/* ══════════════════════════════════════════
+   NAVBAR — slate/indigo Tailwind
+══════════════════════════════════════════ */
+
+/* ── 1. Fondo navbar ── */
 .main-header,
 .main-header .navbar,
-.main-header nav,
 body .main-header .navbar,
 body.skin-blue .main-header .navbar,
 html body .main-header .navbar {
   background: #1e293b !important;
-  background-color: #1e293b !important;
   border-bottom: none !important;
   box-shadow: 0 1px 0 rgba(255,255,255,.05), 0 4px 16px rgba(0,0,0,.25) !important;
 }
+
+/* ── 2. Logo: vacío, solo fondo ── */
 body .main-header .logo,
-body.skin-blue .main-header .logo {
+body.skin-blue .main-header .logo,
+html body.skin-blue .main-header .logo {
   background: #0f172a !important;
-  background-color: #0f172a !important;
   border-right: 1px solid rgba(255,255,255,.06) !important;
   border-bottom: none !important;
-  transition: background .15s;
 }
-body .main-header .logo:hover,
-body.skin-blue .main-header .logo:hover { background: #080f1c !important; }
+/* Ocultar TODA imagen dentro del logo */
+.main-header .logo .logo-mini,
+.main-header .logo .logo-lg,
+.main-header .logo img {
+  display: none !important;
+}
 
-/* Toggle */
+/* ── 3. Sidebar toggle (hamburger) ── */
 .main-header .sidebar-toggle {
-  color: #94a3b8 !important;
-  font-size: 18px;
-  padding: 17px 18px !important;
+  color: #cbd5e1 !important;
+  font-size: 18px !important;
+  padding: 15px 18px !important;
   border: none !important;
+  background: transparent !important;
+  line-height: 20px !important;
   transition: color .15s, background .15s;
 }
 .main-header .sidebar-toggle:hover {
-  color: #f1f5f9 !important;
-  background: rgba(255,255,255,.06) !important;
+  color: #fff !important;
+  background: rgba(255,255,255,.08) !important;
 }
 
-/* Nav icons (bell, ?) */
+/* ── 4. Iconos navbar derecha: estilo píldora circular ── */
 .navbar-custom-menu .navbar-nav > li > a {
   color: #94a3b8 !important;
   padding: 15px 14px !important;
+  font-size: 16px !important;
   transition: color .15s, background .15s;
+  position: relative;
 }
-.navbar-custom-menu .navbar-nav > li > a:hover {
-  color: #f1f5f9 !important;
-  background: rgba(255,255,255,.06) !important;
-}
-/* Badge notificaciones */
-.navbar-custom-menu .label-warning {
-  background: #f59e0b !important;
-  font-size: 9px !important;
-  padding: 2px 5px !important;
-  border-radius: 9999px !important;
-  font-weight: 700 !important;
+.navbar-custom-menu .navbar-nav > li > a:hover,
+.navbar-custom-menu .navbar-nav > li > a:focus {
+  color: #e2e8f0 !important;
+  background: rgba(255,255,255,.08) !important;
 }
 
-/* ── Trigger del user-menu ── */
+/* Ícono de notificación: campana con efecto */
+.navbar-custom-menu .notifications-menu > a > .fa-bell,
+.navbar-custom-menu .notifications-menu > a > .fas {
+  font-size: 16px !important;
+}
+
+/* Ícono FAQ: signo de interrogación */
+.navbar-custom-menu .faq-menu > a > i {
+  font-size: 16px !important;
+}
+
+/* Badge de notificaciones */
+.navbar-custom-menu .label-warning {
+  background: #ef4444 !important;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+  border-radius: 9999px !important;
+  font-weight: 700 !important;
+  position: absolute !important;
+  top: 8px !important;
+  right: 6px !important;
+  line-height: 1.2 !important;
+  box-shadow: 0 0 0 2px #1e293b !important;
+  min-width: 18px !important;
+  text-align: center !important;
+}
+
+/* Dropdown de notificaciones */
+.navbar-custom-menu .notifications-menu .dropdown-menu {
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 40px rgba(15,23,42,.16) !important;
+  overflow: hidden !important;
+}
+.navbar-custom-menu .notifications-menu .dropdown-menu > li.header {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 10px 14px !important;
+}
+.navbar-custom-menu .notifications-menu .menu > li > a {
+  font-size: 12.5px !important;
+  color: #334155 !important;
+  padding: 8px 14px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  transition: background .12s !important;
+}
+.navbar-custom-menu .notifications-menu .menu > li > a:hover {
+  background: #f1f5f9 !important;
+}
+.navbar-custom-menu .notifications-menu .menu > li > a > i {
+  color: #6366f1 !important;
+  margin-right: 6px !important;
+}
+
+/* ── 5. Separador vertical entre iconos nav ── */
+.navbar-custom-menu .navbar-nav > li {
+  border-left: 1px solid rgba(255,255,255,.06);
+}
+.navbar-custom-menu .navbar-nav > li:first-child {
+  border-left: none;
+}
+
+/* ══════════════════════════════════════════
+   USER MENU — trigger + dropdown
+══════════════════════════════════════════ */
+
+/* ── Trigger pill ── */
 .main-header .user-menu > a.egs-trigger {
   display: flex !important;
   align-items: center !important;
   gap: 9px !important;
-  padding: 9px 12px !important;
-  margin: 8px 6px !important;
+  padding: 7px 12px !important;
+  margin: 7px 8px !important;
   border-radius: 8px !important;
   color: #e2e8f0 !important;
-  background: transparent !important;
+  background: rgba(255,255,255,.05) !important;
   border: 1px solid rgba(255,255,255,.10) !important;
   transition: background .15s, border-color .15s !important;
   text-decoration: none !important;
 }
 .main-header .user-menu > a.egs-trigger:hover {
-  background: rgba(255,255,255,.08) !important;
-  border-color: rgba(255,255,255,.18) !important;
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(255,255,255,.20) !important;
 }
 .egs-trigger .egs-av {
-  width: 28px !important;
-  height: 28px !important;
+  width: 30px !important;
+  height: 30px !important;
   border-radius: 50% !important;
   object-fit: cover;
-  border: 1.5px solid rgba(255,255,255,.25) !important;
+  border: 2px solid rgba(255,255,255,.20) !important;
   display: block;
   flex-shrink: 0;
 }
@@ -99,7 +173,7 @@ body.skin-blue .main-header .logo:hover { background: #080f1c !important; }
 }
 .user-menu.open > a.egs-trigger .egs-caret { transform: rotate(180deg); }
 
-/* ── Dropdown panel Tailwind ── */
+/* ── Dropdown panel ── */
 .egs-drop {
   width: 240px !important;
   padding: 0 !important;
@@ -112,7 +186,6 @@ body.skin-blue .main-header .logo:hover { background: #080f1c !important; }
   left: auto !important;
   background: #fff !important;
 }
-/* Sección de usuario */
 .egs-drop-user {
   padding: 16px !important;
   background: #f8fafc !important;
@@ -151,14 +224,12 @@ body.skin-blue .main-header .logo:hover { background: #080f1c !important; }
   border-radius: 9999px;
   text-transform: capitalize;
 }
-/* Status dot */
 .egs-drop-user .egs-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
   background: #22c55e;
   flex-shrink: 0;
 }
-/* Links del menú */
 .egs-drop-nav {
   list-style: none !important;
   margin: 0 !important;
@@ -191,12 +262,10 @@ body.skin-blue .main-header .logo:hover { background: #080f1c !important; }
   color: #0f172a !important;
 }
 .egs-drop-nav > li > a:hover i { color: #334155; }
-/* Divider */
 .egs-drop-divider {
   margin: 4px 0 !important;
   border-top: 1px solid #f1f5f9 !important;
 }
-/* Pie logout */
 .egs-drop-foot {
   padding: 8px 10px 10px !important;
   background: #fff !important;
@@ -225,31 +294,26 @@ body.skin-blue .main-header .logo:hover { background: #080f1c !important; }
   text-decoration: none !important;
 }
 
-/* ── Sidebar: estilos en lateral/menu.php (inline) ── */
+/* ── Sidebar: estilos en lateral/menu.php ── */
+
 </style>
 
 <!-- main-header -->
 <header class="main-header">
 
-  <!-- logo -->
+  <!-- logo: vacío pero necesario para layout AdminLTE -->
   <a href="inicio" class="logo">
-    <span class="logo-mini">
-      <img src="vistas/img/plantilla/icono.png" class="img-responsive"
-           style="padding:8px; filter:brightness(10);">
-    </span>
-    <span class="logo-lg">
-      <img src="vistas/img/plantilla/logo.png" class="img-responsive" id="logo"
-           style="padding:8px 28px; filter:brightness(10);">
-    </span>
+    <span class="logo-mini">&nbsp;</span>
+    <span class="logo-lg">&nbsp;</span>
   </a>
-  <!-- /logo -->
 
   <!-- navbar -->
   <nav class="navbar navbar-static-top" role="navigation">
 
-    <!-- Sidebar toggle -->
+    <!-- Sidebar toggle (ÚNICO hamburger) -->
     <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
       <i class="fa-solid fa-bars"></i>
+      <span class="sr-only">Toggle navigation</span>
     </a>
 
     <!-- Right side -->
@@ -264,15 +328,6 @@ body.skin-blue .main-header .logo:hover { background: #080f1c !important; }
     </div>
 
   </nav>
-  <!-- /navbar -->
 
 </header>
 <!-- /main-header -->
-
-<style>
-/* Fix logo visibility (se conserva del original) */
-#logo { visibility: hidden; }
-@media screen and (min-width: 700px) {
-  #logo { width:150px; height:75px; margin-top:-11px; visibility:visible; }
-}
-</style>

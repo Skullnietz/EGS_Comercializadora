@@ -51,7 +51,11 @@
       "Bash(find C:UsersblackDesktopEGS -maxdepth 1 -type f \\\\\\(-name package.json -o -name bower.json \\\\\\) -o -path */vistas/* -prune -o -type f \\\\\\(-name package.json -o -name bower.json \\\\\\) -print)",
       "Bash(find C:UsersblackDesktopEGSvistasdistcss -name *.css -type f)",
       "Bash(php -l vistas/modulos/lateral/menu.php)",
-      "Bash(php -r \"$c = file_get_contents\\(''vistas/modulos/lateral/menu.php''\\); preg_match_all\\(''/echo .\\(.+?\\).;/s'', $c, $m\\); $html = implode\\('''', $m[1]\\); $html = preg_replace\\(''/<!--.*?-->/s'', '''', $html\\); $openLi = preg_match_all\\(''/<li[^>]*>/'', $html\\); $closeLi = preg_match_all\\(''/<\\\\/li>/'', $html\\); $openUl = preg_match_all\\(''/<ul[^>]*>/'', $html\\); $closeUl = preg_match_all\\(''/<\\\\/ul>/'', $html\\); echo ''li: open=''.$openLi.'' close=''.$closeLi.PHP_EOL; echo ''ul: open=''.$openUl.'' close=''.$closeUl.PHP_EOL;\")"
+      "Bash(php -r \"$c = file_get_contents\\(''vistas/modulos/lateral/menu.php''\\); preg_match_all\\(''/echo .\\(.+?\\).;/s'', $c, $m\\); $html = implode\\('''', $m[1]\\); $html = preg_replace\\(''/<!--.*?-->/s'', '''', $html\\); $openLi = preg_match_all\\(''/<li[^>]*>/'', $html\\); $closeLi = preg_match_all\\(''/<\\\\/li>/'', $html\\); $openUl = preg_match_all\\(''/<ul[^>]*>/'', $html\\); $closeUl = preg_match_all\\(''/<\\\\/ul>/'', $html\\); echo ''li: open=''.$openLi.'' close=''.$closeLi.PHP_EOL; echo ''ul: open=''.$openUl.'' close=''.$closeUl.PHP_EOL;\")",
+      "Bash(php -l vistas/modulos/cabezote.php)",
+      "Bash(php -l vistas/modulos/cabezote/faq.php)",
+      "Bash(php -l vistas/modulos/cabezote/notificaciones.php)",
+      "Bash(php -l vistas/modulos/cabezote/usuario.php)"
     ]
   }
 }
