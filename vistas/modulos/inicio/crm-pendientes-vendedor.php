@@ -73,12 +73,28 @@ $_pend_numAUT = count($_pend_ordenes);
               else                 { $uc='#22c55e'; $ul='Nuevo'; }
 
               $cliNom = "—";
+              $cliTel1 = "";
+              $cliTel2 = "";
               if (!empty($ord["id_usuario"])) {
                   try {
                       $cd = ControladorClientes::ctrMostrarClientes("id", $ord["id_usuario"]);
-                      if (is_array($cd) && isset($cd["nombre"])) $cliNom = $cd["nombre"];
+                      if (is_array($cd)) {
+                          if (isset($cd["nombre"])) $cliNom = $cd["nombre"];
+                          if (isset($cd["telefono"])) $cliTel1 = trim($cd["telefono"]);
+                          if (isset($cd["telefonoDos"])) $cliTel2 = trim($cd["telefonoDos"]);
+                      }
                   } catch (Exception $e) {}
               }
+
+              // Validar 10 dígitos puros
+              $cliTel1Clean = preg_replace('/\D/', '', $cliTel1);
+              $cliTel2Clean = preg_replace('/\D/', '', $cliTel2);
+              $waTel1 = (strlen($cliTel1Clean) === 10) ? '52' . $cliTel1Clean : '';
+              $waTel2 = (strlen($cliTel2Clean) === 10) ? '52' . $cliTel2Clean : '';
+              // Evitar duplicados
+              if ($waTel2 === $waTel1) $waTel2 = '';
+
+              $waMsg = urlencode("Hola " . $cliNom . ", le contactamos de EGS respecto a su orden #" . $ord["id"] . ". ¿Podría indicarnos cómo desea proceder?");
 
               $link = 'index.php?ruta=infoOrden&idOrden='.$ord["id"]
                   .'&empresa='.(isset($ord["id_empresa"]) ? $ord["id_empresa"] : '')
@@ -109,12 +125,30 @@ $_pend_numAUT = count($_pend_ordenes);
                 </span>
               </td>
               <td style="text-align:center">
-                <a href="<?php echo $link; ?>" target="_blank"
-                   style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:8px;background:#6366f1;color:#fff;font-size:11px;font-weight:600;text-decoration:none;transition:background .15s,transform .15s"
-                   onmouseover="this.style.background='#4f46e5';this.style.transform='translateY(-1px)'"
-                   onmouseout="this.style.background='#6366f1';this.style.transform='none'">
-                  <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px"></i> Ver
-                </a>
+                <div style="display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap">
+                  <?php if (!empty($waTel1)): ?>
+                    <a href="https://wa.me/<?php echo $waTel1; ?>?text=<?php echo $waMsg; ?>" target="_blank" title="WhatsApp <?php echo $cliTel1; ?>"
+                       style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#25d366;color:#fff;font-size:13px;text-decoration:none;transition:background .15s,transform .15s"
+                       onmouseover="this.style.background='#1da851';this.style.transform='translateY(-1px)'"
+                       onmouseout="this.style.background='#25d366';this.style.transform='none'">
+                      <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+                  <?php endif; ?>
+                  <?php if (!empty($waTel2)): ?>
+                    <a href="https://wa.me/<?php echo $waTel2; ?>?text=<?php echo $waMsg; ?>" target="_blank" title="WhatsApp 2: <?php echo $cliTel2; ?>"
+                       style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#128c7e;color:#fff;font-size:13px;text-decoration:none;transition:background .15s,transform .15s"
+                       onmouseover="this.style.background='#0d7a6e';this.style.transform='translateY(-1px)'"
+                       onmouseout="this.style.background='#128c7e';this.style.transform='none'">
+                      <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+                  <?php endif; ?>
+                  <a href="<?php echo $link; ?>" target="_blank" title="Ver orden"
+                     style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#6366f1;color:#fff;font-size:12px;text-decoration:none;transition:background .15s,transform .15s"
+                     onmouseover="this.style.background='#4f46e5';this.style.transform='translateY(-1px)'"
+                     onmouseout="this.style.background='#6366f1';this.style.transform='none'">
+                    <i class="fa-solid fa-eye"></i>
+                  </a>
+                </div>
               </td>
             </tr>
             <?php endforeach; ?>
