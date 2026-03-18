@@ -29,7 +29,29 @@
       "Bash(grep -l \"require_once.*conexion\" /c/Users/black/Desktop/EGS/modelos/*.modelo.php)",
       "Bash(grep -l \"require.*conexion\\\\|Conexion::\\\\|ConexionWP::\" /c/Users/black/Desktop/EGS/modelos/*.ajax.php)",
       "Bash(ls /c/Users/black/Desktop/EGS/modelos/*.ajax.php)",
-      "Bash(ls /c/Users/black/Desktop/EGS/modelos/*.php)"
+      "Bash(ls /c/Users/black/Desktop/EGS/modelos/*.php)",
+      "Bash(grep -i '\\\\.php$')",
+      "Bash(grep -n \"url.*ajax\\\\|ajax.*url\\\\|$.get\\\\b\\\\|$.post\\\\b\" vistas/js/gestorOrdenes.js)",
+      "Bash(grep -rn \"url.*[''''\"\"]/\" vistas/js/*.js)",
+      "Bash(grep -rn \"ServerSide\\\\|serverSide\" vistas/js/*.js)",
+      "Bash(grep -rn \"ajax/tecnicos\\\\|ajax/asesores\\\\|ajax/peticion\\\\|ajax/corte\" vistas/js/*.js)",
+      "Bash(grep -rn \"ajax/Tecnicos\\\\|ajax/Asesores\\\\|ajax/PeticionMaterial\\\\|ajax/CorteTotal\" vistas/js/*.js)",
+      "Bash(grep -rohn \"ajax/[a-zA-Z][^''''\"\"?]*\\\\.php\" vistas/js/*.js)",
+      "Bash(grep -n \"^\\\\s*$\\\\.ajax\\\\|^[^/]*$\\\\.ajax\" vistas/js/gestor.pedidos.js)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/black/Desktop/EGS/**)",
+      "Bash(done)",
+      "Bash(grep -rn \"tablaVentasR\\\\.ajax\\\\.php\\\\.ajax\" vistas/js/*.js)",
+      "Bash(ls ajax/*.php)",
+      "Bash(sed -n '30,60p' modelos/ordenes.modelo.php)",
+      "Bash(sed -n '225,270p' modelos/ordenes.modelo.php)",
+      "Bash(findstr /i \"Font Awesome\")",
+      "Bash(findstr /i \"version\")",
+      "Bash(find C:UsersblackDesktopEGS -maxdepth 1 -type f \\\\\\(-name package.json -o -name bower.json \\\\\\) -o -path */vistas/* -prune -o -type f \\\\\\(-name package.json -o -name bower.json \\\\\\) -print)",
+      "Bash(find C:UsersblackDesktopEGSvistasdistcss -name *.css -type f)",
+      "Bash(php -l vistas/modulos/lateral/menu.php)",
+      "Bash(php -r \"$c = file_get_contents\\(''vistas/modulos/lateral/menu.php''\\); preg_match_all\\(''/echo .\\(.+?\\).;/s'', $c, $m\\); $html = implode\\('''', $m[1]\\); $html = preg_replace\\(''/<!--.*?-->/s'', '''', $html\\); $openLi = preg_match_all\\(''/<li[^>]*>/'', $html\\); $closeLi = preg_match_all\\(''/<\\\\/li>/'', $html\\); $openUl = preg_match_all\\(''/<ul[^>]*>/'', $html\\); $closeUl = preg_match_all\\(''/<\\\\/ul>/'', $html\\); echo ''li: open=''.$openLi.'' close=''.$closeLi.PHP_EOL; echo ''ul: open=''.$openUl.'' close=''.$closeUl.PHP_EOL;\")"
     ]
   }
 }

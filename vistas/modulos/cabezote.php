@@ -225,13 +225,7 @@ body.skin-blue .main-header .logo:hover { background: #080f1c !important; }
   text-decoration: none !important;
 }
 
-/* ── Sidebar: estilos movidos a lateral/menu.php (inline) ── */
-
-/* ── Fix: ocultar el segundo toggle que AdminLTE genera en sidebar-mini ── */
-.main-sidebar .sidebar-toggle,
-.sidebar-mini .sidebar > .sidebar-menu > li.header + li > a[data-toggle="push-menu"] {
-  display: none !important;
-}
+/* ── Sidebar: estilos en lateral/menu.php (inline) ── */
 </style>
 
 <!-- main-header -->
