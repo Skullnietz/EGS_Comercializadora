@@ -7,12 +7,19 @@ $_pipe_idAsesor = isset($_crm_idAsesor) ? $_crm_idAsesor : 0;
 $_pipe_todas = array();
 
 try {
-    $_pipe_todas = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
+    $_pipe_raw = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
         "id_empresa", $_SESSION["empresa"],
         "id_Asesor", $_pipe_idAsesor
     );
-    if (!is_array($_pipe_todas)) $_pipe_todas = array();
-} catch (Exception $e) { $_pipe_todas = array(); }
+    if (!is_array($_pipe_raw)) $_pipe_raw = array();
+} catch (Exception $e) { $_pipe_raw = array(); }
+
+// ── Filtrar: solo órdenes del mes actual ──
+$_pipe_mesActual = date("Y-m");
+$_pipe_todas = array_filter($_pipe_raw, function($ord) use ($_pipe_mesActual) {
+    $fi = isset($ord["fecha_ingreso"]) ? substr($ord["fecha_ingreso"], 0, 7) : "";
+    return $fi === $_pipe_mesActual;
+});
 
 $_pipe_grupos = array(
     'AUT'  => array('label'=>'Por Autorizar', 'icon'=>'fa-hourglass-half', 'color'=>'#f59e0b', 'items'=>array()),
