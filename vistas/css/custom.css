@@ -424,8 +424,9 @@ body {
 
 /* ╔══════════════════════════════════════════════════════╗
    ║  MODERNIZACIÓN UI — EGS 2025                        ║
-   ║  Header · Sidebar · User Menu · Footer              ║
-   ║  Bootstrap 3 + AdminLTE 2 compatible                ║
+   ║  Nota: Header · Sidebar · User Menu se gestionan   ║
+   ║  directamente en cabezote.php (style tag inline)   ║
+   ║  para garantizar prioridad sobre cualquier skin.   ║
    ╚══════════════════════════════════════════════════════╝ */
 
 /* ══════════════════════════════════════════════════

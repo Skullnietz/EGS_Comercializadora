@@ -1,69 +1,59 @@
-<!--=====================================
-USUARIOS — MENÚ MODERNO
-======================================-->
 <?php
-$_fotoUser = (!empty($_SESSION["foto"]))
-    ? htmlspecialchars($_SESSION["foto"])
-    : "vistas/img/perfiles/default/anonymous.png";
-$_nombreUser = htmlspecialchars($_SESSION["nombre"] ?? "Usuario");
-$_rolUser    = htmlspecialchars(ucfirst($_SESSION["perfil"] ?? ""));
+/* ── datos del usuario ── */
+$_av   = !empty($_SESSION["foto"]) ? htmlspecialchars($_SESSION["foto"])
+                                   : "vistas/img/perfiles/default/anonymous.png";
+$_nom  = htmlspecialchars($_SESSION["nombre"]     ?? "Usuario");
+$_rol  = htmlspecialchars(ucfirst($_SESSION["perfil"] ?? ""));
 ?>
-
 <!-- user-menu -->
 <li class="dropdown user user-menu">
 
-  <!-- ── Trigger ── -->
-  <a href="#" class="dropdown-toggle egs-user-trigger" data-toggle="dropdown">
-    <span class="egs-avatar-wrap">
-      <img src="<?= $_fotoUser ?>" class="user-image egs-avatar-sm" alt="<?= $_nombreUser ?>">
-      <span class="egs-online-pulse"></span>
-    </span>
-    <span class="hidden-xs egs-trigger-name"><?= $_nombreUser ?></span>
-    <i class="fa-solid fa-chevron-down hidden-xs egs-chevron"></i>
+  <!-- Trigger: pill style Tailwind -->
+  <a href="#" class="dropdown-toggle egs-trigger" data-toggle="dropdown">
+    <img src="<?= $_av ?>" class="egs-av" alt="<?= $_nom ?>">
+    <span class="egs-name hidden-xs"><?= $_nom ?></span>
+    <i class="fa-solid fa-chevron-down egs-caret hidden-xs"></i>
   </a>
 
-  <!-- ── Dropdown ── -->
-  <ul class="dropdown-menu egs-user-dropdown">
+  <!-- Panel Tailwind -->
+  <ul class="dropdown-menu egs-drop">
 
-    <!-- Cabecera con gradiente -->
-    <li class="egs-udrop-header">
-      <div class="egs-udrop-avatar-wrap">
-        <img src="<?= $_fotoUser ?>" class="egs-udrop-avatar" alt="<?= $_nombreUser ?>">
-        <span class="egs-udrop-dot"></span>
+    <!-- Sección usuario -->
+    <li class="egs-drop-user">
+      <img src="<?= $_av ?>" class="egs-av-lg" alt="<?= $_nom ?>">
+      <div class="egs-user-info">
+        <strong><?= $_nom ?></strong>
+        <span><?= $_rol ?></span>
       </div>
-      <div class="egs-udrop-info">
-        <span class="egs-udrop-name"><?= $_nombreUser ?></span>
-        <span class="egs-udrop-role"><?= $_rolUser ?></span>
-      </div>
+      <span class="egs-dot" title="En línea"></span>
     </li>
 
-    <!-- Links rápidos -->
+    <!-- Links -->
     <li style="padding:0">
-      <ul class="egs-udrop-nav">
+      <ul class="egs-drop-nav">
         <li>
           <a href="index.php?ruta=perfiles">
-            <span class="egs-udrop-icon"><i class="fa-solid fa-circle-user"></i></span>
-            Mi Cuenta
+            <i class="fa-solid fa-circle-user"></i> Mi Cuenta
           </a>
         </li>
         <li>
           <a href="index.php?ruta=preguntas">
-            <span class="egs-udrop-icon"><i class="fa-solid fa-circle-question"></i></span>
-            Ayuda
+            <i class="fa-regular fa-circle-question"></i> Ayuda
           </a>
         </li>
       </ul>
     </li>
 
-    <!-- Pie — Cerrar sesión -->
-    <li class="egs-udrop-footer">
-      <a href="index.php?ruta=salir" class="egs-btn-logout">
-        <i class="fa-solid fa-right-from-bracket"></i>
+    <li class="egs-drop-divider"></li>
+
+    <!-- Logout -->
+    <li class="egs-drop-foot">
+      <a href="index.php?ruta=salir" class="egs-drop-logout">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
         Cerrar sesión
       </a>
     </li>
 
   </ul>
-
 </li>
 <!-- /user-menu -->
