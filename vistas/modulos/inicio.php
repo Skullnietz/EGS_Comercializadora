@@ -489,17 +489,28 @@ PÁGINA DE INICIO
 
     <?php elseif ($_SESSION["perfil"] == "tecnico"): ?>
 
-      <div class="row">
-        <?php include_once "inicio/superiorTecnicos.php"; ?>
-      </div>
-      <div class="row">
-        <div class="col-lg-6">
-          <?php include "inicio/ordenes-caja.php"; ?>
+      <!-- ══ WELCOME BANNER TÉCNICO ══ -->
+      <div style="background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 50%,#8b5cf6 100%);border-radius:var(--crm-radius,14px);padding:28px 30px;margin-bottom:24px;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-20px;top:-20px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
+        <div style="position:absolute;right:60px;bottom:-40px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
+        <div style="position:relative;z-index:1">
+          <h2 style="margin:0 0 4px;color:#fff;font-size:22px;font-weight:800;letter-spacing:-.02em">
+            <i class="fa-solid fa-wrench" style="margin-right:8px;opacity:.7"></i>
+            Hola, <?php echo htmlspecialchars($_SESSION["nombre"]); ?>
+          </h2>
+          <?php
+            $diasEs  = array('Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado');
+            $mesesEs = array('','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre');
+            $_fechaTec = $diasEs[date('w')].' '.date('j').' de '.$mesesEs[intval(date('n'))].', '.date('Y');
+          ?>
+          <p style="margin:0;color:rgba(255,255,255,.7);font-size:13px;font-weight:400">
+            <?php echo $_fechaTec; ?> &mdash; Tu panel de trabajo del día
+          </p>
         </div>
-        <div class="col-lg-6">
-          <?php include "inicio/ordenesEnRev.php"; ?>
-        </div>
       </div>
+
+      <!-- ══ KPIs + Pipeline + Órdenes ══ -->
+      <?php include "inicio/tec-dashboard.php"; ?>
 
     <?php endif; ?>
 

@@ -70,7 +70,14 @@
       "Bash(php -r \"echo crypt\\(''C3S4r2026@'', chr\\(36\\).''2a''.chr\\(36\\).''07''.chr\\(36\\).''asxx54ahjppf45sd87a5a4dDDGsystemdev''.chr\\(36\\)\\) . PHP_EOL;\")",
       "Bash(grep -r Push.create C:UsersblackDesktopEGS --include=*.js)",
       "Bash(grep -r \"notificaciones.php\\\\|cabezote/notificaciones\" C:UsersblackDesktopEGSvistas --include=*.php)",
-      "Bash(php -l vistas/modulos/Historialdecliente.php)"
+      "Bash(php -l vistas/modulos/Historialdecliente.php)",
+      "Bash(grep -r estado.*=.* C:UsersblackDesktopEGScontroladoresordenes.controlador.php)",
+      "Bash(php -l vistas/modulos/inicio/tec-dashboard.php)",
+      "Bash(php -r \"echo crypt\\(''3R1K2026'', ''$2a$07$asxx54ahjppf45sd87a5a4dDDGsystemdev''\\);\")",
+      "Bash(php -r 'echo crypt\\(\"\"3R1K2026\"\", \"\"$2a$07$asxx54ahjppf45sd87a5a4dDDGsystemdev\"\"\\);')",
+      "Bash(php -r 'echo crypt\\(\"\"3R1K2026\"\", \"\"\\\\$2a\\\\$07\\\\$asxx54ahjppf45sd87a5a4dDDGsystemdev\"\"\\);')",
+      "Bash(php C:UsersblackDesktopEGStemp_hash.php)",
+      "Bash(php \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\temp_hash.php\")"
     ]
   }
 }
