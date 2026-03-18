@@ -296,25 +296,188 @@ html body.skin-blue .main-header .logo {
 
 /* ── Sidebar: estilos en lateral/menu.php ── */
 
+/* ══════════════════════════════════════════
+   LOGO TEXTO
+══════════════════════════════════════════ */
+.main-header .logo .egs-logo-text {
+  color: #e2e8f0 !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1px !important;
+  text-decoration: none !important;
+}
+.main-header .logo .egs-logo-text .egs-logo-dot {
+  color: #6366f1;
+}
+
+/* ══════════════════════════════════════════
+   BARRA DE BÚSQUEDA GLOBAL
+══════════════════════════════════════════ */
+.egs-navbar-search {
+  float: left;
+  display: flex;
+  align-items: center;
+  padding: 10px 0 10px 8px;
+  max-width: 380px;
+  flex: 1;
+}
+.egs-navbar-search .egs-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 8px;
+  padding: 6px 12px;
+  transition: background .15s, border-color .2s, box-shadow .2s;
+  cursor: text;
+}
+.egs-navbar-search .egs-search-box:hover {
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.15);
+}
+.egs-navbar-search .egs-search-box:focus-within {
+  background: rgba(255,255,255,.12);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+}
+.egs-navbar-search .egs-search-icon {
+  color: #64748b;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: color .15s;
+}
+.egs-navbar-search .egs-search-box:focus-within .egs-search-icon {
+  color: #6366f1;
+}
+.egs-navbar-search .egs-search-input {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: #e2e8f0 !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  line-height: 1.5 !important;
+}
+.egs-navbar-search .egs-search-input::placeholder {
+  color: #64748b;
+  font-weight: 400;
+}
+.egs-navbar-search .egs-search-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  color: #475569;
+  font-size: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+
+/* ── Search Results Dropdown ── */
+.egs-search-results {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 6px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(15,23,42,.16);
+  z-index: 9999;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+.egs-search-results.active {
+  display: block;
+}
+.egs-search-results .egs-sr-group {
+  padding: 6px 12px 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.egs-search-results .egs-sr-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  color: #334155;
+  text-decoration: none;
+  font-size: 13px;
+  transition: background .1s;
+  cursor: pointer;
+}
+.egs-search-results .egs-sr-item:hover {
+  background: #f1f5f9;
+}
+.egs-search-results .egs-sr-item i {
+  color: #94a3b8;
+  width: 16px;
+  text-align: center;
+  font-size: 13px;
+}
+.egs-search-results .egs-sr-empty {
+  padding: 16px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* Responsive: ocultar search en mobile */
+@media (max-width: 767px) {
+  .egs-navbar-search { display: none; }
+}
+
 </style>
 
 <!-- main-header -->
 <header class="main-header">
 
-  <!-- logo: vacío pero necesario para layout AdminLTE -->
+  <!-- Logo texto -->
   <a href="inicio" class="logo">
-    <span class="logo-mini">&nbsp;</span>
-    <span class="logo-lg">&nbsp;</span>
+    <span class="logo-mini"><span class="egs-logo-text">E<span class="egs-logo-dot">.</span></span></span>
+    <span class="logo-lg"><span class="egs-logo-text">EGS<span class="egs-logo-dot">.</span></span></span>
   </a>
 
   <!-- navbar -->
   <nav class="navbar navbar-static-top" role="navigation">
 
-    <!-- Sidebar toggle (ÚNICO hamburger) -->
+    <!-- Sidebar toggle -->
     <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
       <i class="fa-solid fa-bars"></i>
       <span class="sr-only">Toggle navigation</span>
     </a>
+
+    <!-- Search bar global -->
+    <div class="egs-navbar-search" style="position:relative">
+      <div class="egs-search-box" id="egsSearchBox">
+        <i class="fa-solid fa-magnifying-glass egs-search-icon"></i>
+        <input type="text"
+               class="egs-search-input"
+               id="egsSearchInput"
+               placeholder="Buscar órdenes, clientes, productos..."
+               autocomplete="off">
+        <kbd class="egs-search-kbd hidden-xs">Ctrl K</kbd>
+      </div>
+      <!-- Resultados -->
+      <div class="egs-search-results" id="egsSearchResults"></div>
+    </div>
 
     <!-- Right side -->
     <div class="navbar-custom-menu">
@@ -331,3 +494,91 @@ html body.skin-blue .main-header .logo {
 
 </header>
 <!-- /main-header -->
+
+<!-- ═══ JS: Búsqueda global del navbar ═══ -->
+<script>
+(function(){
+  var $input   = $('#egsSearchInput');
+  var $results = $('#egsSearchResults');
+  var timer    = null;
+
+  // Atajos rápidos (navegación directa) — no requiere backend
+  var quickLinks = [
+    { label: 'Tablero',              icon: 'fa-solid fa-home',               url: 'index.php?ruta=inicio',      tags: 'inicio dashboard home tablero' },
+    { label: 'Gestor Productos',     icon: 'fab fa-product-hunt',            url: 'index.php?ruta=productos',   tags: 'productos inventario stock' },
+    { label: 'Gestor Almacenes',     icon: 'fa-solid fa-warehouse',          url: 'index.php?ruta=almacenes',   tags: 'almacenes bodega almacen' },
+    { label: 'Gestor Ventas',        icon: 'fa-solid fa-shopping-cart',      url: 'index.php?ruta=creararventa',tags: 'ventas vender factura' },
+    { label: 'Gestor Ventas R',      icon: 'fa-solid fa-cart-arrow-down',    url: 'index.php?ruta=ventasR',     tags: 'ventas reporte' },
+    { label: 'Gestor Pedidos',       icon: 'fa-solid fa-box-open',           url: 'index.php?ruta=pedidos',     tags: 'pedidos envios paquetes' },
+    { label: 'Órdenes de Servicio',  icon: 'fa-solid fa-clipboard-list',     url: 'index.php?ruta=ordenes',     tags: 'ordenes servicio reparacion' },
+    { label: 'Todas las Órdenes',    icon: 'fa-solid fa-file-alt',           url: 'index.php?ruta=ordenesnew',  tags: 'ordenes todas lista' },
+    { label: 'Comisiones',           icon: 'fa-solid fa-coins',              url: 'index.php?ruta=comisiones',  tags: 'comisiones pago tecnicos' },
+    { label: 'Clientes',             icon: 'fa-solid fa-users',              url: 'index.php?ruta=clientes',    tags: 'clientes contactos personas' },
+    { label: 'Corte de Caja',        icon: 'fa-solid fa-cash-register',      url: 'index.php?ruta=CorteTotal',  tags: 'corte caja efectivo dinero cierre' },
+    { label: 'Cotización',           icon: 'fa-solid fa-file-invoice-dollar', url: 'index.php?ruta=cotizacion', tags: 'cotizacion presupuesto precio' },
+    { label: 'Citas',                icon: 'fa-regular fa-calendar-alt',     url: 'index.php?ruta=listacitas',  tags: 'citas agenda calendario' },
+    { label: 'Técnicos',             icon: 'fa-solid fa-user-cog',           url: 'index.php?ruta=tecnicos',    tags: 'tecnicos personal equipo' },
+    { label: 'Asesores de Ventas',   icon: 'fa-solid fa-user-tie',           url: 'index.php?ruta=asesores',    tags: 'asesores vendedores personal' },
+    { label: 'Perfiles',             icon: 'fa-solid fa-key',                url: 'index.php?ruta=perfiles',    tags: 'perfiles cuenta usuario configuracion' },
+    { label: 'Empresas',             icon: 'fa-solid fa-building',           url: 'index.php?ruta=empresas',    tags: 'empresas compañia' },
+    { label: 'Metas / CRM',          icon: 'fa-solid fa-handshake',          url: 'index.php?ruta=metas',       tags: 'metas crm objetivos' },
+    { label: 'Ayuda',                icon: 'fa-regular fa-circle-question',  url: 'index.php?ruta=preguntas',   tags: 'ayuda faq preguntas soporte' }
+  ];
+
+  function search(query) {
+    if (!query || query.length < 2) {
+      $results.removeClass('active').empty();
+      return;
+    }
+    var q = query.toLowerCase();
+    var matches = quickLinks.filter(function(item) {
+      return item.label.toLowerCase().indexOf(q) > -1 ||
+             item.tags.indexOf(q) > -1;
+    });
+
+    var html = '';
+    if (matches.length) {
+      html += '<div class="egs-sr-group">Ir a</div>';
+      for (var i = 0; i < Math.min(matches.length, 8); i++) {
+        html += '<a class="egs-sr-item" href="' + matches[i].url + '">' +
+                '<i class="' + matches[i].icon + '"></i>' +
+                matches[i].label + '</a>';
+      }
+    } else {
+      html = '<div class="egs-sr-empty"><i class="fa-solid fa-magnifying-glass" style="margin-right:6px;opacity:.5"></i>Sin resultados para "' + query + '"</div>';
+    }
+    $results.html(html).addClass('active');
+  }
+
+  // Eventos
+  $input.on('input', function() {
+    clearTimeout(timer);
+    var val = $(this).val().trim();
+    timer = setTimeout(function() { search(val); }, 150);
+  });
+
+  $input.on('focus', function() {
+    if ($(this).val().trim().length >= 2) search($(this).val().trim());
+  });
+
+  // Cerrar al click fuera
+  $(document).on('click', function(e) {
+    if (!$(e.target).closest('.egs-navbar-search').length) {
+      $results.removeClass('active');
+    }
+  });
+
+  // Atajo Ctrl+K
+  $(document).on('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      $input.focus();
+    }
+    if (e.key === 'Escape') {
+      $results.removeClass('active');
+      $input.blur();
+    }
+  });
+
+})();
+</script>
