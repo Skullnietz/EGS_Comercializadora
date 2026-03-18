@@ -48,9 +48,26 @@ $_cli_grads = array(
       <?php foreach ($_cli_mostrar as $idx => $cli):
         $nombre = isset($cli["nombre"]) ? $cli["nombre"] : "Sin nombre";
         $email = isset($cli["correo"]) ? $cli["correo"] : (isset($cli["email"]) ? $cli["email"] : "");
-        $tel = isset($cli["telefono"]) ? $cli["telefono"] : "";
+        $tel1raw = isset($cli["telefono"]) ? trim($cli["telefono"]) : "";
+        $tel2raw = isset($cli["telefonoDos"]) ? trim($cli["telefonoDos"]) : "";
         $iniciales = mb_strtoupper(mb_substr($nombre, 0, 2));
         $grad = $_cli_grads[$idx % count($_cli_grads)];
+
+        // Validar 10 dígitos
+        $t1clean = preg_replace('/\D/', '', $tel1raw);
+        $t2clean = preg_replace('/\D/', '', $tel2raw);
+        $t1valid = (strlen($t1clean) === 10);
+        $t2valid = (strlen($t2clean) === 10) && ($t2clean !== $t1clean);
+
+        // Texto a mostrar
+        $telDisplay = '';
+        if ($t1valid) $telDisplay = $tel1raw;
+        elseif ($t2valid) $telDisplay = $tel2raw;
+
+        // WhatsApp links
+        $wa1 = $t1valid ? '52' . $t1clean : '';
+        $wa2 = $t2valid ? '52' . $t2clean : '';
+        $waCliMsg = urlencode("Hola " . $nombre . ", le contactamos de EGS. ¿En qué podemos ayudarle?");
       ?>
         <div class="crm-client">
           <div class="crm-client-av" style="background:<?php echo $grad; ?>">
@@ -59,14 +76,35 @@ $_cli_grads = array(
           <div style="flex:1;min-width:0">
             <div class="crm-client-name"><?php echo htmlspecialchars($nombre); ?></div>
             <div class="crm-client-info">
-              <?php if (!empty($tel)): ?>
-                <i class="fa-solid fa-phone" style="font-size:9px;margin-right:2px"></i> <?php echo htmlspecialchars($tel); ?>
+              <?php if (!empty($telDisplay)): ?>
+                <i class="fa-solid fa-phone" style="font-size:9px;margin-right:2px"></i> <?php echo htmlspecialchars($telDisplay); ?>
+                <?php if ($t1valid && $t2valid): ?>
+                  &middot; <?php echo htmlspecialchars($tel2raw); ?>
+                <?php endif; ?>
               <?php elseif (!empty($email)): ?>
                 <i class="fa-solid fa-envelope" style="font-size:9px;margin-right:2px"></i> <?php echo htmlspecialchars($email); ?>
               <?php else: ?>
                 Sin datos de contacto
               <?php endif; ?>
             </div>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <?php if (!empty($wa1)): ?>
+              <a href="https://wa.me/<?php echo $wa1; ?>?text=<?php echo $waCliMsg; ?>" target="_blank" title="WhatsApp <?php echo $tel1raw; ?>"
+                 style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#25d366;color:#fff;font-size:12px;text-decoration:none;transition:background .15s,transform .15s"
+                 onmouseover="this.style.background='#1da851';this.style.transform='translateY(-1px)'"
+                 onmouseout="this.style.background='#25d366';this.style.transform='none'">
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
+            <?php endif; ?>
+            <?php if (!empty($wa2)): ?>
+              <a href="https://wa.me/<?php echo $wa2; ?>?text=<?php echo $waCliMsg; ?>" target="_blank" title="WhatsApp 2: <?php echo $tel2raw; ?>"
+                 style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#128c7e;color:#fff;font-size:12px;text-decoration:none;transition:background .15s,transform .15s"
+                 onmouseover="this.style.background='#0d7a6e';this.style.transform='translateY(-1px)'"
+                 onmouseout="this.style.background='#128c7e';this.style.transform='none'">
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
+            <?php endif; ?>
           </div>
         </div>
       <?php endforeach; ?>
