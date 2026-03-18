@@ -59,104 +59,9 @@ PÁGINA DE INICIO
   <!-- content -->
   <section class="content">
 
-    <?php if ($_SESSION["perfil"] == "administrador"): ?>
-
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 1 — Resumen General del Mes
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#3c8dbc;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-chart-pie"></i> &nbsp;Resumen General del Mes</h4>
-          <small>Totales acumulados del periodo actual</small>
-        </div>
-      </div>
-      <div class="row">
-        <?php include "inicio/superioresAdmin.php"; ?>
-      </div>
-
-      <hr class="dash-divider">
-
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 2 — Estado del Día
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#f39c12;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-bolt"></i> &nbsp;Estado del Día</h4>
-          <small>Órdenes pendientes, ingresos y eficiencia del mes en curso</small>
-        </div>
-      </div>
-
-      <?php include "inicio/alertas-criticas.php"; ?>
-
-      <hr class="dash-divider">
-
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 3 — Análisis y Rendimiento
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#00a65a;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-chart-line"></i> &nbsp;Análisis y Rendimiento</h4>
-          <small>Histórico de ventas y ranking de técnicos del mes</small>
-        </div>
-      </div>
-      <div class="row dash-row-equal">
-        <div class="col-lg-8 col-md-8 col-xs-12">
-          <?php include "inicio/grafico-ventas.php"; ?>
-        </div>
-        <div class="col-lg-4 col-md-4 col-xs-12">
-          <?php include "inicio/top-tecnicos.php"; ?>
-        </div>
-      </div>
-
-      <hr class="dash-divider">
-
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 4 — Actividad Reciente
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#605ca8;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-list-check"></i> &nbsp;Actividad Reciente</h4>
-          <small>Últimas órdenes registradas y productos con mayor demanda</small>
-        </div>
-      </div>
-      <div class="row dash-row-equal">
-        <div class="col-lg-7 col-md-7 col-xs-12">
-          <?php include "inicio/ultimas-ordenes.php"; ?>
-        </div>
-        <div class="col-lg-5 col-md-5 col-xs-12">
-          <?php include "inicio/productos-mas-vendidos.php"; ?>
-        </div>
-      </div>
-
-      <hr class="dash-divider">
-
-      <!-- ══════════════════════════════════════════
-           SECCIÓN 5 — Equipo
-      ══════════════════════════════════════════ -->
-      <div class="dash-section">
-        <div class="dash-section-bar" style="background:#dd4b39;"></div>
-        <div class="dash-section-text">
-          <h4><i class="fa-solid fa-users"></i> &nbsp;Equipo</h4>
-          <small>Asesores y técnicos registrados en la empresa</small>
-        </div>
-      </div>
-      <div class="row dash-row-equal">
-        <div class="col-lg-6 col-md-6 col-xs-12">
-          <?php include "inicio/asesores-caja.php"; ?>
-        </div>
-        <div class="col-lg-6 col-md-6 col-xs-12">
-          <?php include "inicio/tecnicos-caja.php"; ?>
-        </div>
-      </div>
-
-    <?php elseif ($_SESSION["perfil"] == "vendedor"): ?>
-
+    <?php if ($_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "tecnico"): ?>
       <!-- ══════════════════════════════════════════════════════
-           CRM VENDEDOR — Design System
+           CRM DESIGN SYSTEM — Compartido entre Vendedor y Técnico
       ══════════════════════════════════════════════════════ -->
       <style>
       /* ─── Tokens ─── */
@@ -414,6 +319,103 @@ PÁGINA DE INICIO
         .crm-kpi-value { font-size: 22px; }
       }
       </style>
+    <?php endif; ?>
+
+    <?php if ($_SESSION["perfil"] == "administrador"): ?>
+
+      <!-- ══════════════════════════════════════════
+           SECCIÓN 1 — Resumen General del Mes
+      ══════════════════════════════════════════ -->
+      <div class="dash-section">
+        <div class="dash-section-bar" style="background:#3c8dbc;"></div>
+        <div class="dash-section-text">
+          <h4><i class="fa-solid fa-chart-pie"></i> &nbsp;Resumen General del Mes</h4>
+          <small>Totales acumulados del periodo actual</small>
+        </div>
+      </div>
+      <div class="row">
+        <?php include "inicio/superioresAdmin.php"; ?>
+      </div>
+
+      <hr class="dash-divider">
+
+      <!-- ══════════════════════════════════════════
+           SECCIÓN 2 — Estado del Día
+      ══════════════════════════════════════════ -->
+      <div class="dash-section">
+        <div class="dash-section-bar" style="background:#f39c12;"></div>
+        <div class="dash-section-text">
+          <h4><i class="fa-solid fa-bolt"></i> &nbsp;Estado del Día</h4>
+          <small>Órdenes pendientes, ingresos y eficiencia del mes en curso</small>
+        </div>
+      </div>
+
+      <?php include "inicio/alertas-criticas.php"; ?>
+
+      <hr class="dash-divider">
+
+      <!-- ══════════════════════════════════════════
+           SECCIÓN 3 — Análisis y Rendimiento
+      ══════════════════════════════════════════ -->
+      <div class="dash-section">
+        <div class="dash-section-bar" style="background:#00a65a;"></div>
+        <div class="dash-section-text">
+          <h4><i class="fa-solid fa-chart-line"></i> &nbsp;Análisis y Rendimiento</h4>
+          <small>Histórico de ventas y ranking de técnicos del mes</small>
+        </div>
+      </div>
+      <div class="row dash-row-equal">
+        <div class="col-lg-8 col-md-8 col-xs-12">
+          <?php include "inicio/grafico-ventas.php"; ?>
+        </div>
+        <div class="col-lg-4 col-md-4 col-xs-12">
+          <?php include "inicio/top-tecnicos.php"; ?>
+        </div>
+      </div>
+
+      <hr class="dash-divider">
+
+      <!-- ══════════════════════════════════════════
+           SECCIÓN 4 — Actividad Reciente
+      ══════════════════════════════════════════ -->
+      <div class="dash-section">
+        <div class="dash-section-bar" style="background:#605ca8;"></div>
+        <div class="dash-section-text">
+          <h4><i class="fa-solid fa-list-check"></i> &nbsp;Actividad Reciente</h4>
+          <small>Últimas órdenes registradas y productos con mayor demanda</small>
+        </div>
+      </div>
+      <div class="row dash-row-equal">
+        <div class="col-lg-7 col-md-7 col-xs-12">
+          <?php include "inicio/ultimas-ordenes.php"; ?>
+        </div>
+        <div class="col-lg-5 col-md-5 col-xs-12">
+          <?php include "inicio/productos-mas-vendidos.php"; ?>
+        </div>
+      </div>
+
+      <hr class="dash-divider">
+
+      <!-- ══════════════════════════════════════════
+           SECCIÓN 5 — Equipo
+      ══════════════════════════════════════════ -->
+      <div class="dash-section">
+        <div class="dash-section-bar" style="background:#dd4b39;"></div>
+        <div class="dash-section-text">
+          <h4><i class="fa-solid fa-users"></i> &nbsp;Equipo</h4>
+          <small>Asesores y técnicos registrados en la empresa</small>
+        </div>
+      </div>
+      <div class="row dash-row-equal">
+        <div class="col-lg-6 col-md-6 col-xs-12">
+          <?php include "inicio/asesores-caja.php"; ?>
+        </div>
+        <div class="col-lg-6 col-md-6 col-xs-12">
+          <?php include "inicio/tecnicos-caja.php"; ?>
+        </div>
+      </div>
+
+    <?php elseif ($_SESSION["perfil"] == "vendedor"): ?>
 
       <!-- ══ WELCOME BANNER ══ -->
       <div style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a78bfa 100%);border-radius:var(--crm-radius);padding:28px 30px;margin-bottom:24px;position:relative;overflow:hidden">
