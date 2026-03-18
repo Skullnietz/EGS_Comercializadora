@@ -3,7 +3,7 @@
     CRM — Pendientes de Autorización (seguimiento)
     ═══════════════════════════════════════════════════ */
 
-$_pend_ordenes = isset($_crm_ordAUT) && is_array($_crm_ordAUT) ? $_crm_ordAUT : array();
+$_pend_raw = isset($_crm_ordAUT) && is_array($_crm_ordAUT) ? $_crm_ordAUT : array();
 
 function _crmDiasDesde($fecha) {
     if (empty($fecha)) return 0;
@@ -14,13 +14,20 @@ function _crmDiasDesde($fecha) {
     } catch (Exception $e) { return 0; }
 }
 
-// Ordenar por antigüedad
-usort($_pend_ordenes, function($a, $b) {
-    return strtotime(isset($a["fecha_ingreso"]) ? $a["fecha_ingreso"] : "now")
-         - strtotime(isset($b["fecha_ingreso"]) ? $b["fecha_ingreso"] : "now");
+// ── Filtrar: solo órdenes de los últimos 6 meses ──
+$_pend_limite = strtotime("-6 months");
+$_pend_ordenes = array_filter($_pend_raw, function($ord) use ($_pend_limite) {
+    $fi = isset($ord["fecha_ingreso"]) ? strtotime($ord["fecha_ingreso"]) : 0;
+    return $fi >= $_pend_limite;
 });
 
-$_pend_numAUT = isset($_crm_numAUT) ? $_crm_numAUT : count($_pend_ordenes);
+// ── Ordenar: más recientes primero ──
+usort($_pend_ordenes, function($a, $b) {
+    return strtotime(isset($b["fecha_ingreso"]) ? $b["fecha_ingreso"] : "now")
+         - strtotime(isset($a["fecha_ingreso"]) ? $a["fecha_ingreso"] : "now");
+});
+
+$_pend_numAUT = count($_pend_ordenes);
 ?>
 
 <div class="crm-card" style="margin-bottom:20px">

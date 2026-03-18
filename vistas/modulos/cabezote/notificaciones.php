@@ -1,327 +1,207 @@
 <?php
+/*  ═══════════════════════════════════════════════════
+    NOTIFICACIONES — Bell dropdown + Push controlado
+    ═══════════════════════════════════════════════════
+    FIX: Push.create() solo se dispara 1 vez por sesión
+    del navegador, máximo 3 órdenes, solo del último mes.
+    ═══════════════════════════════════════════════════ */
 
-//if($_SESSION["perfil"] != "administrador"){
+date_default_timezone_set("America/Mexico_City");
 
-	//return;	
-//}
+$_noti_ordenes = array();
+$_noti_perfil  = $_SESSION["perfil"];
+$_noti_limite6m = date("Y-m-d", strtotime("-6 months"));
+$_noti_limite1m = date("Y-m-d", strtotime("-1 month"));
 
-$notificaciones = ControladorNotificaciones::ctrMostrarNotificaciones();
+// ── Admin: todas las órdenes de la empresa ──
+if ($_noti_perfil == "administrador") {
 
-$totalNotificaciones = $notificaciones["nuevosUsuarios"] + $notificaciones["nuevasVentas"] + $notificaciones["nuevasVisitas"];
+    $_noti_raw = controladorOrdenes::ctrMostrarOrdenes("id_empresa", $_SESSION["empresa"]);
+    if (is_array($_noti_raw)) {
+        foreach ($_noti_raw as $o) {
+            $est = isset($o["estado"]) ? $o["estado"] : "";
+            $fi  = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
+            // Solo órdenes no entregadas/canceladas y de los últimos 6 meses
+            if (strpos($est, "Ent") === false && strpos($est, "can") === false && $fi >= $_noti_limite6m) {
+                // Verificar si tiene +5 días (atraso)
+                if (strtotime($fi . "+ 5 days") <= time()) {
+                    $_noti_ordenes[] = $o;
+                }
+            }
+        }
+    }
 
-?>
-<!--=====================================
-NOTIFICACIONES PARA SUPER USUARIOS ADMINISTRADORES
-======================================-->
-<?php
+// ── Vendedor: órdenes del asesor ──
+} elseif ($_noti_perfil == "vendedor") {
 
-if($_SESSION["perfil"] == "administrador"){
+    try {
+        $Asesores = Controladorasesores::ctrMostrarAsesoresEleg("correo", $_SESSION["email"]);
+        if (is_array($Asesores) && isset($Asesores["id"])) {
+            $_noti_raw = controladorOrdenes::ctrMostrarOrdenesDelAsesor($Asesores["id"]);
+            if (is_array($_noti_raw)) {
+                foreach ($_noti_raw as $o) {
+                    $est = isset($o["estado"]) ? $o["estado"] : "";
+                    $fi  = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
+                    if (strpos($est, "Ent") === false && strpos($est, "can") === false && $fi >= $_noti_limite6m) {
+                        if (strtotime($fi . "+ 5 days") <= time()) {
+                            $_noti_ordenes[] = $o;
+                        }
+                    }
+                }
+            }
+        }
+    } catch (Exception $e) {}
 
-	$campo = "id_empresa";
+// ── Técnico: órdenes del técnico ──
+} elseif ($_noti_perfil == "tecnico") {
 
-	$empresa = $_SESSION["empresa"];
-
-	$ordenes = controladorOrdenes::ctrMostrarOrdenes($campo,$empresa);
-
-	foreach ($ordenes as $key => $valueordenes) {
-
-	}
-
-	$numero = count($valueordenes);
-
-	echo'<!-- notifications-menu -->
-	<li class="dropdown notifications-menu">
-		
-		<!-- dropdown-toggle -->
-		<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-			
-			<i class="fas fa-bell"></i>
-			
-			<span class="label label-warning">'.$numero.'</span>
-		
-		</a>
-		<!-- dropdown-toggle -->
-
-		<!--dropdown-menu -->
-		<ul class="dropdown-menu">
-
-			<li class="header">Tienes '.$numero.' notificaciones</li>
-
-			<li>
-
-				<!-- menu -->
-				<ul class="menu">';
-
-					foreach ($ordenes as $key => $valueOrdesImpresas){
-						
-						echo'<!-- ORDENES -->
-									
-									<li>
-				
-										<a class="btnVerInfoOrden" idOrden="'.$valueOrdesImpresas["id"].'" cliente="'.$valueOrdesImpresas["id_usuario"].'" tecnico="'.$valueOrdesImpresas["id_tecnico"].'" asesor="'.$valueOrdesImpresas["id_Asesor"].'" empresa="'.$valueOrdesImpresas["id_empresa"].'" pedido="'.$valueOrdesImpresas["id_pedido"].'" item="nuevasVisitas"><i class="fas fa-tv"></i> '.$valueOrdesImpresas["id"].' Orden con atraso de entrega </br>
-										</a>
-
-								</li>';
-					}
-
-			echo'</ul>
-			<!-- menu -->
-
-		</li>
-
-	</ul>
-	<!--dropdown-menu -->
-
-</li>
-<!-- notifications-menu -->	';
-
+    try {
+        $tecnico = ControladorTecnicos::ctrMostrarTecnicos("correo", $_SESSION["email"]);
+        if (is_array($tecnico) && isset($tecnico["id"])) {
+            $ordenesDelTecnico = controladorOrdenes::ctrMostrarOrdenesDelTecncio($tecnico["id"]);
+            if (is_array($ordenesDelTecnico)) {
+                foreach ($ordenesDelTecnico as $o) {
+                    $est = isset($o["estado"]) ? $o["estado"] : "";
+                    $fi  = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
+                    if (strpos($est, "Ent") === false
+                        && strpos($est, "can") === false
+                        && strpos($est, "AUT") === false
+                        && $fi >= $_noti_limite6m
+                    ) {
+                        if (strtotime($fi . "+ 5 days") <= time()) {
+                            $_noti_ordenes[] = $o;
+                        }
+                    }
+                }
+            }
+        }
+    } catch (Exception $e) {}
 }
 
-if($_SESSION["perfil"] == "vendedor"){
-										
-	//TRAER ORDENES CON ATRASO 
-	$item = "correo";
-	$valor =  $_SESSION["email"];
+// Ordenar: más recientes primero
+usort($_noti_ordenes, function($a, $b) {
+    return strtotime(isset($b["fecha_ingreso"]) ? $b["fecha_ingreso"] : "now")
+         - strtotime(isset($a["fecha_ingreso"]) ? $a["fecha_ingreso"] : "now");
+});
 
-	$Asesores = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
+// Limitar dropdown a 20 máximo
+$_noti_mostrar = array_slice($_noti_ordenes, 0, 20);
+$_noti_total = count($_noti_ordenes);
 
-	$id_Asesor = $Asesores["id"];
-
-	//echo'<pre>'.$id_Asesor.'</pre>';
-
-	$ordenesDelAsesor = controladorOrdenes::ctrMostrarOrdenesDelAsesor($id_Asesor);
-
-	foreach ($ordenesDelAsesor as $key => $valueUno) {
-
-	}
-	 $numero = count($valueUno);
-
-echo'<!--=====================================
-NOTIFICACIONES  PARA TECNICOS Y VENDEDORES
-======================================-->
+// Para push: solo las del último mes, máx 3
+$_noti_push = array();
+foreach ($_noti_ordenes as $o) {
+    $fi = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
+    if ($fi >= $_noti_limite1m) {
+        $_noti_push[] = $o;
+        if (count($_noti_push) >= 3) break;
+    }
+}
+?>
 
 <!-- notifications-menu -->
 <li class="dropdown notifications-menu">
-	
-	<!-- dropdown-toggle -->
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-		
-		<i class="fas fa-bell"></i>
-		
-		<span class="label label-warning">'.$numero.'</span>
-	
-	</a>
-	<!-- dropdown-toggle -->
 
-	<!--dropdown-menu -->
-	<ul class="dropdown-menu">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+    <i class="fa-solid fa-bell"></i>
+    <?php if ($_noti_total > 0): ?>
+      <span class="label label-warning"><?php echo $_noti_total > 99 ? '99+' : $_noti_total; ?></span>
+    <?php endif; ?>
+  </a>
 
-		<li class="header">Tienes '.$numero.' notificaciones</li>
+  <ul class="dropdown-menu">
 
-		<li>
+    <li class="header" style="font-size:12px;font-weight:600">
+      <?php if ($_noti_total > 0): ?>
+        <?php echo $_noti_total; ?> orden<?php echo $_noti_total > 1 ? 'es' : ''; ?> con atraso
+      <?php else: ?>
+        Sin notificaciones pendientes
+      <?php endif; ?>
+    </li>
 
-			<!-- menu -->
-			<ul class="menu">
+    <?php if ($_noti_total > 0): ?>
+    <li>
+      <ul class="menu">
+        <?php foreach ($_noti_mostrar as $o):
+          $dias = max(0, floor((time() - strtotime($o["fecha_ingreso"])) / 86400));
+          $urgColor = $dias >= 30 ? '#ef4444' : ($dias >= 15 ? '#f59e0b' : '#3b82f6');
+        ?>
+        <li>
+          <a class="btnVerInfoOrden"
+             idOrden="<?php echo $o["id"]; ?>"
+             cliente="<?php echo isset($o["id_usuario"]) ? $o["id_usuario"] : ''; ?>"
+             tecnico="<?php echo isset($o["id_tecnico"]) ? $o["id_tecnico"] : ''; ?>"
+             asesor="<?php echo isset($o["id_Asesor"]) ? $o["id_Asesor"] : ''; ?>"
+             empresa="<?php echo isset($o["id_empresa"]) ? $o["id_empresa"] : ''; ?>"
+             pedido="<?php echo isset($o["id_pedido"]) ? $o["id_pedido"] : ''; ?>"
+             tecnicodos="<?php echo isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : ''; ?>"
+             item="nuevasVisitas"
+             style="display:flex;align-items:center;gap:8px;padding:8px 12px">
+            <span style="width:8px;height:8px;border-radius:50%;background:<?php echo $urgColor; ?>;flex-shrink:0"></span>
+            <span style="flex:1">
+              <strong>#<?php echo $o["id"]; ?></strong> Atraso de entrega
+              <small style="display:block;color:#94a3b8;font-size:11px"><?php echo $dias; ?> días — <?php echo date("d/m/Y", strtotime($o["fecha_ingreso"])); ?></small>
+            </span>
+          </a>
+        </li>
+        <?php endforeach; ?>
+      </ul>
+    </li>
+    <?php endif; ?>
 
-				';
+    <li class="footer">
+      <a href="index.php?ruta=ordenesnew" style="font-size:12px">Ver todas las órdenes</a>
+    </li>
 
-
-						foreach ($ordenesDelAsesor as $key => $ordenesQueTieneElAsesor) {
-	
-							//echo'<pre>'.$ordenesQueTieneElAsesor.'</pre>';
-
-							date_default_timezone_set("America/Mexico_City");
-
-						 	$fecha = date("Y-m-d H:i:s",strtotime($ordenesQueTieneElAsesor["fecha_ingreso"]."+ 5 days"));
-
-						 	if ($fecha  >= $ordenesQueTieneElAsesor["fecha_ingreso"] and $ordenesQueTieneElAsesor["estado"] != "Entregado (Ent)" and $ordenesQueTieneElAsesor["estado"] != "Cancelada (can)"){
-
-						 		
-						 		echo'<!-- ORDENES -->
-									
-									<li>
-				
-										<a class="btnVerInfoOrden" idOrden="'.$ordenesQueTieneElAsesor["id"].'" cliente="'.$ordenesQueTieneElAsesor["id_usuario"].'" tecnico="'.$ordenesQueTieneElAsesor["id_tecnico"].'" asesor="'.$ordenesQueTieneElAsesor["id_Asesor"].'" empresa="'.$ordenesQueTieneElAsesor["id_empresa"].'" pedido="'.$ordenesQueTieneElAsesor["id_pedido"].'" item="nuevasVisitas"><i class="fas fa-tv"></i> '.$ordenesQueTieneElAsesor["id"].' Orden con atraso de entrega </br>
-										</a>
-
-								</li>';
-								$AlbumDeImagenes = json_decode($ordenesQueTieneElAsesor["multimedia"], true);
-
-								if (is_array($AlbumDeImagenes) || is_object($AlbumDeImagenes)) {
-									
-									foreach ($AlbumDeImagenes as $key => $valueImagenes) {
-										
-										
-									}
-								}
-								
-								echo'<!-- notifications-push -->	
-
-
-									<script>
-
-										Push.create("ORDEN CON ATRASO DE ENTREGA",{
-
-											body:"ORDEN: '.$ordenesQueTieneElAsesor["id"].'",
-											icon:"'.$valueImagenes["foto"].'",
-											timeout:20000,
-											onClick: function(){
-												window.location="index.php?ruta=inicio";
-												this.close();
-											}
-
-											});
-									</script>';
-						 	}
-						}
-
-					
-					echo'
-
-			</ul>
-			<!-- menu -->
-
-		</li>
-
-	</ul>
-	<!--dropdown-menu -->
+  </ul>
 
 </li>
-<!-- notifications-menu -->	';
+<!-- /notifications-menu -->
 
-}
-?>
+<?php if (!empty($_noti_push)): ?>
+<!-- Push notifications: SOLO 1 vez por sesión del navegador -->
+<script>
+(function(){
+  // Clave única por sesión — solo disparar 1 vez
+  var pushKey = 'egs_push_shown_' + <?php echo json_encode(session_id()); ?>;
 
-<?php
-if($_SESSION["perfil"] == "tecnico"){
-										
-	//TRAER ORDENES CON ATRASO 
-	$item = "correo";
-	$valor =  $_SESSION["email"];
+  if (sessionStorage.getItem(pushKey)) return; // Ya se mostró esta sesión
 
-	$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+  // Marcar como mostrado INMEDIATAMENTE
+  sessionStorage.setItem(pushKey, '1');
 
-	$id_tecnico = $tecnico["id"];
+  // Esperar 3s después de cargar la página
+  setTimeout(function(){
+    if (typeof Push === 'undefined') return;
 
-	//echo'<pre>'.$id_tecnico.'</pre>';
+    <?php
+    // Solo la primera orden para push (no bombardear)
+    $pushOrd = $_noti_push[0];
+    $pushImg = '';
+    $album = json_decode(isset($pushOrd["multimedia"]) ? $pushOrd["multimedia"] : '[]', true);
+    if (is_array($album)) {
+        foreach ($album as $img) {
+            if (isset($img["foto"])) { $pushImg = $img["foto"]; break; }
+        }
+    }
+    ?>
 
-	//$ordenesDelTecnico = controladorOrdenes::ctrMostrarOrdenesDelTecncio($id_tecnico);
-	$ordenesDelTecnico = 1;
-	foreach ($ordenesDelTecnico as $key => $valueDos) {
+    try {
+      Push.create("Tienes <?php echo count($_noti_push); ?> orden<?php echo count($_noti_push) > 1 ? 'es' : ''; ?> con atraso", {
+        body: "Orden #<?php echo $pushOrd['id']; ?><?php echo count($_noti_push) > 1 ? ' y ' . (count($_noti_push) - 1) . ' más' : ''; ?> — Requiere atención",
+        <?php if (!empty($pushImg)): ?>
+        icon: "<?php echo $pushImg; ?>",
+        <?php endif; ?>
+        timeout: 8000,
+        onClick: function(){
+          window.focus();
+          window.location = "index.php?ruta=inicio";
+          this.close();
+        }
+      });
+    } catch(e) {}
 
-		//echo '<pre>'.$valueOrdenesDeTecnico["titulo"].'</pre>';
-
-	}
-
-	$numero = count($valueDos);
-echo'<!--=====================================
-NOTIFICACIONES  PARA TECNICOS Y VENDEDORES
-======================================-->
-
-<!-- notifications-menu -->
-<li class="dropdown notifications-menu">
-	
-	<!-- dropdown-toggle -->
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-		
-		<i class="fas fa-bell"></i>
-		
-		<span class="label label-warning">'.$numero.'</span>
-	
-	</a>
-	<!-- dropdown-toggle -->
-
-	<!--dropdown-menu -->
-	<ul class="dropdown-menu">
-
-		<li class="header">Tienes '.$numero.' notificaciones</li>
-
-		<li>
-			<!-- menu -->
-			<ul class="menu">
-
-				';
-
-
-						foreach ($ordenesDelTecnico as $key => $ordenesQueTieneElTecnico) {
-	
-							//echo'<pre>'.$ordenesQueTieneElTecnico.'</pre>';
-
-							if ($ordenesQueTieneElTecnico["estado"] == "Aceptado (ok)") {
-						 			
-						 			echo'<li>
-				
-										<a class="btnVerInfoOrden" idOrden="'.$ordenesQueTieneElTecnico["id"].'" cliente="'.$ordenesQueTieneElTecnico["id_usuario"].'" tecnico="'.$ordenesQueTieneElTecnico["id_tecnico"].'" asesor="'.$ordenesQueTieneElTecnico["id_Asesor"].'" empresa="'.$ordenesQueTieneElTecnico["id_empresa"].'" pedido="'.$ordenesQueTieneElTecnico["id_pedido"].'" item="nuevasVisitas" style="background-color:#C0FFAD; color:black"><i class="fas fa-tv"></i> '.$ordenesQueTieneElTecnico["id"].' Orden Aceptada Inicar Reparacion</br>
-										</a>
-
-									</li>';
-
-						 		}
-
-							date_default_timezone_set("America/Mexico_City");
-
-						 	$fecha = date("Y-m-d H:i:s",strtotime($ordenesQueTieneElTecnico["fecha_ingreso"]."+ 5 days"));
-
-						 	//$diff = $fecha1->diff($fecha2);
-
-							// El resultados sera 3 dias
-							//echo $diff->days . ' dias';
-
-						 	if ($fecha  >= $ordenesQueTieneElTecnico["fecha_ingreso"] and $ordenesQueTieneElTecnico["estado"] != "Entregado (Ent)" and $ordenesQueTieneElTecnico["estado"] != "Cancelada (can)" and $ordenesQueTieneElTecnico["estado"] != "Aceptado (ok)" and $ordenesQueTieneElTecnico["estado"] != "Pendiente de autorización (AUT)"  ){
-						 		
-						 		echo'<!-- ORDENES -->
-									
-									<li>
-				
-										<a class="btnVerInfoOrden" idOrden="'.$ordenesQueTieneElTecnico["id"].'" cliente="'.$ordenesQueTieneElTecnico["id_usuario"].'" tecnico="'.$ordenesQueTieneElTecnico["id_tecnico"].'" asesor="'.$ordenesQueTieneElTecnico["id_Asesor"].'" empresa="'.$ordenesQueTieneElTecnico["id_empresa"].'" pedido="'.$ordenesQueTieneElTecnico["id_pedido"].'" item="nuevasVisitas"><i class="fas fa-tv"></i> '.$ordenesQueTieneElTecnico["id"].' Orden con atraso de entrega </br>
-										</a>
-
-								</li>';
-								$AlbumDeImagenes = json_decode($ordenesQueTieneElTecnico["multimedia"], true);
-								if (is_array($AlbumDeImagenes) || is_object($AlbumDeImagenes)) {
-  								foreach ($AlbumDeImagenes as $key => $valueImagenes) {
-									# code...
-								}
-								}
-								
-								
-								echo'<!-- notifications-push -->	
-
-
-									<script>
-
-										Push.create("ORDEN CON ATRASO DE ENTREGA",{
-
-											body:"ORDEN: '.$ordenesQueTieneElTecnico["id"].'",
-											icon:"'.$valueImagenes["foto"].'",
-											timeout:10000,
-											onClick: function(){
-												window.location="index.php?ruta=inicio";
-												this.close();
-											}
-
-											});
-									</script>';
-						 	}
-						}
-
-					
-					echo'
-
-			</ul>
-			<!-- menu -->
-
-		</li>
-
-	</ul>
-	<!--dropdown-menu -->
-
-</li>
-
-
-';
-
-
-}
-
-?>
+  }, 3000);
+})();
+</script>
+<?php endif; ?>
