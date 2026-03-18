@@ -1,5 +1,171 @@
+<!-- ══ Sidebar: estilos nucleares — gana a skin-blue.min.css ══ -->
 <style>
-  .sidebar-menu span { font-weight: 600; }
+/*
+ * Usamos "html body.skin-blue" para ganar a CUALQUIER selector
+ * de skin-blue.min.css (.skin-blue .xxx = especificidad 0,2,0).
+ * "html body.skin-blue" = 0,1,1 + hijos = siempre mayor.
+ * Además !important como seguro final.
+ */
+
+/* ── 1. Fondo sidebar + wrapper ── */
+html body.skin-blue .wrapper,
+html body.skin-blue .main-sidebar,
+html body.skin-blue .left-side,
+html body.skin-blue .main-sidebar .sidebar {
+  background-color: #0f172a !important;
+  background: #0f172a !important;
+}
+
+/* ── 2. User panel ── */
+html body.skin-blue .user-panel > .info,
+html body.skin-blue .user-panel > .info > a {
+  color: #94a3b8 !important;
+}
+html body.skin-blue .user-panel > .info > p,
+html body.skin-blue .egs-sidebar-user .pull-left.info p {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  margin-bottom: 2px !important;
+}
+html body.skin-blue .egs-sidebar-user {
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  padding: 12px 14px !important;
+  margin-bottom: 4px !important;
+}
+html body.skin-blue .egs-sidebar-user .pull-left.image img {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(255,255,255,.20) !important;
+  object-fit: cover;
+}
+
+/* ── 3. Links globales sidebar ── */
+html body.skin-blue .sidebar a {
+  color: #94a3b8 !important;
+}
+html body.skin-blue .sidebar a:hover {
+  text-decoration: none !important;
+}
+
+/* ── 4. Headers de sección ── */
+html body.skin-blue .sidebar-menu > li.header {
+  color: #475569 !important;
+  background: transparent !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  padding: 12px 16px 4px !important;
+}
+
+/* ── 5. Items primer nivel ── */
+html body.skin-blue .sidebar-menu > li > a {
+  color: #94a3b8 !important;
+  background: transparent !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  border-left: 3px solid transparent !important;
+  padding: 10px 14px 10px 16px !important;
+  transition: background .15s, color .15s, border-color .15s !important;
+}
+html body.skin-blue .sidebar-menu > li > a > i {
+  color: #64748b !important;
+  width: 18px !important;
+  font-size: 14px !important;
+  margin-right: 6px !important;
+  transition: color .15s !important;
+}
+
+/* ── 6. Hover items ── */
+html body.skin-blue .sidebar-menu > li:hover > a,
+html body.skin-blue .sidebar-menu > li > a:hover {
+  background: rgba(99,102,241,.12) !important;
+  color: #e2e8f0 !important;
+  border-left-color: #6366f1 !important;
+}
+html body.skin-blue .sidebar-menu > li:hover > a > i,
+html body.skin-blue .sidebar-menu > li > a:hover > i {
+  color: #a5b4fc !important;
+}
+
+/* ── 7. Estado activo ── */
+html body.skin-blue .sidebar-menu > li.active > a,
+html body.skin-blue .sidebar-menu > li.active > a:hover,
+html body.skin-blue .sidebar-menu > li.menu-open > a {
+  background: rgba(99,102,241,.20) !important;
+  color: #fff !important;
+  border-left-color: #6366f1 !important;
+  font-weight: 600 !important;
+}
+html body.skin-blue .sidebar-menu > li.active > a > i {
+  color: #818cf8 !important;
+}
+
+/* ── 8. Flecha treeview ── */
+html body.skin-blue .sidebar-menu > li > a > .pull-right-container .fa-angle-left,
+html body.skin-blue .sidebar-menu > li > a > .pull-right-container > .pull-right {
+  color: #475569 !important;
+  transition: color .15s !important;
+}
+
+/* ── 9. Submenú treeview ── */
+html body.skin-blue .sidebar-menu > li > .treeview-menu {
+  margin: 0 !important;
+  background: rgba(0,0,0,.30) !important;
+  padding: 4px 0 !important;
+}
+html body.skin-blue .sidebar-menu .treeview-menu > li > a {
+  color: #64748b !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  padding: 8px 14px 8px 42px !important;
+  border-left: 3px solid transparent !important;
+  background: transparent !important;
+  transition: background .12s, color .12s, border-color .12s !important;
+}
+html body.skin-blue .sidebar-menu .treeview-menu > li > a > i {
+  color: #475569 !important;
+  font-size: 10px !important;
+  margin-right: 6px !important;
+}
+html body.skin-blue .sidebar-menu .treeview-menu > li > a:hover {
+  background: rgba(99,102,241,.10) !important;
+  color: #c7d2fe !important;
+  border-left-color: #818cf8 !important;
+}
+html body.skin-blue .sidebar-menu .treeview-menu > li.active > a,
+html body.skin-blue .sidebar-menu .treeview-menu > li.active > a:hover {
+  color: #a5b4fc !important;
+  background: rgba(99,102,241,.08) !important;
+  border-left-color: #818cf8 !important;
+}
+
+/* ── 10. Scrollbar ── */
+html body.skin-blue .main-sidebar .sidebar::-webkit-scrollbar { width: 4px; }
+html body.skin-blue .main-sidebar .sidebar::-webkit-scrollbar-track { background: transparent; }
+html body.skin-blue .main-sidebar .sidebar::-webkit-scrollbar-thumb {
+  background: rgba(99,102,241,.30);
+  border-radius: 9999px;
+}
+
+/* ── 11. Sidebar-mini collapsed ── */
+html body.skin-blue.sidebar-mini.sidebar-collapse .egs-sidebar-user .pull-left.info {
+  display: none !important;
+}
+html body.skin-blue.sidebar-mini.sidebar-collapse .egs-sidebar-user {
+  padding: 10px 8px !important;
+  text-align: center;
+}
+html body.skin-blue.sidebar-mini.sidebar-collapse .egs-sidebar-user .pull-left.image {
+  float: none !important;
+  display: block;
+}
+
+/* ── 12. Font weight texto menú ── */
+.sidebar-menu span { font-weight: 600; }
+
 </style>
 
 <?php

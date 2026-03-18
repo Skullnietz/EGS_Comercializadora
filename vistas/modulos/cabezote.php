@@ -225,45 +225,12 @@ body.skin-blue .main-header .logo:hover { background: #080f1c !important; }
   text-decoration: none !important;
 }
 
-/* ── Sidebar ── */
-body .main-sidebar,
-body.skin-blue .main-sidebar,
-body .main-sidebar .sidebar {
-  background: #0f172a !important;
-  background-color: #0f172a !important;
-}
-body.skin-blue .sidebar-menu > li.active > a,
-body.skin-blue .sidebar-menu > li.active > a:hover {
-  background: rgba(99,102,241,.15) !important;
-  border-left-color: #6366f1 !important;
-  color: #fff !important;
-}
-body.skin-blue .sidebar-menu > li > a:hover {
-  background: rgba(255,255,255,.05) !important;
-  color: #f1f5f9 !important;
-  border-left-color: #6366f1 !important;
-}
-body.skin-blue .treeview-menu {
-  background: rgba(0,0,0,.2) !important;
-}
+/* ── Sidebar: estilos movidos a lateral/menu.php (inline) ── */
 
 /* ── Fix: ocultar el segundo toggle que AdminLTE genera en sidebar-mini ── */
 .main-sidebar .sidebar-toggle,
 .sidebar-mini .sidebar > .sidebar-menu > li.header + li > a[data-toggle="push-menu"] {
   display: none !important;
-}
-
-/* ── Fix: user-panel sidebar-mini — solo muestra avatar, oculta texto ── */
-body.sidebar-mini.sidebar-collapse .egs-sidebar-user .pull-left.info {
-  display: none !important;
-}
-body.sidebar-mini.sidebar-collapse .egs-sidebar-user {
-  padding: 10px 8px !important;
-  text-align: center;
-}
-body.sidebar-mini.sidebar-collapse .egs-sidebar-user .pull-left.image {
-  float: none !important;
-  display: block;
 }
 </style>
 
