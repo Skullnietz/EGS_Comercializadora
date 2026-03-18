@@ -198,6 +198,7 @@ if ($_hc_primeraFecha) {
               <thead>
                 <tr>
                   <th>Orden</th>
+                  <th style="width:56px"></th>
                   <th>Equipo</th>
                   <th>Estado</th>
                   <th style="text-align:right">Total</th>
@@ -215,6 +216,20 @@ if ($_hc_primeraFecha) {
                   $modelo = isset($o["modeloDelEquipo"]) ? $o["modeloDelEquipo"] : "";
                   $equipo = trim($marca . " " . $modelo);
                   if (empty($equipo)) $equipo = "—";
+
+                  // Imagen del equipo
+                  $imgEquipo = "";
+                  if (!empty($o["multimedia"])) {
+                      $album = json_decode($o["multimedia"], true);
+                      if (is_array($album)) {
+                          foreach ($album as $img) {
+                              if (isset($img["foto"]) && !empty($img["foto"])) {
+                                  $imgEquipo = $img["foto"];
+                                  break;
+                              }
+                          }
+                      }
+                  }
 
                   // Antigüedad
                   $dias = 0;
@@ -241,6 +256,17 @@ if ($_hc_primeraFecha) {
                 ?>
                 <tr>
                   <td><span style="font-weight:700;color:#6366f1">#<?php echo $o["id"]; ?></span></td>
+                  <td style="padding:6px 4px">
+                    <?php if (!empty($imgEquipo)): ?>
+                      <img src="<?php echo htmlspecialchars($imgEquipo); ?>" alt="Equipo"
+                           style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid #e2e8f0;cursor:pointer"
+                           onclick="window.open(this.src,'_blank')">
+                    <?php else: ?>
+                      <div style="width:44px;height:44px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:16px;border:1px solid #e2e8f0">
+                        <i class="fa-solid fa-image"></i>
+                      </div>
+                    <?php endif; ?>
+                  </td>
                   <td>
                     <div style="font-weight:600"><?php echo htmlspecialchars($equipo); ?></div>
                     <?php if (!empty($o["numeroDeSerieDelEquipo"])): ?>
