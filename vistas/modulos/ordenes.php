@@ -596,10 +596,6 @@ function _ordGetBadgeClass($estadoText) {
 
 
 
-                  <th>#</th>
-
-                  <th>Empresa</th>
-
                   <th>No. Orden</th>
 
                   <th>Técnico</th>
@@ -836,9 +832,6 @@ function _ordGetBadgeClass($estadoText) {
 
                       
 
-                      <td>' . ($key + 1) . '</td>
-
-                      <td>' . $NombreEmpresa . '</td>
 
                       <td><strong><h2> ' . $valueOrdenes["id"] . '</h2></strong></td>
 
@@ -890,9 +883,6 @@ function _ordGetBadgeClass($estadoText) {
 
                       
 
-                      <td>' . ($key + 1) . '</td>
-
-                      <td>' . $NombreEmpresa . '</td>
 
                       <td><strong><h2>' . $valueOrdenes["id"] . '</h2></strong></td>
 
@@ -1094,9 +1084,6 @@ function _ordGetBadgeClass($estadoText) {
 
                       
 
-                      <td>' . ($key + 1) . '</td>
-
-                      <td>' . $NombreEmpresa . '</td>
 
                       <td><strong><h4>ORDEN: ' . $valueOrdenes["id"] . '</h4></strong></td>
 
@@ -1149,9 +1136,6 @@ function _ordGetBadgeClass($estadoText) {
 
                       
 
-                      <td>' . ($key + 1) . '</td>
-
-                      <td>' . $NombreEmpresa . '</td>
 
                       <td><strong><h4>ORDEN: ' . $valueOrdenes["id"] . '</h4></strong></td>
 
@@ -1347,9 +1331,6 @@ function _ordGetBadgeClass($estadoText) {
 
                       
 
-                      <td>' . ($key + 1) . '</td>
-
-                      <td>' . $NombreEmpresa . '</td>
 
                       <td><strong><h4>ORDEN: ' . $valueOrdeneDelTecnico["id"] . '</h4></strong></td>
 
@@ -1408,9 +1389,6 @@ function _ordGetBadgeClass($estadoText) {
 
                       
 
-                      <td>' . ($key + 1) . '</td>
-
-                      <td>' . $NombreEmpresa . '</td>
 
                       <td><strong><h4>ORDEN: ' . $valueOrdeneDelTecnico["id"] . '</h4></strong></td>
 

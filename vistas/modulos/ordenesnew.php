@@ -467,12 +467,6 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
     },
     
     "columns":[
-        {"render": function ( data, type, full, meta ) {
-    return  meta.row + 1;
-} },
-        {data: null,
-            "render": function (data, type, row, meta ) {
-            return 'Comercializadora EGS'}},
         {data: null,
             "render": function (data, type, row, meta ) {
                 return '<span style="font-weight:800;color:#6366f1">#'+data.id+'</span>';
@@ -641,10 +635,6 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 	            <tr>
 
 	              
-
-	              <th>#</th>
-
-                <th>Empresa</th>
 
 	              <th>No. Orden</th>
 
