@@ -28,15 +28,299 @@ if($_SESSION["perfil"] != "administrador"  AND $_SESSION["perfil"]!= "vendedor" 
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.11.5/datatables.min.js"></script>
 
 <style>
-    .garantia{
-  background: yellow !important;
-    }
-    #ultimaenentrega {
-    border-radius: 15px;
-    background:#CCC;
-    border:#000;
+/* ═══════════════════════════════════════════════════
+   ORDENES NEW — CRM DESIGN SYSTEM OVERRIDE
+   ═══════════════════════════════════════════════════ */
+:root {
+  --crm-bg:       #f8fafc;
+  --crm-surface:  #ffffff;
+  --crm-border:   #e2e8f0;
+  --crm-text:     #0f172a;
+  --crm-text2:    #475569;
+  --crm-muted:    #94a3b8;
+  --crm-accent:   #6366f1;
+  --crm-accent2:  #818cf8;
+  --crm-radius:   14px;
+  --crm-radius-sm:10px;
+  --crm-shadow:   0 1px 3px rgba(15,23,42,.06), 0 4px 14px rgba(15,23,42,.04);
+  --crm-shadow-lg:0 4px 24px rgba(15,23,42,.10);
+  --crm-ease:     cubic-bezier(.4,0,.2,1);
 }
 
+.garantia { background: #fef3c7 !important; border-left: 3px solid #f59e0b; }
+
+/* ─── Content Header ─── */
+.content-wrapper .content-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+  padding: 28px 30px 24px;
+  margin: 0;
+  border-bottom: none;
+}
+.content-wrapper .content-header h1 {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  margin: 0 0 4px;
+}
+.content-wrapper .content-header h1 small {
+  color: rgba(255,255,255,.5);
+  font-size: 13px;
+  font-weight: 400;
+  display: block;
+  margin-top: 4px;
+}
+.content-wrapper .content-header .breadcrumb {
+  background: rgba(255,255,255,.08);
+  border-radius: 8px;
+  padding: 6px 14px;
+  margin: 0;
+  top: 28px;
+}
+.content-wrapper .content-header .breadcrumb > li,
+.content-wrapper .content-header .breadcrumb > li > a,
+.content-wrapper .content-header .breadcrumb > li.active {
+  color: rgba(255,255,255,.6);
+  font-size: 12px;
+  font-weight: 500;
+}
+.content-wrapper .content-header .breadcrumb > li > a:hover { color: #fff; }
+
+/* ─── Main Content ─── */
+.content-wrapper .content { background: var(--crm-bg); padding: 24px; }
+
+/* ─── Box → CRM Card ─── */
+.content .box {
+  background: var(--crm-surface);
+  border: 1px solid var(--crm-border);
+  border-radius: var(--crm-radius);
+  box-shadow: var(--crm-shadow);
+  overflow: visible;
+  margin-bottom: 20px;
+}
+.content .box-header {
+  background: transparent;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 18px 22px 14px;
+  border-radius: var(--crm-radius) var(--crm-radius) 0 0;
+}
+.content .box-body { padding: 22px; }
+
+/* ─── Toolbar Area ─── */
+#ultimaenentrega {
+  background: linear-gradient(135deg, #f0f9ff, #eff6ff) !important;
+  border-radius: var(--crm-radius-sm) !important;
+  border: 1px solid #bfdbfe !important;
+  padding: 12px 18px !important;
+  margin-bottom: 6px;
+}
+.columnaultimaentrega h5 { margin: 4px 0; font-size: 13px; color: #1e40af; }
+
+/* ─── Buttons ─── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--crm-accent), var(--crm-accent2));
+  border: none;
+  border-radius: 10px !important;
+  padding: 10px 22px;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(99,102,241,.25);
+  transition: all .2s var(--crm-ease);
+}
+.btn-primary:hover, .btn-primary:focus {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  box-shadow: 0 4px 14px rgba(99,102,241,.35);
+  transform: translateY(-1px);
+}
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  border: none;
+  border-radius: 8px !important;
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 6px 14px;
+  transition: all .15s;
+}
+.btn-warning:hover { background: linear-gradient(135deg, #d97706, #f59e0b); color: #fff; transform: translateY(-1px); }
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  border: none;
+  border-radius: 8px !important;
+  color: #fff;
+  font-weight: 600;
+  transition: all .15s;
+}
+.btn-danger:hover { background: linear-gradient(135deg, #dc2626, #ef4444); transform: translateY(-1px); }
+.btn-success {
+  background: linear-gradient(135deg, #22c55e, #4ade80);
+  border: none;
+  border-radius: 8px !important;
+  color: #fff;
+  font-weight: 600;
+  transition: all .15s;
+}
+.btn-success:hover { background: linear-gradient(135deg, #16a34a, #22c55e); transform: translateY(-1px); }
+.btn-info {
+  background: linear-gradient(135deg, #06b6d4, #22d3ee);
+  border: none;
+  border-radius: 8px !important;
+  color: #fff;
+  font-weight: 600;
+  transition: all .15s;
+}
+
+/* ─── DataTable Modern ─── */
+.dataTables_wrapper .dataTables_filter input {
+  border: 1px solid var(--crm-border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+}
+.dataTables_wrapper .dataTables_filter input:focus {
+  border-color: var(--crm-accent);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+.dataTables_wrapper .dataTables_length select {
+  border: 1px solid var(--crm-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+  padding: 12px 8px;
+  font-size: 13px;
+  color: var(--crm-text2);
+}
+table.dataTable thead th {
+  background: #f8fafc !important;
+  color: var(--crm-muted) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .6px !important;
+  padding: 12px 14px !important;
+  border-bottom: 2px solid var(--crm-border) !important;
+}
+table.dataTable tbody td {
+  font-size: 13px;
+  color: var(--crm-text);
+  padding: 12px 14px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  vertical-align: middle;
+}
+table.dataTable tbody tr:hover { background: #f8fafc !important; }
+/* Pagination */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  border-radius: 8px !important;
+  border: 1px solid var(--crm-border) !important;
+  margin: 0 2px;
+  padding: 5px 12px !important;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all .15s;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: var(--crm-accent) !important;
+  color: #fff !important;
+  border-color: var(--crm-accent) !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: #eef2ff !important;
+  color: var(--crm-accent) !important;
+  border-color: var(--crm-accent) !important;
+}
+
+/* ─── Status Badges Modern ─── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.badge-pendiente      { color: #92400e; background: #fef3c7; border-color: #fde68a; }
+.badge-proceso        { color: #1e40af; background: #dbeafe; border-color: #bfdbfe; }
+.badge-completada     { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
+.badge-cancelada      { color: #991b1b; background: #fee2e2; border-color: #fecaca; }
+.badge-otro           { color: #374151; background: #f3f4f6; border-color: #e5e7eb; }
+.badge-aceptado       { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
+.badge-pendiente-aut  { color: #92400e; background: #fff7ed; border-color: #fed7aa; }
+.badge-producto-venta { color: #0e7490; background: #cffafe; border-color: #a5f3fc; }
+.badge-terminado      { color: #0e7490; background: #ecfeff; border-color: #a5f3fc; }
+.badge-revision       { color: #c2410c; background: #fff7ed; border-color: #fdba74; }
+.badge-supervision    { color: #7e22ce; background: #faf5ff; border-color: #d8b4fe; }
+.badge-sin-reparacion { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-garantia       { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
+.badge-revision-garantia { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+.badge-entregado      { color: #065f46; background: #ecfdf5; border-color: #6ee7b7; }
+
+/* ─── Modals Modern ─── */
+.modal-content {
+  border-radius: var(--crm-radius) !important;
+  border: none !important;
+  box-shadow: 0 25px 60px rgba(0,0,0,.15), 0 0 0 1px rgba(0,0,0,.04) !important;
+  overflow: hidden;
+}
+.modal-header {
+  background: linear-gradient(135deg, #0f172a, #1e293b) !important;
+  color: #fff !important;
+  border-bottom: none !important;
+  padding: 20px 24px !important;
+  border-radius: 0 !important;
+}
+.modal-header .modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+}
+.modal-header .close {
+  color: rgba(255,255,255,.6) !important;
+  opacity: 1 !important;
+  font-size: 22px;
+  text-shadow: none !important;
+}
+.modal-header .close:hover { color: #fff !important; }
+.modal-body {
+  padding: 24px !important;
+  background: var(--crm-bg);
+}
+.modal-footer {
+  background: var(--crm-surface);
+  border-top: 1px solid var(--crm-border) !important;
+  padding: 16px 24px !important;
+}
+
+/* ─── Form Controls Modern ─── */
+.modal .form-control {
+  border: 1px solid var(--crm-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--crm-text);
+  transition: border-color .2s, box-shadow .2s;
+}
+.modal .form-control:focus {
+  border-color: var(--crm-accent);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+  outline: none;
+}
+.modal .input-group-addon {
+  background: #f8fafc;
+  border: 1px solid var(--crm-border);
+  border-radius: 8px 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--crm-text2);
+}
 </style>
 <script>
  $(document).ready(function(){
@@ -193,33 +477,14 @@ if($_SESSION["perfil"] != "administrador"  AND $_SESSION["perfil"]!= "vendedor" 
 	
 
 	<section class="content-header">
-
-		
-
 		<h1>
-
-			Gestor Órdenes De Servicio
-
+			<i class="fa-solid fa-clipboard-list" style="margin-right:10px;opacity:.7"></i>Gestor de Órdenes
+			<small>Órdenes de Servicio — Vista ServerSide</small>
 		</h1>
-
-
-
 		<ol class="breadcrumb">
-
-
-
-	      <li><a href="inicio"><i class="fas fa-dashboard"></i>Inicio</a></li>
-
-
-
-	      <li class="active">Gestor Órdenes De Servicio</li>
-
-      
-
+	      <li><a href="index.php?ruta=inicio"><i class="fa-solid fa-gauge" style="margin-right:4px"></i> Inicio</a></li>
+	      <li class="active">Órdenes de Servicio</li>
     	</ol>
-
-
-
 	</section>
 
 
@@ -263,7 +528,7 @@ if($_SESSION["perfil"] != "administrador"  AND $_SESSION["perfil"]!= "vendedor" 
 	<div class="container" >
         <div class="row" id="ultimaenentrega">
             <div class="col-md-7">
-                 <button class="btn btn-primary" style="border-radius:15px" data-toggle="modal" data-target="#modalAgregarOrden">
+                 <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarOrden">
 
 	          
 
@@ -288,7 +553,7 @@ if($_SESSION["perfil"] != "administrador"  AND $_SESSION["perfil"]!= "vendedor" 
 	                   <div class="col-sm-2 columnaultimaentrega"><h5><b>ORDEN: '.$ultima["id"].'</b></h5></div>
 	                     <div class="col-sm-1 columnaultimaentrega">';
 	                     if($_SESSION["perfil"] == "administrador"){
-	                         echo'<a href= "extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='.$ultima["id"].'&empresa='.$ultima["id_empresa"].'&asesor='.$ultima["id_Asesor"].'&cliente='.$ultima["id_usuario"].'&tecnico='.$ultima["id_tecnico"].'" class="btn btn-success"  target="_blank" style="border-radius:15px">';}
+	                         echo'<a href= "extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='.$ultima["id"].'&empresa='.$ultima["id_empresa"].'&asesor='.$ultima["id_Asesor"].'&cliente='.$ultima["id_usuario"].'&tecnico='.$ultima["id_tecnico"].'" class="btn btn-success"  target="_blank">';}
 	                    echo'<i class="fas fa-ticket-alt" style"margin-bottom: -25px; "></i></a></div>
 	                 
 	            </div></div></center>'; } ?>
@@ -420,13 +685,13 @@ MODAL AGREGAR OORDENES
 
      
 
-     <div style ="border-radius: 10px;" class="modal-content">
+     <div class="modal-content">
 
-       
+
 
        <!-- <form role="form" method="post" enctype="multipart/form-data"> -->
 
-         
+
 
          <!--=====================================
 
@@ -434,7 +699,7 @@ MODAL AGREGAR OORDENES
 
         ======================================-->
 
-        <div class="modal-header" style="border-radius: 10px 10px 0% 0%; background:#138a1e; color:white">
+        <div class="modal-header">
 
 
 
