@@ -82,10 +82,11 @@
       "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\\\\tec-dashboard.php\")",
       "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\Historialdecliente.php\")",
       "Bash(find /c/Users/black/Desktop/EGS -type f -name *.sql)",
-      "Bash(grep -oP 'value=\"\"\"\"[^\"\"\"\"]*\\\\\\([A-Z]{2,3}\\\\\\)[^\"\"\"\"]*\"\"\"\"' /c/Users/black/Desktop/EGS/vistas/modulos/ordenes.php)",
       "Bash(xargs grep:*)",
       "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\\\\admin-dashboard.php\")",
-      "Bash(php -r \"echo crypt\\(''3R1K2026'', chr\\(36\\).''2a''.chr\\(36\\).''07''.chr\\(36\\).''asxx54ahjppf45sd87a5a4dDDGsystemdev''\\);\")"
+      "Bash(php -r \"echo crypt\\(''3R1K2026'', chr\\(36\\).''2a''.chr\\(36\\).''07''.chr\\(36\\).''asxx54ahjppf45sd87a5a4dDDGsystemdev''\\);\")",
+      "Bash(powershell -Command \":*)",
+      "Bash(php -l \"vistas/modulos/inicio/admin-dashboard.php\")"
     ]
   }
 }

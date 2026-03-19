@@ -329,7 +329,7 @@ PÁGINA DE INICIO
         $mesesEs = array('','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre');
         $_fechaAdmin = $diasEs[date('w')].' '.date('j').' de '.$mesesEs[intval(date('n'))].', '.date('Y');
       ?>
-      <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#334155 100%);border-radius:var(--crm-radius);padding:28px 30px;margin-bottom:24px;position:relative;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#334155 100%);border-radius:var(--crm-radius,14px);padding:28px 30px;margin-bottom:24px;position:relative;overflow:hidden">
         <div style="position:absolute;right:-20px;top:-20px;width:180px;height:180px;border-radius:50%;background:rgba(99,102,241,.12)"></div>
         <div style="position:absolute;right:60px;bottom:-40px;width:120px;height:120px;border-radius:50%;background:rgba(99,102,241,.08)"></div>
         <div style="position:relative;z-index:1">

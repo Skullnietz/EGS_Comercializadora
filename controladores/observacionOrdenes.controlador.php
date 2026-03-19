@@ -30,6 +30,18 @@ class controladorObservaciones{
 	
 	}
 	/*=============================================
+	ÚLTIMAS OBSERVACIONES GLOBALES
+	=============================================*/
+
+	static public function ctrUltimasObservaciones($limite = 12){
+
+		$tabla = "observacionesOrdenes";
+
+		return ModeloObservaciones::mdlUltimasObservaciones($tabla, $limite);
+
+	}
+
+	/*=============================================
 	INSERTAR OBSERVACIONES
 	=============================================*/
 	static public function ctrlCrearObservacion(){
