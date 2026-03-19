@@ -93,13 +93,14 @@ else { $_adm_efColor = '#dc2626'; $_adm_efGrad = '#dc2626,#ef4444'; }
 // ══════════════════════════════════════
 $_adm_allOrders = array();
 try {
+    // null,null en 3er y 4to param = traer TODAS las órdenes de la empresa sin filtro de asesor
     $_adm_allOrders = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
-        "id_empresa", $_SESSION["empresa"], "id_Asesor", "0"
+        "id_empresa", $_SESSION["empresa"], null, null
     );
     if (!is_array($_adm_allOrders)) $_adm_allOrders = array();
 } catch (Exception $e) {}
 
-// Si no hay resultados con asesor=0, intentar cargar todas
+// Fallback: si falla, cargar con tope alto
 if (empty($_adm_allOrders)) {
     try {
         $r = controladorOrdenes::ctrlTraerOrdenesConTope(0, 99999);
@@ -173,7 +174,9 @@ foreach ($_adm_tecList as $t) {
     if (isset($t['id'])) $_adm_mapaTec[$t['id']] = isset($t['nombre']) ? $t['nombre'] : 'Técnico #'.$t['id'];
 }
 
-// Clasificar órdenes del mes por técnico
+// Clasificar órdenes por técnico
+// Criterio: TODAS las órdenes activas (REV, OK, AUT, SUP) sin importar fecha
+//         + órdenes TER/ENT de los últimos 3 meses (para medir productividad reciente)
 $_adm_tecStats = array();
 foreach ($_adm_mapaTec as $tid => $tn) {
     $_adm_tecStats[$tid] = array(
@@ -184,22 +187,10 @@ foreach ($_adm_mapaTec as $tid => $tn) {
     );
 }
 
-// Usar órdenes del mes actual para el análisis
-$_adm_corte1m = date("Y-m-d", strtotime("-1 month"));
+$_adm_corteTec = date("Y-m-d", strtotime("-3 months")); // 3 meses para ENT/TER
 foreach ($_adm_allOrders as $ord) {
-    $fi = isset($ord["fecha_ingreso"]) ? substr($ord["fecha_ingreso"], 0, 10) : "";
-    if ($fi < $_adm_corte1m) continue;
-
     $tid = isset($ord["id_tecnico"]) ? $ord["id_tecnico"] : null;
     if (!$tid || !isset($_adm_mapaTec[$tid])) continue;
-    if (!isset($_adm_tecStats[$tid])) {
-        $_adm_tecStats[$tid] = array(
-            'nombre' => isset($_adm_mapaTec[$tid]) ? $_adm_mapaTec[$tid] : 'Técnico #'.$tid,
-            'REV' => 0, 'OK' => 0, 'TER' => 0, 'ENT' => 0,
-            'AUT' => 0, 'SUP' => 0, 'GAR' => 0, 'CAN' => 0,
-            'total' => 0,
-        );
-    }
 
     $est = isset($ord["estado"]) ? $ord["estado"] : "";
     $estL = strtolower($est);
@@ -218,6 +209,18 @@ foreach ($_adm_allOrders as $ord) {
     }
 
     $clave = _admPipeClasificar($est);
+
+    // Para ENT y TER: solo contar si la fecha de salida o ingreso es reciente (3 meses)
+    if ($clave === 'ENT' || $clave === 'TER') {
+        $fechaRef = "";
+        if (!empty($ord["fecha_Salida"])) {
+            $fechaRef = substr($ord["fecha_Salida"], 0, 10);
+        } elseif (!empty($ord["fecha_ingreso"])) {
+            $fechaRef = substr($ord["fecha_ingreso"], 0, 10);
+        }
+        if ($fechaRef < $_adm_corteTec) continue; // Muy antiguas, no contar
+    }
+
     if (isset($_adm_tecStats[$tid][$clave])) {
         $_adm_tecStats[$tid][$clave]++;
     }
@@ -606,6 +609,28 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
   });
 })();
 </script>
+
+<!-- ══════════════════════════════════════════
+     ÚLTIMOS MOVIMIENTOS + ACCIONES RÁPIDAS
+══════════════════════════════════════════ -->
+<div class="crm-section">
+  <div class="crm-section-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
+    <i class="fa-solid fa-clock-rotate-left"></i>
+  </div>
+  <div>
+    <h3>Últimos Movimientos</h3>
+    <p>Observaciones recientes en órdenes de servicio</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 col-md-7 col-xs-12">
+    <?php include "inicio/admin-ultimos-movimientos.php"; ?>
+  </div>
+  <div class="col-lg-4 col-md-5 col-xs-12">
+    <?php include "inicio/admin-acciones-rapidas.php"; ?>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════
      GRÁFICO DE VENTAS
