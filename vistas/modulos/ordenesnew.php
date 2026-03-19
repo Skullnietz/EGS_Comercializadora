@@ -412,7 +412,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
         }
     });
     $('#datatableordenes').DataTable( {
-    "order": [[ 1, "desc" ]],
+    "order": [[ 0, "desc" ]],
     "scrollX": true,
     "autoWidth": false,
     "ajax":{

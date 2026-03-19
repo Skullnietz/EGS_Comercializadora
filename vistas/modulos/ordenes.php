@@ -478,6 +478,7 @@ function _ordGetBadgeClass($estadoText) {
       }
     });
     $('#datatableordenes').DataTable({
+      "order": [[ 0, "desc" ]],
       "scrollX": true,
       "language": {
         "lengthMenu": "Mostrando _MENU_ registros por hoja",
