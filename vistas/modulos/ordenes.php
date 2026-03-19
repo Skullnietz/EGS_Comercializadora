@@ -1350,7 +1350,7 @@ function _ordGetBadgeClass($estadoText) {
                           break;
                       }
                       echo '</td>
-                      <td>' . $valueOrdeneDelTecnico["estado"] . '</td>
+                      <td><span class="badge ' . _ordGetBadgeClass($valueOrdeneDelTecnico["estado"]) . '">' . htmlspecialchars($valueOrdeneDelTecnico["estado"]) . '</span></td>
 
                       <td>' . $valueOrdeneDelTecnico["fecha_ingreso"] . '</td>
 
@@ -1409,7 +1409,7 @@ function _ordGetBadgeClass($estadoText) {
                       }
                       echo '</td>
 
-                      <td>' . $valueOrdeneDelTecnico["estado"] . '</td>
+                      <td><span class="badge ' . _ordGetBadgeClass($valueOrdeneDelTecnico["estado"]) . '">' . htmlspecialchars($valueOrdeneDelTecnico["estado"]) . '</span></td>
 
                       <td>' . $valueOrdeneDelTecnico["fecha_ingreso"] . '</td>
 
