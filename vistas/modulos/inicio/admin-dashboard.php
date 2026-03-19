@@ -165,7 +165,7 @@ $_adm_stages_def = array(
 );
 
 // ══════════════════════════════════════
-// DATOS: Rendimiento de Técnicos — Scoring Justo
+// DATOS: Rendimiento de Técnicos — Scoring Justo por Periodo
 // ══════════════════════════════════════
 // REGLAS DEL NEGOCIO:
 // ✅ ENT (Entregadas) y TER (Terminadas) = puntos A FAVOR
@@ -184,110 +184,111 @@ foreach ($_adm_tecList as $t) {
     if (isset($t['id'])) $_adm_mapaTec[$t['id']] = isset($t['nombre']) ? $t['nombre'] : 'Técnico #'.$t['id'];
 }
 
-$_adm_tecStats = array();
-foreach ($_adm_mapaTec as $tid => $tn) {
-    $_adm_tecStats[$tid] = array(
-        'nombre' => $tn,
-        'REV' => 0, 'OK' => 0, 'TER' => 0, 'ENT' => 0,
-        'AUT' => 0, 'SUP' => 0, 'GAR' => 0, 'CAN' => 0,
-        'total' => 0,
-    );
-}
+// Periodos disponibles para el filtro
+$_adm_tecPeriodos = array(
+    '1m'  => date("Y-m-d", strtotime("-1 month")),
+    '3m'  => date("Y-m-d", strtotime("-3 months")),
+    '12m' => date("Y-m-d", strtotime("-12 months")),
+    'all' => '1900-01-01',
+);
+$_adm_tecPeriodoLabels = array('1m'=>'Mes','3m'=>'3M','12m'=>'Año','all'=>'Todos');
 
-// Analizar últimos 3 meses de órdenes
-$_adm_corteTec = date("Y-m-d", strtotime("-3 months"));
-foreach ($_adm_allOrders as $ord) {
-    $tid = isset($ord["id_tecnico"]) ? $ord["id_tecnico"] : null;
-    if (!$tid || !isset($_adm_mapaTec[$tid])) continue;
-
-    // Usar fecha más relevante según estado
-    $fi = isset($ord["fecha_ingreso"]) ? substr($ord["fecha_ingreso"], 0, 10) : "";
-    $fs = !empty($ord["fecha_Salida"]) ? substr($ord["fecha_Salida"], 0, 10) : "";
-    $fechaRef = !empty($fs) ? $fs : $fi;
-    if ($fechaRef < $_adm_corteTec) continue;
-
-    $est = isset($ord["estado"]) ? $ord["estado"] : "";
-    $estL = strtolower($est);
-
-    // Garantías
-    if (strpos($estL, 'garantia') !== false || strpos($estL, 'garantía') !== false) {
-        $_adm_tecStats[$tid]['GAR']++;
-        $_adm_tecStats[$tid]['total']++;
-        continue;
-    }
-    // Canceladas
-    if (strpos($estL, 'cancel') !== false || strpos($estL, 'can') !== false) {
-        $_adm_tecStats[$tid]['CAN']++;
-        $_adm_tecStats[$tid]['total']++;
-        continue;
+// Función para calcular ranking dado un corte de fecha
+function _admCalcRanking($allOrders, $mapaTec, $corte) {
+    $tecStats = array();
+    foreach ($mapaTec as $tid => $tn) {
+        $tecStats[$tid] = array(
+            'nombre' => $tn,
+            'REV' => 0, 'OK' => 0, 'TER' => 0, 'ENT' => 0,
+            'AUT' => 0, 'SUP' => 0, 'GAR' => 0, 'CAN' => 0,
+            'total' => 0,
+        );
     }
 
-    $clave = _admPipeClasificar($est);
-    if (isset($_adm_tecStats[$tid][$clave])) {
-        $_adm_tecStats[$tid][$clave]++;
+    foreach ($allOrders as $ord) {
+        $tid = isset($ord["id_tecnico"]) ? $ord["id_tecnico"] : null;
+        if (!$tid || !isset($mapaTec[$tid])) continue;
+
+        $fi = isset($ord["fecha_ingreso"]) ? substr($ord["fecha_ingreso"], 0, 10) : "";
+        $fs = !empty($ord["fecha_Salida"]) ? substr($ord["fecha_Salida"], 0, 10) : "";
+        $fechaRef = !empty($fs) ? $fs : $fi;
+        if ($fechaRef < $corte) continue;
+
+        $est = isset($ord["estado"]) ? $ord["estado"] : "";
+        $estL = strtolower($est);
+
+        if (strpos($estL, 'garantia') !== false || strpos($estL, 'garantía') !== false) {
+            $tecStats[$tid]['GAR']++;
+            $tecStats[$tid]['total']++;
+            continue;
+        }
+        if (strpos($estL, 'cancel') !== false || strpos($estL, 'can') !== false) {
+            $tecStats[$tid]['CAN']++;
+            $tecStats[$tid]['total']++;
+            continue;
+        }
+
+        $clave = _admPipeClasificar($est);
+        if (isset($tecStats[$tid][$clave])) {
+            $tecStats[$tid][$clave]++;
+        }
+        $tecStats[$tid]['total']++;
     }
-    $_adm_tecStats[$tid]['total']++;
+
+    $ranking = array();
+    foreach ($tecStats as $tid => $st) {
+        $puntosA_favor = ($st['ENT'] * 3) + ($st['TER'] * 2);
+        $penalizacion  = $st['GAR'] * 5;
+        $puntosBrutos  = max(0, $puntosA_favor - $penalizacion);
+
+        $pendientes    = $st['REV'] + $st['OK'];
+        $completadas   = $st['TER'] + $st['ENT'];
+        $totalElegible = $st['total'] - $st['CAN'];
+
+        $ratioCalidad = $totalElegible > 0 ? round($completadas * 100 / $totalElegible) : 0;
+        $multiplicador = 1.0 + (min($ratioCalidad, 100) / 100) * 0.5;
+        $scoreFinal = round($puntosBrutos * $multiplicador, 1);
+
+        if ($scoreFinal >= 100) { $nivel = 'Élite'; $nivelColor = '#f59e0b'; $nivelIcon = 'fa-crown'; }
+        elseif ($scoreFinal >= 40) { $nivel = 'Pro'; $nivelColor = '#6366f1'; $nivelIcon = 'fa-gem'; }
+        elseif ($scoreFinal >= 15) { $nivel = 'Activo'; $nivelColor = '#22c55e'; $nivelIcon = 'fa-bolt'; }
+        elseif ($puntosBrutos > 0) { $nivel = 'Inicial'; $nivelColor = '#64748b'; $nivelIcon = 'fa-seedling'; }
+        else { $nivel = '—'; $nivelColor = '#cbd5e1'; $nivelIcon = 'fa-minus'; }
+
+        $ranking[] = array(
+            'nombre'       => $st['nombre'],
+            'score'        => $scoreFinal,
+            'puntosBrutos' => $puntosBrutos,
+            'ratioCalidad' => $ratioCalidad,
+            'multiplicador'=> $multiplicador,
+            'totalOrd'     => $st['total'],
+            'entregadas'   => $st['ENT'],
+            'terminadas'   => $st['TER'],
+            'pendientes'   => $pendientes,
+            'revision'     => $st['REV'],
+            'aceptadas'    => $st['OK'],
+            'garantias'    => $st['GAR'],
+            'nivel'        => $nivel,
+            'nivelColor'   => $nivelColor,
+            'nivelIcon'    => $nivelIcon,
+        );
+    }
+    usort($ranking, function($a, $b) {
+        if ($b['score'] != $a['score']) return $b['score'] > $a['score'] ? 1 : -1;
+        return $b['totalOrd'] - $a['totalOrd'];
+    });
+    $ranking = array_slice($ranking, 0, 10);
+    return $ranking;
 }
 
-// FÓRMULA DE SCORING JUSTO:
-// Puntos = (ENT × 3) + (TER × 2) - (GAR × 5)
-// Score Normalizado = Puntos / max(total_ordenes, 1) × 10  (escala 0-10 por orden)
-// Score Final = Puntos_brutos × (1 + Score_Normalizado/20)
-// Esto premia: volumen (más órdenes = más puntos brutos)
-//              calidad (mejor ratio = mejor multiplicador)
-//              penaliza garantías proporcionalmente
-$_adm_ranking = array();
-foreach ($_adm_tecStats as $tid => $st) {
-    $puntosA_favor = ($st['ENT'] * 3) + ($st['TER'] * 2);
-    $penalizacion  = $st['GAR'] * 5;
-    $puntosBrutos  = max(0, $puntosA_favor - $penalizacion);
-
-    $pendientes    = $st['REV'] + $st['OK'];
-    $completadas   = $st['TER'] + $st['ENT'];
-    $totalElegible = $st['total'] - $st['CAN'];
-
-    // Ratio de calidad: completadas vs total elegible
-    $ratioCalidad = $totalElegible > 0 ? round($completadas * 100 / $totalElegible) : 0;
-
-    // Score normalizado por volumen (0-10 escala)
-    $scoreNorm = $totalElegible > 0 ? round(($puntosBrutos / $totalElegible) * 10, 1) : 0;
-
-    // Multiplicador de calidad: de 1.0 a 1.5 según ratio
-    $multiplicador = 1.0 + (min($ratioCalidad, 100) / 100) * 0.5;
-
-    // Score final: combina volumen bruto × calidad
-    $scoreFinal = round($puntosBrutos * $multiplicador, 1);
-
-    // Nivel
-    if ($scoreFinal >= 100) { $nivel = 'Élite'; $nivelColor = '#f59e0b'; $nivelIcon = 'fa-crown'; }
-    elseif ($scoreFinal >= 40) { $nivel = 'Pro'; $nivelColor = '#6366f1'; $nivelIcon = 'fa-gem'; }
-    elseif ($scoreFinal >= 15) { $nivel = 'Activo'; $nivelColor = '#22c55e'; $nivelIcon = 'fa-bolt'; }
-    elseif ($puntosBrutos > 0) { $nivel = 'Inicial'; $nivelColor = '#64748b'; $nivelIcon = 'fa-seedling'; }
-    else { $nivel = '—'; $nivelColor = '#cbd5e1'; $nivelIcon = 'fa-minus'; }
-
-    $_adm_ranking[] = array(
-        'nombre'       => $st['nombre'],
-        'score'        => $scoreFinal,
-        'puntosBrutos' => $puntosBrutos,
-        'ratioCalidad' => $ratioCalidad,
-        'multiplicador'=> $multiplicador,
-        'totalOrd'     => $st['total'],
-        'entregadas'   => $st['ENT'],
-        'terminadas'   => $st['TER'],
-        'pendientes'   => $pendientes,
-        'revision'     => $st['REV'],
-        'aceptadas'    => $st['OK'],
-        'garantias'    => $st['GAR'],
-        'nivel'        => $nivel,
-        'nivelColor'   => $nivelColor,
-        'nivelIcon'    => $nivelIcon,
-    );
+// Pre-calcular ranking para cada periodo
+$_adm_tecRankByPeriod = array();
+foreach ($_adm_tecPeriodos as $pk => $corte) {
+    $_adm_tecRankByPeriod[$pk] = _admCalcRanking($_adm_allOrders, $_adm_mapaTec, $corte);
 }
-usort($_adm_ranking, function($a, $b) {
-    if ($b['score'] != $a['score']) return $b['score'] > $a['score'] ? 1 : -1;
-    return $b['totalOrd'] - $a['totalOrd'];
-});
-$_adm_ranking = array_slice($_adm_ranking, 0, 10);
+
+// Default: Mes
+$_adm_ranking = $_adm_tecRankByPeriod['1m'];
 $_adm_maxScore = (!empty($_adm_ranking) && $_adm_ranking[0]['score'] > 0) ? $_adm_ranking[0]['score'] : 1;
 
 // ══════════════════════════════════════
@@ -671,10 +672,10 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 
 <div class="row">
   <div class="col-lg-8 col-md-7 col-xs-12">
-    <?php include "inicio/admin-ultimos-movimientos.php"; ?>
+    <?php include __DIR__ . "/admin-ultimos-movimientos.php"; ?>
   </div>
   <div class="col-lg-4 col-md-5 col-xs-12">
-    <?php include "inicio/admin-acciones-rapidas.php"; ?>
+    <?php include __DIR__ . "/admin-acciones-rapidas.php"; ?>
   </div>
 </div>
 
@@ -767,7 +768,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 </script>
 
 <!-- ══════════════════════════════════════════
-     RENDIMIENTO DE TÉCNICOS — Scoring Justo
+     RENDIMIENTO DE TÉCNICOS — Scoring Justo con Filtro Periodo
 ══════════════════════════════════════════ -->
 <div class="crm-section">
   <div class="crm-section-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
@@ -775,7 +776,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
   </div>
   <div>
     <h3>Rendimiento de Técnicos</h3>
-    <p>Últimos 3 meses &mdash; Garantías penalizan, pendientes como contexto</p>
+    <p>Garantías penalizan, pendientes como contexto</p>
   </div>
 </div>
 
@@ -795,105 +796,117 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 
 <div class="crm-card" style="margin-bottom:20px">
   <div class="crm-card-head">
-    <h4 class="crm-card-title"><i class="fa-solid fa-trophy"></i> Ranking (3 meses)</h4>
-    <span class="crm-badge" style="background:#fef3c7;color:#92400e"><?php echo count($_adm_ranking); ?> técnicos</span>
+    <h4 class="crm-card-title"><i class="fa-solid fa-trophy"></i> Ranking</h4>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="crm-badge" id="admTecBadge" style="background:#fef3c7;color:#92400e"><?php echo count($_adm_ranking); ?> técnicos</span>
+      <div style="display:inline-flex;background:#f1f5f9;border-radius:8px;padding:2px;gap:2px" id="admTecFilter">
+        <?php foreach ($_adm_tecPeriodoLabels as $pk => $pl):
+          $isActive = ($pk === '1m');
+        ?>
+          <button type="button" class="adm-tec-btn<?php echo $isActive ? ' active' : ''; ?>" data-period="<?php echo $pk; ?>"
+                  style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:<?php echo $isActive ? '#f59e0b' : 'transparent'; ?>;color:<?php echo $isActive ? '#fff' : '#64748b'; ?>"><?php echo $pl; ?></button>
+        <?php endforeach; ?>
+      </div>
+    </div>
   </div>
   <div class="crm-card-body-flush">
-    <?php if (empty($_adm_ranking) || $_adm_ranking[0]['score'] == 0): ?>
-      <div class="crm-empty" style="padding:30px">
-        <i class="fa-solid fa-trophy" style="font-size:32px"></i>
-        <strong>Sin actividad reciente</strong>
-        <span style="font-size:12px">Los técnicos no tienen órdenes completadas en los últimos 3 meses</span>
-      </div>
-    <?php else: ?>
-      <!-- Header -->
-      <div style="display:flex;align-items:center;padding:10px 20px;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--crm-muted)">
-        <div style="width:36px;text-align:center">#</div>
-        <div style="flex:1;min-width:0">Técnico</div>
-        <div style="width:50px;text-align:center" title="Total de órdenes">Total</div>
-        <div style="width:50px;text-align:center;color:#22c55e" title="Entregadas (+3 pts c/u)">ENT</div>
-        <div style="width:50px;text-align:center;color:#06b6d4" title="Terminadas (+2 pts c/u)">TER</div>
-        <div style="width:70px;text-align:center;color:#64748b" title="Pendientes (REV + OK)">Pend.</div>
-        <div style="width:50px;text-align:center;color:#dc2626" title="Garantías (-5 pts c/u)">GAR</div>
-        <div style="width:55px;text-align:center" title="% completadas vs total">Calidad</div>
-        <div style="width:75px;text-align:center">Score</div>
-        <div style="width:65px;text-align:center">Nivel</div>
-      </div>
+    <div id="admTecContent">
+      <?php if (empty($_adm_ranking) || $_adm_ranking[0]['score'] == 0): ?>
+        <div class="crm-empty" style="padding:30px">
+          <i class="fa-solid fa-trophy" style="font-size:32px"></i>
+          <strong>Sin actividad reciente</strong>
+          <span style="font-size:12px">Los técnicos no tienen órdenes completadas en este periodo</span>
+        </div>
+      <?php else: ?>
+        <!-- Header -->
+        <div style="display:flex;align-items:center;padding:10px 20px;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--crm-muted)">
+          <div style="width:36px;text-align:center">#</div>
+          <div style="flex:1;min-width:0">Técnico</div>
+          <div style="width:50px;text-align:center" title="Total de órdenes">Total</div>
+          <div style="width:50px;text-align:center;color:#22c55e" title="Entregadas (+3 pts c/u)">ENT</div>
+          <div style="width:50px;text-align:center;color:#06b6d4" title="Terminadas (+2 pts c/u)">TER</div>
+          <div style="width:70px;text-align:center;color:#64748b" title="Pendientes (REV + OK)">Pend.</div>
+          <div style="width:50px;text-align:center;color:#dc2626" title="Garantías (-5 pts c/u)">GAR</div>
+          <div style="width:55px;text-align:center" title="% completadas vs total">Calidad</div>
+          <div style="width:75px;text-align:center">Score</div>
+          <div style="width:65px;text-align:center">Nivel</div>
+        </div>
 
-      <?php
-      $_rankMedals = array('🥇','🥈','🥉');
-      foreach ($_adm_ranking as $i => $tec):
-        if ($tec['score'] == 0 && $tec['totalOrd'] == 0) continue;
-        $pctBar = round($tec['score'] * 100 / $_adm_maxScore);
-        $bgRow = $i === 0 ? 'background:linear-gradient(90deg,#fefce8,#fff);' : ($i % 2 === 0 ? '' : 'background:#fafbfc;');
-      ?>
-        <div style="display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid #f1f5f9;transition:background .12s;<?php echo $bgRow; ?>"
-             onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='<?php echo $i === 0 ? 'linear-gradient(90deg,#fefce8,#fff)' : ($i % 2 === 0 ? '' : '#fafbfc'); ?>'">
+        <?php
+        $_rankMedals = array('🥇','🥈','🥉');
+        foreach ($_adm_ranking as $i => $tec):
+          if ($tec['score'] == 0 && $tec['totalOrd'] == 0) continue;
+          $pctBar = round($tec['score'] * 100 / $_adm_maxScore);
+          $bgRow = $i === 0 ? 'background:linear-gradient(90deg,#fefce8,#fff);' : ($i % 2 === 0 ? '' : 'background:#fafbfc;');
+        ?>
+          <div style="display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid #f1f5f9;transition:background .12s;<?php echo $bgRow; ?>"
+               onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='<?php echo $i === 0 ? 'linear-gradient(90deg,#fefce8,#fff)' : ($i % 2 === 0 ? '' : '#fafbfc'); ?>'">
 
-          <div style="width:36px;text-align:center;font-size:16px;flex-shrink:0">
-            <?php if ($i < 3 && $tec['score'] > 0): echo $_rankMedals[$i];
-            else: ?><span style="font-size:12px;font-weight:700;color:#94a3b8"><?php echo ($i + 1); ?></span><?php endif; ?>
-          </div>
+            <div style="width:36px;text-align:center;font-size:16px;flex-shrink:0">
+              <?php if ($i < 3 && $tec['score'] > 0): echo $_rankMedals[$i];
+              else: ?><span style="font-size:12px;font-weight:700;color:#94a3b8"><?php echo ($i + 1); ?></span><?php endif; ?>
+            </div>
 
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:700;color:var(--crm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px"><?php echo htmlspecialchars($tec['nombre']); ?></div>
-            <div style="height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;max-width:180px">
-              <div style="height:100%;width:<?php echo $pctBar; ?>%;background:linear-gradient(90deg,<?php echo $tec['nivelColor']; ?>,<?php echo $tec['nivelColor']; ?>aa);border-radius:2px;transition:width .6s"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:700;color:var(--crm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px"><?php echo htmlspecialchars($tec['nombre']); ?></div>
+              <div style="height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;max-width:180px">
+                <div style="height:100%;width:<?php echo $pctBar; ?>%;background:linear-gradient(90deg,<?php echo $tec['nivelColor']; ?>,<?php echo $tec['nivelColor']; ?>aa);border-radius:2px;transition:width .6s"></div>
+              </div>
+            </div>
+
+            <div style="width:50px;text-align:center;font-size:13px;font-weight:700;color:var(--crm-text)"><?php echo $tec['totalOrd']; ?></div>
+
+            <div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#22c55e"><?php echo $tec['entregadas']; ?></span></div>
+
+            <div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#06b6d4"><?php echo $tec['terminadas']; ?></span></div>
+
+            <div style="width:70px;text-align:center">
+              <span style="font-size:11px;font-weight:600;color:#64748b;background:#f1f5f9;padding:2px 6px;border-radius:4px" title="REV:<?php echo $tec['revision']; ?> + OK:<?php echo $tec['aceptadas']; ?>">
+                <?php echo $tec['pendientes']; ?> <i class="fa-solid fa-clock" style="font-size:8px;color:#94a3b8"></i>
+              </span>
+            </div>
+
+            <div style="width:50px;text-align:center">
+              <?php if ($tec['garantias'] > 0): ?>
+                <span style="font-size:11px;font-weight:700;color:#dc2626;background:#fef2f2;padding:2px 6px;border-radius:4px" title="-<?php echo $tec['garantias'] * 5; ?> pts">
+                  -<?php echo $tec['garantias']; ?>
+                </span>
+              <?php else: ?>
+                <span style="font-size:11px;color:#cbd5e1">0</span>
+              <?php endif; ?>
+            </div>
+
+            <div style="width:55px;text-align:center">
+              <?php
+              $qc = $tec['ratioCalidad'] >= 70 ? '#22c55e' : ($tec['ratioCalidad'] >= 40 ? '#f59e0b' : '#ef4444');
+              $qbg = $tec['ratioCalidad'] >= 70 ? '#f0fdf4' : ($tec['ratioCalidad'] >= 40 ? '#fef3c7' : '#fef2f2');
+              ?>
+              <span style="font-size:11px;font-weight:700;color:<?php echo $qc; ?>;background:<?php echo $qbg; ?>;padding:2px 6px;border-radius:4px">
+                <?php echo $tec['ratioCalidad']; ?>%
+              </span>
+            </div>
+
+            <div style="width:75px;text-align:center">
+              <span style="font-size:15px;font-weight:800;color:var(--crm-text)"><?php echo $tec['score']; ?></span>
+              <span style="font-size:9px;color:#94a3b8;display:block;margin-top:-2px">pts</span>
+            </div>
+
+            <div style="width:65px;text-align:center">
+              <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:<?php echo $tec['nivelColor']; ?>;background:<?php echo $tec['nivelColor']; ?>18;padding:3px 8px;border-radius:8px">
+                <i class="fa-solid <?php echo $tec['nivelIcon']; ?>" style="font-size:9px"></i>
+                <?php echo $tec['nivel']; ?>
+              </span>
             </div>
           </div>
+        <?php endforeach; ?>
 
-          <div style="width:50px;text-align:center;font-size:13px;font-weight:700;color:var(--crm-text)"><?php echo $tec['totalOrd']; ?></div>
-
-          <div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#22c55e"><?php echo $tec['entregadas']; ?></span></div>
-
-          <div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#06b6d4"><?php echo $tec['terminadas']; ?></span></div>
-
-          <div style="width:70px;text-align:center">
-            <span style="font-size:11px;font-weight:600;color:#64748b;background:#f1f5f9;padding:2px 6px;border-radius:4px" title="REV:<?php echo $tec['revision']; ?> + OK:<?php echo $tec['aceptadas']; ?>">
-              <?php echo $tec['pendientes']; ?> <i class="fa-solid fa-clock" style="font-size:8px;color:#94a3b8"></i>
-            </span>
-          </div>
-
-          <div style="width:50px;text-align:center">
-            <?php if ($tec['garantias'] > 0): ?>
-              <span style="font-size:11px;font-weight:700;color:#dc2626;background:#fef2f2;padding:2px 6px;border-radius:4px" title="-<?php echo $tec['garantias'] * 5; ?> pts">
-                -<?php echo $tec['garantias']; ?>
-              </span>
-            <?php else: ?>
-              <span style="font-size:11px;color:#cbd5e1">0</span>
-            <?php endif; ?>
-          </div>
-
-          <div style="width:55px;text-align:center">
-            <?php
-            $qc = $tec['ratioCalidad'] >= 70 ? '#22c55e' : ($tec['ratioCalidad'] >= 40 ? '#f59e0b' : '#ef4444');
-            $qbg = $tec['ratioCalidad'] >= 70 ? '#f0fdf4' : ($tec['ratioCalidad'] >= 40 ? '#fef3c7' : '#fef2f2');
-            ?>
-            <span style="font-size:11px;font-weight:700;color:<?php echo $qc; ?>;background:<?php echo $qbg; ?>;padding:2px 6px;border-radius:4px">
-              <?php echo $tec['ratioCalidad']; ?>%
-            </span>
-          </div>
-
-          <div style="width:75px;text-align:center">
-            <span style="font-size:15px;font-weight:800;color:var(--crm-text)"><?php echo $tec['score']; ?></span>
-            <span style="font-size:9px;color:#94a3b8;display:block;margin-top:-2px">pts</span>
-          </div>
-
-          <div style="width:65px;text-align:center">
-            <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:<?php echo $tec['nivelColor']; ?>;background:<?php echo $tec['nivelColor']; ?>18;padding:3px 8px;border-radius:8px">
-              <i class="fa-solid <?php echo $tec['nivelIcon']; ?>" style="font-size:9px"></i>
-              <?php echo $tec['nivel']; ?>
-            </span>
-          </div>
+        <div style="padding:12px 20px;background:#f8fafc;display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--crm-muted);border-top:2px solid #e2e8f0">
+          <span><i class="fa-solid fa-triangle-exclamation" style="color:#dc2626"></i> Cada <strong>garantía</strong> resta <strong>5 pts</strong> al score</span>
+          <span><i class="fa-solid fa-clock" style="color:#64748b"></i> <strong>Pendientes</strong> (REV+OK) son contexto, no suman ni restan</span>
+          <span style="margin-left:auto"><i class="fa-solid fa-scale-balanced" style="color:#6366f1"></i> Score = Pts brutos × multiplicador calidad</span>
         </div>
-      <?php endforeach; ?>
-
-      <div style="padding:12px 20px;background:#f8fafc;display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--crm-muted);border-top:2px solid #e2e8f0">
-        <span><i class="fa-solid fa-triangle-exclamation" style="color:#dc2626"></i> Cada <strong>garantía</strong> resta <strong>5 pts</strong> al score</span>
-        <span><i class="fa-solid fa-clock" style="color:#64748b"></i> <strong>Pendientes</strong> (REV+OK) son contexto, no suman ni restan</span>
-        <span style="margin-left:auto"><i class="fa-solid fa-scale-balanced" style="color:#6366f1"></i> Score = Pts brutos × multiplicador calidad</span>
-      </div>
-    <?php endif; ?>
+      <?php endif; ?>
+    </div>
   </div>
   <div style="text-align:center;padding:12px;border-top:1px solid #f1f5f9">
     <a href="index.php?ruta=tecnicos" style="color:#6366f1;font-size:12px;font-weight:600;text-decoration:none">
@@ -901,6 +914,96 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
     </a>
   </div>
 </div>
+
+<script>
+(function(){
+  var tecRankData = <?php echo json_encode($_adm_tecRankByPeriod); ?>;
+  var medals = ['🥇','🥈','🥉'];
+
+  function getNivelInfo(score, puntosBrutos) {
+    if (score >= 100) return {nivel:'Élite', color:'#f59e0b', icon:'fa-crown'};
+    if (score >= 40) return {nivel:'Pro', color:'#6366f1', icon:'fa-gem'};
+    if (score >= 15) return {nivel:'Activo', color:'#22c55e', icon:'fa-bolt'};
+    if (puntosBrutos > 0) return {nivel:'Inicial', color:'#64748b', icon:'fa-seedling'};
+    return {nivel:'—', color:'#cbd5e1', icon:'fa-minus'};
+  }
+
+  function getQColor(ratio) {
+    if (ratio >= 70) return {c:'#22c55e', bg:'#f0fdf4'};
+    if (ratio >= 40) return {c:'#f59e0b', bg:'#fef3c7'};
+    return {c:'#ef4444', bg:'#fef2f2'};
+  }
+
+  function renderTecRanking(ranking) {
+    var $cont = $('#admTecContent');
+    if (!ranking || ranking.length === 0 || ranking[0].score === 0) {
+      $cont.html('<div class="crm-empty" style="padding:30px"><i class="fa-solid fa-trophy" style="font-size:32px"></i><strong>Sin actividad en este periodo</strong><span style="font-size:12px">No hay órdenes completadas</span></div>');
+      $('#admTecBadge').text('0 técnicos');
+      return;
+    }
+    var maxScore = ranking[0].score > 0 ? ranking[0].score : 1;
+    var count = 0;
+    var html = '<div style="display:flex;align-items:center;padding:10px 20px;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--crm-muted)">'
+      + '<div style="width:36px;text-align:center">#</div>'
+      + '<div style="flex:1;min-width:0">Técnico</div>'
+      + '<div style="width:50px;text-align:center">Total</div>'
+      + '<div style="width:50px;text-align:center;color:#22c55e">ENT</div>'
+      + '<div style="width:50px;text-align:center;color:#06b6d4">TER</div>'
+      + '<div style="width:70px;text-align:center;color:#64748b">Pend.</div>'
+      + '<div style="width:50px;text-align:center;color:#dc2626">GAR</div>'
+      + '<div style="width:55px;text-align:center">Calidad</div>'
+      + '<div style="width:75px;text-align:center">Score</div>'
+      + '<div style="width:65px;text-align:center">Nivel</div>'
+      + '</div>';
+
+    for (var i = 0; i < ranking.length; i++) {
+      var t = ranking[i];
+      if (t.score === 0 && t.totalOrd === 0) continue;
+      count++;
+      var pctBar = Math.round(t.score * 100 / maxScore);
+      var niv = getNivelInfo(t.score, t.puntosBrutos);
+      var q = getQColor(t.ratioCalidad);
+      var bgRow = i === 0 ? 'background:linear-gradient(90deg,#fefce8,#fff);' : (i % 2 === 0 ? '' : 'background:#fafbfc;');
+      var rank = (i < 3 && t.score > 0) ? '<span style="font-size:16px">' + medals[i] + '</span>' : '<span style="font-size:12px;font-weight:700;color:#94a3b8">' + (i+1) + '</span>';
+      var gar = t.garantias > 0 ? '<span style="font-size:11px;font-weight:700;color:#dc2626;background:#fef2f2;padding:2px 6px;border-radius:4px">-' + t.garantias + '</span>' : '<span style="font-size:11px;color:#cbd5e1">0</span>';
+
+      html += '<div style="display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid #f1f5f9;' + bgRow + '">'
+        + '<div style="width:36px;text-align:center;flex-shrink:0">' + rank + '</div>'
+        + '<div style="flex:1;min-width:0">'
+        +   '<div style="font-size:13px;font-weight:700;color:var(--crm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">' + $('<span>').text(t.nombre).html() + '</div>'
+        +   '<div style="height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;max-width:180px"><div style="height:100%;width:' + pctBar + '%;background:linear-gradient(90deg,' + niv.color + ',' + niv.color + 'aa);border-radius:2px"></div></div>'
+        + '</div>'
+        + '<div style="width:50px;text-align:center;font-size:13px;font-weight:700;color:var(--crm-text)">' + t.totalOrd + '</div>'
+        + '<div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#22c55e">' + t.entregadas + '</span></div>'
+        + '<div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#06b6d4">' + t.terminadas + '</span></div>'
+        + '<div style="width:70px;text-align:center"><span style="font-size:11px;font-weight:600;color:#64748b;background:#f1f5f9;padding:2px 6px;border-radius:4px">' + t.pendientes + ' <i class="fa-solid fa-clock" style="font-size:8px;color:#94a3b8"></i></span></div>'
+        + '<div style="width:50px;text-align:center">' + gar + '</div>'
+        + '<div style="width:55px;text-align:center"><span style="font-size:11px;font-weight:700;color:' + q.c + ';background:' + q.bg + ';padding:2px 6px;border-radius:4px">' + t.ratioCalidad + '%</span></div>'
+        + '<div style="width:75px;text-align:center"><span style="font-size:15px;font-weight:800;color:var(--crm-text)">' + t.score + '</span><span style="font-size:9px;color:#94a3b8;display:block;margin-top:-2px">pts</span></div>'
+        + '<div style="width:65px;text-align:center"><span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:' + niv.color + ';background:' + niv.color + '18;padding:3px 8px;border-radius:8px"><i class="fa-solid ' + niv.icon + '" style="font-size:9px"></i> ' + niv.nivel + '</span></div>'
+        + '</div>';
+    }
+
+    html += '<div style="padding:12px 20px;background:#f8fafc;display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--crm-muted);border-top:2px solid #e2e8f0">'
+      + '<span><i class="fa-solid fa-triangle-exclamation" style="color:#dc2626"></i> Cada <strong>garantía</strong> resta <strong>5 pts</strong></span>'
+      + '<span><i class="fa-solid fa-clock" style="color:#64748b"></i> <strong>Pendientes</strong> (REV+OK) son contexto</span>'
+      + '<span style="margin-left:auto"><i class="fa-solid fa-scale-balanced" style="color:#6366f1"></i> Score = Pts brutos × mult. calidad</span>'
+      + '</div>';
+
+    $cont.html(html);
+    $('#admTecBadge').text(count + ' técnicos');
+  }
+
+  $('#admTecFilter').on('click', '.adm-tec-btn', function(){
+    var $btn = $(this), period = $btn.data('period');
+    var data = tecRankData[period];
+    if (!data) return;
+    $('#admTecFilter .adm-tec-btn').css({background:'transparent',color:'#64748b'}).removeClass('active');
+    $btn.css({background:'#f59e0b',color:'#fff'}).addClass('active');
+    renderTecRanking(data);
+  });
+})();
+</script>
 
 <script>
 (function(){
