@@ -15,6 +15,7 @@ $_rt_tecLista = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", 
 if (!is_array($_rt_tecLista)) $_rt_tecLista = array();
 
 $_rt_limite = date("Y-m-d", strtotime("-1 month"));
+$_rt_limite3m = date("Y-m-d", strtotime("-3 months"));
 
 $_rt_ranking = array();
 
@@ -24,20 +25,30 @@ foreach ($_rt_tecLista as $tec) {
 
     $rev = 0; $ok = 0; $ter = 0; $ent = 0;
 
-    // REV - En revisión (pendientes de diagnosticar)
+    // REV - En revisión (filtrar a 3 meses, las más antiguas están congeladas)
     try {
         $r = $_rt_ctrl->ctrlMostrarOrdenesPorEstadoEmpresayTecnico(
             "En revisión (REV)", $_rt_item, $_rt_val, $_rt_field, $tid
         );
-        if (is_array($r)) $rev = count($r);
+        if (is_array($r)) {
+            foreach ($r as $o) {
+                $fi = isset($o["fecha_ingreso"]) ? substr($o["fecha_ingreso"], 0, 10) : "";
+                if ($fi >= $_rt_limite3m) $rev++;
+            }
+        }
     } catch (Exception $e) {}
 
-    // OK - Aceptadas (en posesión del técnico, reparando)
+    // OK - Aceptadas (filtrar a 3 meses, las más antiguas están congeladas)
     try {
         $r = $_rt_ctrl->ctrlMostrarOrdenesPorEstadoEmpresayTecnico(
             "Aceptado (ok)", $_rt_item, $_rt_val, $_rt_field, $tid
         );
-        if (is_array($r)) $ok = count($r);
+        if (is_array($r)) {
+            foreach ($r as $o) {
+                $fi = isset($o["fecha_ingreso"]) ? substr($o["fecha_ingreso"], 0, 10) : "";
+                if ($fi >= $_rt_limite3m) $ok++;
+            }
+        }
     } catch (Exception $e) {}
 
     // TER - Terminadas (trabajo completado)

@@ -50,22 +50,27 @@ try {
     if (is_array($r)) $_tec_AUT = $r;
 } catch (Exception $e) {}
 
-// ── Filtrar solo del mes (para KPI eficiencia) ──
+// ── Filtrar por fecha ──
 $_tec_limite = date("Y-m-d", strtotime("-1 month"));
+$_tec_limite3m = date("Y-m-d", strtotime("-3 months"));
 
-function _tecFiltrarMes($arr, $limite) {
+function _tecFiltrarFecha($arr, $limite) {
     return array_filter($arr, function($o) use ($limite) {
         $fi = isset($o["fecha_ingreso"]) ? substr($o["fecha_ingreso"], 0, 10) : "";
         return $fi >= $limite;
     });
 }
 
-$_tec_REV_mes = _tecFiltrarMes($_tec_REV, $_tec_limite);
-$_tec_OK_mes  = _tecFiltrarMes($_tec_OK, $_tec_limite);
-$_tec_TER_mes = _tecFiltrarMes($_tec_TER, $_tec_limite);
-$_tec_ENT_mes = _tecFiltrarMes($_tec_ENT, $_tec_limite);
+// Filtrar órdenes activas (REV/OK) a máximo 3 meses — las más antiguas están congeladas
+$_tec_REV = array_values(_tecFiltrarFecha($_tec_REV, $_tec_limite3m));
+$_tec_OK  = array_values(_tecFiltrarFecha($_tec_OK, $_tec_limite3m));
 
-// ── Totales ──
+$_tec_REV_mes = _tecFiltrarFecha($_tec_REV, $_tec_limite);
+$_tec_OK_mes  = _tecFiltrarFecha($_tec_OK, $_tec_limite);
+$_tec_TER_mes = _tecFiltrarFecha($_tec_TER, $_tec_limite);
+$_tec_ENT_mes = _tecFiltrarFecha($_tec_ENT, $_tec_limite);
+
+// ── Totales (ya filtrados a 3 meses) ──
 $_tec_totalActivas = count($_tec_REV) + count($_tec_OK);
 $_tec_totalMes = count($_tec_REV_mes) + count($_tec_OK_mes) + count($_tec_TER_mes) + count($_tec_ENT_mes);
 
