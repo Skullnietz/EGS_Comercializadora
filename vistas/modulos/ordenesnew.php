@@ -469,6 +469,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
     "columns":[
         {data: null,
             "render": function (data, type, row, meta ) {
+                if (type === 'sort' || type === 'type') return parseInt(data.id) || 0;
                 return '<span style="font-weight:800;color:#6366f1">#'+data.id+'</span>';
             }},
         {data: null,
