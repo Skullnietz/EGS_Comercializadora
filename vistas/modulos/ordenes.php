@@ -834,7 +834,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td><strong><h2> ' . $valueOrdenes["id"] . '</h2></strong></td>
+                      <td data-order="' . (int)$valueOrdenes["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdenes["id"] . '</span></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -885,7 +885,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td><strong><h2>' . $valueOrdenes["id"] . '</h2></strong></td>
+                      <td data-order="' . (int)$valueOrdenes["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdenes["id"] . '</span></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -1086,7 +1086,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td><strong><h4>ORDEN: ' . $valueOrdenes["id"] . '</h4></strong></td>
+                      <td data-order="' . (int)$valueOrdenes["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdenes["id"] . '</span></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -1138,7 +1138,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td><strong><h4>ORDEN: ' . $valueOrdenes["id"] . '</h4></strong></td>
+                      <td data-order="' . (int)$valueOrdenes["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdenes["id"] . '</span></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -1333,7 +1333,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td><strong><h4>ORDEN: ' . $valueOrdeneDelTecnico["id"] . '</h4></strong></td>
+                      <td data-order="' . (int)$valueOrdeneDelTecnico["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdeneDelTecnico["id"] . '</span></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -1391,7 +1391,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td><strong><h4>ORDEN: ' . $valueOrdeneDelTecnico["id"] . '</h4></strong></td>
+                      <td data-order="' . (int)$valueOrdeneDelTecnico["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdeneDelTecnico["id"] . '</span></td>
 
                       <td>' . $NombreTecnico . '</td>
 
