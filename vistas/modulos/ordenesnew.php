@@ -484,21 +484,32 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
         {data: null, "render": function(data) {
             var e = (data.estado || '').toLowerCase().trim();
             var cls = 'badge-otro';
-            if (e === 'pendiente' || e === 'por asignar') cls = 'badge-pendiente';
-            else if (e === 'en proceso' || e === 'proceso' || e === 'atendiendo') cls = 'badge-proceso';
-            else if (e === 'completada' || e === 'finalizada' || e === 'cerrada') cls = 'badge-completada';
-            else if (e === 'cancelada' || e === 'rechazada') cls = 'badge-cancelada';
-            else if (e === 'aceptado' || e.indexOf('aceptado') !== -1 || e.indexOf('ok') !== -1) cls = 'badge-aceptado';
-            else if (e.indexOf('pendiente de autoriz') !== -1) cls = 'badge-pendiente-aut';
-            else if (e.indexOf('producto para') !== -1) cls = 'badge-producto-venta';
-            else if (e === 'terminado' || e.indexOf('terminada') !== -1 || e.indexOf('ter') !== -1) cls = 'badge-terminado';
-            else if (e.indexOf('entregado') !== -1 || e.indexOf('ent') !== -1) cls = 'badge-entregado';
-            else if (e.indexOf('garantia') !== -1 || e.indexOf('garantía') !== -1) {
-                cls = (e.indexOf('revision') !== -1 || e.indexOf('revisión') !== -1) ? 'badge-revision-garantia' : 'badge-garantia';
+            // Garantías primero (antes de revisión)
+            if (e.indexOf('garant') !== -1) {
+                cls = (e.indexOf('revision') !== -1 || e.indexOf('revisión') !== -1 || e.indexOf('probable') !== -1) ? 'badge-revision-garantia' : 'badge-garantia';
             }
-            else if (e === 'en revision' || e === 'en revisión' || e.indexOf('rev') !== -1) cls = 'badge-revision';
-            else if (e === 'supervision' || e === 'supervisión' || e.indexOf('sup') !== -1) cls = 'badge-supervision';
+            // Entregado — "Entregado (Ent)"
+            else if (e.indexOf('entregado') !== -1 || e.indexOf('(ent)') !== -1) cls = 'badge-entregado';
+            // Terminada — "Terminada (ter)"
+            else if (e.indexOf('terminad') !== -1 || e.indexOf('(ter)') !== -1) cls = 'badge-terminado';
+            // Aceptado — "Aceptado (ok)"
+            else if (e.indexOf('aceptado') !== -1 || e.indexOf('(ok)') !== -1) cls = 'badge-aceptado';
+            // Supervisión — "Supervisión (SUP)"
+            else if (e.indexOf('supervi') !== -1 || e.indexOf('(sup)') !== -1) cls = 'badge-supervision';
+            // Revisión — "En revisión (REV)"
+            else if (e.indexOf('revisi') !== -1 || e.indexOf('(rev)') !== -1) cls = 'badge-revision';
+            // Autorización — "Pendiente de autorización (AUT"
+            else if (e.indexOf('autoriz') !== -1 || e.indexOf('(aut') !== -1) cls = 'badge-pendiente-aut';
+            // Cancelada
+            else if (e.indexOf('cancel') !== -1 || e.indexOf('rechaz') !== -1) cls = 'badge-cancelada';
+            // Producto para venta
+            else if (e.indexOf('producto para') !== -1) cls = 'badge-producto-venta';
+            // Sin reparación
             else if (e.indexOf('sin reparac') !== -1) cls = 'badge-sin-reparacion';
+            // Pendiente / Por asignar
+            else if (e.indexOf('pendiente') !== -1 || e.indexOf('por asignar') !== -1) cls = 'badge-pendiente';
+            // En proceso
+            else if (e.indexOf('proceso') !== -1 || e.indexOf('atendiendo') !== -1) cls = 'badge-proceso';
             return '<span class="badge ' + cls + '">' + (data.estado || '') + '</span>';
         }},
         {"data":"fecha_ingreso"},

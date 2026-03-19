@@ -392,6 +392,31 @@ table.dataTable thead .sorting_desc::after { content: ' ▼'; font-size: 8px; co
 table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: #cbd5e1; }
 </style>
 
+<?php
+// Helper global: mapear estado a clase de badge
+function _ordGetBadgeClass($estadoText) {
+    $e = trim(mb_strtolower((string)$estadoText, 'UTF-8'));
+    // Garantías primero (antes de revisión)
+    if (strpos($e, 'garant') !== false) {
+        return (strpos($e, 'revision') !== false || strpos($e, 'revisión') !== false || strpos($e, 'probable') !== false)
+            ? 'badge-revision-garantia' : 'badge-garantia';
+    }
+    if (strpos($e, 'entregado') !== false || strpos($e, '(ent)') !== false) return 'badge-entregado';
+    if (strpos($e, 'terminad') !== false || strpos($e, '(ter)') !== false) return 'badge-terminado';
+    if (strpos($e, 'aceptado') !== false || strpos($e, '(ok)') !== false) return 'badge-aceptado';
+    if (strpos($e, 'supervi') !== false || strpos($e, '(sup)') !== false) return 'badge-supervision';
+    if (strpos($e, 'revisi') !== false || strpos($e, '(rev)') !== false) return 'badge-revision';
+    if (strpos($e, 'autoriz') !== false || strpos($e, '(aut') !== false) return 'badge-pendiente-aut';
+    if (strpos($e, 'cancel') !== false || strpos($e, 'rechaz') !== false) return 'badge-cancelada';
+    if (strpos($e, 'producto para') !== false) return 'badge-producto-venta';
+    if (strpos($e, 'sin reparac') !== false) return 'badge-sin-reparacion';
+    if (strpos($e, 'pendiente') !== false || strpos($e, 'por asignar') !== false) return 'badge-pendiente';
+    if (strpos($e, 'proceso') !== false || strpos($e, 'atendiendo') !== false) return 'badge-proceso';
+    if (strpos($e, 'completad') !== false || strpos($e, 'finalizad') !== false || strpos($e, 'cerrad') !== false) return 'badge-completada';
+    return 'badge-otro';
+}
+?>
+
 <script>
   $(document).ready(function () {
     // Ocultar imagenes de la orden
@@ -827,42 +852,8 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 
                       <td>';
                     $estadoText = (string) $valueOrdenes["estado"];
-                    $estadoRaw = trim(mb_strtolower($estadoText, 'UTF-8'));
-                    $estadoClass = 'badge-otro';
-
-                    if (in_array($estadoRaw, ['pendiente', 'por asignar']))
-                      $estadoClass = 'badge-pendiente';
-                    elseif (in_array($estadoRaw, ['en proceso', 'proceso', 'atendiendo']))
-                      $estadoClass = 'badge-proceso';
-                    elseif (in_array($estadoRaw, ['completada', 'finalizada', 'cerrada']))
-                      $estadoClass = 'badge-completada';
-                    elseif (in_array($estadoRaw, ['cancelada', 'rechazada']))
-                      $estadoClass = 'badge-cancelada';
-
-                    // Mapeo específico para Ordenes
-                    elseif ($estadoRaw == 'aceptado')
-                      $estadoClass = 'badge-aceptado';
-                    elseif (strpos($estadoRaw, 'pendiente de autorizacion') !== false || strpos($estadoRaw, 'pendiente de autorización') !== false)
-                      $estadoClass = 'badge-pendiente-aut';
-                    elseif ($estadoRaw == 'producto para venta' || $estadoRaw == 'producto para la venta')
-                      $estadoClass = 'badge-producto-venta';
-                    elseif ($estadoRaw == 'terminado')
-                      $estadoClass = 'badge-terminado';
-                    elseif ($estadoRaw == 'en revision' || $estadoRaw == 'en revisión')
-                      $estadoClass = 'badge-revision';
-                    elseif ($estadoRaw == 'supervision' || $estadoRaw == 'supervisión')
-                      $estadoClass = 'badge-supervision';
-                    elseif ($estadoRaw == 'sin reparacion' || $estadoRaw == 'sin reparación')
-                      $estadoClass = 'badge-sin-reparacion';
-                    elseif (strpos($estadoRaw, 'garantia') !== false || strpos($estadoRaw, 'garantía') !== false) {
-                      if (strpos($estadoRaw, 'revision') !== false || strpos($estadoRaw, 'revisión') !== false) {
-                        $estadoClass = 'badge-revision-garantia';
-                      } else {
-                        $estadoClass = 'badge-garantia';
-                      }
-                    }
-
-                    echo '<span class="badge ' . $estadoClass . '">' . $estadoText . '</span>';
+                    $estadoClass = _ordGetBadgeClass($estadoText);
+                    echo '<span class="badge ' . $estadoClass . '">' . htmlspecialchars($estadoText) . '</span>';
                     echo '</td>
 
                       <td>' . $valueOrdenes["fecha_ingreso"] . '</td>
@@ -915,42 +906,8 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 
                       <td>';
                     $estadoText = (string) $valueOrdenes["estado"];
-                    $estadoRaw = trim(mb_strtolower($estadoText, 'UTF-8'));
-                    $estadoClass = 'badge-otro';
-
-                    if (in_array($estadoRaw, ['pendiente', 'por asignar']))
-                      $estadoClass = 'badge-pendiente';
-                    elseif (in_array($estadoRaw, ['en proceso', 'proceso', 'atendiendo']))
-                      $estadoClass = 'badge-proceso';
-                    elseif (in_array($estadoRaw, ['completada', 'finalizada', 'cerrada']))
-                      $estadoClass = 'badge-completada';
-                    elseif (in_array($estadoRaw, ['cancelada', 'rechazada']))
-                      $estadoClass = 'badge-cancelada';
-
-                    // Mapeo específico para Ordenes
-                    elseif ($estadoRaw == 'aceptado')
-                      $estadoClass = 'badge-aceptado';
-                    elseif (strpos($estadoRaw, 'pendiente de autorizacion') !== false || strpos($estadoRaw, 'pendiente de autorización') !== false)
-                      $estadoClass = 'badge-pendiente-aut';
-                    elseif ($estadoRaw == 'producto para venta' || $estadoRaw == 'producto para la venta')
-                      $estadoClass = 'badge-producto-venta';
-                    elseif ($estadoRaw == 'terminado')
-                      $estadoClass = 'badge-terminado';
-                    elseif ($estadoRaw == 'en revision' || $estadoRaw == 'en revisión')
-                      $estadoClass = 'badge-revision';
-                    elseif ($estadoRaw == 'supervision' || $estadoRaw == 'supervisión')
-                      $estadoClass = 'badge-supervision';
-                    elseif ($estadoRaw == 'sin reparacion' || $estadoRaw == 'sin reparación')
-                      $estadoClass = 'badge-sin-reparacion';
-                    elseif (strpos($estadoRaw, 'garantia') !== false || strpos($estadoRaw, 'garantía') !== false) {
-                      if (strpos($estadoRaw, 'revision') !== false || strpos($estadoRaw, 'revisión') !== false) {
-                        $estadoClass = 'badge-revision-garantia';
-                      } else {
-                        $estadoClass = 'badge-garantia';
-                      }
-                    }
-
-                    echo '<span class="badge ' . $estadoClass . '">' . $estadoText . '</span>';
+                    $estadoClass = _ordGetBadgeClass($estadoText);
+                    echo '<span class="badge ' . $estadoClass . '">' . htmlspecialchars($estadoText) . '</span>';
                     echo '</td>
 
                       <td>' . $valueOrdenes["fecha_ingreso"] . '</td>
@@ -1153,36 +1110,9 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 
                       <td>';
                       $estadoText = (string) $valueOrdenes["estado"];
-                      $estadoRaw = trim($estadoText); // No strtolower to match exact values if needed, but case-insensitive is safer
-                      $estadoClass = 'badge-otro';
+                      $estadoClass = _ordGetBadgeClass($estadoText);
 
-                      // Normalización para comparación
-                      $estadoComp = mb_strtolower($estadoRaw, 'UTF-8');
-
-                      if (strpos($estadoComp, 'en revisión (rev)') !== false)
-                        $estadoClass = 'badge-revision';
-                      elseif (strpos($estadoComp, 'supervisión (sup)') !== false)
-                        $estadoClass = 'badge-supervision';
-                      elseif (strpos($estadoComp, 'pendiente de autorización (aut') !== false)
-                        $estadoClass = 'badge-pendiente-aut';
-                      elseif (strpos($estadoComp, 'aceptado (ok)') !== false)
-                        $estadoClass = 'badge-aceptado';
-                      elseif (strpos($estadoComp, 'terminada (ter)') !== false)
-                        $estadoClass = 'badge-terminado';
-                      elseif (strpos($estadoComp, 'cancelada (can)') !== false)
-                        $estadoClass = 'badge-cancelada';
-                      elseif (strpos($estadoComp, 'sin reparación (sr)') !== false)
-                        $estadoClass = 'badge-sin-reparacion';
-                      elseif (strpos($estadoComp, 'entregado (ent)') !== false)
-                        $estadoClass = 'badge-entregado'; // New class needed? Using default or similar
-                      elseif (strpos($estadoComp, 'producto para venta') !== false)
-                        $estadoClass = 'badge-producto-venta';
-                      elseif (strpos($estadoComp, 'en revisión probable garantía') !== false)
-                        $estadoClass = 'badge-revision-garantia';
-                      elseif (strpos($estadoComp, 'garantía aceptada (ga)') !== false)
-                        $estadoClass = 'badge-garantia';
-
-                      echo '<span class="badge ' . $estadoClass . '">' . $estadoText . '</span>';
+                      echo '<span class="badge ' . $estadoClass . '">' . htmlspecialchars($estadoText) . '</span>';
                       echo '</td>
 
                       <td>' . $valueOrdenes["fecha_ingreso"] . '</td>
@@ -1233,7 +1163,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 
                       <td>$ ' . number_format($valueOrdenes["total"], 2) . '</td>
 
-                      <td>' . $valueOrdenes["estado"] . '</td>
+                      <td><span class="badge ' . _ordGetBadgeClass($valueOrdenes["estado"]) . '">' . htmlspecialchars($valueOrdenes["estado"]) . '</span></td>
 
                       <td>' . $valueOrdenes["fecha_ingreso"] . '</td>
 
