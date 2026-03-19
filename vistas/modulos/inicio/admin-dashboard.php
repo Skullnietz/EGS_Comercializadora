@@ -130,11 +130,21 @@ $_adm_pipe_data = array();
 foreach ($_adm_pipe_cortes as $periodo => $corte) {
     $_adm_pipe_data[$periodo] = array('REV'=>0, 'AUT'=>0, 'OK'=>0, 'TER'=>0, 'ENT'=>0, 'SUP'=>0, 'total'=>0);
     foreach ($_adm_allOrders as $ord) {
+        $est = isset($ord["estado"]) ? $ord["estado"] : "";
+        $clave = _admPipeClasificar($est);
+        if ($clave === 'CAN') continue; // No contar canceladas en pipeline
+
+        // Usar fecha_Salida para ENT/TER (alinea con KPI "Entregadas/Mes")
+        // y fecha_ingreso para los demás estados
         $fi = isset($ord["fecha_ingreso"]) ? substr($ord["fecha_ingreso"], 0, 10) : "";
-        if ($fi >= $corte) {
-            $est = isset($ord["estado"]) ? $ord["estado"] : "";
-            $clave = _admPipeClasificar($est);
-            if ($clave === 'CAN') continue; // No contar canceladas en pipeline
+        $fs = !empty($ord["fecha_Salida"]) ? substr($ord["fecha_Salida"], 0, 10) : "";
+        if ($clave === 'ENT' || $clave === 'TER') {
+            $fechaRef = !empty($fs) ? $fs : $fi;
+        } else {
+            $fechaRef = $fi;
+        }
+
+        if ($fechaRef >= $corte) {
             if (isset($_adm_pipe_data[$periodo][$clave])) {
                 $_adm_pipe_data[$periodo][$clave]++;
             }
@@ -155,13 +165,13 @@ $_adm_stages_def = array(
 );
 
 // ══════════════════════════════════════
-// DATOS: Rendimiento de Técnicos — Sistema de Puntuación Ponderado
+// DATOS: Rendimiento de Técnicos — Scoring Justo
 // ══════════════════════════════════════
-// Fórmula: Score = (ENT×3 + TER×2 + OK×1) × Bonificación_Eficiencia
-// - Premia volumen de trabajo: más órdenes = más puntos base
-// - Bonificación de eficiencia SOLO si tiene ≥5 órdenes (evita que 1/1 = 100%)
-// - Excluye garantías y canceladas del cálculo de eficiencia
-// - Garantías: "En revisión probable garantía", "Garantía aceptada (GA)"
+// REGLAS DEL NEGOCIO:
+// ✅ ENT (Entregadas) y TER (Terminadas) = puntos A FAVOR
+// ⏳ REV (Revisión) y OK (Aceptadas) = trabajo PENDIENTE (contexto, no suma ni resta)
+// ❌ GAR (Garantía) = PENALIZACIÓN (producto regresado por insatisfacción)
+// ⚖️ Justo para pocos y muchos: usa Score Normalizado por volumen
 
 $_adm_tecList = array();
 try {
@@ -174,9 +184,6 @@ foreach ($_adm_tecList as $t) {
     if (isset($t['id'])) $_adm_mapaTec[$t['id']] = isset($t['nombre']) ? $t['nombre'] : 'Técnico #'.$t['id'];
 }
 
-// Clasificar órdenes por técnico
-// Criterio: TODAS las órdenes activas (REV, OK, AUT, SUP) sin importar fecha
-//         + órdenes TER/ENT de los últimos 3 meses (para medir productividad reciente)
 $_adm_tecStats = array();
 foreach ($_adm_mapaTec as $tid => $tn) {
     $_adm_tecStats[$tid] = array(
@@ -187,21 +194,28 @@ foreach ($_adm_mapaTec as $tid => $tn) {
     );
 }
 
-$_adm_corteTec = date("Y-m-d", strtotime("-3 months")); // 3 meses para ENT/TER
+// Analizar últimos 3 meses de órdenes
+$_adm_corteTec = date("Y-m-d", strtotime("-3 months"));
 foreach ($_adm_allOrders as $ord) {
     $tid = isset($ord["id_tecnico"]) ? $ord["id_tecnico"] : null;
     if (!$tid || !isset($_adm_mapaTec[$tid])) continue;
 
+    // Usar fecha más relevante según estado
+    $fi = isset($ord["fecha_ingreso"]) ? substr($ord["fecha_ingreso"], 0, 10) : "";
+    $fs = !empty($ord["fecha_Salida"]) ? substr($ord["fecha_Salida"], 0, 10) : "";
+    $fechaRef = !empty($fs) ? $fs : $fi;
+    if ($fechaRef < $_adm_corteTec) continue;
+
     $est = isset($ord["estado"]) ? $ord["estado"] : "";
     $estL = strtolower($est);
 
-    // Detectar garantías
+    // Garantías
     if (strpos($estL, 'garantia') !== false || strpos($estL, 'garantía') !== false) {
         $_adm_tecStats[$tid]['GAR']++;
         $_adm_tecStats[$tid]['total']++;
         continue;
     }
-    // Detectar canceladas
+    // Canceladas
     if (strpos($estL, 'cancel') !== false || strpos($estL, 'can') !== false) {
         $_adm_tecStats[$tid]['CAN']++;
         $_adm_tecStats[$tid]['total']++;
@@ -209,88 +223,96 @@ foreach ($_adm_allOrders as $ord) {
     }
 
     $clave = _admPipeClasificar($est);
-
-    // Para ENT y TER: solo contar si la fecha de salida o ingreso es reciente (3 meses)
-    if ($clave === 'ENT' || $clave === 'TER') {
-        $fechaRef = "";
-        if (!empty($ord["fecha_Salida"])) {
-            $fechaRef = substr($ord["fecha_Salida"], 0, 10);
-        } elseif (!empty($ord["fecha_ingreso"])) {
-            $fechaRef = substr($ord["fecha_ingreso"], 0, 10);
-        }
-        if ($fechaRef < $_adm_corteTec) continue; // Muy antiguas, no contar
-    }
-
     if (isset($_adm_tecStats[$tid][$clave])) {
         $_adm_tecStats[$tid][$clave]++;
     }
     $_adm_tecStats[$tid]['total']++;
 }
 
-// Calcular Score ponderado para cada técnico
+// FÓRMULA DE SCORING JUSTO:
+// Puntos = (ENT × 3) + (TER × 2) - (GAR × 5)
+// Score Normalizado = Puntos / max(total_ordenes, 1) × 10  (escala 0-10 por orden)
+// Score Final = Puntos_brutos × (1 + Score_Normalizado/20)
+// Esto premia: volumen (más órdenes = más puntos brutos)
+//              calidad (mejor ratio = mejor multiplicador)
+//              penaliza garantías proporcionalmente
 $_adm_ranking = array();
-$_adm_MIN_ORDENES_BONUS = 5; // Mínimo para aplicar bonificación de eficiencia
 foreach ($_adm_tecStats as $tid => $st) {
-    // Puntos base por productividad (volumen)
-    $puntosBase = ($st['ENT'] * 3) + ($st['TER'] * 2) + ($st['OK'] * 1);
+    $puntosA_favor = ($st['ENT'] * 3) + ($st['TER'] * 2);
+    $penalizacion  = $st['GAR'] * 5;
+    $puntosBrutos  = max(0, $puntosA_favor - $penalizacion);
 
-    // Órdenes elegibles para eficiencia (excluyendo garantías y canceladas)
-    $elegibles = $st['total'] - $st['GAR'] - $st['CAN'];
-    $completadas = $st['TER'] + $st['ENT'];
+    $pendientes    = $st['REV'] + $st['OK'];
+    $completadas   = $st['TER'] + $st['ENT'];
+    $totalElegible = $st['total'] - $st['CAN'];
 
-    // Eficiencia real (sin garantías ni canceladas)
-    $eficiencia = $elegibles > 0 ? round($completadas * 100 / $elegibles) : 0;
+    // Ratio de calidad: completadas vs total elegible
+    $ratioCalidad = $totalElegible > 0 ? round($completadas * 100 / $totalElegible) : 0;
 
-    // Bonificación: solo si tiene suficientes órdenes para ser significativo
-    if ($elegibles >= $_adm_MIN_ORDENES_BONUS) {
-        $bonificacion = 1.0 + (($eficiencia / 100) * 0.25); // Hasta +25% bonus
-    } else {
-        $bonificacion = 1.0; // Sin bonus, solo puntos base
-    }
+    // Score normalizado por volumen (0-10 escala)
+    $scoreNorm = $totalElegible > 0 ? round(($puntosBrutos / $totalElegible) * 10, 1) : 0;
 
-    $scoreFinal = round($puntosBase * $bonificacion, 1);
+    // Multiplicador de calidad: de 1.0 a 1.5 según ratio
+    $multiplicador = 1.0 + (min($ratioCalidad, 100) / 100) * 0.5;
 
-    // Nivel basado en score
-    if ($scoreFinal >= 80) { $nivel = 'Élite'; $nivelColor = '#f59e0b'; $nivelIcon = 'fa-crown'; }
+    // Score final: combina volumen bruto × calidad
+    $scoreFinal = round($puntosBrutos * $multiplicador, 1);
+
+    // Nivel
+    if ($scoreFinal >= 100) { $nivel = 'Élite'; $nivelColor = '#f59e0b'; $nivelIcon = 'fa-crown'; }
     elseif ($scoreFinal >= 40) { $nivel = 'Pro'; $nivelColor = '#6366f1'; $nivelIcon = 'fa-gem'; }
     elseif ($scoreFinal >= 15) { $nivel = 'Activo'; $nivelColor = '#22c55e'; $nivelIcon = 'fa-bolt'; }
-    elseif ($puntosBase > 0) { $nivel = 'Inicial'; $nivelColor = '#64748b'; $nivelIcon = 'fa-seedling'; }
+    elseif ($puntosBrutos > 0) { $nivel = 'Inicial'; $nivelColor = '#64748b'; $nivelIcon = 'fa-seedling'; }
     else { $nivel = '—'; $nivelColor = '#cbd5e1'; $nivelIcon = 'fa-minus'; }
 
     $_adm_ranking[] = array(
-        'nombre'      => $st['nombre'],
-        'score'       => $scoreFinal,
-        'puntosBase'  => $puntosBase,
-        'eficiencia'  => $eficiencia,
-        'bonificacion'=> $bonificacion,
-        'totalOrd'    => $st['total'],
-        'elegibles'   => $elegibles,
-        'entregadas'  => $st['ENT'],
-        'terminadas'  => $st['TER'],
-        'aceptadas'   => $st['OK'],
-        'garantias'   => $st['GAR'],
-        'canceladas'  => $st['CAN'],
-        'nivel'       => $nivel,
-        'nivelColor'  => $nivelColor,
-        'nivelIcon'   => $nivelIcon,
-        'tieneBonus'  => $elegibles >= $_adm_MIN_ORDENES_BONUS,
+        'nombre'       => $st['nombre'],
+        'score'        => $scoreFinal,
+        'puntosBrutos' => $puntosBrutos,
+        'ratioCalidad' => $ratioCalidad,
+        'multiplicador'=> $multiplicador,
+        'totalOrd'     => $st['total'],
+        'entregadas'   => $st['ENT'],
+        'terminadas'   => $st['TER'],
+        'pendientes'   => $pendientes,
+        'revision'     => $st['REV'],
+        'aceptadas'    => $st['OK'],
+        'garantias'    => $st['GAR'],
+        'nivel'        => $nivel,
+        'nivelColor'   => $nivelColor,
+        'nivelIcon'    => $nivelIcon,
     );
 }
 usort($_adm_ranking, function($a, $b) {
     if ($b['score'] != $a['score']) return $b['score'] > $a['score'] ? 1 : -1;
-    return $b['totalOrd'] - $a['totalOrd']; // Desempate por volumen
+    return $b['totalOrd'] - $a['totalOrd'];
 });
-$_adm_ranking = array_slice($_adm_ranking, 0, 8);
+$_adm_ranking = array_slice($_adm_ranking, 0, 10);
 $_adm_maxScore = (!empty($_adm_ranking) && $_adm_ranking[0]['score'] > 0) ? $_adm_ranking[0]['score'] : 1;
 
 // ══════════════════════════════════════
-// DATOS: Últimas órdenes
+// DATOS: Últimas órdenes (actividad reciente — últimos 30 días)
 // ══════════════════════════════════════
+// Filtrar de $_adm_allOrders las órdenes con actividad reciente
+// (ordenar por fecha más reciente: fecha_Salida si existe, sino fecha_ingreso)
 $_adm_ultimasOrd = array();
-try {
-    $_adm_ultimasOrd = controladorOrdenes::ctrlTraerOrdenesConTope(0, 8);
-    if (!is_array($_adm_ultimasOrd)) $_adm_ultimasOrd = array();
-} catch (Exception $e) {}
+$_adm_corteReciente = date("Y-m-d", strtotime("-30 days"));
+$_adm_ordRecientes = array();
+foreach ($_adm_allOrders as $ord) {
+    $fi = isset($ord["fecha_ingreso"]) ? substr($ord["fecha_ingreso"], 0, 10) : "";
+    $fs = !empty($ord["fecha_Salida"]) ? substr($ord["fecha_Salida"], 0, 10) : "";
+    // Usar la fecha más reciente de la orden
+    $fechaMax = ($fs > $fi) ? $fs : $fi;
+    if ($fechaMax >= $_adm_corteReciente) {
+        $ord['_fechaSort'] = $fechaMax;
+        $_adm_ordRecientes[] = $ord;
+    }
+}
+// Ordenar por fecha más reciente primero
+usort($_adm_ordRecientes, function($a, $b) {
+    return strcmp($b['_fechaSort'], $a['_fechaSort']);
+});
+$_adm_ultimasOrd = array_slice($_adm_ordRecientes, 0, 8);
 
 function _admEstadoBadge($estado) {
     $e = strtolower(trim($estado));
@@ -347,24 +369,48 @@ $_adm_grads = array(
     'linear-gradient(135deg,#ec4899,#f472b6)',
 );
 
-// Gráfico de ventas (preparar datos)
-$_adm_chartData = array();
+// Gráfico de ventas — Datos por periodo
+// FUENTE: Tabla ventas (pagos registrados), filtrada por empresa
+$_adm_ventasRaw = array();
 try {
-    $fechaInicial = isset($_GET["fechaInicial"]) ? $_GET["fechaInicial"] : null;
-    $fechaFinal = isset($_GET["fechaFinal"]) ? $_GET["fechaFinal"] : null;
-    $respuesta = ControladorVentas::ctrRangoFechasVentas($fechaInicial, $fechaFinal, "id_empresa", $_SESSION["empresa"]);
-    if (is_array($respuesta) && !empty($respuesta)) {
-        $sumaPagosMes = array();
-        foreach ($respuesta as $value) {
-            $fecha = substr($value["fecha"], 0, 7);
-            if (!isset($sumaPagosMes[$fecha])) $sumaPagosMes[$fecha] = 0;
-            $sumaPagosMes[$fecha] += floatval($value["pago"]);
-        }
-        foreach ($sumaPagosMes as $mes => $total) {
-            $_adm_chartData[] = array('y' => $mes, 'ventas' => $total);
-        }
-    }
+    $respuesta = ControladorVentas::ctrRangoFechasVentas(null, null, "id_empresa", $_SESSION["empresa"]);
+    if (is_array($respuesta)) $_adm_ventasRaw = $respuesta;
 } catch (Exception $e) {}
+
+// Pre-calcular datos para cada periodo
+$_adm_chart_cortes = array(
+    '1m'  => date("Y-m-d", strtotime("-1 month")),
+    '3m'  => date("Y-m-d", strtotime("-3 months")),
+    '6m'  => date("Y-m-d", strtotime("-6 months")),
+    '12m' => date("Y-m-d", strtotime("-12 months")),
+);
+$_adm_chartPeriods = array();
+foreach ($_adm_chart_cortes as $pk => $corte) {
+    $sumaPagosMes = array();
+    $totalPeriodo = 0;
+    $maxMes = ''; $maxVal = 0;
+    foreach ($_adm_ventasRaw as $value) {
+        $fechaVenta = isset($value["fecha"]) ? substr($value["fecha"], 0, 10) : "";
+        if ($fechaVenta < $corte) continue;
+        $mes = substr($fechaVenta, 0, 7);
+        if (!isset($sumaPagosMes[$mes])) $sumaPagosMes[$mes] = 0;
+        $sumaPagosMes[$mes] += floatval(isset($value["pago"]) ? $value["pago"] : 0);
+        $totalPeriodo += floatval(isset($value["pago"]) ? $value["pago"] : 0);
+    }
+    $chartData = array();
+    foreach ($sumaPagosMes as $mes => $total) {
+        $chartData[] = array('y' => $mes, 'ventas' => $total);
+        if ($total > $maxVal) { $maxVal = $total; $maxMes = $mes; }
+    }
+    $_adm_chartPeriods[$pk] = array(
+        'data' => $chartData,
+        'total' => $totalPeriodo,
+        'maxMes' => $maxMes,
+        'maxVal' => $maxVal,
+        'count' => count($chartData),
+    );
+}
+$_adm_chartDefault = isset($_adm_chartPeriods['1m']) ? $_adm_chartPeriods['1m'] : array('data'=>array(),'total'=>0,'maxMes'=>'','maxVal'=>0,'count'=>0);
 
 // Productos más vendidos
 $_adm_productos = array();
@@ -648,14 +694,80 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 <div class="crm-card" style="margin-bottom:20px">
   <div class="crm-card-head">
     <h4 class="crm-card-title"><i class="fa-solid fa-chart-area"></i> Ventas Mensuales</h4>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="crm-badge" id="admVentasBadge" style="background:#f0fdf4;color:#16a34a">
+        $<?php echo number_format($_adm_chartDefault['total'], 0); ?>
+      </span>
+      <div style="display:inline-flex;background:#f1f5f9;border-radius:8px;padding:2px;gap:2px" id="admVentasFilter">
+        <button type="button" class="adm-vent-btn active" data-period="1m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:#6366f1;color:#fff">Mes</button>
+        <button type="button" class="adm-vent-btn" data-period="3m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">3M</button>
+        <button type="button" class="adm-vent-btn" data-period="6m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">6M</button>
+        <button type="button" class="adm-vent-btn" data-period="12m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">Año</button>
+      </div>
+    </div>
   </div>
   <div class="crm-card-body" style="padding:16px 20px">
     <div id="admChartVentas" style="height:260px"></div>
+    <!-- Dato significativo -->
+    <div style="display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 14px;background:#f8fafc;border-radius:8px;font-size:11px">
+      <span style="color:var(--crm-muted)"><i class="fa-solid fa-database" style="margin-right:3px"></i> <strong>Fuente:</strong> Tabla de Ventas (pagos registrados)</span>
+      <span style="margin-left:auto;color:#6366f1;font-weight:600" id="admVentasMax">
+        <?php if (!empty($_adm_chartDefault['maxMes'])): ?>
+          Mejor mes: <?php echo $_adm_chartDefault['maxMes']; ?> — $<?php echo number_format($_adm_chartDefault['maxVal'], 0); ?>
+        <?php else: ?>
+          Sin datos en este periodo
+        <?php endif; ?>
+      </span>
+    </div>
   </div>
 </div>
 
+<script>
+(function(){
+  var admVentasData = <?php echo json_encode($_adm_chartPeriods); ?>;
+  var admChart = null;
+
+  function renderVentasChart(period) {
+    var info = admVentasData[period];
+    if (!info) return;
+    var data = info.data;
+    $('#admVentasBadge').text('$' + Number(info.total).toLocaleString('en'));
+    if (info.maxMes) {
+      $('#admVentasMax').html('Mejor mes: ' + info.maxMes + ' — $' + Number(info.maxVal).toLocaleString('en'));
+    } else {
+      $('#admVentasMax').text('Sin datos en este periodo');
+    }
+    $('#admChartVentas').empty();
+    if (data.length === 0) data = [{y:'0', ventas:0}];
+    if (typeof Morris !== 'undefined') {
+      admChart = new Morris.Line({
+        element: 'admChartVentas', resize: true, data: data,
+        xkey:'y', ykeys:['ventas'], labels:['Ventas'],
+        lineColors:['#6366f1'], lineWidth:2, hideHover:'auto',
+        gridTextColor:'#94a3b8', gridStrokeWidth:0.3, pointSize:4,
+        pointStrokeColors:['#6366f1'], gridLineColor:'#e2e8f0',
+        gridTextFamily:'inherit', preUnits:'$', gridTextSize:10, fillOpacity:0.08
+      });
+    }
+  }
+
+  renderVentasChart('1m');
+
+  $('#admVentasFilter').on('click', '.adm-vent-btn', function(){
+    var $btn = $(this), period = $btn.data('period');
+    $('#admVentasFilter .adm-vent-btn').css({background:'transparent',color:'#64748b'}).removeClass('active');
+    $btn.css({background:'#6366f1',color:'#fff'}).addClass('active');
+    renderVentasChart(period);
+  });
+})();
+</script>
+
 <!-- ══════════════════════════════════════════
-     RENDIMIENTO DE TÉCNICOS — Sistema de Puntuación Ponderado
+     RENDIMIENTO DE TÉCNICOS — Scoring Justo
 ══════════════════════════════════════════ -->
 <div class="crm-section">
   <div class="crm-section-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
@@ -663,55 +775,49 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
   </div>
   <div>
     <h3>Rendimiento de Técnicos</h3>
-    <p>Índice de productividad ponderado &mdash; premia volumen y excluye garantías</p>
+    <p>Últimos 3 meses &mdash; Garantías penalizan, pendientes como contexto</p>
   </div>
 </div>
 
-<!-- Leyenda del sistema de scoring -->
+<!-- Leyenda -->
 <div class="crm-card" style="margin-bottom:10px">
   <div class="crm-card-body" style="padding:12px 18px">
-    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;font-size:11px;color:var(--crm-muted)">
-      <span style="font-weight:700;color:var(--crm-text)"><i class="fa-solid fa-calculator" style="margin-right:4px"></i> Fórmula:</span>
-      <span style="background:#eef2ff;color:#4f46e5;padding:3px 8px;border-radius:6px;font-weight:600">Entregadas ×3</span>
-      <span>+</span>
-      <span style="background:#cffafe;color:#0891b2;padding:3px 8px;border-radius:6px;font-weight:600">Terminadas ×2</span>
-      <span>+</span>
-      <span style="background:#dbeafe;color:#2563eb;padding:3px 8px;border-radius:6px;font-weight:600">Aceptadas ×1</span>
-      <span>×</span>
-      <span style="background:#fef3c7;color:#92400e;padding:3px 8px;border-radius:6px;font-weight:600">Bonus eficiencia (≥5 órdenes)</span>
-      <span style="margin-left:auto;display:flex;align-items:center;gap:4px;color:#dc2626">
-        <i class="fa-solid fa-shield-halved"></i> Garantías y canceladas excluidas
-      </span>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:11px;color:var(--crm-muted)">
+      <span style="font-weight:700;color:var(--crm-text)"><i class="fa-solid fa-calculator" style="margin-right:4px"></i> Puntos:</span>
+      <span style="background:#f0fdf4;color:#16a34a;padding:3px 8px;border-radius:6px;font-weight:600"><i class="fa-solid fa-plus" style="font-size:8px"></i> Entregadas ×3</span>
+      <span style="background:#cffafe;color:#0891b2;padding:3px 8px;border-radius:6px;font-weight:600"><i class="fa-solid fa-plus" style="font-size:8px"></i> Terminadas ×2</span>
+      <span style="background:#fef2f2;color:#dc2626;padding:3px 8px;border-radius:6px;font-weight:600"><i class="fa-solid fa-minus" style="font-size:8px"></i> Garantías ×5</span>
+      <span style="background:#f1f5f9;color:#64748b;padding:3px 8px;border-radius:6px;font-weight:600"><i class="fa-solid fa-clock" style="font-size:8px"></i> REV + OK = Pendientes</span>
+      <span style="margin-left:auto;font-size:10px;color:#94a3b8">× Multiplicador calidad</span>
     </div>
   </div>
 </div>
 
 <div class="crm-card" style="margin-bottom:20px">
   <div class="crm-card-head">
-    <h4 class="crm-card-title"><i class="fa-solid fa-trophy"></i> Ranking del Mes</h4>
+    <h4 class="crm-card-title"><i class="fa-solid fa-trophy"></i> Ranking (3 meses)</h4>
     <span class="crm-badge" style="background:#fef3c7;color:#92400e"><?php echo count($_adm_ranking); ?> técnicos</span>
   </div>
   <div class="crm-card-body-flush">
     <?php if (empty($_adm_ranking) || $_adm_ranking[0]['score'] == 0): ?>
       <div class="crm-empty" style="padding:30px">
         <i class="fa-solid fa-trophy" style="font-size:32px"></i>
-        <strong>Sin actividad este mes</strong>
-        <span style="font-size:12px">Los técnicos aún no tienen órdenes en el periodo actual</span>
+        <strong>Sin actividad reciente</strong>
+        <span style="font-size:12px">Los técnicos no tienen órdenes completadas en los últimos 3 meses</span>
       </div>
     <?php else: ?>
-      <!-- Header de tabla -->
+      <!-- Header -->
       <div style="display:flex;align-items:center;padding:10px 20px;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--crm-muted)">
-        <div style="width:40px;text-align:center">#</div>
+        <div style="width:36px;text-align:center">#</div>
         <div style="flex:1;min-width:0">Técnico</div>
-        <div style="width:60px;text-align:center">Órdenes</div>
-        <div style="width:50px;text-align:center;color:#22c55e" title="Entregadas">ENT</div>
-        <div style="width:50px;text-align:center;color:#06b6d4" title="Terminadas">TER</div>
-        <div style="width:50px;text-align:center;color:#3b82f6" title="Aceptadas">OK</div>
-        <div style="width:50px;text-align:center;color:#8b5cf6" title="Garantías (excluidas)">GAR</div>
-        <div style="width:60px;text-align:center" title="Eficiencia (sin garantías)">Efic.</div>
-        <div style="width:55px;text-align:center" title="Bonus aplicado">Bonus</div>
-        <div style="width:80px;text-align:center">Score</div>
-        <div style="width:70px;text-align:center">Nivel</div>
+        <div style="width:50px;text-align:center" title="Total de órdenes">Total</div>
+        <div style="width:50px;text-align:center;color:#22c55e" title="Entregadas (+3 pts c/u)">ENT</div>
+        <div style="width:50px;text-align:center;color:#06b6d4" title="Terminadas (+2 pts c/u)">TER</div>
+        <div style="width:70px;text-align:center;color:#64748b" title="Pendientes (REV + OK)">Pend.</div>
+        <div style="width:50px;text-align:center;color:#dc2626" title="Garantías (-5 pts c/u)">GAR</div>
+        <div style="width:55px;text-align:center" title="% completadas vs total">Calidad</div>
+        <div style="width:75px;text-align:center">Score</div>
+        <div style="width:65px;text-align:center">Nivel</div>
       </div>
 
       <?php
@@ -719,92 +825,61 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
       foreach ($_adm_ranking as $i => $tec):
         if ($tec['score'] == 0 && $tec['totalOrd'] == 0) continue;
         $pctBar = round($tec['score'] * 100 / $_adm_maxScore);
-        $iniciales = mb_strtoupper(mb_substr($tec['nombre'], 0, 2));
         $bgRow = $i === 0 ? 'background:linear-gradient(90deg,#fefce8,#fff);' : ($i % 2 === 0 ? '' : 'background:#fafbfc;');
       ?>
         <div style="display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid #f1f5f9;transition:background .12s;<?php echo $bgRow; ?>"
              onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='<?php echo $i === 0 ? 'linear-gradient(90deg,#fefce8,#fff)' : ($i % 2 === 0 ? '' : '#fafbfc'); ?>'">
 
-          <!-- Posición -->
-          <div style="width:40px;text-align:center;font-size:16px;flex-shrink:0">
-            <?php if ($i < 3 && $tec['score'] > 0): ?>
-              <?php echo $_rankMedals[$i]; ?>
-            <?php else: ?>
-              <span style="font-size:12px;font-weight:700;color:#94a3b8"><?php echo ($i + 1); ?></span>
-            <?php endif; ?>
+          <div style="width:36px;text-align:center;font-size:16px;flex-shrink:0">
+            <?php if ($i < 3 && $tec['score'] > 0): echo $_rankMedals[$i];
+            else: ?><span style="font-size:12px;font-weight:700;color:#94a3b8"><?php echo ($i + 1); ?></span><?php endif; ?>
           </div>
 
-          <!-- Técnico + barra de score -->
           <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:700;color:var(--crm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">
-              <?php echo htmlspecialchars($tec['nombre']); ?>
-            </div>
-            <div style="height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;max-width:200px">
+            <div style="font-size:13px;font-weight:700;color:var(--crm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px"><?php echo htmlspecialchars($tec['nombre']); ?></div>
+            <div style="height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;max-width:180px">
               <div style="height:100%;width:<?php echo $pctBar; ?>%;background:linear-gradient(90deg,<?php echo $tec['nivelColor']; ?>,<?php echo $tec['nivelColor']; ?>aa);border-radius:2px;transition:width .6s"></div>
             </div>
           </div>
 
-          <!-- Órdenes totales -->
-          <div style="width:60px;text-align:center;font-size:13px;font-weight:700;color:var(--crm-text)">
-            <?php echo $tec['totalOrd']; ?>
+          <div style="width:50px;text-align:center;font-size:13px;font-weight:700;color:var(--crm-text)"><?php echo $tec['totalOrd']; ?></div>
+
+          <div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#22c55e"><?php echo $tec['entregadas']; ?></span></div>
+
+          <div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#06b6d4"><?php echo $tec['terminadas']; ?></span></div>
+
+          <div style="width:70px;text-align:center">
+            <span style="font-size:11px;font-weight:600;color:#64748b;background:#f1f5f9;padding:2px 6px;border-radius:4px" title="REV:<?php echo $tec['revision']; ?> + OK:<?php echo $tec['aceptadas']; ?>">
+              <?php echo $tec['pendientes']; ?> <i class="fa-solid fa-clock" style="font-size:8px;color:#94a3b8"></i>
+            </span>
           </div>
 
-          <!-- ENT -->
-          <div style="width:50px;text-align:center">
-            <span style="font-size:12px;font-weight:700;color:#22c55e"><?php echo $tec['entregadas']; ?></span>
-          </div>
-
-          <!-- TER -->
-          <div style="width:50px;text-align:center">
-            <span style="font-size:12px;font-weight:700;color:#06b6d4"><?php echo $tec['terminadas']; ?></span>
-          </div>
-
-          <!-- OK -->
-          <div style="width:50px;text-align:center">
-            <span style="font-size:12px;font-weight:700;color:#3b82f6"><?php echo $tec['aceptadas']; ?></span>
-          </div>
-
-          <!-- GAR -->
           <div style="width:50px;text-align:center">
             <?php if ($tec['garantias'] > 0): ?>
-              <span style="font-size:11px;font-weight:600;color:#dc2626;background:#fef2f2;padding:2px 6px;border-radius:4px" title="Excluidas del cálculo">
-                <?php echo $tec['garantias']; ?>
+              <span style="font-size:11px;font-weight:700;color:#dc2626;background:#fef2f2;padding:2px 6px;border-radius:4px" title="-<?php echo $tec['garantias'] * 5; ?> pts">
+                -<?php echo $tec['garantias']; ?>
               </span>
             <?php else: ?>
               <span style="font-size:11px;color:#cbd5e1">0</span>
             <?php endif; ?>
           </div>
 
-          <!-- Eficiencia -->
-          <div style="width:60px;text-align:center">
+          <div style="width:55px;text-align:center">
             <?php
-            $efColor = $tec['eficiencia'] >= 70 ? '#22c55e' : ($tec['eficiencia'] >= 40 ? '#f59e0b' : '#ef4444');
-            $efBg = $tec['eficiencia'] >= 70 ? '#f0fdf4' : ($tec['eficiencia'] >= 40 ? '#fef3c7' : '#fef2f2');
+            $qc = $tec['ratioCalidad'] >= 70 ? '#22c55e' : ($tec['ratioCalidad'] >= 40 ? '#f59e0b' : '#ef4444');
+            $qbg = $tec['ratioCalidad'] >= 70 ? '#f0fdf4' : ($tec['ratioCalidad'] >= 40 ? '#fef3c7' : '#fef2f2');
             ?>
-            <span style="font-size:11px;font-weight:700;color:<?php echo $efColor; ?>;background:<?php echo $efBg; ?>;padding:2px 6px;border-radius:4px">
-              <?php echo $tec['eficiencia']; ?>%
+            <span style="font-size:11px;font-weight:700;color:<?php echo $qc; ?>;background:<?php echo $qbg; ?>;padding:2px 6px;border-radius:4px">
+              <?php echo $tec['ratioCalidad']; ?>%
             </span>
           </div>
 
-          <!-- Bonus -->
-          <div style="width:55px;text-align:center">
-            <?php if ($tec['tieneBonus']): ?>
-              <span style="font-size:11px;font-weight:700;color:#f59e0b" title="Bonificación aplicada: ×<?php echo number_format($tec['bonificacion'], 2); ?>">
-                ×<?php echo number_format($tec['bonificacion'], 2); ?>
-              </span>
-            <?php else: ?>
-              <span style="font-size:10px;color:#cbd5e1" title="Se necesitan ≥5 órdenes para activar bonus">—</span>
-            <?php endif; ?>
-          </div>
-
-          <!-- Score -->
-          <div style="width:80px;text-align:center">
+          <div style="width:75px;text-align:center">
             <span style="font-size:15px;font-weight:800;color:var(--crm-text)"><?php echo $tec['score']; ?></span>
             <span style="font-size:9px;color:#94a3b8;display:block;margin-top:-2px">pts</span>
           </div>
 
-          <!-- Nivel -->
-          <div style="width:70px;text-align:center">
+          <div style="width:65px;text-align:center">
             <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:<?php echo $tec['nivelColor']; ?>;background:<?php echo $tec['nivelColor']; ?>18;padding:3px 8px;border-radius:8px">
               <i class="fa-solid <?php echo $tec['nivelIcon']; ?>" style="font-size:9px"></i>
               <?php echo $tec['nivel']; ?>
@@ -813,12 +888,10 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
         </div>
       <?php endforeach; ?>
 
-      <!-- Footer con resumen -->
-      <div style="padding:14px 20px;background:#f8fafc;display:flex;flex-wrap:wrap;gap:16px;font-size:11px;color:var(--crm-muted);border-top:2px solid #e2e8f0">
-        <span><i class="fa-solid fa-info-circle"></i> El <strong>bonus de eficiencia</strong> solo aplica si el técnico tiene ≥5 órdenes elegibles (sin garantías ni canceladas)</span>
-        <span style="margin-left:auto">
-          <i class="fa-solid fa-shield-halved" style="color:#dc2626"></i> Las <strong>garantías</strong> no penalizan el score del técnico
-        </span>
+      <div style="padding:12px 20px;background:#f8fafc;display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--crm-muted);border-top:2px solid #e2e8f0">
+        <span><i class="fa-solid fa-triangle-exclamation" style="color:#dc2626"></i> Cada <strong>garantía</strong> resta <strong>5 pts</strong> al score</span>
+        <span><i class="fa-solid fa-clock" style="color:#64748b"></i> <strong>Pendientes</strong> (REV+OK) son contexto, no suman ni restan</span>
+        <span style="margin-left:auto"><i class="fa-solid fa-scale-balanced" style="color:#6366f1"></i> Score = Pts brutos × multiplicador calidad</span>
       </div>
     <?php endif; ?>
   </div>
@@ -865,7 +938,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
   </div>
   <div>
     <h3>Actividad Reciente</h3>
-    <p>Últimas órdenes registradas y productos con mayor demanda</p>
+    <p>Órdenes con actividad en los últimos 30 días</p>
   </div>
 </div>
 
@@ -924,7 +997,14 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
                     </span>
                   </td>
                   <td style="text-align:right;font-weight:700">$<?php echo number_format(floatval(isset($o['total']) ? $o['total'] : 0), 0); ?></td>
-                  <td style="text-align:center;font-size:12px;color:var(--crm-muted)"><?php echo htmlspecialchars(substr(isset($o['fecha_ingreso']) ? $o['fecha_ingreso'] : '', 0, 10)); ?></td>
+                  <?php
+                    $fMostrar = isset($o['_fechaSort']) ? $o['_fechaSort'] : (isset($o['fecha_ingreso']) ? substr($o['fecha_ingreso'], 0, 10) : '');
+                    $fTipo = (!empty($o['fecha_Salida']) && substr($o['fecha_Salida'], 0, 10) === $fMostrar) ? 'Salida' : 'Ingreso';
+                  ?>
+                  <td style="text-align:center;font-size:12px;color:var(--crm-muted)">
+                    <div><?php echo htmlspecialchars($fMostrar); ?></div>
+                    <div style="font-size:9px;color:#94a3b8"><?php echo $fTipo; ?></div>
+                  </td>
                   <td style="text-align:center">
                     <a href="<?php echo $link; ?>" target="_blank"
                        style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#6366f1;color:#fff;font-size:11px;text-decoration:none;transition:background .15s"

@@ -11,6 +11,14 @@ try {
     if (!is_array($_mov_obs)) $_mov_obs = array();
 } catch (Exception $e) { $_mov_obs = array(); }
 
+// Mapa de órdenes para construir links directos
+$_mov_ordMap = array();
+if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
+    foreach ($_adm_allOrders as $o) {
+        if (isset($o['id'])) $_mov_ordMap[$o['id']] = $o;
+    }
+}
+
 // Helper: truncar texto sin cortar palabras
 function _movTruncar($texto, $max = 80) {
     $texto = trim(preg_replace('/\s+/', ' ', strip_tags($texto)));
@@ -111,8 +119,23 @@ $_mov_av_grads = array(
               <div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:4px">
                 <?php echo htmlspecialchars($resumen); ?>
               </div>
-              <a href="index.php?ruta=ordenes" style="font-size:11px;font-weight:600;color:#6366f1;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+              <?php
+                $movLink = 'index.php?ruta=ordenes';
+                if (!empty($idOrden) && isset($_mov_ordMap[$idOrden])) {
+                    $mo = $_mov_ordMap[$idOrden];
+                    $movLink = 'index.php?ruta=infoOrden&idOrden=' . $idOrden
+                        . '&empresa=' . (isset($mo['id_empresa']) ? $mo['id_empresa'] : '')
+                        . '&asesor=' . (isset($mo['id_Asesor']) ? $mo['id_Asesor'] : '')
+                        . '&cliente=' . (isset($mo['id_usuario']) ? $mo['id_usuario'] : '')
+                        . '&tecnico=' . (isset($mo['id_tecnico']) ? $mo['id_tecnico'] : '')
+                        . '&tecnicodos=' . (isset($mo['id_tecnicoDos']) ? $mo['id_tecnicoDos'] : '')
+                        . '&pedido=' . (isset($mo['id_pedido']) ? $mo['id_pedido'] : '');
+                }
+              ?>
+              <a href="<?php echo $movLink; ?>" target="_blank" style="font-size:11px;font-weight:600;color:#6366f1;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s"
+                 onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#6366f1'">
                 <i class="fa-solid fa-hashtag" style="font-size:9px"></i>Orden <?php echo htmlspecialchars($idOrden); ?>
+                <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:8px;margin-left:2px"></i>
               </a>
             </div>
           </div>
