@@ -321,6 +321,35 @@ table.dataTable tbody tr:hover { background: #f8fafc !important; }
   font-weight: 600;
   color: var(--crm-text2);
 }
+
+/* ─── DataTable Fix: evitar columnas sobrepuestas ─── */
+.dataTables_scrollHead,
+.dataTables_scrollBody { overflow: visible !important; }
+table.dataTable {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+table.dataTable th,
+table.dataTable td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.dataTables_wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Quitar sombras raras de sorting */
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc {
+  background-image: none !important;
+  position: relative;
+}
+table.dataTable thead .sorting_asc::after { content: ' ▲'; font-size: 8px; color: var(--crm-accent); }
+table.dataTable thead .sorting_desc::after { content: ' ▼'; font-size: 8px; color: var(--crm-accent); }
+table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: #cbd5e1; }
 </style>
 <script>
  $(document).ready(function(){
@@ -384,6 +413,8 @@ table.dataTable tbody tr:hover { background: #f8fafc !important; }
     });
     $('#datatableordenes').DataTable( {
     "order": [[ 1, "desc" ]],
+    "scrollX": true,
+    "autoWidth": false,
     "ajax":{
         "url": "../ServerSide/consultaordenes.php",
         "dataSrc":""
@@ -444,12 +475,32 @@ table.dataTable tbody tr:hover { background: #f8fafc !important; }
             return 'Comercializadora EGS'}},
         {data: null,
             "render": function (data, type, row, meta ) {
-                return '<b>ORDEN: </b>'+data.id;
+                return '<span style="font-weight:800;color:#6366f1">#'+data.id+'</span>';
             }},
         {data: null,
             "render": function (data, type, row, meta ) {
-            return '<b>$</b>'+data.total;}},
-        {"data":"estado"},
+            var t = parseFloat(data.total || 0);
+            return '<span style="font-weight:700">$'+t.toLocaleString('es-MX', {minimumFractionDigits:0})+'</span>';}},
+        {data: null, "render": function(data) {
+            var e = (data.estado || '').toLowerCase().trim();
+            var cls = 'badge-otro';
+            if (e === 'pendiente' || e === 'por asignar') cls = 'badge-pendiente';
+            else if (e === 'en proceso' || e === 'proceso' || e === 'atendiendo') cls = 'badge-proceso';
+            else if (e === 'completada' || e === 'finalizada' || e === 'cerrada') cls = 'badge-completada';
+            else if (e === 'cancelada' || e === 'rechazada') cls = 'badge-cancelada';
+            else if (e === 'aceptado' || e.indexOf('aceptado') !== -1 || e.indexOf('ok') !== -1) cls = 'badge-aceptado';
+            else if (e.indexOf('pendiente de autoriz') !== -1) cls = 'badge-pendiente-aut';
+            else if (e.indexOf('producto para') !== -1) cls = 'badge-producto-venta';
+            else if (e === 'terminado' || e.indexOf('terminada') !== -1 || e.indexOf('ter') !== -1) cls = 'badge-terminado';
+            else if (e.indexOf('entregado') !== -1 || e.indexOf('ent') !== -1) cls = 'badge-entregado';
+            else if (e.indexOf('garantia') !== -1 || e.indexOf('garantía') !== -1) {
+                cls = (e.indexOf('revision') !== -1 || e.indexOf('revisión') !== -1) ? 'badge-revision-garantia' : 'badge-garantia';
+            }
+            else if (e === 'en revision' || e === 'en revisión' || e.indexOf('rev') !== -1) cls = 'badge-revision';
+            else if (e === 'supervision' || e === 'supervisión' || e.indexOf('sup') !== -1) cls = 'badge-supervision';
+            else if (e.indexOf('sin reparac') !== -1) cls = 'badge-sin-reparacion';
+            return '<span class="badge ' + cls + '">' + (data.estado || '') + '</span>';
+        }},
         {"data":"fecha_ingreso"},
         {"data":"fecha"},
         {"data":"fecha_Salida"},
@@ -522,54 +573,25 @@ table.dataTable tbody tr:hover { background: #f8fafc !important; }
 
 
 	        <div class="box-tools">
-
-
-
-	<div class="container" >
-        <div class="row" id="ultimaenentrega">
-            <div class="col-md-7">
-                 <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarOrden">
-
-	          
-
-	          Agregar Orden
-
-
-
-	        </button>
-            </div>
-            <div class="col">
-                <div class="row" >
-	              <div >
-	                <?php //https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=5283&empresa=1&asesor=9&cliente=2540&tecnico=4
-	                
-	                $UltimaEntregada= controladorOrdenes::ctrUltimaEntrega();
-    foreach ($UltimaEntregada as $key => $ultima) {
-	                echo'
-	                
-	                
-	                 <center>
-	                 <div class="col-sm-2 columnaultimaentrega"><h5><b>ULTIMA ENTREGA </b>  ➜</h5></div>
-	                   <div class="col-sm-2 columnaultimaentrega"><h5><b>ORDEN: '.$ultima["id"].'</b></h5></div>
-	                     <div class="col-sm-1 columnaultimaentrega">';
-	                     if($_SESSION["perfil"] == "administrador"){
-	                         echo'<a href= "extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='.$ultima["id"].'&empresa='.$ultima["id_empresa"].'&asesor='.$ultima["id_Asesor"].'&cliente='.$ultima["id_usuario"].'&tecnico='.$ultima["id_tecnico"].'" class="btn btn-success"  target="_blank">';}
-	                    echo'<i class="fas fa-ticket-alt" style"margin-bottom: -25px; "></i></a></div>
-	                 
-	            </div></div></center>'; } ?>
-	            </div>
-	            </div>
-	            </div>
-
-	       
-
-
-
-         <!-- <button class='btn btn-info' data-toggle='modal' data-target='#modalAsignarPedido'><i class='fa fa-sort'></i></button>-->
-
-
-
-         </div>
+	          <!-- Toolbar: Agregar + Última Entrega -->
+	          <div id="ultimaenentrega" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+	            <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarOrden">
+	              <i class="fa-solid fa-plus" style="margin-right:6px"></i> Agregar Orden
+	            </button>
+	            <?php
+	              $UltimaEntregada = controladorOrdenes::ctrUltimaEntrega();
+	              foreach ($UltimaEntregada as $key => $ultima) {
+	                echo '<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:8px 16px">';
+	                echo '<span style="font-size:12px;font-weight:700;color:#1e40af"><i class="fa-solid fa-truck-fast" style="margin-right:5px"></i> ÚLTIMA ENTREGA</span>';
+	                echo '<span style="font-size:13px;font-weight:800;color:#0f172a">ORDEN: ' . $ultima["id"] . '</span>';
+	                if ($_SESSION["perfil"] == "administrador") {
+	                  echo '<a href="extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=' . $ultima["id"] . '&empresa=' . $ultima["id_empresa"] . '&asesor=' . $ultima["id_Asesor"] . '&cliente=' . $ultima["id_usuario"] . '&tecnico=' . $ultima["id_tecnico"] . '" class="btn btn-success btn-sm" target="_blank" style="padding:4px 10px;font-size:11px"><i class="fa-solid fa-ticket" style="margin-right:4px"></i> Ticket</a>';
+	                }
+	                echo '</div>';
+	              }
+	            ?>
+	          </div>
+	        </div>
 
 
 

@@ -362,6 +362,34 @@ table.dataTable tbody td h2 {
   color: var(--crm-accent);
   margin: 0;
 }
+
+/* ─── DataTable Fix: evitar columnas sobrepuestas ─── */
+.dataTables_scrollHead,
+.dataTables_scrollBody { overflow: visible !important; }
+table.dataTable {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+table.dataTable th,
+table.dataTable td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.dataTables_wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc {
+  background-image: none !important;
+  position: relative;
+}
+table.dataTable thead .sorting_asc::after { content: ' ▲'; font-size: 8px; color: var(--crm-accent); }
+table.dataTable thead .sorting_desc::after { content: ' ▼'; font-size: 8px; color: var(--crm-accent); }
+table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: #cbd5e1; }
 </style>
 
 <script>
@@ -491,58 +519,24 @@ table.dataTable tbody td h2 {
 
 
         <div class="box-tools">
-
-
-
-
-
-          <div class="container">
-            <div class="row" id="ultimaenentrega">
-              <div class="col-md-7">
-                <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarOrden">
-
-
-
-                  Agregar Orden
-
-
-
-                </button>
-              </div>
-              <div class="col">
-                <div class="row">
-                  <div>
-                    <?php //https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=5283&empresa=1&asesor=9&cliente=2540&tecnico=4
-                    $UltimaEntregada = controladorOrdenes::ctrUltimaEntrega();
-                    foreach ($UltimaEntregada as $key => $ultima) {
-                      echo '
-	                
-	                
-	                 <center>
-	                 <div class="col-sm-2 columnaultimaentrega"><h5><b>ULTIMA ENTREGA </b>  ➜</h5></div>
-	                   <div class="col-sm-2 columnaultimaentrega"><h5><b>ORDEN: ' . $ultima["id"] . '</b></h5></div>
-	                     <div class="col-sm-1 columnaultimaentrega">';
-                      if ($_SESSION["perfil"] == "administrador") {
-                        echo '<a href= "extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=' . $ultima["id"] . '&empresa=' . $ultima["id_empresa"] . '&asesor=' . $ultima["id_Asesor"] . '&cliente=' . $ultima["id_usuario"] . '&tecnico=' . $ultima["id_tecnico"] . '" class="btn btn-success"  target="_blank">';
-                      }
-                      echo '<i class="fas fa-ticket-alt"></i></a></div>
-	                 
-	            </div></div></center>';
-                    } ?>
-                  </div>
-                </div>
-              </div>
-
-
-
-              <!-- <button class='btn btn-info' data-toggle='modal' data-target='#modalAsignarPedido'><i class='fa fa-sort'></i></button>-->
-
-
-
-            </div>
-
-
-
+          <!-- Toolbar: Agregar + Última Entrega -->
+          <div id="ultimaenentrega" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarOrden">
+              <i class="fa-solid fa-plus" style="margin-right:6px"></i> Agregar Orden
+            </button>
+            <?php
+              $UltimaEntregada = controladorOrdenes::ctrUltimaEntrega();
+              foreach ($UltimaEntregada as $key => $ultima) {
+                echo '<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:8px 16px">';
+                echo '<span style="font-size:12px;font-weight:700;color:#1e40af"><i class="fa-solid fa-truck-fast" style="margin-right:5px"></i> ÚLTIMA ENTREGA</span>';
+                echo '<span style="font-size:13px;font-weight:800;color:#0f172a">ORDEN: ' . $ultima["id"] . '</span>';
+                if ($_SESSION["perfil"] == "administrador") {
+                  echo '<a href="extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=' . $ultima["id"] . '&empresa=' . $ultima["id_empresa"] . '&asesor=' . $ultima["id_Asesor"] . '&cliente=' . $ultima["id_usuario"] . '&tecnico=' . $ultima["id_tecnico"] . '" class="btn btn-success btn-sm" target="_blank" style="padding:4px 10px;font-size:11px"><i class="fa-solid fa-ticket" style="margin-right:4px"></i> Ticket</a>';
+                }
+                echo '</div>';
+              }
+            ?>
+          </div>
 
 
 
