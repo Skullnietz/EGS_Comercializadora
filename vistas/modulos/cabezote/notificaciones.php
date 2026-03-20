@@ -21,8 +21,11 @@ if ($_noti_perfil == "administrador") {
         foreach ($_noti_raw as $o) {
             $est = isset($o["estado"]) ? $o["estado"] : "";
             $fi  = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
-            // Solo órdenes no entregadas/canceladas y de los últimos 6 meses
-            if (strpos($est, "Ent") === false && strpos($est, "can") === false && $fi >= $_noti_limite6m) {
+            // Solo órdenes no entregadas/canceladas/SR/PV y de los últimos 6 meses
+            if (strpos($est, "Ent") === false && strpos($est, "can") === false
+                && stripos($est, "sin reparación") === false && strpos($est, "SR") === false
+                && stripos($est, "producto para venta") === false && strpos($est, "PV") === false
+                && $fi >= $_noti_limite6m) {
                 // Verificar si tiene +5 días (atraso)
                 if (strtotime($fi . "+ 5 days") <= time()) {
                     $_noti_ordenes[] = $o;
@@ -42,7 +45,10 @@ if ($_noti_perfil == "administrador") {
                 foreach ($_noti_raw as $o) {
                     $est = isset($o["estado"]) ? $o["estado"] : "";
                     $fi  = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
-                    if (strpos($est, "Ent") === false && strpos($est, "can") === false && $fi >= $_noti_limite6m) {
+                    if (strpos($est, "Ent") === false && strpos($est, "can") === false
+                        && stripos($est, "sin reparación") === false && strpos($est, "SR") === false
+                        && stripos($est, "producto para venta") === false && strpos($est, "PV") === false
+                        && $fi >= $_noti_limite6m) {
                         if (strtotime($fi . "+ 5 days") <= time()) {
                             $_noti_ordenes[] = $o;
                         }
@@ -66,6 +72,8 @@ if ($_noti_perfil == "administrador") {
                     if (strpos($est, "Ent") === false
                         && strpos($est, "can") === false
                         && strpos($est, "AUT") === false
+                        && stripos($est, "sin reparación") === false && strpos($est, "SR") === false
+                        && stripos($est, "producto para venta") === false && strpos($est, "PV") === false
                         && $fi >= $_noti_limite6m
                     ) {
                         if (strtotime($fi . "+ 5 days") <= time()) {
