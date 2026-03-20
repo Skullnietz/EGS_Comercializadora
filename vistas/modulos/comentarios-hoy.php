@@ -5,15 +5,12 @@
     registrados en la fecha de hoy.
     ═══════════════════════════════════════════════════ */
 
-// Verificar sesión y perfil permitido
-if (!isset($_SESSION["validarSesionBackend"]) || $_SESSION["validarSesionBackend"] !== "ok") {
-    header("Location: index.php");
-    exit;
-}
+// Control de acceso — usar JS + return, nunca exit ni header() aquí
+// porque la plantilla ya empezó a emitir HTML
 $_perfilesPermitidos = array("administrador", "vendedor", "tecnico");
-if (!in_array($_SESSION["perfil"], $_perfilesPermitidos)) {
-    header("Location: index.php?ruta=inicio");
-    exit;
+if (!isset($_SESSION["perfil"]) || !in_array($_SESSION["perfil"], $_perfilesPermitidos)) {
+    echo '<script>window.location = "index.php?ruta=inicio";</script>';
+    return;
 }
 
 // Cargar observaciones del día
@@ -31,29 +28,32 @@ if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
     }
 }
 
-// Helpers (con guardas para evitar redeclaración)
-if (!function_exists('_choyTruncar'))
-function _choyTruncar($texto, $max = 120) {
-    $texto = trim(preg_replace('/\s+/', ' ', strip_tags($texto)));
-    if (mb_strlen($texto) <= $max) return $texto;
-    $corte = mb_substr($texto, 0, $max);
-    $ultimo = mb_strrpos($corte, ' ');
-    if ($ultimo !== false) $corte = mb_substr($corte, 0, $ultimo);
-    return $corte . '…';
+// Helpers
+if (!function_exists('_choyTruncar')) {
+    function _choyTruncar($texto, $max = 200) {
+        $texto = trim(preg_replace('/\s+/', ' ', strip_tags($texto)));
+        if (mb_strlen($texto) <= $max) return $texto;
+        $corte = mb_substr($texto, 0, $max);
+        $ultimo = mb_strrpos($corte, ' ');
+        if ($ultimo !== false) $corte = mb_substr($corte, 0, $ultimo);
+        return $corte . '...';
+    }
 }
 
-if (!function_exists('_choyHora'))
-function _choyHora($fecha) {
-    return date('H:i', strtotime($fecha));
+if (!function_exists('_choyHora')) {
+    function _choyHora($fecha) {
+        return date('H:i', strtotime($fecha));
+    }
 }
 
-if (!function_exists('_choyColorPerfil'))
-function _choyColorPerfil($perfil) {
-    $p = strtolower($perfil);
-    if (strpos($p, 'admin') !== false)    return array('#6366f1', '#eef2ff', 'fa-shield-halved');
-    if (strpos($p, 'vendedor') !== false || strpos($p, 'asesor') !== false) return array('#8b5cf6', '#f5f3ff', 'fa-headset');
-    if (strpos($p, 'tecnico') !== false || strpos($p, 'técnico') !== false) return array('#06b6d4', '#ecfeff', 'fa-wrench');
-    return array('#64748b', '#f1f5f9', 'fa-user');
+if (!function_exists('_choyColorPerfil')) {
+    function _choyColorPerfil($perfil) {
+        $p = strtolower($perfil);
+        if (strpos($p, 'admin') !== false)    return array('#6366f1', '#eef2ff', 'fa-shield-halved');
+        if (strpos($p, 'vendedor') !== false || strpos($p, 'asesor') !== false) return array('#8b5cf6', '#f5f3ff', 'fa-headset');
+        if (strpos($p, 'tecnico') !== false || strpos($p, 'técnico') !== false) return array('#06b6d4', '#ecfeff', 'fa-wrench');
+        return array('#64748b', '#f1f5f9', 'fa-user');
+    }
 }
 
 $_choy_grads = array(
@@ -93,6 +93,7 @@ $_choy_total = count($_choy_obs);
         border-radius: 14px;
         box-shadow: 0 1px 3px rgba(15,23,42,.06), 0 4px 14px rgba(15,23,42,.04);
         overflow: hidden;
+        margin-bottom: 24px;
       }
       .choy-card-head {
         display: flex;
@@ -107,7 +108,7 @@ $_choy_total = count($_choy_obs);
         display: flex;
         gap: 14px;
         padding: 16px 24px;
-        border-bottom: 1px solid #f8fafc;
+        border-bottom: 1px solid #f1f5f9;
         transition: background .12s;
       }
       .choy-row:last-child { border-bottom: none; }
@@ -116,9 +117,9 @@ $_choy_total = count($_choy_obs);
         font-size: 11px;
         font-weight: 700;
         color: #94a3b8;
-        width: 22px;
+        width: 24px;
         flex-shrink: 0;
-        margin-top: 10px;
+        padding-top: 11px;
         text-align: right;
       }
       .choy-avatar {
@@ -137,29 +138,32 @@ $_choy_total = count($_choy_obs);
         padding: 60px 20px;
         color: #94a3b8;
       }
-      .choy-empty i { font-size: 40px; margin-bottom: 14px; display: block; }
+      .choy-empty i { font-size: 42px; margin-bottom: 14px; display: block; opacity: .5; }
       .choy-empty strong { display: block; font-size: 15px; color: #475569; margin-bottom: 6px; }
     </style>
 
     <!-- Cabecera resumen -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
       <div style="display:flex;align-items:center;gap:14px">
-        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;flex-shrink:0">
           <i class="fa-solid fa-comments" style="color:#fff;font-size:18px"></i>
         </div>
         <div>
           <h3 style="margin:0;font-size:17px;font-weight:800;color:#0f172a">Todos los comentarios de hoy</h3>
-          <p style="margin:2px 0 0;font-size:12px;color:#94a3b8"><?php echo $_choy_fecha; ?> &mdash; <?php echo $_choy_total; ?> comentario<?php echo $_choy_total !== 1 ? 's' : ''; ?> registrado<?php echo $_choy_total !== 1 ? 's' : ''; ?></p>
+          <p style="margin:2px 0 0;font-size:12px;color:#94a3b8">
+            <?php echo $_choy_fecha; ?> &mdash;
+            <?php echo $_choy_total; ?> comentario<?php echo $_choy_total !== 1 ? 's' : ''; ?> registrado<?php echo $_choy_total !== 1 ? 's' : ''; ?>
+          </p>
         </div>
       </div>
       <a href="index.php?ruta=inicio"
          style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#475569;background:#f1f5f9;border:1px solid #e2e8f0;padding:8px 14px;border-radius:10px;text-decoration:none;transition:background .15s"
          onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
-        <i class="fa-solid fa-arrow-left" style="font-size:11px"></i> Volver al tablero
+        <i class="fa-solid fa-arrow-left" style="font-size:10px"></i> Volver al tablero
       </a>
     </div>
 
-    <!-- Tabla de comentarios -->
+    <!-- Lista de comentarios -->
     <div class="choy-card">
       <div class="choy-card-head">
         <div style="display:flex;align-items:center;gap:10px">
@@ -167,7 +171,7 @@ $_choy_total = count($_choy_obs);
           <span style="font-size:14px;font-weight:700;color:#0f172a">Observaciones registradas hoy</span>
         </div>
         <span style="font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;padding:4px 12px;border-radius:20px">
-          <?php echo $_choy_total; ?> total
+          <?php echo $_choy_total; ?> en total
         </span>
       </div>
 
@@ -175,7 +179,7 @@ $_choy_total = count($_choy_obs);
         <div class="choy-empty">
           <i class="fa-solid fa-comment-slash"></i>
           <strong>Sin comentarios hoy</strong>
-          <span>Aún no se han registrado observaciones en el día de hoy</span>
+          <span style="font-size:13px">Aún no se han registrado observaciones en el día de hoy.</span>
         </div>
       <?php else: ?>
         <?php foreach ($_choy_obs as $i => $obs):
@@ -224,7 +228,7 @@ $_choy_total = count($_choy_obs);
 
             <!-- Contenido -->
             <div style="flex:1;min-width:0">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
                 <span style="font-size:13px;font-weight:700;color:#0f172a"><?php echo htmlspecialchars($nombre); ?></span>
                 <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:<?php echo $colPerf[0]; ?>;background:<?php echo $colPerf[1]; ?>;padding:2px 8px;border-radius:8px">
                   <i class="fa-solid <?php echo $colPerf[2]; ?>" style="font-size:8px"></i>
@@ -238,12 +242,12 @@ $_choy_total = count($_choy_obs);
                 <?php echo htmlspecialchars($resumen); ?>
               </div>
               <?php if (!empty($idOrden)): ?>
-              <a href="<?php echo $link; ?>" target="_blank"
-                 style="font-size:11px;font-weight:600;color:#6366f1;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s"
-                 onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#6366f1'">
-                <i class="fa-solid fa-hashtag" style="font-size:9px"></i>Orden <?php echo htmlspecialchars($idOrden); ?>
-                <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:8px;margin-left:2px"></i>
-              </a>
+                <a href="<?php echo $link; ?>" target="_blank"
+                   style="font-size:11px;font-weight:600;color:#6366f1;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s"
+                   onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#6366f1'">
+                  <i class="fa-solid fa-hashtag" style="font-size:9px"></i>Orden <?php echo htmlspecialchars($idOrden); ?>
+                  <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:8px;margin-left:2px"></i>
+                </a>
               <?php endif; ?>
             </div>
           </div>
