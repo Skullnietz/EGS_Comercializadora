@@ -61,7 +61,7 @@
         crossorigin="anonymous" referrerpolicy="no-referrer">
   <!-- v4-shims: convierte las clases FA4 (fa fa-*) a FA6 automáticamente -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/v4-shims.min.css"
-        integrity="sha512-kQgMSFqZKW1rLaEZAIiJTVSQIX0kPi0Y3D3KdmAQY7ZjGhvCJO1XYU8NHpS6bkSRbW5oc5mVMhCUjbFaHdoFg=="
+        integrity="sha512-vU8GapgME7Cc/sHTwbn2Q1eMBgE/ZBU8JL/oRo+Cw/frBXtmeekNEYbNe2gezj/cPaSdkTdERyimVSb+2F6f0A=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
   <!-- Ionicons -->
   <link rel="stylesheet" href="vistas/bower_components/Ionicons/css/ionicons.min.css">

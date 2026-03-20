@@ -20,36 +20,39 @@ if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
 }
 
 // Helper: truncar texto sin cortar palabras
-if (!function_exists('_movTruncar'))
-function _movTruncar($texto, $max = 80) {
-    $texto = trim(preg_replace('/\s+/', ' ', strip_tags($texto)));
-    if (mb_strlen($texto) <= $max) return $texto;
-    $corte = mb_substr($texto, 0, $max);
-    $ultimo = mb_strrpos($corte, ' ');
-    if ($ultimo !== false) $corte = mb_substr($corte, 0, $ultimo);
-    return $corte . '...';
+if (!function_exists('_movTruncar')) {
+    function _movTruncar($texto, $max = 80) {
+        $texto = trim(preg_replace('/\s+/', ' ', strip_tags($texto)));
+        if (mb_strlen($texto) <= $max) return $texto;
+        $corte = mb_substr($texto, 0, $max);
+        $ultimo = mb_strrpos($corte, ' ');
+        if ($ultimo !== false) $corte = mb_substr($corte, 0, $ultimo);
+        return $corte . '...';
+    }
 }
 
 // Helper: tiempo relativo
-if (!function_exists('_movTiempoRelativo'))
-function _movTiempoRelativo($fecha) {
-    $diff = time() - strtotime($fecha);
-    if ($diff < 60) return 'Hace un momento';
-    if ($diff < 3600) return 'Hace ' . floor($diff / 60) . ' min';
-    if ($diff < 86400) return 'Hace ' . floor($diff / 3600) . 'h';
-    if ($diff < 172800) return 'Ayer';
-    if ($diff < 604800) return 'Hace ' . floor($diff / 86400) . ' días';
-    return date('d/m/Y', strtotime($fecha));
+if (!function_exists('_movTiempoRelativo')) {
+    function _movTiempoRelativo($fecha) {
+        $diff = time() - strtotime($fecha);
+        if ($diff < 60) return 'Hace un momento';
+        if ($diff < 3600) return 'Hace ' . floor($diff / 60) . ' min';
+        if ($diff < 86400) return 'Hace ' . floor($diff / 3600) . 'h';
+        if ($diff < 172800) return 'Ayer';
+        if ($diff < 604800) return 'Hace ' . floor($diff / 86400) . ' días';
+        return date('d/m/Y', strtotime($fecha));
+    }
 }
 
 // Colores por perfil
-if (!function_exists('_movColorPerfil'))
-function _movColorPerfil($perfil) {
-    $p = strtolower($perfil);
-    if (strpos($p, 'admin') !== false) return array('#6366f1', '#eef2ff', 'fa-shield-halved');
-    if (strpos($p, 'vendedor') !== false || strpos($p, 'asesor') !== false) return array('#8b5cf6', '#f5f3ff', 'fa-headset');
-    if (strpos($p, 'tecnico') !== false || strpos($p, 'técnico') !== false) return array('#06b6d4', '#ecfeff', 'fa-wrench');
-    return array('#64748b', '#f1f5f9', 'fa-user');
+if (!function_exists('_movColorPerfil')) {
+    function _movColorPerfil($perfil) {
+        $p = strtolower($perfil);
+        if (strpos($p, 'admin') !== false) return array('#6366f1', '#eef2ff', 'fa-shield-halved');
+        if (strpos($p, 'vendedor') !== false || strpos($p, 'asesor') !== false) return array('#8b5cf6', '#f5f3ff', 'fa-headset');
+        if (strpos($p, 'tecnico') !== false || strpos($p, 'técnico') !== false) return array('#06b6d4', '#ecfeff', 'fa-wrench');
+        return array('#64748b', '#f1f5f9', 'fa-user');
+    }
 }
 
 $_mov_av_grads = array(
