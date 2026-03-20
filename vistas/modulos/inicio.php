@@ -420,6 +420,18 @@ PÁGINA DE INICIO
         </div>
       </div>
 
+      <!-- ══ SECCIÓN 5: Últimos Movimientos ══ -->
+      <div class="crm-section">
+        <div class="crm-section-icon" style="background:linear-gradient(135deg,#06b6d4,#6366f1)">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <div>
+          <h3>Últimos Movimientos</h3>
+          <p>Comentarios y observaciones recientes en las órdenes</p>
+        </div>
+      </div>
+      <?php include "inicio/admin-ultimos-movimientos.php"; ?>
+
     <?php elseif ($_SESSION["perfil"] == "tecnico"): ?>
 
       <!-- ══ WELCOME BANNER TÉCNICO ══ -->

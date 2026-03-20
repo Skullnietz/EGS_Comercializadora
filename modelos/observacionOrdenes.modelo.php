@@ -72,6 +72,26 @@ class ModeloObservaciones{
 	}
 
 	/*=============================================
+	OBSERVACIONES DE HOY (GLOBAL)
+	=============================================*/
+
+	static public function mdlObservacionesHoy($tabla){
+
+		$stmt = Conexion::conectar()->prepare(
+			"SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
+			        a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
+			 FROM $tabla o
+			 LEFT JOIN administradores a ON a.id = o.id_creador
+			 WHERE DATE(o.fecha) = CURDATE()
+			 ORDER BY o.fecha DESC"
+		);
+
+		$stmt->execute();
+
+		return $stmt->fetchAll();
+	}
+
+	/*=============================================
 	CREAR OBSERVACIONES
 	=============================================*/
 	static public function mdlCrearObservacion($tabla, $datos){

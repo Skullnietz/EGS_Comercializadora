@@ -7,7 +7,7 @@
 
 $_mov_obs = array();
 try {
-    $_mov_obs = controladorObservaciones::ctrUltimasObservaciones(12);
+    $_mov_obs = controladorObservaciones::ctrUltimasObservaciones(20);
     if (!is_array($_mov_obs)) $_mov_obs = array();
 } catch (Exception $e) { $_mov_obs = array(); }
 
@@ -20,6 +20,7 @@ if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
 }
 
 // Helper: truncar texto sin cortar palabras
+if (!function_exists('_movTruncar'))
 function _movTruncar($texto, $max = 80) {
     $texto = trim(preg_replace('/\s+/', ' ', strip_tags($texto)));
     if (mb_strlen($texto) <= $max) return $texto;
@@ -30,6 +31,7 @@ function _movTruncar($texto, $max = 80) {
 }
 
 // Helper: tiempo relativo
+if (!function_exists('_movTiempoRelativo'))
 function _movTiempoRelativo($fecha) {
     $diff = time() - strtotime($fecha);
     if ($diff < 60) return 'Hace un momento';
@@ -41,6 +43,7 @@ function _movTiempoRelativo($fecha) {
 }
 
 // Colores por perfil
+if (!function_exists('_movColorPerfil'))
 function _movColorPerfil($perfil) {
     $p = strtolower($perfil);
     if (strpos($p, 'admin') !== false) return array('#6366f1', '#eef2ff', 'fa-shield-halved');
@@ -64,9 +67,16 @@ $_mov_av_grads = array(
 <div class="crm-card" style="margin-bottom:20px">
   <div class="crm-card-head">
     <h4 class="crm-card-title"><i class="fa-solid fa-clock-rotate-left"></i> Últimos Movimientos</h4>
-    <span class="crm-badge" style="background:#f1f5f9;color:#475569">
-      <?php echo count($_mov_obs); ?> recientes
-    </span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="crm-badge" style="background:#f1f5f9;color:#475569">
+        <?php echo count($_mov_obs); ?> recientes
+      </span>
+      <a href="index.php?ruta=comentarios-hoy"
+         style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;padding:4px 10px;border-radius:8px;text-decoration:none;transition:background .15s"
+         onmouseover="this.style.background='#e0e7ff'" onmouseout="this.style.background='#eef2ff'">
+        <i class="fa-solid fa-calendar-day" style="font-size:10px"></i> Ver todos del día
+      </a>
+    </div>
   </div>
   <div class="crm-card-body-flush">
     <?php if (empty($_mov_obs)): ?>
@@ -76,7 +86,7 @@ $_mov_av_grads = array(
         <span style="font-size:12px">Las observaciones de órdenes aparecerán aquí</span>
       </div>
     <?php else: ?>
-      <div style="max-height:440px;overflow-y:auto">
+      <div style="max-height:600px;overflow-y:auto">
         <?php foreach ($_mov_obs as $i => $obs):
           $nombre = isset($obs['creador_nombre']) ? $obs['creador_nombre'] : 'Usuario';
           $perfil = isset($obs['creador_perfil']) ? $obs['creador_perfil'] : '';

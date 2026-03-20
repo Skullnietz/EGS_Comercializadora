@@ -42,6 +42,18 @@ class controladorObservaciones{
 	}
 
 	/*=============================================
+	OBSERVACIONES DE HOY
+	=============================================*/
+
+	static public function ctrObservacionesHoy(){
+
+		$tabla = "observacionesOrdenes";
+
+		return ModeloObservaciones::mdlObservacionesHoy($tabla);
+
+	}
+
+	/*=============================================
 	INSERTAR OBSERVACIONES
 	=============================================*/
 	static public function ctrlCrearObservacion(){
