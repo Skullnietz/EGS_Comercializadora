@@ -285,7 +285,7 @@ function _admCalcRanking($allOrders, $mapaTec, $corte) {
             'puntosBrutos' => $puntosBrutos,
             'ratioCalidad' => $ratioCalidad,
             'multiplicador'=> $multiplicador,
-            'totalOrd'     => $st['total'],
+            'totalOrd'     => $totalElegible,
             'entregadas'   => $st['ENT'],
             'terminadas'   => $st['TER'],
             'autorizacion' => $st['AUT'],
@@ -455,6 +455,8 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 <script>
 var _ord=<?php echo json_encode($_adm_ordJS); ?>;
 var _tecMap=<?php echo json_encode($_adm_mapaTec); ?>;
+var _pipeCortes=<?php echo json_encode($_adm_pipe_cortes); ?>;
+var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
 </script>
 
 <!-- ══════════════════════════════════════════
@@ -1489,11 +1491,9 @@ var _tecMap=<?php echo json_encode($_adm_mapaTec); ?>;
 
   // ── Pipeline Drill ──
   window.drillPipe = function(stage) {
-    var cortes = {'1m':30,'3m':90,'6m':180,'12m':365};
     var $active = $('#admPipeFilter .adm-pipe-btn.active');
     var period = $active.length ? $active.data('period') : '1m';
-    var days = cortes[period] || 30;
-    var cut = cutoffStr(days);
+    var cut = (typeof _pipeCortes !== 'undefined' && _pipeCortes[period]) ? _pipeCortes[period] : cutoffStr(30);
     var labels = {REV:'Revisión',AUT:'Por Autorizar',OK:'Aceptadas',TER:'Terminadas',ENT:'Entregadas',SUP:'Supervisión'};
     var f = orders.filter(function(o) {
       var cl = classify(o.est);
@@ -1507,9 +1507,7 @@ var _tecMap=<?php echo json_encode($_adm_mapaTec); ?>;
 
   // ── Technician Drill ──
   window.drillTec = function(tecId, column, period) {
-    var cortes = {'1m':30,'3m':90,'12m':365,'all':36500};
-    var days = cortes[period] || 30;
-    var cut = cutoffStr(days);
+    var cut = (typeof _tecCortes !== 'undefined' && _tecCortes[period]) ? _tecCortes[period] : cutoffStr(30);
     var cols = {total:'Todas',ENT:'Entregadas',TER:'Terminadas',AUT:'Autorización',SUP:'Supervisión',pendientes:'Pendientes (REV+OK)',GAR:'Garantías'};
     var f = orders.filter(function(o) {
       if (String(o.tec) !== String(tecId)) return false;
