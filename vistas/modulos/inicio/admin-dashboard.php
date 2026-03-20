@@ -108,6 +108,29 @@ if (empty($_adm_allOrders)) {
     } catch (Exception $e) {}
 }
 
+// ══════════════════════════════════════
+// JSON trimmed para drill-down en JavaScript
+// ══════════════════════════════════════
+$_adm_ordJS = array();
+foreach ($_adm_allOrders as $_o) {
+    $_adm_ordJS[] = array(
+        'id'    => $_o['id'],
+        'est'   => isset($_o['estado']) ? $_o['estado'] : '',
+        'fi'    => isset($_o['fecha_ingreso']) ? substr($_o['fecha_ingreso'], 0, 10) : '',
+        'fs'    => !empty($_o['fecha_Salida']) ? substr($_o['fecha_Salida'], 0, 10) : '',
+        'tec'   => isset($_o['id_tecnico']) ? $_o['id_tecnico'] : '',
+        'nom'   => isset($_o['nombre']) ? $_o['nombre'] : '',
+        'eq'    => isset($_o['equipo']) ? $_o['equipo'] : '',
+        'marca' => isset($_o['marca']) ? $_o['marca'] : '',
+        'total' => isset($_o['total']) ? floatval($_o['total']) : 0,
+        'emp'   => isset($_o['id_empresa']) ? $_o['id_empresa'] : '',
+        'ase'   => isset($_o['id_Asesor']) ? $_o['id_Asesor'] : '',
+        'usr'   => isset($_o['id_usuario']) ? $_o['id_usuario'] : '',
+        'ped'   => isset($_o['id_pedido']) ? $_o['id_pedido'] : '',
+        'td'    => isset($_o['id_tecnicoDos']) ? $_o['id_tecnicoDos'] : '',
+    );
+}
+
 $_adm_pipe_cortes = array(
     '1m'  => date("Y-m-d", strtotime("-1 month")),
     '3m'  => date("Y-m-d", strtotime("-3 months")),
@@ -256,6 +279,7 @@ function _admCalcRanking($allOrders, $mapaTec, $corte) {
         else { $nivel = '—'; $nivelColor = '#cbd5e1'; $nivelIcon = 'fa-minus'; }
 
         $ranking[] = array(
+            'id'           => $tid,
             'nombre'       => $st['nombre'],
             'score'        => $scoreFinal,
             'puntosBrutos' => $puntosBrutos,
@@ -264,6 +288,8 @@ function _admCalcRanking($allOrders, $mapaTec, $corte) {
             'totalOrd'     => $st['total'],
             'entregadas'   => $st['ENT'],
             'terminadas'   => $st['TER'],
+            'autorizacion' => $st['AUT'],
+            'supervision'  => $st['SUP'],
             'pendientes'   => $pendientes,
             'revision'     => $st['REV'],
             'aceptadas'    => $st['OK'],
@@ -425,13 +451,19 @@ try {
 $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 ?>
 
+<!-- Datos para drill-down -->
+<script>
+var _ord=<?php echo json_encode($_adm_ordJS); ?>;
+var _tecMap=<?php echo json_encode($_adm_mapaTec); ?>;
+</script>
+
 <!-- ══════════════════════════════════════════
      KPIs PRINCIPALES
 ══════════════════════════════════════════ -->
 <div class="row">
   <!-- Ventas del Mes -->
   <div class="col-lg-3 col-sm-6 col-xs-12" style="margin-bottom:16px">
-    <div class="crm-kpi" style="background:linear-gradient(135deg,#6366f1,#818cf8)">
+    <div class="crm-kpi" style="background:linear-gradient(135deg,#6366f1,#818cf8);cursor:pointer" onclick="drillKpi('ventas')">
       <i class="fa-solid fa-dollar-sign crm-kpi-icon"></i>
       <div class="crm-kpi-label">Ventas del Mes</div>
       <div class="crm-kpi-value">$<?php echo number_format($_adm_totalVentas, 0); ?></div>
@@ -442,7 +474,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 
   <!-- Ingresadas -->
   <div class="col-lg-3 col-sm-6 col-xs-12" style="margin-bottom:16px">
-    <div class="crm-kpi" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)">
+    <div class="crm-kpi" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);cursor:pointer" onclick="drillKpi('ingresadas')">
       <i class="fa-solid fa-file-circle-plus crm-kpi-icon"></i>
       <div class="crm-kpi-label">Ingresadas / Mes</div>
       <div class="crm-kpi-value"><?php echo number_format($_adm_totalIngresadas); ?></div>
@@ -453,7 +485,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 
   <!-- Entregadas -->
   <div class="col-lg-3 col-sm-6 col-xs-12" style="margin-bottom:16px">
-    <div class="crm-kpi" style="background:linear-gradient(135deg,#22c55e,#4ade80)">
+    <div class="crm-kpi" style="background:linear-gradient(135deg,#22c55e,#4ade80);cursor:pointer" onclick="drillKpi('ventas')">
       <i class="fa-solid fa-circle-check crm-kpi-icon"></i>
       <div class="crm-kpi-label">Entregadas / Mes</div>
       <div class="crm-kpi-value"><?php echo number_format($_adm_totalEntregadas); ?></div>
@@ -490,7 +522,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 <div class="row">
   <!-- Pendientes -->
   <div class="col-lg-3 col-sm-6 col-xs-12" style="margin-bottom:16px">
-    <div class="crm-card" style="border-left:4px solid <?php echo $_adm_pctPendientes > 50 ? '#ef4444' : ($_adm_pctPendientes > 20 ? '#f59e0b' : '#22c55e'); ?>">
+    <div class="crm-card" style="border-left:4px solid <?php echo $_adm_pctPendientes > 50 ? '#ef4444' : ($_adm_pctPendientes > 20 ? '#f59e0b' : '#22c55e'); ?>;cursor:pointer" onclick="drillKpi('pendientes')">
       <div class="crm-card-body" style="padding:18px 20px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--crm-muted);letter-spacing:.5px">Pendientes</span>
@@ -509,7 +541,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 
   <!-- Ingresadas Hoy -->
   <div class="col-lg-3 col-sm-6 col-xs-12" style="margin-bottom:16px">
-    <div class="crm-card" style="border-left:4px solid #3b82f6">
+    <div class="crm-card" style="border-left:4px solid #3b82f6;cursor:pointer" onclick="drillKpi('hoyIngresadas')">
       <div class="crm-card-body" style="padding:18px 20px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--crm-muted);letter-spacing:.5px">Ingresadas Hoy</span>
@@ -528,7 +560,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 
   <!-- Entregadas Hoy -->
   <div class="col-lg-3 col-sm-6 col-xs-12" style="margin-bottom:16px">
-    <div class="crm-card" style="border-left:4px solid #22c55e">
+    <div class="crm-card" style="border-left:4px solid #22c55e;cursor:pointer" onclick="drillKpi('hoyEntregadas')">
       <div class="crm-card-body" style="padding:18px 20px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--crm-muted);letter-spacing:.5px">Entregadas Hoy</span>
@@ -547,7 +579,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 
   <!-- Eficiencia -->
   <div class="col-lg-3 col-sm-6 col-xs-12" style="margin-bottom:16px">
-    <div class="crm-card" style="border-left:4px solid <?php echo $_adm_efColor; ?>">
+    <div class="crm-card" style="border-left:4px solid <?php echo $_adm_efColor; ?>;cursor:pointer" onclick="drillKpi('ingresadas')">
       <div class="crm-card-body" style="padding:18px 20px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--crm-muted);letter-spacing:.5px">Eficiencia</span>
@@ -611,7 +643,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
         $cnt = isset($_adm_pipe_default[$k]) ? $_adm_pipe_default[$k] : 0;
         $pct = $_adm_pipe_default['total'] > 0 ? round(($cnt / $_adm_pipe_default['total']) * 100, 1) : 0;
       ?>
-        <div class="crm-pipe-stage">
+        <div class="crm-pipe-stage" style="cursor:pointer" onclick="drillPipe('<?php echo $k; ?>')">
           <div class="crm-pipe-stage-icon" style="background:<?php echo $s['color']; ?>">
             <i class="fa-solid <?php echo $s['icon']; ?>"></i>
           </div>
@@ -825,6 +857,8 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
           <div style="width:50px;text-align:center" title="Total de órdenes">Total</div>
           <div style="width:50px;text-align:center;color:#22c55e" title="Entregadas (+3 pts c/u)">ENT</div>
           <div style="width:50px;text-align:center;color:#06b6d4" title="Terminadas (+2 pts c/u)">TER</div>
+          <div style="width:40px;text-align:center;color:#f59e0b" title="Pendiente de Autorización">AUT</div>
+          <div style="width:40px;text-align:center;color:#8b5cf6" title="En Supervisión">SUP</div>
           <div style="width:70px;text-align:center;color:#64748b" title="Pendientes (REV + OK)">Pend.</div>
           <div style="width:50px;text-align:center;color:#dc2626" title="Garantías (-5 pts c/u)">GAR</div>
           <div style="width:55px;text-align:center" title="% completadas vs total">Calidad</div>
@@ -854,19 +888,23 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
               </div>
             </div>
 
-            <div style="width:50px;text-align:center;font-size:13px;font-weight:700;color:var(--crm-text)"><?php echo $tec['totalOrd']; ?></div>
+            <div style="width:50px;text-align:center;font-size:13px;font-weight:700;color:var(--crm-text);cursor:pointer" onclick="drillTec(<?php echo $tec['id']; ?>,'total','1m')"><?php echo $tec['totalOrd']; ?></div>
 
-            <div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#22c55e"><?php echo $tec['entregadas']; ?></span></div>
+            <div style="width:50px;text-align:center;cursor:pointer" onclick="drillTec(<?php echo $tec['id']; ?>,'ENT','1m')"><span style="font-size:12px;font-weight:700;color:#22c55e"><?php echo $tec['entregadas']; ?></span></div>
 
-            <div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#06b6d4"><?php echo $tec['terminadas']; ?></span></div>
+            <div style="width:50px;text-align:center;cursor:pointer" onclick="drillTec(<?php echo $tec['id']; ?>,'TER','1m')"><span style="font-size:12px;font-weight:700;color:#06b6d4"><?php echo $tec['terminadas']; ?></span></div>
 
-            <div style="width:70px;text-align:center">
+            <div style="width:40px;text-align:center;cursor:pointer" onclick="drillTec(<?php echo $tec['id']; ?>,'AUT','1m')"><span style="font-size:11px;font-weight:600;color:#f59e0b"><?php echo $tec['autorizacion']; ?></span></div>
+
+            <div style="width:40px;text-align:center;cursor:pointer" onclick="drillTec(<?php echo $tec['id']; ?>,'SUP','1m')"><span style="font-size:11px;font-weight:600;color:#8b5cf6"><?php echo $tec['supervision']; ?></span></div>
+
+            <div style="width:70px;text-align:center;cursor:pointer" onclick="drillTec(<?php echo $tec['id']; ?>,'pendientes','1m')">
               <span style="font-size:11px;font-weight:600;color:#64748b;background:#f1f5f9;padding:2px 6px;border-radius:4px" title="REV:<?php echo $tec['revision']; ?> + OK:<?php echo $tec['aceptadas']; ?>">
                 <?php echo $tec['pendientes']; ?> <i class="fa-solid fa-clock" style="font-size:8px;color:#94a3b8"></i>
               </span>
             </div>
 
-            <div style="width:50px;text-align:center">
+            <div style="width:50px;text-align:center;cursor:pointer" onclick="drillTec(<?php echo $tec['id']; ?>,'GAR','1m')">
               <?php if ($tec['garantias'] > 0): ?>
                 <span style="font-size:11px;font-weight:700;color:#dc2626;background:#fef2f2;padding:2px 6px;border-radius:4px" title="-<?php echo $tec['garantias'] * 5; ?> pts">
                   -<?php echo $tec['garantias']; ?>
@@ -919,6 +957,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 (function(){
   var tecRankData = <?php echo json_encode($_adm_tecRankByPeriod); ?>;
   var medals = ['🥇','🥈','🥉'];
+  var _tecPeriod = '1m';
 
   function getNivelInfo(score, puntosBrutos) {
     if (score >= 100) return {nivel:'Élite', color:'#f59e0b', icon:'fa-crown'};
@@ -949,6 +988,8 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
       + '<div style="width:50px;text-align:center">Total</div>'
       + '<div style="width:50px;text-align:center;color:#22c55e">ENT</div>'
       + '<div style="width:50px;text-align:center;color:#06b6d4">TER</div>'
+      + '<div style="width:40px;text-align:center;color:#f59e0b">AUT</div>'
+      + '<div style="width:40px;text-align:center;color:#8b5cf6">SUP</div>'
       + '<div style="width:70px;text-align:center;color:#64748b">Pend.</div>'
       + '<div style="width:50px;text-align:center;color:#dc2626">GAR</div>'
       + '<div style="width:55px;text-align:center">Calidad</div>'
@@ -973,11 +1014,13 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
         +   '<div style="font-size:13px;font-weight:700;color:var(--crm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">' + $('<span>').text(t.nombre).html() + '</div>'
         +   '<div style="height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;max-width:180px"><div style="height:100%;width:' + pctBar + '%;background:linear-gradient(90deg,' + niv.color + ',' + niv.color + 'aa);border-radius:2px"></div></div>'
         + '</div>'
-        + '<div style="width:50px;text-align:center;font-size:13px;font-weight:700;color:var(--crm-text)">' + t.totalOrd + '</div>'
-        + '<div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#22c55e">' + t.entregadas + '</span></div>'
-        + '<div style="width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#06b6d4">' + t.terminadas + '</span></div>'
-        + '<div style="width:70px;text-align:center"><span style="font-size:11px;font-weight:600;color:#64748b;background:#f1f5f9;padding:2px 6px;border-radius:4px">' + t.pendientes + ' <i class="fa-solid fa-clock" style="font-size:8px;color:#94a3b8"></i></span></div>'
-        + '<div style="width:50px;text-align:center">' + gar + '</div>'
+        + '<div onclick="drillTec('+t.id+',\'Total\',\''+_tecPeriod+'\')" style="cursor:pointer;width:50px;text-align:center;font-size:13px;font-weight:700;color:var(--crm-text)">' + t.totalOrd + '</div>'
+        + '<div onclick="drillTec('+t.id+',\'ENT\',\''+_tecPeriod+'\')" style="cursor:pointer;width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#22c55e">' + t.entregadas + '</span></div>'
+        + '<div onclick="drillTec('+t.id+',\'TER\',\''+_tecPeriod+'\')" style="cursor:pointer;width:50px;text-align:center"><span style="font-size:12px;font-weight:700;color:#06b6d4">' + t.terminadas + '</span></div>'
+        + '<div onclick="drillTec('+t.id+',\'AUT\',\''+_tecPeriod+'\')" style="cursor:pointer;width:40px;text-align:center"><span style="font-size:11px;font-weight:600;color:#f59e0b">' + (t.autorizacion||0) + '</span></div>'
+        + '<div onclick="drillTec('+t.id+',\'SUP\',\''+_tecPeriod+'\')" style="cursor:pointer;width:40px;text-align:center"><span style="font-size:11px;font-weight:600;color:#8b5cf6">' + (t.supervision||0) + '</span></div>'
+        + '<div onclick="drillTec('+t.id+',\'Pend\',\''+_tecPeriod+'\')" style="cursor:pointer;width:70px;text-align:center"><span style="font-size:11px;font-weight:600;color:#64748b;background:#f1f5f9;padding:2px 6px;border-radius:4px">' + t.pendientes + ' <i class="fa-solid fa-clock" style="font-size:8px;color:#94a3b8"></i></span></div>'
+        + '<div onclick="drillTec('+t.id+',\'GAR\',\''+_tecPeriod+'\')" style="cursor:pointer;width:50px;text-align:center">' + gar + '</div>'
         + '<div style="width:55px;text-align:center"><span style="font-size:11px;font-weight:700;color:' + q.c + ';background:' + q.bg + ';padding:2px 6px;border-radius:4px">' + t.ratioCalidad + '%</span></div>'
         + '<div style="width:75px;text-align:center"><span style="font-size:15px;font-weight:800;color:var(--crm-text)">' + t.score + '</span><span style="font-size:9px;color:#94a3b8;display:block;margin-top:-2px">pts</span></div>'
         + '<div style="width:65px;text-align:center"><span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:' + niv.color + ';background:' + niv.color + '18;padding:3px 8px;border-radius:8px"><i class="fa-solid ' + niv.icon + '" style="font-size:9px"></i> ' + niv.nivel + '</span></div>'
@@ -998,6 +1041,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
     var $btn = $(this), period = $btn.data('period');
     var data = tecRankData[period];
     if (!data) return;
+    _tecPeriod = period;
     $('#admTecFilter .adm-tec-btn').css({background:'transparent',color:'#64748b'}).removeClass('active');
     $btn.css({background:'#f59e0b',color:'#fff'}).addClass('active');
     renderTecRanking(data);
@@ -1307,3 +1351,192 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
     </div>
   <?php endforeach; ?>
 </div>
+
+<!-- ══════════════════════════════════════════
+     MODAL DRILL-DOWN (reutilizable)
+══════════════════════════════════════════ -->
+<div class="modal fade" id="admDrillModal" tabindex="-1">
+  <div class="modal-dialog modal-lg" style="width:90%;max-width:960px">
+    <div class="modal-content" style="border-radius:14px;border:none;box-shadow:0 8px 40px rgba(15,23,42,.18)">
+      <div class="modal-header" style="border-bottom:1px solid #f1f5f9;padding:18px 24px">
+        <button type="button" class="close" data-dismiss="modal" style="font-size:22px;opacity:.6">&times;</button>
+        <h4 class="modal-title" id="admDrillTitle" style="font-weight:800;font-size:16px;color:#0f172a;margin:0"></h4>
+        <div id="admDrillCriteria" style="font-size:11px;color:#94a3b8;margin-top:4px"></div>
+      </div>
+      <div class="modal-body" style="padding:0;max-height:60vh;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:#f8fafc;position:sticky;top:0;z-index:1">
+              <th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.5px">Orden</th>
+              <th style="padding:10px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.5px">Cliente</th>
+              <th style="padding:10px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.5px">Equipo</th>
+              <th style="padding:10px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.5px">Estado</th>
+              <th style="padding:10px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.5px">Ingreso</th>
+              <th style="padding:10px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.5px">Salida</th>
+              <th style="padding:10px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.5px">Técnico</th>
+              <th style="padding:10px 14px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.5px">Total</th>
+            </tr>
+          </thead>
+          <tbody id="admDrillBody"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #f1f5f9;padding:12px 24px;display:flex;justify-content:space-between;align-items:center">
+        <span id="admDrillCount" style="font-size:12px;font-weight:600;color:#94a3b8"></span>
+        <span id="admDrillSum" style="font-size:13px;font-weight:700;color:#0f172a"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MOTOR JAVASCRIPT DE DRILL-DOWN
+══════════════════════════════════════════ -->
+<script>
+(function(){
+  var orders = window._ord || [];
+  var tecMap = window._tecMap || {};
+
+  // Clasificar estado (replica _admPipeClasificar de PHP)
+  function classify(est) {
+    if (!est) return 'REV';
+    var e = est, el = est.toLowerCase();
+    if (el.indexOf('garantia') !== -1 || el.indexOf('garantía') !== -1) return 'GAR';
+    if (el.indexOf('cancel') !== -1) return 'CAN';
+    if (e.indexOf('AUT') !== -1) return 'AUT';
+    if (e.indexOf('REV') !== -1 || e.indexOf('revisión') !== -1) return 'REV';
+    if (e.indexOf('Aceptado') !== -1 || e.indexOf('ok') !== -1) return 'OK';
+    if (e.indexOf('Terminada') !== -1 || e.indexOf('ter') !== -1) return 'TER';
+    if (e.indexOf('Entregado') !== -1 || e.indexOf('Ent') !== -1) return 'ENT';
+    if (e.indexOf('Supervisión') !== -1 || e.indexOf('SUP') !== -1) return 'SUP';
+    return 'REV';
+  }
+
+  function esc(s) { return $('<span>').text(s || '—').html(); }
+
+  function orderLink(o) {
+    return 'index.php?ruta=infoOrden&idOrden=' + o.id
+      + '&empresa=' + (o.emp||'') + '&asesor=' + (o.ase||'')
+      + '&cliente=' + (o.usr||'') + '&tecnico=' + (o.tec||'')
+      + '&tecnicodos=' + (o.td||'') + '&pedido=' + (o.ped||'');
+  }
+
+  function isMonth(ds) {
+    if (!ds) return false;
+    var now = new Date();
+    return parseInt(ds.substring(0,4),10) === now.getFullYear()
+        && parseInt(ds.substring(5,7),10) === (now.getMonth()+1);
+  }
+
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function cutoffStr(days) {
+    var d = new Date(); d.setDate(d.getDate() - days);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  // Mostrar modal con lista filtrada
+  window.admDrill = function(title, criteria, filtered) {
+    $('#admDrillTitle').text(title);
+    $('#admDrillCriteria').html('<i class="fa-solid fa-filter" style="margin-right:4px"></i> ' + criteria);
+    var html = '', sum = 0;
+    filtered.sort(function(a,b){ return (b.fi||'').localeCompare(a.fi||''); });
+    for (var i = 0; i < filtered.length; i++) {
+      var o = filtered[i];
+      sum += o.total;
+      html += '<tr style="border-bottom:1px solid #f1f5f9">'
+        + '<td style="padding:10px 14px"><a href="' + orderLink(o) + '" target="_blank" style="color:#6366f1;font-weight:700;text-decoration:none">#' + o.id + '</a></td>'
+        + '<td style="padding:10px 8px">' + esc(o.nom) + '</td>'
+        + '<td style="padding:10px 8px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(o.eq || o.marca) + '</td>'
+        + '<td style="padding:10px 8px"><span style="font-size:10px;font-weight:600;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:6px;white-space:nowrap">' + esc(o.est) + '</span></td>'
+        + '<td style="padding:10px 8px;white-space:nowrap">' + (o.fi||'—') + '</td>'
+        + '<td style="padding:10px 8px;white-space:nowrap">' + (o.fs||'—') + '</td>'
+        + '<td style="padding:10px 8px">' + esc(tecMap[o.tec]) + '</td>'
+        + '<td style="padding:10px 14px;text-align:right;font-weight:600">$' + Number(o.total||0).toLocaleString('en') + '</td>'
+        + '</tr>';
+    }
+    if (!filtered.length) {
+      html = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8"><i class="fa-solid fa-inbox" style="font-size:24px;display:block;margin-bottom:8px"></i>Sin órdenes para este filtro</td></tr>';
+    }
+    $('#admDrillBody').html(html);
+    $('#admDrillCount').text(filtered.length + ' orden' + (filtered.length !== 1 ? 'es' : ''));
+    $('#admDrillSum').text('Suma totales: $' + Number(sum).toLocaleString('en'));
+    $('#admDrillModal').modal('show');
+  };
+
+  // ── KPI Drills ──
+  window.drillKpi = function(type) {
+    var hoy = today(), f = [];
+    if (type === 'ventas') {
+      f = orders.filter(function(o){ return o.est === 'Entregado (Ent)' && isMonth(o.fs); });
+      admDrill('Órdenes Entregadas del Mes', 'estado = "Entregado (Ent)" Y mes(fecha_Salida) = mes actual', f);
+    } else if (type === 'ingresadas') {
+      f = orders.filter(function(o){ return isMonth(o.fi); });
+      admDrill('Órdenes Ingresadas del Mes', 'mes(fecha_ingreso) = mes actual (todos los estados)', f);
+    } else if (type === 'pendientes') {
+      f = orders.filter(function(o){ return isMonth(o.fi) && o.est !== 'Entregado (Ent)'; });
+      admDrill('Pendientes del Mes', 'mes(fecha_ingreso) = mes actual Y estado ≠ "Entregado (Ent)"', f);
+    } else if (type === 'hoyIngresadas') {
+      f = orders.filter(function(o){ return o.fi === hoy; });
+      admDrill('Ingresadas Hoy', 'fecha_ingreso = ' + hoy, f);
+    } else if (type === 'hoyEntregadas') {
+      f = orders.filter(function(o){ return o.fs === hoy && o.est === 'Entregado (Ent)'; });
+      admDrill('Entregadas Hoy', 'fecha_Salida = ' + hoy + ' Y estado = "Entregado (Ent)"', f);
+    }
+  };
+
+  // ── Pipeline Drill ──
+  window.drillPipe = function(stage) {
+    var cortes = {'1m':30,'3m':90,'6m':180,'12m':365};
+    var $active = $('#admPipeFilter .adm-pipe-btn.active');
+    var period = $active.length ? $active.data('period') : '1m';
+    var days = cortes[period] || 30;
+    var cut = cutoffStr(days);
+    var labels = {REV:'Revisión',AUT:'Por Autorizar',OK:'Aceptadas',TER:'Terminadas',ENT:'Entregadas',SUP:'Supervisión'};
+    var f = orders.filter(function(o) {
+      var cl = classify(o.est);
+      if (cl === 'CAN') return false;
+      if (cl !== stage) return false;
+      var ref = (cl==='ENT'||cl==='TER') ? (o.fs||o.fi) : o.fi;
+      return ref >= cut;
+    });
+    admDrill('Pipeline: ' + (labels[stage]||stage), 'Clasificación = ' + stage + ', fecha_ref >= ' + cut + ' (periodo ' + period + ')', f);
+  };
+
+  // ── Technician Drill ──
+  window.drillTec = function(tecId, column, period) {
+    var cortes = {'1m':30,'3m':90,'12m':365,'all':36500};
+    var days = cortes[period] || 30;
+    var cut = cutoffStr(days);
+    var cols = {total:'Todas',ENT:'Entregadas',TER:'Terminadas',AUT:'Autorización',SUP:'Supervisión',pendientes:'Pendientes (REV+OK)',GAR:'Garantías'};
+    var f = orders.filter(function(o) {
+      if (String(o.tec) !== String(tecId)) return false;
+      var fs = o.fs||'', fi = o.fi||'';
+      var ref = fs || fi;
+      if (ref < cut) return false;
+      var cl = classify(o.est);
+      var el = (o.est||'').toLowerCase();
+      var isGar = el.indexOf('garantia')!==-1 || el.indexOf('garantía')!==-1;
+      var isCan = el.indexOf('cancel')!==-1;
+      if (column === 'total') return !isCan;
+      if (column === 'ENT') return cl==='ENT' && !isGar;
+      if (column === 'TER') return cl==='TER' && !isGar;
+      if (column === 'AUT') return cl==='AUT';
+      if (column === 'SUP') return cl==='SUP';
+      if (column === 'pendientes') return (cl==='REV'||cl==='OK') && !isGar && !isCan;
+      if (column === 'GAR') return isGar;
+      return false;
+    });
+    var tecName = tecMap[tecId] || 'Técnico #' + tecId;
+    admDrill(tecName + ' — ' + (cols[column]||column), 'id_tecnico = ' + tecId + ', columna = ' + column + ', fecha_ref >= ' + cut + ' (' + period + ')', f);
+  };
+
+  // Exponer periodo activo de técnicos para drill-down
+  window._admTecPeriod = function() {
+    var $a = $('#admTecFilter .adm-tec-btn.active');
+    return $a.length ? $a.data('period') : '1m';
+  };
+})();
+</script>

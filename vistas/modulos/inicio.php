@@ -185,13 +185,20 @@ PÁGINA DE INICIO
       .crm-pipe-stage {
         text-align: center; padding: 16px 8px; border-radius: var(--crm-radius-sm);
         background: var(--crm-bg); border: 1px solid var(--crm-border);
-        transition: transform .18s var(--crm-ease), box-shadow .18s var(--crm-ease);
+        transition: transform .18s var(--crm-ease), box-shadow .18s var(--crm-ease), border-color .18s;
         cursor: default;
+      }
+      .crm-pipe-stage[onclick] { cursor: pointer; }
+      .crm-pipe-stage[onclick]:hover {
+        border-color: #6366f1;
+        box-shadow: 0 2px 8px rgba(99,102,241,.15);
       }
       .crm-pipe-stage:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,.06);
       }
+      .crm-kpi[onclick] { cursor: pointer; }
+      [data-drill]:hover { text-decoration: underline; cursor: pointer; }
       .crm-pipe-stage-icon {
         width: 40px; height: 40px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
