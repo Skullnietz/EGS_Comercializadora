@@ -139,6 +139,8 @@ $_adm_pipe_cortes = array(
 );
 
 function _admPipeClasificar($est) {
+    if (stripos($est, "sin reparación") !== false || strpos($est, "SR") !== false) return 'SR';
+    if (stripos($est, "producto para venta") !== false || strpos($est, "PV") !== false) return 'PV';
     if (strpos($est, "AUT") !== false) return 'AUT';
     if (strpos($est, "REV") !== false || strpos($est, "revisión") !== false) return 'REV';
     if (strpos($est, "Aceptado") !== false || strpos($est, "ok") !== false) return 'OK';
@@ -146,7 +148,7 @@ function _admPipeClasificar($est) {
     if (strpos($est, "Entregado") !== false || strpos($est, "Ent") !== false) return 'ENT';
     if (strpos($est, "Supervisión") !== false || strpos($est, "SUP") !== false) return 'SUP';
     if (strpos($est, "cancel") !== false || strpos($est, "can") !== false) return 'CAN';
-    return 'REV';
+    return 'OTR';
 }
 
 $_adm_pipe_data = array();
@@ -155,7 +157,7 @@ foreach ($_adm_pipe_cortes as $periodo => $corte) {
     foreach ($_adm_allOrders as $ord) {
         $est = isset($ord["estado"]) ? $ord["estado"] : "";
         $clave = _admPipeClasificar($est);
-        if ($clave === 'CAN') continue; // No contar canceladas en pipeline
+        if ($clave === 'CAN' || $clave === 'SR' || $clave === 'PV' || $clave === 'OTR') continue;
 
         // Usar fecha_Salida para ENT/TER (alinea con KPI "Entregadas/Mes")
         // y fecha_ingreso para los demás estados
@@ -252,6 +254,7 @@ function _admCalcRanking($allOrders, $mapaTec, $corte) {
         }
 
         $clave = _admPipeClasificar($est);
+        if ($clave === 'SR' || $clave === 'PV' || $clave === 'OTR') continue;
         if (isset($tecStats[$tid][$clave])) {
             $tecStats[$tid][$clave]++;
         }
@@ -1400,9 +1403,11 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
 
   // Clasificar estado (replica _admPipeClasificar de PHP)
   function classify(est) {
-    if (!est) return 'REV';
+    if (!est) return 'OTR';
     var e = est, el = est.toLowerCase();
     if (el.indexOf('garantia') !== -1 || el.indexOf('garantía') !== -1) return 'GAR';
+    if (el.indexOf('sin reparación') !== -1 || el.indexOf('sin reparacion') !== -1 || e.indexOf('SR') !== -1) return 'SR';
+    if (el.indexOf('producto para venta') !== -1 || e.indexOf('PV') !== -1) return 'PV';
     if (el.indexOf('cancel') !== -1) return 'CAN';
     if (e.indexOf('AUT') !== -1) return 'AUT';
     if (e.indexOf('REV') !== -1 || e.indexOf('revisión') !== -1) return 'REV';
@@ -1410,7 +1415,7 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
     if (e.indexOf('Terminada') !== -1 || e.indexOf('ter') !== -1) return 'TER';
     if (e.indexOf('Entregado') !== -1 || e.indexOf('Ent') !== -1) return 'ENT';
     if (e.indexOf('Supervisión') !== -1 || e.indexOf('SUP') !== -1) return 'SUP';
-    return 'REV';
+    return 'OTR';
   }
 
   function esc(s) { return $('<span>').text(s || '—').html(); }
@@ -1497,7 +1502,7 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
     var labels = {REV:'Revisión',AUT:'Por Autorizar',OK:'Aceptadas',TER:'Terminadas',ENT:'Entregadas',SUP:'Supervisión'};
     var f = orders.filter(function(o) {
       var cl = classify(o.est);
-      if (cl === 'CAN') return false;
+      if (cl === 'CAN' || cl === 'SR' || cl === 'PV' || cl === 'OTR') return false;
       if (cl !== stage) return false;
       var ref = (cl==='ENT'||cl==='TER') ? (o.fs||o.fi) : o.fi;
       return ref >= cut;
@@ -1518,6 +1523,7 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
       var el = (o.est||'').toLowerCase();
       var isGar = el.indexOf('garantia')!==-1 || el.indexOf('garantía')!==-1;
       var isCan = el.indexOf('cancel')!==-1;
+      if (cl === 'SR' || cl === 'PV' || cl === 'OTR') return false;
       if (column === 'total') return !isCan;
       if (column === 'ENT') return cl==='ENT' && !isGar;
       if (column === 'TER') return cl==='TER' && !isGar;
