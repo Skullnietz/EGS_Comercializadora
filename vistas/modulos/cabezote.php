@@ -300,73 +300,139 @@ html body.skin-blue .main-header .logo {
    RANKING BADGE — corona/medalla sobre avatar
 ══════════════════════════════════════════ */
 
-/* Wrapper para posicionar la corona sobre el avatar */
+/* Wrapper para posicionar badge sobre avatar */
 .egs-av-wrap {
   position: relative;
   display: inline-block;
   flex-shrink: 0;
 }
 
-/* Badge sobre avatar (trigger del navbar) */
+/* ── Icono flotante sobre avatar (trigger navbar) ── */
 .egs-rank-crown {
   position: absolute;
-  top: -7px;
+  top: -8px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 11px;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
+  font-size: 12px;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.4));
   z-index: 2;
   line-height: 1;
   pointer-events: none;
 }
-/* Colores por posición */
-.egs-rank-pos1 { color: #f59e0b; animation: egs-shine-gold 3s ease-in-out infinite; }
-.egs-rank-pos2 { color: #94a3b8; animation: egs-shine-silver 3s ease-in-out infinite; }
-.egs-rank-pos3 { color: #d97706; animation: egs-shine-bronze 3s ease-in-out infinite; }
-
-/* Badge grande (dropdown panel) */
-.egs-rank-crown-lg {
-  top: -9px;
-  font-size: 14px;
-}
+.egs-rank-pos1 { color: #fbbf24; animation: egs-shine-gold 2.5s ease-in-out infinite; }
+.egs-rank-pos2 { color: #a8b4c4; animation: egs-shine-silver 2.5s ease-in-out infinite; }
+.egs-rank-pos3 { color: #d97706; animation: egs-shine-bronze 2.5s ease-in-out infinite; }
 
 @keyframes egs-shine-gold {
-  0%, 100% { color: #f59e0b; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
-  50%      { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251,191,36,.5)); }
+  0%, 100% { color: #fbbf24; filter: drop-shadow(0 1px 3px rgba(0,0,0,.4)); }
+  50%      { color: #fde68a; filter: drop-shadow(0 0 8px rgba(251,191,36,.6)); }
 }
 @keyframes egs-shine-silver {
-  0%, 100% { color: #94a3b8; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
-  50%      { color: #cbd5e1; filter: drop-shadow(0 0 6px rgba(203,213,225,.5)); }
+  0%, 100% { color: #a8b4c4; filter: drop-shadow(0 1px 3px rgba(0,0,0,.4)); }
+  50%      { color: #e2e8f0; filter: drop-shadow(0 0 8px rgba(148,163,184,.6)); }
 }
 @keyframes egs-shine-bronze {
-  0%, 100% { color: #d97706; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
-  50%      { color: #f59e0b; filter: drop-shadow(0 0 6px rgba(217,119,6,.5)); }
+  0%, 100% { color: #d97706; filter: drop-shadow(0 1px 3px rgba(0,0,0,.4)); }
+  50%      { color: #fbbf24; filter: drop-shadow(0 0 8px rgba(217,119,6,.6)); }
 }
 
-/* Sección de logros en el dropdown */
-.egs-drop-achievements {
-  padding: 8px 12px !important;
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
-  border-bottom: 1px solid #fde68a !important;
+/* ── Número circular sobre avatar (dropdown) ── */
+.egs-rank-badge-num {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  z-index: 3;
+  border: 2px solid #f8fafc;
+  line-height: 1;
 }
-.egs-achievement-item {
+.egs-rank-badge-pos1 { background: linear-gradient(135deg, #f59e0b, #eab308); }
+.egs-rank-badge-pos2 { background: linear-gradient(135deg, #94a3b8, #64748b); }
+.egs-rank-badge-pos3 { background: linear-gradient(135deg, #d97706, #b45309); }
+
+/* ── Sección de logros en dropdown ── */
+.egs-drop-achievements {
+  padding: 0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  background: #fff !important;
+  list-style: none !important;
+}
+.egs-ach-header {
+  padding: 8px 14px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.egs-ach-header i {
+  font-size: 11px;
+  color: #c084fc;
+}
+
+/* Fila de logro */
+.egs-ach-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 0;
+  padding: 5px 14px 7px;
+  margin: 0 8px 6px;
+  border-radius: 8px;
+  transition: transform .12s;
+}
+.egs-ach-row:hover { transform: translateX(2px); }
+
+/* Colores de fondo por tier */
+.egs-ach-gold   { background: linear-gradient(135deg, #fffbeb, #fef3c7); }
+.egs-ach-silver { background: linear-gradient(135deg, #f8fafc, #e2e8f0); }
+.egs-ach-bronze { background: linear-gradient(135deg, #fffbeb, #fed7aa); }
+
+/* Número de posición (circulito) */
+.egs-ach-pos {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.egs-ach-gold .egs-ach-pos   { background: linear-gradient(135deg, #f59e0b, #eab308); }
+.egs-ach-silver .egs-ach-pos { background: linear-gradient(135deg, #94a3b8, #64748b); }
+.egs-ach-bronze .egs-ach-pos { background: linear-gradient(135deg, #d97706, #b45309); }
+
+/* Icono */
+.egs-ach-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.egs-ach-gold .egs-ach-icon   { color: #f59e0b; }
+.egs-ach-silver .egs-ach-icon { color: #94a3b8; }
+.egs-ach-bronze .egs-ach-icon { color: #d97706; }
+
+/* Texto */
+.egs-ach-text {
   font-size: 12px;
   font-weight: 600;
-  color: #92400e;
+  white-space: nowrap;
 }
-.egs-achievement-item i {
-  font-size: 13px;
-  width: 16px;
-  text-align: center;
-}
-/* Colores de icono por posición */
-.egs-achievement-pos1 i { color: #f59e0b; }
-.egs-achievement-pos2 i { color: #94a3b8; }
-.egs-achievement-pos3 i { color: #d97706; }
+.egs-ach-gold .egs-ach-text   { color: #92400e; }
+.egs-ach-silver .egs-ach-text { color: #475569; }
+.egs-ach-bronze .egs-ach-text { color: #7c2d12; }
 
 /* ── Sidebar: estilos en lateral/menu.php ── */
 

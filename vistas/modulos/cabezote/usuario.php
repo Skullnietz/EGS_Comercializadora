@@ -6,8 +6,9 @@ $_nom  = htmlspecialchars($_SESSION["nombre"]     ?? "Usuario");
 $_rol  = htmlspecialchars(ucfirst($_SESSION["perfil"] ?? ""));
 
 /* ── ranking del técnico (si aplica) ── */
-$_egs_rankBadge   = '';   // icono sobre avatar en trigger
+$_egs_rankBadge      = '';      // icono sobre avatar en trigger
 $_egs_rankDropBadges = array(); // menciones en dropdown
+$_egs_bestPos1m      = 0;      // posición en ranking del mes (0 = fuera del top 3)
 
 if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico" && !empty($_SESSION["email"])) {
     try {
@@ -131,11 +132,10 @@ if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico" && !empty($_
     } catch (Exception $e) {}
 }
 ?>
-<!-- DEBUG-RANK: perfil=<?= $_SESSION["perfil"] ?? '?' ?> | badges=<?= count($_egs_rankDropBadges) ?> | badge=<?= !empty($_egs_rankBadge) ? 'SI' : 'NO' ?> -->
 <!-- user-menu -->
 <li class="dropdown user user-menu">
 
-  <!-- Trigger: pill style Tailwind -->
+  <!-- Trigger: pill style -->
   <a href="#" class="dropdown-toggle egs-trigger" data-toggle="dropdown">
     <span class="egs-av-wrap">
       <img src="<?= $_av ?>" class="egs-av" alt="<?= $_nom ?>">
@@ -145,15 +145,15 @@ if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico" && !empty($_
     <i class="fa-solid fa-chevron-down egs-caret hidden-xs"></i>
   </a>
 
-  <!-- Panel Tailwind -->
+  <!-- Panel dropdown -->
   <ul class="dropdown-menu egs-drop">
 
     <!-- Sección usuario -->
     <li class="egs-drop-user">
       <span class="egs-av-wrap egs-av-wrap-lg">
         <img src="<?= $_av ?>" class="egs-av-lg" alt="<?= $_nom ?>">
-        <?php if (!empty($_egs_rankBadge)): ?>
-          <?= str_replace('egs-rank-crown"', 'egs-rank-crown egs-rank-crown-lg"', $_egs_rankBadge) ?>
+        <?php if ($_egs_bestPos1m > 0): ?>
+          <span class="egs-rank-badge-num egs-rank-badge-pos<?= $_egs_bestPos1m ?>"><?= $_egs_bestPos1m ?></span>
         <?php endif; ?>
       </span>
       <div class="egs-user-info">
@@ -166,15 +166,22 @@ if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico" && !empty($_
     <?php if (!empty($_egs_rankDropBadges)): ?>
     <!-- Logros del técnico -->
     <li class="egs-drop-achievements">
+      <div class="egs-ach-header">
+        <i class="fa-solid fa-ranking-star"></i> Tu rendimiento
+      </div>
       <?php foreach ($_egs_rankDropBadges as $_badge):
-        // Icono según posición
-        if ($_badge['pos'] === 1) { $_bIcon = 'fa-crown'; $_bLabel = '#1'; }
-        elseif ($_badge['pos'] === 2) { $_bIcon = 'fa-medal'; $_bLabel = '#2'; }
-        else { $_bIcon = 'fa-award'; $_bLabel = '#3'; }
+        if ($_badge['pos'] === 1) {
+            $_bIcon = 'fa-crown'; $_bEmoji = ''; $_bClass = 'gold';
+        } elseif ($_badge['pos'] === 2) {
+            $_bIcon = 'fa-medal'; $_bEmoji = ''; $_bClass = 'silver';
+        } else {
+            $_bIcon = 'fa-award'; $_bEmoji = ''; $_bClass = 'bronze';
+        }
       ?>
-        <div class="egs-achievement-item egs-achievement-pos<?= $_badge['pos'] ?>">
-          <i class="fa-solid <?= $_bIcon ?>"></i>
-          <span><?= $_bLabel ?> técnico <?= $_badge['periodo'] ?></span>
+        <div class="egs-ach-row egs-ach-<?= $_bClass ?>">
+          <span class="egs-ach-pos"><?= $_badge['pos'] ?></span>
+          <i class="fa-solid <?= $_bIcon ?> egs-ach-icon"></i>
+          <span class="egs-ach-text">Top <?= $_badge['pos'] ?> <?= $_badge['periodo'] ?></span>
         </div>
       <?php endforeach; ?>
     </li>
