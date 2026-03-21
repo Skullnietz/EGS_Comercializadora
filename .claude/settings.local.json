@@ -104,7 +104,9 @@
       "Bash(grep -E \"\\\\.js$\")",
       "Bash(grep -l \"dashboard\\\\|widget\\\\|admin\" C:UsersblackDesktopEGS/ajax/*.php)",
       "Bash(grep -l \"acciones\\\\|movimientos\\\\|widget\\\\|dashboard\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS/vistas/modulos/inicio/\"*.php)",
-      "Bash(grep -n \"section class=content\\\\|<section class=''''content\\\\|div class=content\\\\|div class=''''content''''\" C:UsersblackDesktopEGSvistasmodulos/*.php)"
+      "Bash(grep -n \"section class=content\\\\|<section class=''''content\\\\|div class=content\\\\|div class=''''content''''\" C:UsersblackDesktopEGSvistasmodulos/*.php)",
+      "Bash(find C:UsersblackDesktopEGS -name *.sql -o -name *schema* -o -name *database*)",
+      "Bash(grep -n \"foreach.*value\\\\|$value\\\\[\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\infoOrden.php\")"
     ]
   }
 }

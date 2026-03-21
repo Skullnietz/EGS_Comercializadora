@@ -107,6 +107,69 @@ if (!function_exists('_tnTiempoRel')) {
     }
 }
 
+// ── Batch-fetch datos de órdenes (marca, modelo, cliente) ──
+$_tn_ordenIds = array();
+foreach ($_tn_notifs as $n) {
+    $_tn_ordenIds[intval($n['id_orden'])] = intval($n['id_orden']);
+}
+// También incluir observaciones
+foreach ($_tn_obsHoy as $ob) {
+    $_tn_ordenIds[intval($ob['id_orden'])] = intval($ob['id_orden']);
+}
+
+$_tn_ordenData = array();
+$_tn_clienteNames = array();
+if (!empty($_tn_ordenIds)) {
+    try {
+        $_tn_ordenData = ModeloNotificaciones::mdlDatosOrdenesPorIds(array_values($_tn_ordenIds));
+    } catch (Exception $e) { $_tn_ordenData = array(); }
+
+    // Recopilar id_usuario únicos para obtener nombres de clientes
+    $_tn_clienteIds = array();
+    foreach ($_tn_ordenData as $od) {
+        if (!empty($od['id_usuario'])) {
+            $_tn_clienteIds[intval($od['id_usuario'])] = intval($od['id_usuario']);
+        }
+    }
+    // Fetch client names from sistema DB
+    if (!empty($_tn_clienteIds)) {
+        try {
+            $pdoSis = Conexion::conectar();
+            $phCli = implode(',', array_fill(0, count($_tn_clienteIds), '?'));
+            $stmtCli = $pdoSis->prepare("SELECT id, nombre FROM clientesTienda WHERE id IN ($phCli)");
+            $stmtCli->execute(array_values($_tn_clienteIds));
+            $rowsCli = $stmtCli->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rowsCli as $rc) {
+                $_tn_clienteNames[intval($rc['id'])] = $rc['nombre'];
+            }
+        } catch (Exception $e) {}
+    }
+}
+
+// Helper para obtener info de orden
+if (!function_exists('_tnOrdenInfo')) {
+    function _tnOrdenInfo($idOrden, $ordenData, $clienteNames) {
+        $id = intval($idOrden);
+        $info = array('marca' => '', 'modelo' => '', 'cliente' => '', 'url_params' => '');
+        if (isset($ordenData[$id])) {
+            $od = $ordenData[$id];
+            $info['marca']  = isset($od['marcaDelEquipo']) ? $od['marcaDelEquipo'] : '';
+            $info['modelo'] = isset($od['modeloDelEquipo']) ? $od['modeloDelEquipo'] : '';
+            $idCli = isset($od['id_usuario']) ? intval($od['id_usuario']) : 0;
+            if ($idCli > 0 && isset($clienteNames[$idCli])) {
+                $info['cliente'] = $clienteNames[$idCli];
+            }
+            $info['url_params'] = '&empresa=' . (isset($od['id_empresa']) ? $od['id_empresa'] : '')
+                . '&asesor=' . (isset($od['id_Asesor']) ? $od['id_Asesor'] : '')
+                . '&cliente=' . (isset($od['id_usuario']) ? $od['id_usuario'] : '')
+                . '&tecnico=' . (isset($od['id_tecnico']) ? $od['id_tecnico'] : '')
+                . '&tecnicodos=' . (isset($od['id_tecnicoDos']) ? $od['id_tecnicoDos'] : '')
+                . '&pedido=' . (isset($od['id_pedido']) ? $od['id_pedido'] : '0');
+        }
+        return $info;
+    }
+}
+
 // Contadores
 $_tn_countEstado = 0;
 $_tn_countTraspaso = 0;
@@ -276,21 +339,37 @@ $_tn_countAtraso = count($_tn_atraso);
       <li class="tn-date-sep" data-ntype="<?php echo $nTipo; ?>"><?php echo $nDateLabel; ?></li>
     <?php endif; ?>
 
-    <?php if ($nTipo === 'traspaso'): ?>
+    <?php
+      if ($nTipo === 'traspaso'):
+        $_tn_oi = _tnOrdenInfo($n['id_orden'], $_tn_ordenData, $_tn_clienteNames);
+        $_tn_equipoTxt = '';
+        if (!empty($_tn_oi['marca']) || !empty($_tn_oi['modelo'])) {
+            $_tn_equipoTxt = trim($_tn_oi['marca'] . ' ' . $_tn_oi['modelo']);
+        } elseif (!empty($n['titulo_orden'])) {
+            $_tn_equipoTxt = $n['titulo_orden'];
+        }
+        $_tn_ordenUrl = 'index.php?ruta=infoOrden&idOrden=' . $n['id_orden'] . $_tn_oi['url_params'];
+    ?>
       <li class="tn-item" data-ntype="traspaso">
         <div class="tn-item-icon" style="background:#f5f3ff">
           <i class="fa-solid fa-people-arrows" style="color:#8b5cf6"></i>
         </div>
         <div class="tn-item-body">
           <div class="tn-item-title">
-            <strong>#<?php echo htmlspecialchars($n['id_orden']); ?></strong>
+            <a href="<?php echo $_tn_ordenUrl; ?>" style="color:#6366f1;font-weight:700;text-decoration:none" title="Ver orden #<?php echo $n['id_orden']; ?>">#<?php echo htmlspecialchars($n['id_orden']); ?></a>
             — Traspaso de equipo:
             <?php echo htmlspecialchars($n['estado_anterior']); ?>
             <i class="fa-solid fa-arrow-right" style="font-size:10px;color:#8b5cf6;margin:0 3px"></i>
             <strong style="color:#8b5cf6"><?php echo htmlspecialchars($n['estado_nuevo']); ?></strong>
           </div>
-          <?php if (!empty($n['titulo_orden'])): ?>
-            <div style="font-size:12px;color:#64748b;margin-top:2px"><?php echo htmlspecialchars($n['titulo_orden']); ?></div>
+          <?php if (!empty($_tn_equipoTxt)): ?>
+            <div style="font-size:12px;color:#64748b;margin-top:2px">
+              <i class="fa-solid fa-laptop" style="font-size:9px;margin-right:3px;color:#94a3b8"></i><?php echo htmlspecialchars($_tn_equipoTxt); ?>
+              <?php if (!empty($_tn_oi['cliente'])): ?>
+                <span style="margin-left:8px;color:#94a3b8">|</span>
+                <span style="margin-left:8px"><i class="fa-solid fa-user-tag" style="font-size:9px;margin-right:3px;color:#94a3b8"></i><?php echo htmlspecialchars($_tn_oi['cliente']); ?></span>
+              <?php endif; ?>
+            </div>
           <?php endif; ?>
           <div class="tn-item-meta">
             <span class="tn-badge-tipo" style="background:#f5f3ff;color:#8b5cf6">
@@ -304,6 +383,14 @@ $_tn_countAtraso = count($_tn_atraso);
 
     <?php else:
           $ei = _tnEstadoInfo($n['estado_nuevo']);
+          $_tn_oi = _tnOrdenInfo($n['id_orden'], $_tn_ordenData, $_tn_clienteNames);
+          $_tn_equipoTxt = '';
+          if (!empty($_tn_oi['marca']) || !empty($_tn_oi['modelo'])) {
+              $_tn_equipoTxt = trim($_tn_oi['marca'] . ' ' . $_tn_oi['modelo']);
+          } elseif (!empty($n['titulo_orden'])) {
+              $_tn_equipoTxt = $n['titulo_orden'];
+          }
+          $_tn_ordenUrl = 'index.php?ruta=infoOrden&idOrden=' . $n['id_orden'] . $_tn_oi['url_params'];
     ?>
       <li class="tn-item" data-ntype="estado">
         <div class="tn-item-icon" style="background:<?php echo $ei[1]; ?>">
@@ -311,14 +398,20 @@ $_tn_countAtraso = count($_tn_atraso);
         </div>
         <div class="tn-item-body">
           <div class="tn-item-title">
-            <strong>#<?php echo htmlspecialchars($n['id_orden']); ?></strong>
+            <a href="<?php echo $_tn_ordenUrl; ?>" style="color:#6366f1;font-weight:700;text-decoration:none" title="Ver orden #<?php echo $n['id_orden']; ?>">#<?php echo htmlspecialchars($n['id_orden']); ?></a>
             cambió de
             <span style="color:#94a3b8"><?php echo htmlspecialchars($n['estado_anterior']); ?></span>
             a
             <strong style="color:<?php echo $ei[0]; ?>"><?php echo htmlspecialchars($n['estado_nuevo']); ?></strong>
           </div>
-          <?php if (!empty($n['titulo_orden'])): ?>
-            <div style="font-size:12px;color:#64748b;margin-top:2px"><?php echo htmlspecialchars($n['titulo_orden']); ?></div>
+          <?php if (!empty($_tn_equipoTxt)): ?>
+            <div style="font-size:12px;color:#64748b;margin-top:2px">
+              <i class="fa-solid fa-laptop" style="font-size:9px;margin-right:3px;color:#94a3b8"></i><?php echo htmlspecialchars($_tn_equipoTxt); ?>
+              <?php if (!empty($_tn_oi['cliente'])): ?>
+                <span style="margin-left:8px;color:#94a3b8">|</span>
+                <span style="margin-left:8px"><i class="fa-solid fa-user-tag" style="font-size:9px;margin-right:3px;color:#94a3b8"></i><?php echo htmlspecialchars($_tn_oi['cliente']); ?></span>
+              <?php endif; ?>
+            </div>
           <?php endif; ?>
           <div class="tn-item-meta">
             <span class="tn-badge-tipo" style="background:<?php echo $ei[1]; ?>;color:<?php echo $ei[0]; ?>">
@@ -351,7 +444,32 @@ $_tn_countAtraso = count($_tn_atraso);
         $oaDias = max(0, floor((time() - strtotime($oa["fecha_ingreso"])) / 86400));
         $oaColor = $oaDias >= 30 ? '#ef4444' : ($oaDias >= 15 ? '#f59e0b' : '#3b82f6');
         $oaEstado = isset($oa["estado"]) ? $oa["estado"] : "";
-        $oaTitulo = isset($oa["titulo"]) ? $oa["titulo"] : "";
+        $oaMarca  = isset($oa["marcaDelEquipo"]) ? $oa["marcaDelEquipo"] : "";
+        $oaModelo = isset($oa["modeloDelEquipo"]) ? $oa["modeloDelEquipo"] : "";
+        $oaEquipo = trim($oaMarca . ' ' . $oaModelo);
+        if (empty($oaEquipo) && isset($oa["titulo"])) $oaEquipo = $oa["titulo"];
+        // Client name for atraso orders
+        $oaClienteNom = '';
+        $oaCliId = isset($oa["id_usuario"]) ? intval($oa["id_usuario"]) : 0;
+        if ($oaCliId > 0 && isset($_tn_clienteNames[$oaCliId])) {
+            $oaClienteNom = $_tn_clienteNames[$oaCliId];
+        } elseif ($oaCliId > 0) {
+            // Fetch individually if not already cached
+            try {
+                $cliFetch = ControladorClientes::ctrMostrarClientes("id", $oaCliId);
+                if (is_array($cliFetch) && isset($cliFetch["nombre"])) {
+                    $oaClienteNom = $cliFetch["nombre"];
+                    $_tn_clienteNames[$oaCliId] = $oaClienteNom;
+                }
+            } catch (Exception $e) {}
+        }
+        $oaUrl = 'index.php?ruta=infoOrden&idOrden=' . $oa["id"]
+               . '&empresa=' . (isset($oa["id_empresa"]) ? $oa["id_empresa"] : '')
+               . '&asesor=' . (isset($oa["id_Asesor"]) ? $oa["id_Asesor"] : '')
+               . '&cliente=' . (isset($oa["id_usuario"]) ? $oa["id_usuario"] : '')
+               . '&tecnico=' . (isset($oa["id_tecnico"]) ? $oa["id_tecnico"] : '')
+               . '&tecnicodos=' . (isset($oa["id_tecnicoDos"]) ? $oa["id_tecnicoDos"] : '')
+               . '&pedido=' . (isset($oa["id_pedido"]) ? $oa["id_pedido"] : '0');
     ?>
       <li class="tn-item" data-ntype="atraso">
         <div class="tn-item-icon" style="background:<?php echo $oaDias >= 30 ? '#fef2f2' : ($oaDias >= 15 ? '#fffbeb' : '#eff6ff'); ?>">
@@ -359,12 +477,18 @@ $_tn_countAtraso = count($_tn_atraso);
         </div>
         <div class="tn-item-body">
           <div class="tn-item-title">
-            <strong>#<?php echo $oa["id"]; ?></strong>
+            <a href="<?php echo $oaUrl; ?>" style="color:#6366f1;font-weight:700;text-decoration:none" title="Ver orden #<?php echo $oa['id']; ?>">#<?php echo $oa["id"]; ?></a>
             — Atraso de entrega:
             <strong style="color:<?php echo $oaColor; ?>"><?php echo $oaDias; ?> días</strong>
           </div>
-          <?php if (!empty($oaTitulo)): ?>
-            <div style="font-size:12px;color:#64748b;margin-top:2px"><?php echo htmlspecialchars($oaTitulo); ?></div>
+          <?php if (!empty($oaEquipo)): ?>
+            <div style="font-size:12px;color:#64748b;margin-top:2px">
+              <i class="fa-solid fa-laptop" style="font-size:9px;margin-right:3px;color:#94a3b8"></i><?php echo htmlspecialchars($oaEquipo); ?>
+              <?php if (!empty($oaClienteNom)): ?>
+                <span style="margin-left:8px;color:#94a3b8">|</span>
+                <span style="margin-left:8px"><i class="fa-solid fa-user-tag" style="font-size:9px;margin-right:3px;color:#94a3b8"></i><?php echo htmlspecialchars($oaClienteNom); ?></span>
+              <?php endif; ?>
+            </div>
           <?php endif; ?>
           <div class="tn-item-meta">
             <span class="tn-badge-tipo" style="background:<?php echo $oaDias >= 30 ? '#fef2f2' : ($oaDias >= 15 ? '#fffbeb' : '#eff6ff'); ?>;color:<?php echo $oaColor; ?>">
@@ -375,10 +499,6 @@ $_tn_countAtraso = count($_tn_atraso);
               <span style="color:#64748b"><?php echo htmlspecialchars($oaEstado); ?></span>
             <?php endif; ?>
             <span><i class="fa-regular fa-calendar" style="font-size:8px;margin-right:3px"></i>Ingreso: <?php echo date("d/m/Y", strtotime($oa["fecha_ingreso"])); ?></span>
-            <a href="index.php?ruta=ordenesnew&idOrden=<?php echo $oa["id"]; ?>&cliente=<?php echo isset($oa["id_usuario"]) ? $oa["id_usuario"] : ''; ?>&tecnico=<?php echo isset($oa["id_tecnico"]) ? $oa["id_tecnico"] : ''; ?>&asesor=<?php echo isset($oa["id_Asesor"]) ? $oa["id_Asesor"] : ''; ?>&empresa=<?php echo isset($oa["id_empresa"]) ? $oa["id_empresa"] : ''; ?>&pedido=<?php echo isset($oa["id_pedido"]) ? $oa["id_pedido"] : ''; ?>&tecnicodos=<?php echo isset($oa["id_tecnicoDos"]) ? $oa["id_tecnicoDos"] : ''; ?>"
-               style="color:#6366f1;font-weight:600;text-decoration:none;margin-left:auto">
-              <i class="fa-solid fa-eye" style="font-size:9px"></i> Ver orden
-            </a>
           </div>
         </div>
       </li>
@@ -397,6 +517,12 @@ $_tn_countAtraso = count($_tn_atraso);
         $obTexto = mb_strlen($ob['observacion']) > 120 ? mb_substr($ob['observacion'], 0, 120) . '…' : $ob['observacion'];
         $obCreador = isset($ob['creador_nombre']) ? $ob['creador_nombre'] : 'Usuario';
         $obPerfil  = isset($ob['creador_perfil']) ? $ob['creador_perfil'] : '';
+        $_tn_obOi = _tnOrdenInfo($ob['id_orden'], $_tn_ordenData, $_tn_clienteNames);
+        $_tn_obEquipo = '';
+        if (!empty($_tn_obOi['marca']) || !empty($_tn_obOi['modelo'])) {
+            $_tn_obEquipo = trim($_tn_obOi['marca'] . ' ' . $_tn_obOi['modelo']);
+        }
+        $_tn_obUrl = 'index.php?ruta=infoOrden&idOrden=' . $ob['id_orden'] . $_tn_obOi['url_params'];
     ?>
       <li class="tn-item" data-ntype="observaciones">
         <div class="tn-item-icon" style="background:#fffbeb">
@@ -404,9 +530,20 @@ $_tn_countAtraso = count($_tn_atraso);
         </div>
         <div class="tn-item-body">
           <div class="tn-item-title">
-            <strong style="color:#f59e0b">#<?php echo htmlspecialchars($ob['id_orden']); ?></strong>
+            <a href="<?php echo $_tn_obUrl; ?>" style="color:#6366f1;font-weight:700;text-decoration:none" title="Ver orden #<?php echo $ob['id_orden']; ?>">#<?php echo htmlspecialchars($ob['id_orden']); ?></a>
             — <?php echo htmlspecialchars($obTexto); ?>
           </div>
+          <?php if (!empty($_tn_obEquipo) || !empty($_tn_obOi['cliente'])): ?>
+            <div style="font-size:12px;color:#64748b;margin-top:2px">
+              <?php if (!empty($_tn_obEquipo)): ?>
+                <i class="fa-solid fa-laptop" style="font-size:9px;margin-right:3px;color:#94a3b8"></i><?php echo htmlspecialchars($_tn_obEquipo); ?>
+              <?php endif; ?>
+              <?php if (!empty($_tn_obOi['cliente'])): ?>
+                <?php if (!empty($_tn_obEquipo)): ?><span style="margin-left:8px;color:#94a3b8">|</span><?php endif; ?>
+                <span style="margin-left:8px"><i class="fa-solid fa-user-tag" style="font-size:9px;margin-right:3px;color:#94a3b8"></i><?php echo htmlspecialchars($_tn_obOi['cliente']); ?></span>
+              <?php endif; ?>
+            </div>
+          <?php endif; ?>
           <div class="tn-item-meta">
             <span class="tn-badge-tipo" style="background:#fffbeb;color:#f59e0b">
               <i class="fa-solid fa-comment-dots" style="font-size:8px"></i> Observación
@@ -416,10 +553,6 @@ $_tn_countAtraso = count($_tn_atraso);
               <span style="text-transform:capitalize"><?php echo htmlspecialchars($obPerfil); ?></span>
             <?php endif; ?>
             <span><i class="fa-regular fa-clock" style="font-size:8px;margin-right:3px"></i><?php echo _tnTiempoRel($ob['fecha']); ?></span>
-            <a href="index.php?ruta=ordenesnew&idOrden=<?php echo $ob['id_orden']; ?>"
-               style="color:#6366f1;font-weight:600;text-decoration:none;margin-left:auto">
-              <i class="fa-solid fa-eye" style="font-size:9px"></i> Ver orden
-            </a>
           </div>
         </div>
       </li>

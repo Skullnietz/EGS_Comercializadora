@@ -238,6 +238,36 @@ class ModeloNotificaciones{
 	}
 
 	/*=============================================
+	OBTENER DATOS DE ÓRDENES POR LISTA DE IDs
+	(marca, modelo, cliente, datos para URL)
+	=============================================*/
+
+	static public function mdlDatosOrdenesPorIds($ids){
+
+		if (empty($ids)) return array();
+
+		$pdo = ConexionWP::conectarWP();
+
+		// Construir placeholders
+		$placeholders = implode(',', array_fill(0, count($ids), '?'));
+		$stmt = $pdo->prepare(
+			"SELECT id, marcaDelEquipo, modeloDelEquipo, id_usuario,
+			        id_empresa, id_Asesor, id_tecnico, id_tecnicoDos, id_pedido
+			 FROM ordenes
+			 WHERE id IN ($placeholders)"
+		);
+		$stmt->execute(array_values($ids));
+		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		// Indexar por id
+		$result = array();
+		foreach ($rows as $r) {
+			$result[intval($r['id'])] = $r;
+		}
+		return $result;
+	}
+
+	/*=============================================
 	MARCAR NOTIFICACIONES COMO LEÍDAS
 	=============================================*/
 
