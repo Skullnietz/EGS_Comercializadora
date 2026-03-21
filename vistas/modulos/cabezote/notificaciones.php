@@ -158,6 +158,20 @@ try {
     );
     if (!is_array($_noti_obs)) $_noti_obs = array();
     $_noti_totalObs = count($_noti_obs);
+
+    // Enriquecer con datos de la tabla ordenes (conexión distinta)
+    if ($_noti_totalObs > 0) {
+        $_noti_obs_ids = array();
+        foreach ($_noti_obs as $ob) {
+            if (isset($ob['id_orden'])) $_noti_obs_ids[] = intval($ob['id_orden']);
+        }
+        $_noti_obs_ids = array_unique($_noti_obs_ids);
+        if (!empty($_noti_obs_ids)) {
+            $_noti_obs_ordData = ModeloNotificaciones::mdlDatosOrdenesPorIds($_noti_obs_ids);
+        } else {
+            $_noti_obs_ordData = array();
+        }
+    }
 } catch (Exception $e) { $_noti_obs = array(); }
 
 // ── Total combinado ──
@@ -283,9 +297,18 @@ if (!function_exists('_notiTiempoRel')) {
             $nobTiempo = _notiTiempoRel($nob['fecha']);
             $nobTexto = mb_strlen($nob['observacion']) > 60 ? mb_substr($nob['observacion'], 0, 60) . '…' : $nob['observacion'];
             $nobCreador = isset($nob['creador_nombre']) ? $nob['creador_nombre'] : 'Usuario';
+            $nobOrdId = intval($nob['id_orden']);
+            $nobOrd = (isset($_noti_obs_ordData) && isset($_noti_obs_ordData[$nobOrdId])) ? $_noti_obs_ordData[$nobOrdId] : array();
+            $nobUrlOrden = "index.php?ruta=infoOrden"
+                         . "&idOrden="  . $nobOrdId
+                         . "&empresa="  . intval(isset($nobOrd['id_empresa']) ? $nobOrd['id_empresa'] : 0)
+                         . "&asesor="   . intval(isset($nobOrd['id_Asesor'])  ? $nobOrd['id_Asesor']  : 0)
+                         . "&cliente="  . intval(isset($nobOrd['id_usuario']) ? $nobOrd['id_usuario'] : 0)
+                         . "&tecnico="  . intval(isset($nobOrd['id_tecnico']) ? $nobOrd['id_tecnico'] : 0)
+                         . "&pedido="   . intval(isset($nobOrd['id_pedido'])  ? $nobOrd['id_pedido']  : 0);
         ?>
         <li>
-          <a href="index.php?ruta=infoOrden&idOrden=<?php echo intval($nob['id_orden']); ?>&empresa=<?php echo intval(isset($nob['id_empresa']) ? $nob['id_empresa'] : 0); ?>&asesor=<?php echo intval(isset($nob['id_Asesor']) ? $nob['id_Asesor'] : 0); ?>&cliente=<?php echo intval(isset($nob['id_cliente']) ? $nob['id_cliente'] : 0); ?>&tecnico=<?php echo intval(isset($nob['id_tecnico']) ? $nob['id_tecnico'] : 0); ?>&pedido=<?php echo intval(isset($nob['id_pedido']) ? $nob['id_pedido'] : 0); ?>"
+          <a href="<?php echo $nobUrlOrden; ?>"
              style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">
             <div style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
               <i class="fa-solid fa-comment-dots" style="font-size:12px;color:#f59e0b"></i>
