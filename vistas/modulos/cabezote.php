@@ -296,6 +296,67 @@ html body.skin-blue .main-header .logo {
   text-decoration: none !important;
 }
 
+/* ══════════════════════════════════════════
+   RANKING BADGE — corona/medalla sobre avatar
+══════════════════════════════════════════ */
+
+/* Wrapper para posicionar la corona sobre el avatar */
+.egs-av-wrap {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Corona pequeña (trigger del navbar) */
+.egs-rank-crown {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #f59e0b;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
+  z-index: 2;
+  line-height: 1;
+  animation: egs-crown-shine 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Corona grande (dropdown panel) */
+.egs-rank-crown-lg {
+  top: -9px;
+  font-size: 14px;
+}
+
+@keyframes egs-crown-shine {
+  0%, 100% { color: #f59e0b; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+  50%      { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251,191,36,.5)); }
+}
+
+/* Sección de logros en el dropdown */
+.egs-drop-achievements {
+  padding: 8px 12px !important;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+  border-bottom: 1px solid #fde68a !important;
+}
+.egs-achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #92400e;
+}
+.egs-achievement-item i {
+  font-size: 13px;
+  width: 16px;
+  text-align: center;
+}
+.egs-achievement-1m i  { color: #f59e0b; }
+.egs-achievement-3m i  { color: #a855f7; }
+.egs-achievement-12m i { color: #eab308; }
+
 /* ── Sidebar: estilos en lateral/menu.php ── */
 
 /* ══════════════════════════════════════════

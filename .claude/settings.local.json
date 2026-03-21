@@ -86,7 +86,17 @@
       "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\\\\admin-dashboard.php\")",
       "Bash(php -r \"echo crypt\\(''3R1K2026'', chr\\(36\\).''2a''.chr\\(36\\).''07''.chr\\(36\\).''asxx54ahjppf45sd87a5a4dDDGsystemdev''\\);\")",
       "Bash(powershell -Command \":*)",
-      "Bash(php -l \"vistas/modulos/inicio/admin-dashboard.php\")"
+      "Bash(php -l \"vistas/modulos/inicio/admin-dashboard.php\")",
+      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\\\\admin-ultimos-movimientos.php\")",
+      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\ordenes.php\")",
+      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\ordenesnew.php\")",
+      "Bash(grep -r \"estado.*IN\\\\|estado.*=.*''''\" C:UsersblackDesktopEGS --include=*.php)",
+      "Bash(find C:UsersblackDesktopEGS -name *.sql -o -name *schema* -o -name *migration*)",
+      "Bash(grep -o ''[^'']*estado[^'']*'' C:UsersblackDesktopEGSvistasmodulosordenes.php)",
+      "Bash(grep -r \"Supervicion\\\\|Garantía aceptada\" C:UsersblackDesktopEGS --include=*.php)",
+      "Bash(grep -r estado.*IN\\\\\\(C:UsersblackDesktopEGSmodelosordenes.modelo.php)",
+      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\\\\admin-top-tecnicos.php\")",
+      "Bash(grep -rn \"ranking\\\\|mejor.*tecnico\\\\|primer.*lugar\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\"\" --include=\"*.php \")"
     ]
   }
 }
