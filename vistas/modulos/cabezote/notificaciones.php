@@ -830,6 +830,40 @@ $(function(){
     }, 6000);
   }
 
+  // Genera el HTML de un item del dropdown según el tipo
+  function egsBuildDropdownItem(data) {
+    if (data.type === 'traspaso') {
+      return '<li><a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;cursor:default;white-space:normal">' +
+        '<div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
+          '<i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i></div>' +
+        '<div style="flex:1;min-width:0;line-height:1.4">' +
+          '<div style="font-size:12px;color:#0f172a"><strong>#' + data.idOrden + '</strong> traspaso de equipo</div>' +
+          '<div style="font-size:11px;color:#64748b;margin-top:1px">' + data.anterior +
+            ' <i class="fa-solid fa-arrow-right" style="font-size:8px;color:#8b5cf6;margin:0 3px"></i>' +
+            '<strong style="color:#8b5cf6">' + data.nuevo + '</strong></div>' +
+          '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>' + (data.usuario || '') + ' <span style="margin-left:auto">Ahora</span></div>' +
+        '</div></a></li>';
+    } else if (data.type === 'obs') {
+      return '<li><a href="index.php?ruta=ordenesnew&idOrden=' + data.idOrden + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">' +
+        '<div style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
+          '<i class="fa-solid fa-comment-dots" style="font-size:12px;color:#f59e0b"></i></div>' +
+        '<div style="flex:1;min-width:0;line-height:1.4">' +
+          '<div style="font-size:12px;color:#0f172a"><strong style="color:#f59e0b">#' + data.idOrden + '</strong> nueva observación</div>' +
+          '<div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis">' + (data.texto || '') + '</div>' +
+          '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>' + (data.creador || '') + ' <span style="margin-left:auto">Ahora</span></div>' +
+        '</div></a></li>';
+    } else {
+      // estado — usar color genérico azul para simplificar
+      return '<li><a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #3b82f6;cursor:default;white-space:normal">' +
+        '<div style="width:32px;height:32px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
+          '<i class="fa-solid fa-arrow-right-arrow-left" style="font-size:12px;color:#3b82f6"></i></div>' +
+        '<div style="flex:1;min-width:0;line-height:1.4">' +
+          '<div style="font-size:12px;color:#0f172a"><strong>#' + data.idOrden + '</strong> cambió a <span style="font-weight:700;color:#3b82f6">' + data.nuevo + '</span></div>' +
+          '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>' + (data.usuario || '') + ' <span style="margin-left:auto">Ahora</span></div>' +
+        '</div></a></li>';
+    }
+  }
+
   function egsPollNotificaciones() {
     $.post('ajax/notificaciones.ajax.php', { pollNotificaciones: 1 }, function(r) {
       if (!r || typeof r !== 'object') return;
@@ -847,6 +881,12 @@ $(function(){
         $badge.remove();
       }
 
+      // Actualizar texto del header del dropdown
+      var $headerSpan = $('.notifications-menu .header span').first();
+      if ($headerSpan.length && total > 0) {
+        $headerSpan.text(total + ' notificaci' + (total > 1 ? 'ones' : 'ón'));
+      }
+
       // Detectar nueva notificación de estado/traspaso
       if (r.ultimaNotif && r.ultimaNotif.id && r.ultimaNotif.id > lastEstadoId) {
         lastEstadoId = r.ultimaNotif.id;
@@ -859,6 +899,34 @@ $(function(){
           nuevo: r.ultimaNotif.nuevo,
           usuario: r.ultimaNotif.usuario
         });
+
+        // Insertar en el dropdown menu
+        var $menu = $('.notifications-menu .menu');
+        if ($menu.length) {
+          var itemHtml = egsBuildDropdownItem({
+            type: r.ultimaNotif.tipo || 'estado',
+            idOrden: r.ultimaNotif.idOrden,
+            anterior: r.ultimaNotif.anterior,
+            nuevo: r.ultimaNotif.nuevo,
+            usuario: r.ultimaNotif.usuario
+          });
+          $menu.prepend(itemHtml);
+          // Limitar a 20 items en el dropdown
+          $menu.find('> li').slice(20).remove();
+        } else {
+          // No existía el <ul class="menu">, crear la estructura
+          var $dropdownUl = $('.notifications-menu .dropdown-menu');
+          var $noItems = $dropdownUl.find('li.footer');
+          $('<li><ul class="menu" style="max-height:400px;overflow-y:auto"></ul></li>').insertBefore($noItems);
+          var $newMenu = $dropdownUl.find('.menu');
+          $newMenu.append(egsBuildDropdownItem({
+            type: r.ultimaNotif.tipo || 'estado',
+            idOrden: r.ultimaNotif.idOrden,
+            anterior: r.ultimaNotif.anterior,
+            nuevo: r.ultimaNotif.nuevo,
+            usuario: r.ultimaNotif.usuario
+          }));
+        }
       }
       // Detectar nueva observación
       else if (r.ultimaObs && r.ultimaObs.id && r.ultimaObs.id > lastObsId) {
@@ -870,6 +938,19 @@ $(function(){
           texto: r.ultimaObs.texto,
           creador: r.ultimaObs.creador
         });
+
+        // Insertar en el dropdown menu
+        var $menu = $('.notifications-menu .menu');
+        if ($menu.length) {
+          var itemHtml = egsBuildDropdownItem({
+            type: 'obs',
+            idOrden: r.ultimaObs.idOrden,
+            texto: r.ultimaObs.texto,
+            creador: r.ultimaObs.creador
+          });
+          $menu.prepend(itemHtml);
+          $menu.find('> li').slice(20).remove();
+        }
       }
 
     }, 'json');

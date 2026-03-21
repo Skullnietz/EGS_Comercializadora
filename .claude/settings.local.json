@@ -103,7 +103,8 @@
       "Bash(grep -r \"bajadaCinematica\\\\|egs-azul\" C:UsersblackDesktopEGS --include=*.php --include=*.css)",
       "Bash(grep -E \"\\\\.js$\")",
       "Bash(grep -l \"dashboard\\\\|widget\\\\|admin\" C:UsersblackDesktopEGS/ajax/*.php)",
-      "Bash(grep -l \"acciones\\\\|movimientos\\\\|widget\\\\|dashboard\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS/vistas/modulos/inicio/\"*.php)"
+      "Bash(grep -l \"acciones\\\\|movimientos\\\\|widget\\\\|dashboard\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS/vistas/modulos/inicio/\"*.php)",
+      "Bash(grep -n \"section class=content\\\\|<section class=''''content\\\\|div class=content\\\\|div class=''''content''''\" C:UsersblackDesktopEGSvistasmodulos/*.php)"
     ]
   }
 }
