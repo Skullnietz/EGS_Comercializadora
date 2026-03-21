@@ -310,17 +310,17 @@ if (!function_exists('_notiTiempoRel')) {
           foreach ($_noti_mostrar as $o):
             $dias = max(0, floor((time() - strtotime($o["fecha_ingreso"])) / 86400));
             $urgColor = $dias >= 30 ? '#ef4444' : ($dias >= 15 ? '#f59e0b' : '#3b82f6');
+            // URL directa a la orden — sin pasar por gestorOrdenes.js (que causaba eliminación accidental)
+            $urlOrden = "index.php?ruta=infoOrden"
+                      . "&idOrden="  . intval($o["id"])
+                      . "&empresa="  . intval(isset($o["id_empresa"])  ? $o["id_empresa"]  : 0)
+                      . "&asesor="   . intval(isset($o["id_Asesor"])   ? $o["id_Asesor"]   : 0)
+                      . "&cliente="  . intval(isset($o["id_usuario"])  ? $o["id_usuario"]  : 0)
+                      . "&tecnico="  . intval(isset($o["id_tecnico"])  ? $o["id_tecnico"]  : 0)
+                      . "&pedido="   . intval(isset($o["id_pedido"])   ? $o["id_pedido"]   : 0);
         ?>
         <li>
-          <a class="btnVerInfoOrden"
-             idOrden="<?php echo $o["id"]; ?>"
-             cliente="<?php echo isset($o["id_usuario"]) ? $o["id_usuario"] : ''; ?>"
-             tecnico="<?php echo isset($o["id_tecnico"]) ? $o["id_tecnico"] : ''; ?>"
-             asesor="<?php echo isset($o["id_Asesor"]) ? $o["id_Asesor"] : ''; ?>"
-             empresa="<?php echo isset($o["id_empresa"]) ? $o["id_empresa"] : ''; ?>"
-             pedido="<?php echo isset($o["id_pedido"]) ? $o["id_pedido"] : ''; ?>"
-             tecnicodos="<?php echo isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : ''; ?>"
-             item="nuevasVisitas"
+          <a href="<?php echo $urlOrden; ?>"
              style="display:flex;align-items:center;gap:8px;padding:8px 12px">
             <span style="width:8px;height:8px;border-radius:50%;background:<?php echo $urgColor; ?>;flex-shrink:0"></span>
             <span style="flex:1">
@@ -330,6 +330,7 @@ if (!function_exists('_notiTiempoRel')) {
           </a>
         </li>
         <?php endforeach; endif; ?>
+
 
       </ul>
     </li>
