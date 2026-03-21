@@ -1085,144 +1085,21 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
 </script>
 
 <!-- ══════════════════════════════════════════
-     ÚLTIMAS ÓRDENES + PRODUCTOS
+     CAMBIOS DE ESTADO DEL DÍA
 ══════════════════════════════════════════ -->
 <div class="crm-section">
-  <div class="crm-section-icon" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">
-    <i class="fa-solid fa-list-check"></i>
+  <div class="crm-section-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+    <i class="fa-solid fa-arrow-right-arrow-left"></i>
   </div>
   <div>
-    <h3>Actividad Reciente</h3>
-    <p>Órdenes con actividad en los últimos 30 días</p>
+    <h3>Cambios de Estado</h3>
+    <p>Movimientos de órdenes del día</p>
   </div>
 </div>
 
-<!-- Cambios de estado del día -->
 <div class="row">
   <div class="col-xs-12">
     <?php include __DIR__ . "/admin-actividad-estado.php"; ?>
-  </div>
-</div>
-
-<div class="row">
-  <!-- Últimas Órdenes -->
-  <div class="col-lg-7 col-md-7 col-xs-12">
-    <div class="crm-card" style="margin-bottom:20px">
-      <div class="crm-card-head">
-        <h4 class="crm-card-title"><i class="fa-solid fa-rectangle-list"></i> Últimas Órdenes</h4>
-        <span class="crm-badge" style="background:#f1f5f9;color:#475569"><?php echo count($_adm_ultimasOrd); ?> recientes</span>
-      </div>
-      <div class="crm-card-body-flush">
-        <?php if (empty($_adm_ultimasOrd)): ?>
-          <div class="crm-empty"><i class="fa-solid fa-inbox"></i><strong>Sin órdenes registradas</strong></div>
-        <?php else: ?>
-          <div class="table-responsive">
-            <table class="crm-table">
-              <thead><tr>
-                <th></th>
-                <th>Orden</th>
-                <th>Título / Equipo</th>
-                <th>Estado</th>
-                <th style="text-align:right">Total</th>
-                <th style="text-align:center">Fecha</th>
-                <th></th>
-              </tr></thead>
-              <tbody>
-                <?php foreach ($_adm_ultimasOrd as $o):
-                  $badge = _admEstadoBadge(isset($o['estado']) ? $o['estado'] : '');
-                  $img = _admGetImg($o);
-                  $link = 'index.php?ruta=infoOrden&idOrden='.$o["id"]
-                    .'&empresa='.(isset($o["id_empresa"]) ? $o["id_empresa"] : '')
-                    .'&asesor='.(isset($o["id_Asesor"]) ? $o["id_Asesor"] : '')
-                    .'&cliente='.(isset($o["id_usuario"]) ? $o["id_usuario"] : '')
-                    .'&tecnico='.(isset($o["id_tecnico"]) ? $o["id_tecnico"] : '')
-                    .'&tecnicodos='.(isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : '')
-                    .'&pedido='.(isset($o["id_pedido"]) ? $o["id_pedido"] : '');
-                ?>
-                <tr>
-                  <td style="padding:6px 4px;width:40px">
-                    <?php if (!empty($img)): ?>
-                      <img src="<?php echo htmlspecialchars($img); ?>" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0"
-                           onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';">
-                      <div style="display:none;width:36px;height:36px;border-radius:6px;background:#f1f5f9;align-items:center;justify-content:center;color:#cbd5e1;font-size:12px"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-                    <?php else: ?>
-                      <div style="width:36px;height:36px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:12px"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-                    <?php endif; ?>
-                  </td>
-                  <td><span style="font-weight:700;color:#6366f1">#<?php echo htmlspecialchars($o['id']); ?></span></td>
-                  <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                    <?php echo htmlspecialchars(isset($o['titulo']) ? $o['titulo'] : '—'); ?>
-                  </td>
-                  <td>
-                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:<?php echo $badge[0]; ?>;background:<?php echo $badge[1]; ?>;padding:3px 10px;border-radius:12px">
-                      <?php echo htmlspecialchars(isset($o['estado']) ? $o['estado'] : '—'); ?>
-                    </span>
-                  </td>
-                  <td style="text-align:right;font-weight:700">$<?php echo number_format(floatval(isset($o['total']) ? $o['total'] : 0), 0); ?></td>
-                  <?php
-                    $fMostrar = isset($o['_fechaSort']) ? $o['_fechaSort'] : (isset($o['fecha_ingreso']) ? substr($o['fecha_ingreso'], 0, 10) : '');
-                    $fTipo = (!empty($o['fecha_Salida']) && substr($o['fecha_Salida'], 0, 10) === $fMostrar) ? 'Salida' : 'Ingreso';
-                  ?>
-                  <td style="text-align:center;font-size:12px;color:var(--crm-muted)">
-                    <div><?php echo htmlspecialchars($fMostrar); ?></div>
-                    <div style="font-size:9px;color:#94a3b8"><?php echo $fTipo; ?></div>
-                  </td>
-                  <td style="text-align:center">
-                    <a href="<?php echo $link; ?>" target="_blank"
-                       style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#6366f1;color:#fff;font-size:11px;text-decoration:none;transition:background .15s"
-                       onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">
-                      <i class="fa-solid fa-eye"></i>
-                    </a>
-                  </td>
-                </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
-          <div style="text-align:center;padding:12px;border-top:1px solid #f1f5f9">
-            <a href="index.php?ruta=ordenes" style="color:#6366f1;font-size:12px;font-weight:600;text-decoration:none">
-              Ver todas las órdenes <i class="fa-solid fa-arrow-right" style="font-size:10px"></i>
-            </a>
-          </div>
-        <?php endif; ?>
-      </div>
-    </div>
-  </div>
-
-  <!-- Productos más vendidos -->
-  <div class="col-lg-5 col-md-5 col-xs-12">
-    <div class="crm-card" style="margin-bottom:20px">
-      <div class="crm-card-head">
-        <h4 class="crm-card-title"><i class="fa-solid fa-fire"></i> Productos Top</h4>
-        <span class="crm-badge" style="background:#fef2f2;color:#dc2626">Más vendidos</span>
-      </div>
-      <div class="crm-card-body-flush">
-        <?php if (empty($_adm_productos)): ?>
-          <div class="crm-empty"><i class="fa-solid fa-box-open"></i><strong>Sin datos de productos</strong></div>
-        <?php else: ?>
-          <?php foreach (array_slice($_adm_productos, 0, 5) as $i => $prod):
-            $prodVentas = floatval(isset($prod["ventas"]) ? $prod["ventas"] : 0);
-            $prodPct = $_adm_totalProdVentas > 0 ? round($prodVentas * 100 / $_adm_totalProdVentas) : 0;
-            $prodColor = $_adm_prodColors[$i % count($_adm_prodColors)];
-            $prodNombre = isset($prod["titulo"]) ? $prod["titulo"] : "Producto";
-          ?>
-            <div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid #f8fafc;transition:background .12s"
-                 onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-              <div style="width:36px;height:36px;border-radius:8px;background:<?php echo $prodColor; ?>15;display:flex;align-items:center;justify-content:center;color:<?php echo $prodColor; ?>;font-size:14px;font-weight:800;flex-shrink:0">
-                <?php echo ($i + 1); ?>
-              </div>
-              <div style="flex:1;min-width:0">
-                <div style="font-size:13px;font-weight:600;color:var(--crm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($prodNombre); ?></div>
-                <div style="margin-top:4px;height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden">
-                  <div style="height:100%;width:<?php echo $prodPct; ?>%;background:<?php echo $prodColor; ?>;border-radius:2px"></div>
-                </div>
-              </div>
-              <div style="font-size:12px;font-weight:700;color:<?php echo $prodColor; ?>;flex-shrink:0"><?php echo $prodPct; ?>%</div>
-            </div>
-          <?php endforeach; ?>
-        <?php endif; ?>
-      </div>
-    </div>
   </div>
 </div>
 
