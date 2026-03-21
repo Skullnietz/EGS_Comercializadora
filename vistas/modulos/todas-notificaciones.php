@@ -101,15 +101,24 @@ try {
 if (!function_exists('_tnEstadoInfo')) {
     function _tnEstadoInfo($estado) {
         $e = strtolower($estado);
-        if (strpos($e, 'entregado') !== false || strpos($e, 'ent') !== false) return array('#22c55e', '#f0fdf4', 'fa-handshake', 'Entregado');
-        if (strpos($e, 'terminada') !== false || strpos($e, 'ter') !== false) return array('#06b6d4', '#ecfeff', 'fa-flag-checkered', 'Terminada');
-        if (strpos($e, 'aceptado') !== false || strpos($e, 'ok') !== false)   return array('#3b82f6', '#eff6ff', 'fa-circle-check', 'Aceptado');
-        if (strpos($e, 'revisión') !== false || strpos($e, 'rev') !== false)  return array('#ef4444', '#fef2f2', 'fa-magnifying-glass', 'Revisión');
-        if (strpos($e, 'autorización') !== false || strpos($e, 'aut') !== false) return array('#f59e0b', '#fffbeb', 'fa-hourglass-half', 'Autorización');
-        if (strpos($e, 'supervisión') !== false || strpos($e, 'sup') !== false)  return array('#8b5cf6', '#f5f3ff', 'fa-eye', 'Supervisión');
-        if (strpos($e, 'cancel') !== false) return array('#64748b', '#f1f5f9', 'fa-ban', 'Cancelada');
+        // Orden de prioridad: estados con "ent" en su nombre van DESPUÉS de pendiente/autorización
+        if (strpos($e, 'autorización') !== false || strpos($e, 'autorizacion') !== false || strpos($e, 'pendiente') !== false || $e === 'aut') return array('#f59e0b', '#fffbeb', 'fa-hourglass-half', 'Autorización');
+        if (strpos($e, 'supervisión') !== false || strpos($e, 'supervision') !== false || $e === 'sup') return array('#8b5cf6', '#f5f3ff', 'fa-eye', 'Supervisión');
+        if (strpos($e, 'garantía aceptada') !== false || strpos($e, 'garantia aceptada') !== false || $e === 'ga') return array('#dc2626', '#fef2f2', 'fa-rotate-left', 'Garantía Aceptada');
+        if (strpos($e, 'probable garantía') !== false || strpos($e, 'probable garantia') !== false) return array('#dc2626', '#fef2f2', 'fa-triangle-exclamation', 'Probable Garantía');
         if (strpos($e, 'garantía') !== false || strpos($e, 'garantia') !== false) return array('#dc2626', '#fef2f2', 'fa-rotate-left', 'Garantía');
-        if (strpos($e, 'sin reparación') !== false || strpos($e, 'sr') !== false) return array('#94a3b8', '#f8fafc', 'fa-xmark', 'Sin Reparación');
+        if (strpos($e, 'revisión') !== false || strpos($e, 'revision') !== false || $e === 'rev') return array('#ef4444', '#fef2f2', 'fa-magnifying-glass', 'En Revisión');
+        if (strpos($e, 'terminada') !== false || $e === 'ter') return array('#06b6d4', '#ecfeff', 'fa-flag-checkered', 'Terminada');
+        if (strpos($e, 'entregado al asesor') !== false) return array('#10b981', '#ecfdf5', 'fa-user-check', 'Entregado al Asesor');
+        if (strpos($e, 'entregado/pagado') !== false) return array('#22c55e', '#f0fdf4', 'fa-money-check-dollar', 'Entregado/Pagado');
+        if (strpos($e, 'entregado/credito') !== false || strpos($e, 'entregado/crédito') !== false) return array('#22c55e', '#f0fdf4', 'fa-credit-card', 'Entregado/Crédito');
+        if (strpos($e, 'entregado') !== false || strpos($e, 'entregada') !== false) return array('#22c55e', '#f0fdf4', 'fa-handshake', 'Entregado');
+        if (strpos($e, 'aceptado') !== false || strpos($e, 'aceptada') !== false || $e === 'ok') return array('#3b82f6', '#eff6ff', 'fa-circle-check', 'Aceptado');
+        if (strpos($e, 'cancel') !== false) return array('#64748b', '#f1f5f9', 'fa-ban', 'Cancelada');
+        if (strpos($e, 'sin reparación') !== false || strpos($e, 'sin reparacion') !== false || $e === 'sr') return array('#94a3b8', '#f8fafc', 'fa-xmark', 'Sin Reparación');
+        if (strpos($e, 'producto para venta') !== false || $e === 'pv') return array('#f97316', '#fff7ed', 'fa-tags', 'Producto para Venta');
+        if (strpos($e, 'producto en almacen') !== false || strpos($e, 'producto en almacén') !== false) return array('#78716c', '#fafaf9', 'fa-warehouse', 'Producto en Almacén');
+        if (strpos($e, 'seguimiento') !== false) return array('#0ea5e9', '#f0f9ff', 'fa-chart-line', 'Seguimiento');
         return array('#64748b', '#f1f5f9', 'fa-circle-info', $estado);
     }
 }

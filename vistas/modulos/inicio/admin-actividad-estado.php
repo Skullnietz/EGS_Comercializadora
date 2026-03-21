@@ -9,24 +9,41 @@
 if (!function_exists('_actEstadoInfo')) {
     function _actEstadoInfo($estado) {
         $e = strtolower($estado);
-        if (strpos($e, 'entregado') !== false || strpos($e, 'ent') !== false)
-            return array('label' => 'Entregado', 'color' => '#22c55e', 'bg' => '#f0fdf4', 'icon' => 'fa-handshake');
-        if (strpos($e, 'terminada') !== false || strpos($e, 'ter') !== false)
-            return array('label' => 'Terminada', 'color' => '#06b6d4', 'bg' => '#ecfeff', 'icon' => 'fa-flag-checkered');
-        if (strpos($e, 'aceptado') !== false || strpos($e, 'ok') !== false)
-            return array('label' => 'Aceptado', 'color' => '#3b82f6', 'bg' => '#eff6ff', 'icon' => 'fa-circle-check');
-        if (strpos($e, 'revisión') !== false || strpos($e, 'rev') !== false)
-            return array('label' => 'En Revisión', 'color' => '#ef4444', 'bg' => '#fef2f2', 'icon' => 'fa-magnifying-glass');
-        if (strpos($e, 'autorización') !== false || strpos($e, 'aut') !== false)
+        // Orden de prioridad: estados con "ent" en su nombre van DESPUÉS de pendiente/autorización
+        if (strpos($e, 'autorización') !== false || strpos($e, 'autorizacion') !== false || strpos($e, 'pendiente') !== false || $e === 'aut')
             return array('label' => 'Por Autorizar', 'color' => '#f59e0b', 'bg' => '#fffbeb', 'icon' => 'fa-hourglass-half');
-        if (strpos($e, 'supervisión') !== false || strpos($e, 'sup') !== false)
+        if (strpos($e, 'supervisión') !== false || strpos($e, 'supervision') !== false || $e === 'sup')
             return array('label' => 'Supervisión', 'color' => '#8b5cf6', 'bg' => '#f5f3ff', 'icon' => 'fa-eye');
-        if (strpos($e, 'cancel') !== false)
-            return array('label' => 'Cancelada', 'color' => '#64748b', 'bg' => '#f1f5f9', 'icon' => 'fa-ban');
+        if (strpos($e, 'garantía aceptada') !== false || strpos($e, 'garantia aceptada') !== false || $e === 'ga')
+            return array('label' => 'Garantía Aceptada', 'color' => '#dc2626', 'bg' => '#fef2f2', 'icon' => 'fa-rotate-left');
+        if (strpos($e, 'probable garantía') !== false || strpos($e, 'probable garantia') !== false)
+            return array('label' => 'Probable Garantía', 'color' => '#dc2626', 'bg' => '#fef2f2', 'icon' => 'fa-triangle-exclamation');
         if (strpos($e, 'garantía') !== false || strpos($e, 'garantia') !== false)
             return array('label' => 'Garantía', 'color' => '#dc2626', 'bg' => '#fef2f2', 'icon' => 'fa-rotate-left');
-        if (strpos($e, 'sin reparación') !== false || strpos($e, 'sr') !== false)
+        if (strpos($e, 'revisión') !== false || strpos($e, 'revision') !== false || $e === 'rev')
+            return array('label' => 'En Revisión', 'color' => '#ef4444', 'bg' => '#fef2f2', 'icon' => 'fa-magnifying-glass');
+        if (strpos($e, 'terminada') !== false || $e === 'ter')
+            return array('label' => 'Terminada', 'color' => '#06b6d4', 'bg' => '#ecfeff', 'icon' => 'fa-flag-checkered');
+        if (strpos($e, 'entregado al asesor') !== false)
+            return array('label' => 'Entregado al Asesor', 'color' => '#10b981', 'bg' => '#ecfdf5', 'icon' => 'fa-user-check');
+        if (strpos($e, 'entregado/pagado') !== false)
+            return array('label' => 'Entregado/Pagado', 'color' => '#22c55e', 'bg' => '#f0fdf4', 'icon' => 'fa-money-check-dollar');
+        if (strpos($e, 'entregado/credito') !== false || strpos($e, 'entregado/crédito') !== false)
+            return array('label' => 'Entregado/Crédito', 'color' => '#22c55e', 'bg' => '#f0fdf4', 'icon' => 'fa-credit-card');
+        if (strpos($e, 'entregado') !== false || strpos($e, 'entregada') !== false)
+            return array('label' => 'Entregado', 'color' => '#22c55e', 'bg' => '#f0fdf4', 'icon' => 'fa-handshake');
+        if (strpos($e, 'aceptado') !== false || strpos($e, 'aceptada') !== false || $e === 'ok')
+            return array('label' => 'Aceptado', 'color' => '#3b82f6', 'bg' => '#eff6ff', 'icon' => 'fa-circle-check');
+        if (strpos($e, 'cancel') !== false)
+            return array('label' => 'Cancelada', 'color' => '#64748b', 'bg' => '#f1f5f9', 'icon' => 'fa-ban');
+        if (strpos($e, 'sin reparación') !== false || strpos($e, 'sin reparacion') !== false || $e === 'sr')
             return array('label' => 'Sin Reparación', 'color' => '#94a3b8', 'bg' => '#f8fafc', 'icon' => 'fa-xmark');
+        if (strpos($e, 'producto para venta') !== false || $e === 'pv')
+            return array('label' => 'Producto para Venta', 'color' => '#f97316', 'bg' => '#fff7ed', 'icon' => 'fa-tags');
+        if (strpos($e, 'producto en almacen') !== false || strpos($e, 'producto en almacén') !== false)
+            return array('label' => 'Producto en Almacén', 'color' => '#78716c', 'bg' => '#fafaf9', 'icon' => 'fa-warehouse');
+        if (strpos($e, 'seguimiento') !== false)
+            return array('label' => 'Seguimiento', 'color' => '#0ea5e9', 'bg' => '#f0f9ff', 'icon' => 'fa-chart-line');
         return array('label' => $estado, 'color' => '#64748b', 'bg' => '#f1f5f9', 'icon' => 'fa-circle-info');
     }
 }

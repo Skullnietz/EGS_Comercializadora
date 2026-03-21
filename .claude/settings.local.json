@@ -113,7 +113,9 @@
       "Bash(php -l vistas/modulos/todas-notificaciones.php)",
       "Bash(php -l vistas/modulos/inicio/admin-actividad-estado.php)",
       "Bash(php -l ajax/notificaciones.ajax.php)",
-      "Bash(php -l vistas/js/gestorOrdenes.js)"
+      "Bash(php -l vistas/js/gestorOrdenes.js)",
+      "Bash(grep -oE value=\"\"[^\"\"]*\\\\\\(.*\\\\\\)\"\" /c/Users/black/Desktop/EGS/vistas/modulos/ordenes.php /c/Users/black/Desktop/EGS/vistas/modulos/ordenesnew.php)",
+      "Bash(grep -rho value=\"\"\\\\\\([^\"\"]*\\\\\\)\"\" /c/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php /c/Users/black/Desktop/EGS/vistas/modulos/ordenes.php /c/Users/black/Desktop/EGS/vistas/modulos/ordenesnew.php /c/Users/black/Desktop/EGS/vistas/modulos/EstadoOrden.php)"
     ]
   }
 }
