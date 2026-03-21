@@ -79,7 +79,7 @@ class tablaOrdenes{
 
                   $InfoOrdenes = "<button class='btn btn-warning btnVerInfoOrden' idOrden='".$ordenes[$i]["id"]."' cliente='".$ordenes[$i]["id_usuario"]."'  tecnico='".$ordenes[$i]["id_tecnico"]."' asesor='".$ordenes[$i]["id_Asesor"]."' empresa='".$ordenes[$i]["id_empresa"]."' pedido='".$ordenes[$i]["id_pedido"]."' data-toggle='modal'><i class='fa fa-pencil'></button>";
 
-                  $eliminarOrden = "<button class='btn btn-danger btnEliminarorden' idOrden='".$ordenes[$i]["id"]."'><i class='fa fa-times'></i></button>";
+                  $eliminarOrden = "<button class='btn btn-danger' onclick=\"egsEliminarOrden(".$ordenes[$i]["id"].",'".(isset($ordenes[$i]["portada"]) ? $ordenes[$i]["portada"] : "")."','".(isset($ordenes[$i]["portada"]) ? $ordenes[$i]["portada"] : "")."')\" title='Eliminar orden'><i class='fa fa-times'></i></button>";
 
                   $ticket = "<button class='btn btn-warning btnImprimirorden' idOrden='".$ordenes[$i]["id"]."' cliente='".$ordenes[$i]["id_usuario"]."'  tecnico='".$ordenes[$i]["id_tecnico"]."' asesor='".$ordenes[$i]["id_Asesor"]."' empresa='".$ordenes[$i]["id_empresa"]."' data-toggle='modal'><i class='fa fa-ticket'></i></button>";
 

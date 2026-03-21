@@ -1485,17 +1485,47 @@ class controladorOrdenes{
 
 	static public function ctrEliminarOrden(){
 
-
-
 		if(isset($_GET["idOrden"])){
-
-
 
 			$datos = $_GET["idOrden"];
 
+			// ── SEGURIDAD: Solo administradores con token válido pueden eliminar ──
+			if (!isset($_SESSION['perfil']) || $_SESSION['perfil'] !== 'administrador') {
+				echo '<script>
+					swal({ type: "error", title: "Acceso denegado",
+					       text: "Solo los administradores pueden eliminar órdenes.",
+					       showConfirmButton: true, confirmButtonText: "Cerrar"
+					}).then(function(r){ if(r.value) window.location = "index.php?ruta=ordenesnew"; });
+				</script>';
+				return;
+			}
+
+			// Verificar token de contraseña (generado por AJAX verificarAdminPassword)
+			$tokenGet     = isset($_GET['egsDelToken']) ? $_GET['egsDelToken'] : '';
+			$tokenSesion  = isset($_SESSION['egs_del_token'])   ? $_SESSION['egs_del_token']   : '';
+			$idSesion     = isset($_SESSION['egs_del_id'])      ? intval($_SESSION['egs_del_id']) : 0;
+			$expiraSesion = isset($_SESSION['egs_del_expires']) ? intval($_SESSION['egs_del_expires']) : 0;
+
+			$tokenValido = ($tokenGet !== ''
+			             && $tokenGet === $tokenSesion
+			             && intval($datos) === $idSesion
+			             && time() <= $expiraSesion);
+
+			// Invalidar el token de inmediato (uso único)
+			unset($_SESSION['egs_del_token'], $_SESSION['egs_del_id'], $_SESSION['egs_del_expires']);
+
+			if (!$tokenValido) {
+				echo '<script>
+					swal({ type: "error", title: "Verificación requerida",
+					       text: "Debe ingresar la contraseña de administrador para eliminar una orden.",
+					       showConfirmButton: true, confirmButtonText: "Cerrar"
+					}).then(function(r){ if(r.value) window.location = "index.php?ruta=ordenesnew"; });
+				</script>';
+				return;
+			}
+			// ── FIN SEGURIDAD ──
 
 
-		
 
 			/*=============================================
 

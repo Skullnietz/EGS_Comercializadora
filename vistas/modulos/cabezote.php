@@ -731,3 +731,155 @@ body.sidebar-collapse .main-header .logo .egs-logo-text {
 
 })();
 </script>
+
+<?php if (isset($_SESSION['perfil']) && $_SESSION['perfil'] === 'administrador'): ?>
+<!-- ══════════════════════════════════════════════════════
+     MODAL: Confirmar eliminación de orden con contraseña
+     Solo se muestra a administradores
+══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="egsModalEliminarOrden" tabindex="-1" role="dialog" aria-labelledby="egsModalEliminarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document" style="margin-top:120px">
+    <div class="modal-content" style="border-radius:12px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+
+      <!-- Header -->
+      <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#b91c1c);border:none;padding:16px 20px">
+        <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:.9;font-size:22px;margin-top:-4px">&times;</button>
+        <h4 class="modal-title" id="egsModalEliminarLabel" style="color:#fff;font-weight:700;font-size:15px">
+          <i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>
+          Eliminar Orden
+        </h4>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body" style="padding:20px">
+        <div style="text-align:center;margin-bottom:14px">
+          <div style="width:56px;height:56px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;border:2px solid #fecaca">
+            <i class="fa-solid fa-trash" style="font-size:22px;color:#ef4444"></i>
+          </div>
+          <p style="font-size:13px;color:#374151;margin:0">
+            Esta acción es <strong>irreversible</strong>.<br>
+            Orden: <strong id="egsDelOrdenId" style="color:#ef4444">#—</strong>
+          </p>
+        </div>
+
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;display:block">
+            <i class="fa-solid fa-lock" style="margin-right:4px;color:#6b7280"></i>
+            Contraseña de administrador
+          </label>
+          <div style="position:relative">
+            <input type="password"
+                   id="egsDelPassword"
+                   class="form-control"
+                   placeholder="Tu contraseña"
+                   style="padding-right:40px;border-radius:8px;border:1px solid #d1d5db;font-size:13px"
+                   autocomplete="off">
+            <i class="fa-regular fa-eye" id="egsDelTogglePass"
+               style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9ca3af;font-size:13px"></i>
+          </div>
+        </div>
+
+        <div id="egsDelMensaje" style="display:none;font-size:12px;padding:7px 10px;border-radius:6px;margin-top:8px"></div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer" style="border-top:1px solid #f3f4f6;padding:12px 20px;display:flex;justify-content:space-between">
+        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger btn-sm" id="egsDelConfirmar" style="border-radius:6px;font-weight:600">
+          <i class="fa-solid fa-trash" style="margin-right:4px"></i>Eliminar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Modal de eliminación con contraseña ── */
+(function(){
+  var _idOrden = 0, _imgP = '', _imgPort = '';
+
+  // Toggle ver/ocultar contraseña
+  $('#egsDelTogglePass').on('click', function(){
+    var $inp = $('#egsDelPassword');
+    var tipo = $inp.attr('type') === 'password' ? 'text' : 'password';
+    $inp.attr('type', tipo);
+    $(this).toggleClass('fa-eye fa-eye-slash');
+  });
+
+  // Función global para abrir el modal
+  window.egsEliminarOrden = function(idOrden, imgPrincipal, imgPortada) {
+    _idOrden  = idOrden;
+    _imgP     = imgPrincipal  || '';
+    _imgPort  = imgPortada    || '';
+    $('#egsDelOrdenId').text('#' + idOrden);
+    $('#egsDelPassword').val('');
+    $('#egsDelMensaje').hide().text('');
+    $('#egsDelConfirmar').prop('disabled', false).html('<i class="fa-solid fa-trash" style="margin-right:4px"></i>Eliminar');
+    $('#egsModalEliminarOrden').modal('show');
+    setTimeout(function(){ $('#egsDelPassword').focus(); }, 400);
+  };
+
+  // Confirmar con Enter
+  $('#egsDelPassword').on('keydown', function(e){
+    if (e.key === 'Enter') $('#egsDelConfirmar').click();
+  });
+
+  // Botón Eliminar
+  $('#egsDelConfirmar').on('click', function(){
+    var pass = $('#egsDelPassword').val().trim();
+    if (!pass) {
+      mostrarMsg('Ingresa tu contraseña.', 'warning');
+      return;
+    }
+
+    var $btn = $(this);
+    $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin" style="margin-right:4px"></i>Verificando...');
+
+    var fd = new FormData();
+    fd.append('egsAdminPass',    pass);
+    fd.append('egsOrdenId',      _idOrden);
+    fd.append('egsImgPrincipal', _imgP);
+    fd.append('egsImgPortada',   _imgPort);
+
+    $.ajax({
+      url:         'ajax/verificarAdminPassword.ajax.php',
+      method:      'POST',
+      data:        fd,
+      contentType: false,
+      processData: false,
+      dataType:    'json',
+      success: function(r) {
+        if (r && r.ok) {
+          $btn.html('<i class="fa-solid fa-check" style="margin-right:4px"></i>Verificado…');
+          mostrarMsg('Contraseña correcta. Eliminando…', 'success');
+          setTimeout(function(){ window.location = r.redirect; }, 700);
+        } else {
+          mostrarMsg(r.msg || 'Contraseña incorrecta.', 'danger');
+          $btn.prop('disabled', false).html('<i class="fa-solid fa-trash" style="margin-right:4px"></i>Eliminar');
+          $('#egsDelPassword').val('').focus();
+        }
+      },
+      error: function() {
+        mostrarMsg('Error de conexión. Intenta de nuevo.', 'danger');
+        $btn.prop('disabled', false).html('<i class="fa-solid fa-trash" style="margin-right:4px"></i>Eliminar');
+      }
+    });
+  });
+
+  function mostrarMsg(texto, tipo) {
+    var colores = {
+      success: { bg: '#f0fdf4', color: '#166534', border: '#bbf7d0' },
+      danger:  { bg: '#fef2f2', color: '#991b1b', border: '#fecaca' },
+      warning: { bg: '#fffbeb', color: '#92400e', border: '#fde68a' }
+    };
+    var c = colores[tipo] || colores.warning;
+    $('#egsDelMensaje')
+      .css({ background: c.bg, color: c.color, border: '1px solid ' + c.border })
+      .text(texto)
+      .show();
+  }
+
+})();
+</script>
+<?php endif; ?>
