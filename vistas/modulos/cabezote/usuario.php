@@ -103,18 +103,31 @@ if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico" && !empty($_
                 '12m' => array('corte' => date("Y-m-d", strtotime("-12 months")),'label' => 'del Año'),
             );
 
-            $_egs_best1m = false;
+            $_egs_bestPos1m = 0; // posición en ranking del mes (0 = no está en top 3)
             foreach ($_egs_periodos as $_pk => $_pv) {
                 $_egs_rank = _egsMenuCalcRanking($_egs_allOrd, $_egs_mapaTec, $_pv['corte']);
-                if (!empty($_egs_rank) && $_egs_rank[0]['id'] == $_egs_myTecId && $_egs_rank[0]['score'] > 0) {
-                    $_egs_rankDropBadges[] = array('periodo' => $_pv['label'], 'key' => $_pk);
-                    if ($_pk === '1m') $_egs_best1m = true;
+                // Buscar posición del técnico en el top 3
+                for ($_ri = 0; $_ri < min(3, count($_egs_rank)); $_ri++) {
+                    if ($_egs_rank[$_ri]['id'] == $_egs_myTecId && $_egs_rank[$_ri]['score'] > 0) {
+                        $_pos = $_ri + 1; // 1, 2 o 3
+                        $_egs_rankDropBadges[] = array(
+                            'periodo' => $_pv['label'],
+                            'key'     => $_pk,
+                            'pos'     => $_pos,
+                        );
+                        if ($_pk === '1m') $_egs_bestPos1m = $_pos;
+                        break;
+                    }
                 }
             }
 
-            // Corona en avatar si es #1 del mes
-            if ($_egs_best1m) {
-                $_egs_rankBadge = '<span class="egs-rank-crown" title="¡Mejor técnico del mes!"><i class="fa-solid fa-crown"></i></span>';
+            // Corona/medalla en avatar según posición del mes
+            if ($_egs_bestPos1m === 1) {
+                $_egs_rankBadge = '<span class="egs-rank-crown egs-rank-pos1" title="¡#1 del mes!"><i class="fa-solid fa-crown"></i></span>';
+            } elseif ($_egs_bestPos1m === 2) {
+                $_egs_rankBadge = '<span class="egs-rank-crown egs-rank-pos2" title="¡#2 del mes!"><i class="fa-solid fa-medal"></i></span>';
+            } elseif ($_egs_bestPos1m === 3) {
+                $_egs_rankBadge = '<span class="egs-rank-crown egs-rank-pos3" title="¡#3 del mes!"><i class="fa-solid fa-award"></i></span>';
             }
         }
     } catch (Exception $e) {}
@@ -141,7 +154,7 @@ if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico" && !empty($_
       <span class="egs-av-wrap egs-av-wrap-lg">
         <img src="<?= $_av ?>" class="egs-av-lg" alt="<?= $_nom ?>">
         <?php if (!empty($_egs_rankBadge)): ?>
-          <span class="egs-rank-crown egs-rank-crown-lg" title="¡Mejor técnico del mes!"><i class="fa-solid fa-crown"></i></span>
+          <?= str_replace('egs-rank-crown"', 'egs-rank-crown egs-rank-crown-lg"', $_egs_rankBadge) ?>
         <?php endif; ?>
       </span>
       <div class="egs-user-info">
@@ -154,10 +167,15 @@ if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico" && !empty($_
     <?php if (!empty($_egs_rankDropBadges)): ?>
     <!-- Logros del técnico -->
     <li class="egs-drop-achievements">
-      <?php foreach ($_egs_rankDropBadges as $_badge): ?>
-        <div class="egs-achievement-item egs-achievement-<?= $_badge['key'] ?>">
-          <i class="fa-solid <?= $_badge['key']==='12m' ? 'fa-trophy' : ($_badge['key']==='3m' ? 'fa-medal' : 'fa-crown') ?>"></i>
-          <span>Mejor técnico <?= $_badge['periodo'] ?></span>
+      <?php foreach ($_egs_rankDropBadges as $_badge):
+        // Icono según posición
+        if ($_badge['pos'] === 1) { $_bIcon = 'fa-crown'; $_bLabel = '#1'; }
+        elseif ($_badge['pos'] === 2) { $_bIcon = 'fa-medal'; $_bLabel = '#2'; }
+        else { $_bIcon = 'fa-award'; $_bLabel = '#3'; }
+      ?>
+        <div class="egs-achievement-item egs-achievement-pos<?= $_badge['pos'] ?>">
+          <i class="fa-solid <?= $_bIcon ?>"></i>
+          <span><?= $_bLabel ?> técnico <?= $_badge['periodo'] ?></span>
         </div>
       <?php endforeach; ?>
     </li>

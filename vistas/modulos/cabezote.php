@@ -307,30 +307,40 @@ html body.skin-blue .main-header .logo {
   flex-shrink: 0;
 }
 
-/* Corona pequeña (trigger del navbar) */
+/* Badge sobre avatar (trigger del navbar) */
 .egs-rank-crown {
   position: absolute;
   top: -7px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 11px;
-  color: #f59e0b;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
   z-index: 2;
   line-height: 1;
-  animation: egs-crown-shine 3s ease-in-out infinite;
   pointer-events: none;
 }
+/* Colores por posición */
+.egs-rank-pos1 { color: #f59e0b; animation: egs-shine-gold 3s ease-in-out infinite; }
+.egs-rank-pos2 { color: #94a3b8; animation: egs-shine-silver 3s ease-in-out infinite; }
+.egs-rank-pos3 { color: #d97706; animation: egs-shine-bronze 3s ease-in-out infinite; }
 
-/* Corona grande (dropdown panel) */
+/* Badge grande (dropdown panel) */
 .egs-rank-crown-lg {
   top: -9px;
   font-size: 14px;
 }
 
-@keyframes egs-crown-shine {
+@keyframes egs-shine-gold {
   0%, 100% { color: #f59e0b; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
   50%      { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251,191,36,.5)); }
+}
+@keyframes egs-shine-silver {
+  0%, 100% { color: #94a3b8; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+  50%      { color: #cbd5e1; filter: drop-shadow(0 0 6px rgba(203,213,225,.5)); }
+}
+@keyframes egs-shine-bronze {
+  0%, 100% { color: #d97706; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+  50%      { color: #f59e0b; filter: drop-shadow(0 0 6px rgba(217,119,6,.5)); }
 }
 
 /* Sección de logros en el dropdown */
@@ -353,9 +363,10 @@ html body.skin-blue .main-header .logo {
   width: 16px;
   text-align: center;
 }
-.egs-achievement-1m i  { color: #f59e0b; }
-.egs-achievement-3m i  { color: #a855f7; }
-.egs-achievement-12m i { color: #eab308; }
+/* Colores de icono por posición */
+.egs-achievement-pos1 i { color: #f59e0b; }
+.egs-achievement-pos2 i { color: #94a3b8; }
+.egs-achievement-pos3 i { color: #d97706; }
 
 /* ── Sidebar: estilos en lateral/menu.php ── */
 
