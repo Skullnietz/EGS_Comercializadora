@@ -24,12 +24,10 @@ if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico" && !empty($_
                 if (isset($_t['id'])) $_egs_mapaTec[$_t['id']] = isset($_t['nombre']) ? $_t['nombre'] : 'Técnico';
             }
 
-            // Obtener todas las órdenes de la empresa
+            // Obtener todas las órdenes (el ranking filtra por técnicos de la empresa)
             $_egs_allOrd = array();
             try {
-                $_egs_allOrd = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
-                    "id_empresa", $_SESSION["empresa"], null, null
-                );
+                $_egs_allOrd = controladorOrdenes::ctrlTraerOrdenesConTope(0, 99999);
                 if (!is_array($_egs_allOrd)) $_egs_allOrd = array();
             } catch (Exception $e) {}
 
@@ -133,6 +131,7 @@ if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico" && !empty($_
     } catch (Exception $e) {}
 }
 ?>
+<!-- DEBUG-RANK: perfil=<?= $_SESSION["perfil"] ?? '?' ?> | badges=<?= count($_egs_rankDropBadges) ?> | badge=<?= !empty($_egs_rankBadge) ? 'SI' : 'NO' ?> -->
 <!-- user-menu -->
 <li class="dropdown user user-menu">
 
