@@ -376,14 +376,16 @@ $(function(){
 <?php endif; ?>
 
 <?php if (!empty($_noti_push)): ?>
-<!-- Push notifications: SOLO 1 vez por sesión del navegador -->
+<!-- Push notifications: solo si hay nuevas desde la última vez -->
 <script>
 (function(){
-  var pushKey = 'egs_push_shown_' + <?php echo json_encode(session_id()); ?>;
+  var pushCount = <?php echo count($_noti_push); ?>;
+  var pushKey = 'egs_push_atraso_count';
 
-  if (sessionStorage.getItem(pushKey)) return;
-
-  sessionStorage.setItem(pushKey, '1');
+  // Solo mostrar si cambió la cantidad de atrasos
+  var lastCount = parseInt(localStorage.getItem(pushKey) || '0', 10);
+  if (pushCount <= lastCount) return;
+  localStorage.setItem(pushKey, pushCount);
 
   setTimeout(function(){
     if (typeof Push === 'undefined') return;
@@ -531,11 +533,12 @@ $(function(){
 
 <script>
 (function(){
-  var toastKey = 'egs_toast_estado_' + <?php echo json_encode(session_id()); ?>;
+  var lastShownId = parseInt(localStorage.getItem('egs_toast_estado_lastId') || '0', 10);
+  var currentId = <?php echo intval($_toast_first['id']); ?>;
 
-  // Solo mostrar 1 vez por sesión
-  if (sessionStorage.getItem(toastKey)) return;
-  sessionStorage.setItem(toastKey, '1');
+  // Solo mostrar si hay una notificación más reciente que la última vista
+  if (currentId <= lastShownId) return;
+  localStorage.setItem('egs_toast_estado_lastId', currentId);
 
   // Esperar a que cargue la página
   setTimeout(function(){
@@ -668,10 +671,12 @@ $(function(){
 
 <script>
 (function(){
-  var obsKey = 'egs_toast_obs_' + <?php echo json_encode(session_id()); ?>;
+  var lastShownObsId = parseInt(localStorage.getItem('egs_toast_obs_lastId') || '0', 10);
+  var currentObsId = <?php echo intval($_toastObs_first['id']); ?>;
 
-  if (sessionStorage.getItem(obsKey)) return;
-  sessionStorage.setItem(obsKey, '1');
+  // Solo mostrar si hay una observación más reciente que la última vista
+  if (currentObsId <= lastShownObsId) return;
+  localStorage.setItem('egs_toast_obs_lastId', currentObsId);
 
   // Delay: si hay toast de estado, esperar un poco más
   var delay = <?php echo ($_noti_totalEstado > 0) ? '2500' : '1500'; ?>;
@@ -734,9 +739,12 @@ $(function(){
 <script>
 (function(){
   var POLL_INTERVAL = 45000; // 45 segundos
-  var lastEstadoId  = <?php echo (!empty($_noti_estado) && isset($_noti_estado[0]['id'])) ? intval($_noti_estado[0]['id']) : 0; ?>;
-  var lastObsId     = <?php echo (!empty($_noti_obs) && isset($_noti_obs[0]['id'])) ? intval($_noti_obs[0]['id']) : 0; ?>;
-  var currentAtraso = <?php echo $_noti_totalAtraso; ?>;
+  // Usar el mayor entre lo que hay en PHP y lo guardado en localStorage (por si otra pestaña ya actualizó)
+  var serverEstadoId = <?php echo (!empty($_noti_estado) && isset($_noti_estado[0]['id'])) ? intval($_noti_estado[0]['id']) : 0; ?>;
+  var serverObsId    = <?php echo (!empty($_noti_obs) && isset($_noti_obs[0]['id'])) ? intval($_noti_obs[0]['id']) : 0; ?>;
+  var lastEstadoId   = Math.max(serverEstadoId, parseInt(localStorage.getItem('egs_toast_estado_lastId') || '0', 10));
+  var lastObsId      = Math.max(serverObsId, parseInt(localStorage.getItem('egs_toast_obs_lastId') || '0', 10));
+  var currentAtraso  = <?php echo $_noti_totalAtraso; ?>;
 
   function egsPlayNotifSound(type) {
     try {
@@ -890,6 +898,8 @@ $(function(){
       // Detectar nueva notificación de estado/traspaso
       if (r.ultimaNotif && r.ultimaNotif.id && r.ultimaNotif.id > lastEstadoId) {
         lastEstadoId = r.ultimaNotif.id;
+        // Sincronizar con localStorage para evitar re-mostrar en otras pestañas/navegaciones
+        localStorage.setItem('egs_toast_estado_lastId', r.ultimaNotif.id);
         var soundType = r.ultimaNotif.tipo === 'traspaso' ? 'traspaso' : 'estado';
         egsPlayNotifSound(soundType);
         egsShowLiveToast({
@@ -931,6 +941,7 @@ $(function(){
       // Detectar nueva observación
       else if (r.ultimaObs && r.ultimaObs.id && r.ultimaObs.id > lastObsId) {
         lastObsId = r.ultimaObs.id;
+        localStorage.setItem('egs_toast_obs_lastId', r.ultimaObs.id);
         egsPlayNotifSound('obs');
         egsShowLiveToast({
           type: 'obs',
