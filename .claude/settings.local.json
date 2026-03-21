@@ -96,7 +96,11 @@
       "Bash(grep -r \"Supervicion\\\\|Garantía aceptada\" C:UsersblackDesktopEGS --include=*.php)",
       "Bash(grep -r estado.*IN\\\\\\(C:UsersblackDesktopEGSmodelosordenes.modelo.php)",
       "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\\\\admin-top-tecnicos.php\")",
-      "Bash(grep -rn \"ranking\\\\|mejor.*tecnico\\\\|primer.*lugar\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\"\" --include=\"*.php \")"
+      "Bash(grep -rn \"ranking\\\\|mejor.*tecnico\\\\|primer.*lugar\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\inicio\"\" --include=\"*.php \")",
+      "Bash(find C:UsersblackDesktopEGS -type f \\\\\\(-name *login* -o -name *auth* \\\\\\))",
+      "Bash(find C:UsersblackDesktopEGSvistas -type f \\\\\\(-name *.css -o -name *.js \\\\\\))",
+      "Bash(grep -r \"fondo-animado\\\\|capa-overlay\\\\|login-container\" C:UsersblackDesktopEGS --include=*.css --include=*.php)",
+      "Bash(grep -r \"bajadaCinematica\\\\|egs-azul\" C:UsersblackDesktopEGS --include=*.php --include=*.css)"
     ]
   }
 }

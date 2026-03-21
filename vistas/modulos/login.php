@@ -1,117 +1,89 @@
 <?php
-// 1. CONFIGURACI���N
+// 1. CONFIGURACIÓN
 header('Content-Type: text/html; charset=UTF-8');
 
-function obtenerFondoEstacional() {
-    $mes = (int)date("n"); 
-    $dia = (int)date("j"); 
+/**
+ * Obtiene la imagen del día de Bing.
+ * Cachea el resultado en un archivo temporal para no consultar la API en cada carga.
+ * Si Bing falla, usa un fallback de Unsplash.
+ */
+function obtenerBingImagenDelDia() {
+    // --- Cache local (1 archivo por día) ---
+    $cacheDir  = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'egs_bing_cache';
+    $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . 'bing_' . date('Y-m-d') . '.json';
 
-    $biblioteca = [
+    // Si ya tenemos cache de hoy, devolver directamente
+    if (file_exists($cacheFile)) {
+        $cached = json_decode(file_get_contents($cacheFile), true);
+        if (!empty($cached['url'])) {
+            return $cached;
+        }
+    }
 
-        // --- ENERO: Inicio, Planificación, Invierno ---
-        1 => [
-            "photo-1611988615248-5d4f0b9ac31e", "photo-1608751444940-a8ea4c0696ee", "photo-1706514447301-29fc91aeb6ec",
-            "photo-1578147063111-9ffec96050cd", "photo-1611583786970-0cbe126a1a78", "photo-1735823440223-e4f45b5c4a45",
-            "photo-1546766796-b3560d439487", "photo-1515251721820-48a70bdc846d", "photo-1531297461136-82lw9z21171d",
-            "photo-1608889175166-d174c1b6c8c0" // ⛄ Nueva: Carretera nevada en invierno (JuJiy1hlnnY)
-        ],
+    // --- Consultar API de Bing ---
+    $apiUrl = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=es-MX';
+    $result = ['url' => '', 'title' => '', 'copyright' => ''];
 
-        // --- FEBRERO: Tecnología, Seriedad ---
-        2 => [
-            "photo-1519389950473-47ba0277781c", "photo-1555421689-49263376271e", "photo-1504384308090-c54be3855091",
-            "photo-1518770660439-4636190af475", "photo-1451187580459-43490279c0fa", "photo-1526304640152-d4619684e484",
-            "photo-1531482615713-2afd69097998", "photo-1556761175-5973dc0f32e7", "photo-1505373877841-8d25f7d46678",
-            "photo-1491438590914-bc09fcaaf77a"
-        ],
+    try {
+        $ctx = stream_context_create([
+            'http' => ['timeout' => 5, 'ignore_errors' => true],
+            'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false]
+        ]);
+        $response = @file_get_contents($apiUrl, false, $ctx);
 
-        // --- MARZO: Primavera, Logística ---
-        3 => [
-            "photo-1586528116311-ad8dd3c8310d", "photo-1497366216548-37526070297c", "photo-1566576912902-192ca15239bf",
-            "photo-1506744038136-46273834b3fb", "photo-1517245386807-bb43f82c33c4", "photo-1522202176988-66273c2fd55f",
-            "photo-1558403194-611308249627", "photo-1521791136064-7986c2920216", "photo-1507679799987-c73779587ccf",
-            "photo-1581090700227-1e8a6c6f8d20" // 🚛 Nueva: Camión logístico en carretera
-        ],
+        if ($response !== false) {
+            $data = json_decode($response, true);
+            if (!empty($data['images'][0])) {
+                $img = $data['images'][0];
+                // Bing devuelve URLs relativas como /th?id=... o /az/hprichbg/rb/...
+                $imgUrl = $img['url'];
+                if (strpos($imgUrl, 'http') !== 0) {
+                    $imgUrl = 'https://www.bing.com' . $imgUrl;
+                }
+                // Forzar resolución UHD (1920x1080)
+                $imgUrl = preg_replace('/\d+x\d+/', '1920x1080', $imgUrl);
 
-        // --- ABRIL: Crecimiento ---
-        4 => [
-            "photo-1460925895917-afdab827c52f", "photo-1487014679447-9f8336841d58", "photo-1507525428034-b723cf961d3e",
-            "photo-1556740738-b6a63e27c4df", "photo-1553877607-3cc980cd655e", "photo-1573164713988-8665fc963095",
-            "photo-1552664730-d307ca884978", "photo-1535713875002-d1d0cf377fde", "photo-1497215728101-856f4ea42174",
-            "photo-1504639725590-34d0984388bd"
-        ],
+                $result['url']       = $imgUrl;
+                $result['title']     = isset($img['title']) ? $img['title'] : '';
+                $result['copyright'] = isset($img['copyright']) ? $img['copyright'] : '';
+            }
+        }
+    } catch (Exception $e) {
+        // silenciar errores
+    }
 
-        // --- MAYO: Energía, Claridad ---
-        5 => [
-            "photo-1477959858617-67f85cf4f1df", "photo-1556761175-4b46a572b786", "photo-1513530534585-c7b1394c6d51",
-            "photo-1500530855697-b586d89ba3ee", "photo-1542744173-8e7e53415bb0", "photo-1510519138101-570d1dca3d66",
-            "photo-1526628953301-3e589a6a8b74", "photo-1495195129352-aeb325a55b65", "photo-1486312338219-ce68d2c6f44d",
-            "photo-1523240795612-9a054b0db644"
-        ],
+    // --- Fallback si Bing no respondió ---
+    if (empty($result['url'])) {
+        $fallbacks = [
+            'photo-1506744038136-46273834b3fb',
+            'photo-1451187580459-43490279c0fa',
+            'photo-1519389950473-47ba0277781c',
+            'photo-1477959858617-67f85cf4f1df',
+            'photo-1507525428034-b723cf961d3e',
+        ];
+        $pick = $fallbacks[date('j') % count($fallbacks)];
+        $result['url']       = 'https://images.unsplash.com/' . $pick . '?q=80&w=1920&auto=format&fit=crop';
+        $result['title']     = '';
+        $result['copyright'] = 'Unsplash';
+    }
 
-        // --- JUNIO: Verano, Puertos ---
-        6 => [
-            "photo-1494412574643-35d3d4018828", "photo-1455849318743-b2233052fcff", "photo-1516321318423-f06f85e504b3",
-            "photo-1581091226825-a6a2a5aee158", "photo-1465146344425-f00d5f5c8f07", "photo-1531297461136-82lw9z21171d",
-            "photo-1504384308090-c54be3855091", "photo-1518770660439-4636190af475", "photo-1522071820081-009f0129c71c",
-            "photo-1470770841072-f978cf4d019e"
-        ],
+    // --- Guardar cache ---
+    if (!is_dir($cacheDir)) {
+        @mkdir($cacheDir, 0755, true);
+    }
+    // Limpiar caches de días anteriores
+    foreach (glob($cacheDir . DIRECTORY_SEPARATOR . 'bing_*.json') as $old) {
+        if ($old !== $cacheFile) @unlink($old);
+    }
+    @file_put_contents($cacheFile, json_encode($result));
 
-        // --- JULIO: Azul profundo, Global ---
-        7 => [
-            "photo-1507525428034-b723cf961d3e", "photo-1506744038136-46273834b3fb", "photo-1521791136064-7986c2920216",
-            "photo-1451187580459-43490279c0fa", "photo-1550751827-4bd374c3f58b", "photo-1497366216548-37526070297c",
-            "photo-1486406146926-c627a92ad1ab", "photo-1556740758-90de63f607d8", "photo-1555421689-49263376271e",
-            "photo-1505373877841-8d25f7d46678"
-        ],
-
-        // --- AGOSTO: Trabajo duro ---
-        8 => [
-            "photo-1486312338219-ce68d2c6f44d", "photo-1497215728101-856f4ea42174", "photo-1542744173-8e7e53415bb0",
-            "photo-1460925895917-afdab827c52f", "photo-1477959858617-67f85cf4f1df", "photo-1518600506278-4e8ef466b810",
-            "photo-1531297461136-82lw9z21171d", "photo-1557683316-973673baf926", "photo-1504384308090-c54be3855091",
-            "photo-1616627452411-c03b1b1b80fd" // 🔨 Nueva: Trabajador en obra (BIeC4YK2MTA)
-        ],
-
-        // --- SEPTIEMBRE: Regreso, Estructura ---
-        9 => [
-            "photo-1507537297725-24a1c029d3ca", "photo-1435575653489-b0873ec954e2", "photo-1556761175-5973dc0f32e7",
-            "photo-1498050108023-c5249f4df085", "photo-1483058712412-4245e9b90334", "photo-1519389950473-47ba0277781c",
-            "photo-1487014679447-9f8336841d58", "photo-1522071820081-009f0129c71c", "photo-1551434678-e076c223a692",
-            "photo-1542601906990-b4d3fb778b09"
-        ],
-
-        // --- OCTUBRE: Redes, Mapas ---
-        10 => [
-            "photo-1451187580459-43490279c0fa", "photo-1521791136064-7986c2920216", "photo-1510915228340-29c85a43dcfe",
-            "photo-1550751827-4bd374c3f58b", "photo-1563986768609-322da13575f3", "photo-1507679799987-c73779587ccf",
-            "photo-1531297461136-82lw9z21171d", "photo-1557804506-669a67965ba0", "photo-1494412574643-35d3d4018828",
-            "photo-1486406146926-c627a92ad1ab"
-        ],
-
-        // --- NOVIEMBRE: Cierre, Lluvia/Cristal ---
-        11 => [
-            "photo-1554224155-8d04cb21cd6c", "photo-1518133910546-b6c2fb7d79e3", "photo-1462206092226-f46025ffe607",
-            "photo-1497215728101-856f4ea42174", "photo-1556740758-90de63f607d8", "photo-1484503704168-bfb994137d5e",
-            "photo-1505373877841-8d25f7d46678", "photo-1551288049-bebda4e38f71", "photo-1516321318423-f06f85e504b3",
-            "photo-1523240795612-9a054b0db644"
-        ],
-
-        // --- DICIEMBRE: Fin de Año, Festivo ---
-        12 => [
-            "photo-1668018774680-ea07d89ed7bc", // 🎆 Nueva: Festividad navideña (zgNFArWRC0U)
-            "photo-1637675793836-fe2ee7cf2ce9",
-            "photo-1457269449834-928af64c684d", "photo-1518600506278-4e8ef466b810", "photo-1575129382318-3df171f20a1a",
-            "photo-1636777405172-37604daaa12b", "photo-1489674267075-cee793167910", "photo-1455156218388-5e61b526818b",
-            "photo-1516466723877-e4ec1d736c8a"
-        ]
-    ];
-
-    $lista_mes = isset($biblioteca[$mes]) ? $biblioteca[$mes] : $biblioteca[1];
-    $indice = ($dia - 1) % count($lista_mes);
-    return "https://images.unsplash.com/" . $lista_mes[$indice] . "?q=80&w=1920&auto=format&fit=crop";
+    return $result;
 }
 
-$imagen_fondo = obtenerFondoEstacional();
+$_bingData     = obtenerBingImagenDelDia();
+$imagen_fondo  = $_bingData['url'];
+$_bingTitle    = $_bingData['title'];
+$_bingCopy     = $_bingData['copyright'];
 ?>
 
 <!DOCTYPE html>
@@ -255,6 +227,36 @@ $imagen_fondo = obtenerFondoEstacional();
             position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 9999;
             background: #1B2030 url('vistas/img/plantilla/ajax-loader.gif') 50% 50% no-repeat;
         }
+
+        /* --- Crédito Bing Image of the Day --- */
+        .bing-credit {
+            position: fixed;
+            bottom: 12px;
+            right: 16px;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+            font-size: 11px;
+            font-weight: 400;
+            max-width: 420px;
+            line-height: 1.3;
+            transition: opacity .3s;
+            cursor: default;
+        }
+        .bing-credit:hover { opacity: 1; color: #fff; }
+        .bing-credit i { font-size: 13px; opacity: .7; flex-shrink: 0; }
+        .bing-credit-title { font-weight: 600; }
+
+        @media (max-width: 576px) {
+            .bing-credit { max-width: 260px; font-size: 10px; bottom: 8px; right: 8px; }
+        }
     </style>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -267,6 +269,20 @@ $imagen_fondo = obtenerFondoEstacional();
     <div class="fondo-animado" style="background-image: url('<?php echo $imagen_fondo; ?>');"></div>
 
     <div class="capa-overlay"></div>
+
+    <?php if (!empty($_bingTitle) || !empty($_bingCopy)): ?>
+    <div class="bing-credit">
+        <i class="fas fa-camera"></i>
+        <span>
+            <?php if (!empty($_bingTitle)): ?>
+                <span class="bing-credit-title"><?= htmlspecialchars($_bingTitle) ?></span>
+            <?php endif; ?>
+            <?php if (!empty($_bingCopy)): ?>
+                <br><?= htmlspecialchars($_bingCopy) ?>
+            <?php endif; ?>
+        </span>
+    </div>
+    <?php endif; ?>
 
     <div class="header">
         <div class="brand-corner"><span class="logo-text">EGS</span></div>
@@ -308,9 +324,9 @@ $imagen_fondo = obtenerFondoEstacional();
             $('#contra').keypress(function(e){ if(e.keyCode==13) $('#entrar').click(); });
             actualizarReloj(); setInterval(actualizarReloj, 1000);
             
-            console.log("--- EGS VISUAL ---");
-            console.log("Temporada: <?php echo date('F'); ?>");
-            console.log("Visual: Dron Effect");
+            console.log("--- EGS LOGIN ---");
+            console.log("Fondo: Bing Image of the Day");
+            console.log("Título: <?= addslashes($_bingTitle) ?>");
         });
 
         function actualizarReloj() {
