@@ -858,7 +858,14 @@ class controladorOrdenes{
 
 				$traerOrdenes = ModeloOrdenes::mdlMostrarordenesParaValidar("ordenes", $item, $valor);
 
-
+				// Guardar estado anterior para detectar cambio
+				$_egs_estadoAnterior = '';
+				if (is_array($traerOrdenes) && !empty($traerOrdenes)) {
+					$_egs_primerOrden = reset($traerOrdenes);
+					if (is_array($_egs_primerOrden)) {
+						$_egs_estadoAnterior = isset($_egs_primerOrden["estado"]) ? $_egs_primerOrden["estado"] : '';
+					}
+				}
 
 					foreach ($traerOrdenes as $key => $value) {
 
@@ -1344,7 +1351,26 @@ class controladorOrdenes{
 
 					$respuesta = ModeloOrdenes::mdlEditarOrden("ordenes", $datosOrden);
 
-				
+				// ── Notificación de cambio de estado ──
+				if ($respuesta === "ok" && !empty($_egs_estadoAnterior)
+				    && $_egs_estadoAnterior !== $datos["estado"]) {
+					try {
+						ControladorNotificaciones::ctrCrearTablaEstado();
+						ControladorNotificaciones::ctrRegistrarCambioEstado(array(
+							"id_orden"          => intval($datos["idOrden"]),
+							"estado_anterior"   => $_egs_estadoAnterior,
+							"estado_nuevo"      => $datos["estado"],
+							"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
+							"nombre_usuario"    => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
+							"titulo_orden"      => $datos["tituloOrden"],
+							"id_empresa"        => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+							"id_asesor"         => intval($datos["asesor"]),
+							"id_tecnico"        => intval($datos["tecnico"]),
+						));
+					} catch (Exception $e) { /* silenciar para no romper el flujo */ }
+				}
+
+
 
 
 
