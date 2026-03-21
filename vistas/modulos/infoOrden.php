@@ -4203,18 +4203,33 @@ $(document).ready(function(){
 						<span style="color:red">&times;</span>
 					</button>
 				</div>
-				<form method="post" class="observacion">
+				<form method="post" class="observacion" id="formObservacion">
 					<div class="modal-body">
 						<textarea name="observacion" type="text" class="form-control input-lg text-uppercase" value=""
 							style="text-alinging:right; font-weight: bold;" placeholder="Escribe tu Observación"
 							required></textarea>
 						<input name="id_orden" type="hidden" value="<?php echo $valor = $_GET["idOrden"]; ?>">
 						<input name="id_creador" type="hidden" value="<?php echo $_SESSION["id"]; ?>">
+						<input name="_obs_token" type="hidden" value="<?php echo bin2hex(random_bytes(16)); ?>">
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-						<button type="submit" class="btn btn-primary">Guardar observación</button>
+						<button type="submit" class="btn btn-primary" id="btnGuardarObs">Guardar observación</button>
 				</form>
+				<script>
+				(function(){
+					var form = document.getElementById('formObservacion');
+					if (form) {
+						form.addEventListener('submit', function(){
+							var btn = document.getElementById('btnGuardarObs');
+							if (btn) {
+								btn.disabled = true;
+								btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Guardando...';
+							}
+						});
+					}
+				})();
+				</script>
 			</div>
 		</div>
 	</div>

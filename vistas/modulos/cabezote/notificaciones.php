@@ -144,8 +144,24 @@ if ($_noti_perfil === "administrador" || $_noti_perfil === "vendedor" || $_noti_
     } catch (Exception $e) { $_noti_estado = array(); }
 }
 
+// ══════════════════════════════════════
+// 3. NOTIFICACIONES DE OBSERVACIONES
+// ══════════════════════════════════════
+
+$_noti_obs = array();
+$_noti_totalObs = 0;
+
+try {
+    $_noti_obs = controladorObservaciones::ctrObservacionesRecientesNotif(
+        isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
+        10
+    );
+    if (!is_array($_noti_obs)) $_noti_obs = array();
+    $_noti_totalObs = count($_noti_obs);
+} catch (Exception $e) { $_noti_obs = array(); }
+
 // ── Total combinado ──
-$_noti_total = $_noti_totalAtraso + $_noti_totalEstado;
+$_noti_total = $_noti_totalAtraso + $_noti_totalEstado + $_noti_totalObs;
 
 // Helper: info visual de estado
 if (!function_exists('_notiEstadoColor')) {
@@ -226,6 +242,34 @@ if (!function_exists('_notiTiempoRel')) {
               <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
                 <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($ne['nombre_usuario']); ?></span>
                 <span style="margin-left:auto"><?php echo $neTiempo; ?></span>
+              </div>
+            </div>
+          </a>
+        </li>
+        <?php endforeach; endif; ?>
+
+        <?php // ── Observaciones nuevas ──
+        if (!empty($_noti_obs)):
+          foreach (array_slice($_noti_obs, 0, 8) as $nob):
+            $nobTiempo = _notiTiempoRel($nob['fecha']);
+            $nobTexto = mb_strlen($nob['observacion']) > 60 ? mb_substr($nob['observacion'], 0, 60) . '…' : $nob['observacion'];
+            $nobCreador = isset($nob['creador_nombre']) ? $nob['creador_nombre'] : 'Usuario';
+        ?>
+        <li>
+          <a href="index.php?ruta=ordenesnew&idOrden=<?php echo $nob['id_orden']; ?>"
+             style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">
+            <div style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+              <i class="fa-solid fa-comment-dots" style="font-size:12px;color:#f59e0b"></i>
+            </div>
+            <div style="flex:1;min-width:0;line-height:1.4">
+              <div style="font-size:12px;color:#0f172a">
+                <strong style="color:#f59e0b">#<?php echo htmlspecialchars($nob['id_orden']); ?></strong>
+                nueva observación
+              </div>
+              <div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($nobTexto); ?></div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
+                <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($nobCreador); ?></span>
+                <span style="margin-left:auto"><?php echo $nobTiempo; ?></span>
               </div>
             </div>
           </a>
@@ -503,6 +547,143 @@ $(function(){
     }
 
   }, 1500);
+})();
+</script>
+<?php endif; ?>
+
+<?php if ($_noti_totalObs > 0):
+  // Datos para el toast de observaciones
+  $_toastObs_first = $_noti_obs[0];
+  $_toastObs_extras = $_noti_totalObs - 1;
+  $_toastObs_creador = isset($_toastObs_first['creador_nombre']) ? $_toastObs_first['creador_nombre'] : 'Usuario';
+  $_toastObs_texto = mb_strlen($_toastObs_first['observacion']) > 70
+      ? mb_substr($_toastObs_first['observacion'], 0, 70) . '…'
+      : $_toastObs_first['observacion'];
+?>
+<!-- ══════════════════════════════════════════
+     TOAST OBSERVACIONES + SONIDO
+     Se muestra 1 vez por sesión del navegador
+══════════════════════════════════════════ -->
+<style>
+#egsToastObs {
+  position: fixed;
+  bottom: <?php echo ($_noti_totalEstado > 0) ? '110px' : '24px'; ?>;
+  right: 24px;
+  z-index: 99998;
+  width: 370px;
+  max-width: calc(100vw - 32px);
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+  overflow: hidden;
+  animation: egsToastIn .5s cubic-bezier(.16,1,.3,1) forwards,
+             egsToastPulse 2s ease-in-out 2;
+  font-family: inherit;
+}
+#egsToastObs.egs-toast-hide {
+  animation: egsToastOut .4s cubic-bezier(.7,0,.84,0) forwards;
+}
+#egsToastObs .egs-toast-bar-obs {
+  height: 3px;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  animation: egsToastBarShrink 6s linear forwards;
+}
+</style>
+
+<div id="egsToastObs" style="display:none">
+  <div class="egs-toast-bar-obs"></div>
+  <div style="padding:14px 16px;display:flex;align-items:flex-start;gap:12px">
+
+    <div style="width:40px;height:40px;border-radius:12px;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid rgba(245,158,11,.25)">
+      <i class="fa-solid fa-comment-dots" style="font-size:16px;color:#f59e0b"></i>
+    </div>
+
+    <div style="flex:1;min-width:0">
+      <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:3px">
+        Nueva observación
+      </div>
+      <div style="font-size:12px;color:#475569;line-height:1.5">
+        <strong style="color:#f59e0b">#<?php echo htmlspecialchars($_toastObs_first['id_orden']); ?></strong>
+        — <?php echo htmlspecialchars($_toastObs_texto); ?>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:2px">
+        <i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($_toastObs_creador); ?>
+      </div>
+      <?php if ($_toastObs_extras > 0): ?>
+        <div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:4px">
+          <i class="fa-solid fa-comment-dots" style="font-size:9px"></i>
+          y <?php echo $_toastObs_extras; ?> observaci<?php echo $_toastObs_extras > 1 ? 'ones' : 'ón'; ?> más
+        </div>
+      <?php endif; ?>
+    </div>
+
+    <button type="button" onclick="document.getElementById('egsToastObs').classList.add('egs-toast-hide');setTimeout(function(){document.getElementById('egsToastObs').style.display='none'},400)"
+            style="border:none;background:none;color:#94a3b8;font-size:14px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:-2px"
+            title="Cerrar">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var obsKey = 'egs_toast_obs_' + <?php echo json_encode(session_id()); ?>;
+
+  if (sessionStorage.getItem(obsKey)) return;
+  sessionStorage.setItem(obsKey, '1');
+
+  // Delay: si hay toast de estado, esperar un poco más
+  var delay = <?php echo ($_noti_totalEstado > 0) ? '2500' : '1500'; ?>;
+
+  setTimeout(function(){
+
+    // ── Sonido: tono cálido diferente al de cambios de estado ──
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Tono cálido tipo "pop" (D5 → F#5)
+      var osc1 = ctx.createOscillator();
+      var gain1 = ctx.createGain();
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(587.3, ctx.currentTime);       // D5
+      osc1.frequency.setValueAtTime(740, ctx.currentTime + .08);   // F#5
+      gain1.gain.setValueAtTime(0.13, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .35);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + .35);
+
+      // Segundo toque suave (A5)
+      var osc2 = ctx.createOscillator();
+      var gain2 = ctx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(880, ctx.currentTime + .12);
+      gain2.gain.setValueAtTime(0, ctx.currentTime);
+      gain2.gain.setValueAtTime(0.10, ctx.currentTime + .12);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .5);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(ctx.currentTime + .12);
+      osc2.stop(ctx.currentTime + .5);
+    } catch(e) {}
+
+    // ── Mostrar toast ──
+    var toast = document.getElementById('egsToastObs');
+    if (toast) {
+      toast.style.display = 'block';
+
+      setTimeout(function(){
+        if (toast.style.display !== 'none') {
+          toast.classList.add('egs-toast-hide');
+          setTimeout(function(){ toast.style.display = 'none'; }, 400);
+        }
+      }, 6000);
+    }
+
+  }, delay);
 })();
 </script>
 <?php endif; ?>
