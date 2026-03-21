@@ -16,6 +16,7 @@ return [
     /* ── Dashboard ─────────────────────────────── */
     'inicio',
     'comentarios-hoy',
+    'cambios-estado-hoy',
 
     /* ── Catálogo de productos ──────────────────── */
     'categorias',

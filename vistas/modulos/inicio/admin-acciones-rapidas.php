@@ -23,7 +23,7 @@ $_aradm_eficiencia    = isset($_adm_eficiencia) ? $_adm_eficiencia : 0;
         </div>
         <div class="crm-quick-text">Nueva Orden<small>Crear orden de servicio</small></div>
       </a>
-      <a href="index.php?ruta=reportes" class="crm-quick">
+      <a href="index.php?ruta=reportePorFecheOrdenes" class="crm-quick">
         <div class="crm-quick-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">
           <i class="fa-solid fa-chart-bar"></i>
         </div>
@@ -35,11 +35,11 @@ $_aradm_eficiencia    = isset($_adm_eficiencia) ? $_adm_eficiencia : 0;
         </div>
         <div class="crm-quick-text">Clientes<small>Gestionar cartera de clientes</small></div>
       </a>
-      <a href="index.php?ruta=AgregarPedido" class="crm-quick">
+      <a href="https://backend.comercializadoraegs.com/index.php?ruta=pedidos" class="crm-quick">
         <div class="crm-quick-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">
           <i class="fa-solid fa-box"></i>
         </div>
-        <div class="crm-quick-text">Nuevo Pedido<small>Registrar pedido a proveedor</small></div>
+        <div class="crm-quick-text">Pedidos<small>Gestionar pedidos a proveedor</small></div>
       </a>
     </div>
 

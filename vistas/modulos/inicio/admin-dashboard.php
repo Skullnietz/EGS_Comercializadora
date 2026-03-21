@@ -699,11 +699,11 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
 ══════════════════════════════════════════ -->
 <div class="crm-section">
   <div class="crm-section-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
-    <i class="fa-solid fa-clock-rotate-left"></i>
+    <i class="fa-solid fa-arrow-right-arrow-left"></i>
   </div>
   <div>
-    <h3>Últimos Movimientos</h3>
-    <p>Observaciones recientes en órdenes de servicio</p>
+    <h3>Actividad Reciente</h3>
+    <p>Cambios de estado en órdenes de servicio del día</p>
   </div>
 </div>
 
@@ -793,7 +793,10 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
     }
   }
 
-  renderVentasChart('1m');
+  // Renderizar al cargar el DOM completo para que el contenedor tenga dimensiones
+  $(function(){
+    setTimeout(function(){ renderVentasChart('1m'); }, 150);
+  });
 
   $('#admVentasFilter').on('click', '.adm-vent-btn', function(){
     var $btn = $(this), period = $btn.data('period');

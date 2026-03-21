@@ -100,7 +100,10 @@
       "Bash(find C:UsersblackDesktopEGS -type f \\\\\\(-name *login* -o -name *auth* \\\\\\))",
       "Bash(find C:UsersblackDesktopEGSvistas -type f \\\\\\(-name *.css -o -name *.js \\\\\\))",
       "Bash(grep -r \"fondo-animado\\\\|capa-overlay\\\\|login-container\" C:UsersblackDesktopEGS --include=*.css --include=*.php)",
-      "Bash(grep -r \"bajadaCinematica\\\\|egs-azul\" C:UsersblackDesktopEGS --include=*.php --include=*.css)"
+      "Bash(grep -r \"bajadaCinematica\\\\|egs-azul\" C:UsersblackDesktopEGS --include=*.php --include=*.css)",
+      "Bash(grep -E \"\\\\.js$\")",
+      "Bash(grep -l \"dashboard\\\\|widget\\\\|admin\" C:UsersblackDesktopEGS/ajax/*.php)",
+      "Bash(grep -l \"acciones\\\\|movimientos\\\\|widget\\\\|dashboard\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS/vistas/modulos/inicio/\"*.php)"
     ]
   }
 }
