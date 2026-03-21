@@ -147,9 +147,11 @@ class ModeloObservaciones{
 
 		$stmt = Conexion::conectar()->prepare(
 			"SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
-			        a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
+			        a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil,
+			        ord.id_empresa, ord.id_Asesor, ord.id_tecnico, ord.id_usuario AS id_cliente, ord.id_pedido
 			 FROM $tabla o
-			 LEFT JOIN administradores a ON a.id = o.id_creador
+			 LEFT JOIN administradores a   ON a.id = o.id_creador
+			 LEFT JOIN ordenes ord         ON ord.id = o.id_orden
 			 WHERE DATE(o.fecha) = CURDATE()
 			   AND o.id_creador != :idUsuario
 			 ORDER BY o.fecha DESC

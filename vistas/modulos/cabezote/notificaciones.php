@@ -285,7 +285,7 @@ if (!function_exists('_notiTiempoRel')) {
             $nobCreador = isset($nob['creador_nombre']) ? $nob['creador_nombre'] : 'Usuario';
         ?>
         <li>
-          <a href="index.php?ruta=ordenesnew&idOrden=<?php echo $nob['id_orden']; ?>"
+          <a href="index.php?ruta=infoOrden&idOrden=<?php echo intval($nob['id_orden']); ?>&empresa=<?php echo intval(isset($nob['id_empresa']) ? $nob['id_empresa'] : 0); ?>&asesor=<?php echo intval(isset($nob['id_Asesor']) ? $nob['id_Asesor'] : 0); ?>&cliente=<?php echo intval(isset($nob['id_cliente']) ? $nob['id_cliente'] : 0); ?>&tecnico=<?php echo intval(isset($nob['id_tecnico']) ? $nob['id_tecnico'] : 0); ?>&pedido=<?php echo intval(isset($nob['id_pedido']) ? $nob['id_pedido'] : 0); ?>"
              style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">
             <div style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
               <i class="fa-solid fa-comment-dots" style="font-size:12px;color:#f59e0b"></i>
