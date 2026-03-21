@@ -71,65 +71,25 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     white-space: nowrap;
   }
 
-  .badge-pendiente {
-    color: #92400e;
-    background: #fef3c7;
-    border-color: #fde68a;
-  }
-
-  .badge-proceso {
-    color: #1e3a8a;
-    background: #dbeafe;
-    border-color: #bfdbfe;
-  }
-
-  .badge-completada {
-    color: #065f46;
-    background: #d1fae5;
-    border-color: #a7f3d0;
-  }
-
-  .badge-cancelada {
-    color: #991b1b;
-    background: #fee2e2;
-    border-color: #fecaca;
-  }
-
-  .badge-otro {
-    color: #374151;
-    background: #f3f4f6;
-    border-color: #e5e7eb;
-  }
-
-  /* Nuevos estados con colores específicos */
-  .badge-aceptado {
-    color: #155724;
-    background: #d4edda;
-    border-color: #c3e6cb;
-  }
-
-  /* Verde */
-  .badge-pendiente-aut {
-    color: #856404;
-    background: #fff3cd;
-    border-color: #ffeeba;
-  }
-
-  /* Amarillo/Naranja */
-  .badge-producto-venta {
-    color: #0c5460;
-    background: #d1ecf1;
-    border-color: #bee5eb;
-  }
-
-  /* Azul */
-  .badge-terminado {
-    color: #1b1e21;
-    background: #d6d8d9;
-    border-color: #c6c8ca;
-  }
-
-  /* Gris oscuro */
+  /* ── Estados estandarizados ── */
+  .badge-pendiente-aut  { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+  .badge-supervision    { color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe; }
+  .badge-garantia-acep  { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+  .badge-prob-garantia  { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+  .badge-garantia       { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+  .badge-revision       { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
+  .badge-terminado      { color: #0e7490; background: #ecfeff; border-color: #a5f3fc; }
+  .badge-entreg-asesor  { color: #065f46; background: #ecfdf5; border-color: #a7f3d0; }
+  .badge-entreg-pagado  { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+  .badge-entreg-credito { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+  .badge-entregado      { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+  .badge-aceptado       { color: #1e40af; background: #eff6ff; border-color: #bfdbfe; }
+  .badge-cancelada      { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
+  .badge-sin-reparacion { color: #64748b; background: #f8fafc; border-color: #e2e8f0; }
+  .badge-producto-venta { color: #c2410c; background: #fff7ed; border-color: #fed7aa; }
+  .badge-prod-almacen   { color: #57534e; background: #fafaf9; border-color: #d6d3d1; }
+  .badge-seguimiento    { color: #0369a1; background: #f0f9ff; border-color: #bae6fd; }
+  .badge-otro           { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
   .td-actions {
     white-space: nowrap;
     width: 1%;
@@ -302,29 +262,33 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
                     $marca = isset($value["marcaDelEquipo"]) ? htmlspecialchars($value["marcaDelEquipo"]) : "";
                     $modelo = isset($value["modeloDelEquipo"]) ? htmlspecialchars($value["modeloDelEquipo"]) : "";
 
-                    // Estado -> badge
+                    // Estado -> badge (estandarizado)
                     $estadoText = (string) $value["estado"];
                     $estadoRaw = trim(mb_strtolower($estadoText, 'UTF-8'));
-                    $estadoClass = 'badge-otro';
-
-                    if (in_array($estadoRaw, ['pendiente', 'por asignar']))
-                      $estadoClass = 'badge-pendiente';
-                    elseif (in_array($estadoRaw, ['en proceso', 'proceso', 'atendiendo']))
-                      $estadoClass = 'badge-proceso';
-                    elseif (in_array($estadoRaw, ['completada', 'finalizada', 'cerrada']))
-                      $estadoClass = 'badge-completada';
-                    elseif (in_array($estadoRaw, ['cancelada', 'rechazada']))
-                      $estadoClass = 'badge-cancelada';
-
-                    // Mapeo específico solicitado
-                    elseif ($estadoRaw == 'aceptado')
-                      $estadoClass = 'badge-aceptado';
-                    elseif (strpos($estadoRaw, 'pendiente de autorizacion') !== false || strpos($estadoRaw, 'pendiente de autorización') !== false)
-                      $estadoClass = 'badge-pendiente-aut';
-                    elseif ($estadoRaw == 'producto para venta')
-                      $estadoClass = 'badge-producto-venta';
-                    elseif ($estadoRaw == 'terminado')
-                      $estadoClass = 'badge-terminado';
+                    // Reusar helper de ordenes.php si existe, sino inline
+                    if (function_exists('_ordGetBadgeClass')) {
+                      $estadoClass = _ordGetBadgeClass($estadoText);
+                    } else {
+                      $estadoClass = 'badge-otro';
+                      if (strpos($estadoRaw, 'autorización') !== false || strpos($estadoRaw, 'autorizacion') !== false || $estadoRaw === 'aut') $estadoClass = 'badge-pendiente-aut';
+                      elseif (strpos($estadoRaw, 'pendiente') !== false) $estadoClass = 'badge-pendiente-aut';
+                      elseif (strpos($estadoRaw, 'supervisión') !== false || strpos($estadoRaw, 'supervision') !== false || $estadoRaw === 'sup') $estadoClass = 'badge-supervision';
+                      elseif (strpos($estadoRaw, 'garantía aceptada') !== false || strpos($estadoRaw, 'garantia aceptada') !== false || $estadoRaw === 'ga') $estadoClass = 'badge-garantia-acep';
+                      elseif (strpos($estadoRaw, 'probable garantía') !== false || strpos($estadoRaw, 'probable garantia') !== false) $estadoClass = 'badge-prob-garantia';
+                      elseif (strpos($estadoRaw, 'garantía') !== false || strpos($estadoRaw, 'garantia') !== false) $estadoClass = 'badge-garantia';
+                      elseif (strpos($estadoRaw, 'revisión') !== false || strpos($estadoRaw, 'revision') !== false || $estadoRaw === 'rev') $estadoClass = 'badge-revision';
+                      elseif (strpos($estadoRaw, 'terminada') !== false || $estadoRaw === 'ter') $estadoClass = 'badge-terminado';
+                      elseif (strpos($estadoRaw, 'entregado al asesor') !== false) $estadoClass = 'badge-entreg-asesor';
+                      elseif (strpos($estadoRaw, 'entregado/pagado') !== false) $estadoClass = 'badge-entreg-pagado';
+                      elseif (strpos($estadoRaw, 'entregado/credito') !== false || strpos($estadoRaw, 'entregado/crédito') !== false) $estadoClass = 'badge-entreg-credito';
+                      elseif (strpos($estadoRaw, 'entregado') !== false || strpos($estadoRaw, 'entregada') !== false) $estadoClass = 'badge-entregado';
+                      elseif (strpos($estadoRaw, 'aceptado') !== false || strpos($estadoRaw, 'aceptada') !== false || $estadoRaw === 'ok') $estadoClass = 'badge-aceptado';
+                      elseif (strpos($estadoRaw, 'cancel') !== false) $estadoClass = 'badge-cancelada';
+                      elseif (strpos($estadoRaw, 'sin reparación') !== false || strpos($estadoRaw, 'sin reparacion') !== false || $estadoRaw === 'sr') $estadoClass = 'badge-sin-reparacion';
+                      elseif (strpos($estadoRaw, 'producto para venta') !== false || $estadoRaw === 'pv') $estadoClass = 'badge-producto-venta';
+                      elseif (strpos($estadoRaw, 'producto en almac') !== false) $estadoClass = 'badge-prod-almacen';
+                      elseif (strpos($estadoRaw, 'seguimiento') !== false) $estadoClass = 'badge-seguimiento';
+                    }
 
                     // Total + Fecha
                     $totalNum = (float) $value["total"];

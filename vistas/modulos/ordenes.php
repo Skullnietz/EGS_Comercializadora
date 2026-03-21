@@ -270,21 +270,25 @@ table.dataTable tbody tr.atraso:hover {
   white-space: nowrap;
   border: 1px solid transparent;
 }
-.badge-pendiente      { color: #92400e; background: #fef3c7; border-color: #fde68a; }
-.badge-proceso        { color: #1e40af; background: #dbeafe; border-color: #bfdbfe; }
-.badge-completada     { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
-.badge-cancelada      { color: #991b1b; background: #fee2e2; border-color: #fecaca; }
-.badge-otro           { color: #374151; background: #f3f4f6; border-color: #e5e7eb; }
-.badge-aceptado       { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
-.badge-pendiente-aut  { color: #92400e; background: #fff7ed; border-color: #fed7aa; }
-.badge-producto-venta { color: #0e7490; background: #cffafe; border-color: #a5f3fc; }
+/* ── Estados estandarizados ── */
+.badge-pendiente-aut  { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+.badge-supervision    { color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe; }
+.badge-garantia-acep  { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-prob-garantia  { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-garantia       { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-revision       { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
 .badge-terminado      { color: #0e7490; background: #ecfeff; border-color: #a5f3fc; }
-.badge-revision       { color: #c2410c; background: #fff7ed; border-color: #fdba74; }
-.badge-supervision    { color: #7e22ce; background: #faf5ff; border-color: #d8b4fe; }
-.badge-sin-reparacion { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
-.badge-garantia       { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
-.badge-revision-garantia { color: #92400e; background: #fffbeb; border-color: #fde68a; }
-.badge-entregado      { color: #065f46; background: #ecfdf5; border-color: #6ee7b7; }
+.badge-entreg-asesor  { color: #065f46; background: #ecfdf5; border-color: #a7f3d0; }
+.badge-entreg-pagado  { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.badge-entreg-credito { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.badge-entregado      { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.badge-aceptado       { color: #1e40af; background: #eff6ff; border-color: #bfdbfe; }
+.badge-cancelada      { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
+.badge-sin-reparacion { color: #64748b; background: #f8fafc; border-color: #e2e8f0; }
+.badge-producto-venta { color: #c2410c; background: #fff7ed; border-color: #fed7aa; }
+.badge-prod-almacen   { color: #57534e; background: #fafaf9; border-color: #d6d3d1; }
+.badge-seguimiento    { color: #0369a1; background: #f0f9ff; border-color: #bae6fd; }
+.badge-otro           { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
 
 /* ─── Modals Modern ─── */
 .modal-content {
@@ -396,23 +400,36 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 // Helper global: mapear estado a clase de badge
 function _ordGetBadgeClass($estadoText) {
     $e = trim(mb_strtolower((string)$estadoText, 'UTF-8'));
-    // Garantías primero (antes de revisión)
-    if (strpos($e, 'garant') !== false) {
-        return (strpos($e, 'revision') !== false || strpos($e, 'revisión') !== false || strpos($e, 'probable') !== false)
-            ? 'badge-revision-garantia' : 'badge-garantia';
-    }
-    if (strpos($e, 'entregado') !== false || strpos($e, '(ent)') !== false) return 'badge-entregado';
-    if (strpos($e, 'terminad') !== false || strpos($e, '(ter)') !== false) return 'badge-terminado';
-    if (strpos($e, 'aceptado') !== false || strpos($e, '(ok)') !== false) return 'badge-aceptado';
-    if (strpos($e, 'supervi') !== false || strpos($e, '(sup)') !== false) return 'badge-supervision';
-    if (strpos($e, 'revisi') !== false || strpos($e, '(rev)') !== false) return 'badge-revision';
-    if (strpos($e, 'autoriz') !== false || strpos($e, '(aut') !== false) return 'badge-pendiente-aut';
-    if (strpos($e, 'cancel') !== false || strpos($e, 'rechaz') !== false) return 'badge-cancelada';
-    if (strpos($e, 'producto para') !== false) return 'badge-producto-venta';
-    if (strpos($e, 'sin reparac') !== false) return 'badge-sin-reparacion';
-    if (strpos($e, 'pendiente') !== false || strpos($e, 'por asignar') !== false) return 'badge-pendiente';
-    if (strpos($e, 'proceso') !== false || strpos($e, 'atendiendo') !== false) return 'badge-proceso';
-    if (strpos($e, 'completad') !== false || strpos($e, 'finalizad') !== false || strpos($e, 'cerrad') !== false) return 'badge-completada';
+    // Autorización / Pendiente — ANTES de entregado (evitar match con "ent" en "pendiente")
+    if (strpos($e, 'autorización') !== false || strpos($e, 'autorizacion') !== false || $e === 'aut') return 'badge-pendiente-aut';
+    if (strpos($e, 'pendiente') !== false) return 'badge-pendiente-aut';
+    // Supervisión
+    if (strpos($e, 'supervisión') !== false || strpos($e, 'supervision') !== false || $e === 'sup') return 'badge-supervision';
+    // Garantías (orden: aceptada > probable > genérica)
+    if (strpos($e, 'garantía aceptada') !== false || strpos($e, 'garantia aceptada') !== false || $e === 'ga') return 'badge-garantia-acep';
+    if (strpos($e, 'probable garantía') !== false || strpos($e, 'probable garantia') !== false) return 'badge-prob-garantia';
+    if (strpos($e, 'garantía') !== false || strpos($e, 'garantia') !== false) return 'badge-garantia';
+    // Revisión
+    if (strpos($e, 'revisión') !== false || strpos($e, 'revision') !== false || $e === 'rev') return 'badge-revision';
+    // Terminada
+    if (strpos($e, 'terminada') !== false || $e === 'ter') return 'badge-terminado';
+    // Entregados (específicos primero)
+    if (strpos($e, 'entregado al asesor') !== false) return 'badge-entreg-asesor';
+    if (strpos($e, 'entregado/pagado') !== false) return 'badge-entreg-pagado';
+    if (strpos($e, 'entregado/credito') !== false || strpos($e, 'entregado/crédito') !== false) return 'badge-entreg-credito';
+    if (strpos($e, 'entregado') !== false || strpos($e, 'entregada') !== false) return 'badge-entregado';
+    // Aceptado
+    if (strpos($e, 'aceptado') !== false || strpos($e, 'aceptada') !== false || $e === 'ok') return 'badge-aceptado';
+    // Cancelada
+    if (strpos($e, 'cancel') !== false) return 'badge-cancelada';
+    // Sin reparación
+    if (strpos($e, 'sin reparación') !== false || strpos($e, 'sin reparacion') !== false || $e === 'sr') return 'badge-sin-reparacion';
+    // Producto para venta
+    if (strpos($e, 'producto para venta') !== false || $e === 'pv') return 'badge-producto-venta';
+    // Producto en almacén
+    if (strpos($e, 'producto en almac') !== false) return 'badge-prod-almacen';
+    // Seguimiento de venta
+    if (strpos($e, 'seguimiento') !== false) return 'badge-seguimiento';
     return 'badge-otro';
 }
 ?>

@@ -385,14 +385,26 @@ body {
 }
 
 /* ══════════════════════════════════════════════════
-   11. BADGES DE ESTADO — ÓRDENES
+   11. BADGES DE ESTADO — ÓRDENES (estandarizado)
 ══════════════════════════════════════════════════ */
-.badge-revision         { color: #0c5460; background: #d1ecf1; }
-.badge-supervision      { color: #4a148c; background: #e1bee7; }
-.badge-sin-reparacion   { color: #721c24; background: #f8d7da; }
-.badge-revision-garantia{ color: #856404; background: #fff3cd; }
-.badge-garantia         { color: #155724; background: #d4edda; }
-.badge-entregado        { color: #383d41; background: #e2e3e5; }
+.badge-pendiente-aut  { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+.badge-supervision    { color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe; }
+.badge-garantia-acep  { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-prob-garantia  { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-garantia       { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-revision       { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
+.badge-terminado      { color: #0e7490; background: #ecfeff; border-color: #a5f3fc; }
+.badge-entreg-asesor  { color: #065f46; background: #ecfdf5; border-color: #a7f3d0; }
+.badge-entreg-pagado  { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.badge-entreg-credito { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.badge-entregado      { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.badge-aceptado       { color: #1e40af; background: #eff6ff; border-color: #bfdbfe; }
+.badge-cancelada      { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
+.badge-sin-reparacion { color: #64748b; background: #f8fafc; border-color: #e2e8f0; }
+.badge-producto-venta { color: #c2410c; background: #fff7ed; border-color: #fed7aa; }
+.badge-prod-almacen   { color: #57534e; background: #fafaf9; border-color: #d6d3d1; }
+.badge-seguimiento    { color: #0369a1; background: #f0f9ff; border-color: #bae6fd; }
+.badge-otro           { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
 
 /* ══════════════════════════════════════════════════
    12. INFO-BOX  (AdminLTE component)

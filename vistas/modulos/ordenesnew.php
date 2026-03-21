@@ -247,21 +247,25 @@ table.dataTable tbody tr:hover { background: #f8fafc !important; }
   white-space: nowrap;
   border: 1px solid transparent;
 }
-.badge-pendiente      { color: #92400e; background: #fef3c7; border-color: #fde68a; }
-.badge-proceso        { color: #1e40af; background: #dbeafe; border-color: #bfdbfe; }
-.badge-completada     { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
-.badge-cancelada      { color: #991b1b; background: #fee2e2; border-color: #fecaca; }
-.badge-otro           { color: #374151; background: #f3f4f6; border-color: #e5e7eb; }
-.badge-aceptado       { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
-.badge-pendiente-aut  { color: #92400e; background: #fff7ed; border-color: #fed7aa; }
-.badge-producto-venta { color: #0e7490; background: #cffafe; border-color: #a5f3fc; }
+/* ── Estados estandarizados ── */
+.badge-pendiente-aut  { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+.badge-supervision    { color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe; }
+.badge-garantia-acep  { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-prob-garantia  { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-garantia       { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.badge-revision       { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
 .badge-terminado      { color: #0e7490; background: #ecfeff; border-color: #a5f3fc; }
-.badge-revision       { color: #c2410c; background: #fff7ed; border-color: #fdba74; }
-.badge-supervision    { color: #7e22ce; background: #faf5ff; border-color: #d8b4fe; }
-.badge-sin-reparacion { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
-.badge-garantia       { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
-.badge-revision-garantia { color: #92400e; background: #fffbeb; border-color: #fde68a; }
-.badge-entregado      { color: #065f46; background: #ecfdf5; border-color: #6ee7b7; }
+.badge-entreg-asesor  { color: #065f46; background: #ecfdf5; border-color: #a7f3d0; }
+.badge-entreg-pagado  { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.badge-entreg-credito { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.badge-entregado      { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.badge-aceptado       { color: #1e40af; background: #eff6ff; border-color: #bfdbfe; }
+.badge-cancelada      { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
+.badge-sin-reparacion { color: #64748b; background: #f8fafc; border-color: #e2e8f0; }
+.badge-producto-venta { color: #c2410c; background: #fff7ed; border-color: #fed7aa; }
+.badge-prod-almacen   { color: #57534e; background: #fafaf9; border-color: #d6d3d1; }
+.badge-seguimiento    { color: #0369a1; background: #f0f9ff; border-color: #bae6fd; }
+.badge-otro           { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
 
 /* ─── Modals Modern ─── */
 .modal-content {
@@ -479,32 +483,36 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
         {data: null, "render": function(data) {
             var e = (data.estado || '').toLowerCase().trim();
             var cls = 'badge-otro';
-            // Garantías primero (antes de revisión)
-            if (e.indexOf('garant') !== -1) {
-                cls = (e.indexOf('revision') !== -1 || e.indexOf('revisión') !== -1 || e.indexOf('probable') !== -1) ? 'badge-revision-garantia' : 'badge-garantia';
-            }
-            // Entregado — "Entregado (Ent)"
-            else if (e.indexOf('entregado') !== -1 || e.indexOf('(ent)') !== -1) cls = 'badge-entregado';
-            // Terminada — "Terminada (ter)"
-            else if (e.indexOf('terminad') !== -1 || e.indexOf('(ter)') !== -1) cls = 'badge-terminado';
-            // Aceptado — "Aceptado (ok)"
-            else if (e.indexOf('aceptado') !== -1 || e.indexOf('(ok)') !== -1) cls = 'badge-aceptado';
-            // Supervisión — "Supervisión (SUP)"
-            else if (e.indexOf('supervi') !== -1 || e.indexOf('(sup)') !== -1) cls = 'badge-supervision';
-            // Revisión — "En revisión (REV)"
-            else if (e.indexOf('revisi') !== -1 || e.indexOf('(rev)') !== -1) cls = 'badge-revision';
-            // Autorización — "Pendiente de autorización (AUT"
-            else if (e.indexOf('autoriz') !== -1 || e.indexOf('(aut') !== -1) cls = 'badge-pendiente-aut';
+            // Autorización / Pendiente — ANTES de entregado
+            if (e.indexOf('autorización') !== -1 || e.indexOf('autorizacion') !== -1 || e === 'aut') cls = 'badge-pendiente-aut';
+            else if (e.indexOf('pendiente') !== -1) cls = 'badge-pendiente-aut';
+            // Supervisión
+            else if (e.indexOf('supervisión') !== -1 || e.indexOf('supervision') !== -1 || e === 'sup') cls = 'badge-supervision';
+            // Garantías (aceptada > probable > genérica)
+            else if (e.indexOf('garantía aceptada') !== -1 || e.indexOf('garantia aceptada') !== -1 || e === 'ga') cls = 'badge-garantia-acep';
+            else if (e.indexOf('probable garantía') !== -1 || e.indexOf('probable garantia') !== -1) cls = 'badge-prob-garantia';
+            else if (e.indexOf('garantía') !== -1 || e.indexOf('garantia') !== -1) cls = 'badge-garantia';
+            // Revisión
+            else if (e.indexOf('revisión') !== -1 || e.indexOf('revision') !== -1 || e === 'rev') cls = 'badge-revision';
+            // Terminada
+            else if (e.indexOf('terminada') !== -1 || e === 'ter') cls = 'badge-terminado';
+            // Entregados (específicos primero)
+            else if (e.indexOf('entregado al asesor') !== -1) cls = 'badge-entreg-asesor';
+            else if (e.indexOf('entregado/pagado') !== -1) cls = 'badge-entreg-pagado';
+            else if (e.indexOf('entregado/credito') !== -1 || e.indexOf('entregado/crédito') !== -1) cls = 'badge-entreg-credito';
+            else if (e.indexOf('entregado') !== -1 || e.indexOf('entregada') !== -1) cls = 'badge-entregado';
+            // Aceptado
+            else if (e.indexOf('aceptado') !== -1 || e.indexOf('aceptada') !== -1 || e === 'ok') cls = 'badge-aceptado';
             // Cancelada
-            else if (e.indexOf('cancel') !== -1 || e.indexOf('rechaz') !== -1) cls = 'badge-cancelada';
-            // Producto para venta
-            else if (e.indexOf('producto para') !== -1) cls = 'badge-producto-venta';
+            else if (e.indexOf('cancel') !== -1) cls = 'badge-cancelada';
             // Sin reparación
-            else if (e.indexOf('sin reparac') !== -1) cls = 'badge-sin-reparacion';
-            // Pendiente / Por asignar
-            else if (e.indexOf('pendiente') !== -1 || e.indexOf('por asignar') !== -1) cls = 'badge-pendiente';
-            // En proceso
-            else if (e.indexOf('proceso') !== -1 || e.indexOf('atendiendo') !== -1) cls = 'badge-proceso';
+            else if (e.indexOf('sin reparación') !== -1 || e.indexOf('sin reparacion') !== -1 || e === 'sr') cls = 'badge-sin-reparacion';
+            // Producto para venta
+            else if (e.indexOf('producto para venta') !== -1 || e === 'pv') cls = 'badge-producto-venta';
+            // Producto en almacén
+            else if (e.indexOf('producto en almac') !== -1) cls = 'badge-prod-almacen';
+            // Seguimiento
+            else if (e.indexOf('seguimiento') !== -1) cls = 'badge-seguimiento';
             return '<span class="badge ' + cls + '">' + (data.estado || '') + '</span>';
         }},
         {"data":"fecha_ingreso"},

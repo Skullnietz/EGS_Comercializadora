@@ -346,13 +346,36 @@ $_adm_ultimasOrd = array_slice($_adm_ordRecientes, 0, 8);
 
 function _admEstadoBadge($estado) {
     $e = strtolower(trim($estado));
-    if (strpos($e, 'entregado') !== false) return array('#22c55e', '#f0fdf4');
-    if (strpos($e, 'aceptado') !== false || strpos($e, 'ok') !== false) return array('#3b82f6', '#dbeafe');
-    if (strpos($e, 'revisión') !== false || strpos($e, 'revision') !== false || strpos($e, 'rev') !== false) return array('#f59e0b', '#fef3c7');
-    if (strpos($e, 'terminada') !== false || strpos($e, 'ter') !== false) return array('#06b6d4', '#cffafe');
-    if (strpos($e, 'aut') !== false) return array('#8b5cf6', '#ede9fe');
-    if (strpos($e, 'cancel') !== false) return array('#ef4444', '#fef2f2');
-    if (strpos($e, 'supervisión') !== false || strpos($e, 'sup') !== false) return array('#ec4899', '#fce7f3');
+    // Autorización / Pendiente — antes de entregado
+    if (strpos($e, 'autorización') !== false || strpos($e, 'autorizacion') !== false || $e === 'aut') return array('#f59e0b', '#fffbeb');
+    if (strpos($e, 'pendiente') !== false) return array('#f59e0b', '#fffbeb');
+    // Supervisión
+    if (strpos($e, 'supervisión') !== false || strpos($e, 'supervision') !== false || $e === 'sup') return array('#8b5cf6', '#f5f3ff');
+    // Garantías
+    if (strpos($e, 'garantía aceptada') !== false || strpos($e, 'garantia aceptada') !== false || $e === 'ga') return array('#dc2626', '#fef2f2');
+    if (strpos($e, 'probable garantía') !== false || strpos($e, 'probable garantia') !== false) return array('#dc2626', '#fef2f2');
+    if (strpos($e, 'garantía') !== false || strpos($e, 'garantia') !== false) return array('#dc2626', '#fef2f2');
+    // Revisión
+    if (strpos($e, 'revisión') !== false || strpos($e, 'revision') !== false || $e === 'rev') return array('#ef4444', '#fef2f2');
+    // Terminada
+    if (strpos($e, 'terminada') !== false || $e === 'ter') return array('#06b6d4', '#ecfeff');
+    // Entregados
+    if (strpos($e, 'entregado al asesor') !== false) return array('#10b981', '#ecfdf5');
+    if (strpos($e, 'entregado/pagado') !== false) return array('#22c55e', '#f0fdf4');
+    if (strpos($e, 'entregado/credito') !== false || strpos($e, 'entregado/crédito') !== false) return array('#22c55e', '#f0fdf4');
+    if (strpos($e, 'entregado') !== false || strpos($e, 'entregada') !== false) return array('#22c55e', '#f0fdf4');
+    // Aceptado
+    if (strpos($e, 'aceptado') !== false || strpos($e, 'aceptada') !== false || $e === 'ok') return array('#3b82f6', '#eff6ff');
+    // Cancelada
+    if (strpos($e, 'cancel') !== false) return array('#64748b', '#f1f5f9');
+    // Sin reparación
+    if (strpos($e, 'sin reparación') !== false || strpos($e, 'sin reparacion') !== false || $e === 'sr') return array('#94a3b8', '#f8fafc');
+    // Producto para venta
+    if (strpos($e, 'producto para venta') !== false || $e === 'pv') return array('#f97316', '#fff7ed');
+    // Producto en almacén
+    if (strpos($e, 'producto en almac') !== false) return array('#78716c', '#fafaf9');
+    // Seguimiento
+    if (strpos($e, 'seguimiento') !== false) return array('#0ea5e9', '#f0f9ff');
     return array('#64748b', '#f1f5f9');
 }
 
