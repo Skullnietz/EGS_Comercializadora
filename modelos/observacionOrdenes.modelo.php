@@ -142,23 +142,43 @@ class ModeloObservaciones{
 	/*=============================================
 	OBSERVACIONES RECIENTES PARA NOTIFICACIÓN
 	(Hoy, no creadas por el usuario actual)
+	$ordenIds: array opcional de IDs de orden para filtrar
+	           (se usa para técnicos, que solo ven sus órdenes)
 	=============================================*/
-	static public function mdlObservacionesRecientesNotif($tabla, $idUsuario, $limite = 15){
+	static public function mdlObservacionesRecientesNotif($tabla, $idUsuario, $limite = 15, $ordenIds = null){
 
-		$stmt = Conexion::conectar()->prepare(
-			"SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
-			        a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
-			 FROM $tabla o
-			 LEFT JOIN administradores a ON a.id = o.id_creador
-			 WHERE DATE(o.fecha) = CURDATE()
-			   AND o.id_creador != :idUsuario
-			 ORDER BY o.fecha DESC
-			 LIMIT :limite"
-		);
+		$pdo = Conexion::conectar();
 
-		$stmt->bindParam(":idUsuario", $idUsuario, PDO::PARAM_INT);
-		$stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
-		$stmt->execute();
+		if (is_array($ordenIds) && !empty($ordenIds)) {
+			// Filtrar solo observaciones de las órdenes indicadas
+			$placeholders = implode(',', array_fill(0, count($ordenIds), '?'));
+			$sql = "SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
+			               a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
+			        FROM $tabla o
+			        LEFT JOIN administradores a ON a.id = o.id_creador
+			        WHERE DATE(o.fecha) = CURDATE()
+			          AND o.id_creador != ?
+			          AND o.id_orden IN ($placeholders)
+			        ORDER BY o.fecha DESC
+			        LIMIT " . intval($limite);
+			$stmt = $pdo->prepare($sql);
+			$params = array_merge(array($idUsuario), array_values($ordenIds));
+			$stmt->execute($params);
+		} else {
+			$stmt = $pdo->prepare(
+				"SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
+				        a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
+				 FROM $tabla o
+				 LEFT JOIN administradores a ON a.id = o.id_creador
+				 WHERE DATE(o.fecha) = CURDATE()
+				   AND o.id_creador != :idUsuario
+				 ORDER BY o.fecha DESC
+				 LIMIT :limite"
+			);
+			$stmt->bindParam(":idUsuario", $idUsuario, PDO::PARAM_INT);
+			$stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
+			$stmt->execute();
+		}
 
 		return $stmt->fetchAll();
 	}

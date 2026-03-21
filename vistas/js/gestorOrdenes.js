@@ -1806,19 +1806,7 @@ $(".formularioPedidosDinamicos").on("click", "button.quitarProducto", function()
 
 });
 
-$(document).ready(function() {	
-    function noModificar() {
-       
-        swal({
-		      title: "Favor de actualizar la ventana con la siguiente combinación ctrl + shift + R",
-		      text: "¡Recuerda mantener siempre actualizada la información de tus órdenes de servicio!",
-		      type: "error",
-		      confirmButtonText: "¡Cerrar!"
-		    });
-
-    }
-    setInterval(noModificar, 600000);
-});
+/* Mensaje de inactividad removido */
 
 
 /*=============================================

@@ -116,11 +116,11 @@ class controladorObservaciones{
 	/*=============================================
 	OBSERVACIONES RECIENTES PARA NOTIFICACIÓN
 	=============================================*/
-	static public function ctrObservacionesRecientesNotif($idUsuario, $limite = 15){
+	static public function ctrObservacionesRecientesNotif($idUsuario, $limite = 15, $ordenIds = null){
 
 		$tabla = "observacionesOrdenes";
 
-		return ModeloObservaciones::mdlObservacionesRecientesNotif($tabla, $idUsuario, $limite);
+		return ModeloObservaciones::mdlObservacionesRecientesNotif($tabla, $idUsuario, $limite, $ordenIds);
 
 	}
 		/*=============================================

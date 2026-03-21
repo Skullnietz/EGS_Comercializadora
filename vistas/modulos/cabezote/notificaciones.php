@@ -2,9 +2,10 @@
 /*  ═══════════════════════════════════════════════════
     NOTIFICACIONES — Bell dropdown + Push controlado
     ═══════════════════════════════════════════════════
-    Combina:
-    1. Notificaciones de ATRASO (órdenes con +5 días)
-    2. Notificaciones de CAMBIO DE ESTADO (nuevas)
+    Combina (cronológicamente):
+    1. Notificaciones de CAMBIO DE ESTADO (nuevas)
+    2. Notificaciones de OBSERVACIONES (hoy)
+    3. Notificaciones de ATRASO (órdenes con +5 días)
     ═══════════════════════════════════════════════════ */
 
 date_default_timezone_set("America/Mexico_City");
@@ -17,6 +18,9 @@ $_noti_limite1m = date("Y-m-d", strtotime("-1 month"));
 // ══════════════════════════════════════
 // 1. NOTIFICACIONES DE ATRASO (existentes)
 // ══════════════════════════════════════
+
+// Variable para guardar órdenes del técnico (para filtro de observaciones)
+$_noti_tecOrdenIds = null;
 
 if ($_noti_perfil == "administrador") {
     $_noti_raw = controladorOrdenes::ctrMostrarOrdenes("id_empresa", $_SESSION["empresa"]);
@@ -61,7 +65,10 @@ if ($_noti_perfil == "administrador") {
         if (is_array($tecnico) && isset($tecnico["id"])) {
             $ordenesDelTecnico = controladorOrdenes::ctrMostrarOrdenesDelTecncio($tecnico["id"]);
             if (is_array($ordenesDelTecnico)) {
+                // Guardar IDs de órdenes del técnico para filtrar observaciones
+                $_noti_tecOrdenIds = array();
                 foreach ($ordenesDelTecnico as $o) {
+                    $_noti_tecOrdenIds[] = intval($o["id"]);
                     $est = isset($o["estado"]) ? $o["estado"] : "";
                     $fi  = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
                     if (strpos($est, "Ent") === false
@@ -152,9 +159,11 @@ $_noti_obs = array();
 $_noti_totalObs = 0;
 
 try {
+    // Si es técnico, solo observaciones de SUS órdenes
     $_noti_obs = controladorObservaciones::ctrObservacionesRecientesNotif(
         isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
-        10
+        10,
+        $_noti_tecOrdenIds // null para admin/vendedor (sin filtro), array de IDs para técnico
     );
     if (!is_array($_noti_obs)) $_noti_obs = array();
     $_noti_totalObs = count($_noti_obs);
@@ -174,6 +183,94 @@ try {
     }
 } catch (Exception $e) { $_noti_obs = array(); }
 
+// ══════════════════════════════════════
+// 4. OBTENER DATOS DE ÓRDENES PARA LINKS
+//    (estado + traspaso notifications)
+// ══════════════════════════════════════
+
+$_noti_est_ordData = array();
+if (!empty($_noti_estado)) {
+    $_noti_est_ids = array();
+    foreach ($_noti_estado as $ne) {
+        if (isset($ne['id_orden'])) $_noti_est_ids[] = intval($ne['id_orden']);
+    }
+    $_noti_est_ids = array_unique($_noti_est_ids);
+    if (!empty($_noti_est_ids)) {
+        try {
+            $_noti_est_ordData = ModeloNotificaciones::mdlDatosOrdenesPorIds($_noti_est_ids);
+        } catch (Exception $e) {}
+    }
+}
+
+// ══════════════════════════════════════
+// 5. COMBINAR TODO CRONOLÓGICAMENTE
+// ══════════════════════════════════════
+
+$_noti_combined = array();
+
+// Agregar estado/traspaso
+foreach (array_slice($_noti_estado, 0, 15) as $ne) {
+    $neOrdId = intval($ne['id_orden']);
+    $neOrd = isset($_noti_est_ordData[$neOrdId]) ? $_noti_est_ordData[$neOrdId] : array();
+    $neUrl = "index.php?ruta=infoOrden&idOrden=" . $neOrdId
+           . "&empresa=" . intval(isset($neOrd['id_empresa']) ? $neOrd['id_empresa'] : (isset($ne['id_empresa']) ? $ne['id_empresa'] : 0))
+           . "&asesor=" . intval(isset($neOrd['id_Asesor']) ? $neOrd['id_Asesor'] : (isset($ne['id_asesor']) ? $ne['id_asesor'] : 0))
+           . "&cliente=" . intval(isset($neOrd['id_usuario']) ? $neOrd['id_usuario'] : 0)
+           . "&tecnico=" . intval(isset($neOrd['id_tecnico']) ? $neOrd['id_tecnico'] : (isset($ne['id_tecnico']) ? $ne['id_tecnico'] : 0))
+           . "&pedido=" . intval(isset($neOrd['id_pedido']) ? $neOrd['id_pedido'] : 0);
+
+    $_noti_combined[] = array(
+        'source' => isset($ne['tipo']) && $ne['tipo'] === 'traspaso' ? 'traspaso' : 'estado',
+        'fecha'  => $ne['fecha'],
+        'data'   => $ne,
+        'url'    => $neUrl
+    );
+}
+
+// Agregar observaciones
+foreach (array_slice($_noti_obs, 0, 8) as $nob) {
+    $nobOrdId = intval($nob['id_orden']);
+    $nobOrd = (isset($_noti_obs_ordData) && isset($_noti_obs_ordData[$nobOrdId])) ? $_noti_obs_ordData[$nobOrdId] : array();
+    $nobUrl = "index.php?ruta=infoOrden&idOrden=" . $nobOrdId
+            . "&empresa=" . intval(isset($nobOrd['id_empresa']) ? $nobOrd['id_empresa'] : 0)
+            . "&asesor=" . intval(isset($nobOrd['id_Asesor']) ? $nobOrd['id_Asesor'] : 0)
+            . "&cliente=" . intval(isset($nobOrd['id_usuario']) ? $nobOrd['id_usuario'] : 0)
+            . "&tecnico=" . intval(isset($nobOrd['id_tecnico']) ? $nobOrd['id_tecnico'] : 0)
+            . "&pedido=" . intval(isset($nobOrd['id_pedido']) ? $nobOrd['id_pedido'] : 0);
+
+    $_noti_combined[] = array(
+        'source' => 'obs',
+        'fecha'  => $nob['fecha'],
+        'data'   => $nob,
+        'url'    => $nobUrl
+    );
+}
+
+// Agregar atrasos (usan fecha_ingreso como referencia, pero los colocamos al final cronológicamente)
+foreach ($_noti_mostrar as $o) {
+    $urlOrden = "index.php?ruta=infoOrden&idOrden=" . intval($o["id"])
+              . "&empresa=" . intval(isset($o["id_empresa"]) ? $o["id_empresa"] : 0)
+              . "&asesor=" . intval(isset($o["id_Asesor"]) ? $o["id_Asesor"] : 0)
+              . "&cliente=" . intval(isset($o["id_usuario"]) ? $o["id_usuario"] : 0)
+              . "&tecnico=" . intval(isset($o["id_tecnico"]) ? $o["id_tecnico"] : 0)
+              . "&pedido=" . intval(isset($o["id_pedido"]) ? $o["id_pedido"] : 0);
+
+    $_noti_combined[] = array(
+        'source' => 'atraso',
+        'fecha'  => isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "2000-01-01",
+        'data'   => $o,
+        'url'    => $urlOrden
+    );
+}
+
+// Ordenar cronológicamente (más reciente primero)
+usort($_noti_combined, function($a, $b) {
+    return strtotime($b['fecha']) - strtotime($a['fecha']);
+});
+
+// Limitar a 25 items en el dropdown
+$_noti_combined = array_slice($_noti_combined, 0, 25);
+
 // ── Total combinado ──
 $_noti_total = $_noti_totalAtraso + $_noti_totalEstado + $_noti_totalObs;
 
@@ -187,6 +284,7 @@ if (!function_exists('_notiEstadoColor')) {
         if (strpos($e, 'revisión') !== false || strpos($e, 'rev') !== false)  return array('#ef4444', '#fef2f2', 'fa-magnifying-glass');
         if (strpos($e, 'autorización') !== false || strpos($e, 'aut') !== false) return array('#f59e0b', '#fffbeb', 'fa-hourglass-half');
         if (strpos($e, 'supervisión') !== false || strpos($e, 'sup') !== false)  return array('#8b5cf6', '#f5f3ff', 'fa-eye');
+        if (strpos($e, 'cancel') !== false)  return array('#64748b', '#f1f5f9', 'fa-ban');
         if (strpos($e, 'garantía') !== false || strpos($e, 'garantia') !== false) return array('#dc2626', '#fef2f2', 'fa-rotate-left');
         return array('#64748b', '#f1f5f9', 'fa-circle-info');
     }
@@ -236,86 +334,79 @@ if (!function_exists('_notiTiempoRel')) {
     <li>
       <ul class="menu" style="max-height:400px;overflow-y:auto">
 
-        <?php // ── Cambios de estado + traspasos (primero, son las nuevas) ──
-        if (!empty($_noti_estado)):
-          foreach (array_slice($_noti_estado, 0, 15) as $ne):
-            $neTipo = isset($ne['tipo']) ? $ne['tipo'] : 'estado';
-            $neTiempo = _notiTiempoRel($ne['fecha']);
+        <?php foreach ($_noti_combined as $ci):
+          $ciSource = $ci['source'];
+          $ciData   = $ci['data'];
+          $ciUrl    = $ci['url'];
 
-            if ($neTipo === 'traspaso'):
-              // Traspaso de técnico
+          if ($ciSource === 'traspaso'):
+            // ── Traspaso de técnico ──
+            $neTiempo = _notiTiempoRel($ciData['fecha']);
         ?>
         <li>
-          <a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;cursor:default;white-space:normal">
+          <a href="<?php echo $ciUrl; ?>"
+             style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal;text-decoration:none">
             <div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
               <i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i>
             </div>
             <div style="flex:1;min-width:0;line-height:1.4">
               <div style="font-size:12px;color:#0f172a">
-                <strong>#<?php echo htmlspecialchars($ne['id_orden']); ?></strong>
+                <strong>#<?php echo htmlspecialchars($ciData['id_orden']); ?></strong>
                 traspaso de equipo
               </div>
               <div style="font-size:11px;color:#64748b;margin-top:1px">
-                <?php echo htmlspecialchars($ne['estado_anterior']); ?>
+                <?php echo htmlspecialchars($ciData['estado_anterior']); ?>
                 <i class="fa-solid fa-arrow-right" style="font-size:8px;color:#8b5cf6;margin:0 3px"></i>
-                <strong style="color:#8b5cf6"><?php echo htmlspecialchars($ne['estado_nuevo']); ?></strong>
+                <strong style="color:#8b5cf6"><?php echo htmlspecialchars($ciData['estado_nuevo']); ?></strong>
               </div>
               <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
-                <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($ne['nombre_usuario']); ?></span>
+                <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($ciData['nombre_usuario']); ?></span>
                 <span style="margin-left:auto"><?php echo $neTiempo; ?></span>
               </div>
             </div>
           </a>
         </li>
-        <?php else:
-              // Cambio de estado normal
-              $neColor = _notiEstadoColor($ne['estado_nuevo']);
+
+        <?php elseif ($ciSource === 'estado'):
+              // ── Cambio de estado normal ──
+              $neColor = _notiEstadoColor($ciData['estado_nuevo']);
+              $neTiempo = _notiTiempoRel($ciData['fecha']);
         ?>
         <li>
-          <a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $neColor[0]; ?>;cursor:default;white-space:normal">
+          <a href="<?php echo $ciUrl; ?>"
+             style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $neColor[0]; ?>;white-space:normal;text-decoration:none">
             <div style="width:32px;height:32px;border-radius:50%;background:<?php echo $neColor[1]; ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
               <i class="fa-solid <?php echo $neColor[2]; ?>" style="font-size:12px;color:<?php echo $neColor[0]; ?>"></i>
             </div>
             <div style="flex:1;min-width:0;line-height:1.4">
               <div style="font-size:12px;color:#0f172a">
-                <strong>#<?php echo htmlspecialchars($ne['id_orden']); ?></strong>
+                <strong>#<?php echo htmlspecialchars($ciData['id_orden']); ?></strong>
                 cambió a
-                <span style="font-weight:700;color:<?php echo $neColor[0]; ?>"><?php echo htmlspecialchars($ne['estado_nuevo']); ?></span>
+                <span style="font-weight:700;color:<?php echo $neColor[0]; ?>"><?php echo htmlspecialchars($ciData['estado_nuevo']); ?></span>
               </div>
               <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
-                <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($ne['nombre_usuario']); ?></span>
+                <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($ciData['nombre_usuario']); ?></span>
                 <span style="margin-left:auto"><?php echo $neTiempo; ?></span>
               </div>
             </div>
           </a>
         </li>
-        <?php endif; endforeach; endif; ?>
 
-        <?php // ── Observaciones nuevas ──
-        if (!empty($_noti_obs)):
-          foreach (array_slice($_noti_obs, 0, 8) as $nob):
-            $nobTiempo = _notiTiempoRel($nob['fecha']);
-            $nobTexto = mb_strlen($nob['observacion']) > 60 ? mb_substr($nob['observacion'], 0, 60) . '…' : $nob['observacion'];
-            $nobCreador = isset($nob['creador_nombre']) ? $nob['creador_nombre'] : 'Usuario';
-            $nobOrdId = intval($nob['id_orden']);
-            $nobOrd = (isset($_noti_obs_ordData) && isset($_noti_obs_ordData[$nobOrdId])) ? $_noti_obs_ordData[$nobOrdId] : array();
-            $nobUrlOrden = "index.php?ruta=infoOrden"
-                         . "&idOrden="  . $nobOrdId
-                         . "&empresa="  . intval(isset($nobOrd['id_empresa']) ? $nobOrd['id_empresa'] : 0)
-                         . "&asesor="   . intval(isset($nobOrd['id_Asesor'])  ? $nobOrd['id_Asesor']  : 0)
-                         . "&cliente="  . intval(isset($nobOrd['id_usuario']) ? $nobOrd['id_usuario'] : 0)
-                         . "&tecnico="  . intval(isset($nobOrd['id_tecnico']) ? $nobOrd['id_tecnico'] : 0)
-                         . "&pedido="   . intval(isset($nobOrd['id_pedido'])  ? $nobOrd['id_pedido']  : 0);
+        <?php elseif ($ciSource === 'obs'):
+              // ── Observación ──
+              $nobTiempo = _notiTiempoRel($ciData['fecha']);
+              $nobTexto = mb_strlen($ciData['observacion']) > 60 ? mb_substr($ciData['observacion'], 0, 60) . '…' : $ciData['observacion'];
+              $nobCreador = isset($ciData['creador_nombre']) ? $ciData['creador_nombre'] : 'Usuario';
         ?>
         <li>
-          <a href="<?php echo $nobUrlOrden; ?>"
-             style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">
+          <a href="<?php echo $ciUrl; ?>"
+             style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal;text-decoration:none">
             <div style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
               <i class="fa-solid fa-comment-dots" style="font-size:12px;color:#f59e0b"></i>
             </div>
             <div style="flex:1;min-width:0;line-height:1.4">
               <div style="font-size:12px;color:#0f172a">
-                <strong style="color:#f59e0b">#<?php echo htmlspecialchars($nob['id_orden']); ?></strong>
+                <strong style="color:#f59e0b">#<?php echo htmlspecialchars($ciData['id_orden']); ?></strong>
                 nueva observación
               </div>
               <div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($nobTexto); ?></div>
@@ -326,34 +417,23 @@ if (!function_exists('_notiTiempoRel')) {
             </div>
           </a>
         </li>
-        <?php endforeach; endif; ?>
 
-        <?php // ── Atrasos (después) ──
-        if (!empty($_noti_mostrar)):
-          foreach ($_noti_mostrar as $o):
-            $dias = max(0, floor((time() - strtotime($o["fecha_ingreso"])) / 86400));
-            $urgColor = $dias >= 30 ? '#ef4444' : ($dias >= 15 ? '#f59e0b' : '#3b82f6');
-            // URL directa a la orden — sin pasar por gestorOrdenes.js (que causaba eliminación accidental)
-            $urlOrden = "index.php?ruta=infoOrden"
-                      . "&idOrden="  . intval($o["id"])
-                      . "&empresa="  . intval(isset($o["id_empresa"])  ? $o["id_empresa"]  : 0)
-                      . "&asesor="   . intval(isset($o["id_Asesor"])   ? $o["id_Asesor"]   : 0)
-                      . "&cliente="  . intval(isset($o["id_usuario"])  ? $o["id_usuario"]  : 0)
-                      . "&tecnico="  . intval(isset($o["id_tecnico"])  ? $o["id_tecnico"]  : 0)
-                      . "&pedido="   . intval(isset($o["id_pedido"])   ? $o["id_pedido"]   : 0);
+        <?php elseif ($ciSource === 'atraso'):
+              // ── Atraso de entrega ──
+              $dias = max(0, floor((time() - strtotime($ciData["fecha_ingreso"])) / 86400));
+              $urgColor = $dias >= 30 ? '#ef4444' : ($dias >= 15 ? '#f59e0b' : '#3b82f6');
         ?>
         <li>
-          <a href="<?php echo $urlOrden; ?>"
-             style="display:flex;align-items:center;gap:8px;padding:8px 12px">
+          <a href="<?php echo $ciUrl; ?>"
+             style="display:flex;align-items:center;gap:8px;padding:8px 12px;text-decoration:none">
             <span style="width:8px;height:8px;border-radius:50%;background:<?php echo $urgColor; ?>;flex-shrink:0"></span>
             <span style="flex:1">
-              <strong>#<?php echo $o["id"]; ?></strong> Atraso de entrega
-              <small style="display:block;color:#94a3b8;font-size:11px"><?php echo $dias; ?> días — <?php echo date("d/m/Y", strtotime($o["fecha_ingreso"])); ?></small>
+              <strong>#<?php echo $ciData["id"]; ?></strong> Atraso de entrega
+              <small style="display:block;color:#94a3b8;font-size:11px"><?php echo $dias; ?> días — <?php echo date("d/m/Y", strtotime($ciData["fecha_ingreso"])); ?></small>
             </span>
           </a>
         </li>
-        <?php endforeach; endif; ?>
-
+        <?php endif; endforeach; ?>
 
       </ul>
     </li>
@@ -380,7 +460,7 @@ $(function(){
     $.post('ajax/notificaciones.ajax.php', { marcarLeidasEstado: 1 }, function(){
       // Quitar badge y notificaciones de estado del dropdown
       var $badge = $('#egsNotiBell .label');
-      var nuevoTotal = <?php echo $_noti_totalAtraso; ?>;
+      var nuevoTotal = <?php echo $_noti_totalAtraso + $_noti_totalObs; ?>;
       if (nuevoTotal > 0) {
         $badge.text(nuevoTotal > 99 ? '99+' : nuevoTotal);
       } else {
@@ -391,8 +471,15 @@ $(function(){
         nuevoTotal > 0 ? nuevoTotal + ' notificaci' + (nuevoTotal > 1 ? 'ones' : 'ón') : 'Sin notificaciones'
       );
       $btn.fadeOut();
-      // Remover items de estado (los que tienen border-left)
-      $('.notifications-menu .menu li a[style*="border-left"]').closest('li').slideUp(200);
+      // Remover items de estado (border-left azul o púrpura) pero no observaciones (naranja) ni atrasos
+      $('.notifications-menu .menu li a[style*="border-left:3px solid #3b82f6"]').closest('li').slideUp(200);
+      $('.notifications-menu .menu li a[style*="border-left:3px solid #8b5cf6"]').closest('li').slideUp(200);
+      $('.notifications-menu .menu li a[style*="border-left:3px solid #22c55e"]').closest('li').slideUp(200);
+      $('.notifications-menu .menu li a[style*="border-left:3px solid #06b6d4"]').closest('li').slideUp(200);
+      $('.notifications-menu .menu li a[style*="border-left:3px solid #ef4444"]').closest('li').slideUp(200);
+      $('.notifications-menu .menu li a[style*="border-left:3px solid #f59e0b"]:not(:has(.fa-comment-dots))').closest('li').slideUp(200);
+      $('.notifications-menu .menu li a[style*="border-left:3px solid #dc2626"]').closest('li').slideUp(200);
+      $('.notifications-menu .menu li a[style*="border-left:3px solid #64748b"]').closest('li').slideUp(200);
     });
   });
 });
@@ -865,7 +952,7 @@ $(function(){
   // Genera el HTML de un item del dropdown según el tipo
   function egsBuildDropdownItem(data) {
     if (data.type === 'traspaso') {
-      return '<li><a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;cursor:default;white-space:normal">' +
+      return '<li><a href="index.php?ruta=infoOrden&idOrden=' + data.idOrden + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal;text-decoration:none">' +
         '<div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
           '<i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i></div>' +
         '<div style="flex:1;min-width:0;line-height:1.4">' +
@@ -876,7 +963,7 @@ $(function(){
           '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>' + (data.usuario || '') + ' <span style="margin-left:auto">Ahora</span></div>' +
         '</div></a></li>';
     } else if (data.type === 'obs') {
-      return '<li><a href="index.php?ruta=ordenesnew&idOrden=' + data.idOrden + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">' +
+      return '<li><a href="index.php?ruta=infoOrden&idOrden=' + data.idOrden + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal;text-decoration:none">' +
         '<div style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
           '<i class="fa-solid fa-comment-dots" style="font-size:12px;color:#f59e0b"></i></div>' +
         '<div style="flex:1;min-width:0;line-height:1.4">' +
@@ -886,7 +973,7 @@ $(function(){
         '</div></a></li>';
     } else {
       // estado — usar color genérico azul para simplificar
-      return '<li><a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #3b82f6;cursor:default;white-space:normal">' +
+      return '<li><a href="index.php?ruta=infoOrden&idOrden=' + data.idOrden + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #3b82f6;white-space:normal;text-decoration:none">' +
         '<div style="width:32px;height:32px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
           '<i class="fa-solid fa-arrow-right-arrow-left" style="font-size:12px;color:#3b82f6"></i></div>' +
         '<div style="flex:1;min-width:0;line-height:1.4">' +
@@ -991,11 +1078,10 @@ $(function(){
     }, 'json');
   }
 
-  // ── POLLING DESACTIVADO temporalmente ──
-  // Para reactivar, descomentar las líneas de abajo:
-  // setTimeout(function(){
-  //   setInterval(egsPollNotificaciones, POLL_INTERVAL);
-  // }, 10000);
+  // Iniciar polling después de 10 segundos
+  setTimeout(function(){
+    setInterval(egsPollNotificaciones, POLL_INTERVAL);
+  }, 10000);
 
 })();
 </script>

@@ -106,7 +106,14 @@
       "Bash(grep -l \"acciones\\\\|movimientos\\\\|widget\\\\|dashboard\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS/vistas/modulos/inicio/\"*.php)",
       "Bash(grep -n \"section class=content\\\\|<section class=''''content\\\\|div class=content\\\\|div class=''''content''''\" C:UsersblackDesktopEGSvistasmodulos/*.php)",
       "Bash(find C:UsersblackDesktopEGS -name *.sql -o -name *schema* -o -name *database*)",
-      "Bash(grep -n \"foreach.*value\\\\|$value\\\\[\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\infoOrden.php\")"
+      "Bash(grep -n \"foreach.*value\\\\|$value\\\\[\" \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\infoOrden.php\")",
+      "Bash(php -l modelos/notificaciones.modelo.php)",
+      "Bash(php -l modelos/observacionOrdenes.modelo.php)",
+      "Bash(php -l controladores/observacionOrdenes.controlador.php)",
+      "Bash(php -l vistas/modulos/todas-notificaciones.php)",
+      "Bash(php -l vistas/modulos/inicio/admin-actividad-estado.php)",
+      "Bash(php -l ajax/notificaciones.ajax.php)",
+      "Bash(php -l vistas/js/gestorOrdenes.js)"
     ]
   }
 }

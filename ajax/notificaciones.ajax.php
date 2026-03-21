@@ -108,8 +108,23 @@ if(isset($_POST["pollNotificaciones"])){
 	$totalEstado = count($estadoNotifs);
 
 	// Contar observaciones de hoy (no del usuario actual)
+	// Si es técnico, filtrar solo observaciones de sus órdenes
 	$idUsuario = isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0;
-	$obsNotifs = ModeloObservaciones::mdlObservacionesRecientesNotif("observacionesOrdenes", $idUsuario, 5);
+	$_poll_tecOrdenIds = null;
+	if ($perfil === "tecnico" && $idRol !== null) {
+		try {
+			require_once "../controladores/ordenes.controlador.php";
+			require_once "../modelos/ordenes.modelo.php";
+			$_poll_tecOrdenes = controladorOrdenes::ctrMostrarOrdenesDelTecncio($idRol);
+			if (is_array($_poll_tecOrdenes)) {
+				$_poll_tecOrdenIds = array();
+				foreach ($_poll_tecOrdenes as $_ptOrd) {
+					$_poll_tecOrdenIds[] = intval($_ptOrd["id"]);
+				}
+			}
+		} catch (Exception $e) {}
+	}
+	$obsNotifs = ModeloObservaciones::mdlObservacionesRecientesNotif("observacionesOrdenes", $idUsuario, 5, $_poll_tecOrdenIds);
 	if (!is_array($obsNotifs)) $obsNotifs = array();
 	$totalObs = count($obsNotifs);
 

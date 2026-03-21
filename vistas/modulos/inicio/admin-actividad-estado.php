@@ -42,10 +42,66 @@ if (!function_exists('_actTiempoRelativo')) {
     }
 }
 
-// Detectar actividad del día desde las órdenes
+// Detectar actividad del día desde las órdenes (ingreso/salida)
+// + cambios de estado registrados en notificaciones_estado
 $_act_hoy = date('Y-m-d');
 $_act_actividad = array();
+$_act_ordenesVistos = array(); // evitar duplicados
 
+// Indexar órdenes por ID para lookup rápido
+$_act_ordIndex = array();
+if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
+    foreach ($_adm_allOrders as $ord) {
+        $_act_ordIndex[intval($ord['id'])] = $ord;
+    }
+}
+
+// 1) Obtener TODOS los cambios de estado de HOY desde notificaciones_estado
+try {
+    ControladorNotificaciones::ctrCrearTablaEstado();
+    $pdo_act = ConexionWP::conectarWP();
+    $stmt_act = $pdo_act->prepare(
+        "SELECT * FROM notificaciones_estado
+         WHERE id_empresa = :empresa AND DATE(fecha) = CURDATE()
+         ORDER BY fecha DESC
+         LIMIT 50"
+    );
+    $stmt_act->bindParam(":empresa", $_SESSION["empresa"], PDO::PARAM_INT);
+    $stmt_act->execute();
+    $_act_notifsHoy = $stmt_act->fetchAll(PDO::FETCH_ASSOC);
+
+    if (is_array($_act_notifsHoy)) {
+        foreach ($_act_notifsHoy as $nf) {
+            $nfIdOrden = intval($nf['id_orden']);
+            $nfTipo = isset($nf['tipo']) ? $nf['tipo'] : 'estado';
+            $nfEstado = $nf['estado_nuevo'];
+            $eInfo = _actEstadoInfo($nfEstado);
+
+            // Datos de la orden (si disponible)
+            $ordData = isset($_act_ordIndex[$nfIdOrden]) ? $_act_ordIndex[$nfIdOrden] : array();
+
+            $tipoEvento = 'cambio_estado';
+            if ($nfTipo === 'traspaso') $tipoEvento = 'traspaso';
+
+            $_act_actividad[] = array(
+                'id_orden'  => $nfIdOrden,
+                'estado'    => $nfEstado,
+                'estado_anterior' => isset($nf['estado_anterior']) ? $nf['estado_anterior'] : '',
+                'info'      => $eInfo,
+                'fecha'     => $nf['fecha'],
+                'tipo'      => $tipoEvento,
+                'equipo'    => isset($ordData['equipo']) ? $ordData['equipo'] : '',
+                'marca'     => isset($ordData['marca']) ? $ordData['marca'] : (isset($ordData['marcaDelEquipo']) ? $ordData['marcaDelEquipo'] : ''),
+                'nombre'    => isset($ordData['nombre']) ? $ordData['nombre'] : (isset($nf['nombre_usuario']) ? $nf['nombre_usuario'] : ''),
+                'orden'     => !empty($ordData) ? $ordData : array('id' => $nfIdOrden, 'id_empresa' => isset($nf['id_empresa']) ? $nf['id_empresa'] : '', 'id_Asesor' => isset($nf['id_asesor']) ? $nf['id_asesor'] : '', 'id_tecnico' => isset($nf['id_tecnico']) ? $nf['id_tecnico'] : '', 'id_usuario' => '', 'id_pedido' => '', 'id_tecnicoDos' => ''),
+                'usuario_accion' => isset($nf['nombre_usuario']) ? $nf['nombre_usuario'] : '',
+            );
+            $_act_ordenesVistos[$nfIdOrden . '_' . $nf['fecha']] = true;
+        }
+    }
+} catch (Exception $e) {}
+
+// 2) También incluir ingresos/salidas de hoy que no estén en notificaciones
 if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
     foreach ($_adm_allOrders as $ord) {
         $estado = isset($ord['estado']) ? $ord['estado'] : '';
@@ -54,25 +110,28 @@ if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
         $fi = isset($ord['fecha_ingreso']) ? substr($ord['fecha_ingreso'], 0, 10) : '';
         $fs = !empty($ord['fecha_Salida']) ? substr($ord['fecha_Salida'], 0, 10) : '';
 
-        $fechaActividad = '';
-        $tipoEvento = '';
-
-        if (!empty($fs) && $fs === $_act_hoy) {
-            $fechaActividad = $ord['fecha_Salida'];
-            $tipoEvento = 'salida';
-        } elseif ($fi === $_act_hoy) {
-            $fechaActividad = $ord['fecha_ingreso'];
-            $tipoEvento = 'ingreso';
-        }
-
-        if (!empty($fechaActividad)) {
+        if ($fi === $_act_hoy) {
             $eInfo = _actEstadoInfo($estado);
             $_act_actividad[] = array(
                 'id_orden'  => $ord['id'],
                 'estado'    => $estado,
                 'info'      => $eInfo,
-                'fecha'     => $fechaActividad,
-                'tipo'      => $tipoEvento,
+                'fecha'     => $ord['fecha_ingreso'],
+                'tipo'      => 'ingreso',
+                'equipo'    => isset($ord['equipo']) ? $ord['equipo'] : '',
+                'marca'     => isset($ord['marca']) ? $ord['marca'] : '',
+                'nombre'    => isset($ord['nombre']) ? $ord['nombre'] : '',
+                'orden'     => $ord,
+            );
+        }
+        if (!empty($fs) && $fs === $_act_hoy && $fi !== $_act_hoy) {
+            $eInfo = _actEstadoInfo($estado);
+            $_act_actividad[] = array(
+                'id_orden'  => $ord['id'],
+                'estado'    => $estado,
+                'info'      => $eInfo,
+                'fecha'     => $ord['fecha_Salida'],
+                'tipo'      => 'salida',
                 'equipo'    => isset($ord['equipo']) ? $ord['equipo'] : '',
                 'marca'     => isset($ord['marca']) ? $ord['marca'] : '',
                 'nombre'    => isset($ord['nombre']) ? $ord['nombre'] : '',
@@ -80,13 +139,13 @@ if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
             );
         }
     }
-
-    usort($_act_actividad, function($a, $b) {
-        return strcmp($b['fecha'], $a['fecha']);
-    });
-
-    $_act_actividad = array_slice($_act_actividad, 0, 15);
 }
+
+usort($_act_actividad, function($a, $b) {
+    return strcmp($b['fecha'], $a['fecha']);
+});
+
+$_act_actividad = array_slice($_act_actividad, 0, 20);
 
 // Resumen por estado
 $_act_resumen = array();
@@ -142,6 +201,10 @@ foreach ($_act_actividad as $act) {
           $descripcion = '';
           if ($act['tipo'] === 'ingreso') {
               $descripcion = 'Orden ingresada';
+          } elseif ($act['tipo'] === 'traspaso') {
+              $descripcion = 'Traspaso: ' . (isset($act['estado_anterior']) ? $act['estado_anterior'] : '') . ' → ' . $act['estado'];
+          } elseif ($act['tipo'] === 'cambio_estado' && !empty($act['estado_anterior'])) {
+              $descripcion = $act['estado_anterior'] . ' → ' . $eInfo['label'];
           } else {
               $descripcion = 'Estado: ' . $eInfo['label'];
           }
@@ -166,6 +229,14 @@ foreach ($_act_actividad as $act) {
                 <?php if ($act['tipo'] === 'ingreso'): ?>
                   <span style="font-size:10px;font-weight:600;color:#3b82f6;background:#eff6ff;padding:2px 6px;border-radius:6px">
                     <i class="fa-solid fa-arrow-right-to-bracket" style="font-size:7px"></i> Ingreso
+                  </span>
+                <?php elseif ($act['tipo'] === 'traspaso'): ?>
+                  <span style="font-size:10px;font-weight:600;color:#8b5cf6;background:#f5f3ff;padding:2px 6px;border-radius:6px">
+                    <i class="fa-solid fa-people-arrows" style="font-size:7px"></i> Traspaso
+                  </span>
+                <?php elseif ($act['tipo'] === 'cambio_estado'): ?>
+                  <span style="font-size:10px;font-weight:600;color:#f59e0b;background:#fffbeb;padding:2px 6px;border-radius:6px">
+                    <i class="fa-solid fa-arrow-right-arrow-left" style="font-size:7px"></i> Cambio
                   </span>
                 <?php else: ?>
                   <span style="font-size:10px;font-weight:600;color:#22c55e;background:#f0fdf4;padding:2px 6px;border-radius:6px">
