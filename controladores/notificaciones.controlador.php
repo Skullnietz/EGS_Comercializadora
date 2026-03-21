@@ -57,4 +57,14 @@ Class ControladorNotificaciones{
 
 	}
 
+	/*=============================================
+	OBTENER TODAS LAS NOTIFICACIONES (vista completa)
+	=============================================*/
+
+	static public function ctrTodasNotificaciones($perfil, $idEmpresa, $idRol = null, $limite = 50, $offset = 0){
+
+		return ModeloNotificaciones::mdlTodasNotificaciones($perfil, $idEmpresa, $idRol, $limite, $offset);
+
+	}
+
 }

@@ -85,6 +85,11 @@ class ModeloNotificaciones{
 			$pdo->exec("ALTER TABLE `notificaciones_estado` ADD COLUMN `leido_tecnico` TINYINT(1) NOT NULL DEFAULT 0 AFTER `leido_vendedor`");
 		} catch (Exception $e) { /* columna ya existe, ignorar */ }
 
+		// Agregar columna tipo para distinguir estado vs traspaso
+		try {
+			$pdo->exec("ALTER TABLE `notificaciones_estado` ADD COLUMN `tipo` VARCHAR(20) NOT NULL DEFAULT 'estado' AFTER `id_tecnico`");
+		} catch (Exception $e) { /* columna ya existe, ignorar */ }
+
 	}
 
 	/*=============================================
@@ -95,13 +100,15 @@ class ModeloNotificaciones{
 
 		$pdo = ConexionWP::conectarWP();
 
+		$tipo = isset($datos["tipo"]) ? $datos["tipo"] : "estado";
+
 		$stmt = $pdo->prepare(
 			"INSERT INTO notificaciones_estado
 				(id_orden, estado_anterior, estado_nuevo, id_usuario_accion,
-				 nombre_usuario, titulo_orden, id_empresa, id_asesor, id_tecnico)
+				 nombre_usuario, titulo_orden, id_empresa, id_asesor, id_tecnico, tipo)
 			 VALUES
 				(:id_orden, :estado_anterior, :estado_nuevo, :id_usuario_accion,
-				 :nombre_usuario, :titulo_orden, :id_empresa, :id_asesor, :id_tecnico)"
+				 :nombre_usuario, :titulo_orden, :id_empresa, :id_asesor, :id_tecnico, :tipo)"
 		);
 
 		$stmt->bindParam(":id_orden",           $datos["id_orden"],           PDO::PARAM_INT);
@@ -113,6 +120,7 @@ class ModeloNotificaciones{
 		$stmt->bindParam(":id_empresa",          $datos["id_empresa"],        PDO::PARAM_INT);
 		$stmt->bindParam(":id_asesor",           $datos["id_asesor"],         PDO::PARAM_INT);
 		$stmt->bindParam(":id_tecnico",          $datos["id_tecnico"],        PDO::PARAM_INT);
+		$stmt->bindParam(":tipo",                $tipo,                       PDO::PARAM_STR);
 
 		if($stmt->execute()){
 			return "ok";
@@ -147,7 +155,10 @@ class ModeloNotificaciones{
 			$stmt = $pdo->prepare(
 				"SELECT * FROM notificaciones_estado
 				 WHERE id_tecnico = :tecnico AND leido_tecnico = 0
-				   AND (estado_nuevo LIKE '%Aceptado%' OR estado_nuevo LIKE '%ok%')
+				   AND (
+				     (tipo = 'estado' AND (estado_nuevo LIKE '%Aceptado%' OR estado_nuevo LIKE '%ok%'))
+				     OR tipo = 'traspaso'
+				   )
 				 ORDER BY fecha DESC
 				 LIMIT :limite"
 			);
@@ -166,6 +177,60 @@ class ModeloNotificaciones{
 		}
 
 		$stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
+		$stmt->execute();
+
+		return $stmt->fetchAll();
+
+	}
+
+	/*=============================================
+	OBTENER TODAS LAS NOTIFICACIONES (para vista completa)
+	- Incluye estado + traspaso
+	- Paginado con offset + limite
+	=============================================*/
+
+	static public function mdlTodasNotificaciones($perfil, $idEmpresa, $idRol = null, $limite = 50, $offset = 0){
+
+		$pdo = ConexionWP::conectarWP();
+
+		if ($perfil === 'administrador') {
+
+			$stmt = $pdo->prepare(
+				"SELECT * FROM notificaciones_estado
+				 WHERE id_empresa = :empresa
+				 ORDER BY fecha DESC
+				 LIMIT :limite OFFSET :offset"
+			);
+			$stmt->bindParam(":empresa", $idEmpresa, PDO::PARAM_INT);
+
+		} elseif ($perfil === 'tecnico') {
+
+			$stmt = $pdo->prepare(
+				"SELECT * FROM notificaciones_estado
+				 WHERE id_tecnico = :tecnico
+				   AND (
+				     (tipo = 'estado' AND (estado_nuevo LIKE '%Aceptado%' OR estado_nuevo LIKE '%ok%'))
+				     OR tipo = 'traspaso'
+				   )
+				 ORDER BY fecha DESC
+				 LIMIT :limite OFFSET :offset"
+			);
+			$stmt->bindParam(":tecnico", $idRol, PDO::PARAM_INT);
+
+		} else {
+
+			$stmt = $pdo->prepare(
+				"SELECT * FROM notificaciones_estado
+				 WHERE id_asesor = :asesor
+				 ORDER BY fecha DESC
+				 LIMIT :limite OFFSET :offset"
+			);
+			$stmt->bindParam(":asesor", $idRol, PDO::PARAM_INT);
+
+		}
+
+		$stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
+		$stmt->bindParam(":offset", $offset, PDO::PARAM_INT);
 		$stmt->execute();
 
 		return $stmt->fetchAll();
@@ -193,7 +258,10 @@ class ModeloNotificaciones{
 			$stmt = $pdo->prepare(
 				"UPDATE notificaciones_estado SET leido_tecnico = 1
 				 WHERE id_tecnico = :tecnico AND leido_tecnico = 0
-				   AND (estado_nuevo LIKE '%Aceptado%' OR estado_nuevo LIKE '%ok%')"
+				   AND (
+				     (tipo = 'estado' AND (estado_nuevo LIKE '%Aceptado%' OR estado_nuevo LIKE '%ok%'))
+				     OR tipo = 'traspaso'
+				   )"
 			);
 			$stmt->bindParam(":tecnico", $idRol, PDO::PARAM_INT);
 

@@ -858,12 +858,14 @@ class controladorOrdenes{
 
 				$traerOrdenes = ModeloOrdenes::mdlMostrarordenesParaValidar("ordenes", $item, $valor);
 
-				// Guardar estado anterior para detectar cambio
+				// Guardar estado y técnico anterior para detectar cambios
 				$_egs_estadoAnterior = '';
+				$_egs_tecnicoAnterior = 0;
 				if (is_array($traerOrdenes) && !empty($traerOrdenes)) {
 					$_egs_primerOrden = reset($traerOrdenes);
 					if (is_array($_egs_primerOrden)) {
 						$_egs_estadoAnterior = isset($_egs_primerOrden["estado"]) ? $_egs_primerOrden["estado"] : '';
+						$_egs_tecnicoAnterior = isset($_egs_primerOrden["id_tecnico"]) ? intval($_egs_primerOrden["id_tecnico"]) : 0;
 					}
 				}
 
@@ -1368,6 +1370,37 @@ class controladorOrdenes{
 							"id_tecnico"        => intval($datos["tecnico"]),
 						));
 					} catch (Exception $e) { /* silenciar para no romper el flujo */ }
+				}
+
+				// ── Notificación de traspaso de técnico ──
+				if ($respuesta === "ok" && $_egs_tecnicoAnterior > 0
+				    && $_egs_tecnicoAnterior !== intval($datos["tecnico"])
+				    && intval($datos["tecnico"]) > 0) {
+					try {
+						ControladorNotificaciones::ctrCrearTablaEstado();
+						// Obtener nombres de técnicos
+						$_egs_tecAntNombre = "Técnico #" . $_egs_tecnicoAnterior;
+						$_egs_tecNuevoNombre = "Técnico #" . $datos["tecnico"];
+						try {
+							$_egs_tAnt = ControladorTecnicos::ctrMostrarTecnicos("id", $_egs_tecnicoAnterior);
+							if (is_array($_egs_tAnt) && isset($_egs_tAnt["nombre"])) $_egs_tecAntNombre = $_egs_tAnt["nombre"];
+							$_egs_tNuevo = ControladorTecnicos::ctrMostrarTecnicos("id", intval($datos["tecnico"]));
+							if (is_array($_egs_tNuevo) && isset($_egs_tNuevo["nombre"])) $_egs_tecNuevoNombre = $_egs_tNuevo["nombre"];
+						} catch (Exception $ex) {}
+
+						ControladorNotificaciones::ctrRegistrarCambioEstado(array(
+							"id_orden"          => intval($datos["idOrden"]),
+							"estado_anterior"   => $_egs_tecAntNombre,
+							"estado_nuevo"      => $_egs_tecNuevoNombre,
+							"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
+							"nombre_usuario"    => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
+							"titulo_orden"      => $datos["tituloOrden"],
+							"id_empresa"        => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+							"id_asesor"         => intval($datos["asesor"]),
+							"id_tecnico"        => intval($datos["tecnico"]),
+							"tipo"              => "traspaso",
+						));
+					} catch (Exception $e) {}
 				}
 
 
@@ -5007,15 +5040,25 @@ class controladorOrdenes{
 
 
 
-
-
 		if (isset($_POST["listatOrdenes"])) {
-
-
 
 			$tabla = "ordenes";
 
-			
+			// ── Guardar estado y técnico anterior para detectar cambios ──
+			$_egs_dyn_estadoAnt = '';
+			$_egs_dyn_tecnicoAnt = 0;
+			$_egs_dyn_tituloOrden = '';
+			try {
+				$_egs_dyn_ordenAnt = ModeloOrdenes::mdlMostrarordenesParaValidar("ordenes", "id", $_POST["idOrden"]);
+				if (is_array($_egs_dyn_ordenAnt) && !empty($_egs_dyn_ordenAnt)) {
+					$_egs_dyn_first = reset($_egs_dyn_ordenAnt);
+					if (is_array($_egs_dyn_first)) {
+						$_egs_dyn_estadoAnt = isset($_egs_dyn_first["estado"]) ? $_egs_dyn_first["estado"] : '';
+						$_egs_dyn_tecnicoAnt = isset($_egs_dyn_first["id_tecnico"]) ? intval($_egs_dyn_first["id_tecnico"]) : 0;
+						$_egs_dyn_tituloOrden = isset($_egs_dyn_first["titulo"]) ? $_egs_dyn_first["titulo"] : '';
+					}
+				}
+			} catch (Exception $e) {}
 
 			$datosOrdenDinamica = array(
 
@@ -5237,11 +5280,54 @@ class controladorOrdenes{
 
 					$respuesta = ModeloOrdenes::mdlEditarOrdenDinamica($tabla, $datosOrdenDinamica);
 
-				
+				// ── Notificaciones de cambio de estado (dinámica) ──
+				if ($respuesta == "ok" && !empty($_egs_dyn_estadoAnt)
+				    && $_egs_dyn_estadoAnt !== $_POST["estado"]) {
+					try {
+						ControladorNotificaciones::ctrCrearTablaEstado();
+						ControladorNotificaciones::ctrRegistrarCambioEstado(array(
+							"id_orden"          => intval($_POST["idOrden"]),
+							"estado_anterior"   => $_egs_dyn_estadoAnt,
+							"estado_nuevo"      => $_POST["estado"],
+							"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
+							"nombre_usuario"    => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
+							"titulo_orden"      => $_egs_dyn_tituloOrden,
+							"id_empresa"        => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+							"id_asesor"         => intval($_POST["asesorEditadoEnOrdenDianmica"]),
+							"id_tecnico"        => intval($_POST["tecnicoEditadoEnOrdenDianmica"]),
+						));
+					} catch (Exception $e) {}
+				}
 
-					
+				// ── Notificación de traspaso de técnico (dinámica) ──
+				if ($respuesta == "ok" && $_egs_dyn_tecnicoAnt > 0
+				    && $_egs_dyn_tecnicoAnt !== intval($_POST["tecnicoEditadoEnOrdenDianmica"])
+				    && intval($_POST["tecnicoEditadoEnOrdenDianmica"]) > 0) {
+					try {
+						ControladorNotificaciones::ctrCrearTablaEstado();
+						$_egs_dTecAntNom = "Técnico #" . $_egs_dyn_tecnicoAnt;
+						$_egs_dTecNuevoNom = "Técnico #" . $_POST["tecnicoEditadoEnOrdenDianmica"];
+						try {
+							$_egs_dTA = ControladorTecnicos::ctrMostrarTecnicos("id", $_egs_dyn_tecnicoAnt);
+							if (is_array($_egs_dTA) && isset($_egs_dTA["nombre"])) $_egs_dTecAntNom = $_egs_dTA["nombre"];
+							$_egs_dTN = ControladorTecnicos::ctrMostrarTecnicos("id", intval($_POST["tecnicoEditadoEnOrdenDianmica"]));
+							if (is_array($_egs_dTN) && isset($_egs_dTN["nombre"])) $_egs_dTecNuevoNom = $_egs_dTN["nombre"];
+						} catch (Exception $ex) {}
 
-
+						ControladorNotificaciones::ctrRegistrarCambioEstado(array(
+							"id_orden"          => intval($_POST["idOrden"]),
+							"estado_anterior"   => $_egs_dTecAntNom,
+							"estado_nuevo"      => $_egs_dTecNuevoNom,
+							"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
+							"nombre_usuario"    => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
+							"titulo_orden"      => $_egs_dyn_tituloOrden,
+							"id_empresa"        => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+							"id_asesor"         => intval($_POST["asesorEditadoEnOrdenDianmica"]),
+							"id_tecnico"        => intval($_POST["tecnicoEditadoEnOrdenDianmica"]),
+							"tipo"              => "traspaso",
+						));
+					} catch (Exception $e) {}
+				}
 
 				if ($respuesta == "ok") {
 

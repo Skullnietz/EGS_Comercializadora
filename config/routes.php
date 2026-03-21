@@ -17,6 +17,7 @@ return [
     'inicio',
     'comentarios-hoy',
     'cambios-estado-hoy',
+    'todas-notificaciones',
 
     /* ── Catálogo de productos ──────────────────── */
     'categorias',

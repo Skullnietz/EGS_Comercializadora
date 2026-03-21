@@ -222,11 +222,40 @@ if (!function_exists('_notiTiempoRel')) {
     <li>
       <ul class="menu" style="max-height:400px;overflow-y:auto">
 
-        <?php // ── Cambios de estado (primero, son las nuevas) ──
+        <?php // ── Cambios de estado + traspasos (primero, son las nuevas) ──
         if (!empty($_noti_estado)):
           foreach (array_slice($_noti_estado, 0, 15) as $ne):
-            $neColor = _notiEstadoColor($ne['estado_nuevo']);
+            $neTipo = isset($ne['tipo']) ? $ne['tipo'] : 'estado';
             $neTiempo = _notiTiempoRel($ne['fecha']);
+
+            if ($neTipo === 'traspaso'):
+              // Traspaso de técnico
+        ?>
+        <li>
+          <a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;cursor:default;white-space:normal">
+            <div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+              <i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i>
+            </div>
+            <div style="flex:1;min-width:0;line-height:1.4">
+              <div style="font-size:12px;color:#0f172a">
+                <strong>#<?php echo htmlspecialchars($ne['id_orden']); ?></strong>
+                traspaso de equipo
+              </div>
+              <div style="font-size:11px;color:#64748b;margin-top:1px">
+                <?php echo htmlspecialchars($ne['estado_anterior']); ?>
+                <i class="fa-solid fa-arrow-right" style="font-size:8px;color:#8b5cf6;margin:0 3px"></i>
+                <strong style="color:#8b5cf6"><?php echo htmlspecialchars($ne['estado_nuevo']); ?></strong>
+              </div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
+                <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($ne['nombre_usuario']); ?></span>
+                <span style="margin-left:auto"><?php echo $neTiempo; ?></span>
+              </div>
+            </div>
+          </a>
+        </li>
+        <?php else:
+              // Cambio de estado normal
+              $neColor = _notiEstadoColor($ne['estado_nuevo']);
         ?>
         <li>
           <a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $neColor[0]; ?>;cursor:default;white-space:normal">
@@ -246,7 +275,7 @@ if (!function_exists('_notiTiempoRel')) {
             </div>
           </a>
         </li>
-        <?php endforeach; endif; ?>
+        <?php endif; endforeach; endif; ?>
 
         <?php // ── Observaciones nuevas ──
         if (!empty($_noti_obs)):
@@ -307,7 +336,7 @@ if (!function_exists('_notiTiempoRel')) {
     <?php endif; ?>
 
     <li class="footer">
-      <a href="index.php?ruta=ordenesnew" style="font-size:12px">Ver todas las órdenes</a>
+      <a href="index.php?ruta=todas-notificaciones" style="font-size:12px">Ver todas las notificaciones</a>
     </li>
 
   </ul>
@@ -393,7 +422,8 @@ $(function(){
 <?php if ($_noti_totalEstado > 0):
   // Datos para el toast
   $_toast_first = $_noti_estado[0];
-  $_toast_color = _notiEstadoColor($_toast_first['estado_nuevo']);
+  $_toast_tipo = isset($_toast_first['tipo']) ? $_toast_first['tipo'] : 'estado';
+  $_toast_color = ($_toast_tipo === 'traspaso') ? array('#8b5cf6', '#f5f3ff', 'fa-people-arrows') : _notiEstadoColor($_toast_first['estado_nuevo']);
   $_toast_extras = $_noti_totalEstado - 1;
 ?>
 <!-- ══════════════════════════════════════════
@@ -458,16 +488,25 @@ $(function(){
     <!-- Texto -->
     <div style="flex:1;min-width:0">
       <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:3px">
-        <?php if ($_noti_perfil === 'tecnico'): ?>
+        <?php if ($_toast_tipo === 'traspaso'): ?>
+          Traspaso de equipo
+        <?php elseif ($_noti_perfil === 'tecnico'): ?>
           Orden lista para trabajar
         <?php else: ?>
           Cambio de estado
         <?php endif; ?>
       </div>
       <div style="font-size:12px;color:#475569;line-height:1.5">
-        <strong style="color:<?php echo $_toast_color[0]; ?>">#<?php echo htmlspecialchars($_toast_first['id_orden']); ?></strong>
-        cambió a
-        <strong style="color:<?php echo $_toast_color[0]; ?>"><?php echo htmlspecialchars($_toast_first['estado_nuevo']); ?></strong>
+        <?php if ($_toast_tipo === 'traspaso'): ?>
+          <strong style="color:<?php echo $_toast_color[0]; ?>">#<?php echo htmlspecialchars($_toast_first['id_orden']); ?></strong>
+          — <?php echo htmlspecialchars($_toast_first['estado_anterior']); ?>
+          <i class="fa-solid fa-arrow-right" style="font-size:9px;color:#8b5cf6;margin:0 2px"></i>
+          <strong style="color:#8b5cf6"><?php echo htmlspecialchars($_toast_first['estado_nuevo']); ?></strong>
+        <?php else: ?>
+          <strong style="color:<?php echo $_toast_color[0]; ?>">#<?php echo htmlspecialchars($_toast_first['id_orden']); ?></strong>
+          cambió a
+          <strong style="color:<?php echo $_toast_color[0]; ?>"><?php echo htmlspecialchars($_toast_first['estado_nuevo']); ?></strong>
+        <?php endif; ?>
         <?php if (!empty($_toast_first['nombre_usuario'])): ?>
           <span style="color:#94a3b8">— <?php echo htmlspecialchars($_toast_first['nombre_usuario']); ?></span>
         <?php endif; ?>
@@ -687,3 +726,159 @@ $(function(){
 })();
 </script>
 <?php endif; ?>
+
+<!-- ══════════════════════════════════════════════════
+     POLLING EN TIEMPO REAL (cada 45 seg)
+     Actualiza badge + muestra toast si hay nuevas
+══════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var POLL_INTERVAL = 45000; // 45 segundos
+  var lastEstadoId  = <?php echo (!empty($_noti_estado) && isset($_noti_estado[0]['id'])) ? intval($_noti_estado[0]['id']) : 0; ?>;
+  var lastObsId     = <?php echo (!empty($_noti_obs) && isset($_noti_obs[0]['id'])) ? intval($_noti_obs[0]['id']) : 0; ?>;
+  var currentAtraso = <?php echo $_noti_totalAtraso; ?>;
+
+  function egsPlayNotifSound(type) {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc1 = ctx.createOscillator();
+      var gain1 = ctx.createGain();
+
+      if (type === 'traspaso') {
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(659.3, ctx.currentTime);
+        osc1.frequency.setValueAtTime(880, ctx.currentTime + .1);
+        gain1.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .4);
+      } else if (type === 'obs') {
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(587.3, ctx.currentTime);
+        osc1.frequency.setValueAtTime(740, ctx.currentTime + .08);
+        gain1.gain.setValueAtTime(0.11, ctx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .35);
+      } else {
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, ctx.currentTime);
+        osc1.frequency.setValueAtTime(1108.7, ctx.currentTime + .1);
+        gain1.gain.setValueAtTime(0.13, ctx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .4);
+      }
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + .4);
+
+      var osc2 = ctx.createOscillator();
+      var gain2 = ctx.createGain();
+      osc2.type = osc1.type;
+      osc2.frequency.setValueAtTime(type === 'obs' ? 880 : 1318.5, ctx.currentTime + .12);
+      gain2.gain.setValueAtTime(0, ctx.currentTime);
+      gain2.gain.setValueAtTime(0.09, ctx.currentTime + .12);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .5);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(ctx.currentTime + .12);
+      osc2.stop(ctx.currentTime + .5);
+    } catch(e) {}
+  }
+
+  function egsShowLiveToast(data) {
+    // Remover toast anterior si existe
+    var old = document.getElementById('egsLiveToast');
+    if (old) old.remove();
+
+    var icon, color, bg, title, body;
+
+    if (data.type === 'traspaso') {
+      icon = 'fa-people-arrows'; color = '#8b5cf6'; bg = '#f5f3ff';
+      title = 'Traspaso de equipo';
+      body = '<strong style="color:#8b5cf6">#' + data.idOrden + '</strong> — ' +
+             data.anterior + ' <i class="fa-solid fa-arrow-right" style="font-size:9px;color:#8b5cf6;margin:0 2px"></i> <strong style="color:#8b5cf6">' + data.nuevo + '</strong>';
+    } else if (data.type === 'obs') {
+      icon = 'fa-comment-dots'; color = '#f59e0b'; bg = '#fffbeb';
+      title = 'Nueva observación';
+      body = '<strong style="color:#f59e0b">#' + data.idOrden + '</strong> — ' + data.texto +
+             '<br><span style="color:#94a3b8;font-size:11px"><i class="fa-solid fa-user" style="font-size:8px"></i> ' + data.creador + '</span>';
+    } else {
+      icon = 'fa-arrow-right-arrow-left'; color = '#3b82f6'; bg = '#eff6ff';
+      title = 'Cambio de estado';
+      body = '<strong style="color:' + color + '">#' + data.idOrden + '</strong> cambió a <strong style="color:' + color + '">' + data.nuevo + '</strong>';
+      if (data.usuario) body += ' <span style="color:#94a3b8">— ' + data.usuario + '</span>';
+    }
+
+    var html = '<div id="egsLiveToast" style="position:fixed;bottom:24px;right:24px;z-index:99999;width:370px;max-width:calc(100vw - 32px);background:#fff;border-radius:16px;border:1px solid #e2e8f0;box-shadow:0 8px 32px rgba(0,0,0,.12);overflow:hidden;animation:egsToastIn .5s cubic-bezier(.16,1,.3,1) forwards;font-family:inherit">' +
+      '<div style="height:3px;background:linear-gradient(90deg,' + color + ',#6366f1);animation:egsToastBarShrink 6s linear forwards"></div>' +
+      '<div style="padding:14px 16px;display:flex;align-items:flex-start;gap:12px">' +
+        '<div style="width:40px;height:40px;border-radius:12px;background:' + bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid ' + color + '25">' +
+          '<i class="fa-solid ' + icon + '" style="font-size:16px;color:' + color + '"></i>' +
+        '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:3px">' + title + '</div>' +
+          '<div style="font-size:12px;color:#475569;line-height:1.5">' + body + '</div>' +
+        '</div>' +
+        '<button type="button" onclick="var t=document.getElementById(\'egsLiveToast\');if(t){t.style.animation=\'egsToastOut .4s forwards\';setTimeout(function(){t.remove()},400)}" style="border:none;background:none;color:#94a3b8;font-size:14px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:-2px" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>' +
+      '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+
+    setTimeout(function(){
+      var t = document.getElementById('egsLiveToast');
+      if (t) {
+        t.style.animation = 'egsToastOut .4s forwards';
+        setTimeout(function(){ if (t.parentNode) t.remove(); }, 400);
+      }
+    }, 6000);
+  }
+
+  function egsPollNotificaciones() {
+    $.post('ajax/notificaciones.ajax.php', { pollNotificaciones: 1 }, function(r) {
+      if (!r || typeof r !== 'object') return;
+
+      // Actualizar badge de la campana
+      var total = (r.total || 0) + currentAtraso;
+      var $badge = $('#egsNotiBell .label');
+      if (total > 0) {
+        if ($badge.length) {
+          $badge.text(total > 99 ? '99+' : total);
+        } else {
+          $('#egsNotiBell').append('<span class="label label-warning">' + (total > 99 ? '99+' : total) + '</span>');
+        }
+      } else {
+        $badge.remove();
+      }
+
+      // Detectar nueva notificación de estado/traspaso
+      if (r.ultimaNotif && r.ultimaNotif.id && r.ultimaNotif.id > lastEstadoId) {
+        lastEstadoId = r.ultimaNotif.id;
+        var soundType = r.ultimaNotif.tipo === 'traspaso' ? 'traspaso' : 'estado';
+        egsPlayNotifSound(soundType);
+        egsShowLiveToast({
+          type: r.ultimaNotif.tipo || 'estado',
+          idOrden: r.ultimaNotif.idOrden,
+          anterior: r.ultimaNotif.anterior,
+          nuevo: r.ultimaNotif.nuevo,
+          usuario: r.ultimaNotif.usuario
+        });
+      }
+      // Detectar nueva observación
+      else if (r.ultimaObs && r.ultimaObs.id && r.ultimaObs.id > lastObsId) {
+        lastObsId = r.ultimaObs.id;
+        egsPlayNotifSound('obs');
+        egsShowLiveToast({
+          type: 'obs',
+          idOrden: r.ultimaObs.idOrden,
+          texto: r.ultimaObs.texto,
+          creador: r.ultimaObs.creador
+        });
+      }
+
+    }, 'json');
+  }
+
+  // Iniciar polling después de 10 seg (dejar que la página cargue)
+  setTimeout(function(){
+    setInterval(egsPollNotificaciones, POLL_INTERVAL);
+  }, 10000);
+
+})();
+</script>
