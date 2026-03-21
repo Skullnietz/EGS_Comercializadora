@@ -717,25 +717,6 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
 </div>
 
 <!-- ══════════════════════════════════════════
-     ACTIVIDAD RECIENTE — Cambios de estado del día
-══════════════════════════════════════════ -->
-<div class="crm-section">
-  <div class="crm-section-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-    <i class="fa-solid fa-arrow-right-arrow-left"></i>
-  </div>
-  <div>
-    <h3>Actividad Reciente</h3>
-    <p>Cambios de estado en órdenes de servicio del día</p>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-xs-12">
-    <?php include __DIR__ . "/admin-actividad-estado.php"; ?>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════
      GRÁFICO DE VENTAS
 ══════════════════════════════════════════ -->
 <div class="crm-section">
@@ -1113,6 +1094,13 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
   <div>
     <h3>Actividad Reciente</h3>
     <p>Órdenes con actividad en los últimos 30 días</p>
+  </div>
+</div>
+
+<!-- Cambios de estado del día -->
+<div class="row">
+  <div class="col-xs-12">
+    <?php include __DIR__ . "/admin-actividad-estado.php"; ?>
   </div>
 </div>
 
