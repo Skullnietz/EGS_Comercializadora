@@ -967,10 +967,11 @@ $(function(){
     }, 'json');
   }
 
-  // Iniciar polling después de 10 seg (dejar que la página cargue)
-  setTimeout(function(){
-    setInterval(egsPollNotificaciones, POLL_INTERVAL);
-  }, 10000);
+  // ── POLLING DESACTIVADO temporalmente ──
+  // Para reactivar, descomentar las líneas de abajo:
+  // setTimeout(function(){
+  //   setInterval(egsPollNotificaciones, POLL_INTERVAL);
+  // }, 10000);
 
 })();
 </script>
