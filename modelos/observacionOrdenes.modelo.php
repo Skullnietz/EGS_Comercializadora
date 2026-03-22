@@ -2,48 +2,51 @@
 
 require_once "conexion.php";
 
-class ModeloObservaciones{
-	
+class ModeloObservaciones
+{
+
 	/*=============================================
 	MOSTRAR OBSERVACIONES
 	=============================================*/
 
-	static public function mdlMostrarobservaciones($tabla, $itemobs){
+	static public function mdlMostrarobservaciones($tabla, $itemobs)
+	{
 
-		
 
-			$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE id_orden = $itemobs ORDER BY `fecha` ASC");
 
-			$stmt -> execute();
+		$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE id_orden = $itemobs ORDER BY `fecha` DESC");
 
-			return $stmt -> fetchAll();
+		$stmt->execute();
 
-		
+		return $stmt->fetchAll();
 
-		$stmt -> close();
+
+
+		$stmt->close();
 
 		$stmt = null;
 
 
 	}
-	
+
 	/*=============================================
 	MOSTRAR OBSERVACIONES INFO USUARIO
 	=============================================*/
 
-	static public function mdlMostrarInfoUser($tabla, $idadmin){
+	static public function mdlMostrarInfoUser($tabla, $idadmin)
+	{
 
-		
 
-			$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE id = $idadmin");
 
-			$stmt -> execute();
+		$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE id = $idadmin");
 
-			return $stmt -> fetchAll();
+		$stmt->execute();
 
-		
+		return $stmt->fetchAll();
 
-		$stmt -> close();
+
+
+		$stmt->close();
 
 		$stmt = null;
 
@@ -54,7 +57,8 @@ class ModeloObservaciones{
 	MOSTRAR ÚLTIMAS OBSERVACIONES (GLOBAL)
 	=============================================*/
 
-	static public function mdlUltimasObservaciones($tabla, $limite){
+	static public function mdlUltimasObservaciones($tabla, $limite)
+	{
 
 		$stmt = Conexion::conectar()->prepare(
 			"SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
@@ -75,7 +79,8 @@ class ModeloObservaciones{
 	OBSERVACIONES DE HOY (GLOBAL)
 	=============================================*/
 
-	static public function mdlObservacionesHoy($tabla){
+	static public function mdlObservacionesHoy($tabla)
+	{
 
 		$stmt = Conexion::conectar()->prepare(
 			"SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
@@ -94,7 +99,8 @@ class ModeloObservaciones{
 	/*=============================================
 	CREAR OBSERVACIONES (con protección anti-duplicado)
 	=============================================*/
-	static public function mdlCrearObservacion($tabla, $datos){
+	static public function mdlCrearObservacion($tabla, $datos)
+	{
 
 		$pdo = Conexion::conectar();
 
@@ -106,8 +112,8 @@ class ModeloObservaciones{
 			   AND observacion = :observacion
 			   AND fecha >= DATE_SUB(NOW(), INTERVAL 60 SECOND)"
 		);
-		$chk->bindParam(":id_creador",  $datos["id_creador"],  PDO::PARAM_INT);
-		$chk->bindParam(":id_orden",    $datos["id_orden"],    PDO::PARAM_INT);
+		$chk->bindParam(":id_creador", $datos["id_creador"], PDO::PARAM_INT);
+		$chk->bindParam(":id_orden", $datos["id_orden"], PDO::PARAM_INT);
 		$chk->bindParam(":observacion", $datos["observacion"], PDO::PARAM_STR);
 		$chk->execute();
 
@@ -124,11 +130,11 @@ class ModeloObservaciones{
 		$stmt->bindParam(":observacion", $datos["observacion"], PDO::PARAM_STR);
 		$stmt->bindParam(":fecha", $fecha, PDO::PARAM_STR);
 
-		if($stmt->execute()){
+		if ($stmt->execute()) {
 
 			return "ok";
 
-		}else{
+		} else {
 
 			return "error";
 
@@ -142,74 +148,56 @@ class ModeloObservaciones{
 	/*=============================================
 	OBSERVACIONES RECIENTES PARA NOTIFICACIÓN
 	(Hoy, no creadas por el usuario actual)
-	$ordenIds: array opcional de IDs de orden para filtrar
-	           (se usa para técnicos, que solo ven sus órdenes)
 	=============================================*/
-	static public function mdlObservacionesRecientesNotif($tabla, $idUsuario, $limite = 15, $ordenIds = null){
+	static public function mdlObservacionesRecientesNotif($tabla, $idUsuario, $limite = 15)
+	{
 
-		$pdo = Conexion::conectar();
+		$stmt = Conexion::conectar()->prepare(
+			"SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
+			        a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
+			 FROM $tabla o
+			 LEFT JOIN administradores a ON a.id = o.id_creador
+			 WHERE DATE(o.fecha) = CURDATE()
+			   AND o.id_creador != :idUsuario
+			 ORDER BY o.fecha DESC
+			 LIMIT :limite"
+		);
 
-		if (is_array($ordenIds) && !empty($ordenIds)) {
-			// Filtrar solo observaciones de las órdenes indicadas
-			$placeholders = implode(',', array_fill(0, count($ordenIds), '?'));
-			$sql = "SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
-			               a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
-			        FROM $tabla o
-			        LEFT JOIN administradores a ON a.id = o.id_creador
-			        WHERE DATE(o.fecha) = CURDATE()
-			          AND o.id_creador != ?
-			          AND o.id_orden IN ($placeholders)
-			        ORDER BY o.fecha DESC
-			        LIMIT " . intval($limite);
-			$stmt = $pdo->prepare($sql);
-			$params = array_merge(array($idUsuario), array_values($ordenIds));
-			$stmt->execute($params);
-		} else {
-			$stmt = $pdo->prepare(
-				"SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
-				        a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
-				 FROM $tabla o
-				 LEFT JOIN administradores a ON a.id = o.id_creador
-				 WHERE DATE(o.fecha) = CURDATE()
-				   AND o.id_creador != :idUsuario
-				 ORDER BY o.fecha DESC
-				 LIMIT :limite"
-			);
-			$stmt->bindParam(":idUsuario", $idUsuario, PDO::PARAM_INT);
-			$stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
-			$stmt->execute();
-		}
+		$stmt->bindParam(":idUsuario", $idUsuario, PDO::PARAM_INT);
+		$stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
+		$stmt->execute();
 
 		return $stmt->fetchAll();
 	}
 	/*=============================================
 	ELIMINAR OBSERVACIONES
 	=============================================*/
-		static public function mdlEliminarObservacion($tabla, $datos){
+	static public function mdlEliminarObservacion($tabla, $datos)
+	{
 
 
 
-		$stmt = Conexion::conectar()->prepare("DELETE FROM $tabla WHERE id = :id");
+		$stmt = ConexionWP::conectarWP()->prepare("DELETE FROM $tabla WHERE id = :id");
 
 
 
-		$stmt -> bindParam(":id", $datos, PDO::PARAM_INT);
+		$stmt->bindParam(":id", $datos, PDO::PARAM_INT);
 
 
 
-		if($stmt -> execute()){
+		if ($stmt->execute()) {
 
 
 
 			return "ok";
 
-		
-
-		}else{
 
 
+		} else {
 
-			return "error";	
+
+
+			return "error";
 
 
 
@@ -217,7 +205,7 @@ class ModeloObservaciones{
 
 
 
-		$stmt -> close();
+		$stmt->close();
 
 
 

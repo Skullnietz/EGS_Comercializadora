@@ -15,20 +15,22 @@ require_once "../controladores/ventas.controlador.php";
 
 require_once "../modelos/ventas.modelo.php";
 
-class tablaOrdenes{
-	
-	  /*=============================================
-  	   MOSTRAR LA TABLA DE ORDENES
-  	  =============================================*/
+class tablaOrdenes
+{
 
-  public function mostrarTablaOrdenes(){	
+	/*=============================================
+	   MOSTRAR LA TABLA DE ORDENES
+	  =============================================*/
 
-  		$item = null;
-  		$valor =null;
-  	  $ordenes = controladorOrdenes::ctrMostrarordenesParaValidar($item,$valor);
+	public function mostrarTablaOrdenes()
+	{
+
+		$item = null;
+		$valor = null;
+		$ordenes = controladorOrdenes::ctrMostrarordenesParaValidar($item, $valor);
 
 
-  	$datosJson = '{
+		$datosJson = '{
 
 		 
 
@@ -36,126 +38,126 @@ class tablaOrdenes{
 
 
 
-	for($i = 0; $i < count($ordenes); $i++){
+		for ($i = 0; $i < count($ordenes); $i++) {
 
 
-		//if ($_GET["perfil"] == "administrador") {
-		
-		  //TRAER EMPRESA
+			//if ($_GET["perfil"] == "administrador") {
 
-                  $item = "id";
-                  $valor = $ordenes[$i]["id_empresa"];
+			//TRAER EMPRESA
 
-                  $respuesta = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+			$item = "id";
+			$valor = $ordenes[$i]["id_empresa"];
 
-                  $NombreEmpresa = $respuesta["empresa"];
+			$respuesta = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-                  //TRAER TECNICO
-                  $item = "id";
-                  $valor = $ordenes[$i]["id_tecnico"];
+			$NombreEmpresa = $respuesta["empresa"];
 
-                  $tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+			//TRAER TECNICO
+			$item = "id";
+			$valor = $ordenes[$i]["id_tecnico"];
 
-                  $NombreTecnico = $tecnico["nombre"];
+			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
 
-                  //TRAER ASESOR
-            
-                  $item = "id";
-                  $valor = $ordenes[$i]["id_Asesor"];
+			$NombreTecnico = $tecnico["nombre"];
 
-                  $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
+			//TRAER ASESOR
 
-                  $NombreAsesor = $asesor["nombre"];
+			$item = "id";
+			$valor = $ordenes[$i]["id_Asesor"];
 
-                  //TRAER CLIENTE (USUARIO)
+			$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
-                  $item = "id";
-                  $valor = $ordenes[$i]["id_usuario"];
+			$NombreAsesor = $asesor["nombre"];
 
-                  $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+			//TRAER CLIENTE (USUARIO)
 
-                  $NombreUsuario = $usuario["nombre"];
+			$item = "id";
+			$valor = $ordenes[$i]["id_usuario"];
+
+			$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
+
+			$NombreUsuario = $usuario["nombre"];
 
 
-                  $InfoOrdenes = "<button class='btn btn-warning btnVerInfoOrden' idOrden='".$ordenes[$i]["id"]."' cliente='".$ordenes[$i]["id_usuario"]."'  tecnico='".$ordenes[$i]["id_tecnico"]."' asesor='".$ordenes[$i]["id_Asesor"]."' empresa='".$ordenes[$i]["id_empresa"]."' pedido='".$ordenes[$i]["id_pedido"]."' data-toggle='modal'><i class='fa fa-pencil'></button>";
+			$InfoOrdenes = "<button class='btn btn-warning btnVerInfoOrden' idOrden='" . $ordenes[$i]["id"] . "' cliente='" . $ordenes[$i]["id_usuario"] . "'  tecnico='" . $ordenes[$i]["id_tecnico"] . "' asesor='" . $ordenes[$i]["id_Asesor"] . "' empresa='" . $ordenes[$i]["id_empresa"] . "' pedido='" . $ordenes[$i]["id_pedido"] . "' data-toggle='modal'><i class='fa fa-pencil'></button>";
 
-                  $eliminarOrden = "<button class='btn btn-danger' onclick=\"egsEliminarOrden(".$ordenes[$i]["id"].",'".(isset($ordenes[$i]["portada"]) ? $ordenes[$i]["portada"] : "")."','".(isset($ordenes[$i]["portada"]) ? $ordenes[$i]["portada"] : "")."')\" title='Eliminar orden'><i class='fa fa-times'></i></button>";
+			$eliminarOrden = "<button class='btn btn-danger btnEliminarorden' idOrden='" . $ordenes[$i]["id"] . "'><i class='fa fa-times'></i></button>";
 
-                  $ticket = "<button class='btn btn-warning btnImprimirorden' idOrden='".$ordenes[$i]["id"]."' cliente='".$ordenes[$i]["id_usuario"]."'  tecnico='".$ordenes[$i]["id_tecnico"]."' asesor='".$ordenes[$i]["id_Asesor"]."' empresa='".$ordenes[$i]["id_empresa"]."' data-toggle='modal'><i class='fa fa-ticket'></i></button>";
+			$ticket = "<button class='btn btn-warning btnImprimirorden' idOrden='" . $ordenes[$i]["id"] . "' cliente='" . $ordenes[$i]["id_usuario"] . "'  tecnico='" . $ordenes[$i]["id_tecnico"] . "' asesor='" . $ordenes[$i]["id_Asesor"] . "' empresa='" . $ordenes[$i]["id_empresa"] . "' data-toggle='modal'><i class='fa fa-ticket'></i></button>";
 
-                  $pedido = "<button class='btn btn-info' data-toggle='modal' data-target='#modalAsignarPedido'><i class='fa fa-sort'></i></button>";
+			$pedido = "<button class='btn btn-info' data-toggle='modal' data-target='#modalAsignarPedido'><i class='fa fa-sort'></i></button>";
 
-                  $fechaDeIngreso = $ordenes[$i]["fecha_ingreso"];
+			$fechaDeIngreso = $ordenes[$i]["fecha_ingreso"];
 
-		//}
+			//}
 
-		
 
-	      		
-		/*=============================================
-		DEVOLVER DATOS JSON
-		AQUÍ HICE UNA CORRECCIÓN BIEN PERRONA DE TABLAS
-		=============================================*/
 
-		$datosJson	 .= '[
 
-			      		"'.($i+1).'",
+			/*=============================================
+			DEVOLVER DATOS JSON
+			AQUÍ HICE UNA CORRECCIÓN BIEN PERRONA DE TABLAS
+			=============================================*/
 
-			      		"'.$NombreEmpresa.'",
+			$datosJson .= '[
 
-			      		"<h5><b>ORDEN: '.$ordenes[$i]["id"].'<b></h5>",
+			      		"' . ($i + 1) . '",
 
-			      		"'.$NombreTecnico.'",
+			      		"' . $NombreEmpresa . '",
 
-			      		"'.$NombreAsesor.'",
+			      		"<h5><b>ORDEN: ' . $ordenes[$i]["id"] . '<b></h5>",
 
-			      		"'.$NombreUsuario.'",
+			      		"' . $NombreTecnico . '",
 
-			      	    "$ '.number_format($ordenes[$i]["total"],2).'",
+			      		"' . $NombreAsesor . '",
 
-			      	    "'. trim($ordenes[$i]["estado"]).'",
+			      		"' . $NombreUsuario . '",
 
-			      	    "'.$InfoOrdenes.'",
+			      	    "$ ' . number_format($ordenes[$i]["total"], 2) . '",
+
+			      	    "' . trim($ordenes[$i]["estado"]) . '",
+
+			      	    "' . $InfoOrdenes . '",
 			      	    
-			      	    "'.$eliminarOrden.'",
+			      	    "' . $eliminarOrden . '",
 
-			      		"'.$ticket.'"
+			      		"' . $ticket . '"
 
 			      		],';
 
 
 
-	} 
+		}
 
 
 
-	$datosJson = substr($datosJson, 0, -1);
+		$datosJson = substr($datosJson, 0, -1);
 
 
 
-	$datosJson.=  ']
+		$datosJson .= ']
 
 		  
 
-	}'; 
-
-  	
-
-  	echo $datosJson;	
+	}';
 
 
 
-  }
+		echo $datosJson;
 
- 
+
+
+	}
+
+
 }
 
 /*=============================================
 
 ACTIVAR TABLA DE VENTAS
 
-=============================================*/ 
+=============================================*/
 
 $activar = new tablaOrdenes();
 
-$activar -> mostrarTablaOrdenes(); 
+$activar->mostrarTablaOrdenes();

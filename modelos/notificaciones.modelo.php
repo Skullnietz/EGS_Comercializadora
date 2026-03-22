@@ -90,6 +90,11 @@ class ModeloNotificaciones{
 			$pdo->exec("ALTER TABLE `notificaciones_estado` ADD COLUMN `tipo` VARCHAR(20) NOT NULL DEFAULT 'estado' AFTER `id_tecnico`");
 		} catch (Exception $e) { /* columna ya existe, ignorar */ }
 
+		// Agregar columna id_tecnicoDos para técnico de participación
+		try {
+			$pdo->exec("ALTER TABLE `notificaciones_estado` ADD COLUMN `id_tecnicoDos` INT(11) DEFAULT NULL AFTER `id_tecnico`");
+		} catch (Exception $e) { /* columna ya existe, ignorar */ }
+
 	}
 
 	/*=============================================
@@ -102,13 +107,15 @@ class ModeloNotificaciones{
 
 		$tipo = isset($datos["tipo"]) ? $datos["tipo"] : "estado";
 
+		$idTecDos = isset($datos["id_tecnicoDos"]) ? intval($datos["id_tecnicoDos"]) : 0;
+
 		$stmt = $pdo->prepare(
 			"INSERT INTO notificaciones_estado
 				(id_orden, estado_anterior, estado_nuevo, id_usuario_accion,
-				 nombre_usuario, titulo_orden, id_empresa, id_asesor, id_tecnico, tipo)
+				 nombre_usuario, titulo_orden, id_empresa, id_asesor, id_tecnico, id_tecnicoDos, tipo)
 			 VALUES
 				(:id_orden, :estado_anterior, :estado_nuevo, :id_usuario_accion,
-				 :nombre_usuario, :titulo_orden, :id_empresa, :id_asesor, :id_tecnico, :tipo)"
+				 :nombre_usuario, :titulo_orden, :id_empresa, :id_asesor, :id_tecnico, :id_tecnicoDos, :tipo)"
 		);
 
 		$stmt->bindParam(":id_orden",           $datos["id_orden"],           PDO::PARAM_INT);
@@ -120,6 +127,7 @@ class ModeloNotificaciones{
 		$stmt->bindParam(":id_empresa",          $datos["id_empresa"],        PDO::PARAM_INT);
 		$stmt->bindParam(":id_asesor",           $datos["id_asesor"],         PDO::PARAM_INT);
 		$stmt->bindParam(":id_tecnico",          $datos["id_tecnico"],        PDO::PARAM_INT);
+		$stmt->bindParam(":id_tecnicoDos",       $idTecDos,                   PDO::PARAM_INT);
 		$stmt->bindParam(":tipo",                $tipo,                       PDO::PARAM_STR);
 
 		if($stmt->execute()){
@@ -154,7 +162,7 @@ class ModeloNotificaciones{
 
 			$stmt = $pdo->prepare(
 				"SELECT * FROM notificaciones_estado
-				 WHERE id_tecnico = :tecnico AND leido_tecnico = 0
+				 WHERE (id_tecnico = :tecnico OR id_tecnicoDos = :tecnico2) AND leido_tecnico = 0
 				   AND (
 				     (tipo = 'estado' AND (estado_nuevo LIKE '%Aceptado%' OR estado_nuevo LIKE '%ok%'))
 				     OR tipo = 'traspaso'
@@ -163,6 +171,7 @@ class ModeloNotificaciones{
 				 LIMIT :limite"
 			);
 			$stmt->bindParam(":tecnico", $idRol, PDO::PARAM_INT);
+			$stmt->bindParam(":tecnico2", $idRol, PDO::PARAM_INT);
 
 		} else {
 
@@ -207,7 +216,7 @@ class ModeloNotificaciones{
 
 			$stmt = $pdo->prepare(
 				"SELECT * FROM notificaciones_estado
-				 WHERE id_tecnico = :tecnico
+				 WHERE (id_tecnico = :tecnico OR id_tecnicoDos = :tecnico2)
 				   AND (
 				     (tipo = 'estado' AND (estado_nuevo LIKE '%Aceptado%' OR estado_nuevo LIKE '%ok%'))
 				     OR tipo = 'traspaso'
@@ -216,6 +225,7 @@ class ModeloNotificaciones{
 				 LIMIT :limite OFFSET :offset"
 			);
 			$stmt->bindParam(":tecnico", $idRol, PDO::PARAM_INT);
+			$stmt->bindParam(":tecnico2", $idRol, PDO::PARAM_INT);
 
 		} else {
 
@@ -287,13 +297,14 @@ class ModeloNotificaciones{
 
 			$stmt = $pdo->prepare(
 				"UPDATE notificaciones_estado SET leido_tecnico = 1
-				 WHERE id_tecnico = :tecnico AND leido_tecnico = 0
+				 WHERE (id_tecnico = :tecnico OR id_tecnicoDos = :tecnico2) AND leido_tecnico = 0
 				   AND (
 				     (tipo = 'estado' AND (estado_nuevo LIKE '%Aceptado%' OR estado_nuevo LIKE '%ok%'))
 				     OR tipo = 'traspaso'
 				   )"
 			);
 			$stmt->bindParam(":tecnico", $idRol, PDO::PARAM_INT);
+			$stmt->bindParam(":tecnico2", $idRol, PDO::PARAM_INT);
 
 		} else {
 

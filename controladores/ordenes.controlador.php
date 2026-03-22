@@ -1,12 +1,14 @@
 <?php
 
-class controladorOrdenes{
+class controladorOrdenes
+{
 
-	
 
-	static public function ctrMostrarOrdenes($campo, $empresa){
 
-		
+	static public function ctrMostrarOrdenes($campo, $empresa)
+	{
+
+
 
 		$tabla = "ordenes";
 
@@ -19,9 +21,10 @@ class controladorOrdenes{
 		return $respuesta;
 
 	}
-	static public function ctrMostrarComisionesPorPersonaPrimera($session_id){
+	static public function ctrMostrarComisionesPorPersonaPrimera($session_id)
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
@@ -34,24 +37,26 @@ class controladorOrdenes{
 		return $respuesta;
 
 	}
-	static public function ctrMostrarComisionesPorPersonaSegunda($session_id2){
+	static public function ctrMostrarComisionesPorPersonaSegunda($session_id2)
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
 
 
-		$respuesta = ModeloOrdenes::mdlMostrarComisionesPorPersonaSegunda($tabla, $session_id2 );
+		$respuesta = ModeloOrdenes::mdlMostrarComisionesPorPersonaSegunda($tabla, $session_id2);
 
 
 
 		return $respuesta;
 
 	}
-	static public function ctrMostrarOrdenesMaterial(){
+	static public function ctrMostrarOrdenesMaterial()
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
@@ -64,7 +69,8 @@ class controladorOrdenes{
 		return $respuesta;
 
 	}
-	static public function ctrMostrarHistorial($tabla, $valor){
+	static public function ctrMostrarHistorial($tabla, $valor)
+	{
 
 
 
@@ -75,9 +81,10 @@ class controladorOrdenes{
 		return $respuesta;
 
 	}
-	static public function ctrUltimaEntrega(){
+	static public function ctrUltimaEntrega()
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
@@ -90,10 +97,11 @@ class controladorOrdenes{
 		return $respuesta;
 
 	}
-	
-	static public function ctrMostrarOrdenesNew($campo, $empresa){
 
-		
+	static public function ctrMostrarOrdenesNew($campo, $empresa)
+	{
+
+
 
 		$tabla = "ordenes";
 
@@ -113,9 +121,10 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	static public function ctrlMostrarordenesEmpresayPerfil($itemOrdenes, $valorOrdenes, $iteDosOrdenes, $valorDosOrdenes){
+	static public function ctrlMostrarordenesEmpresayPerfil($itemOrdenes, $valorOrdenes, $iteDosOrdenes, $valorDosOrdenes)
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
@@ -135,9 +144,10 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	static public function ctrMostrarOrdenesSuma(){
+	static public function ctrMostrarOrdenesSuma()
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
@@ -150,21 +160,22 @@ class controladorOrdenes{
 		return $respuesta;
 
 	}
-		/*=============================================
+	/*=============================================
 
-	MOSTRAR ORDENES PARA SUMAR DEL ASESOR
+MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
-	=============================================*/
+=============================================*/
 
-	static public function ctrMostrarOrdenesSumaAsesor($idAsesor){
+	static public function ctrMostrarOrdenesSumaAsesor($idAsesor)
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
 
 
-		$respuesta = ModeloOrdenes::mdlMostrarOrdenesSumaAsesor($tabla,$idAsesor);
+		$respuesta = ModeloOrdenes::mdlMostrarOrdenesSumaAsesor($tabla, $idAsesor);
 
 
 
@@ -180,7 +191,8 @@ class controladorOrdenes{
 
 
 
-	static public function ctrMostrarordenesParaValidar($item, $valor){
+	static public function ctrMostrarordenesParaValidar($item, $valor)
+	{
 
 
 
@@ -194,7 +206,7 @@ class controladorOrdenes{
 
 		return $respuesta;
 
-	
+
 
 	}
 
@@ -210,7 +222,8 @@ class controladorOrdenes{
 
 
 
-	static public function ctrMostrarOrdenesOrdenadas($ordenar, $item, $valor, $base, $tope, $modo){
+	static public function ctrMostrarOrdenesOrdenadas($ordenar, $item, $valor, $base, $tope, $modo)
+	{
 
 
 
@@ -224,21 +237,22 @@ class controladorOrdenes{
 
 		return $respuesta;
 
-	
-
-	}	
 
 
-
-	static public function ctrSubirMultimediaOrden($datos, $ruta){
-
-		
+	}
 
 
 
-		if(isset($datos["tmp_name"]) && !empty($datos["tmp_name"])){
+	static public function ctrSubirMultimediaOrden($datos, $ruta)
+	{
 
-			
+
+
+
+
+		if (isset($datos["tmp_name"]) && !empty($datos["tmp_name"])) {
+
+
 
 
 
@@ -264,19 +278,19 @@ class controladorOrdenes{
 
 			=============================================*/
 
-			$directorio = "../vistas/img/multimedia/".$ruta;
+			$directorio = "../vistas/img/multimedia/" . $ruta;
 
 
 
 
 
-			if (!file_exists($directorio)){
+			if (!file_exists($directorio)) {
 
 
 
 				mkdir($directorio, 0755);
 
-			
+
 
 			}
 
@@ -290,7 +304,7 @@ class controladorOrdenes{
 
 
 
-			if($datos["type"] == "image/jpeg"){
+			if ($datos["type"] == "image/jpeg") {
 
 
 
@@ -302,11 +316,11 @@ class controladorOrdenes{
 
 
 
-				$rutaMultimedia = $directorio."/".$datos["name"];
+				$rutaMultimedia = $directorio . "/" . $datos["name"];
 
 
 
-				$origen = imagecreatefromjpeg($datos["tmp_name"]);						
+				$origen = imagecreatefromjpeg($datos["tmp_name"]);
 
 
 
@@ -328,7 +342,7 @@ class controladorOrdenes{
 
 			if ($datos["type"] == "image/png") {
 
-				
+
 
 				/*=============================================
 
@@ -338,11 +352,11 @@ class controladorOrdenes{
 
 
 
-				$rutaMultimedia = $directorio."/".$datos["name"];
+				$rutaMultimedia = $directorio . "/" . $datos["name"];
 
 
 
-				$origen = imagecreatefrompng($datos["tmp_name"]);						
+				$origen = imagecreatefrompng($datos["tmp_name"]);
 
 
 
@@ -352,7 +366,7 @@ class controladorOrdenes{
 
 				imagealphablending($destino, FALSE);
 
-		
+
 
 				imagesavealpha($destino, TRUE);
 
@@ -370,7 +384,7 @@ class controladorOrdenes{
 
 
 
-			return $rutaMultimedia;	
+			return $rutaMultimedia;
 
 
 
@@ -388,17 +402,18 @@ class controladorOrdenes{
 
 
 
-	static public function ctrCrearOrden($datos){
+	static public function ctrCrearOrden($datos)
+	{
 
 
 
-		if(isset($datos["tituloOrden"]) and isset($datos["empresa"]) and isset($datos["status"])){
+		if (isset($datos["tituloOrden"]) and isset($datos["empresa"]) and isset($datos["status"])) {
 
 
 
 
 
-			if(preg_match('/^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $datos["tituloOrden"]) && preg_match('/^[,\\.\\a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $_POST["descripcionOrden"]) ){
+			if (preg_match('/^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $datos["tituloOrden"]) && preg_match('/^[,\\.\\a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $_POST["descripcionOrden"])) {
 
 
 
@@ -414,7 +429,7 @@ class controladorOrdenes{
 
 
 
-				if(isset($datos["fotoPortada"]["tmp_name"]) && !empty($datos["fotoPortada"]["tmp_name"])){
+				if (isset($datos["fotoPortada"]["tmp_name"]) && !empty($datos["fotoPortada"]["tmp_name"])) {
 
 
 
@@ -426,7 +441,7 @@ class controladorOrdenes{
 
 
 
-					list($ancho, $alto) = getimagesize($datos["fotoPortada"]["tmp_name"]);	
+					list($ancho, $alto) = getimagesize($datos["fotoPortada"]["tmp_name"]);
 
 
 
@@ -446,7 +461,7 @@ class controladorOrdenes{
 
 
 
-					if($datos["fotoPortada"]["type"] == "image/jpeg"){
+					if ($datos["fotoPortada"]["type"] == "image/jpeg") {
 
 
 
@@ -458,15 +473,15 @@ class controladorOrdenes{
 
 
 
-						$aleatorio = mt_rand(100,999);
+						$aleatorio = mt_rand(100, 999);
 
 
 
-						$rutaPortada = "../vistas/img/cabeceras/".$datos["rutaOrden"].".jpg";
+						$rutaPortada = "../vistas/img/cabeceras/" . $datos["rutaOrden"] . ".jpg";
 
 
 
-						$origen = imagecreatefromjpeg($datos["fotoPortada"]["tmp_name"]);						
+						$origen = imagecreatefromjpeg($datos["fotoPortada"]["tmp_name"]);
 
 						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
 
@@ -484,7 +499,7 @@ class controladorOrdenes{
 
 
 
-					if($datos["fotoPortada"]["type"] == "image/png"){
+					if ($datos["fotoPortada"]["type"] == "image/png") {
 
 
 
@@ -496,15 +511,15 @@ class controladorOrdenes{
 
 
 
-						$aleatorio = mt_rand(100,999);
+						$aleatorio = mt_rand(100, 999);
 
 
 
-						$rutaPortada = "../vistas/img/cabeceras/".$datos["rutaOrden"].".png";
+						$rutaPortada = "../vistas/img/cabeceras/" . $datos["rutaOrden"] . ".png";
 
 
 
-						$origen = imagecreatefrompng($datos["fotoPortada"]["tmp_name"]);						
+						$origen = imagecreatefrompng($datos["fotoPortada"]["tmp_name"]);
 
 
 
@@ -514,7 +529,7 @@ class controladorOrdenes{
 
 						imagealphablending($destino, FALSE);
 
-				
+
 
 						imagesavealpha($destino, TRUE);
 
@@ -548,7 +563,7 @@ class controladorOrdenes{
 
 
 
-				if(isset($datos["fotoPrincipal"]["tmp_name"]) && !empty($datos["fotoPrincipal"]["tmp_name"])){
+				if (isset($datos["fotoPrincipal"]["tmp_name"]) && !empty($datos["fotoPrincipal"]["tmp_name"])) {
 
 
 
@@ -560,7 +575,7 @@ class controladorOrdenes{
 
 
 
-					list($ancho, $alto) = getimagesize($datos["fotoPrincipal"]["tmp_name"]);	
+					list($ancho, $alto) = getimagesize($datos["fotoPrincipal"]["tmp_name"]);
 
 
 
@@ -578,7 +593,7 @@ class controladorOrdenes{
 
 
 
-					if($datos["fotoPrincipal"]["type"] == "image/jpeg"){
+					if ($datos["fotoPrincipal"]["type"] == "image/jpeg") {
 
 
 
@@ -590,15 +605,15 @@ class controladorOrdenes{
 
 
 
-						$aleatorio = mt_rand(100,999);
+						$aleatorio = mt_rand(100, 999);
 
 
 
-						$rutaFotoPrincipal = "../vistas/img/productos/".$datos["rutaOrden"].".jpg";
+						$rutaFotoPrincipal = "../vistas/img/productos/" . $datos["rutaOrden"] . ".jpg";
 
 
 
-						$origen = imagecreatefromjpeg($datos["fotoPrincipal"]["tmp_name"]);						
+						$origen = imagecreatefromjpeg($datos["fotoPrincipal"]["tmp_name"]);
 
 
 
@@ -618,7 +633,7 @@ class controladorOrdenes{
 
 
 
-					if($datos["fotoPrincipal"]["type"] == "image/png"){
+					if ($datos["fotoPrincipal"]["type"] == "image/png") {
 
 
 
@@ -630,15 +645,15 @@ class controladorOrdenes{
 
 
 
-						$aleatorio = mt_rand(100,999);
+						$aleatorio = mt_rand(100, 999);
 
 
 
-						$rutaFotoPrincipal = "../vistas/img/productos/".$datos["rutaOrden"].".png";
+						$rutaFotoPrincipal = "../vistas/img/productos/" . $datos["rutaOrden"] . ".png";
 
 
 
-						$origen = imagecreatefrompng($datos["fotoPrincipal"]["tmp_name"]);						
+						$origen = imagecreatefrompng($datos["fotoPrincipal"]["tmp_name"]);
 
 
 
@@ -648,7 +663,7 @@ class controladorOrdenes{
 
 						imagealphablending($destino, FALSE);
 
-				
+
 
 						imagesavealpha($destino, TRUE);
 
@@ -676,85 +691,85 @@ class controladorOrdenes{
 
 				$fechaDeIngreso = date('Y-m-d H:i:s');
 
-							
 
-					$datosOrden = array(
 
-						   "titulo"=>$datos["tituloOrden"],
+				$datosOrden = array(
 
-						   "empresa"=>$datos["empresa"],
+					"titulo" => $datos["tituloOrden"],
 
-						   "multimedia"=>$datos["multimedia"],
+					"empresa" => $datos["empresa"],
 
-						   "ruta"=>$datos["rutaOrden"],
+					"multimedia" => $datos["multimedia"],
 
-						   //"creador"=>$_SESSION["id"],
+					"ruta" => $datos["rutaOrden"],
 
-						   "tecnico"=>$datos["tecnico"],
+					//"creador"=>$_SESSION["id"],
 
-						   "asesor"=>$datos["asesor"],
+					"tecnico" => $datos["tecnico"],
 
-						   "cliente"=>$datos["cliente"],
+					"asesor" => $datos["asesor"],
 
-						   "status"=>$datos["status"],
+					"cliente" => $datos["cliente"],
 
-						   "descripcion"=> $datos["descripcionOrden"],
+					"status" => $datos["status"],
 
-						   "partida1"=> $datos["partida1"],
+					"descripcion" => $datos["descripcionOrden"],
 
-						   "partida2"=> $datos["partida2"],
+					"partida1" => $datos["partida1"],
 
-						   "partida3"=> $datos["partida3"],
+					"partida2" => $datos["partida2"],
 
-						   "partida4"=> $datos["partida4"],
+					"partida3" => $datos["partida3"],
 
-						   "partida5"=> $datos["partida5"],
+					"partida4" => $datos["partida4"],
 
-						   "partida6"=> $datos["partida6"],
+					"partida5" => $datos["partida5"],
 
-						   "partida7"=> $datos["partida7"],
+					"partida6" => $datos["partida6"],
 
-						   "partida8"=> $datos["partida8"],
+					"partida7" => $datos["partida7"],
 
-						   "partida9"=> $datos["partida9"],
+					"partida8" => $datos["partida8"],
 
-						   "partida10"=> $datos["partida10"],
+					"partida9" => $datos["partida9"],
 
-						   "precio1"=> $datos["precio1"],
+					"partida10" => $datos["partida10"],
 
-						   "precio2"=> $datos["precio2"],
+					"precio1" => $datos["precio1"],
 
-						   "precio3"=> $datos["precio3"],
+					"precio2" => $datos["precio2"],
 
-						   "precio4"=> $datos["precio4"],
+					"precio3" => $datos["precio3"],
 
-						   "precio5"=> $datos["precio5"],
+					"precio4" => $datos["precio4"],
 
-						   "precio6"=> $datos["precio6"],
+					"precio5" => $datos["precio5"],
 
-						   "precio7"=> $datos["precio7"],
+					"precio6" => $datos["precio6"],
 
-						   "precio8"=> $datos["precio8"],
+					"precio7" => $datos["precio7"],
 
-						   "precio9"=> $datos["precio9"],
+					"precio8" => $datos["precio8"],
 
-						   "precio10"=> $datos["precio10"],
+					"precio9" => $datos["precio9"],
 
-						   "totalOrden"=> $datos["totalOrden"],
+					"precio10" => $datos["precio10"],
 
-						   "imgPortada"=>substr($rutaPortada,3),
+					"totalOrden" => $datos["totalOrden"],
 
-						   "imgFotoPrincipal"=>substr($rutaFotoPrincipal,3),
+					"imgPortada" => substr($rutaPortada, 3),
 
-						   "fecha_ingreso" =>$fechaDeIngreso,
+					"imgFotoPrincipal" => substr($rutaFotoPrincipal, 3),
 
-						   "marcaDelEquipo"=>$datos["marcaDelEquipo"],
+					"fecha_ingreso" => $fechaDeIngreso,
 
-						   "modeloDelEquipo"=>$datos["modeloDelEquipo"],
+					"marcaDelEquipo" => $datos["marcaDelEquipo"],
 
-						   "numeroDeSerieDelEquipo"=>$datos["numeroDeSerieDelEquipo"]
+					"modeloDelEquipo" => $datos["modeloDelEquipo"],
 
-					   );
+					"numeroDeSerieDelEquipo" => $datos["numeroDeSerieDelEquipo"]
+
+				);
 
 
 
@@ -764,15 +779,15 @@ class controladorOrdenes{
 
 				return $respuesta;
 
-				
 
 
 
-			}else{
+
+			} else {
 
 
 
-					echo'<script>
+				echo '<script>
 
 
 
@@ -812,7 +827,7 @@ class controladorOrdenes{
 
 			}
 
-		
+
 
 		}
 
@@ -830,15 +845,16 @@ class controladorOrdenes{
 
 
 
-	static public function ctrEditarOrden($datos){
+	static public function ctrEditarOrden($datos)
+	{
 
 
 
-		if(isset($datos["idOrden"])){
+		if (isset($datos["idOrden"])) {
 
 
 
-			if(preg_match('/^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $datos["tituloOrden"])  && preg_match('/^[,\\.\\a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $_POST["descripcionOrden"]) ){
+			if (preg_match('/^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $datos["tituloOrden"]) && preg_match('/^[,\\.\\a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $_POST["descripcionOrden"])) {
 
 
 
@@ -869,63 +885,63 @@ class controladorOrdenes{
 					}
 				}
 
-					foreach ($traerOrdenes as $key => $value) {
-
-					
-
-						$multimediaBD = json_decode($value["multimedia"],true);
-
-						$multimediaEditar = json_decode($datos["multimedia"],true);
+				foreach ($traerOrdenes as $key => $value) {
 
 
 
-						$objectMultimediaBD = array();
+					$multimediaBD = json_decode($value["multimedia"], true);
 
-						$objectMultimediaEditar = array();
-
-
-
-						foreach ($multimediaBD as $key => $value) {
+					$multimediaEditar = json_decode($datos["multimedia"], true);
 
 
 
-						  array_push($objectMultimediaBD, $value["foto"]);
+					$objectMultimediaBD = array();
+
+					$objectMultimediaEditar = array();
 
 
 
-						}
+					foreach ($multimediaBD as $key => $value) {
 
 
 
-						foreach ($multimediaEditar as $key => $value) {
+						array_push($objectMultimediaBD, $value["foto"]);
 
 
 
-						  array_push($objectMultimediaEditar, $value["foto"]);
+					}
 
 
 
-						}
+					foreach ($multimediaEditar as $key => $value) {
 
 
 
-						$borrarFoto = array_diff($objectMultimediaBD, $objectMultimediaEditar);
+						array_push($objectMultimediaEditar, $value["foto"]);
 
 
 
-						foreach ($borrarFoto as $key => $value) {
-
-							
-
-							unlink("../".$value);
+					}
 
 
 
-						}
+					$borrarFoto = array_diff($objectMultimediaBD, $objectMultimediaEditar);
 
 
 
-									
+					foreach ($borrarFoto as $key => $value) {
+
+
+
+						unlink("../" . $value);
+
+
+
+					}
+
+
+
+
 
 
 
@@ -941,11 +957,11 @@ class controladorOrdenes{
 
 
 
-				$rutaPortada = "../".$datos["antiguaFotoPortada"];
+				$rutaPortada = "../" . $datos["antiguaFotoPortada"];
 
 
 
-				if(isset($datos["fotoPortada"]["tmp_name"]) && !empty($datos["fotoPortada"]["tmp_name"])){
+				if (isset($datos["fotoPortada"]["tmp_name"]) && !empty($datos["fotoPortada"]["tmp_name"])) {
 
 
 
@@ -957,7 +973,7 @@ class controladorOrdenes{
 
 
 
-					unlink("../".$datos["antiguaFotoPortada"]);
+					unlink("../" . $datos["antiguaFotoPortada"]);
 
 
 
@@ -969,7 +985,7 @@ class controladorOrdenes{
 
 
 
-					list($ancho, $alto) = getimagesize($datos["fotoPortada"]["tmp_name"]);	
+					list($ancho, $alto) = getimagesize($datos["fotoPortada"]["tmp_name"]);
 
 
 
@@ -989,7 +1005,7 @@ class controladorOrdenes{
 
 
 
-					if($datos["fotoPortada"]["type"] == "image/jpeg"){
+					if ($datos["fotoPortada"]["type"] == "image/jpeg") {
 
 
 
@@ -1001,15 +1017,15 @@ class controladorOrdenes{
 
 
 
-						$aleatorio = mt_rand(100,999);
+						$aleatorio = mt_rand(100, 999);
 
 
 
-						$rutaPortada = "../vistas/img/cabeceras/".$datos["rutaOrden"].".jpg";
+						$rutaPortada = "../vistas/img/cabeceras/" . $datos["rutaOrden"] . ".jpg";
 
 
 
-						$origen = imagecreatefromjpeg($datos["fotoPortada"]["tmp_name"]);						
+						$origen = imagecreatefromjpeg($datos["fotoPortada"]["tmp_name"]);
 
 						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
 
@@ -1027,7 +1043,7 @@ class controladorOrdenes{
 
 
 
-					if($datos["fotoPortada"]["type"] == "image/png"){
+					if ($datos["fotoPortada"]["type"] == "image/png") {
 
 
 
@@ -1039,15 +1055,15 @@ class controladorOrdenes{
 
 
 
-						$aleatorio = mt_rand(100,999);
+						$aleatorio = mt_rand(100, 999);
 
 
 
-						$rutaPortada = "../vistas/img/cabeceras/".$datos["rutaOrden"].".png";
+						$rutaPortada = "../vistas/img/cabeceras/" . $datos["rutaOrden"] . ".png";
 
 
 
-						$origen = imagecreatefrompng($datos["fotoPortada"]["tmp_name"]);						
+						$origen = imagecreatefrompng($datos["fotoPortada"]["tmp_name"]);
 
 
 
@@ -1057,7 +1073,7 @@ class controladorOrdenes{
 
 						imagealphablending($destino, FALSE);
 
-				
+
 
 						imagesavealpha($destino, TRUE);
 
@@ -1087,11 +1103,11 @@ class controladorOrdenes{
 
 
 
-				$rutaFotoPrincipal = "../".$datos["antiguaFotoPrincipal"];
+				$rutaFotoPrincipal = "../" . $datos["antiguaFotoPrincipal"];
 
 
 
-				if(isset($datos["fotoPrincipal"]["tmp_name"]) && !empty($datos["fotoPrincipal"]["tmp_name"])){
+				if (isset($datos["fotoPrincipal"]["tmp_name"]) && !empty($datos["fotoPrincipal"]["tmp_name"])) {
 
 
 
@@ -1103,7 +1119,7 @@ class controladorOrdenes{
 
 
 
-					unlink("../".$datos["antiguaFotoPrincipal"]);
+					unlink("../" . $datos["antiguaFotoPrincipal"]);
 
 
 
@@ -1115,7 +1131,7 @@ class controladorOrdenes{
 
 
 
-					list($ancho, $alto) = getimagesize($datos["fotoPrincipal"]["tmp_name"]);	
+					list($ancho, $alto) = getimagesize($datos["fotoPrincipal"]["tmp_name"]);
 
 
 
@@ -1135,7 +1151,7 @@ class controladorOrdenes{
 
 
 
-					if($datos["fotoPrincipal"]["type"] == "image/jpeg"){
+					if ($datos["fotoPrincipal"]["type"] == "image/jpeg") {
 
 
 
@@ -1147,15 +1163,15 @@ class controladorOrdenes{
 
 
 
-						$aleatorio = mt_rand(100,999);
+						$aleatorio = mt_rand(100, 999);
 
 
 
-						$rutaFotoPrincipal = "../vistas/img/productos/".$datos["rutaOrden"].".jpg";
+						$rutaFotoPrincipal = "../vistas/img/productos/" . $datos["rutaOrden"] . ".jpg";
 
 
 
-						$origen = imagecreatefromjpeg($datos["fotoPrincipal"]["tmp_name"]);						
+						$origen = imagecreatefromjpeg($datos["fotoPrincipal"]["tmp_name"]);
 
 
 
@@ -1175,7 +1191,7 @@ class controladorOrdenes{
 
 
 
-					if($datos["fotoPrincipal"]["type"] == "image/png"){
+					if ($datos["fotoPrincipal"]["type"] == "image/png") {
 
 
 
@@ -1187,15 +1203,15 @@ class controladorOrdenes{
 
 
 
-						$aleatorio = mt_rand(100,999);
+						$aleatorio = mt_rand(100, 999);
 
 
 
-						$rutaFotoPrincipal = "../vistas/img/productos/".$datos["rutaOrden"].".png";
+						$rutaFotoPrincipal = "../vistas/img/productos/" . $datos["rutaOrden"] . ".png";
 
 
 
-						$origen = imagecreatefrompng($datos["fotoPrincipal"]["tmp_name"]);						
+						$origen = imagecreatefrompng($datos["fotoPrincipal"]["tmp_name"]);
 
 
 
@@ -1205,7 +1221,7 @@ class controladorOrdenes{
 
 						imagealphablending($destino, FALSE);
 
-				
+
 
 						imagesavealpha($destino, TRUE);
 
@@ -1227,155 +1243,161 @@ class controladorOrdenes{
 
 
 
-					date_default_timezone_set("America/Mexico_City");
+				date_default_timezone_set("America/Mexico_City");
 
 
 
-					$fechaActualParaEntrada = date('Y-m-d');
+				$fechaActualParaEntrada = date('Y-m-d');
 
-							
+
 
 
 
 				$datosOrden = array(
 
-						 		   "id"=>$datos["idOrden"],
+					"id" => $datos["idOrden"],
 
-								   "titulo"=>$datos["tituloOrden"],
+					"titulo" => $datos["tituloOrden"],
 
-								   "idTecnico"=>$datos["tecnico"],
+					"idTecnico" => $datos["tecnico"],
 
-								   "idAsesor"=>$datos["asesor"],
+					"idAsesor" => $datos["asesor"],
 
-								   "idCliente"=>$datos["cliente"], 
+					"idCliente" => $datos["cliente"],
 
-								   "estado"=>$datos["estado"], 
+					"estado" => $datos["estado"],
 
-								   "descripcionOrden"=>$datos["descripcionOrden"],
+					"descripcionOrden" => $datos["descripcionOrden"],
 
-								   "rutaOrden"=>$datos["rutaOrden"],
+					"rutaOrden" => $datos["rutaOrden"],
 
-								   "multimedia"=>$datos["multimedia"],
+					"multimedia" => $datos["multimedia"],
 
-								   "partida1"=>$datos["partida1"],
+					"partida1" => $datos["partida1"],
 
-								   "partida2"=>$datos["partida2"],
+					"partida2" => $datos["partida2"],
 
-								   "partida3"=>$datos["partida3"],
+					"partida3" => $datos["partida3"],
 
-								   "partida4"=>$datos["partida4"],
+					"partida4" => $datos["partida4"],
 
-								   "partida5"=>$datos["partida5"],
+					"partida5" => $datos["partida5"],
 
-								   "partida6"=>$datos["partida6"],
+					"partida6" => $datos["partida6"],
 
-								   "partida7"=>$datos["partida7"],
+					"partida7" => $datos["partida7"],
 
-								   "partida8"=>$datos["partida8"],
+					"partida8" => $datos["partida8"],
 
-								   "partida9"=>$datos["partida9"],
+					"partida9" => $datos["partida9"],
 
-								   "partida10"=>$datos["partida10"],
+					"partida10" => $datos["partida10"],
 
-								   "precio1"=>$datos["precio1"],
+					"precio1" => $datos["precio1"],
 
-								   "precio2"=>$datos["precio2"],
+					"precio2" => $datos["precio2"],
 
-								   "precio3"=>$datos["precio3"],
+					"precio3" => $datos["precio3"],
 
-								   "precio4"=>$datos["precio4"],
+					"precio4" => $datos["precio4"],
 
-								   "precio5"=>$datos["precio5"],
+					"precio5" => $datos["precio5"],
 
-								   "precio6"=>$datos["precio6"],
+					"precio6" => $datos["precio6"],
 
-								   "precio7"=>$datos["precio7"],
+					"precio7" => $datos["precio7"],
 
-								   "precio8"=>$datos["precio8"],
+					"precio8" => $datos["precio8"],
 
-								   "precio9"=>$datos["precio9"],
+					"precio9" => $datos["precio9"],
 
-								   "precio10"=>$datos["precio10"],
+					"precio10" => $datos["precio10"],
 
-								   "totalOrdenEditar"=>$datos["totalOrdenEditar"],
+					"totalOrdenEditar" => $datos["totalOrdenEditar"],
 
-								   "imgPortada"=>substr($rutaPortada,3),
+					"imgPortada" => substr($rutaPortada, 3),
 
-								   "imgFotoPrincipal"=>substr($rutaFotoPrincipal,3),
+					"imgFotoPrincipal" => substr($rutaFotoPrincipal, 3),
 
-								   "seleccionarPedido"=>$datos["seleccionarPedido"],
+					"seleccionarPedido" => $datos["seleccionarPedido"],
 
-								   "idPedido"=>$datos["idPedido"],
+					"idPedido" => $datos["idPedido"],
 
-								   "EstadoDelPedido"=>$datos["EstadoDelPedido"]
+					"EstadoDelPedido" => $datos["EstadoDelPedido"]
 
 
 
-							);
+				);
 
 
 
-						if ($datos["estado"] == "Entregado (Ent)"){
+				if ($datos["estado"] == "Entregado (Ent)") {
 
 
 
-							date_default_timezone_set("America/Mexico_City");
+					date_default_timezone_set("America/Mexico_City");
 
 
 
-							$fecha = date('Y-m-d');
+					$fecha = date('Y-m-d');
 
-							
 
-							$fechaActual = $fecha;
 
+					$fechaActual = $fecha;
 
 
-							$datosOrdenSalida = array("id"=>$datos["idOrden"],
 
-													  "fecha_Salida"=> $fechaActual
+					$datosOrdenSalida = array(
+						"id" => $datos["idOrden"],
 
-							);
+						"fecha_Salida" => $fechaActual
 
+					);
 
 
-							$respuesta = ModeloOrdenes::mdlEditarFechaSalida("ordenes", $datosOrdenSalida);
 
-						}
+					$respuesta = ModeloOrdenes::mdlEditarFechaSalida("ordenes", $datosOrdenSalida);
 
+				}
 
 
-					$actualizadPedido = ModeloOrdenes::mdlEditarPedidoEnOrden("pedidos", $datosOrden);
 
+				$actualizadPedido = ModeloOrdenes::mdlEditarPedidoEnOrden("pedidos", $datosOrden);
 
 
 
 
-					$respuesta = ModeloOrdenes::mdlEditarOrden("ordenes", $datosOrden);
+
+				$respuesta = ModeloOrdenes::mdlEditarOrden("ordenes", $datosOrden);
 
 				// ── Notificación de cambio de estado ──
-				if ($respuesta === "ok" && !empty($_egs_estadoAnterior)
-				    && $_egs_estadoAnterior !== $datos["estado"]) {
+				if (
+					$respuesta === "ok" && !empty($_egs_estadoAnterior)
+					&& $_egs_estadoAnterior !== $datos["estado"]
+				) {
 					try {
 						ControladorNotificaciones::ctrCrearTablaEstado();
 						ControladorNotificaciones::ctrRegistrarCambioEstado(array(
-							"id_orden"          => intval($datos["idOrden"]),
-							"estado_anterior"   => $_egs_estadoAnterior,
-							"estado_nuevo"      => $datos["estado"],
+							"id_orden" => intval($datos["idOrden"]),
+							"estado_anterior" => $_egs_estadoAnterior,
+							"estado_nuevo" => $datos["estado"],
 							"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
-							"nombre_usuario"    => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
-							"titulo_orden"      => $datos["tituloOrden"],
-							"id_empresa"        => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
-							"id_asesor"         => intval($datos["asesor"]),
-							"id_tecnico"        => intval($datos["tecnico"]),
+							"nombre_usuario" => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
+							"titulo_orden" => $datos["tituloOrden"],
+							"id_empresa" => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+							"id_asesor" => intval($datos["asesor"]),
+							"id_tecnico" => intval($datos["tecnico"]),
 						));
-					} catch (Exception $e) { /* silenciar para no romper el flujo */ }
+					} catch (Exception $e) { /* silenciar para no romper el flujo */
+					}
 				}
 
 				// ── Notificación de traspaso de técnico ──
-				if ($respuesta === "ok" && $_egs_tecnicoAnterior > 0
-				    && $_egs_tecnicoAnterior !== intval($datos["tecnico"])
-				    && intval($datos["tecnico"]) > 0) {
+				if (
+					$respuesta === "ok" && $_egs_tecnicoAnterior > 0
+					&& $_egs_tecnicoAnterior !== intval($datos["tecnico"])
+					&& intval($datos["tecnico"]) > 0
+				) {
 					try {
 						ControladorNotificaciones::ctrCrearTablaEstado();
 						// Obtener nombres de técnicos
@@ -1383,37 +1405,41 @@ class controladorOrdenes{
 						$_egs_tecNuevoNombre = "Técnico #" . $datos["tecnico"];
 						try {
 							$_egs_tAnt = ControladorTecnicos::ctrMostrarTecnicos("id", $_egs_tecnicoAnterior);
-							if (is_array($_egs_tAnt) && isset($_egs_tAnt["nombre"])) $_egs_tecAntNombre = $_egs_tAnt["nombre"];
+							if (is_array($_egs_tAnt) && isset($_egs_tAnt["nombre"]))
+								$_egs_tecAntNombre = $_egs_tAnt["nombre"];
 							$_egs_tNuevo = ControladorTecnicos::ctrMostrarTecnicos("id", intval($datos["tecnico"]));
-							if (is_array($_egs_tNuevo) && isset($_egs_tNuevo["nombre"])) $_egs_tecNuevoNombre = $_egs_tNuevo["nombre"];
-						} catch (Exception $ex) {}
+							if (is_array($_egs_tNuevo) && isset($_egs_tNuevo["nombre"]))
+								$_egs_tecNuevoNombre = $_egs_tNuevo["nombre"];
+						} catch (Exception $ex) {
+						}
 
 						ControladorNotificaciones::ctrRegistrarCambioEstado(array(
-							"id_orden"          => intval($datos["idOrden"]),
-							"estado_anterior"   => $_egs_tecAntNombre,
-							"estado_nuevo"      => $_egs_tecNuevoNombre,
+							"id_orden" => intval($datos["idOrden"]),
+							"estado_anterior" => $_egs_tecAntNombre,
+							"estado_nuevo" => $_egs_tecNuevoNombre,
 							"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
-							"nombre_usuario"    => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
-							"titulo_orden"      => $datos["tituloOrden"],
-							"id_empresa"        => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
-							"id_asesor"         => intval($datos["asesor"]),
-							"id_tecnico"        => intval($datos["tecnico"]),
-							"tipo"              => "traspaso",
+							"nombre_usuario" => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
+							"titulo_orden" => $datos["tituloOrden"],
+							"id_empresa" => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+							"id_asesor" => intval($datos["asesor"]),
+							"id_tecnico" => intval($datos["tecnico"]),
+							"tipo" => "traspaso",
 						));
-					} catch (Exception $e) {}
+					} catch (Exception $e) {
+					}
 				}
 
 
 
 
 
-								
-
-				
 
 
 
-				
+
+
+
+
 
 
 
@@ -1423,11 +1449,11 @@ class controladorOrdenes{
 
 
 
-			}else{
+			} else {
 
 
 
-				echo'<script>
+				echo '<script>
 
 
 
@@ -1467,7 +1493,7 @@ class controladorOrdenes{
 
 		}
 
-		
+
 
 	}
 
@@ -1483,47 +1509,18 @@ class controladorOrdenes{
 
 
 
-	static public function ctrEliminarOrden(){
+	static public function ctrEliminarOrden()
+	{
 
-		if(isset($_GET["idOrden"])){
+
+
+		if (isset($_GET["idOrden"])) {
+
+
 
 			$datos = $_GET["idOrden"];
 
-			// ── SEGURIDAD: Solo administradores con token válido pueden eliminar ──
-			if (!isset($_SESSION['perfil']) || $_SESSION['perfil'] !== 'administrador') {
-				echo '<script>
-					swal({ type: "error", title: "Acceso denegado",
-					       text: "Solo los administradores pueden eliminar órdenes.",
-					       showConfirmButton: true, confirmButtonText: "Cerrar"
-					}).then(function(r){ if(r.value) window.location = "index.php?ruta=ordenesnew"; });
-				</script>';
-				return;
-			}
 
-			// Verificar token de contraseña (generado por AJAX verificarAdminPassword)
-			$tokenGet     = isset($_GET['egsDelToken']) ? $_GET['egsDelToken'] : '';
-			$tokenSesion  = isset($_SESSION['egs_del_token'])   ? $_SESSION['egs_del_token']   : '';
-			$idSesion     = isset($_SESSION['egs_del_id'])      ? intval($_SESSION['egs_del_id']) : 0;
-			$expiraSesion = isset($_SESSION['egs_del_expires']) ? intval($_SESSION['egs_del_expires']) : 0;
-
-			$tokenValido = ($tokenGet !== ''
-			             && $tokenGet === $tokenSesion
-			             && intval($datos) === $idSesion
-			             && time() <= $expiraSesion);
-
-			// Invalidar el token de inmediato (uso único)
-			unset($_SESSION['egs_del_token'], $_SESSION['egs_del_id'], $_SESSION['egs_del_expires']);
-
-			if (!$tokenValido) {
-				echo '<script>
-					swal({ type: "error", title: "Verificación requerida",
-					       text: "Debe ingresar la contraseña de administrador para eliminar una orden.",
-					       showConfirmButton: true, confirmButtonText: "Cerrar"
-					}).then(function(r){ if(r.value) window.location = "index.php?ruta=ordenesnew"; });
-				</script>';
-				return;
-			}
-			// ── FIN SEGURIDAD ──
 
 
 
@@ -1535,11 +1532,11 @@ class controladorOrdenes{
 
 
 
-			if($_GET["imgPrincipal"] != "" && $_GET["imgPrincipal"] != "vistas/img/productos/default/default.jpg"){
+			if ($_GET["imgPrincipal"] != "" && $_GET["imgPrincipal"] != "vistas/img/productos/default/default.jpg") {
 
 
 
-				unlink($_GET["imgPrincipal"]);		
+				unlink($_GET["imgPrincipal"]);
 
 
 
@@ -1547,11 +1544,11 @@ class controladorOrdenes{
 
 
 
-			if($_GET["imgPortada"] != "" && $_GET["imgPortada"] != "vistas/img/cabeceras/default/default.jpg"){
+			if ($_GET["imgPortada"] != "" && $_GET["imgPortada"] != "vistas/img/cabeceras/default/default.jpg") {
 
 
 
-				unlink($_GET["imgPortada"]);		
+				unlink($_GET["imgPortada"]);
 
 
 
@@ -1565,11 +1562,11 @@ class controladorOrdenes{
 
 
 
-			if($respuesta == "ok"){
+			if ($respuesta == "ok") {
 
 
 
-				echo'<script>
+				echo '<script>
 
 
 
@@ -1603,7 +1600,7 @@ class controladorOrdenes{
 
 
 
-			}		
+			}
 
 
 
@@ -1625,53 +1622,55 @@ class controladorOrdenes{
 
 	/*=============================================
 
-    AGREGAR OBSERVACION
+	AGREGAR OBSERVACION
 
-    =============================================*/
+	=============================================*/
 
-    public function ctrAgregarObservacion($datos){
-
-
-
-		if(isset($datos["observacion1"])){
+	public function ctrAgregarObservacion($datos)
+	{
 
 
 
-					$tabla ="observacionesOrdenes";
+		if (isset($datos["observacion1"])) {
 
 
 
-					$datos = array("creador" => $datos["creador"], 
-
-								   "idOrdenObservacion" => $datos["idOrdenObservacion"], 
-
-    					  		   "observacion1" => $datos["observacion1"],
-
-    					  		    "observacion2" => $datos["observacion2"],
-
-    					  		    "observacion3" => $datos["observacion3"],
-
-    					  		    "observacion4" => $datos["observacion4"],
-
-    					  		    "observacion5" => $datos["observacion5"],
-
-    					  		    "observacion6" => $datos["observacion6"],
-
-    					  			"observacion7" => $datos["observacion7"],
-
-    					  			"observacion8" => $datos["observacion8"],
-
-    					  			"observacion9" => $datos["observacion9"], 
-
-    					  			"observacion10" => $datos["observacion10"]
-
-    					);
+			$tabla = "observacionesOrdenes";
 
 
 
+			$datos = array(
+				"creador" => $datos["creador"],
+
+				"idOrdenObservacion" => $datos["idOrdenObservacion"],
+
+				"observacion1" => $datos["observacion1"],
+
+				"observacion2" => $datos["observacion2"],
+
+				"observacion3" => $datos["observacion3"],
+
+				"observacion4" => $datos["observacion4"],
+
+				"observacion5" => $datos["observacion5"],
+
+				"observacion6" => $datos["observacion6"],
+
+				"observacion7" => $datos["observacion7"],
+
+				"observacion8" => $datos["observacion8"],
+
+				"observacion9" => $datos["observacion9"],
+
+				"observacion10" => $datos["observacion10"]
+
+			);
 
 
-					
+
+
+
+
 
 
 
@@ -1681,13 +1680,13 @@ class controladorOrdenes{
 
 			return $respuesta;
 
-		}else{
+		} else {
 
 
 
 
 
-				echo '<script>
+			echo '<script>
 
 
 
@@ -1743,11 +1742,12 @@ class controladorOrdenes{
 
 	RANGO FECHAS
 
-	=============================================*/	
+	=============================================*/
 
 
 
-	static public function ctrRangoFechasOrdenes($fechaInicial, $fechaFinal, $itemUno, $valorUno){
+	static public function ctrRangoFechasOrdenes($fechaInicial, $fechaFinal, $itemUno, $valorUno)
+	{
 
 
 
@@ -1761,7 +1761,7 @@ class controladorOrdenes{
 
 		return $respuesta;
 
-		
+
 
 	}
 
@@ -1771,11 +1771,12 @@ class controladorOrdenes{
 
 	RANGO FECHAS PARA SUPER ADMINISTRADOR
 
-	=============================================*/	
+	=============================================*/
 
 
 
-	static public function ctrRangoFechasOrdenesSuperAdmin($fechaInicial, $fechaFinal){
+	static public function ctrRangoFechasOrdenesSuperAdmin($fechaInicial, $fechaFinal)
+	{
 
 
 
@@ -1789,7 +1790,7 @@ class controladorOrdenes{
 
 		return $respuesta;
 
-		
+
 
 	}
 
@@ -1797,11 +1798,12 @@ class controladorOrdenes{
 
 	RANGO FECHAS PARA ENTREGADOS COMISIONES
 
-	=============================================*/	
+	=============================================*/
 
 
 
-	static public function ctrRangoFechasOrdenesComisiones($fechaInicial, $fechaFinal){
+	static public function ctrRangoFechasOrdenesComisiones($fechaInicial, $fechaFinal)
+	{
 
 
 
@@ -1815,7 +1817,7 @@ class controladorOrdenes{
 
 		return $respuesta;
 
-		
+
 
 	}
 
@@ -1831,33 +1833,34 @@ class controladorOrdenes{
 
 
 
-	public function ctrDescargarReporteVOrdenes($valorEmpresa){
+	public function ctrDescargarReporteVOrdenes($valorEmpresa)
+	{
 
-	
 
-		if(isset($_GET["reporte"])){
+
+		if (isset($_GET["reporte"])) {
 
 
 
 			$tabla = "ordenes";
 
-			
 
-			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])){
 
-				
+			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+
+
 
 				$itemUno = "id_empresa";
 
 				$valorUno = $valorEmpresa;
 
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemUno, $valorUno);
-
-			
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemUno, $valorUno);
 
 
 
-			}else{
+
+
+			} else {
 
 
 
@@ -1885,7 +1888,7 @@ class controladorOrdenes{
 
 
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 
 
@@ -1895,15 +1898,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -1939,71 +1942,71 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $value) {
 
-				
-
-				 $item = "id";
-
-              	$valor = $value["id_empresa"];
 
 
+				$item = "id";
 
-             	 $NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+				$valor = $value["id_empresa"];
 
 
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-				
+
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
+
+
 
 				//TRAER ASESOR
 
-                    
-
-	              $item = "id";
-
-	              $valor = $value["id_Asesor"];
 
 
+				$item = "id";
 
-	              $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
-
-					
-
-				  $NombreAsesor = $asesor["nombre"];
+				$valor = $value["id_Asesor"];
 
 
 
-             	//TRAER CLIENTE (USUARIO)
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 
 
-                $item = "id";
-
-                $valor = $value["id_usuario"];
+				$NombreAsesor = $asesor["nombre"];
 
 
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				//TRAER CLIENTE (USUARIO)
 
 
 
-                $NombreUsuario = $usuario["nombre"];
+				$item = "id";
+
+				$valor = $value["id_usuario"];
 
 
 
-                //TRAER TECNICO
-
-      			$item = "id";
-
-      			$valor = $value["id_tecnico"];
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
 
 
 
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$NombreUsuario = $usuario["nombre"];
 
 
 
-      			$NombreTecnico = $tecnico["nombre"];
+				//TRAER TECNICO
+
+				$item = "id";
+
+				$valor = $value["id_tecnico"];
+
+
+
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
+
+
+
+				$NombreTecnico = $tecnico["nombre"];
 
 
 
@@ -2021,59 +2024,59 @@ class controladorOrdenes{
 
 
 
-					echo utf8_decode("<tr>
+				echo utf8_decode("<tr>
 
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".money_format("%i",$value["total"])."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . money_format("%i", $value["total"]) . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
 
-			 					  	 </tr>"); 		
+			 					  	 </tr>");
 
 
 
 			}
 
-			     /*=============================================
+			/*=============================================
 
-				TRAER TOTAL
+		   TRAER TOTAL
 
-				=============================================*/
+		   =============================================*/
 
-				$tabla= "ordenes";
+			$tabla = "ordenes";
 
-				$total = ModeloOrdenes::mdlSumarTotalOrdenesGeneral($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$valorEmpresa);
+			$total = ModeloOrdenes::mdlSumarTotalOrdenesGeneral($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa);
 
-				foreach ($total as $key => $valueTotal) {
+			foreach ($total as $key => $valueTotal) {
 
-						echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>"); 
-
-
-
-						echo utf8_decode("<tr><td style='border:1px solid #eee;'>$".$valueTotal["total"]."</td>
-
-			 					  	 	</tr>"); 
-
-				}
+				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
 
 
+
+				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
+
+			 					  	 	</tr>");
+
+			}
 
 
 
 
 
-				echo utf8_decode("</table>
+
+
+			echo utf8_decode("</table>
 
 
 
@@ -2095,9 +2098,10 @@ class controladorOrdenes{
 
 
 
-	public function ctrDescargarReporteOrdenesENT($valorEmpresa){
+	public function ctrDescargarReporteOrdenesENT($valorEmpresa)
+	{
 
-	
+
 
 		if (isset($_GET["reporte"])) {
 
@@ -2107,12 +2111,12 @@ class controladorOrdenes{
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
 
-				
-
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesENT($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
 
-			}else{
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesENT($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
+
+
+			} else {
 
 				$estado = "Entregado (Ent)";
 
@@ -2125,7 +2129,7 @@ class controladorOrdenes{
 			CREAMOS EL ARCHIVO DE EXCEL
 			=============================================*/
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 			header('Expires: 0');
 
@@ -2133,15 +2137,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -2167,115 +2171,115 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $value) {
 
-				
+
 
 				$item = "id";
 
-              	$valor = $value["id_empresa"];
-              	$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+				$valor = $value["id_empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NombreEmpresa = $NameEmpresa["empresa"];
 
 				//TRAER ASESOR
-	            $item = "id";
-	            $valor = $value["id_Asesor"];
-  	            $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
+				$item = "id";
+				$valor = $value["id_Asesor"];
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 				$NombreAsesor = $asesor["nombre"];
 				$departamentoAsesor = $asesor["departamento"];
 
-             	//TRAER CLIENTE (USUARIO)
-                $item = "id";
-                $valor = $value["id_usuario"];
+				//TRAER CLIENTE (USUARIO)
+				$item = "id";
+				$valor = $value["id_usuario"];
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
 
-                $NombreUsuario = $usuario["nombre"];
-                //TRAER TECNICO
-      			$item = "id";
-      			$valor = $value["id_tecnico"];
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$NombreUsuario = $usuario["nombre"];
+				//TRAER TECNICO
+				$item = "id";
+				$valor = $value["id_tecnico"];
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
 
-      			$NombreTecnico = $tecnico["nombre"];
-      			$departamento = $tecnico["departamento"];
+				$NombreTecnico = $tecnico["nombre"];
+				$departamento = $tecnico["departamento"];
 
 				//$ElTotal = number_format($total["total"],2);
-	   			//CALCULO DEL TOTAL DESCONTANDO INVERCION
+				//CALCULO DEL TOTAL DESCONTANDO INVERCION
 
-      			$invercion = $value["totalInversion"];
-      			$totalNetoOrden =  $value["total"] - $invercion;
+				$invercion = $value["totalInversion"];
+				$totalNetoOrden = $value["total"] - $invercion;
 
-      			if ($departamento == "sistemas"){
+				if ($departamento == "sistemas") {
 
-      				$comision= $totalNetoOrden / 1.16 * 0.04;
+					$comision = $totalNetoOrden / 1.16 * 0.04;
 
-      			}elseif($departamento == "electronica") {
+				} elseif ($departamento == "electronica") {
 
-      				$comision= $totalNetoOrden / 1.16 * 0.2;
+					$comision = $totalNetoOrden / 1.16 * 0.2;
 
-      			}elseif ($departamento == "impresoras") {
-     				
-
-      				$comision= $totalNetoOrden / 1.16 * 0.2;
-
-      			}
-
-      			if ($departamentoAsesor = "ventas") {      				
-
-      				$comision= $totalNetoOrden / 1.16 * 0.03;
-      			}
-
-      			/*=============================================
-				TRAER EMAIL DATOS DE COMPRA
-				=============================================*/
-					echo utf8_decode("</td>
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$value["total"]."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$totalNetoOrden."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha_Salida"]."</td>
-			 					  	 </tr>"); 		
+				} elseif ($departamento == "impresoras") {
 
 
+					$comision = $totalNetoOrden / 1.16 * 0.2;
 
-    			$suma += $totalNetoOrden;
+				}
 
-    			
+				if ($departamentoAsesor = "ventas") {
+
+					$comision = $totalNetoOrden / 1.16 * 0.03;
+				}
+
+				/*=============================================
+			  TRAER EMAIL DATOS DE COMPRA
+			  =============================================*/
+				echo utf8_decode("</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $totalNetoOrden . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha_Salida"] . "</td>
+			 					  	 </tr>");
+
+
+
+				$suma += $totalNetoOrden;
+
+
 			}
 
 			echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL GANANCIA</td></tr>");
-			
-			echo utf8_decode("<tr><td style='border:1px solid #eee;'>$".$suma."</td>
 
-						</tr>"); 
+			echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $suma . "</td>
+
+						</tr>");
 
 			/*=============================
 			AQUI VA EL TOTAL
 			==============================*/
-			$tabla= "ordenes";
+			$tabla = "ordenes";
 
 			$estado = "Entregado (Ent)";
 
-			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$valorEmpresa,$estado);
+			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
 
 			foreach ($total as $key => $valueTotal) {
 
-						echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL  COBRADO</td></tr>"); 
+				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL  COBRADO</td></tr>");
 
-						echo utf8_decode("<tr><td style='border:1px solid #eee;'>$".$valueTotal["total"]."</td>
+				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
 
-						</tr>"); 
+						</tr>");
 
 			}
-			
-			
 
-			
-			
+
+
+
+
 		}
 
 
@@ -2294,22 +2298,23 @@ class controladorOrdenes{
 
 
 
-	public function ctrDescargarReporteOrdenesOk($valorEmpresa){
+	public function ctrDescargarReporteOrdenesOk($valorEmpresa)
+	{
 
-	
+
 		if (isset($_GET["reporte"])) {
 
 			$tabla = "ordenes";
 			$itemEmpresa = "id_empresa";
-			
+
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
-				
-
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesOk($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
 
-			}else{
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesOk($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
+
+
+			} else {
 
 
 				$estado = "Aceptado (ok)";
@@ -2323,15 +2328,15 @@ class controladorOrdenes{
 			CREAMOS EL ARCHIVO DE EXCEL
 			=============================================*/
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
 			header("Content-type: application/xls"); // Archivo de Excel
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 			header('Content-Description: File Transfer');
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
-			header("Pragma: public"); 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header("Pragma: public");
+			header('Content-Disposition:; filename="' . $Name . '"');
 			header("Content-Transfer-Encoding: binary");
 
 			echo utf8_decode("<table border='0'> 
@@ -2350,94 +2355,94 @@ class controladorOrdenes{
 
 
 			foreach ($OrdenesFecha as $key => $value) {
-			
+
 
 				$item = "id";
-              	$valor = $value["id_empresa"];
+				$valor = $value["id_empresa"];
 
-             	$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
+				$NombreEmpresa = $NameEmpresa["empresa"];
 
 				//TRAER ASESOR
-	            $item = "id";
-	            $valor = $value["id_Asesor"];
+				$item = "id";
+				$valor = $value["id_Asesor"];
 
 
 
-	            $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
-					
+
 
 				$NombreAsesor = $asesor["nombre"];
 
-             	//TRAER CLIENTE (USUARIO)
+				//TRAER CLIENTE (USUARIO)
 
-                $item = "id";                
-                $valor = $value["id_usuario"];
+				$item = "id";
+				$valor = $value["id_usuario"];
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
 
-                $NombreUsuario = $usuario["nombre"];
+				$NombreUsuario = $usuario["nombre"];
 
 				//$ElTotal = number_format($total["total"],2);
 
 				//TRAER TECNICO
 
-      			$item = "id";
+				$item = "id";
 
-      			$valor = $value["id_tecnico"];
+				$valor = $value["id_tecnico"];
 
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
 
-      			$NombreTecnico = $tecnico["nombre"];
-      			
+				$NombreTecnico = $tecnico["nombre"];
+
 				/*=============================================
 				TRAER EMAIL DATOS DE COMPRA
 				=============================================*/
 
-					echo utf8_decode("<tr>
+				echo utf8_decode("<tr>
 
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["total"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
 
-			 					  	 </tr>"); 		
+			 					  	 </tr>");
 
-				}
+			}
 
-			    /*=============================================
-				TRAER TOTAL
-				=============================================*/
+			/*=============================================
+			TRAER TOTAL
+			=============================================*/
 
-				$tabla= "ordenes";
+			$tabla = "ordenes";
 
-				$estado = "Aceptado (ok)";
+			$estado = "Aceptado (ok)";
 
-				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$valorEmpresa,$estado);
+			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
 
-				foreach ($total as $key => $valueTotal) {
+			foreach ($total as $key => $valueTotal) {
 
-						echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>"); 
+				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
 
-						echo utf8_decode("<tr><td style='border:1px solid #eee;'>$".$valueTotal["total"]."</td>
+				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
 
-						</tr>"); 
+						</tr>");
 
-				}
+			}
 
-				echo utf8_decode("</table>
+			echo utf8_decode("</table>
 
 					");
 
@@ -2459,9 +2464,10 @@ class controladorOrdenes{
 
 
 
-	public function ctrDescargarReporteOrdenesTer($valorEmpresa){
+	public function ctrDescargarReporteOrdenesTer($valorEmpresa)
+	{
 
-	
+
 
 		if (isset($_GET["reporte"])) {
 
@@ -2475,19 +2481,19 @@ class controladorOrdenes{
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
 
-				
 
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesTer($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
-			
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesTer($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
 
 
-			}else{
+
+
+			} else {
 
 
 
-			
+
 
 				$estado = "Terminada (ter)";
 
@@ -2511,7 +2517,7 @@ class controladorOrdenes{
 
 
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 
 
@@ -2521,15 +2527,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -2565,55 +2571,55 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $value) {
 
-				
-
-				 $item = "id";
-
-              	$valor = $value["id_empresa"];
 
 
+				$item = "id";
 
-             	 $NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+				$valor = $value["id_empresa"];
 
 
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-				
+
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
+
+
 
 				//TRAER ASESOR
 
-                    
-
-	              $item = "id";
-
-	              $valor = $value["id_Asesor"];
 
 
+				$item = "id";
 
-	              $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
-
-					
-
-				  $NombreAsesor = $asesor["nombre"];
+				$valor = $value["id_Asesor"];
 
 
 
-             	//TRAER CLIENTE (USUARIO)
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 
 
-                $item = "id";
-
-                $valor = $value["id_usuario"];
+				$NombreAsesor = $asesor["nombre"];
 
 
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				//TRAER CLIENTE (USUARIO)
 
 
 
-                $NombreUsuario = $usuario["nombre"];
+				$item = "id";
+
+				$valor = $value["id_usuario"];
+
+
+
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
+
+
+
+				$NombreUsuario = $usuario["nombre"];
 
 
 
@@ -2621,19 +2627,19 @@ class controladorOrdenes{
 
 
 
-                //TRAER TECNICO
+				//TRAER TECNICO
 
-      			$item = "id";
+				$item = "id";
 
-      			$valor = $value["id_tecnico"];
-
-
-
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$valor = $value["id_tecnico"];
 
 
 
-      			$NombreTecnico = $tecnico["nombre"];
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
+
+
+
+				$NombreTecnico = $tecnico["nombre"];
 
 
 
@@ -2645,61 +2651,61 @@ class controladorOrdenes{
 
 
 
-					echo utf8_decode("</td>
+				echo utf8_decode("</td>
 
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["total"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
 
-			 					  	 </tr>"); 		
+			 					  	 </tr>");
 
 
 
 			}
 
-			    /*=============================================
+			/*=============================================
 
-				TRAER TOTAL
+			TRAER TOTAL
 
-				=============================================*/
+			=============================================*/
 
-				$tabla= "ordenes";
+			$tabla = "ordenes";
 
-				$estado = "Terminada (ter)";
+			$estado = "Terminada (ter)";
 
-				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$valorEmpresa,$estado);
+			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
 
-				foreach ($total as $key => $valueTotal) {
+			foreach ($total as $key => $valueTotal) {
 
-						echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>"); 
-
-
-
-						echo utf8_decode("<tr><td style='border:1px solid #eee;'>$".$valueTotal["total"]."</td>
-
-			 					  	 	</tr>"); 
-
-				}
+				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
 
 
+
+				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
+
+			 					  	 	</tr>");
+
+			}
 
 
 
 
 
-				echo utf8_decode("</table>
+
+
+			echo utf8_decode("</table>
 
 
 
@@ -2711,17 +2717,18 @@ class controladorOrdenes{
 
 	}
 
-/*=============================================
+	/*=============================================
 
-	DESCARGAR REPORTE ORDENES AUTORIZADAS AUT
+		DESCARGAR REPORTE ORDENES AUTORIZADAS AUT
 
-	=============================================*/
+		=============================================*/
 
 
 
-	public function ctrDescargarReporteOrdenesAut($valorEmpresa){
+	public function ctrDescargarReporteOrdenesAut($valorEmpresa)
+	{
 
-	
+
 
 		if (isset($_GET["reporte"])) {
 
@@ -2735,15 +2742,15 @@ class controladorOrdenes{
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
 
-				
 
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesAut($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$itemEmpresa, $valorEmpresa);
 
-			
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesAut($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
 
 
-			}else{
+
+
+			} else {
 
 
 
@@ -2753,7 +2760,7 @@ class controladorOrdenes{
 
 				$valor = $valorEmpresa;
 
-				$OrdenesFecha = ModeloOrdenes::mdlMostrarOrdenesPorEstado($tabla,$estado, $item, $valor);
+				$OrdenesFecha = ModeloOrdenes::mdlMostrarOrdenesPorEstado($tabla, $estado, $item, $valor);
 
 			}
 
@@ -2771,7 +2778,7 @@ class controladorOrdenes{
 
 
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 
 
@@ -2781,15 +2788,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -2825,73 +2832,73 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $value) {
 
-				
-
-				 $item = "id";
-
-              	$valor = $value["id_empresa"];
 
 
+				$item = "id";
 
-             	 $NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+				$valor = $value["id_empresa"];
 
 
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-				
+
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
+
+
 
 				//TRAER ASESOR
 
-                    
-
-	              $item = "id";
-
-	              $valor = $value["id_Asesor"];
 
 
+				$item = "id";
 
-	              $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
-
-					
-
-				  $NombreAsesor = $asesor["nombre"];
+				$valor = $value["id_Asesor"];
 
 
 
-             	//TRAER CLIENTE (USUARIO)
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 
 
-                $item = "id";
-
-                $valor = $value["id_usuario"];
+				$NombreAsesor = $asesor["nombre"];
 
 
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				//TRAER CLIENTE (USUARIO)
 
 
 
-                $NombreUsuario = $usuario["nombre"];
+				$item = "id";
+
+				$valor = $value["id_usuario"];
+
+
+
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
+
+
+
+				$NombreUsuario = $usuario["nombre"];
 
 
 
 				//$ElTotal = number_format($total["total"],2);
 
-                //TRAER TECNICO
+				//TRAER TECNICO
 
-      			$item = "id";
+				$item = "id";
 
-      			$valor = $value["id_tecnico"];
-
-
-
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$valor = $value["id_tecnico"];
 
 
 
-      			$NombreTecnico = $tecnico["nombre"];
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
+
+
+
+				$NombreTecnico = $tecnico["nombre"];
 
 
 
@@ -2903,61 +2910,61 @@ class controladorOrdenes{
 
 
 
-					echo utf8_decode("</td>
+				echo utf8_decode("</td>
 
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["total"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
 
-			 					  	 </tr>"); 		
+			 					  	 </tr>");
 
 
 
 			}
 
-			    /*=============================================
+			/*=============================================
 
-				TRAER TOTAL
+			TRAER TOTAL
 
-				=============================================*/
+			=============================================*/
 
-				$tabla= "ordenes";
+			$tabla = "ordenes";
 
-				$estado = "Pendiente de autorización (AUT";
+			$estado = "Pendiente de autorización (AUT";
 
-				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$valorEmpresa,$estado);
+			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
 
-				foreach ($total as $key => $valueTotal) {
+			foreach ($total as $key => $valueTotal) {
 
-						echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>"); 
-
-
-
-						echo utf8_decode("<tr><td style='border:1px solid #eee;'>$".$valueTotal["total"]."</td>
-
-			 					  	 	</tr>"); 
-
-				}
+				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
 
 
+
+				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
+
+			 					  	 	</tr>");
+
+			}
 
 
 
 
 
-				echo utf8_decode("</table>
+
+
+			echo utf8_decode("</table>
 
 
 
@@ -2981,9 +2988,10 @@ class controladorOrdenes{
 
 
 
-	public function ctrDescargarReporteOrdenesSup($valorEmpresa){
+	public function ctrDescargarReporteOrdenesSup($valorEmpresa)
+	{
 
-	
+
 
 		if (isset($_GET["reporte"])) {
 
@@ -2997,15 +3005,15 @@ class controladorOrdenes{
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
 
-				
 
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesSup($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
-			
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesSup($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
 
 
-			}else{
+
+
+			} else {
 
 
 
@@ -3013,7 +3021,7 @@ class controladorOrdenes{
 
 				$item = "id_empresa";
 
-				$valor = $valorEmpresa; 
+				$valor = $valorEmpresa;
 
 
 
@@ -3035,7 +3043,7 @@ class controladorOrdenes{
 
 
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 
 
@@ -3043,15 +3051,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -3087,73 +3095,73 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $value) {
 
-				
-
-				 $item = "id";
-
-              	$valor = $value["id_empresa"];
 
 
+				$item = "id";
 
-             	 $NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+				$valor = $value["id_empresa"];
 
 
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-				
+
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
+
+
 
 				//TRAER ASESOR
 
-                    
-
-	              $item = "id";
-
-	              $valor = $value["id_Asesor"];
 
 
+				$item = "id";
 
-	              $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
-
-					
-
-				  $NombreAsesor = $asesor["nombre"];
+				$valor = $value["id_Asesor"];
 
 
 
-             	//TRAER CLIENTE (USUARIO)
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 
 
-                $item = "id";
-
-                $valor = $value["id_usuario"];
+				$NombreAsesor = $asesor["nombre"];
 
 
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				//TRAER CLIENTE (USUARIO)
 
 
 
-                $NombreUsuario = $usuario["nombre"];
+				$item = "id";
+
+				$valor = $value["id_usuario"];
+
+
+
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
+
+
+
+				$NombreUsuario = $usuario["nombre"];
 
 
 
 				//$ElTotal = number_format($total["total"],2);
 
-                //TRAER TECNICO
+				//TRAER TECNICO
 
-      			$item = "id";
+				$item = "id";
 
-      			$valor = $value["id_tecnico"];
-
-
-
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$valor = $value["id_tecnico"];
 
 
 
-      			$NombreTecnico = $tecnico["nombre"];
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
+
+
+
+				$NombreTecnico = $tecnico["nombre"];
 
 
 
@@ -3165,63 +3173,63 @@ class controladorOrdenes{
 
 
 
-					echo utf8_decode("</td>
+				echo utf8_decode("</td>
 
 					                
 
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["total"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
 
-			 					  	 </tr>"); 		
+			 					  	 </tr>");
 
 
 
 			}
 
- 				/*=============================================
+			/*=============================================
 
-				TRAER TOTAL
+		   TRAER TOTAL
 
-				=============================================*/
+		   =============================================*/
 
-				$tabla= "ordenes";
+			$tabla = "ordenes";
 
-				$estado = "Supervisión (SUP)";
+			$estado = "Supervisión (SUP)";
 
-				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$valorEmpresa,$estado);
+			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
 
-				foreach ($total as $key => $valueTotal) {
+			foreach ($total as $key => $valueTotal) {
 
-						echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>"); 
-
-
-
-						echo utf8_decode("<tr><td style='border:1px solid #eee;'>$".$valueTotal["total"]."</td>
-
-			 					  	 	</tr>"); 
-
-				}
+				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
 
 
+
+				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
+
+			 					  	 	</tr>");
+
+			}
 
 
 
 
 
-				echo utf8_decode("</table>
+
+
+			echo utf8_decode("</table>
 
 
 
@@ -3247,9 +3255,10 @@ class controladorOrdenes{
 
 
 
-	public function ctrReporteOrdenesPenR($valorEmpresa){
+	public function ctrReporteOrdenesPenR($valorEmpresa)
+	{
 
-	
+
 
 		if (isset($_GET["reporte"])) {
 
@@ -3257,27 +3266,27 @@ class controladorOrdenes{
 
 			$tabla = "ordenes";
 
-			$itemEmpresa= "id_empresa";
+			$itemEmpresa = "id_empresa";
 
 
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
 
-				
 
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesPenR($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
-			
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesPenR($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
 
 
-			}else{
+
+
+			} else {
 
 
 
-				
 
-				
+
+
 
 				$estado = "En revisión (REV)";
 
@@ -3303,7 +3312,7 @@ class controladorOrdenes{
 
 
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 
 
@@ -3313,15 +3322,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -3357,55 +3366,55 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $value) {
 
-				
-
-				 $item = "id";
-
-              	$valor = $value["id_empresa"];
 
 
+				$item = "id";
 
-             	 $NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+				$valor = $value["id_empresa"];
 
 
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-				
+
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
+
+
 
 				//TRAER ASESOR
 
-                    
-
-	              $item = "id";
-
-	              $valor = $value["id_Asesor"];
 
 
+				$item = "id";
 
-	              $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
-
-					
-
-				  $NombreAsesor = $asesor["nombre"];
+				$valor = $value["id_Asesor"];
 
 
 
-             	//TRAER CLIENTE (USUARIO)
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 
 
-                $item = "id";
-
-                $valor = $value["id_usuario"];
+				$NombreAsesor = $asesor["nombre"];
 
 
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				//TRAER CLIENTE (USUARIO)
 
 
 
-                $NombreUsuario = $usuario["nombre"];
+				$item = "id";
+
+				$valor = $value["id_usuario"];
+
+
+
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
+
+
+
+				$NombreUsuario = $usuario["nombre"];
 
 
 
@@ -3413,19 +3422,19 @@ class controladorOrdenes{
 
 
 
-                //TRAER TECNICO
+				//TRAER TECNICO
 
-      			$item = "id";
+				$item = "id";
 
-      			$valor = $value["id_tecnico"];
-
-
-
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$valor = $value["id_tecnico"];
 
 
 
-      			$NombreTecnico = $tecnico["nombre"];
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
+
+
+
+				$NombreTecnico = $tecnico["nombre"];
 
 				/*=============================================
 
@@ -3435,61 +3444,61 @@ class controladorOrdenes{
 
 
 
-					echo utf8_decode("</td>
+				echo utf8_decode("</td>
 
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["total"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
 
-			 					  	 </tr>"); 		
+			 					  	 </tr>");
 
 
 
 			}
 
-			     /*=============================================
+			/*=============================================
 
-				TRAER TOTAL
+		   TRAER TOTAL
 
-				=============================================*/
+		   =============================================*/
 
-				$tabla= "ordenes";
+			$tabla = "ordenes";
 
-				$estado = "En revisión (REV)";
+			$estado = "En revisión (REV)";
 
-				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$valorEmpresa,$estado);
+			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
 
-				foreach ($total as $key => $valueTotal) {
+			foreach ($total as $key => $valueTotal) {
 
-						echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>"); 
-
-
-
-						echo utf8_decode("<tr><td style='border:1px solid #eee;'>$".$valueTotal["total"]."</td>
-
-			 					  	 	</tr>"); 
-
-				}
+				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
 
 
+
+				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
+
+			 					  	 	</tr>");
+
+			}
 
 
 
 
 
-				echo utf8_decode("</table>
+
+
+			echo utf8_decode("</table>
 
 
 
@@ -3511,23 +3520,26 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	function ctrEditarObservacionesYaExistentes(){
+	function ctrEditarObservacionesYaExistentes()
+	{
 
 
 
 		if (isset($_POST["observaciones"])) {
 
-			
+
 
 			$tabla = "ordenes";
 
 
 
-			$datosObservacion = array("id" => $_POST["idOrden"], 
+			$datosObservacion = array(
+				"id" => $_POST["idOrden"],
 
-									  "observaciones" => $_POST["observaciones"],
+				"observaciones" => $_POST["observaciones"],
 
-									  "listarObservaciones"=> $_POST["listarObservaciones"]);
+				"listarObservaciones" => $_POST["listarObservaciones"]
+			);
 
 
 
@@ -3543,35 +3555,69 @@ class controladorOrdenes{
 
 
 
-					if ($_SESSION["perfil"] == "administrador") {
+			if ($_SESSION["perfil"] == "administrador") {
 
 
 
-						$observaciones = json_decode($_POST["listarObservaciones"], true);
+				$observaciones = json_decode($_POST["listarObservaciones"], true);
 
 
 
-						foreach ($observaciones as $key => $valueObservacionesPush) {
-
-							
-
-							
+				foreach ($observaciones as $key => $valueObservacionesPush) {
 
 
 
-						}
-
-						/* Push notifications del navegador desactivadas - observaciones */
-
-					}
-
-			
 
 
 
-			if ($respuesta == "ok"){
 
-				
+				}
+
+				echo '<!-- notifications-push -->	
+
+
+
+
+
+									<script>
+
+
+
+										Push.create("Nueva observación",{
+
+
+
+											body:"' . $_POST["idOrden"] . ' observación: ' . $valueObservacionesPush["observacion"] . '",
+
+											icon:"' . $_SESSION["foto"] . '",
+
+											timeout:10000,
+
+											onClick: function(){
+
+												window.location="index.php?ruta=inicio";
+
+												this.close();
+
+
+
+											}
+
+
+
+											});
+
+									</script>';
+
+			}
+
+
+
+
+
+			if ($respuesta == "ok") {
+
+
 
 				echo '<script>
 
@@ -3635,7 +3681,8 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	static public function ctrBuscadorDeOrdenes($consulta){
+	static public function ctrBuscadorDeOrdenes($consulta)
+	{
 
 
 
@@ -3659,7 +3706,8 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	static public function ctrBuscadorDeOrdenesNew($consulta){
+	static public function ctrBuscadorDeOrdenesNew($consulta)
+	{
 
 
 
@@ -3687,7 +3735,8 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	public function ctrEditarInversiones(){
+	public function ctrEditarInversiones()
+	{
 
 
 
@@ -3699,39 +3748,39 @@ class controladorOrdenes{
 
 			$tabla = "ordenes";
 
-			
+
 
 			$datosInversion = array(
 
-						 		   "id"=>$_POST["idOrden"],
+				"id" => $_POST["idOrden"],
 
-								   "listarinversiones"=>$_POST["listarinversiones"],
+				"listarinversiones" => $_POST["listarinversiones"],
 
-								   "totalInversiones"=>$_POST["totalInversiones"],
+				"totalInversiones" => $_POST["totalInversiones"],
 
-								   "estado" =>$_POST["estado"]
+				"estado" => $_POST["estado"]
 
-								);
+			);
 
 
 
-				$respuesta = ModeloOrdenes::mdlEditarInversiones($tabla, $datosInversion);
-
-				
-
-				
+			$respuesta = ModeloOrdenes::mdlEditarInversiones($tabla, $datosInversion);
 
 
 
 
 
-				if ($respuesta == "ok") {
+
+
+
+
+			if ($respuesta == "ok") {
 
 
 
 
 
-					echo '<script>
+				echo '<script>
 
 
 
@@ -3781,7 +3830,7 @@ class controladorOrdenes{
 
 					</script>';
 
-				}
+			}
 
 		}
 
@@ -3797,45 +3846,47 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	public function ctrAgregarPedidoEnOrden(){
-
-		
-
-		if(isset($_POST["ProductosPedidoListados"])){
+	public function ctrAgregarPedidoEnOrden()
+	{
 
 
 
-			$datosPedidoEnOrden = array("empresa" => $_POST["empresaPedioDinamico"],
-
-										"asesor" => $_POST["asesorPedidoDinamico"],
-
-										"cliente" => $_POST["clientePedidoDinamico"],
-
-										"productos" => $_POST["ProductosPedidoListados"],
-
-										"total" => $_POST["TotalPedidoEnOrden"],
-
-										"estado"=> $_POST["EstadoPedidoDinamico"],
-
-										"pago"=>$_POST["PrimerPagolistado"],
-
-										"adeudo"=>$_POST["PrimerAdeudo"],
-
-										"id_orden" => $_POST["seleccionarOrdenPedidoDinamico"]
-
-									);
-
-				
-
-				$respuesta = ModeloOrdenes::mdlIngresarPedidoDinamico("pedidos", $datosPedidoEnOrden);
+		if (isset($_POST["ProductosPedidoListados"])) {
 
 
 
-				if ($respuesta == "ok") {
+			$datosPedidoEnOrden = array(
+				"empresa" => $_POST["empresaPedioDinamico"],
 
-					
+				"asesor" => $_POST["asesorPedidoDinamico"],
 
-					echo '<script>
+				"cliente" => $_POST["clientePedidoDinamico"],
+
+				"productos" => $_POST["ProductosPedidoListados"],
+
+				"total" => $_POST["TotalPedidoEnOrden"],
+
+				"estado" => $_POST["EstadoPedidoDinamico"],
+
+				"pago" => $_POST["PrimerPagolistado"],
+
+				"adeudo" => $_POST["PrimerAdeudo"],
+
+				"id_orden" => $_POST["seleccionarOrdenPedidoDinamico"]
+
+			);
+
+
+
+			$respuesta = ModeloOrdenes::mdlIngresarPedidoDinamico("pedidos", $datosPedidoEnOrden);
+
+
+
+			if ($respuesta == "ok") {
+
+
+
+				echo '<script>
 
 
 
@@ -3877,7 +3928,7 @@ class controladorOrdenes{
 
 					</script>';
 
-				}
+			}
 
 		}
 
@@ -3891,15 +3942,16 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	static public function ctrMostrarOrdenesDelAsesor($id_Asesor){
+	static public function ctrMostrarOrdenesDelAsesor($id_Asesor)
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
 
 
-		$respuesta = ModeloOrdenes::mdlMostrarOrdenesConAtraso($id_Asesor,$tabla);
+		$respuesta = ModeloOrdenes::mdlMostrarOrdenesConAtraso($id_Asesor, $tabla);
 
 
 
@@ -3915,15 +3967,16 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	static public function ctrMostrarOrdenesDelTecncio($id_tecnico){
+	static public function ctrMostrarOrdenesDelTecncio($id_tecnico)
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
 
 
-		$respuesta = ModeloOrdenes::mdlMostrarOrdenesDelTecnico($id_tecnico,$tabla);
+		$respuesta = ModeloOrdenes::mdlMostrarOrdenesDelTecnico($id_tecnico, $tabla);
 
 
 
@@ -3939,11 +3992,12 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	static public function ctrListarOrdenes(){
+	static public function ctrListarOrdenes()
+	{
 
 
 
-		$tabla="ordenes";
+		$tabla = "ordenes";
 
 
 
@@ -3956,23 +4010,24 @@ class controladorOrdenes{
 
 
 	}
-	
-	
-		/*=============================================
-
-	LISTAR ORDENES ASESOR MES
-
-	=============================================*/
-
-	static public function ctrListarOrdenesAsesor($idAsesor){
 
 
+	/*=============================================
 
-		$tabla="ordenes";
+LISTAR ORDENES ASESOR MES
+
+=============================================*/
+
+	static public function ctrListarOrdenesAsesor($idAsesor)
+	{
 
 
 
-		$respuesta = ModeloOrdenes::mdlListarOrdenesAsesor($tabla,$idAsesor);
+		$tabla = "ordenes";
+
+
+
+		$respuesta = ModeloOrdenes::mdlListarOrdenesAsesor($tabla, $idAsesor);
 
 
 
@@ -3981,17 +4036,18 @@ class controladorOrdenes{
 
 
 	}
-		/*=============================================
+	/*=============================================
 
-	LISTAR ORDENES MES ENTRADAS
+LISTAR ORDENES MES ENTRADAS
 
-	=============================================*/	
+=============================================*/
 
-	static public function ctrMostrarOrdenesEntrada(){
+	static public function ctrMostrarOrdenesEntrada()
+	{
 
 
 
-		$tabla="ordenes";
+		$tabla = "ordenes";
 
 
 
@@ -4004,17 +4060,18 @@ class controladorOrdenes{
 
 
 	}
-			/*=============================================
+	/*=============================================
 
-	LISTAR ORDENES ASESOR MES ENTRADAS
+LISTAR ORDENES ASESOR MES ENTRADAS
 
-	=============================================*/	
+=============================================*/
 
-	static public function ctrMostrarOrdenesEntradaAsesor($idAsesor){
+	static public function ctrMostrarOrdenesEntradaAsesor($idAsesor)
+	{
 
 
 
-		$tabla="ordenes";
+		$tabla = "ordenes";
 
 
 
@@ -4036,7 +4093,8 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	static public function ctrlTraerOrdenesConTope($base, $tope){
+	static public function ctrlTraerOrdenesConTope($base, $tope)
+	{
 
 
 
@@ -4058,15 +4116,16 @@ class controladorOrdenes{
 
 	=========================*/
 
-	public function ctrlDescargarComisiones(){
+	public function ctrlDescargarComisiones()
+	{
 
-		
+
 
 
 
 		if (isset($_GET["reporte"])) {
 
-			
+
 
 			$tabla = "ordenes";
 
@@ -4076,23 +4135,23 @@ class controladorOrdenes{
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
 
-					
 
-					$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesENT($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"]);
 
-				
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesENT($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"]);
 
 
 
-			}else{
 
-					
 
-					$estado = "Entregado (Ent)";
+			} else {
 
 
 
-					$OrdenesFecha = ModeloOrdenes::mdlMostrarOrdenesPorEstado($tabla, $estado);
+				$estado = "Entregado (Ent)";
+
+
+
+				$OrdenesFecha = ModeloOrdenes::mdlMostrarOrdenesPorEstado($tabla, $estado);
 
 			}
 
@@ -4106,7 +4165,7 @@ class controladorOrdenes{
 
 
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 
 
@@ -4116,15 +4175,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -4164,21 +4223,21 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $valueComisiones) {
 
-				
+
 
 				//TRAER ASESOR
 
-	                    
-
-		        $item = "id";
-
-		        $valor = $valueComisiones["id_Asesor"];
 
 
+				$item = "id";
 
-		        $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
+				$valor = $valueComisiones["id_Asesor"];
 
-						
+
+
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
+
+
 
 				$NombreAsesor = $asesor["nombre"];
 
@@ -4188,133 +4247,133 @@ class controladorOrdenes{
 
 				//TRAER TECNICO
 
-	      		$item = "id";
+				$item = "id";
 
-	      		$valor = $valueComisiones["id_tecnico"];
+				$valor = $valueComisiones["id_tecnico"];
 
 
 
-	      		$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
 
 
 
-	      		$NombreTecnico = $tecnico["nombre"];
+				$NombreTecnico = $tecnico["nombre"];
 
-	      		$departamento = $tecnico["departamento"];
+				$departamento = $tecnico["departamento"];
 
 
 
-	      		//CALCULO DEL TOTAL DESCONTANDO INVERCION
+				//CALCULO DEL TOTAL DESCONTANDO INVERCION
 
-              	if ($valueComisiones["totalInversion"] == 0){
+				if ($valueComisiones["totalInversion"] == 0) {
 
 
 
 
 
-              		$invercion = 0;
+					$invercion = 0;
 
-              		$totalNetoOrden =  $valueComisiones["total"];
+					$totalNetoOrden = $valueComisiones["total"];
 
-              		$utilidadAntesIva = $valueComisiones["total"] / 1.16;
+					$utilidadAntesIva = $valueComisiones["total"] / 1.16;
 
 
 
-              	}else{
+				} else {
 
 
 
-              		$invercion = $valueComisiones["totalInversion"];
+					$invercion = $valueComisiones["totalInversion"];
 
-              		$totalNetoOrden =  $valueComisiones["total"] - $invercion;
+					$totalNetoOrden = $valueComisiones["total"] - $invercion;
 
-      				$utilidadAntesIva =  $valueComisiones["total"] / 1.16;
+					$utilidadAntesIva = $valueComisiones["total"] / 1.16;
 
 
 
-              	}
+				}
 
-	      			//var_dump($valueComisiones["id"],$valueComisiones["total"],$invercion);
+				//var_dump($valueComisiones["id"],$valueComisiones["total"],$invercion);
 
 
 
-	      			if ($departamento == "sistemas"){
+				if ($departamento == "sistemas") {
 
-	      				
 
-	      				$comisionTec= $totalNetoOrden / 1.16 * 0.04;
 
-	 
+					$comisionTec = $totalNetoOrden / 1.16 * 0.04;
 
-	      			}elseif($departamento == "electronica") {
 
 
+				} elseif ($departamento == "electronica") {
 
-	      				$comisionTec= $totalNetoOrden / 1.16 * 0.2;
 
 
+					$comisionTec = $totalNetoOrden / 1.16 * 0.2;
 
-	      			}elseif ($departamento == "impresoras") {
 
-	      				
 
-	      				$comisionTec= $totalNetoOrden / 1.16 * 0.2;
+				} elseif ($departamento == "impresoras") {
 
-	      				$sumaComisionesTec += $comisionTec;
 
-	      			}
 
+					$comisionTec = $totalNetoOrden / 1.16 * 0.2;
 
+					$sumaComisionesTec += $comisionTec;
 
-	      			if ($departamentoAsesor = "ventas") {
+				}
 
-	      				
 
-	      				$comisionVededor= $totalNetoOrden / 1.16 * 0.03;
 
-	      				$sumaComisionesVend += $comisionVededor;
+				if ($departamentoAsesor = "ventas") {
 
-	      			}
 
 
+					$comisionVededor = $totalNetoOrden / 1.16 * 0.03;
 
-	      			/*=============================================
+					$sumaComisionesVend += $comisionVededor;
 
-					TRAER EMAIL DATOS DE COMPRA
+				}
 
-					=============================================*/
 
-					
 
-					
+				/*=============================================
 
-					$sumaGanancia += $totalNetoOrden;
+			  TRAER EMAIL DATOS DE COMPRA
 
-					$sumaCobrado += $valueComisiones["total"];
+			  =============================================*/
 
-					echo utf8_decode("</td>
+
+
+
+
+				$sumaGanancia += $totalNetoOrden;
+
+				$sumaCobrado += $valueComisiones["total"];
+
+				echo utf8_decode("</td>
 
 						
 
-						<td style='border:1px solid #eee;'>".$valueComisiones["id"]."</td>
+						<td style='border:1px solid #eee;'>" . $valueComisiones["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$valueComisiones["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $valueComisiones["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$valueComisiones["total"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $valueComisiones["total"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$utilidadAntesIva."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $utilidadAntesIva . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$invercion."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $invercion . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$comisionTec."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $comisionTec . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$comisionVededor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $comisionVededor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$valueComisiones["fecha_Salida"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $valueComisiones["fecha_Salida"] . "</td>
 
-				 	</tr>"); 		
+				 	</tr>");
 
 			}
 
@@ -4322,19 +4381,19 @@ class controladorOrdenes{
 
 			echo utf8_decode("</br></br><td style='font-weight:bold; border:1px solid #eee;'>total cobrado</td>
 
-					<td style='border:1px solid #eee;'>".$sumaCobrado."</td>
+					<td style='border:1px solid #eee;'>" . $sumaCobrado . "</td>
 
 					<td style='font-weight:bold; border:1px solid #eee;'>total ganancia</td>
 
-					<td style='border:1px solid #eee;'>".$sumaGanancia."</td>
+					<td style='border:1px solid #eee;'>" . $sumaGanancia . "</td>
 
 					<td style='font-weight:bold; border:1px solid #eee;'>total comision Técnico</td>
 
-					<td style='border:1px solid #eee;'>".$sumaComisionesTec."</td>
+					<td style='border:1px solid #eee;'>" . $sumaComisionesTec . "</td>
 
 					<td style='font-weight:bold; border:1px solid #eee;'>total comision Vendedor</td>
 
-					<td style='border:1px solid #eee;'>".$sumaComisionesVend."</td>");
+					<td style='border:1px solid #eee;'>" . $sumaComisionesVend . "</td>");
 
 			echo utf8_decode("</table>
 
@@ -4348,35 +4407,36 @@ class controladorOrdenes{
 
 
 
-	public function ctrlAgregarTipoDeOrden(){
+	public function ctrlAgregarTipoDeOrden()
+	{
 
 
 
-		if (isset($_POST["Tipo-repearacion"])){
+		if (isset($_POST["Tipo-repearacion"])) {
 
 
 
-				$tabla = "ordenes";
+			$tabla = "ordenes";
 
 
 
-				$idOrden=$_POST["idOrden"];
-
-			
-
-				$tipo_de_reparacion=$_POST["Tipo-repearacion"];
-
-				
-
-				$respuesta = ModeloOrdenes::mdlIngresartipoDeRepacion($tabla, $idOrden, $tipo_de_reparacion);
+			$idOrden = $_POST["idOrden"];
 
 
 
-				if ($respuesta == "ok") {
+			$tipo_de_reparacion = $_POST["Tipo-repearacion"];
 
-					
 
-					echo '<script>
+
+			$respuesta = ModeloOrdenes::mdlIngresartipoDeRepacion($tabla, $idOrden, $tipo_de_reparacion);
+
+
+
+			if ($respuesta == "ok") {
+
+
+
+				echo '<script>
 
 
 
@@ -4418,7 +4478,7 @@ class controladorOrdenes{
 
 					</script>';
 
-				}
+			}
 
 		}
 
@@ -4426,39 +4486,40 @@ class controladorOrdenes{
 
 
 
-	public function ctrlAgregarRecargaDeCartucho(){
+	public function ctrlAgregarRecargaDeCartucho()
+	{
 
 
 
-		if (isset($_POST["nuevaRecarga"])){
+		if (isset($_POST["nuevaRecarga"])) {
 
 
 
-				$tabla = "ordenes";
+			$tabla = "ordenes";
 
 
 
-				$idOrden=$_POST["idOrden"];
-
-			
-
-				$recarga=$_POST["nuevaRecarga"];
+			$idOrden = $_POST["idOrden"];
 
 
 
-				$precioRecarga = $_POST["precioRecarga"];
-
-				
-
-				$respuesta = ModeloOrdenes::mdlIngresarRecarga($tabla, $idOrden, $recarga, $precioRecarga);
+			$recarga = $_POST["nuevaRecarga"];
 
 
 
-				if ($respuesta == "ok") {
+			$precioRecarga = $_POST["precioRecarga"];
 
-					
 
-					echo '<script>
+
+			$respuesta = ModeloOrdenes::mdlIngresarRecarga($tabla, $idOrden, $recarga, $precioRecarga);
+
+
+
+			if ($respuesta == "ok") {
+
+
+
+				echo '<script>
 
 
 
@@ -4500,7 +4561,7 @@ class controladorOrdenes{
 
 					</script>';
 
-				}
+			}
 
 		}
 
@@ -4508,11 +4569,12 @@ class controladorOrdenes{
 
 
 
-	public function ctrlEnviarCorreoCliente(){
+	public function ctrlEnviarCorreoCliente()
+	{
 
-		
 
-		if (isset($_GET["correo"])){
+
+		if (isset($_GET["correo"])) {
 
 
 
@@ -4522,7 +4584,7 @@ class controladorOrdenes{
 
 			$tabla = "ordenes";
 
-			$item = "id"; 
+			$item = "id";
 
 			$valor = $_GET["idOrden"];
 
@@ -4530,23 +4592,23 @@ class controladorOrdenes{
 
 			foreach ($respuestaOrdenes as $key => $valueOrdenesCorreo) {
 
-				
+
 
 				$partidas = json_decode($valueOrdenesCorreo["partidas"], true);
 
 
 
-	      		foreach ($partidas as $key => $valuePartidas) {
+				foreach ($partidas as $key => $valuePartidas) {
 
-	      							
 
-	      			$descripcionpartidas =$valuePartidas["descripcion"];
 
-	      		}
+					$descripcionpartidas = $valuePartidas["descripcion"];
+
+				}
 
 			}
 
-			
+
 
 
 
@@ -4558,37 +4620,37 @@ class controladorOrdenes{
 
 			$itemCliente = "id";
 
-            $valorCliente = $_GET["cliente"];
+			$valorCliente = $_GET["cliente"];
 
 
 
-            $usuario = ControladorClientes::ctrMostrarClientes($itemCliente,$valorCliente);
+			$usuario = ControladorClientes::ctrMostrarClientes($itemCliente, $valorCliente);
 
 
 
-            
+
 
 			//VOLCAR NOMBRE DEL ASESOR
 
 			$itemAsesor = "id";
 
-	        $valorAsesor = $_GET["asesor"];
+			$valorAsesor = $_GET["asesor"];
 
 
 
-	        $asesor = Controladorasesores::ctrMostrarAsesoresEleg($itemAsesor,$valorAsesor);
+			$asesor = Controladorasesores::ctrMostrarAsesoresEleg($itemAsesor, $valorAsesor);
 
-			
+
 
 			//VOLCAR NOMBRE DEL TECNICO
 
-      		$item = "id";
+			$item = "id";
 
-      		$valor = $_GET["tecnico"];
+			$valor = $_GET["tecnico"];
 
 
 
-      		$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
 
 
 
@@ -4610,7 +4672,7 @@ class controladorOrdenes{
 
 
 
-			$mail->isMail();	
+			$mail->isMail();
 
 
 
@@ -4628,7 +4690,7 @@ class controladorOrdenes{
 
 			$mail->addAddress($usuario["correo"]);
 
-								
+
 
 			$mail->msgHTML('
 
@@ -4638,7 +4700,7 @@ class controladorOrdenes{
 
 
 
-				<h1 style="font-weight: bold;">Gracias por su preferencia su ordene se encuetra '.$valueOrdenesCorreo["estado"].'</h1>
+				<h1 style="font-weight: bold;">Gracias por su preferencia su ordene se encuetra ' . $valueOrdenesCorreo["estado"] . '</h1>
 
 
 
@@ -4714,17 +4776,17 @@ class controladorOrdenes{
 
       								
 
-      						<li>'.$_GET["idOrden"].'</li>
+      						<li>' . $_GET["idOrden"] . '</li>
 
-      						<li>'.$valueOrdenesCorreo["estado"].'</li>
+      						<li>' . $valueOrdenesCorreo["estado"] . '</li>
 
-      						<li>'.$usuario["nombre"].'</li>
+      						<li>' . $usuario["nombre"] . '</li>
 
-      						<li>'.$asesor["nombre"].'</li>
+      						<li>' . $asesor["nombre"] . '</li>
 
-      						<li>'.$tecnico["nombre"].'</li>
+      						<li>' . $tecnico["nombre"] . '</li>
 
-      						<li>'.$valueOrdenesCorreo["fecha_ingreso"].'</li>      						 
+      						<li>' . $valueOrdenesCorreo["fecha_ingreso"] . '</li>      						 
 
 
 
@@ -4782,13 +4844,13 @@ class controladorOrdenes{
 
 
 
-      						<li>'.$valueOrdenesCorreo["partidaUno"].'</li>
+      						<li>' . $valueOrdenesCorreo["partidaUno"] . '</li>
 
-      						<li>'.$valueOrdenesCorreo["partidaDos"].'</li>
+      						<li>' . $valueOrdenesCorreo["partidaDos"] . '</li>
 
-							<li>'.$descripcionpartidas.'</li>
+							<li>' . $descripcionpartidas . '</li>
 
-							<li>MXN $'.$valueOrdenesCorreo["total"].'</li> 
+							<li>MXN $' . $valueOrdenesCorreo["total"] . '</li> 
 
 
 
@@ -4812,13 +4874,13 @@ class controladorOrdenes{
 
 			if (!$mail->Send()) {
 
-					
-
-				echo'<script>
 
 
+				echo '<script>
 
-					alert("'.$mail->ErrorInfo.'");
+
+
+					alert("' . $mail->ErrorInfo . '");
 
 						 
 
@@ -4830,11 +4892,11 @@ class controladorOrdenes{
 
 
 
-			}else{
+			} else {
 
 
 
-				echo'<script>
+				echo '<script>
 
 
 
@@ -4860,39 +4922,40 @@ class controladorOrdenes{
 
 
 
-	public function ctrlAgregarNuevaPartidaTecnicoDos(){
+	public function ctrlAgregarNuevaPartidaTecnicoDos()
+	{
 
 
 
-		if (isset($_POST["partidasTecnicoDos"])){
+		if (isset($_POST["partidasTecnicoDos"])) {
 
 
 
-				$tabla = "ordenes";
+			$tabla = "ordenes";
 
 
 
-				$idOrden=$_POST["idOrden"];
-
-			
-
-				$partidasTecnicoDos=$_POST["partidasTecnicoDos"];
+			$idOrden = $_POST["idOrden"];
 
 
 
-				$TotalPartidasTecnicoDos = $_POST["TotalPartidasTecnicoDos"];
-
-				
-
-				$respuesta = ModeloOrdenes::mdlIngresarPartidasTecnico($tabla, $idOrden, $partidasTecnicoDos, $TotalPartidasTecnicoDos);
+			$partidasTecnicoDos = $_POST["partidasTecnicoDos"];
 
 
 
-				if ($respuesta == "ok") {
+			$TotalPartidasTecnicoDos = $_POST["TotalPartidasTecnicoDos"];
 
-					
 
-					echo '<script>
+
+			$respuesta = ModeloOrdenes::mdlIngresarPartidasTecnico($tabla, $idOrden, $partidasTecnicoDos, $TotalPartidasTecnicoDos);
+
+
+
+			if ($respuesta == "ok") {
+
+
+
+				echo '<script>
 
 
 
@@ -4934,7 +4997,7 @@ class controladorOrdenes{
 
 					</script>';
 
-				}
+			}
 
 		}
 
@@ -4944,39 +5007,40 @@ class controladorOrdenes{
 
 
 
-	public function ctrlAgregarTecnicoDos(){
+	public function ctrlAgregarTecnicoDos()
+	{
 
 
 
-		if (isset($_POST["NuevoTecnicoEnOrden"])){
+		if (isset($_POST["NuevoTecnicoEnOrden"])) {
 
 
 
-				$tabla = "ordenes";
+			$tabla = "ordenes";
 
 
 
-				$idOrden=$_POST["idOrden"];
-
-			
-
-				$idTecnicoDos=$_POST["NuevoTecnicoEnOrden"];
-
-				
-
-				$respuesta = ModeloOrdenes::mdlIngresarTecnicoDos($tabla, $idOrden, $idTecnicoDos);
-
-				// Se cambio el titulo del success
-
-				//title: "¡Tecnico agregado correctamente!",
+			$idOrden = $_POST["idOrden"];
 
 
 
-				if ($respuesta == "ok") {
+			$idTecnicoDos = $_POST["NuevoTecnicoEnOrden"];
 
-					
 
-					echo '<script>
+
+			$respuesta = ModeloOrdenes::mdlIngresarTecnicoDos($tabla, $idOrden, $idTecnicoDos);
+
+			// Se cambio el titulo del success
+
+			//title: "¡Tecnico agregado correctamente!",
+
+
+
+			if ($respuesta == "ok") {
+
+
+
+				echo '<script>
 
 
 
@@ -5018,13 +5082,13 @@ class controladorOrdenes{
 
 					</script>';
 
-				}
+			}
 
 		}
 
 	}
 
-	
+
 
 	/*=============================================
 
@@ -5032,7 +5096,8 @@ class controladorOrdenes{
 
 	=============================================*/
 
-	public function ctrEditarOrdenDinamica(){
+	public function ctrEditarOrdenDinamica()
+	{
 
 
 
@@ -5054,254 +5119,296 @@ class controladorOrdenes{
 						$_egs_dyn_tituloOrden = isset($_egs_dyn_first["titulo"]) ? $_egs_dyn_first["titulo"] : '';
 					}
 				}
-			} catch (Exception $e) {}
+			} catch (Exception $e) {
+			}
 
 			$datosOrdenDinamica = array(
 
-						 		   "id"=>$_POST["idOrden"],
+				"id" => $_POST["idOrden"],
 
-								   "asesor"=>$_POST["asesorEditadoEnOrdenDianmica"],
+				"asesor" => $_POST["asesorEditadoEnOrdenDianmica"],
 
-								   "tecnico"=>$_POST["tecnicoEditadoEnOrdenDianmica"],
+				"tecnico" => $_POST["tecnicoEditadoEnOrdenDianmica"],
 
-								   "tecnicodos"=>isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? $_POST["tecnicodosEditadoEnOrdenDianmica"] : 0,
+				"estado" => $_POST["estado"],
 
-								   "estado"=>$_POST["estado"],
+				"partidaUno" => $_POST["partidaUno"],
 
-								   "partidaUno"=>$_POST["partidaUno"],
+				"precioUno" => $_POST["precioUno"],
 
-								   "precioUno"=>$_POST["precioUno"],
+				"partidaDos" => $_POST["partidaDos"],
 
-								   "partidaDos"=>$_POST["partidaDos"],
+				"precioDos" => $_POST["precioDos"],
 
-								   "precioDos"=>$_POST["precioDos"],
+				"partidaTres" => $_POST["partidaTres"],
 
-								   "partidaTres"=>$_POST["partidaTres"],
+				"precioTres" => $_POST["precioTres"],
 
-								   "precioTres"=>$_POST["precioTres"],
+				"partidaCuatro" => $_POST["partidaCuatro"],
 
-								   "partidaCuatro"=>$_POST["partidaCuatro"],
+				"precioCuatro" => $_POST["precioCuatro"],
 
-								   "precioCuatro"=>$_POST["precioCuatro"],
+				"partidaCinco" => $_POST["partidaCinco"],
 
-								   "partidaCinco"=>$_POST["partidaCinco"],
+				"precioCinco" => $_POST["precioCinco"],
 
-								   "precioCinco"=>$_POST["precioCinco"],
+				"partidaSeis" => $_POST["partidaSeis"],
 
-								   "partidaSeis"=>$_POST["partidaSeis"],
+				"precioSeis" => $_POST["precioSeis"],
 
-								   "precioSeis"=>$_POST["precioSeis"],
+				"partidaSiete" => $_POST["partidaSiete"],
 
-								   "partidaSiete"=>$_POST["partidaSiete"],
+				"precioSiete" => $_POST["precioSiete"],
 
-								   "precioSiete"=>$_POST["precioSiete"],
+				"partidaOcho" => $_POST["partidaOcho"],
 
-								   "partidaOcho"=>$_POST["partidaOcho"],
+				"precioOcho" => $_POST["precioOcho"],
 
-								   "precioOcho"=>$_POST["precioOcho"],
+				"partidaNueve" => $_POST["partidaNueve"],
 
-								   "partidaNueve"=>$_POST["partidaNueve"],
+				"precioNueve" => $_POST["precioNueve"],
 
-								   "precioNueve"=>$_POST["precioNueve"],
+				"partidaDiez" => $_POST["partidaDiez"],
 
-								   "partidaDiez"=>$_POST["partidaDiez"],
+				"precioDiez" => $_POST["precioDiez"],
 
-								   "precioDiez"=>$_POST["precioDiez"],
+				"listatOrdenes" => $_POST["listatOrdenes"],
 
-								   "listatOrdenes"=>$_POST["listatOrdenes"],
+				"costoTotalDeOrden" => $_POST["costoTotalDeOrden"],
 
-								   "costoTotalDeOrden"=>$_POST["costoTotalDeOrden"],
+				"listatOrdenesNuevas" => $_POST["listatOrdenesNuevas"],
 
-								   "listatOrdenesNuevas"=>$_POST["listatOrdenesNuevas"],
+				"listarinversiones" => $_POST["listarinversiones"],
 
-								   "listarinversiones"=>$_POST["listarinversiones"],
+				"totalInversiones" => $_POST["totalInversiones"],
 
-								   "totalInversiones"=>$_POST["totalInversiones"],
+				//	   "marcaDelEquipo"=>$_POST["marcaDelEquipo"],
 
-							//	   "marcaDelEquipo"=>$_POST["marcaDelEquipo"],
+				//	   "modeloDelEquipo"=>$_POST["modeloDelEquipo"],
 
-							//	   "modeloDelEquipo"=>$_POST["modeloDelEquipo"],
+				//	   "numeroDeSerieDelEquipo"=>$_POST["numeroDeSerieDelEquipo"]
 
-							//	   "numeroDeSerieDelEquipo"=>$_POST["numeroDeSerieDelEquipo"]
 
 
+			);
 
-								);
 
 
 
 
 
-							
 
-		
 
-						if ($datosOrdenDinamica["estado"] == "Entregado (Ent)"){
 
+			if ($datosOrdenDinamica["estado"] == "Entregado (Ent)") {
 
 
-							date_default_timezone_set("America/Mexico_City");
 
+				date_default_timezone_set("America/Mexico_City");
 
 
-							$fecha = date('Y-m-d H:i:s');
 
-							
+				$fecha = date('Y-m-d H:i:s');
 
-							$fechaActual = $fecha;
 
-							
 
-							$tabla = "ordenes";
+				$fechaActual = $fecha;
 
 
 
-							$datosOrdenDinamicaFecha = array(
+				$tabla = "ordenes";
 
-						 		   "id"=>$_POST["idOrden"],
 
-						 		   "asesor"=>$_POST["asesorEditadoEnOrdenDianmica"],
 
-								   "tecnico"=>$_POST["tecnicoEditadoEnOrdenDianmica"],
+				$datosOrdenDinamicaFecha = array(
 
-								   "estado"=>"Entregado (Ent)",
+					"id" => $_POST["idOrden"],
 
-								   "partidaUno"=>$_POST["partidaUno"],
+					"asesor" => $_POST["asesorEditadoEnOrdenDianmica"],
 
-								   "precioUno"=>$_POST["precioUno"],
+					"tecnico" => $_POST["tecnicoEditadoEnOrdenDianmica"],
 
-								   "partidaDos"=>$_POST["partidaDos"],
+					"estado" => "Entregado (Ent)",
 
-								   "precioDos"=>$_POST["precioDos"],
+					"partidaUno" => $_POST["partidaUno"],
 
-								   "partidaTres"=>$_POST["partidaTres"],
+					"precioUno" => $_POST["precioUno"],
 
-								   "precioTres"=>$_POST["precioTres"],
+					"partidaDos" => $_POST["partidaDos"],
 
-								   "partidaCuatro"=>$_POST["partidaCuatro"],
+					"precioDos" => $_POST["precioDos"],
 
-								   "precioCuatro"=>$_POST["precioCuatro"],
+					"partidaTres" => $_POST["partidaTres"],
 
-								   "partidaCinco"=>$_POST["partidaCinco"],
+					"precioTres" => $_POST["precioTres"],
 
-								   "precioCinco"=>$_POST["precioCinco"],
+					"partidaCuatro" => $_POST["partidaCuatro"],
 
-								   "partidaSeis"=>$_POST["partidaSeis"],
+					"precioCuatro" => $_POST["precioCuatro"],
 
-								   "precioSeis"=>$_POST["precioSeis"],
+					"partidaCinco" => $_POST["partidaCinco"],
 
-								   "partidaSiete"=>$_POST["partidaSiete"],
+					"precioCinco" => $_POST["precioCinco"],
 
-								   "precioSiete"=>$_POST["precioSiete"],
+					"partidaSeis" => $_POST["partidaSeis"],
 
-								   "partidaOcho"=>$_POST["partidaOcho"],
+					"precioSeis" => $_POST["precioSeis"],
 
-								   "precioOcho"=>$_POST["precioOcho"],
+					"partidaSiete" => $_POST["partidaSiete"],
 
-								   "partidaNueve"=>$_POST["partidaNueve"],
+					"precioSiete" => $_POST["precioSiete"],
 
-								   "precioNueve"=>$_POST["precioNueve"],
+					"partidaOcho" => $_POST["partidaOcho"],
 
-								   "partidaDiez"=>$_POST["partidaDiez"],
+					"precioOcho" => $_POST["precioOcho"],
 
-								   "precioDiez"=>$_POST["precioDiez"],
+					"partidaNueve" => $_POST["partidaNueve"],
 
-								   "listatOrdenes"=>$_POST["listatOrdenes"],
+					"precioNueve" => $_POST["precioNueve"],
 
-								   "costoTotalDeOrden"=>$_POST["costoTotalDeOrden"],
+					"partidaDiez" => $_POST["partidaDiez"],
 
-								   "listatOrdenesNuevas"=>$_POST["listatOrdenesNuevas"],
+					"precioDiez" => $_POST["precioDiez"],
 
-								   "listarinversiones"=>$_POST["listarinversiones"],
+					"listatOrdenes" => $_POST["listatOrdenes"],
 
-								   "totalInversiones"=>$_POST["totalInversiones"],
+					"costoTotalDeOrden" => $_POST["costoTotalDeOrden"],
 
-								   "fecha_Salida"=> $fechaActual,
+					"listatOrdenesNuevas" => $_POST["listatOrdenesNuevas"],
 
-								   "marcaDelEquipo"=>$_POST["marcaDelEquipo"],
+					"listarinversiones" => $_POST["listarinversiones"],
 
-								   "modeloDelEquipo"=>$_POST["modeloDelEquipo"],
+					"totalInversiones" => $_POST["totalInversiones"],
 
-								   "numeroDeSerieDelEquipo"=>$_POST["numeroDeSerieDelEquipo"]
+					"fecha_Salida" => $fechaActual,
 
-								);
+					"marcaDelEquipo" => $_POST["marcaDelEquipo"],
 
+					"modeloDelEquipo" => $_POST["modeloDelEquipo"],
 
+					"numeroDeSerieDelEquipo" => $_POST["numeroDeSerieDelEquipo"]
 
+				);
 
 
-		$respuestaUno = ModeloOrdenes::mdlEditarFechaSalida($tabla, $datosOrdenDinamicaFecha);
 
 
 
-							/* Push notifications del navegador desactivadas - entregada */
+				$respuestaUno = ModeloOrdenes::mdlEditarFechaSalida($tabla, $datosOrdenDinamicaFecha);
 
 
 
-							
+				echo '<!-- notifications-push -->	
 
-						}
 
 
 
-					$respuesta = ModeloOrdenes::mdlEditarOrdenDinamica($tabla, $datosOrdenDinamica);
 
-				// ── Notificaciones de cambio de estado (dinámica) ──
-				if ($respuesta == "ok" && !empty($_egs_dyn_estadoAnt)
-				    && $_egs_dyn_estadoAnt !== $_POST["estado"]) {
-					try {
-						ControladorNotificaciones::ctrCrearTablaEstado();
-						ControladorNotificaciones::ctrRegistrarCambioEstado(array(
-							"id_orden"          => intval($_POST["idOrden"]),
-							"estado_anterior"   => $_egs_dyn_estadoAnt,
-							"estado_nuevo"      => $_POST["estado"],
-							"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
-							"nombre_usuario"    => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
-							"titulo_orden"      => $_egs_dyn_tituloOrden,
-							"id_empresa"        => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
-							"id_asesor"         => intval($_POST["asesorEditadoEnOrdenDianmica"]),
-							"id_tecnico"        => intval($_POST["tecnicoEditadoEnOrdenDianmica"]),
-						));
-					} catch (Exception $e) {}
+									<script>
+
+
+
+										Push.create("ENTREGADA",{
+
+
+
+											body:"ORDEN: ' . $_POST["idOrden"] . '",
+
+											icon:"' . $_SESSION["foto"] . '",
+
+											timeout:10000,
+
+											onClick: function(){
+
+												window.location="index.php?ruta=inicio";
+
+												this.close();
+
+											}
+
+
+
+											});
+
+									</script>';
+
+
+
+
+
+			}
+
+
+
+			$respuesta = ModeloOrdenes::mdlEditarOrdenDinamica($tabla, $datosOrdenDinamica);
+
+			// ── Notificaciones de cambio de estado (dinámica) ──
+			if (
+				$respuesta == "ok" && !empty($_egs_dyn_estadoAnt)
+				&& $_egs_dyn_estadoAnt !== $_POST["estado"]
+			) {
+				try {
+					ControladorNotificaciones::ctrCrearTablaEstado();
+					ControladorNotificaciones::ctrRegistrarCambioEstado(array(
+						"id_orden" => intval($_POST["idOrden"]),
+						"estado_anterior" => $_egs_dyn_estadoAnt,
+						"estado_nuevo" => $_POST["estado"],
+						"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
+						"nombre_usuario" => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
+						"titulo_orden" => $_egs_dyn_tituloOrden,
+						"id_empresa" => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+						"id_asesor" => intval($_POST["asesorEditadoEnOrdenDianmica"]),
+						"id_tecnico" => intval($_POST["tecnicoEditadoEnOrdenDianmica"]),
+						"id_tecnicoDos" => isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? intval($_POST["tecnicodosEditadoEnOrdenDianmica"]) : 0,
+					));
+				} catch (Exception $e) {
 				}
+			}
 
-				// ── Notificación de traspaso de técnico (dinámica) ──
-				if ($respuesta == "ok" && $_egs_dyn_tecnicoAnt > 0
-				    && $_egs_dyn_tecnicoAnt !== intval($_POST["tecnicoEditadoEnOrdenDianmica"])
-				    && intval($_POST["tecnicoEditadoEnOrdenDianmica"]) > 0) {
+			// ── Notificación de traspaso de técnico (dinámica) ──
+			if (
+				$respuesta == "ok" && $_egs_dyn_tecnicoAnt > 0
+				&& $_egs_dyn_tecnicoAnt !== intval($_POST["tecnicoEditadoEnOrdenDianmica"])
+				&& intval($_POST["tecnicoEditadoEnOrdenDianmica"]) > 0
+			) {
+				try {
+					ControladorNotificaciones::ctrCrearTablaEstado();
+					$_egs_dTecAntNom = "Técnico #" . $_egs_dyn_tecnicoAnt;
+					$_egs_dTecNuevoNom = "Técnico #" . $_POST["tecnicoEditadoEnOrdenDianmica"];
 					try {
-						ControladorNotificaciones::ctrCrearTablaEstado();
-						$_egs_dTecAntNom = "Técnico #" . $_egs_dyn_tecnicoAnt;
-						$_egs_dTecNuevoNom = "Técnico #" . $_POST["tecnicoEditadoEnOrdenDianmica"];
-						try {
-							$_egs_dTA = ControladorTecnicos::ctrMostrarTecnicos("id", $_egs_dyn_tecnicoAnt);
-							if (is_array($_egs_dTA) && isset($_egs_dTA["nombre"])) $_egs_dTecAntNom = $_egs_dTA["nombre"];
-							$_egs_dTN = ControladorTecnicos::ctrMostrarTecnicos("id", intval($_POST["tecnicoEditadoEnOrdenDianmica"]));
-							if (is_array($_egs_dTN) && isset($_egs_dTN["nombre"])) $_egs_dTecNuevoNom = $_egs_dTN["nombre"];
-						} catch (Exception $ex) {}
+						$_egs_dTA = ControladorTecnicos::ctrMostrarTecnicos("id", $_egs_dyn_tecnicoAnt);
+						if (is_array($_egs_dTA) && isset($_egs_dTA["nombre"]))
+							$_egs_dTecAntNom = $_egs_dTA["nombre"];
+						$_egs_dTN = ControladorTecnicos::ctrMostrarTecnicos("id", intval($_POST["tecnicoEditadoEnOrdenDianmica"]));
+						if (is_array($_egs_dTN) && isset($_egs_dTN["nombre"]))
+							$_egs_dTecNuevoNom = $_egs_dTN["nombre"];
+					} catch (Exception $ex) {
+					}
 
-						ControladorNotificaciones::ctrRegistrarCambioEstado(array(
-							"id_orden"          => intval($_POST["idOrden"]),
-							"estado_anterior"   => $_egs_dTecAntNom,
-							"estado_nuevo"      => $_egs_dTecNuevoNom,
-							"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
-							"nombre_usuario"    => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
-							"titulo_orden"      => $_egs_dyn_tituloOrden,
-							"id_empresa"        => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
-							"id_asesor"         => intval($_POST["asesorEditadoEnOrdenDianmica"]),
-							"id_tecnico"        => intval($_POST["tecnicoEditadoEnOrdenDianmica"]),
-							"tipo"              => "traspaso",
-						));
-					} catch (Exception $e) {}
+					ControladorNotificaciones::ctrRegistrarCambioEstado(array(
+						"id_orden" => intval($_POST["idOrden"]),
+						"estado_anterior" => $_egs_dTecAntNom,
+						"estado_nuevo" => $_egs_dTecNuevoNom,
+						"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
+						"nombre_usuario" => isset($_SESSION["nombre"]) ? $_SESSION["nombre"] : "Sistema",
+						"titulo_orden" => $_egs_dyn_tituloOrden,
+						"id_empresa" => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+						"id_asesor" => intval($_POST["asesorEditadoEnOrdenDianmica"]),
+						"id_tecnico" => intval($_POST["tecnicoEditadoEnOrdenDianmica"]),
+						"id_tecnicoDos" => isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? intval($_POST["tecnicodosEditadoEnOrdenDianmica"]) : 0,
+						"tipo" => "traspaso",
+					));
+				} catch (Exception $e) {
 				}
+			}
 
-				if ($respuesta == "ok") {
-
-
-
+			if ($respuesta == "ok") {
 
 
-					echo '<script>
+
+
+
+				echo '<script>
 
 
 
@@ -5351,7 +5458,7 @@ class controladorOrdenes{
 
 					</script>';
 
-				}
+			}
 
 		}
 
@@ -5371,9 +5478,10 @@ class controladorOrdenes{
 
 	public function ctrDescargarReporteOrdenesIngresos(
 
-		$valorEmpresa){
+		$valorEmpresa
+	) {
 
-	
+
 
 		if (isset($_GET["reporte"])) {
 
@@ -5381,7 +5489,7 @@ class controladorOrdenes{
 
 			$tabla = "ordenes";
 
-			
+
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
 
@@ -5391,13 +5499,13 @@ class controladorOrdenes{
 
 
 
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesingresadas($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemUno, $valorEmpresa);
-
-			
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesingresadas($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemUno, $valorEmpresa);
 
 
 
-			}else{
+
+
+			} else {
 
 
 
@@ -5425,7 +5533,7 @@ class controladorOrdenes{
 
 
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 
 
@@ -5435,15 +5543,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -5477,71 +5585,71 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $value) {
 
-				
-
-				 $item = "id";
-
-              	$valor = $value["id_empresa"];
 
 
+				$item = "id";
 
-             	 $NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+				$valor = $value["id_empresa"];
 
 
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-				
+
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
+
+
 
 				//TRAER ASESOR
 
-                    
-
-	              $item = "id";
-
-	              $valor = $value["id_Asesor"];
 
 
+				$item = "id";
 
-	              $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
-
-					
-
-				  $NombreAsesor = $asesor["nombre"];
+				$valor = $value["id_Asesor"];
 
 
 
-             	//TRAER CLIENTE (USUARIO)
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 
 
-                $item = "id";
-
-                $valor = $value["id_usuario"];
+				$NombreAsesor = $asesor["nombre"];
 
 
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				//TRAER CLIENTE (USUARIO)
 
 
 
-                $NombreUsuario = $usuario["nombre"];
+				$item = "id";
+
+				$valor = $value["id_usuario"];
 
 
 
-                //TRAER TECNICO
-
-      			$item = "id";
-
-      			$valor = $value["id_tecnico"];
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
 
 
 
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$NombreUsuario = $usuario["nombre"];
 
 
 
-      			$NombreTecnico = $tecnico["nombre"];
+				//TRAER TECNICO
+
+				$item = "id";
+
+				$valor = $value["id_tecnico"];
+
+
+
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
+
+
+
+				$NombreTecnico = $tecnico["nombre"];
 
 
 
@@ -5559,31 +5667,31 @@ class controladorOrdenes{
 
 
 
-					echo utf8_decode("<tr>
+				echo utf8_decode("<tr>
 
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha_ingreso"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha_ingreso"] . "</td>
 
-			 					  	 </tr>"); 		
+			 					  	 </tr>");
 
 
 
 			}
 
-			    
 
-				echo utf8_decode("</table>");
+
+			echo utf8_decode("</table>");
 
 		}
 
@@ -5601,9 +5709,10 @@ class controladorOrdenes{
 
 
 
-	public function ctrReporteOrdenesParaVenta($valorEmpresa){
+	public function ctrReporteOrdenesParaVenta($valorEmpresa)
+	{
 
-	
+
 
 		if (isset($_GET["reporte"])) {
 
@@ -5617,15 +5726,15 @@ class controladorOrdenes{
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
 
-				
 
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesAut($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$itemEmpresa, $valorEmpresa);
 
-			
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesAut($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
 
 
-			}else{
+
+
+			} else {
 
 
 
@@ -5653,7 +5762,7 @@ class controladorOrdenes{
 
 
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 
 
@@ -5663,15 +5772,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -5707,73 +5816,73 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $value) {
 
-				
-
-				 $item = "id";
-
-              	$valor = $value["id_empresa"];
 
 
+				$item = "id";
 
-             	 $NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+				$valor = $value["id_empresa"];
 
 
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-				
+
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
+
+
 
 				//TRAER ASESOR
 
-                    
-
-	              $item = "id";
-
-	              $valor = $value["id_Asesor"];
 
 
+				$item = "id";
 
-	              $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
-
-					
-
-				  $NombreAsesor = $asesor["nombre"];
+				$valor = $value["id_Asesor"];
 
 
 
-             	//TRAER CLIENTE (USUARIO)
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 
 
-                $item = "id";
-
-                $valor = $value["id_usuario"];
+				$NombreAsesor = $asesor["nombre"];
 
 
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				//TRAER CLIENTE (USUARIO)
 
 
 
-                $NombreUsuario = $usuario["nombre"];
+				$item = "id";
+
+				$valor = $value["id_usuario"];
+
+
+
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
+
+
+
+				$NombreUsuario = $usuario["nombre"];
 
 
 
 				//$ElTotal = number_format($total["total"],2);
 
-                //TRAER TECNICO
+				//TRAER TECNICO
 
-      			$item = "id";
+				$item = "id";
 
-      			$valor = $value["id_tecnico"];
-
-
-
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$valor = $value["id_tecnico"];
 
 
 
-      			$NombreTecnico = $tecnico["nombre"];
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
+
+
+
+				$NombreTecnico = $tecnico["nombre"];
 
 
 
@@ -5785,61 +5894,61 @@ class controladorOrdenes{
 
 
 
-					echo utf8_decode("</td>
+				echo utf8_decode("</td>
 
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["total"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
 
-			 					  	 </tr>"); 		
+			 					  	 </tr>");
 
 
 
 			}
 
-			    /*=============================================
+			/*=============================================
 
-				TRAER TOTAL
+			TRAER TOTAL
 
-				=============================================*/
+			=============================================*/
 
-				$tabla= "ordenes";
+			$tabla = "ordenes";
 
-				$estado = "Pendiente de autorización (AUT";
+			$estado = "Pendiente de autorización (AUT";
 
-				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"],$valorEmpresa,$estado);
+			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
 
-				foreach ($total as $key => $valueTotal) {
+			foreach ($total as $key => $valueTotal) {
 
-						echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>"); 
-
-
-
-						echo utf8_decode("<tr><td style='border:1px solid #eee;'>$".$valueTotal["total"]."</td>
-
-			 					  	 	</tr>"); 
-
-				}
+				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
 
 
+
+				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
+
+			 					  	 	</tr>");
+
+			}
 
 
 
 
 
-				echo utf8_decode("</table>
+
+
+			echo utf8_decode("</table>
 
 
 
@@ -5855,9 +5964,10 @@ class controladorOrdenes{
 
 
 
-	public function ctrlMostrarOrdenesPorEstadoEmpresayTecnico($estado, $item, $valor, $tecnico, $valorTecnico){
+	public function ctrlMostrarOrdenesPorEstadoEmpresayTecnico($estado, $item, $valor, $tecnico, $valorTecnico)
+	{
 
-		
+
 
 		$tabla = "ordenes";
 
@@ -5881,9 +5991,10 @@ class controladorOrdenes{
 
 
 
-	public function ctrDescargarReporteOrdenesOkTecnico($estado, $item, $valor, $tecnico, $valorTecnico){
+	public function ctrDescargarReporteOrdenesOkTecnico($estado, $item, $valor, $tecnico, $valorTecnico)
+	{
 
-	
+
 
 		if (isset($_GET["reporte"])) {
 
@@ -5891,9 +6002,9 @@ class controladorOrdenes{
 
 			$tabla = "ordenes";
 
-			$OrdenesFecha = ModeloOrdenes::mdlMostrarOrdenesPorEstadoEmpresayTecnico($tabla,$estado, $item, $valor, $tecnico, $valorTecnico);
+			$OrdenesFecha = ModeloOrdenes::mdlMostrarOrdenesPorEstadoEmpresayTecnico($tabla, $estado, $item, $valor, $tecnico, $valorTecnico);
 
-		
+
 
 			/*=============================================
 
@@ -5903,7 +6014,7 @@ class controladorOrdenes{
 
 
 
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 
 
 
@@ -5913,15 +6024,15 @@ class controladorOrdenes{
 
 			header("Content-type: application/xls"); // Archivo de Excel
 
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 
 			header('Content-Description: File Transfer');
 
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
 
-			header("Pragma: public"); 
+			header("Pragma: public");
 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Content-Disposition:; filename="' . $Name . '"');
 
 			header("Content-Transfer-Encoding: binary");
 
@@ -5957,55 +6068,55 @@ class controladorOrdenes{
 
 			foreach ($OrdenesFecha as $key => $value) {
 
-			
-
-				 $item = "id";
-
-              	$valor = $value["id_empresa"];
 
 
+				$item = "id";
 
-             	 $NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
+				$valor = $value["id_empresa"];
 
 
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
 
-				
+
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
+
+
 
 				//TRAER ASESOR
 
-                    
-
-	              $item = "id";
-
-	              $valor = $value["id_Asesor"];
 
 
+				$item = "id";
 
-	              $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);
-
-					
-
-				  $NombreAsesor = $asesor["nombre"];
+				$valor = $value["id_Asesor"];
 
 
 
-             	//TRAER CLIENTE (USUARIO)
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 
 
-                $item = "id";
-
-                $valor = $value["id_usuario"];
+				$NombreAsesor = $asesor["nombre"];
 
 
 
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+				//TRAER CLIENTE (USUARIO)
 
 
 
-                $NombreUsuario = $usuario["nombre"];
+				$item = "id";
+
+				$valor = $value["id_usuario"];
+
+
+
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
+
+
+
+				$NombreUsuario = $usuario["nombre"];
 
 
 
@@ -6015,19 +6126,19 @@ class controladorOrdenes{
 
 				//TRAER TECNICO
 
-      			$item = "id";
+				$item = "id";
 
-      			$valor = $value["id_tecnico"];
-
-
-
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				$valor = $value["id_tecnico"];
 
 
 
-      			$NombreTecnico = $tecnico["nombre"];
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
 
-      			
+
+
+				$NombreTecnico = $tecnico["nombre"];
+
+
 
 
 
@@ -6039,35 +6150,35 @@ class controladorOrdenes{
 
 
 
-					echo utf8_decode("<tr>
+				echo utf8_decode("<tr>
 
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
 
-									 <td style='border:1px solid #eee;'>".$NombreEmpresa."</td>
+									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreAsesor."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["total"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
 
-			 					  	 <td style='border:1px solid #eee;'>".$value["fecha"]."</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
 
-			 					  	 </tr>"); 		
+			 					  	 </tr>");
 
-				}
-
-			
-
-			   
+			}
 
 
 
-				echo utf8_decode("</table>
+
+
+
+
+			echo utf8_decode("</table>
 
 
 
@@ -6079,13 +6190,14 @@ class controladorOrdenes{
 
 	}
 
-		/*=============================================
+	/*=============================================
 
-	AGREGAR ORDENES CON PARTIDAS LISTADAS
+AGREGAR ORDENES CON PARTIDAS LISTADAS
 
-	=============================================*/
+=============================================*/
 
-	public function ctrlEditarMarca(){
+	public function ctrlEditarMarca()
+	{
 
 
 
@@ -6097,27 +6209,27 @@ class controladorOrdenes{
 
 			$tabla = "ordenes";
 
-			
+
 
 			$datos = array(
 
-						 		   "id"=>$_POST["idOrden"],
+				"id" => $_POST["idOrden"],
 
-								   "marcaDelEquipo"=>$_POST["marcaDelEquipo"],
+				"marcaDelEquipo" => $_POST["marcaDelEquipo"],
 
-								   "modeloDelEquipo"=>$_POST["modeloDelEquipo"],
+				"modeloDelEquipo" => $_POST["modeloDelEquipo"],
 
-								   "numeroDeSerieDelEquipo"=>$_POST["numeroDeSerieDelEquipo"]
+				"numeroDeSerieDelEquipo" => $_POST["numeroDeSerieDelEquipo"]
 
-								);
+			);
 
 
 
 			$respuesta = ModeloOrdenes::mdlEditarMarca($tabla, $datos);
 
-				
 
-	
+
+
 
 		}
 
@@ -6133,9 +6245,10 @@ class controladorOrdenes{
 
 
 
-	public function ctrDescargarReporteOrdenesMarca($valorEmpresa){
+	public function ctrDescargarReporteOrdenesMarca($valorEmpresa)
+	{
 
-	
+
 
 		if (isset($_GET["reporte"])) {
 
@@ -6147,15 +6260,15 @@ class controladorOrdenes{
 
 			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
 
-				
 
-				$OrdenesFecha =ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
-			
+				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemEmpresa, $valorEmpresa);
 
 
 
-			}else{
+
+
+			} else {
 
 
 
@@ -6180,15 +6293,15 @@ class controladorOrdenes{
 			/*=============================================
 			CREAMOS EL ARCHIVO DE EXCEL
 			=============================================*/
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 			header('Content-Description: File Transfer');
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
-			header("Pragma: public"); 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header("Pragma: public");
+			header('Content-Disposition:; filename="' . $Name . '"');
 			header("Content-Transfer-Encoding: binary");
 
 			echo utf8_decode("<table border='0'> 
@@ -6204,50 +6317,50 @@ class controladorOrdenes{
 					</tr>");
 
 			foreach ($OrdenesFecha as $key => $value) {
-				
-				$item = "id";
-              	$valor = $value["id_empresa"];
-             	$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];	
+				$item = "id";
+				$valor = $value["id_empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
 				//TRAER ASESOR                   
 
-	            $item = "id";
-	            $valor = $value["id_Asesor"];
-	            $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);	
+				$item = "id";
+				$valor = $value["id_Asesor"];
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 				$NombreAsesor = $asesor["nombre"];
 				$departamentoAsesor = $asesor["departamento"];
 
-             	//TRAER CLIENTE (USUARIO)
-                $item = "id";
-                $valor = $value["id_usuario"];
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
-                $NombreUsuario = $usuario["nombre"];
+				//TRAER CLIENTE (USUARIO)
+				$item = "id";
+				$valor = $value["id_usuario"];
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
+				$NombreUsuario = $usuario["nombre"];
 
-                //TRAER TECNICO
-      			$item = "id";
-      			$valor = $value["id_tecnico"];
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				//TRAER TECNICO
+				$item = "id";
+				$valor = $value["id_tecnico"];
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
 
-      			$NombreTecnico = $tecnico["nombre"];
-      			$departamento = $tecnico["departamento"];
+				$NombreTecnico = $tecnico["nombre"];
+				$departamento = $tecnico["departamento"];
 
 				//$ElTotal = number_format($total["total"],2);
 
-    			/*=============================================
+				/*=============================================
 				TRAER EMAIL DATOS DE COMPRA
 				=============================================*/
 
-					echo utf8_decode("</td>
-									 <td style='border:1px solid #eee;'>".$value["id"]."</td>
-									 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$value["marcaDelEquipo"]."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$value["modeloDelEquipo"]."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$value["numeroDeSerieDelEquipo"]."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$value["estado"]."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
-			 					  	 </tr>"); 		
+				echo utf8_decode("</td>
+									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
+									 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["marcaDelEquipo"] . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["modeloDelEquipo"] . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["numeroDeSerieDelEquipo"] . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
+			 					  	 </tr>");
 
 
 			}
@@ -6266,10 +6379,10 @@ class controladorOrdenes{
 	============================*/
 	public function ctrDescargarReporteInfoOrden($valorEmpresa)
 	{
-		
+
 
 		if (isset($_GET["reporte"])) {
-			
+
 
 			$tabla = "ordenes";
 			$item = "id_empresa";
@@ -6280,15 +6393,15 @@ class controladorOrdenes{
 			/*=============================================
 			CREAMOS EL ARCHIVO DE EXCEL
 			=============================================*/
-			$Name = $_GET["reporte"].'.xls';
+			$Name = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
 			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-			header("Cache-Control: cache, must-revalidate"); 
+			header("Cache-Control: cache, must-revalidate");
 			header('Content-Description: File Transfer');
-			header('Last-Modified: '.date('D, d M Y H:i:s'));
-			header("Pragma: public"); 
-			header('Content-Disposition:; filename="'.$Name.'"');
+			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header("Pragma: public");
+			header('Content-Disposition:; filename="' . $Name . '"');
 			header("Content-Transfer-Encoding: binary");
 
 			echo utf8_decode("<table border='0'> 
@@ -6305,41 +6418,41 @@ class controladorOrdenes{
 					");
 
 			foreach ($ordenesInfo as $key => $valuOrdenesInfo) {
-				
-				$item = "id";
-              	$valor = $valuOrdenesInfo["id_empresa"];
-             	$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item,$valor);
 
-              	$NombreEmpresa = $NameEmpresa["empresa"];	
+				$item = "id";
+				$valor = $valuOrdenesInfo["id_empresa"];
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
+
+				$NombreEmpresa = $NameEmpresa["empresa"];
 				//TRAER ASESOR                   
 
-	            $item = "id";
-	            $valor = $valuOrdenesInfo["id_Asesor"];
-	            $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item,$valor);	
+				$item = "id";
+				$valor = $valuOrdenesInfo["id_Asesor"];
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
 				$NombreAsesor = $asesor["nombre"];
 				$departamentoAsesor = $asesor["departamento"];
 
-             	//TRAER CLIENTE (USUARIO)
-                $item = "id";
-                $valor = $valuOrdenesInfo["id_usuario"];
-                $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
-                $NombreUsuario = $usuario["nombre"];
+				//TRAER CLIENTE (USUARIO)
+				$item = "id";
+				$valor = $valuOrdenesInfo["id_usuario"];
+				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
+				$NombreUsuario = $usuario["nombre"];
 
-                //TRAER TECNICO
-      			$item = "id";
-      			$valor = $valuOrdenesInfo["id_tecnico"];
-      			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item,$valor);
+				//TRAER TECNICO
+				$item = "id";
+				$valor = $valuOrdenesInfo["id_tecnico"];
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
 
-      			$NombreTecnico = $tecnico["nombre"];
-      			$departamento = $tecnico["departamento"];
+				$NombreTecnico = $tecnico["nombre"];
+				$departamento = $tecnico["departamento"];
 
 				//$ElTotal = number_format($total["total"],2);
 
-    			/*=============================================
+				/*=============================================
 				TRAER EMAIL DATOS DE COMPRA
 				=============================================*/
-				$partidas = json_decode($valuOrdenesInfo["partidas"], true);	
+				$partidas = json_decode($valuOrdenesInfo["partidas"], true);
 
 				foreach ($partidas as $key => $itemDetallesPartidas) {
 
@@ -6349,41 +6462,41 @@ class controladorOrdenes{
 				}
 
 				$observaciones = json_decode($valuOrdenesInfo["observaciones"], true);
-	
+
 
 				foreach ($observaciones as $key => $itemobservaciones) {
 
-					
-					echo utf8_decode("<td style='border:1px solid #eee;'>Observaciones</td>"); 
-					
 
-					
+					echo utf8_decode("<td style='border:1px solid #eee;'>Observaciones</td>");
+
+
+
 				}
-				echo utf8_decode("</tr>"); 
-					echo utf8_decode("</td>
-									 <td style='border:1px solid #eee;'>".$valuOrdenesInfo["id"]."</td>
-									 <td style='border:1px solid #eee;'>".$NombreTecnico."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$valuOrdenesInfo["estado"]."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$NombreUsuario."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$valuOrdenesInfo["partidaUno"]."</br>
-			 					  	 ".$valuOrdenesInfo["partidaDos"]."
-			 					  	 ".$valuOrdenesInfo["partidaDos"]."
+				echo utf8_decode("</tr>");
+				echo utf8_decode("</td>
+									 <td style='border:1px solid #eee;'>" . $valuOrdenesInfo["id"] . "</td>
+									 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $valuOrdenesInfo["estado"] . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $valuOrdenesInfo["partidaUno"] . "</br>
+			 					  	 " . $valuOrdenesInfo["partidaDos"] . "
+			 					  	 " . $valuOrdenesInfo["partidaDos"] . "
 			 					  	 </td>
-			 					  	 <td style='border:1px solid #eee;'>".$descripcioPartida."</td>
-			 					  	 <td style='border:1px solid #eee;'>".$valorProducto."</td>
-			 					  	"); 	
+			 					  	 <td style='border:1px solid #eee;'>" . $descripcioPartida . "</td>
+			 					  	 <td style='border:1px solid #eee;'>" . $valorProducto . "</td>
+			 					  	");
 
-									foreach ($observaciones as $key => $itemobservaciones) {
-										
-										$obs = $itemobservaciones["observacion"];
-										echo utf8_decode("<td style='border:1px solid #eee;'>".$obs."</td>"); 
-														
+				foreach ($observaciones as $key => $itemobservaciones) {
 
-														
-									}
-									echo utf8_decode("</tr>"); 
+					$obs = $itemobservaciones["observacion"];
+					echo utf8_decode("<td style='border:1px solid #eee;'>" . $obs . "</td>");
 
-			 					  		
+
+
+				}
+				echo utf8_decode("</tr>");
+
+
 
 
 			}
