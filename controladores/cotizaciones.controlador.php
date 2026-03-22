@@ -103,9 +103,9 @@ class CotizacionesControlador
 	}
 	
 	/*=============================================
-    MOSTRAR COTIZACIONES
+    MOSTRAR COTIZACIONES (múltiples)
     =============================================*/
-	
+
 	static public function ctrMostrarCotizaciones($item, $valor)
     {
 
@@ -117,6 +117,19 @@ class CotizacionesControlador
 
     }
 
+	/*=============================================
+    MOSTRAR COTIZACIÓN (individual o por filtro)
+    =============================================*/
 
+	static public function ctrMostrarCotizacion($item, $valor)
+    {
+
+        $tabla = "cotizaciones";
+
+        $respuesta = CotizacionModelo::mdlMostrarCotizacion($tabla, $item, $valor);
+
+        return $respuesta;
+
+    }
 
 }
