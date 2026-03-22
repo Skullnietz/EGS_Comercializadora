@@ -693,18 +693,31 @@ function _egsEstadoClass($estado) {
 						<div class="egs-field-row">
 							<label class="egs-lbl">Técnico (Participación)</label>
 							<?php
-							$tecnico2 = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnicodos"]);
-							if ($isTecnico || $isSecretaria) {
+							$_tec2Id = isset($_GET["tecnicodos"]) ? $_GET["tecnicodos"] : '';
+							$tecnico2 = null;
+							if ($_tec2Id !== '' && $_tec2Id !== '0') {
+								$tecnico2 = ControladorTecnicos::ctrMostrarTecnicos("id", $_tec2Id);
+							}
+							$_tec2Nombre = (is_array($tecnico2) && isset($tecnico2["nombre"])) ? $tecnico2["nombre"] : 'Sin asignar';
+							$_tec2IdVal  = (is_array($tecnico2) && isset($tecnico2["id"])) ? $tecnico2["id"] : '';
+
+							if ($isTecnico || $isVendedor || $isSecretaria) {
 								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-user-plus"></i></span>';
-								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico2["nombre"]).'" readonly></div>';
-								echo '<input type="hidden" value="'.$tecnico2["id"].'" name="tecnicodosEditadoEnOrdenDianmica" form="formObservaciones">';
+								echo '<input type="text" class="form-control" value="'.htmlspecialchars($_tec2Nombre).'" readonly></div>';
+								echo '<input type="hidden" value="'.htmlspecialchars($_tec2IdVal).'" name="tecnicodosEditadoEnOrdenDianmica" form="formObservaciones">';
 							} else {
 								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-user-plus"></i></span>';
 								echo '<select class="form-control selector" name="tecnicodosEditadoEnOrdenDianmica" form="formObservaciones">';
-								echo '<option value="'.$tecnico2["id"].'">'.htmlspecialchars($tecnico2["nombre"]).'</option>';
+								if ($_tec2IdVal !== '') {
+									echo '<option value="'.htmlspecialchars($_tec2IdVal).'">'.htmlspecialchars($_tec2Nombre).'</option>';
+								} else {
+									echo '<option value="">Sin asignar</option>';
+								}
 								$tecnico2List = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
 								foreach ($tecnico2List as $vt2) {
-									echo '<option value="'.$vt2["id"].'" class="text-uppercase">'.htmlspecialchars($vt2["nombre"]).'</option>';
+									if ($vt2["id"] != $_tec2IdVal) {
+										echo '<option value="'.$vt2["id"].'" class="text-uppercase">'.htmlspecialchars($vt2["nombre"]).'</option>';
+									}
 								}
 								echo '</select></div>';
 							}
