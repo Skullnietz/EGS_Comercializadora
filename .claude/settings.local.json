@@ -126,7 +126,14 @@
       "Bash(grep -r \"guardarOrden\\\\|AgregarCampos\" C:UsersblackDesktopEGS --include=*.js)",
       "Bash(grep -r \"AgregarCampos\\\\|function AgregarCampos\" C:UsersblackDesktopEGS --include=*.php)",
       "Bash(find C:UsersblackDesktopEGScontroladores -name *.php)",
-      "Bash(find C:UsersblackDesktopEGSvistas -name *.js -type f)"
+      "Bash(find C:UsersblackDesktopEGSvistas -name *.js -type f)",
+      "Bash(grep -n \"ruta=infoOrden\" /c/Users/black/Desktop/EGS/vistas/modulos/*.php)",
+      "Bash(grep -rn \"index.php?ruta=infoOrden\\\\|infoOrden\" /c/Users/black/Desktop/EGS/vistas/modulos/ordenes*.php)",
+      "Bash(grep -n \"$_ET\\\\[\" /c/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php)",
+      "Bash(grep -o '\\\\$_GET\\\\[[^]]*\\\\]' /c/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php)",
+      "Bash(grep -r \"pollNotificaciones\\\\|setInterval.*notif\\\\|statusNotificaciones\" /c/Users/black/Desktop/EGS/vistas --include=*.php --include=*.html)",
+      "Bash(php -l vistas/modulos/infoOrden.php)",
+      "Bash(php -l ajax/infoOrden.ajax.php)"
     ]
   }
 }
