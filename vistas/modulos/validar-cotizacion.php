@@ -5,22 +5,6 @@ $cotizacion = null;
 if ($codigo) {
     $cotizaciones = CotizacionesControlador::ctrMostrarCotizacion("codigo_qr", $codigo);
     $cotizacion = !empty($cotizaciones) ? $cotizaciones[0] : null;
-
-    // DEBUG
-    echo "<pre style='background:white; padding:10px; border:1px solid red; z-index:9999; position:relative;'>";
-    echo "DEBUG INFO:<br>";
-    echo "Código recibido (GET): ";
-    var_dump($codigo);
-    echo "Resultado búsqueda: ";
-    var_dump($cotizacion);
-
-    $all = CotizacionesControlador::ctrMostrarCotizacion(null, null);
-    echo "Total cotizaciones en BD: " . count($all) . "<br>";
-    if (count($all) > 0) {
-        echo "Ejemplo de primer código QR en BD: ";
-        var_dump($all[0]['codigo_qr']);
-    }
-    echo "</pre>";
 }
 ?>
 <div class="content-wrapper" style="margin-left: 0 !important; background: #f4f6f9;">

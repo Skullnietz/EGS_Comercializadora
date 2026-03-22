@@ -47,33 +47,17 @@ try {
 // Estadísticas rápidas
 $_hc_total = count($_hc_cotizaciones);
 $_hc_montoTotal = 0;
-$_hc_vigentes = 0;
-$_hc_vencidas = 0;
-$_hc_hoy = date("Y-m-d");
+$_hc_esteMes = 0;
+$_hc_mesActual = date("Y-m");
 
 foreach ($_hc_cotizaciones as $c) {
   $_hc_montoTotal += floatval($c["total"]);
-  $vig = isset($c["vigencia"]) ? $c["vigencia"] : "";
-  if (!empty($vig) && $vig >= $_hc_hoy) {
-    $_hc_vigentes++;
-  } elseif (!empty($vig)) {
-    $_hc_vencidas++;
+  $fecha = isset($c["fecha"]) ? $c["fecha"] : "";
+  if (!empty($fecha) && substr($fecha, 0, 7) === $_hc_mesActual) {
+    $_hc_esteMes++;
   }
 }
-
-// Helper: estado de vigencia
-function _hcVigenciaEstado($vigencia) {
-  if (empty($vigencia)) return array("Sin fecha", "#94a3b8", "#f1f5f9", "fa-minus");
-  $hoy = date("Y-m-d");
-  $diff = (strtotime($vigencia) - strtotime($hoy)) / 86400;
-  if ($diff < 0) return array("Vencida", "#ef4444", "#fef2f2", "fa-clock-rotate-left");
-  if ($diff <= 3) return array("Por vencer", "#f59e0b", "#fffbeb", "fa-triangle-exclamation");
-  return array("Vigente", "#22c55e", "#f0fdf4", "fa-circle-check");
-}
 ?>
-
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.11.5/datatables.min.css" />
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.11.5/datatables.min.js"></script>
 
 <style>
 /* ═══════════════════════════════════════════════════
@@ -265,25 +249,16 @@ function _hcVigenciaEstado($vigencia) {
         </div>
         <div>
           <div class="hc-kpi-value"><?php echo $_hc_total; ?></div>
-          <div class="hc-kpi-label">Cotizaciones</div>
+          <div class="hc-kpi-label">Total cotizaciones</div>
         </div>
       </div>
       <div class="hc-kpi">
         <div class="hc-kpi-icon" style="background:#f0fdf4;color:#22c55e">
-          <i class="fa-solid fa-circle-check"></i>
+          <i class="fa-solid fa-calendar-check"></i>
         </div>
         <div>
-          <div class="hc-kpi-value"><?php echo $_hc_vigentes; ?></div>
-          <div class="hc-kpi-label">Vigentes</div>
-        </div>
-      </div>
-      <div class="hc-kpi">
-        <div class="hc-kpi-icon" style="background:#fef2f2;color:#ef4444">
-          <i class="fa-solid fa-clock-rotate-left"></i>
-        </div>
-        <div>
-          <div class="hc-kpi-value"><?php echo $_hc_vencidas; ?></div>
-          <div class="hc-kpi-label">Vencidas</div>
+          <div class="hc-kpi-value"><?php echo $_hc_esteMes; ?></div>
+          <div class="hc-kpi-label">Este mes</div>
         </div>
       </div>
       <div class="hc-kpi">
@@ -292,7 +267,7 @@ function _hcVigenciaEstado($vigencia) {
         </div>
         <div>
           <div class="hc-kpi-value">$<?php echo number_format($_hc_montoTotal, 0, '.', ','); ?></div>
-          <div class="hc-kpi-label">Monto total</div>
+          <div class="hc-kpi-label">Monto acumulado</div>
         </div>
       </div>
     </div>
@@ -324,10 +299,9 @@ function _hcVigenciaEstado($vigencia) {
           </thead>
           <tbody>
             <?php foreach ($_hc_cotizaciones as $cot):
-              $vigInfo = _hcVigenciaEstado(isset($cot["vigencia"]) ? $cot["vigencia"] : "");
               $vendedorNombre = isset($_hc_vendedores[intval($cot["id_vendedor"])]) ? $_hc_vendedores[intval($cot["id_vendedor"])] : "Vendedor #".$cot["id_vendedor"];
               $fechaFmt = !empty($cot["fecha"]) ? date("d/m/Y", strtotime($cot["fecha"])) : "-";
-              $vigFmt   = !empty($cot["vigencia"]) ? date("d/m/Y", strtotime($cot["vigencia"])) : "-";
+              $vigTexto = !empty($cot["vigencia"]) ? htmlspecialchars($cot["vigencia"]) : "-";
             ?>
             <tr>
               <td><span class="hc-id">#<?php echo $cot["id"]; ?></span></td>
@@ -336,9 +310,9 @@ function _hcVigenciaEstado($vigencia) {
               <td><span class="hc-asunto" title="<?php echo htmlspecialchars($cot["asunto"]); ?>"><?php echo htmlspecialchars($cot["asunto"]); ?></span></td>
               <td><?php echo htmlspecialchars($vendedorNombre); ?></td>
               <td>
-                <span class="hc-badge" style="color:<?php echo $vigInfo[1]; ?>;background:<?php echo $vigInfo[2]; ?>">
-                  <i class="fa-solid <?php echo $vigInfo[3]; ?>" style="font-size:10px"></i>
-                  <?php echo $vigInfo[0]; ?>
+                <span class="hc-badge" style="color:#6366f1;background:#eef2ff">
+                  <i class="fa-solid fa-clock" style="font-size:10px"></i>
+                  <?php echo $vigTexto; ?>
                 </span>
               </td>
               <td><span class="hc-monto">$<?php echo number_format($cot["total"], 2); ?></span></td>
@@ -351,10 +325,7 @@ function _hcVigenciaEstado($vigencia) {
                     data-vendedor="<?php echo htmlspecialchars($vendedorNombre); ?>"
                     data-empresa="<?php echo htmlspecialchars($cot['empresa']); ?>"
                     data-asunto="<?php echo htmlspecialchars($cot['asunto']); ?>"
-                    data-vigencia="<?php echo $vigFmt; ?>"
-                    data-vig-estado="<?php echo $vigInfo[0]; ?>"
-                    data-vig-color="<?php echo $vigInfo[1]; ?>"
-                    data-vig-bg="<?php echo $vigInfo[2]; ?>"
+                    data-vigencia="<?php echo $vigTexto; ?>"
                     data-total="<?php echo number_format($cot['total'], 2); ?>"
                     data-neto="<?php echo number_format($cot['neto'], 2); ?>"
                     data-impuesto="<?php echo number_format($cot['impuesto'], 2); ?>"
@@ -441,9 +412,12 @@ function _hcVigenciaEstado($vigencia) {
             <div id="hcDetObs"></div>
           </div>
 
-          <!-- QR -->
+          <!-- Código de verificación -->
           <div id="hcDetQrWrap" style="display:none;text-align:center;margin-top:16px">
-            <img id="hcDetQr" src="" style="max-width:120px;border-radius:8px;border:1px solid #e2e8f0">
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;font-size:12px;color:#64748b">
+              <i class="fa-solid fa-shield-check" style="color:#6366f1"></i>
+              Código de verificación: <code id="hcDetQr" style="font-weight:600;color:#0f172a"></code>
+            </span>
           </div>
         </div>
 
@@ -463,6 +437,9 @@ function _hcVigenciaEstado($vigencia) {
 $(document).ready(function(){
 
   // ── DataTable ──
+  if ($.fn.DataTable.isDataTable('#hcTable')) {
+    $('#hcTable').DataTable().destroy();
+  }
   $('#hcTable').DataTable({
     order: [[0, 'desc']],
     pageLength: 25,
@@ -496,8 +473,8 @@ $(document).ready(function(){
     $('#hcDetTotal').text('$' + $b.data('total'));
 
     // Vigencia
-    var vigHtml = '<i class="fa-solid fa-calendar-check" style="font-size:11px"></i> Vigencia: ' + $b.data('vigencia');
-    vigHtml += ' <span style="background:'+$b.data('vig-bg')+';color:'+$b.data('vig-color')+';padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600;margin-left:4px">'+$b.data('vig-estado')+'</span>';
+    var vigText = $b.data('vigencia') || '-';
+    var vigHtml = '<i class="fa-solid fa-clock" style="font-size:11px;color:#818cf8"></i> ' + vigText;
     $('#hcDetVigWrap').html(vigHtml);
 
     // Descuento
@@ -518,10 +495,10 @@ $(document).ready(function(){
       $('#hcDetObsWrap').hide();
     }
 
-    // QR
+    // Código de verificación (QR hash)
     var qr = $b.data('qr');
     if (qr && qr.trim() !== '') {
-      $('#hcDetQr').attr('src', qr);
+      $('#hcDetQr').text(qr);
       $('#hcDetQrWrap').show();
     } else {
       $('#hcDetQrWrap').hide();
@@ -534,12 +511,12 @@ $(document).ready(function(){
     if (Array.isArray(prods) && prods.length > 0) {
       for (var i = 0; i < prods.length; i++) {
         var p = prods[i];
-        var desc = p.descripcion || p.producto || p.nombre || '-';
+        var pdesc = p.descripcion || p.producto || p.nombre || '-';
         var qty  = p.cantidad || p.qty || 1;
         var prc  = parseFloat(p.precio || p.price || p.precioUnitario || 0);
         var tot  = parseFloat(p.total || (qty * prc));
         html += '<tr>';
-        html += '<td>' + desc + '</td>';
+        html += '<td>' + pdesc + '</td>';
         html += '<td style="text-align:center">' + qty + '</td>';
         html += '<td style="text-align:right">$' + prc.toFixed(2) + '</td>';
         html += '<td style="text-align:right;font-weight:600">$' + tot.toFixed(2) + '</td>';
