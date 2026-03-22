@@ -5098,6 +5098,8 @@ class controladorOrdenes{
 
 								   "tecnico"=>$_POST["tecnicoEditadoEnOrdenDianmica"],
 
+								   "tecnicodos"=>isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? $_POST["tecnicodosEditadoEnOrdenDianmica"] : 0,
+
 								   "estado"=>$_POST["estado"],
 
 								   "partidaUno"=>$_POST["partidaUno"],

@@ -35,6 +35,8 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 	.egs-btn-accent { background: #6366f1; border-color: #6366f1; color: #fff; border-radius: 8px; font-weight: 600; }
 	.egs-btn-accent:hover { background: #4f46e5; border-color: #4f46e5; color: #fff; }
 	.egs-dollar { background: #6366f1; color: #fff; border-color: #6366f1; font-weight: 700; }
+	.egs-body .input-group-addon { background: #f1f5f9; color: #475569; border-color: #d2d6de; min-width: 40px; }
+	.egs-body .input-group-addon i { font-size: 14px; }
 	.egs-estado-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; background: #e0e7ff; color: #4338ca; }
 
 	/* Carousel */
@@ -173,32 +175,50 @@ date_default_timezone_set("America/Mexico_City");
 					<div class="egs-title-bar"><i class="fa-solid fa-user"></i> Datos del cliente</div>
 					<div class="egs-body">
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-solid fa-user" style="margin-right:4px"></i>Nombre</label>
-							<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" readonly>
+							<label class="egs-lbl">Nombre</label>
+							<div class="input-group">
+								<span class="input-group-addon"><i class="fas fa-user"></i></span>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" readonly>
+							</div>
 						</div>
 
 						<?php if (!$isTecnico): ?>
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-solid fa-envelope" style="margin-right:4px"></i>Correo</label>
-							<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["correo"]); ?>" readonly>
+							<label class="egs-lbl">Correo</label>
+							<div class="input-group">
+								<span class="input-group-addon"><i class="fas fa-envelope"></i></span>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["correo"]); ?>" readonly>
+							</div>
 						</div>
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-brands fa-whatsapp" style="margin-right:4px"></i>WhatsApp</label>
-							<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["telefonoDos"]); ?>" id="botonwhats" readonly>
+							<label class="egs-lbl">WhatsApp</label>
+							<div class="input-group">
+								<span class="input-group-addon"><i class="fab fa-whatsapp"></i></span>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["telefonoDos"]); ?>" id="botonwhats" readonly>
+							</div>
 						</div>
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-solid fa-phone" style="margin-right:4px"></i>Teléfono</label>
-							<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["telefono"]); ?>" readonly>
+							<label class="egs-lbl">Teléfono</label>
+							<div class="input-group">
+								<span class="input-group-addon"><i class="fas fa-phone-alt"></i></span>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["telefono"]); ?>" readonly>
+							</div>
 						</div>
 						<?php endif; ?>
 
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-solid fa-calendar-check" style="margin-right:4px"></i>Fecha de entrada</label>
-							<input type="text" class="form-control" value="<?php echo htmlspecialchars($fecha_ingreso); ?>" readonly>
+							<label class="egs-lbl">Fecha de entrada</label>
+							<div class="input-group">
+								<span class="input-group-addon"><i class="fas fa-calendar-check"></i></span>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($fecha_ingreso); ?>" readonly>
+							</div>
 						</div>
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-solid fa-clock" style="margin-right:4px"></i>Última modificación</label>
-							<input type="text" class="form-control" value="<?php echo htmlspecialchars($value["fecha"]); ?>" readonly>
+							<label class="egs-lbl">Última modificación</label>
+							<div class="input-group">
+								<span class="input-group-addon"><i class="fas fa-clock"></i></span>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($value["fecha"]); ?>" readonly>
+							</div>
 						</div>
 
 						<?php if ($isAdmin || $isVendedor): ?>
@@ -535,32 +555,50 @@ date_default_timezone_set("America/Mexico_City");
 						<form role="form" method="post" class="formularioFichaTecnica">
 							<?php if ($value["marcaDelEquipo"] == ""): ?>
 								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="far fa-copyright" style="margin-right:4px"></i>Marca del equipo</label>
-									<input type="text" id="marca" class="form-control" name="marcaDelEquipo" placeholder="Ej: HP, EPSON, BROTHER">
+									<label class="egs-lbl">Marca del equipo</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
+										<input type="text" id="marca" class="form-control" name="marcaDelEquipo" placeholder="Ej: HP, EPSON, BROTHER">
+									</div>
 									<span id="spanmarca" style="color:red;font-size:12px"></span>
 								</div>
 								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="fas fa-kaaba" style="margin-right:4px"></i>Modelo del equipo</label>
-									<input type="text" id="modelo" class="form-control" name="modeloDelEquipo" placeholder="Ej: LaserJet Pro M404">
+									<label class="egs-lbl">Modelo del equipo</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
+										<input type="text" id="modelo" class="form-control" name="modeloDelEquipo" placeholder="Ej: LaserJet Pro M404">
+									</div>
 									<span id="spanmodelo" style="color:red;font-size:12px"></span>
 								</div>
 								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="fas fa-barcode" style="margin-right:4px"></i>Número de serie</label>
-									<input type="text" id="numeroserial" class="form-control" name="numeroDeSerieDelEquipo" placeholder="Últimos 6 dígitos">
+									<label class="egs-lbl">Número de serie</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
+										<input type="text" id="numeroserial" class="form-control" name="numeroDeSerieDelEquipo" placeholder="Últimos 6 dígitos">
+									</div>
 									<span id="spannumeroserie" style="color:red;font-size:12px"></span>
 								</div>
 							<?php else: ?>
 								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="far fa-copyright" style="margin-right:4px"></i>Marca</label>
-									<input type="text" id="marca2" class="form-control" value="<?php echo htmlspecialchars($value["marcaDelEquipo"]); ?>" readonly>
+									<label class="egs-lbl">Marca</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
+										<input type="text" id="marca2" class="form-control" value="<?php echo htmlspecialchars($value["marcaDelEquipo"]); ?>" readonly>
+									</div>
 								</div>
 								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="fas fa-kaaba" style="margin-right:4px"></i>Modelo</label>
-									<input type="text" id="modelo2" class="form-control" value="<?php echo htmlspecialchars($value["modeloDelEquipo"]); ?>" readonly>
+									<label class="egs-lbl">Modelo</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
+										<input type="text" id="modelo2" class="form-control" value="<?php echo htmlspecialchars($value["modeloDelEquipo"]); ?>" readonly>
+									</div>
 								</div>
 								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="fas fa-barcode" style="margin-right:4px"></i>Número de serie</label>
-									<input type="text" id="numeroserial2" class="form-control" value="<?php echo htmlspecialchars($value["numeroDeSerieDelEquipo"]); ?>" readonly>
+									<label class="egs-lbl">Número de serie</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
+										<input type="text" id="numeroserial2" class="form-control" value="<?php echo htmlspecialchars($value["numeroDeSerieDelEquipo"]); ?>" readonly>
+									</div>
 								</div>
 							<?php endif; ?>
 							<input type="hidden" value="<?php echo $_GET["idOrden"]; ?>" name="idOrden">
@@ -575,67 +613,73 @@ date_default_timezone_set("America/Mexico_City");
 
 						<!-- ASESOR -->
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-solid fa-user-tie" style="margin-right:4px"></i>Asesor</label>
+							<label class="egs-lbl">Asesor</label>
 							<?php
 							$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $_GET["asesor"]);
 							if ($isReadonly) {
-								echo '<input type="text" class="form-control" value="'.htmlspecialchars($asesor["nombre"]).'" readonly>';
+								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-user-tie"></i></span>';
+								echo '<input type="text" class="form-control" value="'.htmlspecialchars($asesor["nombre"]).'" readonly></div>';
 								echo '<input type="hidden" value="'.$asesor["id"].'" name="asesorEditadoEnOrdenDianmica" form="formObservaciones">';
 							} else {
+								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-user-tie"></i></span>';
 								echo '<select class="form-control selector" name="asesorEditadoEnOrdenDianmica" form="formObservaciones" required>';
 								echo '<option value="'.$asesor["id"].'">'.htmlspecialchars($asesor["nombre"]).'</option>';
 								$asesorParaSelect = Controladorasesores::ctrMostrarAsesoresEmpresas("id_empresa", $_SESSION["empresa"]);
 								foreach ($asesorParaSelect as $va) {
 									echo '<option value="'.$va["id"].'" class="text-uppercase">'.htmlspecialchars($va["nombre"]).'</option>';
 								}
-								echo '</select>';
+								echo '</select></div>';
 							}
 							?>
 						</div>
 
 						<!-- TÉCNICO (En posesión) -->
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-solid fa-screwdriver-wrench" style="margin-right:4px"></i>Técnico (En posesión)</label>
+							<label class="egs-lbl">Técnico (En posesión)</label>
 							<?php
 							$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnico"]);
 							if ($isTecnico || $isSecretaria) {
-								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico["nombre"]).'" readonly>';
+								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-screwdriver-wrench"></i></span>';
+								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico["nombre"]).'" readonly></div>';
 								echo '<input type="hidden" value="'.$tecnico["id"].'" name="tecnicoEditadoEnOrdenDianmica" form="formObservaciones">';
 							} else {
+								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-screwdriver-wrench"></i></span>';
 								echo '<select class="form-control selector" name="tecnicoEditadoEnOrdenDianmica" form="formObservaciones" required>';
 								echo '<option value="'.$tecnico["id"].'">'.htmlspecialchars($tecnico["nombre"]).'</option>';
 								$tecnicoList = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
 								foreach ($tecnicoList as $vt) {
 									echo '<option value="'.$vt["id"].'" class="text-uppercase">'.htmlspecialchars($vt["nombre"]).'</option>';
 								}
-								echo '</select>';
+								echo '</select></div>';
 							}
 							?>
 						</div>
 
 						<!-- TÉCNICO (Participación) -->
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-solid fa-user-plus" style="margin-right:4px"></i>Técnico (Participación)</label>
+							<label class="egs-lbl">Técnico (Participación)</label>
 							<?php
 							$tecnico2 = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnicodos"]);
 							if ($isTecnico || $isSecretaria) {
-								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico2["nombre"]).'" readonly>';
+								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-user-plus"></i></span>';
+								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico2["nombre"]).'" readonly></div>';
 								echo '<input type="hidden" value="'.$tecnico2["id"].'" name="tecnicodosEditadoEnOrdenDianmica" form="formObservaciones">';
 							} else {
+								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-user-plus"></i></span>';
 								echo '<select class="form-control selector" name="tecnicodosEditadoEnOrdenDianmica" form="formObservaciones">';
 								echo '<option value="'.$tecnico2["id"].'">'.htmlspecialchars($tecnico2["nombre"]).'</option>';
 								$tecnico2List = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
 								foreach ($tecnico2List as $vt2) {
 									echo '<option value="'.$vt2["id"].'" class="text-uppercase">'.htmlspecialchars($vt2["nombre"]).'</option>';
 								}
-								echo '</select>';
+								echo '</select></div>';
 							}
 							?>
 						</div>
 
 						<!-- ESTADO DE LA ORDEN -->
 						<div class="egs-field-row">
-							<label class="egs-lbl"><i class="fa-solid fa-toggle-on" style="margin-right:4px"></i>Estado</label>
+							<label class="egs-lbl">Estado</label>
 							<span class="egs-estado-badge" style="margin-bottom:8px"><?php echo htmlspecialchars($estado); ?></span>
 							<?php
 							if ($estado !== "Entregado (Ent)") {
@@ -646,6 +690,7 @@ date_default_timezone_set("America/Mexico_City");
 									'En revisión probable garantía ', 'Garantía aceptada (GA)'
 								);
 
+								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-toggle-on"></i></span>';
 								if ($isTecnico) {
 									echo '<select class="form-control selector" name="estado" form="formObservaciones">';
 									echo '<option>'.htmlspecialchars($estado).'</option>';
@@ -688,6 +733,7 @@ date_default_timezone_set("America/Mexico_City");
 									echo '<option>'.htmlspecialchars($estado).'</option>';
 									echo '</select>';
 								}
+								echo '</div>';
 							} else {
 								echo '<input type="hidden" name="estado" value="Entregado (Ent)" form="formObservaciones">';
 								echo '<div style="text-align:center;padding:8px"><h4 style="color:#16a34a;margin:0"><i class="fa-solid fa-circle-check"></i> ENTREGADO EL: '.htmlspecialchars($fecha_Salida).'</h4></div>';
