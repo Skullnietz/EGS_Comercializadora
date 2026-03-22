@@ -701,7 +701,7 @@ function _egsEstadoClass($estado) {
 							$_tec2Nombre = (is_array($tecnico2) && isset($tecnico2["nombre"])) ? $tecnico2["nombre"] : 'Sin asignar';
 							$_tec2IdVal  = (is_array($tecnico2) && isset($tecnico2["id"])) ? $tecnico2["id"] : '';
 
-							if ($isTecnico || $isVendedor || $isSecretaria) {
+							if ($isTecnico || $isSecretaria) {
 								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-user-plus"></i></span>';
 								echo '<input type="text" class="form-control" value="'.htmlspecialchars($_tec2Nombre).'" readonly></div>';
 								echo '<input type="hidden" value="'.htmlspecialchars($_tec2IdVal).'" name="tecnicodosEditadoEnOrdenDianmica" form="formObservaciones">';
