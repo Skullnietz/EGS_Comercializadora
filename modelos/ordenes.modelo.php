@@ -79,7 +79,7 @@ class ModeloOrdenes{
 
 
 		
-		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE MONTH(fecha_Salida) = MONTH(now()) AND YEAR(fecha_Salida) = YEAR(now())  AND DAY(fecha_Salida) <= 15 AND estado = 'Entregado (Ent)'  AND  id_tecnico = $session_id ORDER BY `ordenes`.`fecha_Salida`  DESC");
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE MONTH(fecha_Salida) = MONTH(now()) AND YEAR(fecha_Salida) = YEAR(now()) AND DAY(fecha_Salida) <= 15 AND estado = 'Entregado (Ent)' AND (id_tecnico = $session_id OR id_tecnicoDos = $session_id) ORDER BY `ordenes`.`fecha_Salida` DESC");
 
 
 
@@ -125,7 +125,7 @@ class ModeloOrdenes{
 
 
 		
-		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE MONTH(fecha_Salida) = MONTH(now()) AND YEAR(fecha_Salida) = YEAR(now())  AND DAY(fecha_Salida) >= 15 AND estado = 'Entregado (Ent)'  AND  id_tecnico = $session_id2 ORDER BY `ordenes`.`fecha_Salida`  DESC");
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE MONTH(fecha_Salida) = MONTH(now()) AND YEAR(fecha_Salida) = YEAR(now()) AND DAY(fecha_Salida) >= 15 AND estado = 'Entregado (Ent)' AND (id_tecnico = $session_id2 OR id_tecnicoDos = $session_id2) ORDER BY `ordenes`.`fecha_Salida` DESC");
 
 
 
@@ -2628,7 +2628,7 @@ class ModeloOrdenes{
 
 		
 
-		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE id_tecnico = $id_tecnico ORDER BY id DESC");
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE (id_tecnico = $id_tecnico OR id_tecnicoDos = $id_tecnico) ORDER BY id DESC");
 
 
 
@@ -2892,7 +2892,7 @@ class ModeloOrdenes{
 
 
 
-			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE estado = 'Entregado (Ent)' AND id_tecnico = $id_tecnico ORDER BY id DESC");
+			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE estado = 'Entregado (Ent)' AND (id_tecnico = $id_tecnico OR id_tecnicoDos = $id_tecnico) ORDER BY id DESC");
 
 
 
@@ -2910,7 +2910,7 @@ class ModeloOrdenes{
 
 
 
-			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha_Salida like '%$fechaFinal%'  AND estado = 'Entregado (Ent)' AND id_tecnico = $id_tecnico ORDER BY id DESC");
+			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha_Salida like '%$fechaFinal%' AND estado = 'Entregado (Ent)' AND (id_tecnico = $id_tecnico OR id_tecnicoDos = $id_tecnico) ORDER BY id DESC");
 
 
 
@@ -2950,7 +2950,7 @@ class ModeloOrdenes{
 
 
 
-				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha_Salida BETWEEN '$fechaInicial' AND '$fechaFinalMasUno' AND estado = 'Entregado (Ent)' AND id_tecnico = $id_tecnico ORDER BY id DESC");
+				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha_Salida BETWEEN '$fechaInicial' AND '$fechaFinalMasUno' AND estado = 'Entregado (Ent)' AND (id_tecnico = $id_tecnico OR id_tecnicoDos = $id_tecnico) ORDER BY id DESC");
 
 
 
@@ -2960,7 +2960,7 @@ class ModeloOrdenes{
 
 
 
-				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha_Salida BETWEEN '$fechaInicial' AND '$fechaFinal' AND estado = 'Entregado (Ent)' AND id_tecnico = $id_tecnico ORDER BY id DESC");
+				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha_Salida BETWEEN '$fechaInicial' AND '$fechaFinal' AND estado = 'Entregado (Ent)' AND (id_tecnico = $id_tecnico OR id_tecnicoDos = $id_tecnico) ORDER BY id DESC");
 
 
 
@@ -2988,7 +2988,7 @@ class ModeloOrdenes{
 
 	
 
-		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE estado = '$estado' AND id_tecnico = $id_tecnico");
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE estado = '$estado' AND (id_tecnico = $id_tecnico OR id_tecnicoDos = $id_tecnico)");
 
 
 
@@ -3338,7 +3338,7 @@ class ModeloOrdenes{
 
 
 
-		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE estado = '$estado' AND $item = $valor  AND $tecnico = $valorTecnico ORDER BY id DESC");
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE estado = '$estado' AND $item = $valor AND ($tecnico = $valorTecnico OR id_tecnicoDos = $valorTecnico) ORDER BY id DESC");
 
 
 
