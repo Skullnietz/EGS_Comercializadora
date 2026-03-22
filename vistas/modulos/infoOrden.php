@@ -832,39 +832,101 @@ date_default_timezone_set("America/Mexico_City");
 								<input type="hidden" name="estado" id="estadoObs">
 							</div>
 
-							<!-- OBSERVACIONES NUEVAS (tabla observacionesOrdenes) -->
-							<div class="egs-observaciones-list" style="margin-top:16px">
+							<!-- OBSERVACIONES DE LA ORDEN (tabla observacionesOrdenes) -->
 							<?php
+							$_obs_grads = array(
+								'linear-gradient(135deg,#6366f1,#818cf8)',
+								'linear-gradient(135deg,#3b82f6,#60a5fa)',
+								'linear-gradient(135deg,#8b5cf6,#a78bfa)',
+								'linear-gradient(135deg,#06b6d4,#22d3ee)',
+								'linear-gradient(135deg,#22c55e,#4ade80)',
+								'linear-gradient(135deg,#f59e0b,#fbbf24)',
+							);
+							function _obsColorPerfil($perfil) {
+								$p = strtolower($perfil);
+								if (strpos($p, 'admin') !== false)    return array('#6366f1', '#eef2ff', 'fa-shield-halved');
+								if (strpos($p, 'vendedor') !== false || strpos($p, 'asesor') !== false) return array('#8b5cf6', '#f5f3ff', 'fa-headset');
+								if (strpos($p, 'tecnico') !== false || strpos($p, 'técnico') !== false) return array('#06b6d4', '#ecfeff', 'fa-wrench');
+								if (strpos($p, 'secretaria') !== false) return array('#f59e0b', '#fffbeb', 'fa-clipboard');
+								return array('#64748b', '#f1f5f9', 'fa-user');
+							}
+
 							$itemobs = $_GET["idOrden"];
 							$observacionesnew = controladorObservaciones::ctrMostrarobservaciones($itemobs);
+							$_obs_count = is_array($observacionesnew) ? count($observacionesnew) : 0;
+							?>
+
+							<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:10px">
+								<span style="font-size:13px;font-weight:700;color:#0f172a">
+									<i class="fa-solid fa-clock-rotate-left" style="color:#6366f1;margin-right:6px"></i>Historial de observaciones
+								</span>
+								<span style="font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;padding:3px 10px;border-radius:20px">
+									<?php echo $_obs_count; ?> registrada<?php echo $_obs_count !== 1 ? 's' : ''; ?>
+								</span>
+							</div>
+
+							<div class="egs-observaciones-list">
+							<?php
 							if (!empty($observacionesnew)) {
-								foreach ($observacionesnew as $key => $valueobs) {
+								foreach ($observacionesnew as $_oi => $valueobs) {
 									$idadmin = $valueobs["id_creador"];
 									$infouser = controladorObservaciones::ctrMostrarInfoUser($idadmin);
 									$infoiduser = $infouser[0];
 									$date = strtotime($valueobs["fecha"]);
 									$fecha = date("d/m/Y H:i", $date);
+									$_obs_nombre = htmlspecialchars($infoiduser["nombre"]);
+									$_obs_foto = $infoiduser["foto"];
+									$_obs_perfil = isset($infoiduser["perfil"]) ? $infoiduser["perfil"] : '';
+									$_obs_initial = mb_strtoupper(mb_substr($_obs_nombre, 0, 1));
+									$_obs_grad = $_obs_grads[$_oi % count($_obs_grads)];
+									$_obs_col = _obsColorPerfil($_obs_perfil);
 							?>
-								<div class="egs-obs-item">
-									<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-										<img src="<?php echo $infoiduser["foto"]; ?>" alt="Avatar" class="avatar" style="width:36px;height:36px">
-										<div style="flex:1">
-											<strong style="color:#6366f1"><?php echo htmlspecialchars($infoiduser["nombre"]); ?></strong>
-											<?php if ($isAdmin): ?>
-											<button type="button" class="btn btn-xs eliminarObservacion" idObs="<?php echo $valueobs["id"]; ?>" style="float:right;color:#ef4444">
-												<i class="fas fa-trash"></i> Eliminar
-											</button>
-											<?php endif; ?>
+								<div class="egs-obs-item" style="display:flex;gap:12px;padding:14px;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:8px;transition:background .12s"
+									 onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+									<?php if (!empty($_obs_foto)): ?>
+										<img src="<?php echo $_obs_foto; ?>" alt=""
+											 onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'"
+											 style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
+										<div style="display:none;width:40px;height:40px;border-radius:50%;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:<?php echo $_obs_grad; ?>">
+											<?php echo $_obs_initial; ?>
 										</div>
+									<?php else: ?>
+										<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:<?php echo $_obs_grad; ?>">
+											<?php echo $_obs_initial; ?>
+										</div>
+									<?php endif; ?>
+									<div style="flex:1;min-width:0">
+										<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+											<span style="font-size:13px;font-weight:700;color:#0f172a"><?php echo $_obs_nombre; ?></span>
+											<?php if (!empty($_obs_perfil)): ?>
+											<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:<?php echo $_obs_col[0]; ?>;background:<?php echo $_obs_col[1]; ?>;padding:2px 8px;border-radius:8px">
+												<i class="fa-solid <?php echo $_obs_col[2]; ?>" style="font-size:8px"></i>
+												<?php echo htmlspecialchars(ucfirst($_obs_perfil)); ?>
+											</span>
+											<?php endif; ?>
+											<span style="font-size:11px;color:#94a3b8;margin-left:auto;flex-shrink:0">
+												<i class="fa-regular fa-clock" style="font-size:9px"></i> <?php echo $fecha; ?>
+											</span>
+										</div>
+										<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5"><?php echo htmlspecialchars($valueobs["observacion"]); ?></p>
+										<?php if ($isAdmin): ?>
+										<button type="button" class="btn btn-xs eliminarObservacion" idObs="<?php echo $valueobs["id"]; ?>"
+												style="margin-top:6px;color:#ef4444;font-size:11px;padding:2px 8px;border:1px solid #fecaca;border-radius:6px;background:#fff"
+												onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+											<i class="fas fa-trash" style="margin-right:3px"></i>Eliminar
+										</button>
+										<?php endif; ?>
 									</div>
-									<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500"><?php echo htmlspecialchars($valueobs["observacion"]); ?></p>
-									<span style="float:right;font-size:11px;color:#94a3b8;margin-top:4px"><i class="fa-regular fa-clock"></i> <?php echo $fecha; ?></span>
-									<div style="clear:both"></div>
 								</div>
 							<?php
 								}
-							}
+							} else {
 							?>
+								<div style="text-align:center;padding:30px 16px;color:#94a3b8">
+									<i class="fa-solid fa-comment-slash" style="font-size:28px;display:block;margin-bottom:10px;opacity:.4"></i>
+									<span style="font-size:13px">Sin observaciones registradas para esta orden</span>
+								</div>
+							<?php } ?>
 							</div>
 
 							<!-- Botón agregar observación -->
@@ -992,13 +1054,30 @@ $(document).ready(function(){
 				if(res.observaciones && res.observaciones.length > lastObsCount){
 					var container = $(".egs-observaciones-list");
 					if(container.length){
+						var grads = ['linear-gradient(135deg,#6366f1,#818cf8)','linear-gradient(135deg,#3b82f6,#60a5fa)','linear-gradient(135deg,#8b5cf6,#a78bfa)','linear-gradient(135deg,#06b6d4,#22d3ee)','linear-gradient(135deg,#22c55e,#4ade80)','linear-gradient(135deg,#f59e0b,#fbbf24)'];
+						// Limpiar estado vacío si existe
+						container.find('.egs-obs-empty').remove();
 						for(var i = lastObsCount; i < res.observaciones.length; i++){
 							var obs = res.observaciones[i];
-							var html = '<div class="egs-obs-item">';
-							html += '<strong style="color:#6366f1">' + (obs.creador || obs.id_creador || '') + '</strong>';
-							html += '<span style="float:right;font-size:11px;color:#94a3b8">' + (obs.fecha || '') + '</span>';
-							html += '<p style="margin:4px 0 0;color:#334155;text-transform:uppercase">' + (obs.observacion || '') + '</p>';
+							var nombre = obs.nombre || 'Usuario';
+							var ini = nombre.charAt(0).toUpperCase();
+							var grad = grads[i % grads.length];
+							var fecha = obs.fecha ? new Date(obs.fecha) : null;
+							var fechaStr = fecha ? (fecha.getDate()+'/'+(fecha.getMonth()+1)+'/'+fecha.getFullYear()+' '+fecha.getHours()+':'+String(fecha.getMinutes()).padStart(2,'0')) : '';
+							var html = '<div class="egs-obs-item" style="display:flex;gap:12px;padding:14px;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:8px">';
+							if(obs.foto){
+								html += '<img src="'+obs.foto+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">';
+								html += '<div style="display:none;width:40px;height:40px;border-radius:50%;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:'+grad+'">'+ini+'</div>';
+							} else {
+								html += '<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:'+grad+'">'+ini+'</div>';
+							}
+							html += '<div style="flex:1;min-width:0">';
+							html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">';
+							html += '<span style="font-size:13px;font-weight:700;color:#0f172a">'+nombre+'</span>';
+							html += '<span style="font-size:11px;color:#94a3b8;margin-left:auto"><i class="fa-regular fa-clock" style="font-size:9px"></i> '+fechaStr+'</span>';
 							html += '</div>';
+							html += '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' + (obs.observacion || '') + '</p>';
+							html += '</div></div>';
 							container.append(html);
 						}
 					}
