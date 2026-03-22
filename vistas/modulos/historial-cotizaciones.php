@@ -49,8 +49,10 @@ try {
 // Retorna: [expirada(bool), diasVigencia(int|null), fechaExpira(string|null), etiqueta, colorTexto, colorBg, icono]
 function _hcEvalVigencia($vigenciaText, $fechaCotizacion) {
   $dias = null;
-  // Intentar extraer número de días del texto
-  if (preg_match('/(\d+)\s*d[ií]as?/i', $vigenciaText, $m)) {
+  // Extraer el número de días del texto (ej: "Validez 8 días", "30 dias", etc.)
+  // Usamos solo \d+ ya que el formato siempre es "Validez N días"
+  // Evitamos regex con caracteres UTF-8 (í) que fallan sin flag /u
+  if (preg_match('/(\d+)/', $vigenciaText, $m)) {
     $dias = intval($m[1]);
   }
   if ($dias === null || empty($fechaCotizacion)) {
