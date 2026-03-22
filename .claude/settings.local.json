@@ -115,7 +115,12 @@
       "Bash(php -l ajax/notificaciones.ajax.php)",
       "Bash(php -l vistas/js/gestorOrdenes.js)",
       "Bash(grep -oE value=\"\"[^\"\"]*\\\\\\(.*\\\\\\)\"\" /c/Users/black/Desktop/EGS/vistas/modulos/ordenes.php /c/Users/black/Desktop/EGS/vistas/modulos/ordenesnew.php)",
-      "Bash(grep -rho value=\"\"\\\\\\([^\"\"]*\\\\\\)\"\" /c/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php /c/Users/black/Desktop/EGS/vistas/modulos/ordenes.php /c/Users/black/Desktop/EGS/vistas/modulos/ordenesnew.php /c/Users/black/Desktop/EGS/vistas/modulos/EstadoOrden.php)"
+      "Bash(grep -rho value=\"\"\\\\\\([^\"\"]*\\\\\\)\"\" /c/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php /c/Users/black/Desktop/EGS/vistas/modulos/ordenes.php /c/Users/black/Desktop/EGS/vistas/modulos/ordenesnew.php /c/Users/black/Desktop/EGS/vistas/modulos/EstadoOrden.php)",
+      "Bash(grep -r \"guardarOrden\\\\|crearOrden\\\\|nuevaOrden\" C:UsersblackDesktopEGSajax*)",
+      "Bash(python3:*)",
+      "Bash(where python:*)",
+      "Bash(C:Python313python.exe -c \":*)",
+      "Bash(python -c \":*)"
     ]
   }
 }

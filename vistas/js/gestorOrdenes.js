@@ -83,9 +83,10 @@ REVISAR SI EL TITULO DEL PRODUCTO YA EXISTE
 
 $(".validarOrden").change(function(){
 
-	$(".alert").remove();
+	$(".alert-titulo-dup").remove();
 
 	var orden = $(this).val();
+	if (!orden || orden.trim() === '') return;
 
 	var datos = new FormData();
 	datos.append("validarOrden", orden);
@@ -102,9 +103,13 @@ $(".validarOrden").change(function(){
 
     		if(respuesta.length != 0){
 
-    			$(".validarOrden").parent().after('<div class="alert alert-warning">Este título de orden ya existe en la base de datos</div>');
-
-	    		$(".validarOrden").val("");
+    			// Mostrar advertencia en el preview del título
+    			var alertHtml = '<div class="alert alert-warning alert-titulo-dup" style="margin:8px 0;padding:8px 12px;font-size:12px;border-radius:6px"><i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>Ya existe una orden con este título. Se ajustará automáticamente al guardar.</div>';
+    			if ($("#egs_tituloPreview").length) {
+    				$("#egs_tituloPreview").closest('.egs-title-bar').after(alertHtml);
+    			} else {
+    				$(".validarOrden").parent().after(alertHtml);
+    			}
 
     		}
 
@@ -119,15 +124,16 @@ RUTA ORDEN
 =============================================*/
 
 function limpiarUrl(texto){
-  var texto = texto.toLowerCase(); 
-  texto = texto.replace(/[á]/, 'a');
-  texto = texto.replace(/[é]/, 'e');
-  texto = texto.replace(/[í]/, 'i');
-  texto = texto.replace(/[ó]/, 'o');
-  texto = texto.replace(/[ú]/, 'u');
-  texto = texto.replace(/[ñ]/, 'n');
-  texto = texto.replace(/[-]/, ' ');
-  texto = texto.replace(/ /g, "-")
+  var texto = texto.toLowerCase();
+  texto = texto.replace(/[á]/g, 'a');
+  texto = texto.replace(/[é]/g, 'e');
+  texto = texto.replace(/[í]/g, 'i');
+  texto = texto.replace(/[ó]/g, 'o');
+  texto = texto.replace(/[ú]/g, 'u');
+  texto = texto.replace(/[ñ]/g, 'n');
+  texto = texto.replace(/[^a-z0-9 -]/g, '');
+  texto = texto.replace(/ /g, "-");
+  texto = texto.replace(/-+/g, "-");
   return texto;
 }
 
@@ -515,7 +521,19 @@ var nextinputPrecio = 0;
 function AgregarCampos(){
 nextinput++;
 nextinputPrecio++;
-campo = '<div class="form-group row"><div class="col-xs-4"><div class="input-group"> <span class="input-group-addon"><i class="fas fa-edit"></i></span><textarea type="text" maxlength="320" rows="3" class="form-control input-lg text-uppercase	 partida partida' + nextinput + '" placeholder="Ingresar detalles para cliente (Primera partida)" style="text-transform: uppercase;"></textarea> </div> </div><div><div class="col-xs-4"><div class="input-group"><input class="form-control input-lg precio' + nextinputPrecio + ' preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio"><span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span></div></div></div><div class="campocaracteristicas"></div></div>';
+campo = '<div class="form-group row" style="margin-bottom:10px;padding:12px;background:#fafbfc;border-radius:8px;border:1px solid #f1f5f9">' +
+  '<div class="col-xs-7 col-md-8">' +
+    '<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:4px;display:block"><i class="fa-solid fa-file-lines" style="margin-right:4px"></i>Partida ' + nextinput + ' <span style="color:#94a3b8;font-weight:400">(visible en ticket del cliente)</span></label>' +
+    '<textarea type="text" maxlength="320" rows="2" class="form-control partida partida' + nextinput + '" placeholder="Descripción del servicio o refacción para el cliente" style="text-transform:uppercase;font-size:13px"></textarea>' +
+  '</div>' +
+  '<div class="col-xs-5 col-md-4">' +
+    '<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:4px;display:block"><i class="fa-solid fa-dollar-sign" style="margin-right:4px"></i>Precio</label>' +
+    '<div class="input-group">' +
+      '<span class="input-group-addon" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:700">$</span>' +
+      '<input class="form-control precio' + nextinputPrecio + ' preciodeOrdenUno" type="number" value="0" min="0" step="any" placeholder="0.00" style="font-weight:700">' +
+    '</div>' +
+  '</div>' +
+'</div>';
 $("#campos").append(campo);
 }
 

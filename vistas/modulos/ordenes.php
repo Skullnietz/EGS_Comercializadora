@@ -436,64 +436,69 @@ function _ordGetBadgeClass($estadoText) {
 
 <script>
   $(document).ready(function () {
-    // Ocultar imagenes de la orden
     $(".ocultarimagen").hide();
-    //No se admitira numeros ni signos en el titulo
-    const $input1 = document.querySelector('.nce');
-    const patron = /[a-zA-Z]+/;
-    $input1.addEventListener("keydown", event => {
-      console.log(event.key);
-      if (patron.test(event.key)) {
-        $("#nombre").css({ "border": "1px solid #0C0" });
-      }
-      else {
-        if (event.keyCode == 8) { console.log("backspace"); }
-        else { event.preventDefault(); }
-      }
-    });
-    //Todo en MAYUS
-    $("#btncompletarorden").hide();
-    $("#spanboton").html("Complete su ficha tecnica");
-    $("#marca").keyup(function () {
-      $('#marca').val($(this).val().toUpperCase());
-    });
-    $("#modelo").keyup(function () {
-      $('#modelo').val($(this).val().toUpperCase());
-    });
-    $("#numeroserial").keyup(function () {
-      $('#numeroserial').val($(this).val().toUpperCase());
-    });
-    $("#textareaDetallesInternos").keyup(function () {
-      $('#textareaDetallesInternos').val($(this).val().toUpperCase());
-    });
-    //No se mostrara el boton de completar si los tecnicos no llenan la ficha tecnica
-    $("#marca,#modelo,#numeroserial").keyup(function () {
-      if ($("#marca").val().length >= 2) {
-        $("#spanmarca").html("");
-        $("#spanboton").html("");
-        if ($("#modelo").val().length >= 4) {
-          $("#spanmodelo").html("");
-          $("#spanboton").html("");
-          if ($("#numeroserial").val().length == 6) {
-            $("#spannumeroserie").html("");
-            $("#spanboton").html("");
-            $("#btncompletarorden").show();
-          } else {
-            $("#btncompletarorden").hide();
-            $("#spannumeroserie").html("Debe contener los ultimos <b>6</b> digitos");
-            $("#spanboton").html("Complete el campo de numero de serie");
-          }
-        } else {
-          $("#btncompletarorden").hide();
-          $("#spanboton").html("Complete el campo de modelo");
-          $("#spanmodelo").html("Debe contener al menos <b>4</b> digitos");
-        }
+
+    /* ═══ Auto-generación de título ═══ */
+    function _egsStrip(s) {
+      return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    function _egsBuildTitle() {
+      var cSel = $('.cliente option:selected');
+      var cTxt = (cSel.val() && cSel.val() !== '' &&
+                  cSel.text().trim() !== 'Seleccionar cliente')
+                 ? cSel.text().trim() : '';
+      var m  = ($('#marca').val()  || '').toUpperCase();
+      var mo = ($('#modelo').val() || '').toUpperCase();
+      var sr = ($('#numeroserial').val() || '').toUpperCase();
+      var cClean = _egsStrip(cTxt).toUpperCase().replace(/[^A-Z0-9 ]/g,'').trim();
+      var parts = [cClean, m, mo, sr].filter(function(p){ return p!==''; });
+      var title = parts.join(' ');
+      $('.tituloOrden').val(title);
+      $('.rutaOrden').val(title.length > 0 ? limpiarUrl(title) : '');
+      if (title.length > 0) {
+        $('#egs_tituloPreview').html('<i class="fa-solid fa-check-circle" style="color:#22c55e;margin-right:4px"></i>' + title).css('color','#1e293b');
       } else {
-        $("#btncompletarorden").hide();
-        $("#spanboton").html("Complete el campo de marca");
-        $("#spanmarca").html("Debe contener al menos <b>2</b> digitos");
+        $('#egs_tituloPreview').html('<i class="fa-solid fa-circle-info" style="color:#94a3b8;margin-right:4px"></i>Se genera al completar Cliente + Equipo').css('color','#94a3b8');
       }
-    });
+      if (cClean && m && mo && sr) { $('.tituloOrden').trigger('change'); }
+    }
+
+    /* ═══ Eventos de cambio ═══ */
+    $('.cliente').on('change', function(){ _egsBuildTitle(); _egsValidate(); });
+    $('#marca').on('keyup', function(){ $(this).val($(this).val().toUpperCase()); _egsBuildTitle(); _egsValidate(); });
+    $('#modelo').on('keyup', function(){ $(this).val($(this).val().toUpperCase()); _egsBuildTitle(); _egsValidate(); });
+    $('#numeroserial').on('keyup', function(){ $(this).val($(this).val().toUpperCase()); _egsBuildTitle(); _egsValidate(); });
+    $('#textareaDetallesInternos').on('keyup', function(){ $(this).val($(this).val().toUpperCase()); });
+
+    /* ═══ Validación + habilitar botón guardar ═══ */
+    $("#btncompletarorden").hide();
+    $("#spanboton").html("Complete los campos obligatorios");
+
+    function _egsValidate() {
+      var mOk  = $('#marca').val().length >= 2;
+      var moOk = $('#modelo').val().length >= 4;
+      var srOk = $('#numeroserial').val().length === 6;
+      var clOk = $('.cliente').val() && $('.cliente').val() !== '' &&
+                 $('.cliente option:selected').text().trim() !== 'Seleccionar cliente';
+      /* Visual feedback */
+      $('#marca').css('border-color', !mOk && $('#marca').val().length>0 ? '#ef4444' : (mOk ? '#22c55e':''));
+      $('#modelo').css('border-color', !moOk && $('#modelo').val().length>0 ? '#ef4444' : (moOk ? '#22c55e':''));
+      $('#numeroserial').css('border-color', !srOk && $('#numeroserial').val().length>0 ? '#ef4444' : (srOk ? '#22c55e':''));
+      /* Mensajes */
+      $('#spanmarca').html(!mOk && $('#marca').val().length>0 ? 'Mín. 2 caracteres':'');
+      $('#spanmodelo').html(!moOk && $('#modelo').val().length>0 ? 'Mín. 4 caracteres':'');
+      $('#spannumeroserie').html(!srOk && $('#numeroserial').val().length>0 ? 'Exactamente 6 dígitos':'');
+      /* Botón */
+      if (mOk && moOk && srOk && clOk) {
+        $('#btncompletarorden').show(); $('#spanboton').html('');
+      } else {
+        $('#btncompletarorden').hide();
+        if (!clOk) $('#spanboton').html('Seleccione un cliente');
+        else if (!mOk) $('#spanboton').html('Complete la marca (mín. 2 caracteres)');
+        else if (!moOk) $('#spanboton').html('Complete el modelo (mín. 4 caracteres)');
+        else $('#spanboton').html('Complete el N° de serie (6 dígitos)');
+      }
+    }
     $('#datatableordenes').DataTable({
       "order": [[ 0, "desc" ]],
       "scrollX": true,
@@ -1504,1387 +1509,282 @@ MODAL AGREGAR ORDENES
 
 ======================================-->
 
+<style>
+/* ── Modal Nueva Orden — Estilos ── */
+#modalAgregarOrden .egs-section {
+  margin: 0 -24px; padding: 14px 24px 4px;
+  border-top: 1px solid #f1f5f9;
+}
+#modalAgregarOrden .egs-section:first-child { border-top: none; }
+#modalAgregarOrden .egs-section-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; color: #6366f1; margin-bottom: 14px;
+}
+#modalAgregarOrden .egs-section-title i { font-size: 13px; }
+#modalAgregarOrden .egs-lbl {
+  display: block; font-size: 11px; font-weight: 600;
+  color: #64748b; margin-bottom: 4px; letter-spacing: .02em;
+}
+#modalAgregarOrden .egs-lbl .egs-req { color: #ef4444; margin-left: 2px; }
+#modalAgregarOrden .egs-title-bar {
+  background: #f8fafc; border: 1px dashed #e2e8f0; border-radius: 8px;
+  padding: 10px 14px; margin-bottom: 16px; font-size: 13px;
+  font-weight: 600; color: #94a3b8; transition: all .2s;
+}
+#modalAgregarOrden .egs-field-hint {
+  font-size: 10px; color: #ef4444; margin-top: 2px; min-height: 14px;
+}
+#modalAgregarOrden .form-control:focus {
+  border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+#modalAgregarOrden .row.egs-row { margin-left: -8px; margin-right: -8px; }
+#modalAgregarOrden .row.egs-row > [class*="col-"] { padding-left: 8px; padding-right: 8px; }
+</style>
+
 <div id="modalAgregarOrden" class="modal fade" role="dialog">
-
-
-
   <div class="modal-dialog modal-lg">
-
-
-
     <div class="modal-content">
 
-
-
-      <!-- <form role="form" method="post" enctype="multipart/form-data"> -->
-
-
-
-      <!--=====================================
-
-        CABEZA DEL MODAL
-
-        ======================================-->
-
+      <!-- HEADER -->
       <div class="modal-header">
-
-
-
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-
-
-
-        <h4 class="modal-title">Agregar Orden</h4>
-
-
-
+        <h4 class="modal-title"><i class="fa-solid fa-clipboard-list" style="margin-right:8px;opacity:.8"></i>Nueva Orden de Servicio</h4>
       </div>
 
+      <!-- BODY -->
+      <div class="modal-body" style="padding:20px 24px">
+        <div class="box-body" style="padding:0">
 
+          <!-- Hidden fields -->
+          <?php echo '<input type="hidden" value="'.$_SESSION["empresa"].'" class="empresa">'; ?>
+          <input type="hidden" class="validarOrden tituloOrden nce" value="">
+          <input type="hidden" class="rutaOrden" value="">
 
-      <!--=====================================
-
-        CUERPO DEL MODAL
-
-        ======================================-->
-
-
-
-      <div class="modal-body">
-
-
-
-        <div class="box-body">
-
-
-
-          <!-- ENTRADA PARA EL NOMBRE DE LA EMPRESA QUE VENDE-->
-
-
-
-          <div class="form-group">
-
-
-
-            <div class="input-group">
-
-
-
-
-
-              <?php
-
-
-
-              echo '<input  type="hidden" value="' . $_SESSION["empresa"] . '" class="empresa">';
-
-
-
-              ?>
-
-
-
-
-
+          <!-- Título auto-generado (preview) -->
+          <div class="egs-title-bar">
+            <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;display:block;margin-bottom:4px">
+              <i class="fa-solid fa-tag" style="margin-right:4px"></i>Título de la orden
+            </span>
+            <div id="egs_tituloPreview" style="font-size:13px">
+              <i class="fa-solid fa-circle-info" style="color:#94a3b8;margin-right:4px"></i>Se genera al completar Cliente + Equipo
             </div>
-
-
-
           </div>
 
-          <!--=====================================
-
-            ENTRADA PARA EL TÍTULO
-
-            ======================================-->
-
-
-
-          <div class="form-group">
-
-
-
-            <div class="input-group">
-
-
-
-              <span class="input-group-addon"><i class='fas fa-edit'></i></span>
-
-
-
-              <input type="text" class="form-control form-control-sm  validarOrden tituloOrden nce"
-                placeholder="Ingresar título orden" required>
-
-
-
-            </div>
-
-
-
-          </div>
-
-
-
-          <!--=====================================
-
-            ENTRADA PARA LA RUTA DEL PRODUCTO
-
-            ======================================-->
-
-
-
-          <div class="form-group">
-
-
-
-            <div class="input-group">
-
-
-
-              <span class="input-group-addon"><i class="fas fa-link"></i></span>
-
-
-
-              <input type="text" class="form-control form-control-sm rutaOrden" placeholder="Ruta url de la orden"
-                readonly>
-
-
-
-            </div>
-
-
-
-          </div>
-
-
-
-
-
-
-
-          <!--=====================================
-
-            ENTRADA PARA AGREGAR MULTIMEDIA
-
-            ======================================-->
-
-
-
-          <div class="form-group agregarMultimedia">
-
-
-
-
-
-
-
-            <!--=====================================
-
-                ENTRADA PARA EL TECNICO
-
-                ======================================-->
-
-            <div class="form-group">
-
-
-
-              <div class="input-group">
-
-
-
-                <span class="input-group-addon"><i class="fas fa-cogs"></i></span>
-
-
-
-                <select class="form-control form-control-sm tecnico" required>
-
-
-
-                  <option value="">
-
-
-
-                    Seleccionar técnico
-
-
-
-                  </option>
-
-
-
-                  <?php
-
-
-
-                  //$tecnico = ControladorAdministradores::ctrMostrarTecnicosActivos();
-                  
-
-
-
-
-                  $item = "id_empresa";
-
-
-
-                  $valor = $_SESSION["empresa"];
-
-
-
-
-
-
-
-                  $tecnico = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas($item, $valor);
-
-
-
-
-
-                  foreach ($tecnico as $key => $valueTecnicoActivo) {
-
-
-
-                    echo '<option value="' . $valueTecnicoActivo["id"] . '" class="text-uppercase">' . $valueTecnicoActivo["nombre"] . '</option>';
-
-                  }
-
-
-
-
-
-                  ?>
-
-
-
-                </select>
-
-
-
-              </div>
-
-
-
-            </div>
-
-
-
-            <!--=====================================
-
-                ENTRADA PARA EL ASESOR
-
-                ======================================-->
-
-            <div class="form-group">
-
-
-
-              <div class="input-group">
-
-
-
-                <span class="input-group-addon"><i class="fas fa-user"></i></span>
-
-
-
-                <select class="form-control form-control-sm asesor" required>
-
-
-
-                  <option>
-
-
-
-                    Seleccionar asesor
-
-
-
-                  </option>
-
-
-
-                  <?php
-
-
-
-
-
-                  //$asesorActivo = ControladorAdministradores::ctrMostrarAdministradoresActvisoEnVentas();
-                  
-
-
-                  $itemUno = "id_empresa";
-
-
-
-                  $valorDos = $_SESSION["empresa"];
-
-
-
-                  $asesorParaSelect = Controladorasesores::ctrMostrarAsesoresEmpresas($itemUno, $valorDos);
-
-
-
-                  foreach ($asesorParaSelect as $key => $valueAsesoresActivos) {
-
-
-
-                    echo '<option value="' . $valueAsesoresActivos["id"] . '" idAsesor=' . $valueAsesoresActivos["id"] . ' class="seleccionarElAsesor text-uppercase">' . $valueAsesoresActivos["nombre"] . '</option>';
-
-
-
-                  }
-
-
-
-                  ?>
-
-
-
-                </select>
-
-
-
-              </div>
-
-
-
-            </div>
-
-
-
-            <!--=====================================
-
-                ENTRADA PARA EL CLIENTE
-
-                ======================================-->
-
-            <div class="form-group">
-
-
-
-              <div class="input-group">
-
-
-
-                <span class="input-group-addon"><i class="fas fa-user"></i></i></span>
-
-
-
-                <select class="form-control  cliente" style="width: 100%; height: 100%" required>
-
-
-
-                  <option>
-
-
-
-                    Seleccionar cliente
-
-
-
-                  </option>
-
-
-
-                  <?php
-
-
-
-                  $item = "id_empresa";
-
-                  $valor = $_SESSION["empresa"];
-
-
-
-                  $usuario = ControladorClientes::ctrMostrarClientesTabla($item, $valor);
-
-
-
-                  foreach ($usuario as $key => $value) {
-
-
-
-                    echo '<option value="' . $value["id"] . '">' . $value["nombre"] . '</option>';
-
-
-
-                  }
-
-
-
-                  ?>
-
-
-
-                </select>
-
-
-
-              </div>
-
-
-
-            </div>
-
-            <!--=====================================
-
-                ENTRADA PARA EL STATUS
-
-                ======================================-->
-
-            <div class="form-group">
-
-
-
-              <div class="input-group">
-
-
-
-                <span class="input-group-addon"><i class="fas fa-toggle-on"></i></span>
-
-
-
-                <select class="form-control form-control-sm status" required>
-
-
-
-
-
-
-
-                  <?php
-
-
-
-                  if ($_SESSION["perfil"] == "tecnico") {
-
-
-
-                    echo '<option value="En revisión (REV)">En revisión (REV)</option>
-                                  <option value="Supervisión (SUP)">Supervisión (SUP)</option>
-                                  <option class="garantia" value="En revisión probable garantía "> En revisión probable garantía </option>';
-
-                  }
-
-
-
-                  if ($_SESSION["perfil"] == "editor") {
-
-
-
-                    echo '<option value="En revisión (REV)">En revisión (REV)</option>
-
-                                  <option value="Aceptado (ok)">Aceptado (ok)</option>
-                                  
-
-                                  <option value="Terminada (ter)">Terminada (ter)</option>
-                                  <option class="garantia" value="En revisión probable garantía "> En revisión probable garantía </option>';
-
-                  }
-
-
-
-                  if ($_SESSION["perfil"] == "vendedor") {
-
-                    echo '<option value="En revisión (REV)">En revisión (REV)</option>
-                              <option value="Supervisión (SUP)">Supervisión (SUP)</option>
-                              <option value="Pendiente de autorización (AUT)">Pendiente de autorización (AUT)</option>
-                                    <option value="Terminada (ter)">Terminada (ter)</option>
-                                    <option class="garantia" value="En revisión probable garantía "> En revisión probable garantía </option>';
-
-                  }
-
-                  if ($_SESSION["perfil"] == "administrador") {
-
-
-
-                    echo '<option value="En revisión (REV)">En revisión (REV)</option>
-
-                                  <option value="Supervisión (SUP)">Supervisión (SUP)</option>
-
-                                  <option value="Pendiente de autorización (AUT)">Pendiente de autorización (AUT)</option>
-
-                                  <option value="Aceptado (ok)">Aceptado (ok)</option>
-
-                                  <option value="Terminada (ter)">Terminada (ter)</option>
-
-                                  <option value="Cancelada (can)">Cancelada (can)</option>
-
-                                  <option value="Entregado (Ent)">Entregado (Ent)</option>
-
-                                  <option value="Sin reparación (SR)">Sin reparación (SR)</option>
-
-                                  <option class="garantia" value="En revisión probable garantía "> En revisión probable garantía </option>
-                                  <option class="garantia" value="Garantía aceptada (GA)">Garantía aceptada (GA)</option>';
-
-                  }
-
-
-
-                  ?>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                </select>
-
-
-
-              </div>
-
-
-
-            </div>
-
-            <!--=====================================
-
-              SUBIR MULTIMEDIA DE PRODUCTO FÍSICO
-
-              ======================================-->
-
-
-
-            <div class="multimediaOrden needsclick dz-clickable">
-
-
-
-              <div class="dz-message needsclick cuadro multimedia">
-
-
-
-                <center>Arrastrar o dar click para subir imagenes</center><br>
-
-                <center><span class="glyphicon glyphicon-open" aria-hidden="true" style="font-size:60px;"></span>
-                </center>
-
-
-
-              </div>
-
-
-
-            </div>
-
-
-
-          </div>
-
-          <!--=====================================
-
-            MARCA
-
-            ======================================-->
-          <div class="form-group">
-
-
-
-            <div class="input-group">
-
-
-
-              <span class="input-group-addon"><i class="far fa-copyright"></i></span>
-
-
-
-              <input id="marca" class="form-control form-control-lg marcaDelEquipo" type="text"
-                placeholder="Marca del equipo" name="marcaDelEquipo"><span id="spanmarca" style="color:red;"></span>
-
-
-
-            </div>
-
-            <!--=====================================
-
-            MODELO
-
-            ======================================-->
-            <div class="form-group">
-
-
-
-              <div class="input-group">
-
-
-
-                <span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
-
-
-
-                <input id="modelo" class="form-control form-control-lg modeloDelEquipo" type="text"
-                  placeholder="Modelo del equipo" name="modeloDelEquipo"><span id="spanmodelo"
-                  style="color:red;"></span>
-
-
-
-              </div>
-
-              <!--=====================================
-
-            NUMERO DE SERIE
-
-            ======================================-->
-              <div class="form-group">
-
-
-
-                <div class="input-group">
-
-
-
-                  <span class="input-group-addon"><i class="fas fa-barcode"></i></span>
-
-
-                  <input id="numeroserial" class="form-control form-control-lg numeroDeSerieDelEquipo" type="text"
-                    placeholder="Numero Serial" name="numeroDeSerieDelEquipo"><span id="spannumeroserie"
-                    style="color:red;"></span>
-
-
-
-                </div>
-
-
-
-
-
-
-
-                <!--=====================================
-
-            AGREGAR DESCRIPCIÓN
-
-            ======================================-->
-
-
-
+          <!-- SECCION: Asignacion -->
+          <div class="egs-section">
+            <div class="egs-section-title"><i class="fa-solid fa-users"></i> Asignaci&oacute;n</div>
+            <div class="row egs-row">
+              <div class="col-md-6">
                 <div class="form-group">
+                  <label class="egs-lbl"><i class="fa-solid fa-user" style="margin-right:4px"></i>Cliente<span class="egs-req">*</span></label>
+                  <select class="form-control cliente" style="width:100%" required>
+                    <option>Seleccionar cliente</option>
+                    <?php
+                    $item = "id_empresa"; $valor = $_SESSION["empresa"];
+                    $usuario = ControladorClientes::ctrMostrarClientesTabla($item, $valor);
+                    foreach ($usuario as $key => $value) {
+                      echo '<option value="' . $value["id"] . '">' . $value["nombre"] . '</option>';
+                    }
+                    ?>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="egs-lbl"><i class="fa-solid fa-screwdriver-wrench" style="margin-right:4px"></i>T&eacute;cnico<span class="egs-req">*</span></label>
+                  <select class="form-control form-control-sm tecnico" required>
+                    <option value="">Seleccionar t&eacute;cnico</option>
+                    <?php
+                    $item = "id_empresa"; $valor = $_SESSION["empresa"];
+                    $tecnico = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas($item, $valor);
+                    foreach ($tecnico as $key => $valueTecnicoActivo) {
+                      echo '<option value="' . $valueTecnicoActivo["id"] . '" class="text-uppercase">' . $valueTecnicoActivo["nombre"] . '</option>';
+                    }
+                    ?>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row egs-row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="egs-lbl"><i class="fa-solid fa-user-tie" style="margin-right:4px"></i>Asesor</label>
+                  <select class="form-control form-control-sm asesor" required>
+                    <option>Seleccionar asesor</option>
+                    <?php
+                    $itemUno = "id_empresa"; $valorDos = $_SESSION["empresa"];
+                    $asesorParaSelect = Controladorasesores::ctrMostrarAsesoresEmpresas($itemUno, $valorDos);
+                    foreach ($asesorParaSelect as $key => $valueAsesoresActivos) {
+                      echo '<option value="' . $valueAsesoresActivos["id"] . '" idAsesor=' . $valueAsesoresActivos["id"] . ' class="seleccionarElAsesor text-uppercase">' . $valueAsesoresActivos["nombre"] . '</option>';
+                    }
+                    ?>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="egs-lbl"><i class="fa-solid fa-flag" style="margin-right:4px"></i>Estado<span class="egs-req">*</span></label>
+                  <select class="form-control form-control-sm status" required>
+                    <?php
+                    if ($_SESSION["perfil"] == "tecnico") {
+                      echo '<option value="En revisión (REV)">En revisión (REV)</option>
+                            <option value="Supervisión (SUP)">Supervisión (SUP)</option>
+                            <option class="garantia" value="En revisión probable garantía">En revisión probable garantía</option>';
+                    }
+                    if ($_SESSION["perfil"] == "editor") {
+                      echo '<option value="En revisión (REV)">En revisión (REV)</option>
+                            <option value="Aceptado (ok)">Aceptado (ok)</option>
+                            <option value="Terminada (ter)">Terminada (ter)</option>
+                            <option class="garantia" value="En revisión probable garantía">En revisión probable garantía</option>';
+                    }
+                    if ($_SESSION["perfil"] == "vendedor") {
+                      echo '<option value="En revisión (REV)">En revisión (REV)</option>
+                            <option value="Supervisión (SUP)">Supervisión (SUP)</option>
+                            <option value="Pendiente de autorización (AUT)">Pendiente de autorización (AUT)</option>
+                            <option value="Terminada (ter)">Terminada (ter)</option>
+                            <option class="garantia" value="En revisión probable garantía">En revisión probable garantía</option>';
+                    }
+                    if ($_SESSION["perfil"] == "administrador") {
+                      echo '<option value="En revisión (REV)">En revisión (REV)</option>
+                            <option value="Supervisión (SUP)">Supervisión (SUP)</option>
+                            <option value="Pendiente de autorización (AUT)">Pendiente de autorización (AUT)</option>
+                            <option value="Aceptado (ok)">Aceptado (ok)</option>
+                            <option value="Terminada (ter)">Terminada (ter)</option>
+                            <option value="Cancelada (can)">Cancelada (can)</option>
+                            <option value="Entregado (Ent)">Entregado (Ent)</option>
+                            <option value="Sin reparación (SR)">Sin reparación (SR)</option>
+                            <option class="garantia" value="En revisión probable garantía">En revisión probable garantía</option>
+                            <option class="garantia" value="Garantía aceptada (GA)">Garantía aceptada (GA)</option>';
+                    }
+                    ?>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <!-- SECCION: Equipo -->
+          <div class="egs-section">
+            <div class="egs-section-title"><i class="fa-solid fa-laptop"></i> Datos del Equipo</div>
+            <div class="row egs-row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="egs-lbl"><i class="far fa-copyright" style="margin-right:4px"></i>Marca<span class="egs-req">*</span></label>
+                  <input id="marca" class="form-control marcaDelEquipo" type="text" placeholder="Marca del equipo" name="marcaDelEquipo" style="text-transform:uppercase">
+                  <div class="egs-field-hint" id="spanmarca"></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="egs-lbl"><i class="fa-solid fa-microchip" style="margin-right:4px"></i>Modelo<span class="egs-req">*</span></label>
+                  <input id="modelo" class="form-control modeloDelEquipo" type="text" placeholder="Modelo del equipo" name="modeloDelEquipo" style="text-transform:uppercase">
+                  <div class="egs-field-hint" id="spanmodelo"></div>
+                </div>
+              </div>
+            </div>
+            <div class="row egs-row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="egs-lbl"><i class="fa-solid fa-barcode" style="margin-right:4px"></i>N&uacute;mero de Serie<span class="egs-req">*</span> <span style="font-weight:400;color:#94a3b8">(últimos 6 dígitos)</span></label>
+                  <input id="numeroserial" class="form-control numeroDeSerieDelEquipo" type="text" placeholder="Numero Serial" name="numeroDeSerieDelEquipo" maxlength="6" style="text-transform:uppercase;letter-spacing:2px;font-weight:700">
+                  <div class="egs-field-hint" id="spannumeroserie"></div>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <!-- SECCION: Evidencia -->
+          <div class="egs-section">
+            <div class="egs-section-title"><i class="fa-solid fa-camera"></i> Evidencia Fotogr&aacute;fica</div>
+            <div class="form-group agregarMultimedia">
+              <div class="multimediaOrden needsclick dz-clickable">
+                <div class="dz-message needsclick cuadro multimedia" style="border:2px dashed #e2e8f0;border-radius:10px;padding:24px;text-align:center;background:#fafbfc;transition:all .2s;cursor:pointer">
+                  <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px;color:#94a3b8;display:block;margin-bottom:8px"></i>
+                  <span style="font-size:13px;font-weight:600;color:#64748b">Arrastrar o dar clic para subir im&aacute;genes</span>
+                  <br><span style="font-size:11px;color:#94a3b8">JPG o PNG &bull; m&aacute;x. 2MB por imagen &bull; hasta 10 fotos</span>
+                </div>
+              </div>
+            </div>
 
+            <!-- Fotos ocultas (portada/principal) -->
+            <div class="form-group row ocultarimagen">
+              <div class="col col-lg-6">
+                <div class="panel"><h3>SUBIR FOTO PORTADA</h3></div>
+                <input type="file" class="fotoPortada form-control-file">
+                <input type="hidden" class="antiguaFotoPortada">
+                <p class="help-block">Tamaño recomendado 1280px * 720px <br> Peso máximo de la foto 2MB</p>
+              </div>
+              <div class="col col-lg-6">
+                <img loading="lazy" src="vistas/img/cabeceras/default/default.jpg" class="img-thumbnail previsualizarPortada" style="width=200px;">
+              </div>
+            </div>
+            <div class="form-group row ocultarimagen">
+              <div class="col col-lg-6">
+                <div class="panel"><h3>SUBIR FOTO PRINCIPAL DEL PRODUCTO</h3></div>
+                <input type="file" class="fotoPrincipal form-control-file">
+                <p class="help-block">Tamaño recomendado 400px * 450px <br> Peso máximo de la foto 2MB</p>
+              </div>
+              <div class="col col-lg-6">
+                <img loading="lazy" src="vistas/img/productos/default/default.jpg" class="img-thumbnail previsualizarPrincipal" style="width=200px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCION: Detalles Internos -->
+          <div class="egs-section">
+            <div class="egs-section-title"><i class="fa-solid fa-file-lines"></i> Detalles Internos</div>
+            <div class="form-group">
+              <label class="egs-lbl"><i class="fa-solid fa-lock" style="margin-right:4px"></i>Observaciones internas <span style="font-weight:400;color:#94a3b8">(no visible para el cliente)</span></label>
+              <textarea rows="3" class="form-control form-control-sm descripcionOrden" id="textareaDetallesInternos" placeholder="Ingresar detalles internos" style="text-transform:uppercase"></textarea>
+            </div>
+          </div>
+
+          <!-- SECCION: Partidas -->
+          <div class="egs-section">
+            <div class="egs-section-title"><i class="fa-solid fa-receipt"></i> Partidas <span style="font-weight:400;font-size:10px;color:#94a3b8;text-transform:none">(visible en el ticket del cliente)</span></div>
+            <div id="campos">
+              <!-- Partidas dinámicas se agregan aquí -->
+            </div>
+            <div style="margin:8px 0 16px">
+              <a href="#" onclick="AgregarCampos(); return false;" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px dashed #cbd5e1;border-radius:8px;color:#6366f1;font-size:12px;font-weight:600;text-decoration:none;transition:all .15s" onmouseover="this.style.borderColor='#6366f1';this.style.background='#f5f3ff'" onmouseout="this.style.borderColor='#cbd5e1';this.style.background=''">
+                <i class="fa-solid fa-plus"></i> Agregar Partida
+              </a>
+            </div>
+
+            <!-- Total -->
+            <div class="row egs-row">
+              <div class="col-md-6 col-md-offset-6">
+                <div style="background:#f8fafc;border-radius:10px;padding:14px 18px;border:1px solid #e2e8f0">
+                  <label class="egs-lbl" style="margin-bottom:6px"><i class="fa-solid fa-calculator" style="margin-right:4px"></i>TOTAL</label>
                   <div class="input-group">
-
-
-
-                    <span class="input-group-addon"><i class='fas fa-edit'></i></span>
-
-
-
-                    <textarea type="text" rows="3" class="form-control form-control-sm descripcionOrden"
-                      id="textareaDetallesInternos" placeholder="Ingresar detalles internos"></textarea>
-
-
-
+                    <span class="input-group-addon" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:700">$</span>
+                    <input type="number" class="form-control input-lg totalOrden" min="0" value="0" step="any" readonly style="font-size:18px;font-weight:800;color:#1e293b">
                   </div>
-
-
-
                 </div>
-
-
-
-                <div class="form-group row">
-
-
-
-
-
-
-
-                  <!--=====================================
-
-            ENTRADA PARA AGREGAR NUEVA PARTIDA
-
-            ======================================-->
-
-
-
-                  <div class="form-group row ocultarimagen">
-
-
-                    <div class="col col-lg-6">
-
-                      <div class="panel">
-                        <h3>SUBIR FOTO PORTADA</h3>
-                      </div>
-
-
-
-                      <input type="file" class="fotoPortada form-control-file">
-
-                      <input type="hidden" class="antiguaFotoPortada">
-
-
-
-                      <p class="help-block">Tamaño recomendado 1280px * 720px <br> Peso máximo de la foto 2MB</p>
-
-                    </div>
-
-                    <div class="col col-lg-6">
-
-
-
-                      <img loading="lazy" src="vistas/img/cabeceras/default/default.jpg"
-                        class="img-thumbnail previsualizarPortada" style="width=200px;">
-
-                    </div>
-
-
-
-                  </div>
-
-
-
-                  <!--=====================================
-
-            AGREGAR FOTO DE MULTIMEDIA
-
-            ======================================-->
-
-
-
-                  <div class="form-group row ocultarimagen">
-
-                    <div class="col col-lg-6">
-
-                      <div class="panel">
-                        <h3>SUBIR FOTO PRINCIPAL DEL PRODUCTO</h3>
-                      </div>
-
-
-
-                      <input type="file" class="fotoPrincipal form-control-file">
-
-
-
-                      <p class="help-block">Tamaño recomendado 400px * 450px <br> Peso máximo de la foto 2MB</p>
-
-                    </div>
-
-                    <div class="col col-lg-6">
-
-
-
-                      <img loading="lazy" src="vistas/img/productos/default/default.jpg"
-                        class="img-thumbnail previsualizarPrincipal" style="width=200px;">
-
-                    </div>
-
-
-
-                  </div>
-
-
-
-
-
-                  <!--=====================================
-
-            PARTIDA UNO
-
-            ======================================
-
-            <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida1 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
               </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio1 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
             </div>
-
           </div>
 
         </div>
-
-        </div>-->
-
-                  <!--=====================================
-
-            PARTIDA DOS
-
-            ======================================
-
-            <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida2 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
-              </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio2 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
-            </div>
-
-          </div>
-
-        </div>
-
-        </div>-->
-
-                  <!--=====================================
-
-            PARTIDA TRES
-
-            ======================================
-
-
-
-          <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida3 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
-              </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio3 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
-            </div>
-
-          </div>
-
-        </div>
-
-        </div>-->
-
-                  <!--=====================================
-
-            PARTIDA CUATRO
-
-            ======================================
-
-
-
-          <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida4 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
-              </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio4 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
-            </div>
-
-          </div>
-
-        </div>
-
-        </div>-->
-
-                  <!--=====================================
-
-            PARTIDA CINCO
-
-            ======================================
-
-
-
-                      <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida5 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
-              </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio5 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
-            </div>
-
-          </div>
-
-        </div>
-
-        </div>-->
-
-                  <!--=====================================
-
-            PARTIDA SEIS
-
-            ======================================
-
-                      <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida6 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
-              </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio6 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
-            </div>
-
-          </div>
-
-        </div>
-
-        </div>-->
-
-                  <!--=====================================
-
-            PARTIDA SIETE
-
-            ======================================
-
-                      <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida7 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
-              </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio7 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
-            </div>
-
-          </div>
-
-        </div>
-
-        </div>-->
-
-                  <!--=====================================
-
-            PARTIDA OCHO
-
-            ======================================
-
-                                  <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida8 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
-              </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio8 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
-            </div>
-
-          </div>
-
-        </div>
-
-        </div>-->
-
-                  <!--=====================================
-
-            PARTIDA NUEVE
-
-            ======================================
-
-            <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida9 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
-              </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio9 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
-            </div>
-
-          </div>
-
-        </div>
-
-        </div>-->
-
-                  <!--=====================================
-
-            PARTIDA DIEZ
-
-            ======================================
-
-            <div class="form-group row">
-
-              <div class="col-xs-6">
-
-                <div class="input-group"> 
-
-                  <span class="input-group-addon"><i class="fa fa-edit"></i></span>
-
-                    <textarea type="text" maxlength="320" rows="3" class="form-control input-lg partida10 partidaUno" placeholder="Ingresar detalles para cliente (Primera partida)"></textarea> 
-
-
-
-                </div> 
-
-              </div>
-
-            <div>
-
-            <div class="col-xs-6"><div class="input-group">
-
-
-
-              <input class="form-control input-lg precio10 preciodeOrdenUno" type="number" value="0"  min="0" step="any" placeholder="Precio">
-
-
-
-              <span class="input-group-addon"><i class="fa fa-dollar"></i></span>
-
-
-
-            </div>
-
-          </div>
-
-        </div>-->
-
-                </div>
-
-
-
-
-
-              </div>
-
-
-
-              <div class="form-group">
-
-
-                <!--=====================================
-            BOTON AGREGAR PARTIDAS
-            ======================================-->
-                <div class="panel">
-                  <h3>AGREGAR PARTIDAS</h3>
-                </div>
-
-                <a href="#" onclick="AgregarCampos();">
-
-                  <div id="campos">
-
-                    <input type="button" class="btn btn-primary " value="Agregar Partida" />
-
-                </a>
-                <!--<input type="button" class="btn btn-success" id="agregarCaracteristicas" value="Agregar Caracteristicas"/></br></br>-->
-
-
-              </div>
-
-
-
-              <!--=====================================
-
-                PRODUCTO CALCULAR TOTALES
-
-                ======================================-->
-
-              <div class="form-group row">
-
-
-
-                <!--=====================================
-
-                CAMBIO A REGRESAR
-
-                ======================================-->
-
-
-
-                <div class="col-xs-6">
-
-
-
-
-
-
-
-                </div>
-
-
-
-                <div class="col-xs-6">
-
-                  <span>
-                    <h5>
-                      <center>TOTAL</center>
-                    </h5>
-                  </span>
-
-                  <div class="input-group">
-
-
-
-                    <span class="input-group-addon"><i class="fas fa-hand-holding-usd"></i></span>
-
-
-
-                    <input type="number" class="form-control input-lg totalOrden" min="0" value="0" step="any" readonly>
-
-
-
-                  </div>
-
-
-
-                </div>
-
-
-
-              </div>
-
-            </div>
-
-
-
-          </div>
-
-
-
-
-
-          <!--=====================================
-
-        PIE DEL MODAL
-
-        ======================================-->
-
-
-
-          <div class="modal-footer">
-
-
-
-            <div class="preload"></div>
-
-
-
-            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Salir</button>
-
-
-
-            <button type="button" id="btncompletarorden" class="btn btn-primary guardarOrden">Guardar Orden</button>
-
-
-            <span style="color:red; float:right;" id="spanboton"></span>
-
-          </div>
-
-
-
-          </form>
-
-
-
-        </div>
-
-
-
       </div>
 
+      <!-- PIE DEL MODAL -->
+      <div class="modal-footer" style="display:flex;align-items:center;justify-content:space-between">
+        <div class="preload"></div>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa-solid fa-xmark" style="margin-right:4px"></i>Salir</button>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="color:#ef4444;font-size:12px;font-weight:600" id="spanboton"></span>
+          <button type="button" id="btncompletarorden" class="btn btn-primary guardarOrden" style="padding:8px 24px;font-weight:700">
+            <i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Guardar Orden
+          </button>
+        </div>
+      </div>
 
-
+      </form>
     </div>
+  </div>
+</div>
 
     <!--=====================================
 
