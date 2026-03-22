@@ -156,7 +156,8 @@
       "Bash(powershell -Command \"Invoke-WebRequest -Uri ''http://egsequipodecomputo.com/'' -UseBasicParsing -TimeoutSec 10 -ErrorAction SilentlyContinue | Select-Object StatusCode\")",
       "Bash(powershell -Command \"try { Invoke-WebRequest -Uri ''https://backend.egsequipodecomputo.com/'' -UseBasicParsing -TimeoutSec 10 | Select-Object StatusCode } catch { Write-Host $_.Exception.Message }\")",
       "Bash(php -l vistas/modulos/historial-cotizaciones.php)",
-      "Bash(php -l controladores/cotizaciones.controlador.php)"
+      "Bash(php -l controladores/cotizaciones.controlador.php)",
+      "Bash(php -l vistas/modulos/validar-cotizacion.php)"
     ]
   }
 }

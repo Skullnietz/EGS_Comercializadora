@@ -44,10 +44,52 @@ try {
   }
 } catch (Exception $e) {}
 
+// ── Helper: parsear vigencia y determinar si expiró ──
+// vigencia viene como texto libre: "Validez 8 días", "Validez 30 días", etc.
+// Retorna: [expirada(bool), diasVigencia(int|null), fechaExpira(string|null), etiqueta, colorTexto, colorBg, icono]
+function _hcEvalVigencia($vigenciaText, $fechaCotizacion) {
+  $dias = null;
+  // Intentar extraer número de días del texto
+  if (preg_match('/(\d+)\s*d[ií]as?/i', $vigenciaText, $m)) {
+    $dias = intval($m[1]);
+  }
+  if ($dias === null || empty($fechaCotizacion)) {
+    // No se puede determinar, mostrar como texto neutral
+    return array(false, null, null, $vigenciaText ?: '-', '#6366f1', '#eef2ff', 'fa-clock');
+  }
+  $fechaBase = strtotime($fechaCotizacion);
+  if ($fechaBase === false) {
+    return array(false, null, null, $vigenciaText, '#6366f1', '#eef2ff', 'fa-clock');
+  }
+  $fechaExpira = date('Y-m-d', strtotime("+{$dias} days", $fechaBase));
+  $hoy = date('Y-m-d');
+  $expirada = ($hoy > $fechaExpira);
+
+  if ($expirada) {
+    return array(true, $dias, $fechaExpira, 'Expirada', '#dc2626', '#fef2f2', 'fa-circle-exclamation');
+  } else {
+    // Calcular días restantes
+    $restantes = (strtotime($fechaExpira) - strtotime($hoy)) / 86400;
+    $restantes = max(0, intval($restantes));
+    if ($restantes <= 3) {
+      return array(false, $dias, $fechaExpira, $restantes . 'd restantes', '#f59e0b', '#fffbeb', 'fa-triangle-exclamation');
+    }
+    return array(false, $dias, $fechaExpira, 'Vigente (' . $restantes . 'd)', '#16a34a', '#f0fdf4', 'fa-circle-check');
+  }
+}
+
+// URL base para QR
+$_hc_baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+  . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/';
+// Limpiar trailing slashes
+$_hc_baseUrl = rtrim($_hc_baseUrl, '/') . '/';
+
 // Estadísticas rápidas
 $_hc_total = count($_hc_cotizaciones);
 $_hc_montoTotal = 0;
 $_hc_esteMes = 0;
+$_hc_vigentes = 0;
+$_hc_expiradas = 0;
 $_hc_mesActual = date("Y-m");
 
 foreach ($_hc_cotizaciones as $c) {
@@ -56,6 +98,8 @@ foreach ($_hc_cotizaciones as $c) {
   if (!empty($fecha) && substr($fecha, 0, 7) === $_hc_mesActual) {
     $_hc_esteMes++;
   }
+  $vig = _hcEvalVigencia(isset($c["vigencia"]) ? $c["vigencia"] : "", $fecha);
+  if ($vig[0]) $_hc_expiradas++; else $_hc_vigentes++;
 }
 ?>
 
@@ -253,12 +297,21 @@ foreach ($_hc_cotizaciones as $c) {
         </div>
       </div>
       <div class="hc-kpi">
-        <div class="hc-kpi-icon" style="background:#f0fdf4;color:#22c55e">
-          <i class="fa-solid fa-calendar-check"></i>
+        <div class="hc-kpi-icon" style="background:#f0fdf4;color:#16a34a">
+          <i class="fa-solid fa-circle-check"></i>
         </div>
         <div>
-          <div class="hc-kpi-value"><?php echo $_hc_esteMes; ?></div>
-          <div class="hc-kpi-label">Este mes</div>
+          <div class="hc-kpi-value"><?php echo $_hc_vigentes; ?></div>
+          <div class="hc-kpi-label">Vigentes</div>
+        </div>
+      </div>
+      <div class="hc-kpi">
+        <div class="hc-kpi-icon" style="background:#fef2f2;color:#dc2626">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div>
+          <div class="hc-kpi-value"><?php echo $_hc_expiradas; ?></div>
+          <div class="hc-kpi-label">Expiradas</div>
         </div>
       </div>
       <div class="hc-kpi">
@@ -301,7 +354,10 @@ foreach ($_hc_cotizaciones as $c) {
             <?php foreach ($_hc_cotizaciones as $cot):
               $vendedorNombre = isset($_hc_vendedores[intval($cot["id_vendedor"])]) ? $_hc_vendedores[intval($cot["id_vendedor"])] : "Vendedor #".$cot["id_vendedor"];
               $fechaFmt = !empty($cot["fecha"]) ? date("d/m/Y", strtotime($cot["fecha"])) : "-";
-              $vigTexto = !empty($cot["vigencia"]) ? htmlspecialchars($cot["vigencia"]) : "-";
+              $vigRaw = isset($cot["vigencia"]) ? $cot["vigencia"] : "";
+              $vigEval = _hcEvalVigencia($vigRaw, isset($cot["fecha"]) ? $cot["fecha"] : "");
+              // $vigEval = [expirada, dias, fechaExpira, etiqueta, colorTexto, colorBg, icono]
+              $qrValidUrl = $_hc_baseUrl . 'index.php?ruta=validar-cotizacion&codigo=' . urlencode($cot['codigo_qr']);
             ?>
             <tr>
               <td><span class="hc-id">#<?php echo $cot["id"]; ?></span></td>
@@ -310,9 +366,9 @@ foreach ($_hc_cotizaciones as $c) {
               <td><span class="hc-asunto" title="<?php echo htmlspecialchars($cot["asunto"]); ?>"><?php echo htmlspecialchars($cot["asunto"]); ?></span></td>
               <td><?php echo htmlspecialchars($vendedorNombre); ?></td>
               <td>
-                <span class="hc-badge" style="color:#6366f1;background:#eef2ff">
-                  <i class="fa-solid fa-clock" style="font-size:10px"></i>
-                  <?php echo $vigTexto; ?>
+                <span class="hc-badge" style="color:<?php echo $vigEval[4]; ?>;background:<?php echo $vigEval[5]; ?>">
+                  <i class="fa-solid <?php echo $vigEval[6]; ?>" style="font-size:10px"></i>
+                  <?php echo htmlspecialchars($vigEval[3]); ?>
                 </span>
               </td>
               <td><span class="hc-monto">$<?php echo number_format($cot["total"], 2); ?></span></td>
@@ -325,7 +381,12 @@ foreach ($_hc_cotizaciones as $c) {
                     data-vendedor="<?php echo htmlspecialchars($vendedorNombre); ?>"
                     data-empresa="<?php echo htmlspecialchars($cot['empresa']); ?>"
                     data-asunto="<?php echo htmlspecialchars($cot['asunto']); ?>"
-                    data-vigencia="<?php echo $vigTexto; ?>"
+                    data-vigencia="<?php echo htmlspecialchars($vigRaw); ?>"
+                    data-vig-label="<?php echo htmlspecialchars($vigEval[3]); ?>"
+                    data-vig-color="<?php echo $vigEval[4]; ?>"
+                    data-vig-bg="<?php echo $vigEval[5]; ?>"
+                    data-vig-icon="<?php echo $vigEval[6]; ?>"
+                    data-vig-expirada="<?php echo $vigEval[0] ? '1' : '0'; ?>"
                     data-total="<?php echo number_format($cot['total'], 2); ?>"
                     data-neto="<?php echo number_format($cot['neto'], 2); ?>"
                     data-impuesto="<?php echo number_format($cot['impuesto'], 2); ?>"
@@ -333,6 +394,7 @@ foreach ($_hc_cotizaciones as $c) {
                     data-observaciones="<?php echo htmlspecialchars($cot['observaciones']); ?>"
                     data-productos="<?php echo htmlspecialchars($cot['productos']); ?>"
                     data-qr="<?php echo htmlspecialchars($cot['codigo_qr']); ?>"
+                    data-qr-url="<?php echo htmlspecialchars($qrValidUrl); ?>"
                   ><i class="fa-solid fa-eye"></i></button>
                   <a class="hc-act-btn print" title="Imprimir / PDF"
                     href="index.php?ruta=validar-cotizacion&codigo=<?php echo urlencode($cot['codigo_qr']); ?>"
@@ -412,12 +474,27 @@ foreach ($_hc_cotizaciones as $c) {
             <div id="hcDetObs"></div>
           </div>
 
-          <!-- Código de verificación -->
-          <div id="hcDetQrWrap" style="display:none;text-align:center;margin-top:16px">
-            <span style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;font-size:12px;color:#64748b">
-              <i class="fa-solid fa-shield-check" style="color:#6366f1"></i>
-              Código de verificación: <code id="hcDetQr" style="font-weight:600;color:#0f172a"></code>
-            </span>
+          <!-- Banner de expiración -->
+          <div id="hcDetExpiredBanner" style="display:none;margin-top:16px;padding:16px 20px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;text-align:center">
+            <i class="fa-solid fa-circle-exclamation" style="font-size:28px;color:#dc2626;display:block;margin-bottom:8px"></i>
+            <div style="font-size:15px;font-weight:700;color:#dc2626;margin-bottom:4px">Cotización Expirada</div>
+            <div style="font-size:13px;color:#991b1b">La vigencia de esta cotización ha finalizado. Es necesario generar una nueva cotización con precios actualizados.</div>
+            <a href="index.php?ruta=cotizacion" class="btn" style="margin-top:12px;background:#dc2626;color:#fff;border-radius:8px;font-weight:600;font-size:12px;padding:8px 16px">
+              <i class="fa-solid fa-rotate-right"></i> Nueva Cotización
+            </a>
+          </div>
+
+          <!-- QR de verificación -->
+          <div id="hcDetQrWrap" style="display:none;text-align:center;margin-top:20px">
+            <label style="display:block;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">
+              <i class="fa-solid fa-qrcode" style="margin-right:4px"></i> Código QR de Verificación
+            </label>
+            <div style="display:inline-block;padding:12px;background:#fff;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+              <img id="hcDetQrImg" src="" alt="QR" style="width:160px;height:160px;display:block">
+            </div>
+            <div style="margin-top:8px;font-size:11px;color:#94a3b8">
+              Escanea para verificar autenticidad
+            </div>
           </div>
         </div>
 
@@ -472,10 +549,23 @@ $(document).ready(function(){
     $('#hcDetIva').text('$' + $b.data('impuesto'));
     $('#hcDetTotal').text('$' + $b.data('total'));
 
-    // Vigencia
+    // Vigencia con estado
     var vigText = $b.data('vigencia') || '-';
+    var vigLabel = $b.data('vig-label') || vigText;
+    var vigColor = $b.data('vig-color') || '#6366f1';
+    var vigBg = $b.data('vig-bg') || '#eef2ff';
+    var vigIcon = $b.data('vig-icon') || 'fa-clock';
+    var vigExpirada = $b.data('vig-expirada') == '1';
     var vigHtml = '<i class="fa-solid fa-clock" style="font-size:11px;color:#818cf8"></i> ' + vigText;
+    vigHtml += ' <span style="background:'+vigBg+';color:'+vigColor+';padding:2px 10px;border-radius:12px;font-size:10px;font-weight:700;margin-left:6px"><i class="fa-solid '+vigIcon+'" style="font-size:9px;margin-right:3px"></i>'+vigLabel+'</span>';
     $('#hcDetVigWrap').html(vigHtml);
+
+    // Banner de expiración
+    if (vigExpirada) {
+      $('#hcDetExpiredBanner').show();
+    } else {
+      $('#hcDetExpiredBanner').hide();
+    }
 
     // Descuento
     var desc = parseFloat($b.data('descuento'));
@@ -495,10 +585,11 @@ $(document).ready(function(){
       $('#hcDetObsWrap').hide();
     }
 
-    // Código de verificación (QR hash)
-    var qr = $b.data('qr');
-    if (qr && qr.trim() !== '') {
-      $('#hcDetQr').text(qr);
+    // QR de verificación (imagen generada)
+    var qrUrl = $b.data('qr-url');
+    if (qrUrl && qrUrl.trim() !== '') {
+      var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&format=png&data=' + encodeURIComponent(qrUrl);
+      $('#hcDetQrImg').attr('src', qrApiUrl);
       $('#hcDetQrWrap').show();
     } else {
       $('#hcDetQrWrap').hide();
