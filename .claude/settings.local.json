@@ -120,7 +120,13 @@
       "Bash(python3:*)",
       "Bash(where python:*)",
       "Bash(C:Python313python.exe -c \":*)",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(grep -r 'function AgregarCampos' /c/Users/black/Desktop/EGS/ --include=*.js)",
+      "Bash(find C:UsersblackDesktopEGS -name *ordenesnew* -o -name *ordenes*.js)",
+      "Bash(grep -r \"guardarOrden\\\\|AgregarCampos\" C:UsersblackDesktopEGS --include=*.js)",
+      "Bash(grep -r \"AgregarCampos\\\\|function AgregarCampos\" C:UsersblackDesktopEGS --include=*.php)",
+      "Bash(find C:UsersblackDesktopEGScontroladores -name *.php)",
+      "Bash(find C:UsersblackDesktopEGSvistas -name *.js -type f)"
     ]
   }
 }

@@ -442,6 +442,13 @@ function _ordGetBadgeClass($estadoText) {
     function _egsStrip(s) {
       return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
+    function _egsDateStamp() {
+      var d = new Date();
+      var dd = ('0'+d.getDate()).slice(-2);
+      var mm = ('0'+(d.getMonth()+1)).slice(-2);
+      var aa = String(d.getFullYear()).slice(-2);
+      return dd + mm + aa;
+    }
     function _egsBuildTitle() {
       var cSel = $('.cliente option:selected');
       var cTxt = (cSel.val() && cSel.val() !== '' &&
@@ -451,7 +458,8 @@ function _ordGetBadgeClass($estadoText) {
       var mo = ($('#modelo').val() || '').toUpperCase();
       var sr = ($('#numeroserial').val() || '').toUpperCase();
       var cClean = _egsStrip(cTxt).toUpperCase().replace(/[^A-Z0-9 ]/g,'').trim();
-      var parts = [cClean, m, mo, sr].filter(function(p){ return p!==''; });
+      var fecha = _egsDateStamp();
+      var parts = [cClean, m, mo, sr, fecha].filter(function(p){ return p!==''; });
       var title = parts.join(' ');
       $('.tituloOrden').val(title);
       $('.rutaOrden').val(title.length > 0 ? limpiarUrl(title) : '');
@@ -2739,777 +2747,63 @@ MODAL EDITAR ORDEN
 
                     </div>
 
-                    <!--=====================================
-
-            PARTIDA UNO
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-">
-
-
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida1 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)" readonly></textarea>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
-                          <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio1 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio" readonly>
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          </div>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
+                    <!-- ═══ PARTIDAS (visible en ticket del cliente) ═══ -->
+                    <div style="margin:16px 0 8px">
+                      <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#475569">
+                        <i class="fa-solid fa-receipt" style="margin-right:4px"></i>Partidas
+                      </span>
+                      <span style="font-size:10px;color:#94a3b8;font-weight:400"> (visible en el ticket del cliente)</span>
                     </div>
 
-
-
-                    <!--=====================================
-
-            PARTIDA DOS
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-6">
-
-
-
+                    <?php
+                    $partidaLabels = array(
+                      1 => 'Diagnóstico / Servicio principal',
+                      2 => 'Refacción o pieza',
+                      3 => 'Servicio adicional',
+                      4 => 'Refacción o pieza adicional',
+                      5 => 'Servicio complementario',
+                      6 => 'Componente extra',
+                      7 => 'Trabajo adicional',
+                      8 => 'Material o insumo',
+                      9 => 'Concepto adicional',
+                      10 => 'Concepto adicional'
+                    );
+                    for ($p = 1; $p <= 10; $p++):
+                      $ro = ($p === 1) ? ' readonly' : '';
+                    ?>
+                    <div class="form-group row egs-partida-row" style="margin-bottom:8px;padding:10px 12px;background:#fafbfc;border-radius:8px;border:1px solid #f1f5f9">
+                      <div class="col-xs-7 col-md-8" style="padding-right:6px">
+                        <label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
+                          <i class="fa-solid fa-file-lines" style="margin-right:3px"></i>Partida <?php echo $p; ?>
+                          <span style="color:#94a3b8;font-weight:400">(visible en ticket)</span>
+                        </label>
+                        <textarea maxlength="320" rows="2" class="form-control partida<?php echo $p; ?> partidaUno" placeholder="<?php echo $partidaLabels[$p]; ?>" style="text-transform:uppercase;font-size:13px;resize:vertical"<?php echo $ro; ?>></textarea>
+                      </div>
+                      <div class="col-xs-5 col-md-4" style="padding-left:6px">
+                        <label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
+                          <i class="fa-solid fa-dollar-sign" style="margin-right:3px"></i>Precio
+                        </label>
                         <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida2 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)"></textarea>
-
-
-
+                          <span class="input-group-addon" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:700">$</span>
+                          <input class="form-control precio<?php echo $p; ?> precioOrdenEditar" type="number" value="0" min="0" step="any" placeholder="0.00" style="font-weight:700"<?php echo $ro; ?>>
                         </div>
-
-
-
                       </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
-                          <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio2 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio">
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          </div>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
                     </div>
+                    <?php endfor; ?>
 
-                    <!--=====================================
-
-            PARTIDA TRES
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-6">
-
-
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida3 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)"></textarea>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
+                    <!-- TOTAL -->
+                    <div class="row" style="margin-top:12px">
+                      <div class="col-xs-6 col-xs-offset-6 col-md-4 col-md-offset-8">
+                        <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;border:1px solid #e2e8f0">
+                          <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#475569;margin-bottom:4px;display:block">
+                            <i class="fa-solid fa-calculator" style="margin-right:4px"></i>Total
+                          </label>
                           <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio3 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio">
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
+                            <span class="input-group-addon" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:700">$</span>
+                            <input type="number" class="form-control input-lg totalOrdenEditar" min="0" value="0" step="any" readonly style="font-size:18px;font-weight:800;color:#1e293b">
                           </div>
-
-
-
                         </div>
-
-
-
                       </div>
-
-
-
-                    </div>
-
-                    <!--=====================================
-
-            PARTIDA CUATRO
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-6">
-
-
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida4 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)"></textarea>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
-                          <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio4 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio">
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          </div>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                    </div>
-
-                    <!--=====================================
-
-            PARTIDA CINCO
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-6">
-
-
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida5 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)"></textarea>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
-                          <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio5 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio">
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          </div>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                    </div>
-
-
-
-                    <!--=====================================
-
-            PARTIDA SEIS
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-6">
-
-
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida6 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)"></textarea>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
-                          <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio6 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio">
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          </div>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                    </div>
-
-
-
-                    <!--=====================================
-
-            PARTIDA SIETE
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-6">
-
-
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida7 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)"></textarea>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
-                          <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio7 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio">
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          </div>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                    </div>
-
-                    <!--=====================================
-
-            PARTIDA OCHO
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-6">
-
-
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida8 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)"></textarea>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
-                          <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio8 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio">
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          </div>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                    </div>
-
-                    <!--=====================================
-
-            PARTIDA NUEVE
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-6">
-
-
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida9 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)"></textarea>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
-                          <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio9 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio">
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          </div>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                    </div>
-
-
-
-                    <!--=====================================
-
-            PARTIDA DIEZ
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-
-
-                      <div class="col-xs-6">
-
-
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-edit"></i></span>
-
-
-
-                          <textarea type="text" maxlength="320" rows="3"
-                            class="form-control input-lg partida10 partidaUno"
-                            placeholder="Ingresar detalles para cliente (Primera partida)"></textarea>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                      <div>
-
-
-
-                        <div class="col-xs-6">
-
-
-
-                          <div class="input-group">
-
-
-
-                            <input class="form-control input-lg precio10 precioOrdenEditar" type="number" value="0"
-                              min="0" step="any" placeholder="Precio">
-
-
-
-                            <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          </div>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
-                    </div>
-
-                    <!--=====================================
-
-            TOTAL ORDEN
-
-            ======================================-->
-
-                    <div class="form-group row">
-
-                      <!--=====================================
-
-            CAMBIO A REGRESAR
-
-            ======================================-->
-
-                      <div class="col-xs-6">
-
-
-
-
-
-                      </div>
-
-
-
-                      <div class="col-xs-6">
-
-                        <span>
-                          <h5>
-                            <center>TOTAL</center>
-                          </h5>
-                        </span>
-
-                        <div class="input-group">
-
-
-
-                          <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-
-
-
-                          <input type="number" class="form-control input-lg totalOrdenEditar" min="0" value="0"
-                            step="any" readonly>
-
-
-
-                        </div>
-
-
-
-                      </div>
-
-
-
                     </div>
 
 
