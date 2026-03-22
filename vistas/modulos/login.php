@@ -1,6 +1,6 @@
 <?php
 // 1. CONFIGURACIÓN
-header('Content-Type: text/html; charset=UTF-8');
+// Nota: no usar header() aquí porque plantilla.php ya emitió output antes de incluir login.php
 
 /**
  * Obtiene la imagen del día de Bing.

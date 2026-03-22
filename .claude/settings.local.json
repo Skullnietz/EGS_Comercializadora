@@ -137,7 +137,24 @@
       "Bash(find /c/Users/black/Desktop/EGS -type f -name *.js)",
       "Bash(find /c/Users/black/Desktop/EGS -type f \\\\\\(-name *.js -o -name *.html -o -name *.php \\\\\\) -path */vistas/* ! -path */bower_components/* ! -path */node_modules/*)",
       "Bash(grep -r pollNotificaciones /c/Users/black/Desktop/EGS --include=*.js --include=*.php)",
-      "Bash(grep -A 2 \"ConexionWP::conectarWP\" /c/Users/black/Desktop/EGS/modelos/*.php)"
+      "Bash(grep -A 2 \"ConexionWP::conectarWP\" /c/Users/black/Desktop/EGS/modelos/*.php)",
+      "Bash(php -l vistas/modulos/login.php)",
+      "Bash(php -l controladores/notificaciones.controlador.php)",
+      "Bash(php -l config/env.php)",
+      "Bash(php -l config/Database.php)",
+      "Bash(php -l modelos/conexion.php)",
+      "Bash(php -r \"echo ini_get\\(''error_log''\\);\")",
+      "Bash(powershell -Command \"Get-Content -Tail 80\")",
+      "Bash(powershell -Command \"Get-Content ''C:\\\\xampp\\\\apache\\\\logs\\\\error.log'' -Tail 80\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\xampp'' -Filter ''error*'' -Recurse -ErrorAction SilentlyContinue | Select-Object FullName -First 10\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\xampp'' -Filter ''*.log'' -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Length -gt 0 } | Select-Object FullName, Length, LastWriteTime | Sort-Object LastWriteTime -Descending | Select-Object -First 10\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\xampp\\\\apache\\\\logs'' -ErrorAction SilentlyContinue\")",
+      "Bash(powershell -Command \"Get-Service -Name ''mysql*'' -ErrorAction SilentlyContinue; Get-Process -Name ''mysqld*'' -ErrorAction SilentlyContinue\")",
+      "Bash(powershell -Command \"netstat -an | Select-String '':3306''\")",
+      "Bash(powershell -Command \"if \\(Test-Path ''C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\.env''\\) { Get-Content ''C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\.env'' } else { Write-Host ''No .env file found'' }\")",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://egsequipodecomputo.com/panel/'' -UseBasicParsing -TimeoutSec 10 -ErrorAction SilentlyContinue | Select-Object StatusCode, StatusDescription\")",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''http://egsequipodecomputo.com/'' -UseBasicParsing -TimeoutSec 10 -ErrorAction SilentlyContinue | Select-Object StatusCode\")",
+      "Bash(powershell -Command \"try { Invoke-WebRequest -Uri ''https://backend.egsequipodecomputo.com/'' -UseBasicParsing -TimeoutSec 10 | Select-Object StatusCode } catch { Write-Host $_.Exception.Message }\")"
     ]
   }
 }

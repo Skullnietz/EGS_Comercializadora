@@ -1377,6 +1377,15 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 				) {
 					try {
 						ControladorNotificaciones::ctrCrearTablaEstado();
+						// Obtener id_tecnicoDos de la orden
+						$_egs_ordTecDos = 0;
+						try {
+							$_egs_ordActual = ModeloOrdenes::mdlMostrarOrdenes("ordenes", "id", intval($datos["idOrden"]));
+							if (is_array($_egs_ordActual) && isset($_egs_ordActual["id_tecnicoDos"])) {
+								$_egs_ordTecDos = intval($_egs_ordActual["id_tecnicoDos"]);
+							}
+						} catch (Exception $ex) {}
+
 						ControladorNotificaciones::ctrRegistrarCambioEstado(array(
 							"id_orden" => intval($datos["idOrden"]),
 							"estado_anterior" => $_egs_estadoAnterior,
@@ -1387,6 +1396,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 							"id_empresa" => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
 							"id_asesor" => intval($datos["asesor"]),
 							"id_tecnico" => intval($datos["tecnico"]),
+							"id_tecnicoDos" => $_egs_ordTecDos,
 						));
 					} catch (Exception $e) { /* silenciar para no romper el flujo */
 					}
@@ -1423,6 +1433,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 							"id_empresa" => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
 							"id_asesor" => intval($datos["asesor"]),
 							"id_tecnico" => intval($datos["tecnico"]),
+							"id_tecnicoDos" => isset($_egs_ordTecDos) ? $_egs_ordTecDos : 0,
 							"tipo" => "traspaso",
 						));
 					} catch (Exception $e) {

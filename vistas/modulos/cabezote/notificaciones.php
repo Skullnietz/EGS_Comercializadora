@@ -14,6 +14,9 @@ $_noti_perfil = $_SESSION["perfil"];
 $_noti_limite6m = date("Y-m-d", strtotime("-6 months"));
 $_noti_limite1m = date("Y-m-d", strtotime("-1 month"));
 
+// Variable para guardar IDs de órdenes del técnico (para filtro de observaciones)
+$_noti_tecOrdenIds = null;
+
 // ══════════════════════════════════════
 // 1. NOTIFICACIONES DE ATRASO (existentes)
 // ══════════════════════════════════════
@@ -66,7 +69,10 @@ if ($_noti_perfil == "administrador") {
     if (is_array($tecnico) && isset($tecnico["id"])) {
       $ordenesDelTecnico = controladorOrdenes::ctrMostrarOrdenesDelTecncio($tecnico["id"]);
       if (is_array($ordenesDelTecnico)) {
+        // Guardar IDs de órdenes del técnico para filtrar observaciones
+        $_noti_tecOrdenIds = array();
         foreach ($ordenesDelTecnico as $o) {
+          $_noti_tecOrdenIds[] = intval($o["id"]);
           $est = isset($o["estado"]) ? $o["estado"] : "";
           $fi = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
           if (
@@ -163,9 +169,11 @@ $_noti_obs = array();
 $_noti_totalObs = 0;
 
 try {
+  // Si es técnico, solo observaciones de SUS órdenes (principal + participación)
   $_noti_obs = controladorObservaciones::ctrObservacionesRecientesNotif(
     isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
-    10
+    10,
+    $_noti_tecOrdenIds // null para admin/vendedor (sin filtro), array de IDs para técnico
   );
   if (!is_array($_noti_obs))
     $_noti_obs = array();
