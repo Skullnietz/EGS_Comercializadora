@@ -38,7 +38,7 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 	.egs-estado-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; background: #e0e7ff; color: #4338ca; }
 
 	/* Carousel */
-	.img-orden-standard { width: 100%; height: 400px; object-fit: cover; background-color: #f4f4f4; cursor: pointer; }
+	.img-orden-standard { width: 100%; height: 400px; object-fit: cover; background-color: #f4f4f4; cursor: pointer; border-radius: 8px; }
 	.orden-carousel .carousel-inner { height: 400px !important; }
 	.imagepreview { transform-origin: center center; cursor: grab; }
 	.imagepreview:active { cursor: grabbing; }
@@ -164,11 +164,10 @@ date_default_timezone_set("America/Mexico_City");
 
 	<section class="content">
 
+		<!-- ==================== FILA 1: CLIENTE (izq) + IMÁGENES (der) ==================== -->
 		<div class="row">
 
-			<!-- ===================== COLUMNA IZQUIERDA: CLIENTE + IMÁGENES ===================== -->
 			<div class="col-lg-5 col-xs-12">
-
 				<!-- DATOS DEL CLIENTE -->
 				<div class="egs-section">
 					<div class="egs-title-bar"><i class="fa-solid fa-user"></i> Datos del cliente</div>
@@ -215,7 +214,9 @@ date_default_timezone_set("America/Mexico_City");
 						<?php endif; ?>
 					</div>
 				</div>
+			</div>
 
+			<div class="col-lg-7 col-xs-12">
 				<!-- IMÁGENES DE LA ORDEN -->
 				<div class="egs-section">
 					<div class="egs-title-bar"><i class="fa-solid fa-images"></i> Imágenes de la orden</div>
@@ -256,29 +257,281 @@ date_default_timezone_set("America/Mexico_City");
 								</a>
 							</div>
 						<?php } else { ?>
-							<img src="vistas/img/productos/default/default.jpg" class="img-orden-standard" alt="Sin imágenes" style="border-radius:8px">
+							<img src="vistas/img/productos/default/default.jpg" class="img-orden-standard" alt="Sin imágenes">
 						<?php } ?>
 					</div>
 				</div>
+			</div>
 
-				<!-- Modal Lightbox -->
-				<div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-hidden="true">
-					<div class="modal-dialog">
-						<div class="modal-content">
-							<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
-								<h4 class="modal-title" style="display:inline-block">Vista previa</h4>
-								<div class="pull-right" style="margin-right:20px">
-									<button type="button" class="btn btn-default btn-sm" id="zoomOut"><i class="fa fa-minus"></i></button>
-									<button type="button" class="btn btn-default btn-sm" id="zoomIn"><i class="fa fa-plus"></i></button>
-								</div>
-							</div>
-							<div class="modal-body">
-								<img src="" class="imagepreview" style="width:100%">
-							</div>
+		</div><!-- /row 1 -->
+
+		<!-- Modal Lightbox -->
+		<div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" style="display:inline-block">Vista previa</h4>
+						<div class="pull-right" style="margin-right:20px">
+							<button type="button" class="btn btn-default btn-sm" id="zoomOut"><i class="fa fa-minus"></i></button>
+							<button type="button" class="btn btn-default btn-sm" id="zoomIn"><i class="fa fa-plus"></i></button>
 						</div>
 					</div>
+					<div class="modal-body">
+						<img src="" class="imagepreview" style="width:100%">
+					</div>
 				</div>
+			</div>
+		</div>
+
+		<!-- ==================== FILA 2: PARTIDAS (izq) + FICHA TÉCNICA + ASIGNACIÓN (der) ==================== -->
+		<div class="row">
+
+			<!-- COLUMNA IZQUIERDA: PARTIDAS Y COSTOS -->
+			<div class="col-lg-8 col-xs-12">
+				<div class="egs-section">
+					<div class="egs-title-bar"><i class="fa-solid fa-list-check"></i> Partidas y costos</div>
+					<div class="egs-body">
+						<form role="form" method="post" class="formularioPartidas" id="formPartidas">
+							<div class="box" style="border:none;box-shadow:none;margin:0">
+
+								<?php
+								// 10 partidas hardcodeadas en un loop
+								for ($p = 0; $p < 10; $p++):
+									$pName = $partidaNames[$p];
+									$pNum = $p + 1;
+									$partidaField = "partida".$pName;
+									$precioField = "precio".$pName;
+									$partidaVal = $value[$partidaField];
+									$precioVal = $value[$precioField];
+
+									if ($partidaVal == null) continue;
+								?>
+									<div class="form-group row egs-partida-row">
+										<div class="col-xs-7 col-md-8" style="padding-right:6px">
+											<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
+												<i class="fa-solid fa-file-lines" style="margin-right:3px"></i>Partida <?php echo $pNum; ?>
+											</label>
+											<?php if ($isReadonly): ?>
+												<textarea maxlength="320" rows="2" class="form-control text-uppercase" name="<?php echo $partidaField; ?>" placeholder="<?php echo $partidaLabels[$pNum]; ?>" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($partidaVal); ?></textarea>
+											<?php else: ?>
+												<div class="input-group">
+													<span class="input-group-addon"><button type="button" class="btn btn-danger btn-xs quitarPartida"><i class="fas fa-times"></i></button></span>
+													<textarea maxlength="320" rows="2" class="form-control text-uppercase" name="<?php echo $partidaField; ?>" placeholder="<?php echo $partidaLabels[$pNum]; ?>" style="font-size:13px;resize:vertical"><?php echo htmlspecialchars($partidaVal); ?></textarea>
+												</div>
+											<?php endif; ?>
+										</div>
+										<div class="col-xs-5 col-md-4" style="padding-left:6px">
+											<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
+												<i class="fa-solid fa-dollar-sign" style="margin-right:3px"></i>Precio
+											</label>
+											<div class="input-group">
+												<span class="input-group-addon egs-dollar">$</span>
+												<input class="form-control precioPartidaGuardada" name="<?php echo $precioField; ?>" type="number" value="<?php echo htmlspecialchars($precioVal); ?>" min="0" step="any" placeholder="0.00" style="font-weight:700"<?php echo $isReadonly ? ' readonly' : ''; ?>>
+											</div>
+										</div>
+									</div>
+								<?php endfor; ?>
+
+								<!-- PARTIDAS JSON DINÁMICAS -->
+								<?php
+								if (is_array($partidas) || is_object($partidas)) {
+									foreach ($partidas as $key => $itemDetallesPartidas) {
+								?>
+									<div class="form-group row egs-partida-row">
+										<div class="col-xs-7 col-md-8" style="padding-right:6px">
+											<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
+												<i class="fa-solid fa-plus-circle" style="margin-right:3px"></i>Partida adicional
+											</label>
+											<?php if ($isReadonly): ?>
+												<textarea maxlength="320" rows="2" class="form-control text-uppercase NuevaPartidaAgregada" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($itemDetallesPartidas["descripcion"]); ?></textarea>
+											<?php else: ?>
+												<div class="input-group">
+													<span class="input-group-addon"><button type="button" class="btn btn-danger btn-xs quitarPartida"><i class="fas fa-times"></i></button></span>
+													<textarea maxlength="320" rows="2" class="form-control text-uppercase NuevaPartidaAgregada" style="font-size:13px;resize:vertical"><?php echo htmlspecialchars($itemDetallesPartidas["descripcion"]); ?></textarea>
+												</div>
+											<?php endif; ?>
+										</div>
+										<div class="col-xs-5 col-md-4" style="padding-left:6px">
+											<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
+												<i class="fa-solid fa-dollar-sign" style="margin-right:3px"></i>Precio
+											</label>
+											<div class="input-group">
+												<span class="input-group-addon egs-dollar">$</span>
+												<input class="form-control precioPartidaGuardada precioPartidaListada" type="number" value="<?php echo htmlspecialchars($itemDetallesPartidas["precioPartida"]); ?>" min="0" step="any" style="font-weight:700"<?php echo $isReadonly ? ' readonly' : ''; ?>>
+												<input type="hidden" name="partidaYaListada">
+											</div>
+										</div>
+									</div>
+								<?php
+									}
+								}
+								?>
+
+								<!-- DISPLAY RECARGA EXISTENTE (readonly) -->
+								<?php if ($recarga != ""): ?>
+								<div class="form-group row egs-partida-row" style="border-color:#d4d4d8;background:#f5f5f4">
+									<div class="col-xs-7 col-md-8" style="padding-right:6px">
+										<label style="font-size:10px;font-weight:600;color:#78716c;margin-bottom:3px;display:block">
+											<i class="fa-solid fa-tint" style="margin-right:3px"></i>Recarga de cartucho
+										</label>
+										<textarea maxlength="320" rows="2" class="form-control text-uppercase NuevaRecargaAgregada" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($recarga); ?></textarea>
+									</div>
+									<div class="col-xs-5 col-md-4" style="padding-left:6px">
+										<label style="font-size:10px;font-weight:600;color:#78716c;margin-bottom:3px;display:block">Precio</label>
+										<div class="input-group">
+											<span class="input-group-addon egs-dollar">$</span>
+											<input class="form-control precioPartidaGuardada preciodeRecarganueva" type="number" value="<?php echo htmlspecialchars($precioRecarga); ?>" readonly style="font-weight:700">
+										</div>
+									</div>
+								</div>
+								<?php endif; ?>
+
+								<!-- DISPLAY PARTIDAS TÉCNICO DOS (readonly) -->
+								<?php
+								if (!empty($partidasTecnicoDos) && (is_array($partidasTecnicoDos) || is_object($partidasTecnicoDos))) {
+									foreach ($partidasTecnicoDos as $key => $valuePartidasTecnivosDos) {
+								?>
+								<div class="form-group row egs-partida-row" style="border-color:#bfdbfe;background:#eff6ff">
+									<div class="col-xs-7 col-md-8" style="padding-right:6px">
+										<label style="font-size:10px;font-weight:600;color:#3b82f6;margin-bottom:3px;display:block">
+											<i class="fa-solid fa-user-plus" style="margin-right:3px"></i>Partida 2do técnico
+										</label>
+										<textarea maxlength="320" rows="2" class="form-control text-uppercase" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($valuePartidasTecnivosDos["descripcion"]); ?></textarea>
+									</div>
+									<div class="col-xs-5 col-md-4" style="padding-left:6px">
+										<label style="font-size:10px;font-weight:600;color:#3b82f6;margin-bottom:3px;display:block">Precio</label>
+										<div class="input-group">
+											<span class="input-group-addon egs-dollar">$</span>
+											<input class="form-control precioPartidaGuardada" type="number" value="<?php echo htmlspecialchars($valuePartidasTecnivosDos["precioPartida"]); ?>" readonly style="font-weight:700">
+										</div>
+									</div>
+								</div>
+								<?php
+									}
+								}
+								?>
+
+								<!-- Containers dinámicos -->
+								<div class="nuevaRecarga"></div>
+								<div class="nuevaPartidaTecnicoDos">
+									<input type="hidden" id="listarPartidasTecnicoDos" name="partidasTecnicoDos">
+									<input type="hidden" id="TotalPartidasTecnicoDos" name="TotalPartidasTecnicoDos">
+								</div>
+								<div class="NuevaPartida"></div>
+
+								<!-- INVERSIONES (admin only) -->
+								<?php if ($isAdmin): ?>
+								<div class="nuevaInversion"></div>
+								<?php
+								if (is_array($inversiones) || is_object($inversiones)) {
+									foreach ($inversiones as $key => $valueinversiones) {
+								?>
+									<div class="form-group row egs-partida-row" style="border-color:#fde68a;background:#fffbeb">
+										<div class="col-xs-6" style="padding-right:6px">
+											<label style="font-size:10px;font-weight:600;color:#ca8a04;margin-bottom:3px;display:block">
+												<i class="fa-solid fa-coins" style="margin-right:3px"></i>Detalle inversión
+											</label>
+											<div class="input-group">
+												<span class="input-group-addon"><button type="button" class="btn btn-danger btn-xs quitarInversion"><i class="fas fa-times"></i></button></span>
+												<input type="text" class="form-control detalleInversion" value="<?php echo htmlspecialchars($valueinversiones["observacion"]); ?>">
+											</div>
+										</div>
+										<div class="col-xs-6" style="padding-left:6px">
+											<label style="font-size:10px;font-weight:600;color:#ca8a04;margin-bottom:3px;display:block">Inversión</label>
+											<div class="input-group">
+												<span class="input-group-addon egs-dollar">$</span>
+												<input type="number" class="form-control precioNuevainversion" value="<?php echo htmlspecialchars($valueinversiones["invsersion"]); ?>" min="0" step="any" style="font-weight:700">
+											</div>
+										</div>
+									</div>
+								<?php
+									}
+								}
+								endif;
+								?>
+
+								<!-- TIPO DE REPARACIÓN (técnico) -->
+								<?php if ($isTecnico): ?>
+								<div style="margin:12px 0">
+									<button type="button" class="btn btn-sm egs-btn-accent agregartipReparacion">Agregar tipo de reparación</button>
+								</div>
+								<div class="Tipo-de-reparacion" style="display:none;margin-bottom:12px">
+									<select class="form-control Tipo-repearacion-selector" name="Tipo-repearacion">
+										<option value="sin tipo de reaparacion">Escoge el tipo de reparación</option>
+										<option value="recarga-de-cartucho">Recarga de cartucho</option>
+										<option value="servicio-externo">Servicio externo</option>
+									</select>
+								</div>
+								<?php endif; ?>
+
+								<!-- TIPO DE ORDEN (vendedor) -->
+								<?php if ($isVendedor): ?>
+								<div style="margin:12px 0">
+									<button type="button" class="btn btn-sm egs-btn-accent agregartipReparacion">Agregar tipo de orden</button>
+								</div>
+								<div class="Tipo-de-orden" style="margin-bottom:12px">
+									<select class="form-control Tipo-orden">
+										<option value="sin tipo de orden">Escoge el tipo de orden</option>
+										<option value="Seguimiento-de-venta">Seguimiento de venta</option>
+									</select>
+								</div>
+								<?php endif; ?>
+
+								<!-- HIDDEN FIELDS -->
+								<input type="hidden" id="listatOrdenesNuevas" name="listatOrdenesNuevas">
+								<input type="hidden" id="listatOrdenes" name="listatOrdenes">
+								<input type="hidden" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" name="nombreCliente" readonly>
+								<input type="hidden" class="form-control" value="<?php echo htmlspecialchars($usuario["correo"]); ?>" name="correoCliente" readonly>
+								<input type="hidden" value="<?php echo htmlspecialchars($fecha_ingreso); ?>" name="fecha_ingreso">
+								<input type="hidden" value="<?php echo htmlspecialchars($_GET["idOrden"]); ?>" name="idOrden">
+
+								<!-- TOTAL -->
+								<div class="egs-total-bar">
+									<span class="egs-total-label"><i class="fa-solid fa-calculator" style="margin-right:6px"></i>Total</span>
+									<div class="input-group">
+										<span class="input-group-addon egs-dollar">$</span>
+										<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" readonly style="font-weight:700;font-size:18px">
+									</div>
+								</div>
+
+								<!-- TOTAL INVERSIONES (admin only) -->
+								<?php if ($isAdmin): ?>
+								<div class="egs-inv-bar">
+									<span class="egs-inv-label"><i class="fa-solid fa-coins" style="margin-right:6px"></i>Inversión total</span>
+									<div class="input-group">
+										<span class="input-group-addon egs-dollar">$</span>
+										<input type="number" name="totalInversiones" class="form-control" id="costoTotalInversiones" readonly style="font-weight:700;font-size:18px">
+									</div>
+								</div>
+								<?php endif; ?>
+
+								<!-- BOTONES DE ACCIÓN -->
+								<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+									<button type="button" class="btn egs-btn-accent AgregarCamposDePartida">
+										<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar Nueva Partida
+									</button>
+									<?php if ($isAdmin): ?>
+									<button type="button" class="btn btn-success agregarInvercion">
+										<i class="fas fa-money" style="margin-right:4px"></i>Agregar Inversión
+									</button>
+									<?php endif; ?>
+								</div>
+
+							</div><!-- /box -->
+
+							<?php
+							$objeto = new controladorOrdenes();
+							$objeto->ctrEditarOrdenDinamica();
+							?>
+
+						</form>
+					</div>
+				</div>
+			</div><!-- /col-lg-8 partidas -->
+
+			<!-- COLUMNA DERECHA: FICHA TÉCNICA + ASIGNACIÓN -->
+			<div class="col-lg-4 col-xs-12">
 
 				<!-- FICHA TÉCNICA -->
 				<div class="egs-section">
@@ -320,649 +573,391 @@ date_default_timezone_set("America/Mexico_City");
 					</div>
 				</div>
 
-			</div>
-
-			<!-- ===================== COLUMNA DERECHA: FORMULARIO PRINCIPAL ===================== -->
-			<div class="col-lg-7 col-xs-12">
-
 				<!-- ASIGNACIÓN -->
 				<div class="egs-section">
 					<div class="egs-title-bar"><i class="fa-solid fa-users-gear"></i> Asignación</div>
 					<div class="egs-body">
-						<form role="form" method="post" class="formularioPartidas">
-							<div class="box" style="border:none;box-shadow:none;margin:0">
 
-								<!-- ASESOR -->
-								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="fa-solid fa-user-tie" style="margin-right:4px"></i>Asesor</label>
-									<?php
-									$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $_GET["asesor"]);
-									if ($isReadonly) {
-										echo '<input type="text" class="form-control" value="'.htmlspecialchars($asesor["nombre"]).'" readonly>';
-										echo '<input type="hidden" value="'.$asesor["id"].'" name="asesorEditadoEnOrdenDianmica">';
-									} else {
-										echo '<select class="form-control selector" name="asesorEditadoEnOrdenDianmica" required>';
-										echo '<option value="'.$asesor["id"].'">'.htmlspecialchars($asesor["nombre"]).'</option>';
-										$asesorParaSelect = Controladorasesores::ctrMostrarAsesoresEmpresas("id_empresa", $_SESSION["empresa"]);
-										foreach ($asesorParaSelect as $va) {
-											echo '<option value="'.$va["id"].'" class="text-uppercase">'.htmlspecialchars($va["nombre"]).'</option>';
-										}
-										echo '</select>';
-									}
-									?>
-								</div>
-
-								<!-- TÉCNICO (En posesión) -->
-								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="fa-solid fa-screwdriver-wrench" style="margin-right:4px"></i>Técnico (En posesión)</label>
-									<?php
-									$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnico"]);
-									if ($isTecnico || $isSecretaria) {
-										echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico["nombre"]).'" readonly>';
-										echo '<input type="hidden" value="'.$tecnico["id"].'" name="tecnicoEditadoEnOrdenDianmica">';
-									} else {
-										echo '<select class="form-control selector" name="tecnicoEditadoEnOrdenDianmica" required>';
-										echo '<option value="'.$tecnico["id"].'">'.htmlspecialchars($tecnico["nombre"]).'</option>';
-										$tecnicoList = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
-										foreach ($tecnicoList as $vt) {
-											echo '<option value="'.$vt["id"].'" class="text-uppercase">'.htmlspecialchars($vt["nombre"]).'</option>';
-										}
-										echo '</select>';
-									}
-									?>
-								</div>
-
-								<!-- TÉCNICO (Participación) -->
-								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="fa-solid fa-user-plus" style="margin-right:4px"></i>Técnico (Participación)</label>
-									<?php
-									$tecnico2 = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnicodos"]);
-									if ($isTecnico || $isSecretaria) {
-										echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico2["nombre"]).'" readonly>';
-										echo '<input type="hidden" value="'.$tecnico2["id"].'" name="tecnicodosEditadoEnOrdenDianmica">';
-									} else {
-										echo '<select class="form-control selector" name="tecnicodosEditadoEnOrdenDianmica">';
-										echo '<option value="'.$tecnico2["id"].'">'.htmlspecialchars($tecnico2["nombre"]).'</option>';
-										$tecnico2List = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
-										foreach ($tecnico2List as $vt2) {
-											echo '<option value="'.$vt2["id"].'" class="text-uppercase">'.htmlspecialchars($vt2["nombre"]).'</option>';
-										}
-										echo '</select>';
-									}
-									?>
-								</div>
-
-								<!-- ESTADO DE LA ORDEN -->
-								<div class="egs-field-row">
-									<label class="egs-lbl"><i class="fa-solid fa-toggle-on" style="margin-right:4px"></i>Estado de la orden <span class="egs-estado-badge"><?php echo htmlspecialchars($estado); ?></span></label>
-									<?php
-									if ($estado !== "Entregado (Ent)") {
-										$allStates = array(
-											'En revisión (REV)',
-											'Supervisión (SUP)',
-											'Pendiente de autorización (AUT',
-											'Aceptado (ok)',
-											'Terminada (ter)',
-											'Cancelada (can)',
-											'Sin reparación (SR)',
-											'Entregado (Ent)',
-											'Producto para venta',
-											'En revisión probable garantía ',
-											'Garantía aceptada (GA)'
-										);
-
-										if ($isTecnico) {
-											// Técnico: solo REV→SUP o OK→TER
-											echo '<select class="form-control selector" name="estado">';
-											echo '<option>'.htmlspecialchars($estado).'</option>';
-											if ($estado == 'En revisión (REV)') {
-												echo '<option value="En revisión (REV)">En revisión (REV)</option>';
-												echo '<option value="Supervisión (SUP)">Supervisión (SUP)</option>';
-											} elseif ($estado == 'Aceptado (ok)') {
-												echo '<option value="Aceptado (ok)">Aceptado (ok)</option>';
-												echo '<option value="Terminada (ter)">Terminada (ter)</option>';
-											}
-											echo '</select>';
-
-										} elseif ($isVendedor) {
-											echo '<select class="form-control selector" name="estado">';
-											echo '<option>'.htmlspecialchars($estado).'</option>';
-											if ($estado == 'En revisión (REV)') {
-												echo '<option value="En revisión (REV)">En revisión (REV)</option><option value="Supervisión (SUP)">Supervisión (SUP)</option>';
-											} elseif ($estado == 'Supervisión (SUP)') {
-												echo '<option value="Supervisión (SUP)">Supervisión (SUP)</option><option value="Pendiente de autorización (AUT">Pendiente de autorización (AUT</option>';
-											} elseif ($estado == 'Pendiente de autorización (AUT') {
-												echo '<option value="Pendiente de autorización (AUT">Pendiente de autorización (AUT</option><option value="Aceptado (ok)">Aceptado (ok)</option>';
-											} elseif ($estado == 'Aceptado (ok)') {
-												echo '<option value="Aceptado (ok)">Aceptado (ok)</option><option value="Terminada (ter)">Terminada (ter)</option>';
-											} elseif ($estado == 'Terminada (ter)') {
-												echo '<option value="Terminada (ter)">Terminada (ter)</option>';
-											} elseif ($estado == 'Cancelada (can)') {
-												echo '<option value="Cancelada (can)">Cancelada (can)</option>';
-											}
-											echo '</select>';
-
-										} elseif ($isAdmin) {
-											// Admin: todos los estados
-											echo '<select class="form-control selector" name="estado">';
-											// Poner el estado actual primero
-											echo '<option value="'.htmlspecialchars($estado).'">'.htmlspecialchars($estado).'</option>';
-											foreach ($allStates as $st) {
-												if ($st !== $estado) {
-													echo '<option value="'.htmlspecialchars($st).'">'.htmlspecialchars($st).'</option>';
-												}
-											}
-											echo '</select>';
-
-										} else {
-											// Editor y otros
-											echo '<select class="form-control selector" name="estado">';
-											echo '<option>'.htmlspecialchars($estado).'</option>';
-											echo '</select>';
-										}
-
-									} else {
-										echo '<input type="hidden" name="estado" value="Entregado (Ent)">';
-										echo '<div style="text-align:center;padding:12px"><h3 style="color:#16a34a;margin:0"><i class="fa-solid fa-circle-check"></i> ENTREGADO EL: '.htmlspecialchars($fecha_Salida).'</h3></div>';
-									}
-									?>
-								</div>
-
-				</div><!-- /egs-body asignacion -->
-			</div><!-- /egs-section asignacion -->
-
-			<!-- ===================== PARTIDAS ===================== -->
-			<div class="egs-section">
-				<div class="egs-title-bar"><i class="fa-solid fa-list-check"></i> Partidas y costos</div>
-				<div class="egs-body">
-
-					<?php
-					// 10 partidas hardcodeadas en un loop
-					for ($p = 0; $p < 10; $p++):
-						$pName = $partidaNames[$p]; // Uno, Dos, etc.
-						$pNum = $p + 1;
-						$partidaField = "partida".$pName;
-						$precioField = "precio".$pName;
-						$partidaVal = $value[$partidaField];
-						$precioVal = $value[$precioField];
-
-						if ($partidaVal == null) continue;
-					?>
-						<div class="form-group row egs-partida-row">
-							<div class="col-xs-7 col-md-8" style="padding-right:6px">
-								<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
-									<i class="fa-solid fa-file-lines" style="margin-right:3px"></i>Partida <?php echo $pNum; ?>
-								</label>
-								<?php if ($isReadonly): ?>
-									<textarea maxlength="320" rows="2" class="form-control text-uppercase" name="<?php echo $partidaField; ?>" placeholder="<?php echo $partidaLabels[$pNum]; ?>" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($partidaVal); ?></textarea>
-								<?php else: ?>
-									<div class="input-group">
-										<span class="input-group-addon"><button type="button" class="btn btn-danger btn-xs quitarPartida"><i class="fas fa-times"></i></button></span>
-										<textarea maxlength="320" rows="2" class="form-control text-uppercase" name="<?php echo $partidaField; ?>" placeholder="<?php echo $partidaLabels[$pNum]; ?>" style="font-size:13px;resize:vertical"><?php echo htmlspecialchars($partidaVal); ?></textarea>
-									</div>
-								<?php endif; ?>
-							</div>
-							<div class="col-xs-5 col-md-4" style="padding-left:6px">
-								<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
-									<i class="fa-solid fa-dollar-sign" style="margin-right:3px"></i>Precio
-								</label>
-								<div class="input-group">
-									<span class="input-group-addon egs-dollar">$</span>
-									<input class="form-control precioPartidaGuardada" name="<?php echo $precioField; ?>" type="number" value="<?php echo htmlspecialchars($precioVal); ?>" min="0" step="any" placeholder="0.00" style="font-weight:700"<?php echo $isReadonly ? ' readonly' : ''; ?>>
-								</div>
-							</div>
-						</div>
-					<?php endfor; ?>
-
-					<!-- PARTIDAS JSON DINÁMICAS -->
-					<?php
-					if (is_array($partidas) || is_object($partidas)) {
-						foreach ($partidas as $key => $itemDetallesPartidas) {
-					?>
-						<div class="form-group row egs-partida-row">
-							<div class="col-xs-7 col-md-8" style="padding-right:6px">
-								<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
-									<i class="fa-solid fa-plus-circle" style="margin-right:3px"></i>Partida adicional
-								</label>
-								<?php if ($isReadonly): ?>
-									<textarea maxlength="320" rows="2" class="form-control text-uppercase NuevaPartidaAgregada" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($itemDetallesPartidas["descripcion"]); ?></textarea>
-								<?php else: ?>
-									<div class="input-group">
-										<span class="input-group-addon"><button type="button" class="btn btn-danger btn-xs quitarPartida"><i class="fas fa-times"></i></button></span>
-										<textarea maxlength="320" rows="2" class="form-control text-uppercase NuevaPartidaAgregada" style="font-size:13px;resize:vertical"><?php echo htmlspecialchars($itemDetallesPartidas["descripcion"]); ?></textarea>
-									</div>
-								<?php endif; ?>
-							</div>
-							<div class="col-xs-5 col-md-4" style="padding-left:6px">
-								<label style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:3px;display:block">
-									<i class="fa-solid fa-dollar-sign" style="margin-right:3px"></i>Precio
-								</label>
-								<div class="input-group">
-									<span class="input-group-addon egs-dollar">$</span>
-									<input class="form-control precioPartidaGuardada precioPartidaListada" type="number" value="<?php echo htmlspecialchars($itemDetallesPartidas["precioPartida"]); ?>" min="0" step="any" style="font-weight:700"<?php echo $isReadonly ? ' readonly' : ''; ?>>
-									<input type="hidden" name="partidaYaListada">
-								</div>
-							</div>
-						</div>
-					<?php
-						}
-					}
-					?>
-
-					<!-- DISPLAY RECARGA EXISTENTE (readonly) -->
-					<?php if ($recarga != ""): ?>
-					<div class="form-group row egs-partida-row" style="border-color:#d4d4d8;background:#f5f5f4">
-						<div class="col-xs-7 col-md-8" style="padding-right:6px">
-							<label style="font-size:10px;font-weight:600;color:#78716c;margin-bottom:3px;display:block">
-								<i class="fa-solid fa-tint" style="margin-right:3px"></i>Recarga de cartucho
-							</label>
-							<textarea maxlength="320" rows="2" class="form-control text-uppercase NuevaRecargaAgregada" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($recarga); ?></textarea>
-						</div>
-						<div class="col-xs-5 col-md-4" style="padding-left:6px">
-							<label style="font-size:10px;font-weight:600;color:#78716c;margin-bottom:3px;display:block">Precio</label>
-							<div class="input-group">
-								<span class="input-group-addon egs-dollar">$</span>
-								<input class="form-control precioPartidaGuardada preciodeRecarganueva" type="number" value="<?php echo htmlspecialchars($precioRecarga); ?>" readonly style="font-weight:700">
-							</div>
-						</div>
-					</div>
-					<?php endif; ?>
-
-					<!-- DISPLAY PARTIDAS TÉCNICO DOS (readonly) -->
-					<?php
-					if (!empty($partidasTecnicoDos) && (is_array($partidasTecnicoDos) || is_object($partidasTecnicoDos))) {
-						foreach ($partidasTecnicoDos as $key => $valuePartidasTecnivosDos) {
-					?>
-					<div class="form-group row egs-partida-row" style="border-color:#bfdbfe;background:#eff6ff">
-						<div class="col-xs-7 col-md-8" style="padding-right:6px">
-							<label style="font-size:10px;font-weight:600;color:#3b82f6;margin-bottom:3px;display:block">
-								<i class="fa-solid fa-user-plus" style="margin-right:3px"></i>Partida 2do técnico
-							</label>
-							<textarea maxlength="320" rows="2" class="form-control text-uppercase" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($valuePartidasTecnivosDos["descripcion"]); ?></textarea>
-						</div>
-						<div class="col-xs-5 col-md-4" style="padding-left:6px">
-							<label style="font-size:10px;font-weight:600;color:#3b82f6;margin-bottom:3px;display:block">Precio</label>
-							<div class="input-group">
-								<span class="input-group-addon egs-dollar">$</span>
-								<input class="form-control precioPartidaGuardada" type="number" value="<?php echo htmlspecialchars($valuePartidasTecnivosDos["precioPartida"]); ?>" readonly style="font-weight:700">
-							</div>
-						</div>
-					</div>
-					<?php
-						}
-					}
-					?>
-
-					<!-- Containers dinámicos -->
-					<div class="nuevaRecarga"></div>
-					<div class="nuevaPartidaTecnicoDos">
-						<input type="hidden" id="listarPartidasTecnicoDos" name="partidasTecnicoDos">
-						<input type="hidden" id="TotalPartidasTecnicoDos" name="TotalPartidasTecnicoDos">
-					</div>
-					<div class="NuevaPartida"></div>
-
-					<!-- INVERSIONES (admin only) -->
-					<?php if ($isAdmin): ?>
-					<div class="nuevaInversion"></div>
-					<?php
-					if (is_array($inversiones) || is_object($inversiones)) {
-						foreach ($inversiones as $key => $valueinversiones) {
-					?>
-						<div class="form-group row egs-partida-row" style="border-color:#fde68a;background:#fffbeb">
-							<div class="col-xs-6" style="padding-right:6px">
-								<label style="font-size:10px;font-weight:600;color:#ca8a04;margin-bottom:3px;display:block">
-									<i class="fa-solid fa-coins" style="margin-right:3px"></i>Detalle inversión
-								</label>
-								<div class="input-group">
-									<span class="input-group-addon"><button type="button" class="btn btn-danger btn-xs quitarInversion"><i class="fas fa-times"></i></button></span>
-									<input type="text" class="form-control detalleInversion" value="<?php echo htmlspecialchars($valueinversiones["observacion"]); ?>">
-								</div>
-							</div>
-							<div class="col-xs-6" style="padding-left:6px">
-								<label style="font-size:10px;font-weight:600;color:#ca8a04;margin-bottom:3px;display:block">Inversión</label>
-								<div class="input-group">
-									<span class="input-group-addon egs-dollar">$</span>
-									<input type="number" class="form-control precioNuevainversion" value="<?php echo htmlspecialchars($valueinversiones["invsersion"]); ?>" min="0" step="any" style="font-weight:700">
-								</div>
-							</div>
-						</div>
-					<?php
-						}
-					}
-					endif;
-					?>
-
-					<!-- TIPO DE REPARACIÓN (técnico) -->
-					<?php if ($isTecnico): ?>
-					<div style="margin:12px 0">
-						<button type="button" class="btn btn-sm egs-btn-accent agregartipReparacion">Agregar tipo de reparación</button>
-					</div>
-					<div class="Tipo-de-reparacion" style="display:none;margin-bottom:12px">
-						<select class="form-control Tipo-repearacion-selector" name="Tipo-repearacion">
-							<option value="sin tipo de reaparacion">Escoge el tipo de reparación</option>
-							<option value="recarga-de-cartucho">Recarga de cartucho</option>
-							<option value="servicio-externo">Servicio externo</option>
-						</select>
-					</div>
-					<?php endif; ?>
-
-					<!-- TIPO DE ORDEN (vendedor) -->
-					<?php if ($isVendedor): ?>
-					<div style="margin:12px 0">
-						<button type="button" class="btn btn-sm egs-btn-accent agregartipReparacion">Agregar tipo de orden</button>
-					</div>
-					<div class="Tipo-de-orden" style="margin-bottom:12px">
-						<select class="form-control Tipo-orden">
-							<option value="sin tipo de orden">Escoge el tipo de orden</option>
-							<option value="Seguimiento-de-venta">Seguimiento de venta</option>
-						</select>
-					</div>
-					<?php endif; ?>
-
-					<!-- HIDDEN FIELDS -->
-					<input type="hidden" id="listatOrdenesNuevas" name="listatOrdenesNuevas">
-					<input type="hidden" id="listatOrdenes" name="listatOrdenes">
-					<input type="hidden" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" name="nombreCliente" readonly>
-					<input type="hidden" class="form-control" value="<?php echo htmlspecialchars($usuario["correo"]); ?>" name="correoCliente" readonly>
-					<input type="hidden" value="<?php echo htmlspecialchars($fecha_ingreso); ?>" name="fecha_ingreso">
-					<input type="hidden" value="<?php echo htmlspecialchars($_GET["idOrden"]); ?>" name="idOrden">
-
-					<!-- TOTAL -->
-					<div class="egs-total-bar">
-						<span class="egs-total-label"><i class="fa-solid fa-calculator" style="margin-right:6px"></i>Total</span>
-						<div class="input-group">
-							<span class="input-group-addon egs-dollar">$</span>
-							<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" readonly style="font-weight:700;font-size:18px">
-						</div>
-					</div>
-
-					<!-- TOTAL INVERSIONES (admin only) -->
-					<?php if ($isAdmin): ?>
-					<div class="egs-inv-bar">
-						<span class="egs-inv-label"><i class="fa-solid fa-coins" style="margin-right:6px"></i>Inversión total</span>
-						<div class="input-group">
-							<span class="input-group-addon egs-dollar">$</span>
-							<input type="number" name="totalInversiones" class="form-control" id="costoTotalInversiones" readonly style="font-weight:700;font-size:18px">
-						</div>
-					</div>
-					<?php endif; ?>
-
-					<!-- BOTONES DE ACCIÓN -->
-					<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-						<button type="button" class="btn egs-btn-accent AgregarCamposDePartida">
-							<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar Nueva Partida
-						</button>
-						<?php if ($isAdmin): ?>
-						<button type="button" class="btn btn-success agregarInvercion">
-							<i class="fas fa-money" style="margin-right:4px"></i>Agregar Inversión
-						</button>
-						<?php endif; ?>
-					</div>
-
-								</div><!-- /box -->
-							</div><!-- /box-body -->
-
+						<!-- ASESOR -->
+						<div class="egs-field-row">
+							<label class="egs-lbl"><i class="fa-solid fa-user-tie" style="margin-right:4px"></i>Asesor</label>
 							<?php
-							$objeto = new controladorOrdenes();
-							$objeto->ctrEditarOrdenDinamica();
+							$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $_GET["asesor"]);
+							if ($isReadonly) {
+								echo '<input type="text" class="form-control" value="'.htmlspecialchars($asesor["nombre"]).'" readonly>';
+								echo '<input type="hidden" value="'.$asesor["id"].'" name="asesorEditadoEnOrdenDianmica" form="formPartidas">';
+							} else {
+								echo '<select class="form-control selector" name="asesorEditadoEnOrdenDianmica" form="formPartidas" required>';
+								echo '<option value="'.$asesor["id"].'">'.htmlspecialchars($asesor["nombre"]).'</option>';
+								$asesorParaSelect = Controladorasesores::ctrMostrarAsesoresEmpresas("id_empresa", $_SESSION["empresa"]);
+								foreach ($asesorParaSelect as $va) {
+									echo '<option value="'.$va["id"].'" class="text-uppercase">'.htmlspecialchars($va["nombre"]).'</option>';
+								}
+								echo '</select>';
+							}
+							?>
+						</div>
+
+						<!-- TÉCNICO (En posesión) -->
+						<div class="egs-field-row">
+							<label class="egs-lbl"><i class="fa-solid fa-screwdriver-wrench" style="margin-right:4px"></i>Técnico (En posesión)</label>
+							<?php
+							$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnico"]);
+							if ($isTecnico || $isSecretaria) {
+								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico["nombre"]).'" readonly>';
+								echo '<input type="hidden" value="'.$tecnico["id"].'" name="tecnicoEditadoEnOrdenDianmica" form="formPartidas">';
+							} else {
+								echo '<select class="form-control selector" name="tecnicoEditadoEnOrdenDianmica" form="formPartidas" required>';
+								echo '<option value="'.$tecnico["id"].'">'.htmlspecialchars($tecnico["nombre"]).'</option>';
+								$tecnicoList = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
+								foreach ($tecnicoList as $vt) {
+									echo '<option value="'.$vt["id"].'" class="text-uppercase">'.htmlspecialchars($vt["nombre"]).'</option>';
+								}
+								echo '</select>';
+							}
+							?>
+						</div>
+
+						<!-- TÉCNICO (Participación) -->
+						<div class="egs-field-row">
+							<label class="egs-lbl"><i class="fa-solid fa-user-plus" style="margin-right:4px"></i>Técnico (Participación)</label>
+							<?php
+							$tecnico2 = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnicodos"]);
+							if ($isTecnico || $isSecretaria) {
+								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico2["nombre"]).'" readonly>';
+								echo '<input type="hidden" value="'.$tecnico2["id"].'" name="tecnicodosEditadoEnOrdenDianmica" form="formPartidas">';
+							} else {
+								echo '<select class="form-control selector" name="tecnicodosEditadoEnOrdenDianmica" form="formPartidas">';
+								echo '<option value="'.$tecnico2["id"].'">'.htmlspecialchars($tecnico2["nombre"]).'</option>';
+								$tecnico2List = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
+								foreach ($tecnico2List as $vt2) {
+									echo '<option value="'.$vt2["id"].'" class="text-uppercase">'.htmlspecialchars($vt2["nombre"]).'</option>';
+								}
+								echo '</select>';
+							}
+							?>
+						</div>
+
+						<!-- ESTADO DE LA ORDEN -->
+						<div class="egs-field-row">
+							<label class="egs-lbl"><i class="fa-solid fa-toggle-on" style="margin-right:4px"></i>Estado</label>
+							<span class="egs-estado-badge" style="margin-bottom:8px"><?php echo htmlspecialchars($estado); ?></span>
+							<?php
+							if ($estado !== "Entregado (Ent)") {
+								$allStates = array(
+									'En revisión (REV)', 'Supervisión (SUP)', 'Pendiente de autorización (AUT',
+									'Aceptado (ok)', 'Terminada (ter)', 'Cancelada (can)',
+									'Sin reparación (SR)', 'Entregado (Ent)', 'Producto para venta',
+									'En revisión probable garantía ', 'Garantía aceptada (GA)'
+								);
+
+								if ($isTecnico) {
+									echo '<select class="form-control selector" name="estado" form="formPartidas">';
+									echo '<option>'.htmlspecialchars($estado).'</option>';
+									if ($estado == 'En revisión (REV)') {
+										echo '<option value="En revisión (REV)">En revisión (REV)</option>';
+										echo '<option value="Supervisión (SUP)">Supervisión (SUP)</option>';
+									} elseif ($estado == 'Aceptado (ok)') {
+										echo '<option value="Aceptado (ok)">Aceptado (ok)</option>';
+										echo '<option value="Terminada (ter)">Terminada (ter)</option>';
+									}
+									echo '</select>';
+								} elseif ($isVendedor) {
+									echo '<select class="form-control selector" name="estado" form="formPartidas">';
+									echo '<option>'.htmlspecialchars($estado).'</option>';
+									if ($estado == 'En revisión (REV)') {
+										echo '<option value="En revisión (REV)">En revisión (REV)</option><option value="Supervisión (SUP)">Supervisión (SUP)</option>';
+									} elseif ($estado == 'Supervisión (SUP)') {
+										echo '<option value="Supervisión (SUP)">Supervisión (SUP)</option><option value="Pendiente de autorización (AUT">Pendiente de autorización (AUT</option>';
+									} elseif ($estado == 'Pendiente de autorización (AUT') {
+										echo '<option value="Pendiente de autorización (AUT">Pendiente de autorización (AUT</option><option value="Aceptado (ok)">Aceptado (ok)</option>';
+									} elseif ($estado == 'Aceptado (ok)') {
+										echo '<option value="Aceptado (ok)">Aceptado (ok)</option><option value="Terminada (ter)">Terminada (ter)</option>';
+									} elseif ($estado == 'Terminada (ter)') {
+										echo '<option value="Terminada (ter)">Terminada (ter)</option>';
+									} elseif ($estado == 'Cancelada (can)') {
+										echo '<option value="Cancelada (can)">Cancelada (can)</option>';
+									}
+									echo '</select>';
+								} elseif ($isAdmin) {
+									echo '<select class="form-control selector" name="estado" form="formPartidas">';
+									echo '<option value="'.htmlspecialchars($estado).'">'.htmlspecialchars($estado).'</option>';
+									foreach ($allStates as $st) {
+										if ($st !== $estado) {
+											echo '<option value="'.htmlspecialchars($st).'">'.htmlspecialchars($st).'</option>';
+										}
+									}
+									echo '</select>';
+								} else {
+									echo '<select class="form-control selector" name="estado" form="formPartidas">';
+									echo '<option>'.htmlspecialchars($estado).'</option>';
+									echo '</select>';
+								}
+							} else {
+								echo '<input type="hidden" name="estado" value="Entregado (Ent)" form="formPartidas">';
+								echo '<div style="text-align:center;padding:8px"><h4 style="color:#16a34a;margin:0"><i class="fa-solid fa-circle-check"></i> ENTREGADO EL: '.htmlspecialchars($fecha_Salida).'</h4></div>';
+							}
+							?>
+						</div>
+
+					</div>
+				</div>
+
+			</div><!-- /col-lg-4 ficha+asignacion -->
+
+		</div><!-- /row 2 -->
+
+		<!-- ==================== PEDIDOS ==================== -->
+		<?php
+		$item = "id";
+		$valor = $_GET["pedido"];
+		$tarerPedido = ControladorPedidos::ctrMostrarPedido($item, $valor);
+		foreach ($tarerPedido as $key => $valuePedidos) {}
+
+		if ($valuePedidos["productoUno"] != null and $valuePedidos["productoUno"]) {
+			echo '<div class="row"><div class="col-lg-12"><div class="egs-section"><div class="egs-title-bar"><i class="fa-solid fa-box"></i> Pedido</div><div class="egs-body"><ul class="todo-list" style="list-style:none;padding:0">';
+			foreach ($tarerPedido as $key => $valuePedidos) {
+				echo '<li id="'.$valuePedidos["id"].'">
+					<div class="box-group" id="accordion">
+						<div class="panel box box-info" style="margin-bottom:8px">
+							<div class="box-header with-border">
+								<h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'.$valuePedidos["id"].'"><p class="text-uppercase">PEDIDO '.$valuePedidos["id"].'</p></a></h4>
+								<div id="collapse'.$valuePedidos["id"].'" class="panel-collapse collapse">
+									<center><h3>'.$valuePedidos["productoUno"].'</h3></center>';
+				if ($isAdmin || $isVendedor || $_SESSION["perfil"] == "editor") {
+					echo '<select class="form-control" name="EstadoPedidoDinamico">
+						<option>'.$valuePedidos["estado"].'</option>
+						<option value="Pedido Pendiente">Pedido Pendiente</option>
+						<option value="Pedido Adquirido">Pedido Adquirido</option>
+						<option value="Producto en Almacen">Producto en Almacén</option>
+						<option value="Entregado al asesor">Entregado al Asesor</option>
+						<option value="Entregado/Pagado">Entregado/Pagado</option>
+						<option value="Entregado/Credito">Entregado/Crédito</option>
+						<option value="cancelado">cancelado</option>
+					</select>';
+				} else {
+					echo "<input type='text' class='form-control' value='".$valuePedidos["estado"]."' readonly>";
+				}
+				echo '</div></div></div></div></li>';
+			}
+			echo '</ul></div></div></div></div>';
+		}
+
+		$productosPedidoDinamico = json_decode($valuePedidos["productos"], true);
+		if (is_array($productosPedidoDinamico) || is_object($productosPedidoDinamico)) {
+			foreach ($productosPedidoDinamico as $key => $valueProductosPedido) {}
+		}
+
+		if ($productosPedidoDinamico != null and $productosPedidoDinamico != "") {
+			echo '<div class="row"><div class="col-lg-12"><div class="egs-section"><div class="egs-title-bar"><i class="fa-solid fa-boxes-stacked"></i> Pedido (productos)</div><div class="egs-body"><ul class="todo-list" style="list-style:none;padding:0">';
+			foreach ($tarerPedido as $key => $valuePedidos) {
+				echo '<li id="'.$valuePedidos["id"].'">
+					<div class="box-group" id="accordion">
+						<div class="panel box box-info" style="margin-bottom:8px">
+							<div class="box-header with-border">
+								<h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'.$valuePedidos["id"].'"><p class="text-uppercase">PEDIDO '.$valuePedidos["id"].'</p></a>
+								<input type="hidden" value="'.$valuePedidos["id"].'" name="idPeido"></h4>
+								<div id="collapse'.$valuePedidos["id"].'" class="panel-collapse collapse">';
+				$productosPedidoDinamico = json_decode($valuePedidos["productos"], true);
+				foreach ($productosPedidoDinamico as $key => $valueProductosPedido) {
+					echo '<div class="form-group row egs-partida-row">
+						<div class="col-xs-6"><div class="input-group"><span class="input-group-addon"><i class="fas fa-product-hunt"></i></span><input type="text" class="form-control" value="'.$valueProductosPedido["Descripcion"].'" readonly></div></div>
+						<div class="col-xs-2"><div class="input-group"><span class="input-group-addon"><i class="fas fa-cubes"></i></span><input type="text" class="form-control" value="'.$valueProductosPedido["cantidad"].'" readonly></div></div>
+						<div class="col-xs-4"><div class="input-group"><span class="input-group-addon egs-dollar">$</span><input type="text" class="form-control" value="'.$valueProductosPedido["precio"].'" readonly></div></div>
+					</div>';
+				}
+				if ($isAdmin || $isVendedor || $_SESSION["perfil"] == "editor") {
+					echo '<div class="form-group"><select class="form-control" name="EdicionUnicaDeEstadoDePedidoEnOrden">
+						<option>'.$valuePedidos["estado"].'</option>
+						<option value="Pedido Pendiente">Pedido Pendiente</option>
+						<option value="Pedido Adquirido">Pedido Adquirido</option>
+						<option value="Producto en Almacen">Producto en Almacén</option>
+						<option value="Entregado al asesor">Entregado al Asesor</option>
+						<option value="Entregado/Pagado">Entregado/Pagado</option>
+						<option value="Entregado/Credito">Entregado/Crédito</option>
+						<option value="cancelado">cancelado</option>
+					</select></div>';
+				} else {
+					echo "<input type='text' class='form-control' value='".$valuePedidos["estado"]."' readonly>";
+				}
+				echo '</div></div></div></div></li>';
+			}
+			echo '</ul></div></div></div></div>';
+		}
+		?>
+
+		<!-- ==================== FILA 3: OBSERVACIONES (ancho completo) ==================== -->
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="egs-section">
+					<div class="egs-title-bar"><i class="fa-solid fa-comments"></i> Observaciones y detalles internos</div>
+					<div class="egs-body">
+						<form role="form" method="post" class="formularioObervaciones">
+
+							<!-- Detalles internos -->
+							<div class="egs-field-row">
+								<label class="egs-lbl"><i class="fa-solid fa-edit" style="margin-right:4px"></i>Detalles internos</label>
+								<?php
+								echo '<textarea class="form-control text-uppercase" style="font-weight:bold;min-height:80px" name="observaciones">'.htmlspecialchars($descripcion).'</textarea>';
+								echo '<input type="hidden" value="'.$_GET["idOrden"].'" name="idOrden">';
+								?>
+							</div>
+
+							<!-- OBSERVACIONES JSON EXISTENTES -->
+							<?php
+							if (is_array($observaciones) || is_object($observaciones)) {
+								foreach ($observaciones as $key => $valueObservaciones) {
+									if ($isReadonly) {
+										echo '<div class="egs-obs-item">
+											<strong style="color:#6366f1">'.htmlspecialchars($valueObservaciones["creador"]).'</strong>
+											<textarea class="form-control text-uppercase nuevaObservacion" style="font-weight:bold;margin-top:6px" readonly>'.htmlspecialchars($valueObservaciones["observacion"]).'</textarea>
+										</div>';
+									} else {
+										echo '<div class="egs-obs-item" style="position:relative">
+											<strong style="color:#6366f1">'.htmlspecialchars($valueObservaciones["creador"]).'</strong>
+											<button type="button" class="btn btn-danger btn-xs quitarObservacion" style="float:right"><i class="fas fa-times"></i></button>
+											<textarea class="form-control text-uppercase nuevaObservacion" style="font-weight:bold;margin-top:6px">'.htmlspecialchars($valueObservaciones["observacion"]).'</textarea>
+										</div>';
+									}
+								}
+							}
 							?>
 
-				</div><!-- /egs-body partidas -->
-			</div><!-- /egs-section partidas -->
+							<div class="NuevaObserva">
+								<?php echo '<input type="hidden" class="usuarioQueCaptura" value="'.$_SESSION["nombre"].'" name="usuarioQueCaptura">'; ?>
+								<input type="hidden" class="form-control" id="fechaVista">
+								<input type="hidden" id="listarObservaciones" name="listarObservaciones">
+								<input type="hidden" name="listarinversiones" id="listarinversiones">
+								<input type="hidden" name="totalInversiones" id="totalInversionesObs">
+								<input type="hidden" name="estado" id="estadoObs">
+							</div>
 
-			</div><!-- /col-lg-7 -->
+							<!-- OBSERVACIONES NUEVAS (tabla observacionesOrdenes) -->
+							<div class="egs-observaciones-list" style="margin-top:16px">
+							<?php
+							$itemobs = $_GET["idOrden"];
+							$observacionesnew = controladorObservaciones::ctrMostrarobservaciones($itemobs);
+							if (!empty($observacionesnew)) {
+								foreach ($observacionesnew as $key => $valueobs) {
+									$idadmin = $valueobs["id_creador"];
+									$infouser = controladorObservaciones::ctrMostrarInfoUser($idadmin);
+									$infoiduser = $infouser[0];
+									$date = strtotime($valueobs["fecha"]);
+									$fecha = date("d/m/Y H:i", $date);
+							?>
+								<div class="egs-obs-item">
+									<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+										<img src="<?php echo $infoiduser["foto"]; ?>" alt="Avatar" class="avatar" style="width:36px;height:36px">
+										<div style="flex:1">
+											<strong style="color:#6366f1"><?php echo htmlspecialchars($infoiduser["nombre"]); ?></strong>
+											<?php if ($isAdmin): ?>
+											<button type="button" class="btn btn-xs eliminarObservacion" idObs="<?php echo $valueobs["id"]; ?>" style="float:right;color:#ef4444">
+												<i class="fas fa-trash"></i> Eliminar
+											</button>
+											<?php endif; ?>
+										</div>
+									</div>
+									<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500"><?php echo htmlspecialchars($valueobs["observacion"]); ?></p>
+									<span style="float:right;font-size:11px;color:#94a3b8;margin-top:4px"><i class="fa-regular fa-clock"></i> <?php echo $fecha; ?></span>
+									<div style="clear:both"></div>
+								</div>
+							<?php
+								}
+							}
+							?>
+							</div>
 
-		</div><!-- /row -->
+							<!-- Botón agregar observación -->
+							<div style="margin-top:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+								<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#exampleModal">
+									<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar observación
+								</button>
+							</div>
+
+							<hr style="margin:20px 0 12px">
+							<div style="display:flex;align-items:center;justify-content:space-between">
+								<span style="color:red;font-weight:600" id="spanboton"></span>
+								<button type="submit" class="btn egs-btn-accent btn-lg" id="btncompletarorden" style="min-width:160px">
+									<i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Guardar
+								</button>
+							</div>
+
+							<?php
+							$observacionesDePartidas = new controladorOrdenes();
+							$observacionesDePartidas->ctrEditarObservacionesYaExistentes();
+
+							$objetoUno = new controladorOrdenes();
+							$objetoUno->ctrEditarOrdenDinamica();
+
+							$objetoDos = new controladorOrdenes();
+							$objetoDos->ctrEditarInversiones();
+
+							$editarEstadoOrden = new ControladorPedidos();
+							$editarEstadoOrden->ctrEditarPedidoEnEstado();
+
+							$ingresarTipoDeOrden = new controladorOrdenes();
+							$ingresarTipoDeOrden->ctrlAgregarTipoDeOrden();
+
+							$ingresarRecarga = new controladorOrdenes();
+							$ingresarRecarga->ctrlAgregarRecargaDeCartucho();
+
+							$ingresarPartidasTecnicoDos = new controladorOrdenes();
+							$ingresarPartidasTecnicoDos->ctrlAgregarNuevaPartidaTecnicoDos();
+
+							$ingresarTecnicoDos = new controladorOrdenes();
+							$ingresarTecnicoDos->ctrlAgregarTecnicoDos();
+
+							$marca = new controladorOrdenes();
+							$marca->ctrlEditarMarca();
+							?>
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div><!-- /row 3 observaciones -->
+
+		<!-- Modal Observación -->
+		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="Observacion" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="border-radius:12px;overflow:hidden">
+					<div class="modal-header" style="background:linear-gradient(135deg,#6366f1 0%,#818cf8 100%);color:#fff;border:none">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:#fff;opacity:.8">
+							<span>&times;</span>
+						</button>
+						<h4 class="modal-title" style="font-weight:600"><i class="fa-solid fa-comment-dots" style="margin-right:8px"></i>Nueva observación</h4>
+					</div>
+					<form method="post" class="observacion" id="formObservacion">
+						<div class="modal-body" style="padding:20px">
+							<label class="egs-lbl egs-req">Observación</label>
+							<textarea name="observacion" class="form-control text-uppercase" style="font-weight:bold;min-height:100px" placeholder="Escribe tu observación" required></textarea>
+							<input name="id_orden" type="hidden" value="<?php echo $_GET["idOrden"]; ?>">
+							<input name="id_creador" type="hidden" value="<?php echo $_SESSION["id"]; ?>">
+							<input name="_obs_token" type="hidden" value="<?php echo bin2hex(random_bytes(16)); ?>">
+						</div>
+						<div class="modal-footer" style="border-top:1px solid #f1f5f9">
+							<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+							<button type="submit" class="btn egs-btn-accent" id="btnGuardarObs">
+								<i class="fa-solid fa-paper-plane" style="margin-right:4px"></i>Guardar observación
+							</button>
+						</div>
+					</form>
+					<script>
+					(function(){
+						var form = document.getElementById('formObservacion');
+						if (form) {
+							form.addEventListener('submit', function(){
+								var btn = document.getElementById('btnGuardarObs');
+								if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Guardando...'; }
+							});
+						}
+					})();
+					</script>
+				</div>
+			</div>
+		</div>
 
 	</section>
-
-	<!-- ===================== PEDIDOS (se preserva tal cual) ===================== -->
-	<?php
-	$item = "id";
-	$valor = $_GET["pedido"];
-	$tarerPedido = ControladorPedidos::ctrMostrarPedido($item, $valor);
-	foreach ($tarerPedido as $key => $valuePedidos) {}
-
-	if ($valuePedidos["productoUno"] != null and $valuePedidos["productoUno"]) {
-		echo '<section class="content"><div class="egs-section"><div class="egs-title-bar"><i class="fa-solid fa-box"></i> Pedido</div><div class="egs-body"><ul class="todo-list" style="list-style:none;padding:0">';
-		foreach ($tarerPedido as $key => $valuePedidos) {
-			echo '<li id="'.$valuePedidos["id"].'">
-				<div class="box-group" id="accordion">
-					<div class="panel box box-info" style="margin-bottom:8px">
-						<div class="box-header with-border">
-							<h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'.$valuePedidos["id"].'"><p class="text-uppercase">PEDIDO '.$valuePedidos["id"].'</p></a></h4>
-							<div id="collapse'.$valuePedidos["id"].'" class="panel-collapse collapse">
-								<center><h3>'.$valuePedidos["productoUno"].'</h3></center>';
-			if ($isAdmin || $isVendedor || $_SESSION["perfil"] == "editor") {
-				echo '<select class="form-control" name="EstadoPedidoDinamico">
-					<option>'.$valuePedidos["estado"].'</option>
-					<option value="Pedido Pendiente">Pedido Pendiente</option>
-					<option value="Pedido Adquirido">Pedido Adquirido</option>
-					<option value="Producto en Almacen">Producto en Almacén</option>
-					<option value="Entregado al asesor">Entregado al Asesor</option>
-					<option value="Entregado/Pagado">Entregado/Pagado</option>
-					<option value="Entregado/Credito">Entregado/Crédito</option>
-					<option value="cancelado">cancelado</option>
-				</select>';
-			} else {
-				echo "<input type='text' class='form-control' value='".$valuePedidos["estado"]."' readonly>";
-			}
-			echo '</div></div></div></div></li>';
-		}
-		echo '</ul></div></div></section>';
-	}
-
-	$productosPedidoDinamico = json_decode($valuePedidos["productos"], true);
-	if (is_array($productosPedidoDinamico) || is_object($productosPedidoDinamico)) {
-		foreach ($productosPedidoDinamico as $key => $valueProductosPedido) {}
-	}
-
-	if ($productosPedidoDinamico != null and $productosPedidoDinamico != "") {
-		echo '<section class="content"><div class="egs-section"><div class="egs-title-bar"><i class="fa-solid fa-boxes-stacked"></i> Pedido (productos)</div><div class="egs-body"><ul class="todo-list" style="list-style:none;padding:0">';
-		foreach ($tarerPedido as $key => $valuePedidos) {
-			echo '<li id="'.$valuePedidos["id"].'">
-				<div class="box-group" id="accordion">
-					<div class="panel box box-info" style="margin-bottom:8px">
-						<div class="box-header with-border">
-							<h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'.$valuePedidos["id"].'"><p class="text-uppercase">PEDIDO '.$valuePedidos["id"].'</p></a>
-							<input type="hidden" value="'.$valuePedidos["id"].'" name="idPeido"></h4>
-							<div id="collapse'.$valuePedidos["id"].'" class="panel-collapse collapse">';
-			$productosPedidoDinamico = json_decode($valuePedidos["productos"], true);
-			foreach ($productosPedidoDinamico as $key => $valueProductosPedido) {
-				echo '<div class="form-group row egs-partida-row">
-					<div class="col-xs-6"><div class="input-group"><span class="input-group-addon"><i class="fas fa-product-hunt"></i></span><input type="text" class="form-control" value="'.$valueProductosPedido["Descripcion"].'" readonly></div></div>
-					<div class="col-xs-2"><div class="input-group"><span class="input-group-addon"><i class="fas fa-cubes"></i></span><input type="text" class="form-control" value="'.$valueProductosPedido["cantidad"].'" readonly></div></div>
-					<div class="col-xs-4"><div class="input-group"><span class="input-group-addon egs-dollar">$</span><input type="text" class="form-control" value="'.$valueProductosPedido["precio"].'" readonly></div></div>
-				</div>';
-			}
-			if ($isAdmin || $isVendedor || $_SESSION["perfil"] == "editor") {
-				echo '<div class="form-group"><select class="form-control" name="EdicionUnicaDeEstadoDePedidoEnOrden">
-					<option>'.$valuePedidos["estado"].'</option>
-					<option value="Pedido Pendiente">Pedido Pendiente</option>
-					<option value="Pedido Adquirido">Pedido Adquirido</option>
-					<option value="Producto en Almacen">Producto en Almacén</option>
-					<option value="Entregado al asesor">Entregado al Asesor</option>
-					<option value="Entregado/Pagado">Entregado/Pagado</option>
-					<option value="Entregado/Credito">Entregado/Crédito</option>
-					<option value="cancelado">cancelado</option>
-				</select></div>';
-			} else {
-				echo "<input type='text' class='form-control' value='".$valuePedidos["estado"]."' readonly>";
-			}
-			echo '</div></div></div></div></li>';
-		}
-		echo '</ul></div></div></section>';
-	}
-	?>
-
-	<!-- ===================== OBSERVACIONES ===================== -->
-	<div class="col-lg-12">
-		<div class="egs-section">
-			<div class="egs-title-bar"><i class="fa-solid fa-comments"></i> Observaciones y detalles internos</div>
-			<div class="egs-body">
-				<form role="form" method="post" class="formularioObervaciones">
-
-					<!-- Detalles internos -->
-					<div class="egs-field-row">
-						<label class="egs-lbl"><i class="fa-solid fa-edit" style="margin-right:4px"></i>Detalles internos</label>
-						<?php
-						echo '<textarea class="form-control text-uppercase" style="font-weight:bold;min-height:80px" name="observaciones">'.htmlspecialchars($descripcion).'</textarea>';
-						echo '<input type="hidden" value="'.$_GET["idOrden"].'" name="idOrden">';
-						?>
-					</div>
-
-					<!-- OBSERVACIONES JSON EXISTENTES -->
-					<?php
-					if (is_array($observaciones) || is_object($observaciones)) {
-						foreach ($observaciones as $key => $valueObservaciones) {
-							if ($isReadonly) {
-								echo '<div class="egs-obs-item">
-									<strong style="color:#6366f1">'.htmlspecialchars($valueObservaciones["creador"]).'</strong>
-									<textarea class="form-control text-uppercase nuevaObservacion" style="font-weight:bold;margin-top:6px" readonly>'.htmlspecialchars($valueObservaciones["observacion"]).'</textarea>
-								</div>';
-							} else {
-								echo '<div class="egs-obs-item" style="position:relative">
-									<strong style="color:#6366f1">'.htmlspecialchars($valueObservaciones["creador"]).'</strong>
-									<button type="button" class="btn btn-danger btn-xs quitarObservacion" style="float:right"><i class="fas fa-times"></i></button>
-									<textarea class="form-control text-uppercase nuevaObservacion" style="font-weight:bold;margin-top:6px">'.htmlspecialchars($valueObservaciones["observacion"]).'</textarea>
-								</div>';
-							}
-						}
-					}
-					?>
-
-					<div class="NuevaObserva">
-						<?php echo '<input type="hidden" class="usuarioQueCaptura" value="'.$_SESSION["nombre"].'" name="usuarioQueCaptura">'; ?>
-						<input type="hidden" class="form-control" id="fechaVista">
-						<input type="hidden" id="listarObservaciones" name="listarObservaciones">
-						<input type="hidden" name="listarinversiones" id="listarinversiones">
-						<input type="hidden" name="totalInversiones" id="totalInversionesObs">
-						<input type="hidden" name="estado" id="estadoObs">
-					</div>
-
-					<!-- OBSERVACIONES NUEVAS (tabla observacionesOrdenes) -->
-					<div class="egs-observaciones-list" style="margin-top:16px">
-					<?php
-					$itemobs = $_GET["idOrden"];
-					$observacionesnew = controladorObservaciones::ctrMostrarobservaciones($itemobs);
-					if (!empty($observacionesnew)) {
-						foreach ($observacionesnew as $key => $valueobs) {
-							$idadmin = $valueobs["id_creador"];
-							$infouser = controladorObservaciones::ctrMostrarInfoUser($idadmin);
-							$infoiduser = $infouser[0];
-							$date = strtotime($valueobs["fecha"]);
-							$fecha = date("d/m/Y H:i", $date);
-					?>
-						<div class="egs-obs-item">
-							<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-								<img src="<?php echo $infoiduser["foto"]; ?>" alt="Avatar" class="avatar" style="width:36px;height:36px">
-								<div style="flex:1">
-									<strong style="color:#6366f1"><?php echo htmlspecialchars($infoiduser["nombre"]); ?></strong>
-									<?php if ($isAdmin): ?>
-									<button type="button" class="btn btn-xs eliminarObservacion" idObs="<?php echo $valueobs["id"]; ?>" style="float:right;color:#ef4444">
-										<i class="fas fa-trash"></i> Eliminar
-									</button>
-									<?php endif; ?>
-								</div>
-							</div>
-							<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500"><?php echo htmlspecialchars($valueobs["observacion"]); ?></p>
-							<span style="float:right;font-size:11px;color:#94a3b8;margin-top:4px"><i class="fa-regular fa-clock"></i> <?php echo $fecha; ?></span>
-							<div style="clear:both"></div>
-						</div>
-					<?php
-						}
-					}
-					?>
-					</div>
-
-					<!-- Botón agregar observación -->
-					<div style="margin-top:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-						<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#exampleModal">
-							<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar observación
-						</button>
-					</div>
-
-					<hr style="margin:20px 0 12px">
-					<div style="display:flex;align-items:center;justify-content:space-between">
-						<span style="color:red;font-weight:600" id="spanboton"></span>
-						<button type="submit" class="btn egs-btn-accent btn-lg" id="btncompletarorden" style="min-width:160px">
-							<i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Guardar
-						</button>
-					</div>
-
-					<?php
-					$observacionesDePartidas = new controladorOrdenes();
-					$observacionesDePartidas->ctrEditarObservacionesYaExistentes();
-
-					$objetoUno = new controladorOrdenes();
-					$objetoUno->ctrEditarOrdenDinamica();
-
-					$objetoDos = new controladorOrdenes();
-					$objetoDos->ctrEditarInversiones();
-
-					$editarEstadoOrden = new ControladorPedidos();
-					$editarEstadoOrden->ctrEditarPedidoEnEstado();
-
-					$ingresarTipoDeOrden = new controladorOrdenes();
-					$ingresarTipoDeOrden->ctrlAgregarTipoDeOrden();
-
-					$ingresarRecarga = new controladorOrdenes();
-					$ingresarRecarga->ctrlAgregarRecargaDeCartucho();
-
-					$ingresarPartidasTecnicoDos = new controladorOrdenes();
-					$ingresarPartidasTecnicoDos->ctrlAgregarNuevaPartidaTecnicoDos();
-
-					$ingresarTecnicoDos = new controladorOrdenes();
-					$ingresarTecnicoDos->ctrlAgregarTecnicoDos();
-
-					$marca = new controladorOrdenes();
-					$marca->ctrlEditarMarca();
-					?>
-
-				</form>
-			</div>
-		</div>
-	</div>
-
-	<!-- Modal Observación -->
-	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="Observacion" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content" style="border-radius:12px;overflow:hidden">
-				<div class="modal-header" style="background:linear-gradient(135deg,#6366f1 0%,#818cf8 100%);color:#fff;border:none">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:#fff;opacity:.8">
-						<span>&times;</span>
-					</button>
-					<h4 class="modal-title" style="font-weight:600"><i class="fa-solid fa-comment-dots" style="margin-right:8px"></i>Nueva observación</h4>
-				</div>
-				<form method="post" class="observacion" id="formObservacion">
-					<div class="modal-body" style="padding:20px">
-						<label class="egs-lbl egs-req">Observación</label>
-						<textarea name="observacion" class="form-control text-uppercase" style="font-weight:bold;min-height:100px" placeholder="Escribe tu observación" required></textarea>
-						<input name="id_orden" type="hidden" value="<?php echo $_GET["idOrden"]; ?>">
-						<input name="id_creador" type="hidden" value="<?php echo $_SESSION["id"]; ?>">
-						<input name="_obs_token" type="hidden" value="<?php echo bin2hex(random_bytes(16)); ?>">
-					</div>
-					<div class="modal-footer" style="border-top:1px solid #f1f5f9">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-						<button type="submit" class="btn egs-btn-accent" id="btnGuardarObs">
-							<i class="fa-solid fa-paper-plane" style="margin-right:4px"></i>Guardar observación
-						</button>
-					</div>
-				</form>
-				<script>
-				(function(){
-					var form = document.getElementById('formObservacion');
-					if (form) {
-						form.addEventListener('submit', function(){
-							var btn = document.getElementById('btnGuardarObs');
-							if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Guardando...'; }
-						});
-					}
-				})();
-				</script>
-			</div>
-		</div>
-	</div>
 
 </div><!-- /content-wrapper -->
 
