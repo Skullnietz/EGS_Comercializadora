@@ -157,7 +157,11 @@
       "Bash(powershell -Command \"try { Invoke-WebRequest -Uri ''https://backend.egsequipodecomputo.com/'' -UseBasicParsing -TimeoutSec 10 | Select-Object StatusCode } catch { Write-Host $_.Exception.Message }\")",
       "Bash(php -l vistas/modulos/historial-cotizaciones.php)",
       "Bash(php -l controladores/cotizaciones.controlador.php)",
-      "Bash(php -l vistas/modulos/validar-cotizacion.php)"
+      "Bash(php -l vistas/modulos/validar-cotizacion.php)",
+      "Bash(grep -r \"cotizacion\\\\|cotización\" /c/Users/black/Desktop/EGS/vistas/modulos --include=*.php --include=*.js)",
+      "Bash(php -l vistas/modulos/cotizacion.php)",
+      "Bash(php -l vistas/modulos/imprimir-cotizacion.php)",
+      "Bash(php -l config/routes.php)"
     ]
   }
 }

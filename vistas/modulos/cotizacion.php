@@ -63,6 +63,34 @@ $_SESSION['form_token'] = bin2hex(random_bytes(32));
 
 // Generar UUID para el código QR de esta cotización
 $codigoQr = bin2hex(random_bytes(16)); // 32 caracteres hex
+
+// ── Recotizar: cargar datos de cotización existente (sin precios) ──
+$_rc_data = null;
+if (isset($_GET['recotizar']) && intval($_GET['recotizar']) > 0) {
+  try {
+    $rcResult = CotizacionesControlador::ctrMostrarCotizaciones("id", intval($_GET['recotizar']));
+    if (is_array($rcResult) && !empty($rcResult)) {
+      $_rc_data = isset($rcResult["id"]) ? $rcResult : (isset($rcResult[0]) ? $rcResult[0] : null);
+    }
+  } catch (Exception $e) {}
+
+  if ($_rc_data) {
+    // Sobreescribir selecciones
+    $asesorSeleccionadoId = intval($_rc_data["id_vendedor"]);
+    $clienteSeleccionadoId = intval($_rc_data["id_cliente"]);
+    // Buscar nombres
+    try {
+      if ($asesorSeleccionadoId) {
+        $asesor = Controladorasesores::ctrMostrarAsesoresEleg('id', $asesorSeleccionadoId);
+        $NombreAsesor = $asesor['nombre'] ?? '';
+      }
+      if ($clienteSeleccionadoId) {
+        $usuario = ControladorClientes::ctrMostrarClientesOrdenes('id', $clienteSeleccionadoId);
+        $NombreUsuario = $usuario['nombre'] ?? '';
+      }
+    } catch (Throwable $e) {}
+  }
+}
 ?>
 <!doctype html>
 <html lang="es-MX">
@@ -682,18 +710,18 @@ $codigoQr = bin2hex(random_bytes(16)); // 32 caracteres hex
       <div class="row2">
         <div class="field">
           <div class="label">Asunto</div>
-          <input id="asunto" type="text" placeholder="Cotización de equipos / refacciones / servicio técnico" />
+          <input id="asunto" type="text" placeholder="Cotización de equipos / refacciones / servicio técnico" value="<?php echo $_rc_data ? htmlspecialchars($_rc_data['asunto']) : ''; ?>" />
         </div>
         <div class="field">
           <div class="label">Vigencia</div>
-          <input id="vigencia" type="text" value="Validez 30 días" />
+          <input id="vigencia" type="text" value="<?php echo $_rc_data ? htmlspecialchars($_rc_data['vigencia']) : 'Validez 30 días'; ?>" />
         </div>
       </div>
 
       <div class="field" style="margin-top:6px">
         <div class="label">Descripción / Observaciones</div>
         <textarea id="descripcion"
-          placeholder="Especifica requisitos, tiempos de entrega, garantías, condiciones de servicio o instalación."></textarea>
+          placeholder="Especifica requisitos, tiempos de entrega, garantías, condiciones de servicio o instalación."><?php echo $_rc_data && !empty($_rc_data['observaciones']) ? htmlspecialchars($_rc_data['observaciones']) : ''; ?></textarea>
       </div>
 
       <table id="items">
@@ -1018,6 +1046,58 @@ $codigoQr = bin2hex(random_bytes(16)); // 32 caracteres hex
     document.getElementById('fechaTxt').textContent =
       new Date().toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
     refreshPrintTexts(); recalc();
+
+    // ── Recotizar: cargar productos sin precios y preseleccionar empresa ──
+    <?php if ($_rc_data): ?>
+    (function(){
+      // Seleccionar empresa
+      var empSelect = document.getElementById('empresaSelect');
+      if (empSelect) {
+        empSelect.value = <?php echo json_encode($_rc_data['empresa']); ?>;
+        cambiarEmpresa();
+      }
+
+      // Preseleccionar vendedor en Choices.js
+      var vendId = <?php echo json_encode(strval($asesorSeleccionadoId)); ?>;
+      if (vendId && vendId !== '0') {
+        vendedorChoices.setChoiceByValue(vendId);
+      }
+
+      // Preseleccionar cliente
+      var cliId = <?php echo json_encode(strval($clienteSeleccionadoId)); ?>;
+      var cliNombre = <?php echo json_encode($_rc_data['nombre_cliente']); ?>;
+      if (cliId && cliId !== '0') {
+        // Cliente registrado
+        if (chkPaso) { chkPaso.checked = false; chkPaso.dispatchEvent(new Event('change')); }
+        clienteChoices.setChoiceByValue(cliId);
+      } else if (cliNombre) {
+        // Cliente de paso
+        if (chkPaso) { chkPaso.checked = true; chkPaso.dispatchEvent(new Event('change')); }
+        document.getElementById('clientePaso').value = cliNombre;
+      }
+
+      // Cargar productos (sin precios: precio = 0)
+      var prods = <?php echo json_encode(json_decode($_rc_data['productos'], true)); ?>;
+      if (Array.isArray(prods) && prods.length > 0) {
+        // Limpiar fila default
+        var tbody = document.getElementById('tbody');
+        while (tbody.rows.length) tbody.deleteRow(0);
+        // Agregar cada producto
+        for (var i = 0; i < prods.length; i++) {
+          var p = prods[i];
+          var desc = p.descripcion || p.producto || p.nombre || '';
+          var qty = parseInt(p.cantidad) || 1;
+          addRow(desc, qty, 0); // precio = 0 para actualizar
+        }
+      }
+
+      refreshPrintTexts();
+      recalc();
+
+      // Limpiar draft para que no se mezcle con datos previos
+      localStorage.removeItem(DKEY);
+    })();
+    <?php endif; ?>
 
     async function printAndSave() {
       // 1. Imprimir

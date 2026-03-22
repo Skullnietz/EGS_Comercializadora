@@ -53,6 +53,7 @@ return [
     'cotizacion',
     'historial-cotizaciones',
     'validar-cotizacion',
+    'imprimir-cotizacion',
 
     /* ── Clientes ───────────────────────────────── */
     'clientes',

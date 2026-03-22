@@ -399,9 +399,14 @@ foreach ($_hc_cotizaciones as $c) {
                     data-qr-url="<?php echo htmlspecialchars($qrValidUrl); ?>"
                   ><i class="fa-solid fa-eye"></i></button>
                   <a class="hc-act-btn print" title="Imprimir / PDF"
-                    href="index.php?ruta=validar-cotizacion&codigo=<?php echo urlencode($cot['codigo_qr']); ?>"
+                    href="index.php?ruta=imprimir-cotizacion&id=<?php echo $cot['id']; ?>"
                     target="_blank"
                   ><i class="fa-solid fa-print"></i></a>
+                  <?php if ($vigEval[0]): ?>
+                  <a class="hc-act-btn copy" title="Recotizar (nueva cotización con estos datos)"
+                    href="index.php?ruta=cotizacion&recotizar=<?php echo $cot['id']; ?>"
+                  ><i class="fa-solid fa-rotate-right"></i></a>
+                  <?php endif; ?>
                 </div>
               </td>
             </tr>
@@ -502,9 +507,12 @@ foreach ($_hc_cotizaciones as $c) {
 
         <div class="hc-detail-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary" id="hcDetPrint" style="background:#6366f1;border-color:#6366f1;border-radius:10px">
+          <a id="hcDetRecotizar" href="#" class="btn btn-warning" style="display:none;border-radius:10px;font-weight:600;font-size:13px;padding:9px 18px">
+            <i class="fa-solid fa-rotate-right"></i> Recotizar
+          </a>
+          <a id="hcDetPrint" href="#" target="_blank" class="btn btn-primary" style="background:#6366f1;border-color:#6366f1;border-radius:10px">
             <i class="fa-solid fa-print"></i> Imprimir
-          </button>
+          </a>
         </div>
 
       </div>
@@ -620,11 +628,16 @@ $(document).ready(function(){
     }
     $('#hcDetProductos').html(html);
 
-    // Print button
-    $('#hcDetPrint').off('click').on('click', function(){
-      var url = $b.closest('tr').find('.hc-act-btn.print').attr('href');
-      if (url) window.open(url, '_blank');
-    });
+    // Print button → abrir formato de impresión profesional
+    var cotId = $b.data('id');
+    $('#hcDetPrint').attr('href', 'index.php?ruta=imprimir-cotizacion&id=' + cotId);
+
+    // Recotizar button (solo si expirada)
+    if (vigExpirada) {
+      $('#hcDetRecotizar').attr('href', 'index.php?ruta=cotizacion&recotizar=' + cotId).show();
+    } else {
+      $('#hcDetRecotizar').hide();
+    }
 
     $('#hcDetailModal').modal('show');
   });
