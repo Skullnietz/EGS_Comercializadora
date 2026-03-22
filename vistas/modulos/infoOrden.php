@@ -34,10 +34,28 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 	.egs-obs-item { padding: 12px 16px; background: #f8fafc; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #6366f1; }
 	.egs-btn-accent { background: #6366f1; border-color: #6366f1; color: #fff; border-radius: 8px; font-weight: 600; }
 	.egs-btn-accent:hover { background: #4f46e5; border-color: #4f46e5; color: #fff; }
-	.egs-dollar { background: #6366f1; color: #fff; border-color: #6366f1; font-weight: 700; }
-	.egs-body .input-group-addon { background: #f1f5f9; color: #475569; border-color: #d2d6de; min-width: 40px; }
+	.egs-dollar { background: #6366f1; color: #fff; border-color: #6366f1; font-weight: 700; border-radius: 8px 0 0 8px !important; }
+	.egs-body .input-group { border-radius: 8px; overflow: hidden; }
+	.egs-body .input-group .form-control { border-radius: 0 8px 8px 0 !important; border-left: none; }
+	.egs-body .input-group-addon { background: linear-gradient(135deg,#6366f1 0%,#818cf8 100%); color: #fff; border-color: #6366f1; min-width: 42px; border-radius: 8px 0 0 8px !important; }
 	.egs-body .input-group-addon i { font-size: 14px; }
-	.egs-estado-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; background: #e0e7ff; color: #4338ca; }
+	.egs-body .input-group-addon .btn { background: transparent; border: none; color: #fff; padding: 0; }
+	.egs-body .input-group-addon .btn-danger { color: #fca5a5; }
+	.egs-body .input-group-addon .btn-danger:hover { color: #fff; }
+	.egs-estado-badge { display: inline-block; padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid transparent; }
+
+	/* Estados estandarizados */
+	.egs-estado-revision       { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
+	.egs-estado-supervision    { color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe; }
+	.egs-estado-pendiente      { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+	.egs-estado-aceptado       { color: #1e40af; background: #eff6ff; border-color: #bfdbfe; }
+	.egs-estado-terminada      { color: #0e7490; background: #ecfeff; border-color: #a5f3fc; }
+	.egs-estado-cancelada      { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
+	.egs-estado-sin-reparacion { color: #64748b; background: #f8fafc; border-color: #e2e8f0; }
+	.egs-estado-entregado      { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+	.egs-estado-garantia       { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+	.egs-estado-producto-venta { color: #c2410c; background: #fff7ed; border-color: #fed7aa; }
+	.egs-estado-default        { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
 
 	/* Carousel */
 	.img-orden-standard { width: 100%; height: 400px; object-fit: cover; background-color: #f4f4f4; cursor: pointer; border-radius: 8px; }
@@ -151,6 +169,22 @@ $partidaLabels = array(
 );
 
 date_default_timezone_set("America/Mexico_City");
+
+// Mapeo estandarizado de estado → clase CSS
+function _egsEstadoClass($estado) {
+	$e = strtolower(trim($estado));
+	if (strpos($e, 'autorización') !== false || strpos($e, 'autorizacion') !== false || strpos($e, 'pendiente') !== false) return 'egs-estado-pendiente';
+	if (strpos($e, 'supervisión') !== false || strpos($e, 'supervision') !== false) return 'egs-estado-supervision';
+	if (strpos($e, 'garantía') !== false || strpos($e, 'garantia') !== false) return 'egs-estado-garantia';
+	if (strpos($e, 'revisión') !== false || strpos($e, 'revision') !== false) return 'egs-estado-revision';
+	if (strpos($e, 'terminada') !== false) return 'egs-estado-terminada';
+	if (strpos($e, 'entregado') !== false || strpos($e, 'entregada') !== false) return 'egs-estado-entregado';
+	if (strpos($e, 'aceptado') !== false || strpos($e, 'aceptada') !== false) return 'egs-estado-aceptado';
+	if (strpos($e, 'cancel') !== false) return 'egs-estado-cancelada';
+	if (strpos($e, 'sin reparación') !== false || strpos($e, 'sin reparacion') !== false) return 'egs-estado-sin-reparacion';
+	if (strpos($e, 'producto para venta') !== false) return 'egs-estado-producto-venta';
+	return 'egs-estado-default';
+}
 ?>
 
 <div class="content-wrapper">
@@ -680,7 +714,7 @@ date_default_timezone_set("America/Mexico_City");
 						<!-- ESTADO DE LA ORDEN -->
 						<div class="egs-field-row">
 							<label class="egs-lbl">Estado</label>
-							<span class="egs-estado-badge" style="margin-bottom:8px"><?php echo htmlspecialchars($estado); ?></span>
+							<span class="egs-estado-badge <?php echo _egsEstadoClass($estado); ?>" style="margin-bottom:8px"><?php echo htmlspecialchars($estado); ?></span>
 							<?php
 							if ($estado !== "Entregado (Ent)") {
 								$allStates = array(
@@ -1086,7 +1120,24 @@ $(document).ready(function(){
 				if(res.error) return;
 				if(lastEstado !== null && res.estado !== lastEstado){
 					var badge = $(".egs-estado-badge");
-					if(badge.length){ badge.text(res.estado).css("animation","pulse .6s"); }
+					if(badge.length){
+						badge.text(res.estado).css("animation","pulse .6s");
+						// Actualizar clase de color
+						badge.removeClass("egs-estado-revision egs-estado-supervision egs-estado-pendiente egs-estado-aceptado egs-estado-terminada egs-estado-cancelada egs-estado-sin-reparacion egs-estado-entregado egs-estado-garantia egs-estado-producto-venta egs-estado-default");
+						var e = res.estado.toLowerCase();
+						var cls = "egs-estado-default";
+						if(e.indexOf("autorización")>-1||e.indexOf("autorizacion")>-1||e.indexOf("pendiente")>-1) cls="egs-estado-pendiente";
+						else if(e.indexOf("supervisión")>-1||e.indexOf("supervision")>-1) cls="egs-estado-supervision";
+						else if(e.indexOf("garantía")>-1||e.indexOf("garantia")>-1) cls="egs-estado-garantia";
+						else if(e.indexOf("revisión")>-1||e.indexOf("revision")>-1) cls="egs-estado-revision";
+						else if(e.indexOf("terminada")>-1) cls="egs-estado-terminada";
+						else if(e.indexOf("entregado")>-1||e.indexOf("entregada")>-1) cls="egs-estado-entregado";
+						else if(e.indexOf("aceptado")>-1||e.indexOf("aceptada")>-1) cls="egs-estado-aceptado";
+						else if(e.indexOf("cancel")>-1) cls="egs-estado-cancelada";
+						else if(e.indexOf("sin reparación")>-1||e.indexOf("sin reparacion")>-1) cls="egs-estado-sin-reparacion";
+						else if(e.indexOf("producto para venta")>-1) cls="egs-estado-producto-venta";
+						badge.addClass(cls);
+					}
 				}
 				lastEstado = res.estado;
 				if(res.observaciones && res.observaciones.length > lastObsCount){

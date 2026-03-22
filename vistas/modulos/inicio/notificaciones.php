@@ -165,23 +165,7 @@ NOTIFICACIONES  PARA TECNICOS Y VENDEDORES
 									}
 								}
 								
-								echo'<!-- notifications-push -->	
-
-
-									<script>
-
-										Push.create("ORDEN CON ATRASO DE ENTREGA",{
-
-											body:"ORDEN: '.$ordenesQueTieneElAsesor["id"].'",
-											icon:"'.$valueImagenes["foto"].'",
-											timeout:20000,
-											onClick: function(){
-												window.location="inicio";
-												this.close();
-											}
-
-											});
-									</script>';
+								/* Push notifications del navegador desactivadas */
 						 	}
 						}
 
@@ -295,23 +279,7 @@ NOTIFICACIONES  PARA TECNICOS Y VENDEDORES
 								}
 								
 								
-								echo'<!-- notifications-push -->	
-
-
-									<script>
-
-										Push.create("ORDEN CON ATRASO DE ENTREGA",{
-
-											body:"ORDEN: '.$ordenesQueTieneElTecnico["id"].'",
-											icon:"'.$valueImagenes["foto"].'",
-											timeout:10000,
-											onClick: function(){
-												window.location="inicio";
-												this.close();
-											}
-
-											});
-									</script>';
+								/* Push notifications del navegador desactivadas */
 						 	}
 						}
 

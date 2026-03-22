@@ -496,51 +496,7 @@ $(function(){
 </script>
 <?php endif; ?>
 
-<?php if (!empty($_noti_push)): ?>
-<!-- Push notifications: solo si hay nuevas desde la última vez -->
-<script>
-(function(){
-  var pushCount = <?php echo count($_noti_push); ?>;
-  var pushKey = 'egs_push_atraso_count';
-
-  // Solo mostrar si cambió la cantidad de atrasos
-  var lastCount = parseInt(localStorage.getItem(pushKey) || '0', 10);
-  if (pushCount <= lastCount) return;
-  localStorage.setItem(pushKey, pushCount);
-
-  setTimeout(function(){
-    if (typeof Push === 'undefined') return;
-
-    <?php
-    $pushOrd = $_noti_push[0];
-    $pushImg = '';
-    $album = json_decode(isset($pushOrd["multimedia"]) ? $pushOrd["multimedia"] : '[]', true);
-    if (is_array($album)) {
-        foreach ($album as $img) {
-            if (isset($img["foto"])) { $pushImg = $img["foto"]; break; }
-        }
-    }
-    ?>
-
-    try {
-      Push.create("Tienes <?php echo count($_noti_push); ?> orden<?php echo count($_noti_push) > 1 ? 'es' : ''; ?> con atraso", {
-        body: "Orden #<?php echo $pushOrd['id']; ?><?php echo count($_noti_push) > 1 ? ' y ' . (count($_noti_push) - 1) . ' más' : ''; ?> — Requiere atención",
-        <?php if (!empty($pushImg)): ?>
-        icon: "<?php echo $pushImg; ?>",
-        <?php endif; ?>
-        timeout: 8000,
-        onClick: function(){
-          window.focus();
-          window.location = "index.php?ruta=inicio";
-          this.close();
-        }
-      });
-    } catch(e) {}
-
-  }, 3000);
-})();
-</script>
-<?php endif; ?>
+<!-- Push notifications del navegador desactivadas - se usan solo toasts internos -->
 
 <?php if ($_noti_totalEstado > 0):
   // Datos para el toast

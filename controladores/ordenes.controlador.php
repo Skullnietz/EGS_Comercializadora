@@ -3561,41 +3561,7 @@ class controladorOrdenes{
 
 						}
 
-						echo'<!-- notifications-push -->	
-
-
-
-
-
-									<script>
-
-
-
-										Push.create("Nueva observación",{
-
-
-
-											body:"'.$_POST["idOrden"].' observación: '.$valueObservacionesPush["observacion"].'",
-
-											icon:"'.$_SESSION["foto"].'",
-
-											timeout:10000,
-
-											onClick: function(){
-
-												window.location="index.php?ruta=inicio";
-
-												this.close();
-
-
-
-											}
-
-
-
-											});
-
-									</script>';
+						/* Push notifications del navegador desactivadas - observaciones */
 
 					}
 
@@ -5268,39 +5234,7 @@ class controladorOrdenes{
 
 
 
-							echo'<!-- notifications-push -->	
-
-
-
-
-
-									<script>
-
-
-
-										Push.create("ENTREGADA",{
-
-
-
-											body:"ORDEN: '.$_POST["idOrden"].'",
-
-											icon:"'.$_SESSION["foto"].'",
-
-											timeout:10000,
-
-											onClick: function(){
-
-												window.location="index.php?ruta=inicio";
-
-												this.close();
-
-											}
-
-
-
-											});
-
-									</script>';
+							/* Push notifications del navegador desactivadas - entregada */
 
 
 

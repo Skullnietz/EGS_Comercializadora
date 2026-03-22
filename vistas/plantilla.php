@@ -173,7 +173,8 @@
 
   <script src="vistas/plugins/bardcode/codigo.js"></script>
   <script src="vistas/plugins/printArea/jquery.PrintArea.js"></script>
-  <script src="vistas/plugins/push/push.min.js"></script>
+  <!-- Push notifications del navegador desactivadas -->
+  <!-- <script src="vistas/plugins/push/push.min.js"></script> -->
 
 
 
