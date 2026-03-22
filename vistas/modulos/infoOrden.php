@@ -57,12 +57,164 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 	.egs-estado-producto-venta { color: #c2410c; background: #fff7ed; border-color: #fed7aa; }
 	.egs-estado-default        { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
 
-	/* Carousel */
-	.img-orden-standard { width: 100%; height: 400px; object-fit: cover; background-color: #f4f4f4; cursor: pointer; border-radius: 8px; }
-	.orden-carousel .carousel-inner { height: 400px !important; }
-	.imagepreview { transform-origin: center center; cursor: grab; }
-	.imagepreview:active { cursor: grabbing; }
-	.modal-body { overflow: hidden; }
+	/* ═══════════════════════════════════════
+	   GALLERY — Modern Carousel + Lightbox
+	   ═══════════════════════════════════════ */
+
+	/* ── Main image ── */
+	.egs-gallery { position: relative; border-radius: 12px; overflow: hidden; background: #0f172a; }
+	.egs-gallery-main {
+		position: relative; width: 100%; height: 420px;
+		display: flex; align-items: center; justify-content: center;
+		cursor: pointer; overflow: hidden;
+	}
+	.egs-gallery-main img {
+		width: 100%; height: 100%; object-fit: contain;
+		transition: transform .5s cubic-bezier(.4,0,.2,1), opacity .4s ease;
+		user-select: none; -webkit-user-drag: none;
+	}
+	.egs-gallery-main:hover img { transform: scale(1.03); }
+
+	/* ── Zoom hint overlay ── */
+	.egs-gallery-main::after {
+		content: '\f00e'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+		position: absolute; bottom: 14px; right: 14px;
+		width: 38px; height: 38px; border-radius: 50%;
+		background: rgba(255,255,255,.9); color: #334155;
+		display: flex; align-items: center; justify-content: center;
+		font-size: 14px; opacity: 0; transition: opacity .25s ease;
+		pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+	}
+	.egs-gallery-main:hover::after { opacity: 1; }
+
+	/* ── Counter badge ── */
+	.egs-gallery-counter {
+		position: absolute; top: 12px; left: 12px; z-index: 5;
+		background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+		color: #fff; font-size: 11px; font-weight: 600;
+		padding: 4px 10px; border-radius: 20px;
+		letter-spacing: .03em;
+	}
+
+	/* ── Navigation arrows ── */
+	.egs-gallery-nav {
+		position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+		width: 40px; height: 40px; border-radius: 50%;
+		background: rgba(255,255,255,.85); backdrop-filter: blur(4px);
+		border: none; color: #334155; font-size: 15px;
+		display: flex; align-items: center; justify-content: center;
+		cursor: pointer; opacity: 0; transition: all .25s ease;
+		box-shadow: 0 2px 10px rgba(0,0,0,.15);
+	}
+	.egs-gallery:hover .egs-gallery-nav { opacity: 1; }
+	.egs-gallery-nav:hover { background: #fff; color: #0f172a; transform: translateY(-50%) scale(1.1); }
+	.egs-gallery-nav.prev { left: 12px; }
+	.egs-gallery-nav.next { right: 12px; }
+
+	/* ── Thumbnails strip ── */
+	.egs-gallery-thumbs {
+		display: flex; gap: 6px; padding: 10px 12px;
+		background: rgba(15,23,42,.6);
+		overflow-x: auto; scroll-behavior: smooth;
+		-ms-overflow-style: none; scrollbar-width: none;
+	}
+	.egs-gallery-thumbs::-webkit-scrollbar { display: none; }
+	.egs-gallery-thumb {
+		flex-shrink: 0; width: 62px; height: 48px;
+		border-radius: 8px; overflow: hidden; cursor: pointer;
+		border: 2px solid transparent; opacity: .55;
+		transition: all .25s ease; position: relative;
+	}
+	.egs-gallery-thumb.active,
+	.egs-gallery-thumb:hover { opacity: 1; border-color: #6366f1; }
+	.egs-gallery-thumb img {
+		width: 100%; height: 100%; object-fit: cover;
+		pointer-events: none;
+	}
+
+	/* ── No-image placeholder ── */
+	.egs-gallery-empty {
+		width: 100%; height: 300px; display: flex; flex-direction: column;
+		align-items: center; justify-content: center; gap: 12px;
+		background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+		border-radius: 12px; color: #94a3b8;
+	}
+	.egs-gallery-empty i { font-size: 48px; opacity: .5; }
+	.egs-gallery-empty span { font-size: 13px; font-weight: 500; }
+
+	/* ═══════════════════════════════════════
+	   LIGHTBOX — Fullscreen modal
+	   ═══════════════════════════════════════ */
+	#egsLightbox .modal-dialog { width: 96vw; max-width: 1200px; margin: 2vh auto; }
+	#egsLightbox .modal-content {
+		background: #0f172a; border: none; border-radius: 16px;
+		overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,.6);
+	}
+	#egsLightbox .modal-body {
+		position: relative; padding: 0; overflow: hidden;
+		display: flex; align-items: center; justify-content: center;
+		min-height: 70vh; max-height: 85vh; background: #0f172a;
+	}
+	#egsLightbox .lb-image {
+		max-width: 100%; max-height: 82vh; object-fit: contain;
+		transform-origin: center center; cursor: grab;
+		transition: transform .3s cubic-bezier(.4,0,.2,1);
+		user-select: none; -webkit-user-drag: none;
+	}
+	#egsLightbox .lb-image:active { cursor: grabbing; }
+
+	/* ── Lightbox toolbar ── */
+	.lb-toolbar {
+		position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+		display: flex; align-items: center; justify-content: center; gap: 4px;
+		padding: 12px 16px;
+		background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 100%);
+	}
+	.lb-toolbar button {
+		width: 40px; height: 40px; border-radius: 50%;
+		background: rgba(255,255,255,.12); border: none;
+		color: #e2e8f0; font-size: 15px; cursor: pointer;
+		display: flex; align-items: center; justify-content: center;
+		transition: all .2s ease; backdrop-filter: blur(4px);
+	}
+	.lb-toolbar button:hover { background: rgba(255,255,255,.25); color: #fff; transform: scale(1.1); }
+	.lb-toolbar .lb-separator { width: 1px; height: 24px; background: rgba(255,255,255,.15); margin: 0 8px; }
+	.lb-counter { color: rgba(255,255,255,.7); font-size: 12px; font-weight: 600; margin: 0 12px; }
+
+	/* ── Lightbox close ── */
+	.lb-close {
+		position: absolute; top: 14px; right: 14px; z-index: 15;
+		width: 42px; height: 42px; border-radius: 50%;
+		background: rgba(0,0,0,.4); backdrop-filter: blur(6px);
+		border: 1px solid rgba(255,255,255,.1);
+		color: #e2e8f0; font-size: 18px; cursor: pointer;
+		display: flex; align-items: center; justify-content: center;
+		transition: all .2s ease;
+	}
+	.lb-close:hover { background: rgba(239,68,68,.8); color: #fff; transform: scale(1.1); }
+
+	/* ── Lightbox nav arrows ── */
+	.lb-nav {
+		position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
+		width: 48px; height: 48px; border-radius: 50%;
+		background: rgba(255,255,255,.1); backdrop-filter: blur(4px);
+		border: 1px solid rgba(255,255,255,.08);
+		color: #e2e8f0; font-size: 18px; cursor: pointer;
+		display: flex; align-items: center; justify-content: center;
+		transition: all .25s ease; opacity: 0;
+	}
+	#egsLightbox .modal-body:hover .lb-nav { opacity: 1; }
+	.lb-nav:hover { background: rgba(255,255,255,.25); color: #fff; transform: translateY(-50%) scale(1.1); }
+	.lb-nav.prev { left: 16px; }
+	.lb-nav.next { right: 16px; }
+
+	@media (max-width: 768px) {
+		.egs-gallery-main { height: 280px; }
+		.egs-gallery-thumb { width: 50px; height: 38px; }
+		#egsLightbox .modal-dialog { width: 100vw; margin: 0; }
+		#egsLightbox .modal-content { border-radius: 0; min-height: 100vh; }
+		.lb-nav { width: 38px; height: 38px; }
+	}
 </style>
 
 <?php
@@ -105,24 +257,150 @@ $(document).ready(function(){
 
 <script>
 $(document).ready(function () {
-	var currentScale = 1, isDragging = false, startX, startY, translateX = 0, translateY = 0;
-	function updateTransform(t) {
-		$(".imagepreview").css("transition", t ? "transform 0.25s ease" : "none")
-			.css("transform", "translate("+translateX+"px, "+translateY+"px) scale("+currentScale+")");
+
+	/* ═══════════════════════════════════════
+	   EGS GALLERY — Carousel + Lightbox
+	   ═══════════════════════════════════════ */
+	var _gal = {
+		imgs: [],       // array of src URLs
+		idx: 0,         // current index
+		scale: 1,
+		dragging: false,
+		startX: 0, startY: 0,
+		tx: 0, ty: 0
+	};
+
+	// Collect images
+	$('.egs-gallery-main img').each(function(){ _gal.imgs.push($(this).attr('src')); });
+	if (_gal.imgs.length === 0) {
+		$('.egs-gallery-thumb').each(function(){ _gal.imgs.push($(this).data('src')); });
 	}
-	$(".img-orden-standard").on("click", function () {
-		currentScale = 1; translateX = 0; translateY = 0;
-		$(".imagepreview").attr("src", $(this).attr("src"));
-		updateTransform(false);
-		$("#imagemodal").modal("show");
+
+	function galUpdate(animate) {
+		var $main = $('.egs-gallery-main img');
+		if (animate) {
+			$main.css({opacity: 0, transform: 'scale(.96)'});
+			setTimeout(function(){
+				$main.attr('src', _gal.imgs[_gal.idx]);
+				$main.css({opacity: 1, transform: 'scale(1)'});
+			}, 200);
+		} else {
+			$main.attr('src', _gal.imgs[_gal.idx]);
+		}
+		$('.egs-gallery-counter').text((_gal.idx + 1) + ' / ' + _gal.imgs.length);
+		$('.egs-gallery-thumb').removeClass('active').eq(_gal.idx).addClass('active');
+		// Scroll thumb into view
+		var $strip = $('.egs-gallery-thumbs'), $active = $('.egs-gallery-thumb.active');
+		if ($active.length && $strip.length) {
+			var sl = $active[0].offsetLeft - $strip.width()/2 + $active.outerWidth()/2;
+			$strip.animate({scrollLeft: sl}, 200);
+		}
+	}
+
+	function galGo(dir) {
+		_gal.idx = (_gal.idx + dir + _gal.imgs.length) % _gal.imgs.length;
+		galUpdate(true);
+	}
+
+	// Carousel nav
+	$(document).on('click', '.egs-gallery-nav.prev', function(e){ e.preventDefault(); e.stopPropagation(); galGo(-1); });
+	$(document).on('click', '.egs-gallery-nav.next', function(e){ e.preventDefault(); e.stopPropagation(); galGo(1); });
+	$(document).on('click', '.egs-gallery-thumb', function(e){
+		e.preventDefault();
+		_gal.idx = $(this).index();
+		galUpdate(true);
 	});
-	$("#zoomIn").on("click", function() { currentScale += 0.2; updateTransform(true); });
-	$("#zoomOut").on("click", function() { if (currentScale > 0.4) { currentScale -= 0.2; updateTransform(true); } });
-	$(".imagepreview").on("mousedown", function(e) {
-		if (currentScale > 1) { isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; e.preventDefault(); }
+
+	// Keyboard nav in gallery
+	$(document).on('keydown', function(e){
+		if ($('#egsLightbox').hasClass('in')) {
+			if (e.keyCode === 37) { galGo(-1); lbUpdate(true); }
+			else if (e.keyCode === 39) { galGo(1); lbUpdate(true); }
+			else if (e.keyCode === 27) { $('#egsLightbox').modal('hide'); }
+			else if (e.keyCode === 187 || e.keyCode === 107) { _gal.scale = Math.min(_gal.scale + .25, 5); lbTransform(true); }
+			else if (e.keyCode === 189 || e.keyCode === 109) { _gal.scale = Math.max(_gal.scale - .25, .3); lbTransform(true); }
+		}
 	});
-	$(document).on("mousemove", function(e) { if (isDragging) { translateX = e.clientX - startX; translateY = e.clientY - startY; updateTransform(false); } });
-	$(document).on("mouseup", function() { isDragging = false; });
+
+	/* ── Lightbox ── */
+	function lbTransform(anim) {
+		$('.lb-image').css({
+			transition: anim ? 'transform .3s cubic-bezier(.4,0,.2,1)' : 'none',
+			transform: 'translate('+_gal.tx+'px,'+_gal.ty+'px) scale('+_gal.scale+')'
+		});
+	}
+	function lbReset() { _gal.scale = 1; _gal.tx = 0; _gal.ty = 0; }
+	function lbUpdate(animate) {
+		var $img = $('.lb-image');
+		if (animate) {
+			$img.css({opacity: 0, transform: 'scale(.92)'});
+			setTimeout(function(){
+				lbReset(); $img.attr('src', _gal.imgs[_gal.idx]);
+				$img.css({opacity: 1}); lbTransform(true);
+			}, 200);
+		} else {
+			lbReset(); $img.attr('src', _gal.imgs[_gal.idx]); lbTransform(false);
+		}
+		$('.lb-counter').text((_gal.idx + 1) + ' / ' + _gal.imgs.length);
+	}
+
+	// Open lightbox
+	$(document).on('click', '.egs-gallery-main', function(){
+		lbReset();
+		$('.lb-image').attr('src', _gal.imgs[_gal.idx]);
+		lbTransform(false);
+		$('.lb-counter').text((_gal.idx + 1) + ' / ' + _gal.imgs.length);
+		$('#egsLightbox').modal('show');
+	});
+
+	// Lightbox nav
+	$(document).on('click', '.lb-nav.prev', function(){ galGo(-1); lbUpdate(true); });
+	$(document).on('click', '.lb-nav.next', function(){ galGo(1); lbUpdate(true); });
+
+	// Zoom controls
+	$(document).on('click', '#lbZoomIn', function(){ _gal.scale = Math.min(_gal.scale + .25, 5); lbTransform(true); });
+	$(document).on('click', '#lbZoomOut', function(){ _gal.scale = Math.max(_gal.scale - .25, .3); lbTransform(true); });
+	$(document).on('click', '#lbZoomReset', function(){ lbReset(); lbTransform(true); });
+
+	// Drag
+	$('.lb-image').on('mousedown touchstart', function(e){
+		if (_gal.scale > 1) {
+			_gal.dragging = true;
+			var ev = e.type === 'touchstart' ? e.originalEvent.touches[0] : e;
+			_gal.startX = ev.clientX - _gal.tx; _gal.startY = ev.clientY - _gal.ty;
+			e.preventDefault();
+		}
+	});
+	$(document).on('mousemove touchmove', function(e){
+		if (_gal.dragging) {
+			var ev = e.type === 'touchmove' ? e.originalEvent.touches[0] : e;
+			_gal.tx = ev.clientX - _gal.startX; _gal.ty = ev.clientY - _gal.startY;
+			lbTransform(false);
+		}
+	});
+	$(document).on('mouseup touchend', function(){ _gal.dragging = false; });
+
+	// Double-click to zoom toggle
+	$('.lb-image').on('dblclick', function(){
+		if (_gal.scale > 1) { lbReset(); } else { _gal.scale = 2.5; }
+		lbTransform(true);
+	});
+
+	// Mouse wheel zoom
+	$('#egsLightbox .modal-body').on('wheel', function(e){
+		e.preventDefault();
+		var delta = e.originalEvent.deltaY > 0 ? -.15 : .15;
+		_gal.scale = Math.min(Math.max(_gal.scale + delta, .3), 5);
+		lbTransform(true);
+	});
+
+	// Swipe on mobile (gallery)
+	var _swipeX = 0;
+	$('.egs-gallery-main').on('touchstart', function(e){ _swipeX = e.originalEvent.touches[0].clientX; });
+	$('.egs-gallery-main').on('touchend', function(e){
+		var diff = e.originalEvent.changedTouches[0].clientX - _swipeX;
+		if (Math.abs(diff) > 50) { galGo(diff < 0 ? 1 : -1); }
+	});
 });
 </script>
 
@@ -274,65 +552,85 @@ function _egsEstadoClass($estado) {
 				<!-- IMÁGENES DE LA ORDEN -->
 				<div class="egs-section">
 					<div class="egs-title-bar"><i class="fa-solid fa-images"></i> Imágenes de la orden</div>
-					<div class="egs-body" style="padding:12px">
-						<?php if (!empty($portada) || !empty($AlbumDeImagenes)) { ?>
-							<div id="myCarousel" class="carousel slide orden-carousel" data-ride="carousel">
-								<ol class="carousel-indicators">
-									<li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-									<?php
-									$i = 0;
-									if (!empty($AlbumDeImagenes)) {
-										foreach ($AlbumDeImagenes as $key => $valueImagenes) {
-											$i++;
-											echo '<li data-target="#myCarousel" data-slide-to="'.$i.'"></li>';
-										}
-									}
-									?>
-								</ol>
-								<div class="carousel-inner">
-									<div class="item active">
-										<?php if (!empty($portada)) { ?>
-											<img loading="lazy" src="<?php echo $portada; ?>" class="img-orden-standard">
-										<?php } ?>
-									</div>
-									<?php
-									if (!empty($AlbumDeImagenes)) {
-										foreach ($AlbumDeImagenes as $key => $valueImagenes) {
-											echo '<div class="item"><img loading="lazy" src="'.$valueImagenes["foto"].'" class="img-orden-standard"></div>';
-										}
-									}
-									?>
-								</div>
-								<a class="left carousel-control" href="#myCarousel" style="color:black" data-slide="prev">
-									<span class="glyphicon glyphicon-chevron-left"></span>
-								</a>
-								<a class="right carousel-control" href="#myCarousel" style="color:black" data-slide="next">
-									<span class="glyphicon glyphicon-chevron-right"></span>
-								</a>
+					<div class="egs-body" style="padding:0">
+						<?php
+						// Construir array de todas las imágenes
+						$_gal_imgs = array();
+						if (!empty($portada)) $_gal_imgs[] = $portada;
+						if (!empty($AlbumDeImagenes)) {
+							foreach ($AlbumDeImagenes as $_gi) {
+								if (isset($_gi["foto"]) && !empty($_gi["foto"])) $_gal_imgs[] = $_gi["foto"];
+							}
+						}
+						$_gal_total = count($_gal_imgs);
+
+						if ($_gal_total > 0):
+						?>
+						<div class="egs-gallery">
+							<!-- Counter badge -->
+							<span class="egs-gallery-counter">1 / <?php echo $_gal_total; ?></span>
+
+							<!-- Main image -->
+							<div class="egs-gallery-main">
+								<img src="<?php echo htmlspecialchars($_gal_imgs[0]); ?>" alt="Imagen de la orden" loading="lazy">
 							</div>
-						<?php } else { ?>
-							<img src="vistas/img/productos/default/default.jpg" class="img-orden-standard" alt="Sin imágenes">
-						<?php } ?>
+
+							<?php if ($_gal_total > 1): ?>
+							<!-- Navigation arrows -->
+							<button class="egs-gallery-nav prev" title="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+							<button class="egs-gallery-nav next" title="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+
+							<!-- Thumbnails strip -->
+							<div class="egs-gallery-thumbs">
+								<?php foreach ($_gal_imgs as $_gi_idx => $_gi_src): ?>
+								<div class="egs-gallery-thumb <?php echo $_gi_idx === 0 ? 'active' : ''; ?>" data-src="<?php echo htmlspecialchars($_gi_src); ?>">
+									<img src="<?php echo htmlspecialchars($_gi_src); ?>" alt="Miniatura" loading="lazy">
+								</div>
+								<?php endforeach; ?>
+							</div>
+							<?php endif; ?>
+						</div>
+						<?php else: ?>
+						<div class="egs-gallery-empty">
+							<i class="fa-solid fa-image"></i>
+							<span>Sin imágenes disponibles</span>
+						</div>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>
 
 		</div><!-- /row 1 -->
 
-		<!-- Modal Lightbox -->
-		<div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-hidden="true">
+		<!-- ═══ Lightbox Modal ═══ -->
+		<div class="modal fade" id="egsLightbox" tabindex="-1" role="dialog" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
-						<h4 class="modal-title" style="display:inline-block">Vista previa</h4>
-						<div class="pull-right" style="margin-right:20px">
-							<button type="button" class="btn btn-default btn-sm" id="zoomOut"><i class="fa fa-minus"></i></button>
-							<button type="button" class="btn btn-default btn-sm" id="zoomIn"><i class="fa fa-plus"></i></button>
-						</div>
-					</div>
 					<div class="modal-body">
-						<img src="" class="imagepreview" style="width:100%">
+						<!-- Close button -->
+						<button class="lb-close" data-dismiss="modal" title="Cerrar (Esc)">
+							<i class="fa-solid fa-xmark"></i>
+						</button>
+
+						<!-- Nav arrows -->
+						<?php if ($_gal_total > 1): ?>
+						<button class="lb-nav prev" title="Anterior (←)"><i class="fa-solid fa-chevron-left"></i></button>
+						<button class="lb-nav next" title="Siguiente (→)"><i class="fa-solid fa-chevron-right"></i></button>
+						<?php endif; ?>
+
+						<!-- Image -->
+						<img src="" class="lb-image" alt="Vista previa">
+
+						<!-- Toolbar -->
+						<div class="lb-toolbar">
+							<button id="lbZoomOut" title="Alejar (-)"><i class="fa-solid fa-minus"></i></button>
+							<button id="lbZoomReset" title="Restablecer"><i class="fa-solid fa-expand"></i></button>
+							<button id="lbZoomIn" title="Acercar (+)"><i class="fa-solid fa-plus"></i></button>
+							<?php if ($_gal_total > 1): ?>
+							<div class="lb-separator"></div>
+							<span class="lb-counter">1 / <?php echo $_gal_total; ?></span>
+							<?php endif; ?>
+						</div>
 					</div>
 				</div>
 			</div>
