@@ -378,12 +378,24 @@ $('.agregarNuevoTecnicoAorden').click(function() {
 });
 
 /*=============================================
-SINCRONIZAR INVERSIONES AL ENVIAR FORMULARIO OBS
+ELIMINAR OBSERVACIÓN (tabla observacionesOrdenes)
 =============================================*/
-$('.formularioObervaciones').on('submit', function(){
-	var totalInv = $('#costoTotalInversiones').val();
-	$('#totalInversionesObs').val(totalInv || '0');
-
-	var estado = $('.formularioPartidas select[name="estado"]').val() || $('.formularioPartidas input[name="estado"]').val();
-	$('#estadoObs').val(estado || '');
+$(document).on("click", ".eliminarObservacion", function(){
+	var idObs = $(this).attr("idObs");
+	var item = $(this).closest(".egs-obs-item");
+	swal({
+		title: "¿Eliminar esta observación?",
+		text: "Esta acción no se puede deshacer",
+		type: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#ef4444",
+		confirmButtonText: "Sí, eliminar",
+		cancelButtonText: "Cancelar",
+		closeOnConfirm: false
+	}, function(isConfirm){
+		if(isConfirm){
+			window.location = window.location.pathname + window.location.search + "&idobs=" + idObs;
+		}
+	});
 });
+

@@ -189,7 +189,7 @@ class ModeloObservaciones{
 
 
 
-		$stmt = ConexionWP::conectarWP()->prepare("DELETE FROM $tabla WHERE id = :id");
+		$stmt = Conexion::conectar()->prepare("DELETE FROM $tabla WHERE id = :id");
 
 
 

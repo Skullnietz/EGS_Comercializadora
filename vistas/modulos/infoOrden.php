@@ -292,7 +292,7 @@ date_default_timezone_set("America/Mexico_City");
 				<div class="egs-section">
 					<div class="egs-title-bar"><i class="fa-solid fa-list-check"></i> Partidas y costos</div>
 					<div class="egs-body">
-						<form role="form" method="post" class="formularioPartidas" id="formPartidas">
+						<div class="formularioPartidas" id="formPartidas">
 							<div class="box" style="border:none;box-shadow:none;margin:0">
 
 								<?php
@@ -313,11 +313,11 @@ date_default_timezone_set("America/Mexico_City");
 												<i class="fa-solid fa-file-lines" style="margin-right:3px"></i>Partida <?php echo $pNum; ?>
 											</label>
 											<?php if ($isReadonly): ?>
-												<textarea maxlength="320" rows="2" class="form-control text-uppercase" name="<?php echo $partidaField; ?>" placeholder="<?php echo $partidaLabels[$pNum]; ?>" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($partidaVal); ?></textarea>
+												<textarea maxlength="320" rows="2" class="form-control text-uppercase" name="<?php echo $partidaField; ?>" form="formObservaciones" placeholder="<?php echo $partidaLabels[$pNum]; ?>" style="font-size:13px;resize:vertical" readonly><?php echo htmlspecialchars($partidaVal); ?></textarea>
 											<?php else: ?>
 												<div class="input-group">
 													<span class="input-group-addon"><button type="button" class="btn btn-danger btn-xs quitarPartida"><i class="fas fa-times"></i></button></span>
-													<textarea maxlength="320" rows="2" class="form-control text-uppercase" name="<?php echo $partidaField; ?>" placeholder="<?php echo $partidaLabels[$pNum]; ?>" style="font-size:13px;resize:vertical"><?php echo htmlspecialchars($partidaVal); ?></textarea>
+													<textarea maxlength="320" rows="2" class="form-control text-uppercase" name="<?php echo $partidaField; ?>" form="formObservaciones" placeholder="<?php echo $partidaLabels[$pNum]; ?>" style="font-size:13px;resize:vertical"><?php echo htmlspecialchars($partidaVal); ?></textarea>
 												</div>
 											<?php endif; ?>
 										</div>
@@ -327,7 +327,7 @@ date_default_timezone_set("America/Mexico_City");
 											</label>
 											<div class="input-group">
 												<span class="input-group-addon egs-dollar">$</span>
-												<input class="form-control precioPartidaGuardada" name="<?php echo $precioField; ?>" type="number" value="<?php echo htmlspecialchars($precioVal); ?>" min="0" step="any" placeholder="0.00" style="font-weight:700"<?php echo $isReadonly ? ' readonly' : ''; ?>>
+												<input class="form-control precioPartidaGuardada" name="<?php echo $precioField; ?>" form="formObservaciones" type="number" value="<?php echo htmlspecialchars($precioVal); ?>" min="0" step="any" placeholder="0.00" style="font-weight:700"<?php echo $isReadonly ? ' readonly' : ''; ?>>
 											</div>
 										</div>
 									</div>
@@ -415,8 +415,8 @@ date_default_timezone_set("America/Mexico_City");
 								<!-- Containers dinámicos -->
 								<div class="nuevaRecarga"></div>
 								<div class="nuevaPartidaTecnicoDos">
-									<input type="hidden" id="listarPartidasTecnicoDos" name="partidasTecnicoDos">
-									<input type="hidden" id="TotalPartidasTecnicoDos" name="TotalPartidasTecnicoDos">
+									<input type="hidden" id="listarPartidasTecnicoDos" name="partidasTecnicoDos" form="formObservaciones">
+									<input type="hidden" id="TotalPartidasTecnicoDos" name="TotalPartidasTecnicoDos" form="formObservaciones">
 								</div>
 								<div class="NuevaPartida"></div>
 
@@ -457,7 +457,7 @@ date_default_timezone_set("America/Mexico_City");
 									<button type="button" class="btn btn-sm egs-btn-accent agregartipReparacion">Agregar tipo de reparación</button>
 								</div>
 								<div class="Tipo-de-reparacion" style="display:none;margin-bottom:12px">
-									<select class="form-control Tipo-repearacion-selector" name="Tipo-repearacion">
+									<select class="form-control Tipo-repearacion-selector" name="Tipo-repearacion" form="formObservaciones">
 										<option value="sin tipo de reaparacion">Escoge el tipo de reparación</option>
 										<option value="recarga-de-cartucho">Recarga de cartucho</option>
 										<option value="servicio-externo">Servicio externo</option>
@@ -479,19 +479,19 @@ date_default_timezone_set("America/Mexico_City");
 								<?php endif; ?>
 
 								<!-- HIDDEN FIELDS -->
-								<input type="hidden" id="listatOrdenesNuevas" name="listatOrdenesNuevas">
-								<input type="hidden" id="listatOrdenes" name="listatOrdenes">
-								<input type="hidden" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" name="nombreCliente" readonly>
-								<input type="hidden" class="form-control" value="<?php echo htmlspecialchars($usuario["correo"]); ?>" name="correoCliente" readonly>
-								<input type="hidden" value="<?php echo htmlspecialchars($fecha_ingreso); ?>" name="fecha_ingreso">
-								<input type="hidden" value="<?php echo htmlspecialchars($_GET["idOrden"]); ?>" name="idOrden">
+								<input type="hidden" id="listatOrdenesNuevas" name="listatOrdenesNuevas" form="formObservaciones">
+								<input type="hidden" id="listatOrdenes" name="listatOrdenes" form="formObservaciones">
+								<input type="hidden" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" name="nombreCliente" form="formObservaciones" readonly>
+								<input type="hidden" class="form-control" value="<?php echo htmlspecialchars($usuario["correo"]); ?>" name="correoCliente" form="formObservaciones" readonly>
+								<input type="hidden" value="<?php echo htmlspecialchars($fecha_ingreso); ?>" name="fecha_ingreso" form="formObservaciones">
+								<input type="hidden" value="<?php echo htmlspecialchars($_GET["idOrden"]); ?>" name="idOrden" form="formObservaciones">
 
 								<!-- TOTAL -->
 								<div class="egs-total-bar">
 									<span class="egs-total-label"><i class="fa-solid fa-calculator" style="margin-right:6px"></i>Total</span>
 									<div class="input-group">
 										<span class="input-group-addon egs-dollar">$</span>
-										<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" readonly style="font-weight:700;font-size:18px">
+										<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" form="formObservaciones" readonly style="font-weight:700;font-size:18px">
 									</div>
 								</div>
 
@@ -501,7 +501,7 @@ date_default_timezone_set("America/Mexico_City");
 									<span class="egs-inv-label"><i class="fa-solid fa-coins" style="margin-right:6px"></i>Inversión total</span>
 									<div class="input-group">
 										<span class="input-group-addon egs-dollar">$</span>
-										<input type="number" name="totalInversiones" class="form-control" id="costoTotalInversiones" readonly style="font-weight:700;font-size:18px">
+										<input type="number" name="totalInversiones" class="form-control" id="costoTotalInversiones" form="formObservaciones" readonly style="font-weight:700;font-size:18px">
 									</div>
 								</div>
 								<?php endif; ?>
@@ -520,12 +520,7 @@ date_default_timezone_set("America/Mexico_City");
 
 							</div><!-- /box -->
 
-							<?php
-							$objeto = new controladorOrdenes();
-							$objeto->ctrEditarOrdenDinamica();
-							?>
-
-						</form>
+						</div><!-- /formularioPartidas -->
 					</div>
 				</div>
 			</div><!-- /col-lg-8 partidas -->
@@ -585,9 +580,9 @@ date_default_timezone_set("America/Mexico_City");
 							$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $_GET["asesor"]);
 							if ($isReadonly) {
 								echo '<input type="text" class="form-control" value="'.htmlspecialchars($asesor["nombre"]).'" readonly>';
-								echo '<input type="hidden" value="'.$asesor["id"].'" name="asesorEditadoEnOrdenDianmica" form="formPartidas">';
+								echo '<input type="hidden" value="'.$asesor["id"].'" name="asesorEditadoEnOrdenDianmica" form="formObservaciones">';
 							} else {
-								echo '<select class="form-control selector" name="asesorEditadoEnOrdenDianmica" form="formPartidas" required>';
+								echo '<select class="form-control selector" name="asesorEditadoEnOrdenDianmica" form="formObservaciones" required>';
 								echo '<option value="'.$asesor["id"].'">'.htmlspecialchars($asesor["nombre"]).'</option>';
 								$asesorParaSelect = Controladorasesores::ctrMostrarAsesoresEmpresas("id_empresa", $_SESSION["empresa"]);
 								foreach ($asesorParaSelect as $va) {
@@ -605,9 +600,9 @@ date_default_timezone_set("America/Mexico_City");
 							$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnico"]);
 							if ($isTecnico || $isSecretaria) {
 								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico["nombre"]).'" readonly>';
-								echo '<input type="hidden" value="'.$tecnico["id"].'" name="tecnicoEditadoEnOrdenDianmica" form="formPartidas">';
+								echo '<input type="hidden" value="'.$tecnico["id"].'" name="tecnicoEditadoEnOrdenDianmica" form="formObservaciones">';
 							} else {
-								echo '<select class="form-control selector" name="tecnicoEditadoEnOrdenDianmica" form="formPartidas" required>';
+								echo '<select class="form-control selector" name="tecnicoEditadoEnOrdenDianmica" form="formObservaciones" required>';
 								echo '<option value="'.$tecnico["id"].'">'.htmlspecialchars($tecnico["nombre"]).'</option>';
 								$tecnicoList = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
 								foreach ($tecnicoList as $vt) {
@@ -625,9 +620,9 @@ date_default_timezone_set("America/Mexico_City");
 							$tecnico2 = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnicodos"]);
 							if ($isTecnico || $isSecretaria) {
 								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico2["nombre"]).'" readonly>';
-								echo '<input type="hidden" value="'.$tecnico2["id"].'" name="tecnicodosEditadoEnOrdenDianmica" form="formPartidas">';
+								echo '<input type="hidden" value="'.$tecnico2["id"].'" name="tecnicodosEditadoEnOrdenDianmica" form="formObservaciones">';
 							} else {
-								echo '<select class="form-control selector" name="tecnicodosEditadoEnOrdenDianmica" form="formPartidas">';
+								echo '<select class="form-control selector" name="tecnicodosEditadoEnOrdenDianmica" form="formObservaciones">';
 								echo '<option value="'.$tecnico2["id"].'">'.htmlspecialchars($tecnico2["nombre"]).'</option>';
 								$tecnico2List = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
 								foreach ($tecnico2List as $vt2) {
@@ -652,7 +647,7 @@ date_default_timezone_set("America/Mexico_City");
 								);
 
 								if ($isTecnico) {
-									echo '<select class="form-control selector" name="estado" form="formPartidas">';
+									echo '<select class="form-control selector" name="estado" form="formObservaciones">';
 									echo '<option>'.htmlspecialchars($estado).'</option>';
 									if ($estado == 'En revisión (REV)') {
 										echo '<option value="En revisión (REV)">En revisión (REV)</option>';
@@ -663,7 +658,7 @@ date_default_timezone_set("America/Mexico_City");
 									}
 									echo '</select>';
 								} elseif ($isVendedor) {
-									echo '<select class="form-control selector" name="estado" form="formPartidas">';
+									echo '<select class="form-control selector" name="estado" form="formObservaciones">';
 									echo '<option>'.htmlspecialchars($estado).'</option>';
 									if ($estado == 'En revisión (REV)') {
 										echo '<option value="En revisión (REV)">En revisión (REV)</option><option value="Supervisión (SUP)">Supervisión (SUP)</option>';
@@ -680,7 +675,7 @@ date_default_timezone_set("America/Mexico_City");
 									}
 									echo '</select>';
 								} elseif ($isAdmin) {
-									echo '<select class="form-control selector" name="estado" form="formPartidas">';
+									echo '<select class="form-control selector" name="estado" form="formObservaciones">';
 									echo '<option value="'.htmlspecialchars($estado).'">'.htmlspecialchars($estado).'</option>';
 									foreach ($allStates as $st) {
 										if ($st !== $estado) {
@@ -689,12 +684,12 @@ date_default_timezone_set("America/Mexico_City");
 									}
 									echo '</select>';
 								} else {
-									echo '<select class="form-control selector" name="estado" form="formPartidas">';
+									echo '<select class="form-control selector" name="estado" form="formObservaciones">';
 									echo '<option>'.htmlspecialchars($estado).'</option>';
 									echo '</select>';
 								}
 							} else {
-								echo '<input type="hidden" name="estado" value="Entregado (Ent)" form="formPartidas">';
+								echo '<input type="hidden" name="estado" value="Entregado (Ent)" form="formObservaciones">';
 								echo '<div style="text-align:center;padding:8px"><h4 style="color:#16a34a;margin:0"><i class="fa-solid fa-circle-check"></i> ENTREGADO EL: '.htmlspecialchars($fecha_Salida).'</h4></div>';
 							}
 							?>
@@ -792,14 +787,13 @@ date_default_timezone_set("America/Mexico_City");
 				<div class="egs-section">
 					<div class="egs-title-bar"><i class="fa-solid fa-comments"></i> Observaciones y detalles internos</div>
 					<div class="egs-body">
-						<form role="form" method="post" class="formularioObervaciones">
+						<form role="form" method="post" class="formularioObervaciones" id="formObservaciones">
 
 							<!-- Detalles internos -->
 							<div class="egs-field-row">
 								<label class="egs-lbl"><i class="fa-solid fa-edit" style="margin-right:4px"></i>Detalles internos</label>
 								<?php
 								echo '<textarea class="form-control text-uppercase" style="font-weight:bold;min-height:80px" name="observaciones">'.htmlspecialchars($descripcion).'</textarea>';
-								echo '<input type="hidden" value="'.$_GET["idOrden"].'" name="idOrden">';
 								?>
 							</div>
 
@@ -828,8 +822,6 @@ date_default_timezone_set("America/Mexico_City");
 								<input type="hidden" class="form-control" id="fechaVista">
 								<input type="hidden" id="listarObservaciones" name="listarObservaciones">
 								<input type="hidden" name="listarinversiones" id="listarinversiones">
-								<input type="hidden" name="totalInversiones" id="totalInversionesObs">
-								<input type="hidden" name="estado" id="estadoObs">
 							</div>
 
 							<!-- OBSERVACIONES DE LA ORDEN (tabla observacionesOrdenes) -->
@@ -842,14 +834,14 @@ date_default_timezone_set("America/Mexico_City");
 								'linear-gradient(135deg,#22c55e,#4ade80)',
 								'linear-gradient(135deg,#f59e0b,#fbbf24)',
 							);
-							function _obsColorPerfil($perfil) {
+							if (!function_exists('_obsColorPerfil')) { function _obsColorPerfil($perfil) {
 								$p = strtolower($perfil);
 								if (strpos($p, 'admin') !== false)    return array('#6366f1', '#eef2ff', 'fa-shield-halved');
 								if (strpos($p, 'vendedor') !== false || strpos($p, 'asesor') !== false) return array('#8b5cf6', '#f5f3ff', 'fa-headset');
 								if (strpos($p, 'tecnico') !== false || strpos($p, 'técnico') !== false) return array('#06b6d4', '#ecfeff', 'fa-wrench');
 								if (strpos($p, 'secretaria') !== false) return array('#f59e0b', '#fffbeb', 'fa-clipboard');
 								return array('#64748b', '#f1f5f9', 'fa-user');
-							}
+							} }
 
 							$itemobs = $_GET["idOrden"];
 							$observacionesnew = controladorObservaciones::ctrMostrarobservaciones($itemobs);
@@ -1036,7 +1028,7 @@ $(document).ready(function () {
 $(document).ready(function(){
 	var ordenId = <?php echo json_encode($_GET["idOrden"]); ?>;
 	var lastEstado = null;
-	var lastObsCount = 0;
+	var lastObsCount = <?php echo isset($_obs_count) ? intval($_obs_count) : 0; ?>;
 
 	function pollInfoOrden(){
 		$.ajax({

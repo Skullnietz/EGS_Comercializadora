@@ -133,7 +133,11 @@
       "Bash(grep -o '\\\\$_GET\\\\[[^]]*\\\\]' /c/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php)",
       "Bash(grep -r \"pollNotificaciones\\\\|setInterval.*notif\\\\|statusNotificaciones\" /c/Users/black/Desktop/EGS/vistas --include=*.php --include=*.html)",
       "Bash(php -l vistas/modulos/infoOrden.php)",
-      "Bash(php -l ajax/infoOrden.ajax.php)"
+      "Bash(php -l ajax/infoOrden.ajax.php)",
+      "Bash(find /c/Users/black/Desktop/EGS -type f -name *.js)",
+      "Bash(find /c/Users/black/Desktop/EGS -type f \\\\\\(-name *.js -o -name *.html -o -name *.php \\\\\\) -path */vistas/* ! -path */bower_components/* ! -path */node_modules/*)",
+      "Bash(grep -r pollNotificaciones /c/Users/black/Desktop/EGS --include=*.js --include=*.php)",
+      "Bash(grep -A 2 \"ConexionWP::conectarWP\" /c/Users/black/Desktop/EGS/modelos/*.php)"
     ]
   }
 }

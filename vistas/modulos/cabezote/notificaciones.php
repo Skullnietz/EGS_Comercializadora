@@ -1059,8 +1059,8 @@ $(function(){
           }));
         }
       }
-      // Detectar nueva observación
-      else if (r.ultimaObs && r.ultimaObs.id && r.ultimaObs.id > lastObsId) {
+      // Detectar nueva observación (independiente del estado)
+      if (r.ultimaObs && r.ultimaObs.id && r.ultimaObs.id > lastObsId) {
         lastObsId = r.ultimaObs.id;
         localStorage.setItem('egs_toast_obs_lastId', r.ultimaObs.id);
         egsPlayNotifSound('obs');
