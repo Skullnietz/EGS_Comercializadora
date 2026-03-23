@@ -374,10 +374,9 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
       </li>';
   }
 
-  // ── Visitas + Seguimiento ──
+  // ── Visitas ──
   if ($_SESSION["perfil"] == "administrador" AND $_SESSION["empresa"] == 1) {
     echo '<li><a href="index.php?ruta=visitas"><i class="fas fa-map-marker"></i><span> Gestor Visitas</span></a></li>';
-    echo '<li><a href="index.php?ruta=seguimiento"><i class="fas fa-route"></i><span> Seguimiento</span></a></li>';
   }
 
   // ── Técnico ──

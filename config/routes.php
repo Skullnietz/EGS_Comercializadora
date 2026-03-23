@@ -34,6 +34,7 @@ return [
     'lasordenes',
     'EstadoOrden',
     'infoOrden',
+    'seguimiento',
     'Historialdecliente',
 
     /* ── Ventas ─────────────────────────────────── */

@@ -323,4 +323,24 @@ class ModeloNotificaciones{
 
 	}
 
+	/*=============================================
+	HISTORIAL COMPLETO DE UNA ORDEN (seguimiento)
+	Devuelve todos los cambios de estado y traspasos
+	=============================================*/
+	static public function mdlHistorialOrden($idOrden){
+
+		$pdo = ConexionWP::conectarWP();
+
+		$stmt = $pdo->prepare(
+			"SELECT * FROM notificaciones_estado
+			 WHERE id_orden = :id_orden
+			 ORDER BY fecha DESC"
+		);
+
+		$stmt->bindParam(":id_orden", $idOrden, PDO::PARAM_INT);
+		$stmt->execute();
+
+		return $stmt->fetchAll();
+	}
+
 }

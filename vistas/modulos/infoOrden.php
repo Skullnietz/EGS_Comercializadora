@@ -332,7 +332,15 @@ function _egsEstadoClass($estado) {
 <div class="content-wrapper">
 
 	<section class="content-header">
-		<h2 style="margin:0 0 10px"><i class="fa-solid fa-file-invoice" style="color:#6366f1;margin-right:8px"></i>Orden #<?php echo htmlspecialchars($_GET["idOrden"]); ?></h2>
+		<h2 style="margin:0 0 10px">
+			<i class="fa-solid fa-file-invoice" style="color:#6366f1;margin-right:8px"></i>Orden #<?php echo htmlspecialchars($_GET["idOrden"]); ?>
+			<a href="index.php?ruta=seguimiento&idOrden=<?php echo urlencode($_GET["idOrden"]); ?>"
+			   class="btn btn-sm"
+			   style="margin-left:12px;background:#6366f1;color:#fff;border-radius:6px;font-size:13px;vertical-align:middle"
+			   title="Ver seguimiento de la orden">
+				<i class="fas fa-route" style="margin-right:4px"></i> Seguimiento
+			</a>
+		</h2>
 		<ol class="breadcrumb">
 			<li><a href="index.php?ruta=inicio"><i class="fas fa-dashboard"></i> Inicio</a></li>
 			<li><a href="index.php?ruta=ordenes">Órdenes</a></li>

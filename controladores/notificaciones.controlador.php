@@ -67,4 +67,14 @@ Class ControladorNotificaciones{
 
 	}
 
+	/*=============================================
+	HISTORIAL COMPLETO DE UNA ORDEN (seguimiento)
+	=============================================*/
+
+	static public function ctrHistorialOrden($idOrden){
+
+		return ModeloNotificaciones::mdlHistorialOrden($idOrden);
+
+	}
+
 }

@@ -5133,15 +5133,6 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 			} catch (Exception $e) {
 			}
 
-			// DEBUG: Log temporal para verificar los valores que llegan
-			file_put_contents("debug_infoOrden.txt", date("Y-m-d H:i:s") . " | " .
-				"perfil=" . (isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "?") .
-				" | tecnicodos_POST=" . (isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? $_POST["tecnicodosEditadoEnOrdenDianmica"] : "NO_EXISTE") .
-				" | inversiones_POST=" . (isset($_POST["listarinversiones"]) ? mb_substr($_POST["listarinversiones"], 0, 80) : "NO_EXISTE") .
-				" | totalInv_POST=" . (isset($_POST["totalInversiones"]) ? $_POST["totalInversiones"] : "NO_EXISTE") .
-				" | estado=" . $_POST["estado"] .
-				"\n", FILE_APPEND);
-
 			$datosOrdenDinamica = array(
 
 				"id" => $_POST["idOrden"],
