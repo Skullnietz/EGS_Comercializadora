@@ -297,7 +297,7 @@ $(document).on("click", "button.quitarObservacion", function(){
 QUITAR INVERSIONES
 =============================================*/
 $(document).on("click", "button.quitarInversion", function(){
-	$(this).parent().parent().parent().remove();
+	$(this).closest('.egs-partida-row').remove();
 
 	var sum = 0;
 	$(".precioNuevainversion").each(function(){
@@ -310,6 +310,13 @@ $(document).on("click", "button.quitarInversion", function(){
 	listarObservaciones();
 	listarinversion();
 	listaPartidasTecncioDos();
+});
+
+/*=============================================
+ACTUALIZAR JSON CUANDO CAMBIE DETALLE DE INVERSIÓN
+=============================================*/
+$(document).on("input", ".detalleInversion", function(){
+	listarinversion();
 });
 
 /*=============================================
