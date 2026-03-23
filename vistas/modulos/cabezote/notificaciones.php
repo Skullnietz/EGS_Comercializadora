@@ -229,21 +229,43 @@ $_noti_unified = array_slice($_noti_unified, 0, 25);
 if (!function_exists('_notiEstadoColor')) {
   function _notiEstadoColor($estado)
   {
+    // Usar strpos con el valor ORIGINAL (sin lowercase) para abreviaturas case-sensitive
+    // y strtolower solo para nombres completos.
+    // Orden: más específicos primero para evitar falsos positivos
+    // (ej. "Pendiente" contiene "ent" → NO debe matchear Entregado)
     $e = strtolower($estado);
-    if (strpos($e, 'entregado') !== false || strpos($e, 'ent') !== false)
-      return array('#22c55e', '#f0fdf4', 'fa-handshake');
-    if (strpos($e, 'terminada') !== false || strpos($e, 'ter') !== false)
-      return array('#06b6d4', '#ecfeff', 'fa-flag-checkered');
-    if (strpos($e, 'aceptado') !== false || strpos($e, 'ok') !== false)
-      return array('#3b82f6', '#eff6ff', 'fa-circle-check');
-    if (strpos($e, 'revisión') !== false || strpos($e, 'rev') !== false)
-      return array('#ef4444', '#fef2f2', 'fa-magnifying-glass');
-    if (strpos($e, 'autorización') !== false || strpos($e, 'aut') !== false)
-      return array('#f59e0b', '#fffbeb', 'fa-hourglass-half');
-    if (strpos($e, 'supervisión') !== false || strpos($e, 'sup') !== false)
-      return array('#8b5cf6', '#f5f3ff', 'fa-eye');
+
+    // 1. Garantía — antes que todo (estado especial)
     if (strpos($e, 'garantía') !== false || strpos($e, 'garantia') !== false)
       return array('#dc2626', '#fef2f2', 'fa-rotate-left');
+    // 2. Sin reparación (SR)
+    if (strpos($e, 'sin reparación') !== false || strpos($e, 'sin reparacion') !== false || strpos($estado, '(SR)') !== false)
+      return array('#78716c', '#f5f5f4', 'fa-ban');
+    // 3. Cancelada (can)
+    if (strpos($e, 'cancelada') !== false || strpos($estado, '(can)') !== false)
+      return array('#6b7280', '#f3f4f6', 'fa-circle-xmark');
+    // 4. Producto para venta (PV)
+    if (strpos($e, 'producto para venta') !== false || strpos($estado, '(PV)') !== false)
+      return array('#d97706', '#fffbeb', 'fa-tag');
+    // 5. Pendiente de autorización (AUT) — ANTES de Entregado para evitar que "pendiente" matchee "ent"
+    if (strpos($e, 'autorización') !== false || strpos($e, 'autorizacion') !== false || strpos($estado, 'AUT') !== false)
+      return array('#f59e0b', '#fffbeb', 'fa-hourglass-half');
+    // 6. Supervisión (SUP)
+    if (strpos($e, 'supervisión') !== false || strpos($e, 'supervision') !== false || strpos($estado, 'SUP') !== false)
+      return array('#8b5cf6', '#f5f3ff', 'fa-eye');
+    // 7. En revisión (REV)
+    if (strpos($e, 'revisión') !== false || strpos($e, 'revision') !== false || strpos($estado, 'REV') !== false)
+      return array('#ef4444', '#fef2f2', 'fa-magnifying-glass');
+    // 8. Aceptado (ok)
+    if (strpos($e, 'aceptado') !== false || strpos($estado, '(ok)') !== false)
+      return array('#3b82f6', '#eff6ff', 'fa-circle-check');
+    // 9. Terminada (ter)
+    if (strpos($e, 'terminada') !== false || strpos($estado, '(ter)') !== false)
+      return array('#06b6d4', '#ecfeff', 'fa-flag-checkered');
+    // 10. Entregado (Ent) — AL FINAL para que "ent" no matchee "pendiente"
+    if (strpos($e, 'entregado') !== false || strpos($estado, '(Ent)') !== false)
+      return array('#22c55e', '#f0fdf4', 'fa-handshake');
+
     return array('#64748b', '#f1f5f9', 'fa-circle-info');
   }
 }
