@@ -838,7 +838,7 @@ function _egsEstadoClass($estado) {
 									</div>
 								</div>
 
-								<!-- TOTAL INVERSIONES (admin only) -->
+								<!-- TOTAL INVERSIONES -->
 								<?php if ($isAdmin): ?>
 								<div class="egs-inv-bar">
 									<span class="egs-inv-label"><i class="fa-solid fa-coins" style="margin-right:6px"></i>Inversión total</span>
@@ -847,6 +847,9 @@ function _egsEstadoClass($estado) {
 										<input type="number" name="totalInversiones" class="form-control" id="costoTotalInversiones" form="formObservaciones" readonly style="font-weight:700;font-size:18px">
 									</div>
 								</div>
+								<?php else: ?>
+								<!-- Preservar inversiones cuando no es admin -->
+								<input type="hidden" name="totalInversiones" value="<?php echo htmlspecialchars($value["totalInversion"]); ?>" form="formObservaciones">
 								<?php endif; ?>
 
 								<!-- BOTONES DE ACCIÓN -->
@@ -1203,7 +1206,12 @@ function _egsEstadoClass($estado) {
 								<?php echo '<input type="hidden" class="usuarioQueCaptura" value="'.$_SESSION["nombre"].'" name="usuarioQueCaptura">'; ?>
 								<input type="hidden" class="form-control" id="fechaVista">
 								<input type="hidden" id="listarObservaciones" name="listarObservaciones">
+								<?php if ($isAdmin): ?>
 								<input type="hidden" name="listarinversiones" id="listarinversiones">
+								<?php else: ?>
+								<!-- Preservar inversiones JSON originales para no-admin -->
+								<input type="hidden" name="listarinversiones" id="listarinversiones" value="<?php echo htmlspecialchars($value["inversiones"]); ?>">
+								<?php endif; ?>
 							</div>
 
 							<!-- OBSERVACIONES DE LA ORDEN (tabla observacionesOrdenes) -->
@@ -1398,6 +1406,7 @@ function _egsEstadoClass($estado) {
 </div><!-- /content-wrapper -->
 
 <script>
+var _egsIsAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
 $(document).ready(function () {
 	if ($("#botonwhats").val() && $("#botonwhats").val().length < 10) {
 		$('#linkwhats').hide();

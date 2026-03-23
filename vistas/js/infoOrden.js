@@ -269,6 +269,8 @@ $(document).on("change", ".precioNuevainversion", function() {
 LISTAR INVERSIONES
 =============================================*/
 function listarinversion(){
+	// Solo admin puede editar inversiones; no-admin preserva el valor original del hidden
+	if (typeof _egsIsAdmin !== 'undefined' && !_egsIsAdmin) return;
 	var listarinversiones = [];
 	var invsersion = $(".precioNuevainversion");
 	var detalle = $(".detalleInversion");

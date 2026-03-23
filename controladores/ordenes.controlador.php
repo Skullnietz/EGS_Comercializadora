@@ -3767,7 +3767,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 				"listarinversiones" => $_POST["listarinversiones"],
 
-				"totalInversiones" => $_POST["totalInversiones"],
+				"totalInversiones" => isset($_POST["totalInversiones"]) ? $_POST["totalInversiones"] : 0,
 
 				"estado" => $_POST["estado"]
 
@@ -5191,9 +5191,9 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 				"listatOrdenesNuevas" => $_POST["listatOrdenesNuevas"],
 
-				"listarinversiones" => $_POST["listarinversiones"],
+				"listarinversiones" => isset($_POST["listarinversiones"]) ? $_POST["listarinversiones"] : '',
 
-				"totalInversiones" => $_POST["totalInversiones"],
+				"totalInversiones" => isset($_POST["totalInversiones"]) ? $_POST["totalInversiones"] : 0,
 
 				//	   "marcaDelEquipo"=>$_POST["marcaDelEquipo"],
 
