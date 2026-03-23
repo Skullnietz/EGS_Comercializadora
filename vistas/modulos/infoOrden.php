@@ -1209,8 +1209,8 @@ function _egsEstadoClass($estado) {
 								<?php if ($isAdmin): ?>
 								<input type="hidden" name="listarinversiones" id="listarinversiones">
 								<?php else: ?>
-								<!-- Preservar inversiones JSON originales para no-admin -->
-								<input type="hidden" name="listarinversiones" id="listarinversiones" value="<?php echo htmlspecialchars($value["inversiones"]); ?>">
+								<!-- Sin id= para que el JS no lo encuentre y sobreescriba -->
+								<input type="hidden" name="listarinversiones" value="<?php echo htmlspecialchars($value["inversiones"]); ?>">
 								<?php endif; ?>
 							</div>
 
