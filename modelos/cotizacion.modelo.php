@@ -113,7 +113,8 @@ class CotizacionModelo
 
             $stmt->execute();
 
-            return $stmt->fetch();
+            // fetchAll para soportar múltiples resultados (ej: id_vendedor)
+            return $stmt->fetchAll();
 
         } else {
 

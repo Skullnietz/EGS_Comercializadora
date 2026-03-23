@@ -162,7 +162,8 @@
       "Bash(php -l vistas/modulos/cotizacion.php)",
       "Bash(php -l vistas/modulos/imprimir-cotizacion.php)",
       "Bash(php -l config/routes.php)",
-      "Bash(find /c/Users/black/Desktop/EGS/vistas/modulos/inicio -type f -name *.php)"
+      "Bash(find /c/Users/black/Desktop/EGS/vistas/modulos/inicio -type f -name *.php)",
+      "Bash(grep -n \"ctrMostrarCotizaciones\" /c/Users/black/Desktop/EGS/controladores/*.php)"
     ]
   }
 }

@@ -20,10 +20,6 @@ try {
     if (is_array($asesorData) && isset($asesorData["id"])) {
       $_hc_cotizaciones = CotizacionesControlador::ctrMostrarCotizaciones("id_vendedor", $asesorData["id"]);
       if (!is_array($_hc_cotizaciones)) $_hc_cotizaciones = array();
-      // ctrMostrarCotizaciones con item devuelve fetch() (un solo registro), necesitamos array
-      if (!empty($_hc_cotizaciones) && isset($_hc_cotizaciones["id"])) {
-        $_hc_cotizaciones = array($_hc_cotizaciones); // convertir a array de arrays
-      }
     }
   } else {
     $_hc_cotizaciones = CotizacionesControlador::ctrMostrarCotizaciones(null, null);

@@ -10,7 +10,7 @@ $_ic_cot = null;
 if ($_ic_id > 0) {
     $result = CotizacionesControlador::ctrMostrarCotizaciones("id", $_ic_id);
     if (is_array($result) && !empty($result)) {
-        // ctrMostrarCotizaciones con item devuelve fetch() (registro único)
+        // ctrMostrarCotizaciones devuelve fetchAll(), tomar el primer elemento
         $_ic_cot = isset($result["id"]) ? $result : (isset($result[0]) ? $result[0] : null);
     }
 }

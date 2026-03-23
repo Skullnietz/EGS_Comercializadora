@@ -599,41 +599,7 @@ $_tec_stages_def = array(
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     COTIZACIONES ACTIVAS
-══════════════════════════════════════════ -->
-<div class="crm-section">
-  <div class="crm-section-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-    <i class="fa-solid fa-file-invoice-dollar"></i>
-  </div>
-  <div>
-    <h3>Cotizaciones</h3>
-    <p>Cotizaciones vigentes pendientes de seguimiento</p>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-lg-8 col-md-7 col-xs-12">
-    <?php include __DIR__ . "/tec-cotizaciones.php"; ?>
-  </div>
-  <div class="col-lg-4 col-md-5 col-xs-12">
-    <div class="crm-card" style="margin-bottom:20px">
-      <div class="crm-card-head">
-        <h4 class="crm-card-title"><i class="fa-solid fa-link"></i> Cotizaciones</h4>
-      </div>
-      <div class="crm-card-body" style="padding:16px 18px">
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <a href="index.php?ruta=historial-cotizaciones" class="crm-quick">
-            <div class="crm-quick-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8)">
-              <i class="fa-solid fa-clock-rotate-left"></i>
-            </div>
-            <div class="crm-quick-text">Historial<small>Ver todas las cotizaciones</small></div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- Cotizaciones removidas del panel técnico -->
 
 <!-- ══════════════════════════════════════════
      TERMINADAS + ENTREGADAS (resumen)
