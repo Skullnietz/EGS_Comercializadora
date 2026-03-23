@@ -88,18 +88,9 @@ function _admGetImgOrd($ord) {
             ?>
               <tr>
                 <td style="padding:6px 4px;width:40px">
-                  <?php if (!empty($img)): ?>
-                    <img src="<?php echo htmlspecialchars($img); ?>"
-                         onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'"
-                         style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0">
-                    <div style="display:none;width:36px;height:36px;border-radius:6px;background:#f1f5f9;align-items:center;justify-content:center;color:#cbd5e1;font-size:13px">
-                      <i class="fa-solid fa-laptop"></i>
-                    </div>
-                  <?php else: ?>
-                    <div style="width:36px;height:36px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:13px">
-                      <i class="fa-solid fa-laptop"></i>
-                    </div>
-                  <?php endif; ?>
+                  <img src="<?php echo !empty($img) ? htmlspecialchars($img) : 'vistas/img/default/default.jpg'; ?>"
+                       onerror="this.onerror=null;this.src='vistas/img/default/default.jpg'"
+                       style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0" loading="lazy">
                 </td>
                 <td><span style="font-weight:700;color:#6366f1">#<?php echo htmlspecialchars($o['id']); ?></span></td>
                 <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">

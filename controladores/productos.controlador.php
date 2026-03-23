@@ -284,7 +284,7 @@ class ControladorProductos{
 
 
 
-				$rutaPortada = "../vistas/img/cabeceras/default/default.jpg";
+				$rutaPortada = "../vistas/img/default/default.jpg";
 
 
 
@@ -418,7 +418,7 @@ class ControladorProductos{
 
 
 
-				$rutaFotoPrincipal = "../vistas/img/productos/default/default.jpg";
+				$rutaFotoPrincipal = "../vistas/img/default/default.jpg";
 
 
 
@@ -1750,7 +1750,7 @@ class ControladorProductos{
 
 
 
-			if($_GET["imgPrincipal"] != "" && $_GET["imgPrincipal"] != "vistas/img/productos/default/default.jpg"){
+			if($_GET["imgPrincipal"] != "" && $_GET["imgPrincipal"] != "vistas/img/default/default.jpg"){
 
 
 
@@ -1790,7 +1790,7 @@ class ControladorProductos{
 
 
 
-			if($_GET["imgPortada"] != "" && $_GET["imgPortada"] != "vistas/img/cabeceras/default/default.jpg"){
+			if($_GET["imgPortada"] != "" && $_GET["imgPortada"] != "vistas/img/default/default.jpg"){
 
 
 

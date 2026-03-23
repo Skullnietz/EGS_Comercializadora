@@ -113,11 +113,10 @@ function _tecDias($fecha) {
     catch (Exception $e) { return 0; }
 }
 
-// ── Helper: render imagen con fallback onerror ──
+// ── Helper: render imagen con fallback a default ──
 function _tecImgTag($src, $w, $h, $radius) {
-    $fallback = "this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';";
+    $fallback = "this.onerror=null;this.src='vistas/img/default/default.jpg';";
     $html = '<img src="' . htmlspecialchars($src) . '" onerror="' . $fallback . '" style="width:'.$w.'px;height:'.$h.'px;border-radius:'.$radius.'px;object-fit:cover;flex-shrink:0;border:1px solid #e2e8f0">';
-    $html .= '<div style="display:none;width:'.$w.'px;height:'.$h.'px;border-radius:'.$radius.'px;background:#f1f5f9;align-items:center;justify-content:center;color:#cbd5e1;font-size:'.round($w*0.35).'px;flex-shrink:0"><i class="fa-solid fa-screwdriver-wrench"></i></div>';
     return $html;
 }
 

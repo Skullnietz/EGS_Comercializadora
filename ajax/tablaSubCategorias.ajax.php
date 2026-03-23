@@ -81,7 +81,7 @@ class TablaSubCategorias{
 
   			}else{
 
-  				$imagenPortada = "<img loading='lazy' src='vistas/img/cabeceras/default/default.jpg' class='img-thumbnail imgPortadaSubCategorias' width='100px'>";
+  				$imagenPortada = "<img loading='lazy' src='vistas/img/default/default.jpg' class='img-thumbnail imgPortadaSubCategorias' width='100px'>";
   			}
 
 			/*=============================================

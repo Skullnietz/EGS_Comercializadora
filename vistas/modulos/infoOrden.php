@@ -455,9 +455,8 @@ function _egsEstadoClass($estado) {
 							<?php endif; ?>
 						</div>
 						<?php else: ?>
-						<div class="egs-gallery-empty">
-							<i class="fa-solid fa-image"></i>
-							<span>Sin imágenes disponibles</span>
+						<div style="width:100%;border-radius:12px;overflow:hidden;background:#f1f5f9">
+							<img src="vistas/img/default/default.jpg" alt="Sin imagen" style="width:100%;height:300px;object-fit:contain;display:block" loading="lazy">
 						</div>
 						<?php endif; ?>
 					</div>

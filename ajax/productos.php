@@ -541,7 +541,7 @@ MODAL AGREGAR PRODUCTO
 
               <p class="help-block">Tamaño recomendado 1280px * 720px <br> Peso máximo de la foto 2MB</p>
 
-              <img loading="lazy" src="vistas/img/cabeceras/default/default.jpg" class="img-thumbnail previsualizarPortada" width="100%">
+              <img loading="lazy" src="vistas/img/default/default.jpg" class="img-thumbnail previsualizarPortada" width="100%">
 
             </div>
             <!--=====================================
@@ -554,7 +554,7 @@ MODAL AGREGAR PRODUCTO
                 <input type="file" class="fotoPrincipal">
 
                   <p class="help-block">Tamaño recomendado 400px * 450px <br> Peso máximo de la foto 2MB</p>
-                  <img loading="lazy" src="vistas/img/productos/default/default.jpg" class="img-thumbnail previsualizarPrincipal" width="200px">
+                  <img loading="lazy" src="vistas/img/default/default.jpg" class="img-thumbnail previsualizarPrincipal" width="200px">
 
               </div>
               <!--=====================================
@@ -1082,7 +1082,7 @@ MODAL AGREGAR PRODUCTO
 
                               <p class="help-block">Tamaño recomendado 1280px * 720px <br> Peso máximo de la foto 2MB</p>
 
-                              <img loading="lazy" src="vistas/img/cabeceras/default/default.jpg" class="img-thumbnail previsualizarPortada" width="100%">
+                              <img loading="lazy" src="vistas/img/default/default.jpg" class="img-thumbnail previsualizarPortada" width="100%">
 
                             </div>
                             <!--=====================================
@@ -1096,7 +1096,7 @@ MODAL AGREGAR PRODUCTO
                                 <input type="hidden" class="antiguaFotoPrincipal">
                                 <p class="help-block">Tamaño recomendado 400px * 450px <br> Peso máximo de la foto 2MB</p>
 
-                                <img loading="lazy" src="vistas/img/productos/default/default.jpg" class="img-thumbnail previsualizarPrincipal" width="200px">
+                                <img loading="lazy" src="vistas/img/default/default.jpg" class="img-thumbnail previsualizarPrincipal" width="200px">
 
                               </div>
                               <!--=====================================
