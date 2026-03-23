@@ -307,7 +307,8 @@ if (!function_exists('_notiTiempoRel')) {
               $neTiempo = _notiTiempoRel($nuData['fecha']);
               ?>
               <li>
-                <a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;cursor:default;white-space:normal">
+                <a href="index.php?ruta=ordenesnew&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
+                  style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal">
                   <div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
                     <i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i>
                   </div>
@@ -335,7 +336,8 @@ if (!function_exists('_notiTiempoRel')) {
               $neColor = _notiEstadoColor($nuData['estado_nuevo']);
               ?>
               <li>
-                <a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $neColor[0]; ?>;cursor:default;white-space:normal">
+                <a href="index.php?ruta=ordenesnew&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
+                  style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $neColor[0]; ?>;white-space:normal">
                   <div style="width:32px;height:32px;border-radius:50%;background:<?php echo $neColor[1]; ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
                     <i class="fa-solid <?php echo $neColor[2]; ?>" style="font-size:12px;color:<?php echo $neColor[0]; ?>"></i>
                   </div>
@@ -972,8 +974,9 @@ if (!function_exists('_notiTiempoRel')) {
 
     // Genera el HTML de un item del dropdown según el tipo
     function egsBuildDropdownItem(data) {
+      var link = 'index.php?ruta=ordenesnew&idOrden=' + data.idOrden;
       if (data.type === 'traspaso') {
-        return '<li><a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;cursor:default;white-space:normal">' +
+        return '<li><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal">' +
           '<div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
           '<i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i></div>' +
           '<div style="flex:1;min-width:0;line-height:1.4">' +
@@ -984,7 +987,7 @@ if (!function_exists('_notiTiempoRel')) {
           '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>' + (data.usuario || '') + ' <span style="margin-left:auto">Ahora</span></div>' +
           '</div></a></li>';
       } else if (data.type === 'obs') {
-        return '<li><a href="index.php?ruta=ordenesnew&idOrden=' + data.idOrden + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">' +
+        return '<li><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">' +
           '<div style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
           '<i class="fa-solid fa-comment-dots" style="font-size:12px;color:#f59e0b"></i></div>' +
           '<div style="flex:1;min-width:0;line-height:1.4">' +
@@ -993,8 +996,8 @@ if (!function_exists('_notiTiempoRel')) {
           '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>' + (data.creador || '') + ' <span style="margin-left:auto">Ahora</span></div>' +
           '</div></a></li>';
       } else {
-        // estado — usar color genérico azul para simplificar
-        return '<li><a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #3b82f6;cursor:default;white-space:normal">' +
+        // estado
+        return '<li><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #3b82f6;white-space:normal">' +
           '<div style="width:32px;height:32px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
           '<i class="fa-solid fa-arrow-right-arrow-left" style="font-size:12px;color:#3b82f6"></i></div>' +
           '<div style="flex:1;min-width:0;line-height:1.4">' +
