@@ -307,7 +307,7 @@ if (!function_exists('_notiTiempoRel')) {
               $neTiempo = _notiTiempoRel($nuData['fecha']);
               ?>
               <li>
-                <a href="index.php?ruta=ordenesnew&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
+                <a href="index.php?ruta=infoOrden&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
                   style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal">
                   <div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
                     <i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i>
@@ -336,7 +336,7 @@ if (!function_exists('_notiTiempoRel')) {
               $neColor = _notiEstadoColor($nuData['estado_nuevo']);
               ?>
               <li>
-                <a href="index.php?ruta=ordenesnew&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
+                <a href="index.php?ruta=infoOrden&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
                   style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $neColor[0]; ?>;white-space:normal">
                   <div style="width:32px;height:32px;border-radius:50%;background:<?php echo $neColor[1]; ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
                     <i class="fa-solid <?php echo $neColor[2]; ?>" style="font-size:12px;color:<?php echo $neColor[0]; ?>"></i>
@@ -362,7 +362,7 @@ if (!function_exists('_notiTiempoRel')) {
               $nobCreador = isset($nuData['creador_nombre']) ? $nuData['creador_nombre'] : 'Usuario';
               ?>
               <li>
-                <a href="index.php?ruta=ordenesnew&idOrden=<?php echo $nuData['id_orden']; ?>"
+                <a href="index.php?ruta=infoOrden&idOrden=<?php echo $nuData['id_orden']; ?>"
                   style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">
                   <div style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
                     <i class="fa-solid fa-comment-dots" style="font-size:12px;color:#f59e0b"></i>
@@ -389,13 +389,7 @@ if (!function_exists('_notiTiempoRel')) {
               $urgColor = $dias >= 30 ? '#ef4444' : ($dias >= 15 ? '#f59e0b' : '#3b82f6');
               ?>
               <li>
-                <a class="btnVerInfoOrden" idOrden="<?php echo $nuData["id"]; ?>"
-                  cliente="<?php echo isset($nuData["id_usuario"]) ? $nuData["id_usuario"] : ''; ?>"
-                  tecnico="<?php echo isset($nuData["id_tecnico"]) ? $nuData["id_tecnico"] : ''; ?>"
-                  asesor="<?php echo isset($nuData["id_Asesor"]) ? $nuData["id_Asesor"] : ''; ?>"
-                  empresa="<?php echo isset($nuData["id_empresa"]) ? $nuData["id_empresa"] : ''; ?>"
-                  pedido="<?php echo isset($nuData["id_pedido"]) ? $nuData["id_pedido"] : ''; ?>"
-                  tecnicodos="<?php echo isset($nuData["id_tecnicoDos"]) ? $nuData["id_tecnicoDos"] : ''; ?>" item="nuevasVisitas"
+                <a href="index.php?ruta=infoOrden&idOrden=<?php echo $nuData["id"]; ?>"
                   style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $urgColor; ?>;white-space:normal">
                   <div style="width:32px;height:32px;border-radius:50%;background:<?php echo $dias >= 30 ? '#fef2f2' : ($dias >= 15 ? '#fffbeb' : '#eff6ff'); ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
                     <i class="fa-solid fa-clock-rotate-left" style="font-size:12px;color:<?php echo $urgColor; ?>"></i>
@@ -974,7 +968,7 @@ if (!function_exists('_notiTiempoRel')) {
 
     // Genera el HTML de un item del dropdown según el tipo
     function egsBuildDropdownItem(data) {
-      var link = 'index.php?ruta=ordenesnew&idOrden=' + data.idOrden;
+      var link = 'index.php?ruta=infoOrden&idOrden=' + data.idOrden;
       if (data.type === 'traspaso') {
         return '<li><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal">' +
           '<div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +

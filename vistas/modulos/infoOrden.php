@@ -263,6 +263,17 @@ $item = "id";
 $valor = $_GET["idOrden"];
 $ordenes = controladorOrdenes::ctrMostrarordenesParaValidar($item, $valor);
 
+// Fallback: si faltan parámetros GET, obtenerlos de la orden misma
+if (is_array($ordenes) && !empty($ordenes)) {
+	$_ord0 = $ordenes[0];
+	if (!isset($_GET["cliente"]))  $_GET["cliente"]  = isset($_ord0["id_usuario"])   ? $_ord0["id_usuario"]   : 0;
+	if (!isset($_GET["empresa"]))  $_GET["empresa"]  = isset($_ord0["id_empresa"])   ? $_ord0["id_empresa"]   : 0;
+	if (!isset($_GET["asesor"]))   $_GET["asesor"]   = isset($_ord0["id_Asesor"])    ? $_ord0["id_Asesor"]    : 0;
+	if (!isset($_GET["tecnico"]))  $_GET["tecnico"]  = isset($_ord0["id_tecnico"])   ? $_ord0["id_tecnico"]   : 0;
+	if (!isset($_GET["pedido"]))   $_GET["pedido"]   = isset($_ord0["id_pedido"])    ? $_ord0["id_pedido"]    : 0;
+	if (!isset($_GET["tecnicodos"])) $_GET["tecnicodos"] = isset($_ord0["id_tecnicoDos"]) ? $_ord0["id_tecnicoDos"] : 0;
+}
+
 // Cliente
 $usuario = ControladorClientes::ctrMostrarClientesOrdenes("id", $_GET["cliente"]);
 
