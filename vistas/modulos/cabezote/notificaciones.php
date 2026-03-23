@@ -993,7 +993,9 @@ if (!function_exists('_notiTiempoRel')) {
         }
 
         // Detectar nueva notificación de estado/traspaso
+        var hayNuevoEstado = false;
         if (r.ultimaNotif && r.ultimaNotif.id && r.ultimaNotif.id > lastEstadoId) {
+          hayNuevoEstado = true;
           lastEstadoId = r.ultimaNotif.id;
           // Sincronizar con localStorage para evitar re-mostrar en otras pestañas/navegaciones
           localStorage.setItem('egs_toast_estado_lastId', r.ultimaNotif.id);
@@ -1035,19 +1037,24 @@ if (!function_exists('_notiTiempoRel')) {
             }));
           }
         }
-        // Detectar nueva observación
-        else if (r.ultimaObs && r.ultimaObs.id && r.ultimaObs.id > lastObsId) {
+        // Detectar nueva observación (independiente del estado)
+        if (r.ultimaObs && r.ultimaObs.id && r.ultimaObs.id > lastObsId) {
           lastObsId = r.ultimaObs.id;
           localStorage.setItem('egs_toast_obs_lastId', r.ultimaObs.id);
-          egsPlayNotifSound('obs');
-          egsShowLiveToast({
-            type: 'obs',
-            idOrden: r.ultimaObs.idOrden,
-            texto: r.ultimaObs.texto,
-            creador: r.ultimaObs.creador
-          });
 
-          // Insertar en el dropdown menu
+          // Si hubo toast de estado, esperar 7s para no sobreponerlo
+          var obsDelay = hayNuevoEstado ? 7000 : 0;
+          setTimeout(function () {
+            egsPlayNotifSound('obs');
+            egsShowLiveToast({
+              type: 'obs',
+              idOrden: r.ultimaObs.idOrden,
+              texto: r.ultimaObs.texto,
+              creador: r.ultimaObs.creador
+            });
+          }, obsDelay);
+
+          // Insertar en el dropdown menu inmediatamente
           var $menu = $('.notifications-menu .menu');
           if ($menu.length) {
             var itemHtml = egsBuildDropdownItem({

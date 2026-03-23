@@ -149,8 +149,14 @@ class ModeloObservaciones
 	OBSERVACIONES RECIENTES PARA NOTIFICACIÓN
 	(Hoy, no creadas por el usuario actual)
 	=============================================*/
-	static public function mdlObservacionesRecientesNotif($tabla, $idUsuario, $limite = 15)
+	static public function mdlObservacionesRecientesNotif($tabla, $idUsuario, $limite = 15, $ordenIds = null)
 	{
+
+		$filtroOrden = "";
+		if (is_array($ordenIds) && !empty($ordenIds)) {
+			$placeholders = implode(',', array_map('intval', $ordenIds));
+			$filtroOrden = " AND o.id_orden IN ($placeholders)";
+		}
 
 		$stmt = Conexion::conectar()->prepare(
 			"SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
@@ -159,6 +165,7 @@ class ModeloObservaciones
 			 LEFT JOIN administradores a ON a.id = o.id_creador
 			 WHERE DATE(o.fecha) = CURDATE()
 			   AND o.id_creador != :idUsuario
+			   $filtroOrden
 			 ORDER BY o.fecha DESC
 			 LIMIT :limite"
 		);
