@@ -185,6 +185,46 @@ try {
 // ── Total combinado ──
 $_noti_total = $_noti_totalAtraso + $_noti_totalEstado + $_noti_totalObs;
 
+// ══════════════════════════════════════
+// UNIFICAR NOTIFICACIONES EN ORDEN CRONOLÓGICO
+// ══════════════════════════════════════
+$_noti_unified = array();
+
+// Agregar cambios de estado/traspasos
+foreach (array_slice($_noti_estado, 0, 15) as $ne) {
+  $_noti_unified[] = array(
+    '_type'  => isset($ne['tipo']) ? $ne['tipo'] : 'estado',
+    '_fecha' => $ne['fecha'],
+    '_data'  => $ne
+  );
+}
+
+// Agregar observaciones
+foreach (array_slice($_noti_obs, 0, 8) as $nob) {
+  $_noti_unified[] = array(
+    '_type'  => 'obs',
+    '_fecha' => $nob['fecha'],
+    '_data'  => $nob
+  );
+}
+
+// Agregar atrasos (usar fecha_ingreso como referencia)
+foreach ($_noti_mostrar as $o) {
+  $_noti_unified[] = array(
+    '_type'  => 'atraso',
+    '_fecha' => isset($o['fecha_ingreso']) ? $o['fecha_ingreso'] : '2000-01-01',
+    '_data'  => $o
+  );
+}
+
+// Ordenar por fecha descendente (más recientes primero)
+usort($_noti_unified, function ($a, $b) {
+  return strtotime($b['_fecha']) - strtotime($a['_fecha']);
+});
+
+// Limitar a 25 items en el dropdown
+$_noti_unified = array_slice($_noti_unified, 0, 25);
+
 // Helper: info visual de estado
 if (!function_exists('_notiEstadoColor')) {
   function _notiEstadoColor($estado)
@@ -258,125 +298,120 @@ if (!function_exists('_notiTiempoRel')) {
       <li>
         <ul class="menu" style="max-height:400px;overflow-y:auto">
 
-          <?php // ── Cambios de estado + traspasos (primero, son las nuevas) ──
-            if (!empty($_noti_estado)):
-              foreach (array_slice($_noti_estado, 0, 15) as $ne):
-                $neTipo = isset($ne['tipo']) ? $ne['tipo'] : 'estado';
-                $neTiempo = _notiTiempoRel($ne['fecha']);
+          <?php foreach ($_noti_unified as $_nu):
+            $nuType = $_nu['_type'];
+            $nuData = $_nu['_data'];
 
-                if ($neTipo === 'traspaso'):
-                  // Traspaso de técnico
-                  ?>
-                <li>
-                  <a
-                    style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;cursor:default;white-space:normal">
-                    <div
-                      style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
-                      <i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i>
-                    </div>
-                    <div style="flex:1;min-width:0;line-height:1.4">
-                      <div style="font-size:12px;color:#0f172a">
-                        <strong>#<?php echo htmlspecialchars($ne['id_orden']); ?></strong>
-                        traspaso de equipo
-                      </div>
-                      <div style="font-size:11px;color:#64748b;margin-top:1px">
-                        <?php echo htmlspecialchars($ne['estado_anterior']); ?>
-                        <i class="fa-solid fa-arrow-right" style="font-size:8px;color:#8b5cf6;margin:0 3px"></i>
-                        <strong style="color:#8b5cf6"><?php echo htmlspecialchars($ne['estado_nuevo']); ?></strong>
-                      </div>
-                      <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
-                        <span><i class="fa-solid fa-user"
-                            style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($ne['nombre_usuario']); ?></span>
-                        <span style="margin-left:auto"><?php echo $neTiempo; ?></span>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              <?php else:
-                  // Cambio de estado normal
-                  $neColor = _notiEstadoColor($ne['estado_nuevo']);
-                  ?>
-                <li>
-                  <a
-                    style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $neColor[0]; ?>;cursor:default;white-space:normal">
-                    <div
-                      style="width:32px;height:32px;border-radius:50%;background:<?php echo $neColor[1]; ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
-                      <i class="fa-solid <?php echo $neColor[2]; ?>"
-                        style="font-size:12px;color:<?php echo $neColor[0]; ?>"></i>
-                    </div>
-                    <div style="flex:1;min-width:0;line-height:1.4">
-                      <div style="font-size:12px;color:#0f172a">
-                        <strong>#<?php echo htmlspecialchars($ne['id_orden']); ?></strong>
-                        cambió a
-                        <span
-                          style="font-weight:700;color:<?php echo $neColor[0]; ?>"><?php echo htmlspecialchars($ne['estado_nuevo']); ?></span>
-                      </div>
-                      <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
-                        <span><i class="fa-solid fa-user"
-                            style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($ne['nombre_usuario']); ?></span>
-                        <span style="margin-left:auto"><?php echo $neTiempo; ?></span>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              <?php endif; endforeach; endif; ?>
-
-          <?php // ── Observaciones nuevas ──
-            if (!empty($_noti_obs)):
-              foreach (array_slice($_noti_obs, 0, 8) as $nob):
-                $nobTiempo = _notiTiempoRel($nob['fecha']);
-                $nobTexto = mb_strlen($nob['observacion']) > 60 ? mb_substr($nob['observacion'], 0, 60) . '…' : $nob['observacion'];
-                $nobCreador = isset($nob['creador_nombre']) ? $nob['creador_nombre'] : 'Usuario';
-                ?>
+            if ($nuType === 'traspaso'):
+              // ── Traspaso de técnico ──
+              $neTiempo = _notiTiempoRel($nuData['fecha']);
+              ?>
               <li>
-                <a href="index.php?ruta=ordenesnew&idOrden=<?php echo $nob['id_orden']; ?>"
+                <a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;cursor:default;white-space:normal">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+                    <i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i>
+                  </div>
+                  <div style="flex:1;min-width:0;line-height:1.4">
+                    <div style="font-size:12px;color:#0f172a">
+                      <strong>#<?php echo htmlspecialchars($nuData['id_orden']); ?></strong>
+                      traspaso de equipo
+                    </div>
+                    <div style="font-size:11px;color:#64748b;margin-top:1px">
+                      <?php echo htmlspecialchars($nuData['estado_anterior']); ?>
+                      <i class="fa-solid fa-arrow-right" style="font-size:8px;color:#8b5cf6;margin:0 3px"></i>
+                      <strong style="color:#8b5cf6"><?php echo htmlspecialchars($nuData['estado_nuevo']); ?></strong>
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
+                      <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($nuData['nombre_usuario']); ?></span>
+                      <span style="margin-left:auto"><?php echo $neTiempo; ?></span>
+                    </div>
+                  </div>
+                </a>
+              </li>
+
+            <?php elseif ($nuType === 'estado'):
+              // ── Cambio de estado ──
+              $neTiempo = _notiTiempoRel($nuData['fecha']);
+              $neColor = _notiEstadoColor($nuData['estado_nuevo']);
+              ?>
+              <li>
+                <a style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $neColor[0]; ?>;cursor:default;white-space:normal">
+                  <div style="width:32px;height:32px;border-radius:50%;background:<?php echo $neColor[1]; ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+                    <i class="fa-solid <?php echo $neColor[2]; ?>" style="font-size:12px;color:<?php echo $neColor[0]; ?>"></i>
+                  </div>
+                  <div style="flex:1;min-width:0;line-height:1.4">
+                    <div style="font-size:12px;color:#0f172a">
+                      <strong>#<?php echo htmlspecialchars($nuData['id_orden']); ?></strong>
+                      cambió a
+                      <span style="font-weight:700;color:<?php echo $neColor[0]; ?>"><?php echo htmlspecialchars($nuData['estado_nuevo']); ?></span>
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
+                      <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($nuData['nombre_usuario']); ?></span>
+                      <span style="margin-left:auto"><?php echo $neTiempo; ?></span>
+                    </div>
+                  </div>
+                </a>
+              </li>
+
+            <?php elseif ($nuType === 'obs'):
+              // ── Observación ──
+              $nobTiempo = _notiTiempoRel($nuData['fecha']);
+              $nobTexto = mb_strlen($nuData['observacion']) > 60 ? mb_substr($nuData['observacion'], 0, 60) . '…' : $nuData['observacion'];
+              $nobCreador = isset($nuData['creador_nombre']) ? $nuData['creador_nombre'] : 'Usuario';
+              ?>
+              <li>
+                <a href="index.php?ruta=ordenesnew&idOrden=<?php echo $nuData['id_orden']; ?>"
                   style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #f59e0b;white-space:normal">
-                  <div
-                    style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
                     <i class="fa-solid fa-comment-dots" style="font-size:12px;color:#f59e0b"></i>
                   </div>
                   <div style="flex:1;min-width:0;line-height:1.4">
                     <div style="font-size:12px;color:#0f172a">
-                      <strong style="color:#f59e0b">#<?php echo htmlspecialchars($nob['id_orden']); ?></strong>
+                      <strong style="color:#f59e0b">#<?php echo htmlspecialchars($nuData['id_orden']); ?></strong>
                       nueva observación
                     </div>
                     <div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis">
-                      <?php echo htmlspecialchars($nobTexto); ?></div>
+                      <?php echo htmlspecialchars($nobTexto); ?>
+                    </div>
                     <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
-                      <span><i class="fa-solid fa-user"
-                          style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($nobCreador); ?></span>
+                      <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($nobCreador); ?></span>
                       <span style="margin-left:auto"><?php echo $nobTiempo; ?></span>
                     </div>
                   </div>
                 </a>
               </li>
-            <?php endforeach; endif; ?>
 
-          <?php // ── Atrasos (después) ──
-            if (!empty($_noti_mostrar)):
-              foreach ($_noti_mostrar as $o):
-                $dias = max(0, floor((time() - strtotime($o["fecha_ingreso"])) / 86400));
-                $urgColor = $dias >= 30 ? '#ef4444' : ($dias >= 15 ? '#f59e0b' : '#3b82f6');
-                ?>
+            <?php elseif ($nuType === 'atraso'):
+              // ── Atraso de entrega ──
+              $dias = max(0, floor((time() - strtotime($nuData["fecha_ingreso"])) / 86400));
+              $urgColor = $dias >= 30 ? '#ef4444' : ($dias >= 15 ? '#f59e0b' : '#3b82f6');
+              ?>
               <li>
-                <a class="btnVerInfoOrden" idOrden="<?php echo $o["id"]; ?>"
-                  cliente="<?php echo isset($o["id_usuario"]) ? $o["id_usuario"] : ''; ?>"
-                  tecnico="<?php echo isset($o["id_tecnico"]) ? $o["id_tecnico"] : ''; ?>"
-                  asesor="<?php echo isset($o["id_Asesor"]) ? $o["id_Asesor"] : ''; ?>"
-                  empresa="<?php echo isset($o["id_empresa"]) ? $o["id_empresa"] : ''; ?>"
-                  pedido="<?php echo isset($o["id_pedido"]) ? $o["id_pedido"] : ''; ?>"
-                  tecnicodos="<?php echo isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : ''; ?>" item="nuevasVisitas"
-                  style="display:flex;align-items:center;gap:8px;padding:8px 12px">
-                  <span
-                    style="width:8px;height:8px;border-radius:50%;background:<?php echo $urgColor; ?>;flex-shrink:0"></span>
-                  <span style="flex:1">
-                    <strong>#<?php echo $o["id"]; ?></strong> Atraso de entrega
-                    <small style="display:block;color:#94a3b8;font-size:11px"><?php echo $dias; ?> días —
-                      <?php echo date("d/m/Y", strtotime($o["fecha_ingreso"])); ?></small>
-                  </span>
+                <a class="btnVerInfoOrden" idOrden="<?php echo $nuData["id"]; ?>"
+                  cliente="<?php echo isset($nuData["id_usuario"]) ? $nuData["id_usuario"] : ''; ?>"
+                  tecnico="<?php echo isset($nuData["id_tecnico"]) ? $nuData["id_tecnico"] : ''; ?>"
+                  asesor="<?php echo isset($nuData["id_Asesor"]) ? $nuData["id_Asesor"] : ''; ?>"
+                  empresa="<?php echo isset($nuData["id_empresa"]) ? $nuData["id_empresa"] : ''; ?>"
+                  pedido="<?php echo isset($nuData["id_pedido"]) ? $nuData["id_pedido"] : ''; ?>"
+                  tecnicodos="<?php echo isset($nuData["id_tecnicoDos"]) ? $nuData["id_tecnicoDos"] : ''; ?>" item="nuevasVisitas"
+                  style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $urgColor; ?>;white-space:normal">
+                  <div style="width:32px;height:32px;border-radius:50%;background:<?php echo $dias >= 30 ? '#fef2f2' : ($dias >= 15 ? '#fffbeb' : '#eff6ff'); ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+                    <i class="fa-solid fa-clock-rotate-left" style="font-size:12px;color:<?php echo $urgColor; ?>"></i>
+                  </div>
+                  <div style="flex:1;min-width:0;line-height:1.4">
+                    <div style="font-size:12px;color:#0f172a">
+                      <strong>#<?php echo $nuData["id"]; ?></strong> Atraso de entrega
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
+                      <span><i class="fa-solid fa-calendar" style="font-size:8px;margin-right:2px"></i><?php echo date("d/m/Y", strtotime($nuData["fecha_ingreso"])); ?></span>
+                      <span style="margin-left:auto;font-weight:600;color:<?php echo $urgColor; ?>"><?php echo $dias; ?>d</span>
+                    </div>
+                  </div>
                 </a>
               </li>
-            <?php endforeach; endif; ?>
+
+            <?php endif; ?>
+          <?php endforeach; ?>
 
         </ul>
       </li>
