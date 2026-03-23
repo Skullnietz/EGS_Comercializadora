@@ -28,7 +28,7 @@ PRODUCTOS RECIENTES
 
 	      <li class="item">
 	        <div class="product-img">
-	          <img src="vistas/img/default/default.jpg" alt="Product Image">
+	          <img src="vistas/img/default/default.png" alt="Product Image">
 	        </div>
 	        <div class="product-info">
 	          <a href="javascript:void(0)" class="product-title">Samsung TV
@@ -41,7 +41,7 @@ PRODUCTOS RECIENTES
 
 	      <li class="item">
 	        <div class="product-img">
-	          <img src="vistas/img/default/default.jpg" alt="Product Image">
+	          <img src="vistas/img/default/default.png" alt="Product Image">
 	        </div>
 	        <div class="product-info">
 	          <a href="javascript:void(0)" class="product-title">Bicycle
@@ -54,7 +54,7 @@ PRODUCTOS RECIENTES
 
 	      <li class="item">
 	        <div class="product-img">
-	          <img src="vistas/img/default/default.jpg" alt="Product Image">
+	          <img src="vistas/img/default/default.png" alt="Product Image">
 	        </div>
 	        <div class="product-info">
 	          <a href="javascript:void(0)" class="product-title">Xbox One <span class="label label-danger pull-right">$350</span></a>
@@ -66,7 +66,7 @@ PRODUCTOS RECIENTES
 
 	      <li class="item">
 	        <div class="product-img">
-	          <img src="vistas/img/default/default.jpg" alt="Product Image">
+	          <img src="vistas/img/default/default.png" alt="Product Image">
 	        </div>
 	        <div class="product-info">
 	          <a href="javascript:void(0)" class="product-title">PlayStation 4

@@ -456,7 +456,7 @@ function _egsEstadoClass($estado) {
 						</div>
 						<?php else: ?>
 						<div style="width:100%;border-radius:12px;overflow:hidden;background:#f1f5f9">
-							<img src="vistas/img/default/default.jpg" alt="Sin imagen" style="width:100%;height:300px;object-fit:contain;display:block" loading="lazy">
+							<img src="vistas/img/default/default.png" alt="Sin imagen" style="width:100%;height:300px;object-fit:contain;display:block" loading="lazy">
 						</div>
 						<?php endif; ?>
 					</div>

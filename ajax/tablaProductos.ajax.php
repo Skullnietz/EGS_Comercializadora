@@ -108,7 +108,7 @@ class TablaProductos{
 
   			}else{
 
-  				$imagenPortada = "<img loading='lazy' src='vistas/img/default/default.jpg' class='img-thumbnail imgPortadaProductos' width='100px'>";
+  				$imagenPortada = "<img loading='lazy' src='vistas/img/default/default.png' class='img-thumbnail imgPortadaProductos' width='100px'>";
   			}
 
 			/*=============================================

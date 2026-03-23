@@ -63,7 +63,7 @@ class TablaCategorias{
 
 			}else{
 
-				$imgPortada = "<img loading='lazy' class='img-thumbnail imgPortadaCategorias' src='vistas/img/default/default.jpg' width='100px'>";
+				$imgPortada = "<img loading='lazy' class='img-thumbnail imgPortadaCategorias' src='vistas/img/default/default.png' width='100px'>";
 			}
 
 			/*=============================================

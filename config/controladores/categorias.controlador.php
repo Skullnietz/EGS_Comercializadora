@@ -29,7 +29,7 @@ class ControladorCategorias{
 				VALIDAR IMAGEN PORTADA
 				=============================================*/
 
-				$rutaPortada = "vistas/img/default/default.jpg";
+				$rutaPortada = "vistas/img/default/default.png";
 
 				if(isset($_FILES["fotoPortada"]["tmp_name"]) && !empty($_FILES["fotoPortada"]["tmp_name"])){
 
@@ -551,7 +551,7 @@ class ControladorCategorias{
 			ELIMINAR CABECERA
 			=============================================*/
 
-			if($_GET["imgPortada"] != "" && $_GET["imgPortada"] != "vistas/img/default/default.jpg"){
+			if($_GET["imgPortada"] != "" && $_GET["imgPortada"] != "vistas/img/default/default.png"){
 
 				unlink($_GET["imgPortada"]);
 

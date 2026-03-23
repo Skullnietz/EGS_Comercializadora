@@ -926,7 +926,7 @@ MODAL AGREGAR OORDENES
                 <p class="help-block">Tamaño recomendado 1280px * 720px <br> Peso máximo de la foto 2MB</p>
               </div>
               <div class="col col-lg-6">
-                <img loading="lazy" src="vistas/img/default/default.jpg" class="img-thumbnail previsualizarPortada" style="width=200px;">
+                <img loading="lazy" src="vistas/img/default/default.png" class="img-thumbnail previsualizarPortada" style="width=200px;">
               </div>
             </div>
             <div class="form-group row ocultarimagen">
@@ -936,7 +936,7 @@ MODAL AGREGAR OORDENES
                 <p class="help-block">Tamaño recomendado 400px * 450px <br> Peso máximo de la foto 2MB</p>
               </div>
               <div class="col col-lg-6">
-                <img loading="lazy" src="vistas/img/default/default.jpg" class="img-thumbnail previsualizarPrincipal" style="width=200px;">
+                <img loading="lazy" src="vistas/img/default/default.png" class="img-thumbnail previsualizarPrincipal" style="width=200px;">
               </div>
             </div>
           </div>
@@ -1894,7 +1894,7 @@ MODAL EDITAR ORDEN
 
 
 
-              <img loading="lazy" src="vistas/img/default/default.jpg" class="img-thumbnail previsualizarPortada" style="width=200px;">
+              <img loading="lazy" src="vistas/img/default/default.png" class="img-thumbnail previsualizarPortada" style="width=200px;">
 
               </div>
 
@@ -1932,7 +1932,7 @@ MODAL EDITAR ORDEN
 
 
 
-              <img loading="lazy" src="vistas/img/default/default.jpg" class="img-thumbnail previsualizarPrincipal" style="width=200px;">
+              <img loading="lazy" src="vistas/img/default/default.png" class="img-thumbnail previsualizarPrincipal" style="width=200px;">
 
               </div>
 

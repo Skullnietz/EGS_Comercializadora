@@ -88,8 +88,8 @@ function _admGetImgOrd($ord) {
             ?>
               <tr>
                 <td style="padding:6px 4px;width:40px">
-                  <img src="<?php echo !empty($img) ? htmlspecialchars($img) : 'vistas/img/default/default.jpg'; ?>"
-                       onerror="this.onerror=null;this.src='vistas/img/default/default.jpg'"
+                  <img src="<?php echo !empty($img) ? htmlspecialchars($img) : 'vistas/img/default/default.png'; ?>"
+                       onerror="this.onerror=null;this.src='vistas/img/default/default.png'"
                        style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0" loading="lazy">
                 </td>
                 <td><span style="font-weight:700;color:#6366f1">#<?php echo htmlspecialchars($o['id']); ?></span></td>

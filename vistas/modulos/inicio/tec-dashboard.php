@@ -115,7 +115,7 @@ function _tecDias($fecha) {
 
 // ── Helper: render imagen con fallback a default ──
 function _tecImgTag($src, $w, $h, $radius) {
-    $fallback = "this.onerror=null;this.src='vistas/img/default/default.jpg';";
+    $fallback = "this.onerror=null;this.src='vistas/img/default/default.png';";
     $html = '<img src="' . htmlspecialchars($src) . '" onerror="' . $fallback . '" style="width:'.$w.'px;height:'.$h.'px;border-radius:'.$radius.'px;object-fit:cover;flex-shrink:0;border:1px solid #e2e8f0">';
     return $html;
 }

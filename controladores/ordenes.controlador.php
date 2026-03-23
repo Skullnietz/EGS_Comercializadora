@@ -425,7 +425,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				$rutaPortada = "../vistas/img/default/default.jpg";
+				$rutaPortada = "../vistas/img/default/default.png";
 
 
 
@@ -559,7 +559,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				$rutaFotoPrincipal = "../vistas/img/default/default.jpg";
+				$rutaFotoPrincipal = "../vistas/img/default/default.png";
 
 
 
@@ -1543,7 +1543,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-			if ($_GET["imgPrincipal"] != "" && $_GET["imgPrincipal"] != "vistas/img/default/default.jpg") {
+			if ($_GET["imgPrincipal"] != "" && $_GET["imgPrincipal"] != "vistas/img/default/default.png") {
 
 
 
@@ -1555,7 +1555,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-			if ($_GET["imgPortada"] != "" && $_GET["imgPortada"] != "vistas/img/default/default.jpg") {
+			if ($_GET["imgPortada"] != "" && $_GET["imgPortada"] != "vistas/img/default/default.png") {
 
 
 
