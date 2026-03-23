@@ -5133,6 +5133,15 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 			} catch (Exception $e) {
 			}
 
+			// DEBUG: Log temporal para verificar los valores que llegan
+			file_put_contents("debug_infoOrden.txt", date("Y-m-d H:i:s") . " | " .
+				"perfil=" . (isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "?") .
+				" | tecnicodos_POST=" . (isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? $_POST["tecnicodosEditadoEnOrdenDianmica"] : "NO_EXISTE") .
+				" | inversiones_POST=" . (isset($_POST["listarinversiones"]) ? mb_substr($_POST["listarinversiones"], 0, 80) : "NO_EXISTE") .
+				" | totalInv_POST=" . (isset($_POST["totalInversiones"]) ? $_POST["totalInversiones"] : "NO_EXISTE") .
+				" | estado=" . $_POST["estado"] .
+				"\n", FILE_APPEND);
+
 			$datosOrdenDinamica = array(
 
 				"id" => $_POST["idOrden"],
@@ -5241,6 +5250,8 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 					"tecnico" => $_POST["tecnicoEditadoEnOrdenDianmica"],
 
+					"tecnicodos" => isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? intval($_POST["tecnicodosEditadoEnOrdenDianmica"]) : 0,
+
 					"estado" => "Entregado (Ent)",
 
 					"partidaUno" => $_POST["partidaUno"],
@@ -5289,17 +5300,17 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 					"listatOrdenesNuevas" => $_POST["listatOrdenesNuevas"],
 
-					"listarinversiones" => $_POST["listarinversiones"],
+					"listarinversiones" => isset($_POST["listarinversiones"]) ? $_POST["listarinversiones"] : '',
 
-					"totalInversiones" => $_POST["totalInversiones"],
+					"totalInversiones" => isset($_POST["totalInversiones"]) ? $_POST["totalInversiones"] : 0,
 
 					"fecha_Salida" => $fechaActual,
 
-					"marcaDelEquipo" => $_POST["marcaDelEquipo"],
+					"marcaDelEquipo" => isset($_POST["marcaDelEquipo"]) ? $_POST["marcaDelEquipo"] : '',
 
-					"modeloDelEquipo" => $_POST["modeloDelEquipo"],
+					"modeloDelEquipo" => isset($_POST["modeloDelEquipo"]) ? $_POST["modeloDelEquipo"] : '',
 
-					"numeroDeSerieDelEquipo" => $_POST["numeroDeSerieDelEquipo"]
+					"numeroDeSerieDelEquipo" => isset($_POST["numeroDeSerieDelEquipo"]) ? $_POST["numeroDeSerieDelEquipo"] : ''
 
 				);
 
