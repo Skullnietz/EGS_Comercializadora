@@ -161,7 +161,8 @@
       "Bash(grep -r \"cotizacion\\\\|cotización\" /c/Users/black/Desktop/EGS/vistas/modulos --include=*.php --include=*.js)",
       "Bash(php -l vistas/modulos/cotizacion.php)",
       "Bash(php -l vistas/modulos/imprimir-cotizacion.php)",
-      "Bash(php -l config/routes.php)"
+      "Bash(php -l config/routes.php)",
+      "Bash(find /c/Users/black/Desktop/EGS/vistas/modulos/inicio -type f -name *.php)"
     ]
   }
 }

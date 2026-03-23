@@ -5141,6 +5141,8 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 				"tecnico" => $_POST["tecnicoEditadoEnOrdenDianmica"],
 
+				"tecnicodos" => isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? intval($_POST["tecnicodosEditadoEnOrdenDianmica"]) : 0,
+
 				"estado" => $_POST["estado"],
 
 				"partidaUno" => $_POST["partidaUno"],

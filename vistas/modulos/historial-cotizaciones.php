@@ -95,13 +95,17 @@ $_hc_expiradas = 0;
 $_hc_mesActual = date("Y-m");
 
 foreach ($_hc_cotizaciones as $c) {
-  $_hc_montoTotal += floatval($c["total"]);
   $fecha = isset($c["fecha"]) ? $c["fecha"] : "";
   if (!empty($fecha) && substr($fecha, 0, 7) === $_hc_mesActual) {
     $_hc_esteMes++;
   }
   $vig = _hcEvalVigencia(isset($c["vigencia"]) ? $c["vigencia"] : "", $fecha);
-  if ($vig[0]) $_hc_expiradas++; else $_hc_vigentes++;
+  if ($vig[0]) {
+    $_hc_expiradas++;
+  } else {
+    $_hc_vigentes++;
+    $_hc_montoTotal += floatval($c["total"]); // Solo acumular monto de cotizaciones activas
+  }
 }
 ?>
 
@@ -322,7 +326,7 @@ foreach ($_hc_cotizaciones as $c) {
         </div>
         <div>
           <div class="hc-kpi-value">$<?php echo number_format($_hc_montoTotal, 0, '.', ','); ?></div>
-          <div class="hc-kpi-label">Monto acumulado</div>
+          <div class="hc-kpi-label">Monto vigente</div>
         </div>
       </div>
     </div>

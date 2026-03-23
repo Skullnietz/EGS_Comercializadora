@@ -6,16 +6,25 @@
 $_cot_lista = isset($_crm_cotizaciones) && is_array($_crm_cotizaciones) ? $_crm_cotizaciones : array();
 $_cot_vigentes = array();
 $_cot_vencidas = array();
-$hoy = date("Y-m-d");
 
 foreach ($_cot_lista as $cot) {
-    $vig = isset($cot["vigencia"]) ? $cot["vigencia"] : "";
-    if (!empty($vig) && $vig < $hoy) $_cot_vencidas[] = $cot;
+    $vigText = isset($cot["vigencia"]) ? $cot["vigencia"] : "";
+    $fecha = isset($cot["fecha"]) ? $cot["fecha"] : "";
+    $expirada = false;
+    if (preg_match('/(\d+)/', $vigText, $m) && !empty($fecha)) {
+        $d = intval($m[1]);
+        $fb = strtotime($fecha);
+        if ($fb !== false) {
+            $expirada = (date('Y-m-d') > date('Y-m-d', strtotime("+{$d} days", $fb)));
+        }
+    }
+    if ($expirada) $_cot_vencidas[] = $cot;
     else $_cot_vigentes[] = $cot;
 }
 
+// Solo acumular monto de cotizaciones activas
 $_cot_totalMonto = 0;
-foreach ($_cot_lista as $c) {
+foreach ($_cot_vigentes as $c) {
     $_cot_totalMonto += floatval(isset($c["total"]) ? $c["total"] : 0);
 }
 ?>
@@ -62,8 +71,19 @@ foreach ($_cot_lista as $c) {
     <!-- List -->
     <div class="crm-card-body-flush" style="max-height:320px;overflow-y:auto">
       <?php foreach (array_slice($_cot_lista, 0, 10) as $cot):
-        $vigencia = isset($cot["vigencia"]) ? $cot["vigencia"] : "";
-        $vencida = (!empty($vigencia) && $vigencia < $hoy);
+        $vigText = isset($cot["vigencia"]) ? $cot["vigencia"] : "";
+        $fecha = isset($cot["fecha"]) ? $cot["fecha"] : "";
+        $vencida = false;
+        $diasRest = null;
+        if (preg_match('/(\d+)/', $vigText, $m) && !empty($fecha)) {
+            $d = intval($m[1]);
+            $fb = strtotime($fecha);
+            if ($fb !== false) {
+                $fExp = strtotime("+{$d} days", $fb);
+                $vencida = (date('Y-m-d') > date('Y-m-d', $fExp));
+                if (!$vencida) $diasRest = max(0, intval(($fExp - strtotime(date('Y-m-d'))) / 86400));
+            }
+        }
         $totalCot = floatval(isset($cot["total"]) ? $cot["total"] : 0);
         $nombreCli = isset($cot["nombre_cliente"]) ? $cot["nombre_cliente"] : (isset($cot["cliente"]) ? $cot["cliente"] : "Sin nombre");
         $asunto = isset($cot["asunto"]) ? $cot["asunto"] : (isset($cot["descripcion"]) ? $cot["descripcion"] : "");
@@ -79,10 +99,14 @@ foreach ($_cot_lista as $c) {
             </div>
             <div style="font-size:11px;color:#94a3b8">
               <?php echo !empty($asunto) ? htmlspecialchars(mb_substr($asunto, 0, 28)) : 'Sin asunto'; ?>
-              <?php if (!empty($vigencia)): ?>
-                &middot; <span style="color:<?php echo $vencida ? '#ef4444' : '#64748b'; ?>">
-                  <?php echo $vencida ? 'Venció' : 'Vence'; ?> <?php echo date("d/m", strtotime($vigencia)); ?>
+              <?php if ($vencida): ?>
+                &middot; <span style="color:#ef4444">Expirada</span>
+              <?php elseif ($diasRest !== null): ?>
+                &middot; <span style="color:<?php echo $diasRest <= 3 ? '#ef4444' : ($diasRest <= 7 ? '#f59e0b' : '#64748b'); ?>">
+                  <?php echo $diasRest; ?>d restantes
                 </span>
+              <?php else: ?>
+                &middot; <span style="color:#64748b"><?php echo htmlspecialchars($vigText); ?></span>
               <?php endif; ?>
             </div>
           </div>
