@@ -12,15 +12,18 @@ class ModeloObservaciones
 	static public function mdlMostrarobservaciones($tabla, $itemobs)
 	{
 
+		$stmt = Conexion::conectar()->prepare(
+			"SELECT o.*, a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
+			 FROM $tabla o
+			 LEFT JOIN administradores a ON a.id = o.id_creador
+			 WHERE o.id_orden = :idOrden
+			 ORDER BY o.fecha DESC"
+		);
 
-
-		$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE id_orden = $itemobs ORDER BY `fecha` DESC");
-
+		$stmt->bindParam(":idOrden", $itemobs, PDO::PARAM_INT);
 		$stmt->execute();
 
 		return $stmt->fetchAll();
-
-
 
 		$stmt->close();
 
