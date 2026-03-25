@@ -2828,12 +2828,15 @@ $(document).on('click', '#btn-ml-oauth', function () {
         cache: false, contentType: false, processData: false, dataType: 'json',
         success: function (r) {
           if (r.status === 'ok') {
-            // Mostrar la redirect_uri como referencia
+            // Mostrar la redirect_uri exacta antes de redirigir
             $('#ml-redirect-uri-hint')
-              .text('Redirect URI registrada: ' + r.redirect_uri)
+              .html('<i class="fa-solid fa-circle-info"></i> <strong>Redirect URI que debes tener en ML:</strong><br><code style="word-break:break-all;">' + r.redirect_uri + '</code><br>Redirigiendo a MercadoLibre...')
               .show();
-            // Redirigir a ML para autorizar
-            window.location.href = r.url;
+            $btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Redirigiendo...');
+            // Pequeña pausa para que el usuario vea la URI
+            setTimeout(function () {
+              window.location.href = r.url;
+            }, 2500);
           } else {
             swal({ type: 'error', title: 'Error', text: r.error || 'No se pudo generar la URL.', showConfirmButton: true });
             $btn.prop('disabled', false).html('<i class="fa-solid fa-link"></i> Conectar con MercadoLibre (OAuth)');

@@ -214,14 +214,17 @@ if ($accion === 'generarURLOAuth') {
         exit;
     }
 
-    // Construir redirect_uri dinámicamente
+    // Construir redirect_uri dinámicamente desde la ruta real del proyecto
+    // SCRIPT_NAME = /EGS_Comercializadora/ajax/mercadolibre.ajax.php
+    // → base      = /EGS_Comercializadora
     $protocol    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host        = $_SERVER['HTTP_HOST'];
-    $redirectUri = $protocol . '://' . $host . '/webhook/mercadolibre-oauth.php';
+    $scriptDir   = dirname($_SERVER['SCRIPT_NAME']); // .../ajax
+    $baseDir     = rtrim(dirname($scriptDir), '/');  // proyecto raíz
+    $redirectUri = $protocol . '://' . $host . $baseDir . '/webhook/mercadolibre-oauth.php';
 
-    // State CSRF
+    // State CSRF (session ya está abierta al inicio del archivo)
     $state = bin2hex(random_bytes(16));
-    session_start();
     $_SESSION['ml_oauth_state'] = $state;
 
     $authUrl = 'https://auth.mercadolibre.com.mx/authorization'

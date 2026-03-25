@@ -61,9 +61,10 @@ if (empty($config['client_id']) || empty($config['client_secret'])) {
 }
 
 /* ── Construir la Redirect URI (debe ser exacta a la registrada en ML) ──── */
+// SCRIPT_NAME = /EGS_Comercializadora/webhook/mercadolibre-oauth.php
 $protocol    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host        = $_SERVER['HTTP_HOST'];
-$redirectUri = $protocol . '://' . $host . '/webhook/mercadolibre-oauth.php';
+$redirectUri = $protocol . '://' . $host . $_SERVER['SCRIPT_NAME'];
 
 /* ── Canjear code por tokens ─────────────────────────────────────────────── */
 $ch = curl_init('https://api.mercadolibre.com/oauth/token');
