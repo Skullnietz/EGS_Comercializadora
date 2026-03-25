@@ -330,6 +330,27 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     font-weight: 500;
   }
 
+  #tablematerial_wrapper .bm-export-btn {
+    margin-right: 8px;
+    border-radius: 8px;
+    border: 1px solid #15803d;
+    background: #16a34a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 12px;
+    line-height: 1.2;
+    transition: all .15s ease;
+  }
+
+  #tablematerial_wrapper .bm-export-btn:hover,
+  #tablematerial_wrapper .bm-export-btn:focus {
+    background: #15803d;
+    border-color: #166534;
+    color: #fff;
+    outline: none;
+  }
+
   /* Paginacion DataTables (Bootstrap) - override local para evitar estilo blanco por defecto */
   #tablematerial_wrapper .dataTables_paginate {
     margin-top: 14px;
@@ -499,6 +520,11 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
       width: 100%;
       min-width: 0;
       margin-left: 0;
+    }
+
+    #tablematerial_wrapper .bm-export-btn {
+      display: inline-block;
+      margin: 0 0 8px;
     }
   }
 </style>
@@ -690,6 +716,8 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
   }
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <script>
   // ---- Modal de imagen (Plain JS) ----
   function openImageModal(imgElement) {
@@ -734,6 +762,64 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, ' ');
+  }
+
+  function textFromCell($cell) {
+    const dataState = $cell.attr('data-estado');
+    if (dataState) return dataState.toString().trim();
+    return $cell.text().replace(/\s+/g, ' ').trim();
+  }
+
+  function exportFilteredRowsToExcel(table) {
+    if (typeof XLSX === 'undefined') {
+      alert('No se pudo cargar la libreria de Excel. Intenta recargar la pagina.');
+      return;
+    }
+
+    const rows = [];
+    table.rows({ search: 'applied' }).every(function () {
+      const $row = $(this.node());
+      if (!$row.length) return;
+
+      const totalRaw = parseFloat($row.find('td:eq(8)').attr('data-total'));
+      rows.push([
+        textFromCell($row.find('td:eq(0)')),
+        textFromCell($row.find('td:eq(1)')),
+        textFromCell($row.find('td:eq(2)')),
+        textFromCell($row.find('td:eq(3)')),
+        textFromCell($row.find('td:eq(4)')),
+        textFromCell($row.find('td:eq(5)')),
+        textFromCell($row.find('td:eq(7)')),
+        isNaN(totalRaw) ? textFromCell($row.find('td:eq(8)')) : totalRaw,
+        textFromCell($row.find('td:eq(9)'))
+      ]);
+    });
+
+    if (!rows.length) {
+      alert('No hay registros filtrados para exportar.');
+      return;
+    }
+
+    const header = [[
+      '#', 'Informacion', 'Marca', 'Modelo', 'Orden', 'Tecnico', 'Estado', 'Total', 'Ingreso'
+    ]];
+    const ws = XLSX.utils.aoa_to_sheet(header.concat(rows));
+    ws['!cols'] = [
+      { wch: 6 }, { wch: 45 }, { wch: 20 }, { wch: 20 }, { wch: 12 },
+      { wch: 22 }, { wch: 24 }, { wch: 14 }, { wch: 14 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Busqueda Material');
+
+    const today = new Date();
+    const stamp = today.getFullYear().toString()
+      + String(today.getMonth() + 1).padStart(2, '0')
+      + String(today.getDate()).padStart(2, '0')
+      + '_'
+      + String(today.getHours()).padStart(2, '0')
+      + String(today.getMinutes()).padStart(2, '0');
+    XLSX.writeFile(wb, 'busqueda_material_filtrada_' + stamp + '.xlsx');
   }
 
   // Filtro global extra: Total (rango) + Fecha (rango) + Estado (select)
@@ -796,6 +882,15 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
         { targets: [0, 6, 10], orderable: false },  // #, Imagen, Acción
         { targets: [6, 10], searchable: false }    // Imagen, Acción
       ]
+    });
+
+    const $filter = $('#tablematerial_wrapper .dataTables_filter');
+    if ($filter.length && !$filter.find('#btnExportExcelMaterial').length) {
+      $filter.prepend('<button type="button" id="btnExportExcelMaterial" class="bm-export-btn"><i class="fa-solid fa-file-excel"></i> Excel</button>');
+    }
+
+    $(document).off('click', '#btnExportExcelMaterial').on('click', '#btnExportExcelMaterial', function () {
+      exportFilteredRowsToExcel(table);
     });
 
     // ---- Búsquedas por columna (Información=1, Marca=2, Modelo=3, Orden=4) ----
