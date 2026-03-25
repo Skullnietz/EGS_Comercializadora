@@ -216,8 +216,9 @@ if (!$orderId) {
         Orden de MercadoLibre
         <small id="ml-order-id-title">#<?php echo $orderId; ?></small>
       </h2>
-      <a href="https://myorders.mercadolibre.com.mx/purchases/<?php echo $orderId; ?>"
+      <a href="#"
          target="_blank"
+         rel="noreferrer noopener"
          id="ml-header-link-ml"
          class="ml-btn ml-btn-ml">
         <i class="fa-solid fa-external-link-alt"></i> Ver en MercadoLibre
@@ -397,7 +398,7 @@ if (!$orderId) {
         <a href="index.php?ruta=pedidos" class="ml-btn ml-btn-back">
           <i class="fa-solid fa-arrow-left"></i> Regresar a Pedidos
         </a>
-        <a id="ml-link-ver-ml" href="#" target="_blank" class="ml-btn ml-btn-ml">
+        <a id="ml-link-ver-ml" href="#" target="_blank" rel="noreferrer noopener" class="ml-btn ml-btn-ml">
           <i class="fa-solid fa-external-link-alt"></i> Ver en MercadoLibre
         </a>
       </div>

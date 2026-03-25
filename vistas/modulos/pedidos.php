@@ -3022,7 +3022,9 @@ function renderizarTablaML(pedidos) {
       buyer = p.seller.nickname || '—';
     }
 
-    var urlML = 'https://www.mercadolibre.com.mx/compras/' + p.id + '/detalle';
+    var packId = p.pack_id || p.id;
+    var urlML  = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
+               + '/status?packId=' + packId + '&orderId=' + p.id;
 
     html += '<tr>';
     html += '<td>' + num + '</td>';
@@ -3034,7 +3036,7 @@ function renderizarTablaML(pedidos) {
     html += '<td>' + fecha + '</td>';
     html += '<td style="white-space:nowrap;">';
     html += '<a href="index.php?ruta=infopedidoML&order_id=' + p.id + '" class="btn btn-xs btn-info" title="Ver detalles en el sistema" style="margin-right:4px;"><i class="fas fa-eye"></i></a>';
-    html += '<a href="' + urlML + '" target="_blank" class="btn btn-xs btn-warning" title="Ver en MercadoLibre"><i class="fas fa-external-link-alt"></i></a>';
+    html += '<a href="' + urlML + '" target="_blank" rel="noreferrer noopener" class="btn btn-xs btn-warning" title="Ver en MercadoLibre"><i class="fas fa-external-link-alt"></i></a>';
     html += '</td>';
     html += '</tr>';
   });
