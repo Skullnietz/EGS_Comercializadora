@@ -32,6 +32,12 @@ if (!is_array($ordenes)) {
 	$ordenes = array();
 }
 
+$rangoTexto = (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"]))
+	? (($_GET["fechaInicial"] === $_GET["fechaFinal"])
+		? $_GET["fechaInicial"]
+		: $_GET["fechaInicial"] . " a " . $_GET["fechaFinal"])
+	: "Todas las ordenes";
+
 usort($ordenes, function ($a, $b) {
 	return strtotime((string)($a["fecha_ingreso"] ?? "")) <=> strtotime((string)($b["fecha_ingreso"] ?? ""));
 });
@@ -58,7 +64,12 @@ foreach ($ordenes as $value) {
 
 ExcelExportHelper::downloadXlsx($_GET["reporte"] ?? "ordenes_ingresos", $headers, $rows, array(
 	"sheetName" => "Ingresos",
-	"dateColumns" => array(6)
+	"title" => "Reporte de Ingresos",
+	"subtitle" => "Rango: " . $rangoTexto . " | Generado: " . date("Y-m-d H:i"),
+	"dateColumns" => array(6),
+	"footerRows" => array(
+		array("values" => array(0 => "Registros", 1 => count($rows)))
+	)
 ));
 
 

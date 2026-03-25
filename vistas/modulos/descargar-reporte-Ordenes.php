@@ -34,6 +34,12 @@ if (!is_array($ordenes)) {
 	$ordenes = array();
 }
 
+$rangoTexto = (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"]))
+	? (($_GET["fechaInicial"] === $_GET["fechaFinal"])
+		? $_GET["fechaInicial"]
+		: $_GET["fechaInicial"] . " a " . $_GET["fechaFinal"])
+	: "Todas las ordenes";
+
 usort($ordenes, function ($a, $b) {
 	return strtotime((string)($a["fecha"] ?? "")) <=> strtotime((string)($b["fecha"] ?? ""));
 });
@@ -45,6 +51,9 @@ $headers = array(
 );
 
 $rows = array();
+$sumaTotal = 0.0;
+$sumaInversion = 0.0;
+$sumaUtilidad = 0.0;
 foreach ($ordenes as $value) {
 	$empresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
 	$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
@@ -54,6 +63,9 @@ foreach ($ordenes as $value) {
 	$total = floatval($value["total"]);
 	$inversion = floatval($value["totalInversion"] ?? 0);
 	$utilidad = $total - $inversion;
+	$sumaTotal += $total;
+	$sumaInversion += $inversion;
+	$sumaUtilidad += $utilidad;
 
 	$rows[] = array(
 		$value["id"],
@@ -75,6 +87,11 @@ foreach ($ordenes as $value) {
 
 ExcelExportHelper::downloadXlsx($_GET["reporte"] ?? "ordenes", $headers, $rows, array(
 	"sheetName" => "Ordenes",
+	"title" => "Reporte General de Ordenes",
+	"subtitle" => "Rango: " . $rangoTexto . " | Generado: " . date("Y-m-d H:i"),
 	"currencyColumns" => array(9, 10, 11),
-	"dateColumns" => array(12, 13)
+	"dateColumns" => array(12, 13),
+	"footerRows" => array(
+		array("values" => array(0 => "Registros", 1 => count($rows), 8 => "Totales", 9 => $sumaTotal, 10 => $sumaInversion, 11 => $sumaUtilidad))
+	)
 ));

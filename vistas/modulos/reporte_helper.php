@@ -31,6 +31,7 @@ if (!class_exists('ReporteHelper')) {
 
             $headers = array('#', 'Folio', 'Empresa', 'Cliente', 'Telefono', 'WhatsApp', 'Titulo', 'Estado', 'Total', 'Fecha');
             $rows = array();
+            $sumaTotal = 0.0;
 
             foreach ($filteredOrdenes as $key => $value) {
 
@@ -73,13 +74,20 @@ if (!class_exists('ReporteHelper')) {
                     floatval($value["total"]),
                     $value["fecha"]
                 );
+
+                $sumaTotal += floatval($value["total"]);
             }
 
             ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
                 'sheetName' => 'Ordenes',
+                'title' => 'Reporte de Ordenes por Estado',
+                'subtitle' => 'Estado: ' . $statusFilter . ' | Generado: ' . date('Y-m-d H:i'),
                 'currencyColumns' => array(8),
                 'dateColumns' => array(9),
-                'hyperlinkColumns' => array(5 => 'whatsapp_api')
+                'hyperlinkColumns' => array(5 => 'whatsapp_api'),
+                'footerRows' => array(
+                    array('values' => array(0 => 'Registros', 1 => count($rows), 7 => 'Total', 8 => $sumaTotal))
+                )
             ));
         }
     }

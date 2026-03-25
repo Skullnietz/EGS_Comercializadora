@@ -32,12 +32,19 @@ if (!is_array($ordenes)) {
 	$ordenes = array();
 }
 
+$rangoTexto = (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"]))
+	? (($_GET["fechaInicial"] === $_GET["fechaFinal"])
+		? $_GET["fechaInicial"]
+		: $_GET["fechaInicial"] . " a " . $_GET["fechaFinal"])
+	: "Todas las ordenes";
+
 usort($ordenes, function ($a, $b) {
 	return strtotime((string)($a["fecha"] ?? "")) <=> strtotime((string)($b["fecha"] ?? ""));
 });
 
 $headers = array("Orden", "Empresa", "Asesor", "Tecnico", "Cliente", "Estado", "Total", "Fecha");
 $rows = array();
+$sumaTotal = 0.0;
 
 foreach ($ordenes as $value) {
 	$empresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
@@ -55,10 +62,16 @@ foreach ($ordenes as $value) {
 		floatval($value["total"]),
 		$value["fecha"] ?? ""
 	);
+	$sumaTotal += floatval($value["total"]);
 }
 
 ExcelExportHelper::downloadXlsx($_GET["reporte"] ?? "ordenes_venta", $headers, $rows, array(
 	"sheetName" => "Para Venta",
+	"title" => "Reporte de Ordenes para Venta",
+	"subtitle" => "Rango: " . $rangoTexto . " | Generado: " . date("Y-m-d H:i"),
 	"currencyColumns" => array(6),
-	"dateColumns" => array(7)
+	"dateColumns" => array(7),
+	"footerRows" => array(
+		array("values" => array(0 => "Registros", 1 => count($rows), 5 => "Total", 6 => $sumaTotal))
+	)
 ));

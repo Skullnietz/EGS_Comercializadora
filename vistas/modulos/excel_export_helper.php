@@ -6,6 +6,9 @@ if (!class_exists('ExcelExportHelper')) {
         {
             $sheetName = isset($options['sheetName']) ? (string) $options['sheetName'] : 'Reporte';
             $sheetName = self::sanitizeSheetName($sheetName);
+            $title = isset($options['title']) ? trim((string) $options['title']) : '';
+            $subtitle = isset($options['subtitle']) ? trim((string) $options['subtitle']) : '';
+            $footerRows = isset($options['footerRows']) ? (array) $options['footerRows'] : array();
 
             $dateColumns = isset($options['dateColumns']) ? (array) $options['dateColumns'] : array();
             $currencyColumns = isset($options['currencyColumns']) ? (array) $options['currencyColumns'] : array();
@@ -19,16 +22,38 @@ if (!class_exists('ExcelExportHelper')) {
 
             $sharedHyperlinks = array();
             $xmlRows = array();
+            $mergeCells = array();
+
+            $rnum = 1;
+
+            if ($title !== '') {
+                $xmlRows[] = '<row r="' . $rnum . '" ht="26" customHeight="1">'
+                    . self::inlineCell('A' . $rnum, $title, 5)
+                    . '</row>';
+                $mergeCells[] = 'A' . $rnum . ':' . end($letters) . $rnum;
+                $maxLen[0] = max($maxLen[0], mb_strlen($title, 'UTF-8'));
+                $rnum++;
+            }
+
+            if ($subtitle !== '') {
+                $xmlRows[] = '<row r="' . $rnum . '" ht="20" customHeight="1">'
+                    . self::inlineCell('A' . $rnum, $subtitle, 6)
+                    . '</row>';
+                $mergeCells[] = 'A' . $rnum . ':' . end($letters) . $rnum;
+                $maxLen[0] = max($maxLen[0], mb_strlen($subtitle, 'UTF-8'));
+                $rnum++;
+            }
 
             // Header row
+            $headerRowNumber = $rnum;
             $headerCells = array();
             foreach ($headers as $c => $headerText) {
-                $headerCells[] = self::inlineCell($letters[$c] . '1', (string) $headerText, 2);
+                $headerCells[] = self::inlineCell($letters[$c] . $headerRowNumber, (string) $headerText, 2);
             }
-            $xmlRows[] = '<row r="1">' . implode('', $headerCells) . '</row>';
+            $xmlRows[] = '<row r="' . $headerRowNumber . '" ht="22" customHeight="1">' . implode('', $headerCells) . '</row>';
 
             // Data rows
-            $rnum = 2;
+            $rnum = $headerRowNumber + 1;
             foreach ($rows as $row) {
                 $cells = array();
                 foreach ($headers as $c => $_) {
@@ -75,8 +100,49 @@ if (!class_exists('ExcelExportHelper')) {
                 $rnum++;
             }
 
+            if (!empty($footerRows)) {
+                foreach ($footerRows as $footerRow) {
+                    $values = isset($footerRow['values']) && is_array($footerRow['values']) ? $footerRow['values'] : array();
+                    $cells = array();
+                    foreach ($values as $c => $value) {
+                        $c = intval($c);
+                        if (!isset($letters[$c])) {
+                            continue;
+                        }
+
+                        $display = is_null($value) ? '' : (string) $value;
+                        $maxLen[$c] = max($maxLen[$c], mb_strlen($display, 'UTF-8'));
+                        $ref = $letters[$c] . $rnum;
+
+                        if (in_array($c, $dateColumns, true)) {
+                            $serial = self::excelDateSerial($value);
+                            if ($serial !== null) {
+                                $cells[] = '<c r="' . $ref . '" s="7"><v>' . $serial . '</v></c>';
+                                continue;
+                            }
+                        }
+
+                        if (in_array($c, $currencyColumns, true)) {
+                            $num = self::toNumber($value);
+                            if ($num !== null) {
+                                $cells[] = '<c r="' . $ref . '" s="8"><v>' . self::xmlNumber($num) . '</v></c>';
+                                continue;
+                            }
+                        }
+
+                        if (self::looksNumeric($value)) {
+                            $cells[] = '<c r="' . $ref . '" s="7"><v>' . self::xmlNumber($value) . '</v></c>';
+                        } else {
+                            $cells[] = self::inlineCell($ref, $display, 7);
+                        }
+                    }
+                    $xmlRows[] = '<row r="' . $rnum . '" ht="21" customHeight="1">' . implode('', $cells) . '</row>';
+                    $rnum++;
+                }
+            }
+
             $lastCol = end($letters);
-            $lastRow = max(1, count($rows) + 1);
+            $lastRow = max(1, $rnum - 1);
             $dimension = 'A1:' . $lastCol . $lastRow;
 
             $colsXml = array();
@@ -99,10 +165,11 @@ if (!class_exists('ExcelExportHelper')) {
                 . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
                 . 'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
                 . '<dimension ref="' . $dimension . '"/>'
-                . '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
+                . '<sheetViews><sheetView workbookViewId="0"><pane ySplit="' . $headerRowNumber . '" topLeftCell="A' . ($headerRowNumber + 1) . '" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
                 . '<sheetFormatPr defaultRowHeight="15"/>'
                 . '<cols>' . implode('', $colsXml) . '</cols>'
                 . '<sheetData>' . implode('', $xmlRows) . '</sheetData>'
+                . (!empty($mergeCells) ? '<mergeCells count="' . count($mergeCells) . '"><mergeCell ref="' . implode('"/><mergeCell ref="', $mergeCells) . '"/></mergeCells>' : '')
                 . $hyperlinksXml
                 . '</worksheet>';
 
@@ -121,23 +188,33 @@ if (!class_exists('ExcelExportHelper')) {
                 . '<numFmt numFmtId="164" formatCode="yyyy-mm-dd hh:mm"/>'
                 . '<numFmt numFmtId="165" formatCode="$#,##0.00"/>'
                 . '</numFmts>'
-                . '<fonts count="3">'
+                . '<fonts count="6">'
                 . '<font><sz val="11"/><name val="Calibri"/></font>'
                 . '<font><b/><sz val="11"/><name val="Calibri"/></font>'
                 . '<font><u/><color rgb="FF0563C1"/><sz val="11"/><name val="Calibri"/></font>'
+                . '<font><b/><sz val="16"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>'
+                . '<font><sz val="10"/><color rgb="FF475569"/><name val="Calibri"/></font>'
+                . '<font><b/><sz val="11"/><color rgb="FF0F172A"/><name val="Calibri"/></font>'
                 . '</fonts>'
-                . '<fills count="2">'
+                . '<fills count="5">'
                 . '<fill><patternFill patternType="none"/></fill>'
                 . '<fill><patternFill patternType="solid"><fgColor rgb="FFEFF6FF"/><bgColor indexed="64"/></patternFill></fill>'
+                . '<fill><patternFill patternType="solid"><fgColor rgb="FF0F172A"/><bgColor indexed="64"/></patternFill></fill>'
+                . '<fill><patternFill patternType="solid"><fgColor rgb="FF1D4ED8"/><bgColor indexed="64"/></patternFill></fill>'
+                . '<fill><patternFill patternType="solid"><fgColor rgb="FFE2E8F0"/><bgColor indexed="64"/></patternFill></fill>'
                 . '</fills>'
                 . '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
                 . '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-                . '<cellXfs count="5">'
+                . '<cellXfs count="9">'
                 . '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
                 . '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
-                . '<xf numFmtId="0" fontId="1" fillId="1" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
+                . '<xf numFmtId="0" fontId="1" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'
                 . '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
                 . '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+                . '<xf numFmtId="0" fontId="3" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'
+                . '<xf numFmtId="0" fontId="4" fillId="1" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
+                . '<xf numFmtId="0" fontId="5" fillId="4" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
+                . '<xf numFmtId="165" fontId="5" fillId="4" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1"/>'
                 . '</cellXfs>'
                 . '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
                 . '</styleSheet>';

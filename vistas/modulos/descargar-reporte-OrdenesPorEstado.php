@@ -31,12 +31,15 @@ if (!is_array($ordenes)) {
 	$ordenes = array();
 }
 
+$rangoTexto = isset($_GET["estado"]) ? $_GET["estado"] : "Estado";
+
 usort($ordenes, function ($a, $b) {
 	return strtotime((string)($a["fecha"] ?? "")) <=> strtotime((string)($b["fecha"] ?? ""));
 });
 
 $headers = array("Orden", "Empresa", "Asesor", "Tecnico", "Cliente", "Estado", "Monto", "Fecha");
 $rows = array();
+$sumaTotal = 0.0;
 
 foreach ($ordenes as $value) {
 	$empresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
@@ -54,10 +57,16 @@ foreach ($ordenes as $value) {
 		floatval($value["total"]),
 		$value["fecha"] ?? ""
 	);
+	$sumaTotal += floatval($value["total"]);
 }
 
 ExcelExportHelper::downloadXlsx($_GET["reporte"] ?? "ordenes_estado", $headers, $rows, array(
 	"sheetName" => "Por Estado",
+	"title" => "Reporte por Estado",
+	"subtitle" => "Filtro: " . $rangoTexto . " | Generado: " . date("Y-m-d H:i"),
 	"currencyColumns" => array(6),
-	"dateColumns" => array(7)
+	"dateColumns" => array(7),
+	"footerRows" => array(
+		array("values" => array(0 => "Registros", 1 => count($rows), 5 => "Total", 6 => $sumaTotal))
+	)
 ));
