@@ -1082,7 +1082,7 @@ const $input11 = document.querySelector(' #productoDiez');
 
           <div class="vr-primary-actions">
 
-            <a id="btnDescargarExcelVentasR" href="vistas/modulos/reporte.ventasR.php?reporte=compras&empresa=<?echo $_SESSION["empresa"]?>">
+            <a id="btnDescargarExcelVentasR" href="vistas/modulos/descargar-reporte-ventasR.php?reporte=ventasR&empresa=<?echo $_SESSION["empresa"]?>">
             
               <button class="btn btn-success vr-btn-main"><i class="fas fa-file-excel"></i> Descargar Reporte En Excel</button>
 

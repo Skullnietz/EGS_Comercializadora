@@ -31,7 +31,7 @@ function buildVentasRAjaxUrl(){
 function updateExcelVentasRLink(){
   var empresa = $("#id_empresa").val();
   var filtros = getVentasRDateFilters();
-  var href = "vistas/modulos/reporte.ventasR.php?reporte=compras&empresa=" + encodeURIComponent(empresa);
+  var href = "vistas/modulos/descargar-reporte-ventasR.php?reporte=ventasR&empresa=" + encodeURIComponent(empresa);
 
   if(filtros.fechaInicial !== ""){
     href += "&fechaInicial=" + encodeURIComponent(filtros.fechaInicial);
