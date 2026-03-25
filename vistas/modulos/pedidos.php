@@ -12,6 +12,8 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 
 }
 
+$mostrarMercadoLibre = $_SESSION["perfil"] !== "vendedor";
+
 ?>
 
 <style>
@@ -539,11 +541,13 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
           <i class="fa-solid fa-list"></i> Pedidos del Sistema
         </a>
       </li>
+      <?php if ($mostrarMercadoLibre) { ?>
       <li role="presentation">
         <a href="#tab-ml" aria-controls="tab-ml" role="tab" data-toggle="tab" id="tab-ml-nav">
           <i class="fa-solid fa-store"></i> MercadoLibre
         </a>
       </li>
+      <?php } ?>
     </ul>
 
     <div class="tab-content ped-tab-content">
@@ -628,6 +632,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 
     </div><!-- /tab-pane sistema -->
 
+    <?php if ($mostrarMercadoLibre) { ?>
     <!-- ── Tab MercadoLibre ─────────────────────────────────────── -->
     <div class="tab-pane" id="tab-ml">
       <div class="row">
@@ -697,6 +702,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
         </div>
       </div>
     </div><!-- /tab-pane ml -->
+    <?php } ?>
 
     </div><!-- /tab-content -->
 
@@ -1471,6 +1477,7 @@ MODAL AGREGAR PEDIDO
 
 </div>
 
+<?php if ($mostrarMercadoLibre) { ?>
 <!--=====================================
 MODAL CONFIGURACIÓN MERCADOLIBRE
 ======================================-->
@@ -1550,6 +1557,7 @@ MODAL CONFIGURACIÓN MERCADOLIBRE
     </div>
   </div>
 </div>
+<?php } ?>
 
 <script>
     /*=============================================
@@ -2726,6 +2734,7 @@ function listarNuevosPreciosDePedido(){
 
 }
 
+<?php if ($mostrarMercadoLibre) { ?>
 /*=============================================
 INTEGRACIÓN MERCADOLIBRE
 =============================================*/
@@ -3084,5 +3093,6 @@ function mostrarStatusML(tipo, mensaje) {
     .html(mensaje)
     .show();
 }
+  <?php } ?>
 
 </script>

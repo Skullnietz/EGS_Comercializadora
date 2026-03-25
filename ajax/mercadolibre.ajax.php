@@ -5,7 +5,7 @@ header('Content-Type: application/json; charset=utf-8');
 /*=============================================
   AUTH CHECK
 =============================================*/
-$perfilesPermitidos = ['administrador', 'vendedor', 'Super-Administrador', 'tecnico'];
+$perfilesPermitidos = ['administrador', 'Super-Administrador', 'tecnico'];
 if (!isset($_SESSION['perfil']) || !in_array($_SESSION['perfil'], $perfilesPermitidos)) {
     http_response_code(403);
     echo json_encode(['error' => 'No autorizado']);
