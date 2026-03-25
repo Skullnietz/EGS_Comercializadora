@@ -811,6 +811,97 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════
+     GRÁFICO DE VENTAS
+══════════════════════════════════════════ -->
+<div class="crm-section">
+  <div class="crm-section-icon" style="background:linear-gradient(135deg,#22c55e,#06b6d4)">
+    <i class="fa-solid fa-chart-line"></i>
+  </div>
+  <div>
+    <h3>Análisis de Ventas</h3>
+    <p>Histórico de ventas mensuales de la empresa</p>
+  </div>
+</div>
+
+<div class="crm-card" style="margin-bottom:20px">
+  <div class="crm-card-head">
+    <h4 class="crm-card-title"><i class="fa-solid fa-chart-area"></i> Ventas Mensuales</h4>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="crm-badge" id="admVentasBadge" style="background:#f0fdf4;color:#16a34a">
+        $<?php echo number_format($_adm_chartDefault['total'], 0); ?>
+      </span>
+      <div style="display:inline-flex;background:#f1f5f9;border-radius:8px;padding:2px;gap:2px" id="admVentasFilter">
+        <button type="button" class="adm-vent-btn active" data-period="1m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:#6366f1;color:#fff">Mes</button>
+        <button type="button" class="adm-vent-btn" data-period="3m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">3M</button>
+        <button type="button" class="adm-vent-btn" data-period="6m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">6M</button>
+        <button type="button" class="adm-vent-btn" data-period="12m"
+                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">Año</button>
+      </div>
+    </div>
+  </div>
+  <div class="crm-card-body" style="padding:16px 20px">
+    <div id="admChartVentas" style="height:260px"></div>
+    <!-- Dato significativo -->
+    <div style="display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 14px;background:#f8fafc;border-radius:8px;font-size:11px">
+      <span style="color:var(--crm-muted)"><i class="fa-solid fa-database" style="margin-right:3px"></i> <strong>Fuente:</strong> Tabla de Ventas (pagos registrados)</span>
+      <span style="margin-left:auto;color:#6366f1;font-weight:600" id="admVentasMax">
+        <?php if (!empty($_adm_chartDefault['maxMes'])): ?>
+          Mejor mes: <?php echo $_adm_chartDefault['maxMes']; ?> — $<?php echo number_format($_adm_chartDefault['maxVal'], 0); ?>
+        <?php else: ?>
+          Sin datos en este periodo
+        <?php endif; ?>
+      </span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var admVentasData = <?php echo json_encode($_adm_chartPeriods); ?>;
+  var admChart = null;
+
+  function renderVentasChart(period) {
+    var info = admVentasData[period];
+    if (!info) return;
+    var data = info.data;
+    $('#admVentasBadge').text('$' + Number(info.total).toLocaleString('en'));
+    if (info.maxMes) {
+      $('#admVentasMax').html('Mejor mes: ' + info.maxMes + ' — $' + Number(info.maxVal).toLocaleString('en'));
+    } else {
+      $('#admVentasMax').text('Sin datos en este periodo');
+    }
+    $('#admChartVentas').empty();
+    if (data.length === 0) data = [{y:'0', ventas:0}];
+    if (typeof Morris !== 'undefined') {
+      admChart = new Morris.Line({
+        element: 'admChartVentas', resize: true, data: data,
+        xkey:'y', ykeys:['ventas'], labels:['Ventas'],
+        lineColors:['#6366f1'], lineWidth:2, hideHover:'auto',
+        gridTextColor:'#94a3b8', gridStrokeWidth:0.3, pointSize:4,
+        pointStrokeColors:['#6366f1'], gridLineColor:'#e2e8f0',
+        gridTextFamily:'inherit', preUnits:'$', gridTextSize:10, fillOpacity:0.08
+      });
+    }
+  }
+
+  // Renderizar al cargar el DOM completo para que el contenedor tenga dimensiones
+  $(function(){
+    setTimeout(function(){ renderVentasChart('1m'); }, 150);
+  });
+
+  $('#admVentasFilter').on('click', '.adm-vent-btn', function(){
+    var $btn = $(this), period = $btn.data('period');
+    $('#admVentasFilter .adm-vent-btn').css({background:'transparent',color:'#64748b'}).removeClass('active');
+    $btn.css({background:'#6366f1',color:'#fff'}).addClass('active');
+    renderVentasChart(period);
+  });
+})();
+</script>
+
 <div class="row" style="margin-top:6px">
   <div class="col-lg-8 col-md-7 col-xs-12">
     <div class="crm-card" style="margin-bottom:20px">
@@ -927,97 +1018,6 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
     $('#admVentasRFilter .adm-ventr-btn').css({background:'transparent',color:'#64748b'}).removeClass('active');
     $btn.css({background:'#6366f1',color:'#fff'}).addClass('active');
     renderVentasR(period);
-  });
-})();
-</script>
-
-<!-- ══════════════════════════════════════════
-     GRÁFICO DE VENTAS
-══════════════════════════════════════════ -->
-<div class="crm-section">
-  <div class="crm-section-icon" style="background:linear-gradient(135deg,#22c55e,#06b6d4)">
-    <i class="fa-solid fa-chart-line"></i>
-  </div>
-  <div>
-    <h3>Análisis de Ventas</h3>
-    <p>Histórico de ventas mensuales de la empresa</p>
-  </div>
-</div>
-
-<div class="crm-card" style="margin-bottom:20px">
-  <div class="crm-card-head">
-    <h4 class="crm-card-title"><i class="fa-solid fa-chart-area"></i> Ventas Mensuales</h4>
-    <div style="display:flex;align-items:center;gap:6px">
-      <span class="crm-badge" id="admVentasBadge" style="background:#f0fdf4;color:#16a34a">
-        $<?php echo number_format($_adm_chartDefault['total'], 0); ?>
-      </span>
-      <div style="display:inline-flex;background:#f1f5f9;border-radius:8px;padding:2px;gap:2px" id="admVentasFilter">
-        <button type="button" class="adm-vent-btn active" data-period="1m"
-                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:#6366f1;color:#fff">Mes</button>
-        <button type="button" class="adm-vent-btn" data-period="3m"
-                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">3M</button>
-        <button type="button" class="adm-vent-btn" data-period="6m"
-                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">6M</button>
-        <button type="button" class="adm-vent-btn" data-period="12m"
-                style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">Año</button>
-      </div>
-    </div>
-  </div>
-  <div class="crm-card-body" style="padding:16px 20px">
-    <div id="admChartVentas" style="height:260px"></div>
-    <!-- Dato significativo -->
-    <div style="display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 14px;background:#f8fafc;border-radius:8px;font-size:11px">
-      <span style="color:var(--crm-muted)"><i class="fa-solid fa-database" style="margin-right:3px"></i> <strong>Fuente:</strong> Tabla de Ventas (pagos registrados)</span>
-      <span style="margin-left:auto;color:#6366f1;font-weight:600" id="admVentasMax">
-        <?php if (!empty($_adm_chartDefault['maxMes'])): ?>
-          Mejor mes: <?php echo $_adm_chartDefault['maxMes']; ?> — $<?php echo number_format($_adm_chartDefault['maxVal'], 0); ?>
-        <?php else: ?>
-          Sin datos en este periodo
-        <?php endif; ?>
-      </span>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  var admVentasData = <?php echo json_encode($_adm_chartPeriods); ?>;
-  var admChart = null;
-
-  function renderVentasChart(period) {
-    var info = admVentasData[period];
-    if (!info) return;
-    var data = info.data;
-    $('#admVentasBadge').text('$' + Number(info.total).toLocaleString('en'));
-    if (info.maxMes) {
-      $('#admVentasMax').html('Mejor mes: ' + info.maxMes + ' — $' + Number(info.maxVal).toLocaleString('en'));
-    } else {
-      $('#admVentasMax').text('Sin datos en este periodo');
-    }
-    $('#admChartVentas').empty();
-    if (data.length === 0) data = [{y:'0', ventas:0}];
-    if (typeof Morris !== 'undefined') {
-      admChart = new Morris.Line({
-        element: 'admChartVentas', resize: true, data: data,
-        xkey:'y', ykeys:['ventas'], labels:['Ventas'],
-        lineColors:['#6366f1'], lineWidth:2, hideHover:'auto',
-        gridTextColor:'#94a3b8', gridStrokeWidth:0.3, pointSize:4,
-        pointStrokeColors:['#6366f1'], gridLineColor:'#e2e8f0',
-        gridTextFamily:'inherit', preUnits:'$', gridTextSize:10, fillOpacity:0.08
-      });
-    }
-  }
-
-  // Renderizar al cargar el DOM completo para que el contenedor tenga dimensiones
-  $(function(){
-    setTimeout(function(){ renderVentasChart('1m'); }, 150);
-  });
-
-  $('#admVentasFilter').on('click', '.adm-vent-btn', function(){
-    var $btn = $(this), period = $btn.data('period');
-    $('#admVentasFilter .adm-vent-btn').css({background:'transparent',color:'#64748b'}).removeClass('active');
-    $btn.css({background:'#6366f1',color:'#fff'}).addClass('active');
-    renderVentasChart(period);
   });
 })();
 </script>
