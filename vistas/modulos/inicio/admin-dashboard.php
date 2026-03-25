@@ -465,6 +465,36 @@ foreach ($_adm_chart_cortes as $pk => $corte) {
 }
 $_adm_chartDefault = isset($_adm_chartPeriods['1m']) ? $_adm_chartPeriods['1m'] : array('data'=>array(),'total'=>0,'maxMes'=>'','maxVal'=>0,'count'=>0);
 
+// Widget VentasR (Gestor Ventas Rapidas) por periodo
+$_adm_ventasRPeriods = array();
+foreach ($_adm_chart_cortes as $pk => $corte) {
+  $meses = array();
+  $totalPeriodo = 0;
+  $totalOperaciones = 0;
+  foreach ($_adm_ventasRaw as $value) {
+    $fechaVenta = isset($value["fecha"]) ? substr($value["fecha"], 0, 10) : "";
+    if ($fechaVenta < $corte) continue;
+    $monto = floatval(isset($value["pago"]) ? $value["pago"] : 0);
+    $mes = substr($fechaVenta, 0, 7);
+    if (!isset($meses[$mes])) $meses[$mes] = 0;
+    $meses[$mes] += $monto;
+    $totalPeriodo += $monto;
+    $totalOperaciones++;
+  }
+  ksort($meses);
+  $rows = array();
+  foreach ($meses as $mes => $monto) {
+    $rows[] = array('mes' => $mes, 'total' => $monto);
+  }
+  $_adm_ventasRPeriods[$pk] = array(
+    'rows' => $rows,
+    'total' => $totalPeriodo,
+    'ops' => $totalOperaciones,
+    'ticket' => $totalOperaciones > 0 ? ($totalPeriodo / $totalOperaciones) : 0,
+  );
+}
+$_adm_ventasRDefault = isset($_adm_ventasRPeriods['1m']) ? $_adm_ventasRPeriods['1m'] : array('rows'=>array(),'total'=>0,'ops'=>0,'ticket'=>0);
+
 // Productos más vendidos
 $_adm_productos = array();
 $_adm_totalProdVentas = 1;
@@ -780,6 +810,126 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
     <?php include __DIR__ . "/admin-acciones-rapidas.php"; ?>
   </div>
 </div>
+
+<div class="row" style="margin-top:6px">
+  <div class="col-lg-8 col-md-7 col-xs-12">
+    <div class="crm-card" style="margin-bottom:20px">
+      <div class="crm-card-head">
+        <h4 class="crm-card-title"><i class="fa-solid fa-cart-arrow-down"></i> VentasR</h4>
+        <div style="display:flex;align-items:center;gap:8px">
+          <a href="index.php?ruta=ventasR" class="crm-badge" style="background:#eff6ff;color:#1d4ed8;text-decoration:none">
+            <i class="fa-solid fa-arrow-up-right-from-square" style="margin-right:4px"></i> Abrir gestor
+          </a>
+          <div style="display:inline-flex;background:#f1f5f9;border-radius:8px;padding:2px;gap:2px" id="admVentasRFilter">
+            <button type="button" class="adm-ventr-btn active" data-period="1m"
+                    style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:#6366f1;color:#fff">Mes</button>
+            <button type="button" class="adm-ventr-btn" data-period="3m"
+                    style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">3M</button>
+            <button type="button" class="adm-ventr-btn" data-period="6m"
+                    style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">6M</button>
+            <button type="button" class="adm-ventr-btn" data-period="12m"
+                    style="padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#64748b">Año</button>
+          </div>
+        </div>
+      </div>
+      <div class="crm-card-body" style="padding:16px 20px">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <span class="crm-badge" id="admVentasRTotal" style="background:#f0fdf4;color:#16a34a">
+            $<?php echo number_format($_adm_ventasRDefault['total'], 0); ?>
+          </span>
+          <span class="crm-badge" id="admVentasROps" style="background:#eff6ff;color:#1d4ed8">
+            <?php echo intval($_adm_ventasRDefault['ops']); ?> operaciones
+          </span>
+          <span class="crm-badge" id="admVentasRTicket" style="background:#fef3c7;color:#92400e">
+            Ticket: $<?php echo number_format($_adm_ventasRDefault['ticket'], 0); ?>
+          </span>
+        </div>
+
+        <div id="admVentasRRows">
+          <?php if (empty($_adm_ventasRDefault['rows'])): ?>
+            <div class="crm-empty" style="padding:24px 10px">
+              <i class="fa-solid fa-inbox"></i>
+              <strong>Sin ventas en este periodo</strong>
+            </div>
+          <?php else: ?>
+            <?php
+              $_adm_rows_default = array_slice($_adm_ventasRDefault['rows'], -6);
+              $_adm_row_max = 0;
+              foreach ($_adm_rows_default as $_rw) {
+                if ($_rw['total'] > $_adm_row_max) $_adm_row_max = $_rw['total'];
+              }
+              if ($_adm_row_max <= 0) $_adm_row_max = 1;
+            ?>
+            <?php foreach ($_adm_rows_default as $_rw):
+              $_w = round(($_rw['total'] * 100) / $_adm_row_max);
+            ?>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <span style="width:58px;font-size:11px;color:#64748b;font-weight:600"><?php echo $_rw['mes']; ?></span>
+                <div style="flex:1;background:#f1f5f9;border-radius:999px;height:8px;overflow:hidden">
+                  <div style="height:100%;width:<?php echo $_w; ?>%;background:linear-gradient(90deg,#22c55e,#06b6d4)"></div>
+                </div>
+                <span style="min-width:92px;text-align:right;font-size:11px;font-weight:700;color:#0f172a">
+                  $<?php echo number_format($_rw['total'], 0); ?>
+                </span>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var admVentasRData = <?php echo json_encode($_adm_ventasRPeriods); ?>;
+
+  function money(v){
+    return '$' + Number(v || 0).toLocaleString('en');
+  }
+
+  function renderVentasR(period){
+    var info = admVentasRData[period];
+    if (!info) return;
+
+    $('#admVentasRTotal').text(money(info.total));
+    $('#admVentasROps').text(Number(info.ops || 0).toLocaleString('en') + ' operaciones');
+    $('#admVentasRTicket').text('Ticket: ' + money(info.ticket));
+
+    var rows = Array.isArray(info.rows) ? info.rows.slice(-6) : [];
+    if (rows.length === 0) {
+      $('#admVentasRRows').html('<div class="crm-empty" style="padding:24px 10px"><i class="fa-solid fa-inbox"></i><strong>Sin ventas en este periodo</strong></div>');
+      return;
+    }
+
+    var maxVal = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var v = Number(rows[i].total || 0);
+      if (v > maxVal) maxVal = v;
+    }
+    if (maxVal <= 0) maxVal = 1;
+
+    var html = '';
+    for (var j = 0; j < rows.length; j++) {
+      var monto = Number(rows[j].total || 0);
+      var pct = Math.round((monto * 100) / maxVal);
+      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+           +    '<span style="width:58px;font-size:11px;color:#64748b;font-weight:600">' + rows[j].mes + '</span>'
+           +    '<div style="flex:1;background:#f1f5f9;border-radius:999px;height:8px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#22c55e,#06b6d4)"></div></div>'
+           +    '<span style="min-width:92px;text-align:right;font-size:11px;font-weight:700;color:#0f172a">' + money(monto) + '</span>'
+           +  '</div>';
+    }
+    $('#admVentasRRows').html(html);
+  }
+
+  $('#admVentasRFilter').on('click', '.adm-ventr-btn', function(){
+    var $btn = $(this), period = $btn.data('period');
+    $('#admVentasRFilter .adm-ventr-btn').css({background:'transparent',color:'#64748b'}).removeClass('active');
+    $btn.css({background:'#6366f1',color:'#fff'}).addClass('active');
+    renderVentasR(period);
+  });
+})();
+</script>
 
 <!-- ══════════════════════════════════════════
      GRÁFICO DE VENTAS
