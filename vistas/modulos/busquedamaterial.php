@@ -330,6 +330,7 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     font-weight: 500;
   }
 
+  .bm-export-btn,
   #tablematerial_wrapper .bm-export-btn {
     margin-right: 8px;
     border-radius: 8px;
@@ -343,6 +344,8 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     transition: all .15s ease;
   }
 
+  .bm-export-btn:hover,
+  .bm-export-btn:focus,
   #tablematerial_wrapper .bm-export-btn:hover,
   #tablematerial_wrapper .bm-export-btn:focus {
     background: #15803d;
@@ -552,7 +555,10 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
         <div class="bm-card">
           <div class="bm-card-head">
             <h3 class="bm-card-title"><i class="fa-solid fa-table"></i> Búsqueda de Producto</h3>
-            <span class="bm-card-subtitle">Vista avanzada de resultados</span>
+            <div>
+              <button type="button" id="btnExportExcelMaterial" class="bm-export-btn"><i class="fa-solid fa-file-excel"></i> Excel</button>
+              <span class="bm-card-subtitle">Vista avanzada de resultados</span>
+            </div>
           </div>
           <div class="bm-card-body">
             <div class="table-responsive-wrap">
@@ -883,11 +889,6 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
         { targets: [6, 10], searchable: false }    // Imagen, Acción
       ]
     });
-
-    const $filter = $('#tablematerial_wrapper .dataTables_filter');
-    if ($filter.length && !$filter.find('#btnExportExcelMaterial').length) {
-      $filter.prepend('<button type="button" id="btnExportExcelMaterial" class="bm-export-btn"><i class="fa-solid fa-file-excel"></i> Excel</button>');
-    }
 
     $(document).off('click', '#btnExportExcelMaterial').on('click', '#btnExportExcelMaterial', function () {
       exportFilteredRowsToExcel(table);
