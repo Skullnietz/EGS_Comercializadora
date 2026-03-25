@@ -1,5 +1,7 @@
 <?php
 if (!class_exists('ReporteHelper')) {
+    require_once __DIR__ . '/excel_export_helper.php';
+
     class ReporteHelper {
         public static function generarReporteExcel($statusFilter, $empresaId, $filename) {
 
@@ -23,23 +25,12 @@ if (!class_exists('ReporteHelper')) {
                 return intval($a['id']) <=> intval($b['id']);
             });
 
-            // Excel headers
-            $excelName = $filename . '.xls';
-            header('Expires: 0');
-            header('Cache-control: private');
-            header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
-            header('Cache-Control: cache, must-revalidate');
-            header('Content-Description: File Transfer');
-            header('Last-Modified: '.date('D, d M Y H:i:s'));
-            header('Pragma: public');
-            header('Content-Disposition: attachment; filename="'.$excelName.'"');
-            header('Content-Transfer-Encoding: binary');
+            usort($filteredOrdenes, function ($a, $b) {
+                return strtotime((string)($a['fecha'] ?? '')) <=> strtotime((string)($b['fecha'] ?? ''));
+            });
 
-            $output = fopen('php://output', 'w');
-            // BOM UTF-8 for Excel/Sheets compatibility
-            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-
-            fputcsv($output, ['#', 'Folio', 'Empresa', 'Cliente', 'Teléfono', 'WhatsApp', 'Título', 'Estado', 'Total', 'Fecha']);
+            $headers = array('#', 'Folio', 'Empresa', 'Cliente', 'Telefono', 'WhatsApp', 'Titulo', 'Estado', 'Total', 'Fecha');
+            $rows = array();
 
             foreach ($filteredOrdenes as $key => $value) {
 
@@ -70,7 +61,7 @@ if (!class_exists('ReporteHelper')) {
                     $whatsapp = ($finalPhone != "") ? "52".$finalPhone : "";
                 }
 
-                fputcsv($output, [
+                $rows[] = array(
                     $key + 1,
                     $value["id"],
                     $value["id_empresa"],
@@ -79,12 +70,17 @@ if (!class_exists('ReporteHelper')) {
                     $whatsapp,
                     $value["titulo"],
                     $value["estado"],
-                    number_format($value["total"], 2),
+                    floatval($value["total"]),
                     $value["fecha"]
-                ]);
+                );
             }
 
-            fclose($output);
+            ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
+                'sheetName' => 'Ordenes',
+                'currencyColumns' => array(8),
+                'dateColumns' => array(9),
+                'hyperlinkColumns' => array(5 => 'whatsapp_api')
+            ));
         }
     }
 }

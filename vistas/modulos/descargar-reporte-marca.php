@@ -18,8 +18,41 @@ require_once "../../modelos/clientes.modelo.php";
 
 require_once "../../controladores/tecnicos.controlador.php";
 require_once "../../modelos/tecnicos.modelo.php";
+require_once __DIR__ . "/excel_export_helper.php";
 
-//$reporte = new controladorOrdenes();
-//$reporte -> ctrDescargarReporteOrdenesENT();
 $valorEmpresa = $_GET["empresa"];
-$reporte = controladorOrdenes::ctrDescargarReporteOrdenesMarca($valorEmpresa);
+
+if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+	$ordenes = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa("ordenes", $_GET["fechaInicial"], $_GET["fechaFinal"], "id_empresa", $valorEmpresa);
+} else {
+	$ordenes = ModeloOrdenes::mdlMostrarordenesParaValidar("ordenes", "id_empresa", $valorEmpresa);
+}
+
+if (!is_array($ordenes)) {
+	$ordenes = array();
+}
+
+usort($ordenes, function ($a, $b) {
+	return strtotime((string)($a["fecha"] ?? "")) <=> strtotime((string)($b["fecha"] ?? ""));
+});
+
+$headers = array("Orden", "Tecnico", "Marca", "Modelo", "Serie", "Estado", "Cliente");
+$rows = array();
+foreach ($ordenes as $value) {
+	$cliente = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+	$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+	$rows[] = array(
+		$value["id"],
+		$tecnico["nombre"] ?? "",
+		$value["marcaDelEquipo"] ?? "",
+		$value["modeloDelEquipo"] ?? "",
+		$value["numeroDeSerieDelEquipo"] ?? "",
+		$value["estado"] ?? "",
+		$cliente["nombre"] ?? ""
+	);
+}
+
+ExcelExportHelper::downloadXlsx($_GET["reporte"] ?? "ordenes_marca", $headers, $rows, array(
+	"sheetName" => "Por Marca"
+));

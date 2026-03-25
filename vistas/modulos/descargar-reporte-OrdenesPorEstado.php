@@ -18,13 +18,46 @@ require_once "../../modelos/clientes.modelo.php";
 
 require_once "../../controladores/tecnicos.controlador.php";
 require_once "../../modelos/tecnicos.modelo.php";
+require_once __DIR__ . "/excel_export_helper.php";
 
-//$reporte = new controladorOrdenes();
-//$reporte -> ctrDescargarReporteVOrdenes();
 $estado = $_GET["estado"];
 $item = "id_empresa";
 $valor = $_GET["empresa"];
 $tecnico = "id_tecnico"; 
 $valorTecnico = $_GET["tecnico"];
 
-$reporte = controladorOrdenes::ctrDescargarReporteOrdenesOkTecnico($estado, $item, $valor, $tecnico, $valorTecnico);
+$ordenes = ModeloOrdenes::mdlMostrarOrdenesPorEstadoEmpresayTecnico("ordenes", $estado, $item, $valor, $tecnico, $valorTecnico);
+if (!is_array($ordenes)) {
+	$ordenes = array();
+}
+
+usort($ordenes, function ($a, $b) {
+	return strtotime((string)($a["fecha"] ?? "")) <=> strtotime((string)($b["fecha"] ?? ""));
+});
+
+$headers = array("Orden", "Empresa", "Asesor", "Tecnico", "Cliente", "Estado", "Monto", "Fecha");
+$rows = array();
+
+foreach ($ordenes as $value) {
+	$empresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+	$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+	$cliente = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+	$tec = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+	$rows[] = array(
+		$value["id"],
+		$empresa["empresa"] ?? "",
+		$asesor["nombre"] ?? "",
+		$tec["nombre"] ?? "",
+		$cliente["nombre"] ?? "",
+		$value["estado"] ?? "",
+		floatval($value["total"]),
+		$value["fecha"] ?? ""
+	);
+}
+
+ExcelExportHelper::downloadXlsx($_GET["reporte"] ?? "ordenes_estado", $headers, $rows, array(
+	"sheetName" => "Por Estado",
+	"currencyColumns" => array(6),
+	"dateColumns" => array(7)
+));
