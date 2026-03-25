@@ -1483,13 +1483,26 @@ MODAL CONFIGURACIÓN MERCADOLIBRE
       </div>
       <div class="modal-body">
 
+        <!-- Alerta de estado OAuth (resultado de la redirección) -->
+        <div id="ml-oauth-alert" class="alert" style="display:none; font-size:13px;"></div>
+
+        <!-- Paso 1: Client ID + Secret → botón OAuth -->
         <div class="alert alert-info" style="font-size:12px; line-height:1.6;">
           <i class="fa-solid fa-circle-info"></i>
-          Obtén tu <strong>Access Token</strong> e <strong>ID de Usuario</strong> desde el
-          <a href="https://developers.mercadolibre.com.mx" target="_blank">portal de desarrolladores de ML</a>.
-          Tu ID de usuario aparece al llamar:
-          <code>https://api.mercadolibre.com/users/me?access_token={tu_token}</code>
+          <strong>Modo recomendado:</strong> ingresa tu <strong>Client ID</strong> y
+          <strong>Client Secret</strong> y pulsa <em>Conectar con MercadoLibre</em> para
+          obtener los tokens automáticamente.<br>
+          O bien, pega el <strong>Access Token</strong> manualmente si lo tienes a la mano.
         </div>
+
+        <!-- Botón OAuth -->
+        <div class="form-group" style="margin-bottom:18px;">
+          <button type="button" class="btn btn-warning btn-block" id="btn-ml-oauth" style="font-weight:600;">
+            <i class="fa-solid fa-link"></i> Conectar con MercadoLibre (OAuth)
+          </button>
+          <small class="text-muted" id="ml-redirect-uri-hint" style="display:none; word-break:break-all;"></small>
+        </div>
+        <hr style="margin:10px 0 16px;">
 
         <div class="form-group">
           <label><i class="fas fa-key" style="color:#6366f1;"></i> Access Token <small class="text-muted">(requerido)</small></label>
@@ -2746,6 +2759,97 @@ $(document).on('click', '#btn-ml-anterior', function () {
     mlOffset = Math.max(0, mlOffset - mlLimit);
     cargarPedidosML();
   }
+});
+
+/* ── Leer ml_status de la URL (regreso del OAuth) ───────────────────────── */
+(function () {
+  var params  = new URLSearchParams(window.location.search);
+  var status  = params.get('ml_status');
+  var msg     = params.get('ml_msg');
+  var mlUser  = params.get('ml_user');
+  var $alert  = $('#ml-oauth-alert');
+
+  var msgs = {
+    success     : '✅ MercadoLibre conectado correctamente. Usuario ID: ' + (mlUser || '—'),
+    error       : '❌ ML devolvió un error: ' + (msg || ''),
+    token_error : '❌ No se pudo obtener el token: ' + (msg || ''),
+    no_code     : '❌ ML no envió el código de autorización.',
+    csrf_error  : '❌ Error de seguridad (state inválido). Intenta de nuevo.',
+    no_credentials : '❌ Guarda primero el Client ID y Client Secret antes de conectar.',
+    no_session  : '❌ Tu sesión ha expirado. Inicia sesión nuevamente.',
+  };
+
+  if (status && msgs[status]) {
+    var type = status === 'success' ? 'alert-success' : 'alert-danger';
+    $alert.removeClass('alert-success alert-danger').addClass(type).html(msgs[status]).show();
+    $('#modalMLConfig').modal('show');
+
+    // Limpiar el parámetro de la URL sin recargar
+    var clean = window.location.pathname + '?ruta=pedidos';
+    window.history.replaceState({}, '', clean);
+  }
+})();
+
+/* ── Botón Conectar con ML (OAuth) ──────────────────────────────────────── */
+$(document).on('click', '#btn-ml-oauth', function () {
+  var $btn = $(this);
+  $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Generando enlace...');
+
+  // Guardar primero client_id y client_secret si están escritos
+  var clientId     = $('#ml-cfg-client-id').val().trim();
+  var clientSecret = $('#ml-cfg-client-secret').val().trim();
+
+  if (!clientId || !clientSecret) {
+    swal({ type: 'warning', title: 'Faltan datos',
+           text: 'Ingresa el Client ID y el Client Secret antes de conectar.',
+           showConfirmButton: true });
+    $btn.prop('disabled', false).html('<i class="fa-solid fa-link"></i> Conectar con MercadoLibre (OAuth)');
+    return;
+  }
+
+  // Guardar credenciales primero, luego redirigir
+  var datos = new FormData();
+  datos.append('accion',        'guardarConfig');
+  datos.append('access_token',  $('#ml-cfg-access-token').val().trim());
+  datos.append('seller_id',     $('#ml-cfg-seller-id').val().trim());
+  datos.append('client_id',     clientId);
+  datos.append('client_secret', clientSecret);
+  datos.append('refresh_token', $('#ml-cfg-refresh-token').val().trim());
+
+  $.ajax({
+    url: 'ajax/mercadolibre.ajax.php', method: 'POST', data: datos,
+    cache: false, contentType: false, processData: false, dataType: 'json',
+    success: function () {
+      // Ahora obtener la URL de OAuth
+      var d2 = new FormData();
+      d2.append('accion', 'generarURLOAuth');
+      $.ajax({
+        url: 'ajax/mercadolibre.ajax.php', method: 'POST', data: d2,
+        cache: false, contentType: false, processData: false, dataType: 'json',
+        success: function (r) {
+          if (r.status === 'ok') {
+            // Mostrar la redirect_uri como referencia
+            $('#ml-redirect-uri-hint')
+              .text('Redirect URI registrada: ' + r.redirect_uri)
+              .show();
+            // Redirigir a ML para autorizar
+            window.location.href = r.url;
+          } else {
+            swal({ type: 'error', title: 'Error', text: r.error || 'No se pudo generar la URL.', showConfirmButton: true });
+            $btn.prop('disabled', false).html('<i class="fa-solid fa-link"></i> Conectar con MercadoLibre (OAuth)');
+          }
+        },
+        error: function () {
+          swal({ type: 'error', title: 'Error de conexión', showConfirmButton: true });
+          $btn.prop('disabled', false).html('<i class="fa-solid fa-link"></i> Conectar con MercadoLibre (OAuth)');
+        }
+      });
+    },
+    error: function () {
+      swal({ type: 'error', title: 'Error al guardar credenciales', showConfirmButton: true });
+      $btn.prop('disabled', false).html('<i class="fa-solid fa-link"></i> Conectar con MercadoLibre (OAuth)');
+    }
+  });
 });
 
 /* Guardar configuración */

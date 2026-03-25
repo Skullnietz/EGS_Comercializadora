@@ -206,4 +206,36 @@ if ($accion === 'verificarConfig') {
     exit;
 }
 
+// ── Generar URL de autorización OAuth ────────────────────────────────────
+if ($accion === 'generarURLOAuth') {
+
+    if (empty($config['client_id'])) {
+        echo json_encode(['error' => 'Debes guardar el Client ID antes de conectar con OAuth.']);
+        exit;
+    }
+
+    // Construir redirect_uri dinámicamente
+    $protocol    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host        = $_SERVER['HTTP_HOST'];
+    $redirectUri = $protocol . '://' . $host . '/webhook/mercadolibre-oauth.php';
+
+    // State CSRF
+    $state = bin2hex(random_bytes(16));
+    session_start();
+    $_SESSION['ml_oauth_state'] = $state;
+
+    $authUrl = 'https://auth.mercadolibre.com.mx/authorization'
+             . '?response_type=code'
+             . '&client_id='    . urlencode($config['client_id'])
+             . '&redirect_uri=' . urlencode($redirectUri)
+             . '&state='        . $state;
+
+    echo json_encode([
+        'status'       => 'ok',
+        'url'          => $authUrl,
+        'redirect_uri' => $redirectUri,
+    ]);
+    exit;
+}
+
 echo json_encode(['error' => 'Acción no reconocida.']);
