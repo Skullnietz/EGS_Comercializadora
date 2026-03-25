@@ -579,10 +579,19 @@ if (!$orderId) {
       }
 
       /* ── Link ver en ML (via ir.php para evitar detección de referrer) ── */
-      var packId  = p.pack_id || (p.shipping ? p.shipping.pack_id : null) || ORDER_ID;
-      var urlML   = p.permalink
-                 || ('https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
-                     + '/status?packId=' + packId + '&orderId=' + ORDER_ID);
+      // packId debe ser el mismo en el path y en el query string
+      var packId = p.pack_id || (p.shipping ? p.shipping.pack_id : null);
+      var urlML;
+      if (p.permalink) {
+        urlML = p.permalink;
+      } else if (packId) {
+        urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
+              + '/status?packId=' + packId + '&orderId=' + ORDER_ID;
+      } else {
+        // Sin pack_id: orden simple, solo orderId
+        urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + ORDER_ID
+              + '/status?orderId=' + ORDER_ID;
+      }
       // Guardar la URL real en data-url para copiar al portapapeles
       $('#ml-link-ver-ml').attr('data-url', urlML);
       $('#ml-header-link-ml').attr('data-url', urlML);

@@ -3022,9 +3022,10 @@ function renderizarTablaML(pedidos) {
       buyer = p.seller.nickname || '—';
     }
 
-    var packId = p.pack_id || p.id;
-    var urlML  = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
-               + '/status?packId=' + packId + '&orderId=' + p.id;
+    var packId = p.pack_id || null;
+    var urlML  = packId
+      ? 'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId + '/status?packId=' + packId + '&orderId=' + p.id
+      : 'https://myaccount.mercadolibre.com.mx/my_purchases/' + p.id + '/status?orderId=' + p.id;
 
     html += '<tr>';
     html += '<td>' + num + '</td>';
