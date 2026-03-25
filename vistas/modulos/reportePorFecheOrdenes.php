@@ -50,6 +50,10 @@ if($cargarDatos){
     }
 
     if(!is_array($respuesta)) $respuesta = [];
+
+    usort($respuesta, function($a, $b){
+      return intval($a["id"]) <=> intval($b["id"]);
+    });
 }
 
 /* ── Calcular resumen ── */
@@ -381,55 +385,55 @@ $totalCols    = $isAdmin ? 12 : 10;
     <div class="rpt-downloads">
       <?php if($perfil == "administrador"): ?>
         <a class="rpt-dl-btn green" href="<?= _dlLink('descargar-reporte-Ordenes.php','ordenes','reporte',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-file-csv"></i> Descargar Reporte
+          <i class="fa-solid fa-file-excel"></i> Descargar Reporte
         </a>
         <a class="rpt-dl-btn blue" href="<?= _dlLink('descargar-reporte-infoOrden.php','infoordenes','infoordenes','',$empParam) ?>">
-          <i class="fa-solid fa-circle-info"></i> Info Órdenes
+          <i class="fa-solid fa-file-excel"></i> Info Órdenes
         </a>
         <a class="rpt-dl-btn cyan" href="<?= _dlLink('descargar-reporte-Ordenes-ingresos.php','ordenesIgresos','reporteIngresos',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-money-bill-trend-up"></i> Ingresos
+          <i class="fa-solid fa-file-excel"></i> Ingresos
         </a>
       <?php endif; ?>
 
       <?php if(in_array($perfil, ['administrador','tecnico','vendedor'])): ?>
         <a class="rpt-dl-btn amber" href="<?= _dlLink('descargar-reporte-OrdenesPEN.php','ordenesPEN','reporte',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-magnifying-glass"></i> REV
+          <i class="fa-solid fa-file-excel"></i> REV
         </a>
       <?php endif; ?>
 
       <?php if(in_array($perfil, ['administrador','vendedor'])): ?>
         <a class="rpt-dl-btn purple" href="<?= _dlLink('descargar-reporte-OrdenesSup.php','ordenesSup','reporte',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-eye"></i> SUP
+          <i class="fa-solid fa-file-excel"></i> SUP
         </a>
       <?php endif; ?>
 
       <?php if(in_array($perfil, ['administrador','editor','vendedor'])): ?>
         <a class="rpt-dl-btn slate" href="<?= _dlLink('descargar-reporte-OrdenesAut.php','ordenesAUT','reporte',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-lock"></i> AUT
+          <i class="fa-solid fa-file-excel"></i> AUT
         </a>
       <?php endif; ?>
 
       <?php if(in_array($perfil, ['administrador','editor','tecnico','vendedor'])): ?>
         <a class="rpt-dl-btn blue" href="<?= _dlLink('descargar-reporte-OrdenesOK.php','ordenesOk','reporte',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-check"></i> OK
+          <i class="fa-solid fa-file-excel"></i> OK
         </a>
         <a class="rpt-dl-btn cyan" href="<?= _dlLink('descargar-reporte-OrdenesTer.php','ordenesTer','reporte',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-flag-checkered"></i> TER
+          <i class="fa-solid fa-file-excel"></i> TER
         </a>
       <?php endif; ?>
 
       <?php if(in_array($perfil, ['administrador','secretaria','vendedor'])): ?>
         <a class="rpt-dl-btn green" href="<?= _dlLink('descargar-reporte-OrdenesEntregadas.php','ordenesENT','reporte',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-truck"></i> ENT
+          <i class="fa-solid fa-file-excel"></i> ENT
         </a>
         <a class="rpt-dl-btn rose" href="<?= _dlLink('descargar-reporte-OrdenesParaVenta.php','ordenesVenta','reporte',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-tags"></i> Para Venta
+          <i class="fa-solid fa-file-excel"></i> Para Venta
         </a>
       <?php endif; ?>
 
       <?php if($perfil == "administrador"): ?>
         <a class="rpt-dl-btn slate" href="vistas/modulos/descargar-reporte-marca.php?reporte=ordenespormarca<?= $empParam ?>">
-          <i class="fa-solid fa-copyright"></i> Por Marca
+          <i class="fa-solid fa-file-excel"></i> Por Marca
         </a>
       <?php endif; ?>
 
@@ -439,11 +443,11 @@ $totalCols    = $isAdmin ? 12 : 10;
       ?>
         <?php if(isset($_GET["fechaInicial"])): ?>
           <a class="rpt-dl-btn green" href="vistas/modulos/descargar-reporte-OrdenesEntregadas.php?reporte=entregadas<?= $fechaParams.$empParam ?>">
-            <i class="fa-solid fa-truck"></i> ENT
+            <i class="fa-solid fa-file-excel"></i> ENT
           </a>
         <?php else: ?>
           <a class="rpt-dl-btn green" href="vistas/modulos/descargar-reporte-OrdenesPorEstado.php?reporte=ordenesTER<?= $empParam ?>&estado=<?= urlencode($estadoreporte) ?>&tecnico=<?= $tecnicoEnSession["id"] ?>">
-            <i class="fa-solid fa-truck"></i> ENT
+            <i class="fa-solid fa-file-excel"></i> ENT
           </a>
         <?php endif; ?>
       <?php endif; ?>
@@ -518,7 +522,7 @@ $totalCols    = $isAdmin ? 12 : 10;
           ?>
           <tr data-total="<?= $total ?>" data-inversion="<?= $inversion ?>" data-estado="<?= htmlspecialchars($value["estado"]) ?>">
             <td><?= $key + 1 ?></td>
-            <td>
+            <td data-order="<?= intval($value["id"]) ?>">
               <a class="rpt-orden-link" href="index.php?ruta=infoOrden&idOrden=<?= $value["id"] ?>">
                 #<?= $value["id"] ?>
               </a>
@@ -587,7 +591,7 @@ $totalCols    = $isAdmin ? 12 : 10;
     searching: true,
     info: true,
     ordering: true,
-    order: [[1, 'desc']], // Orden descendente por # orden
+    order: [[1, 'asc']], // Orden ascendente por id de orden
     orderCellsTop: true,  // Click en la fila de títulos para ordenar
     language: {
       info: "Mostrando _START_ a _END_ de _TOTAL_ órdenes",

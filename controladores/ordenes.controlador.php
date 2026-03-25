@@ -1856,12 +1856,12 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 			$OrdenesFecha = ModeloOrdenes::mdlMostrarordenesParaValidar($tabla, "id_empresa", $valorEmpresa);
 		}
 
-		/* ── Generar CSV (compatible con Excel, Google Sheets, LibreOffice) ── */
-		$Name = $_GET["reporte"] . '.csv';
+		/* ── Generar Excel (.xls) ── */
+		$Name = $_GET["reporte"] . '.xls';
 
 		header('Expires: 0');
 		header('Cache-control: private');
-		header("Content-Type: text/csv; charset=utf-8");
+		header("Content-Type: application/vnd.ms-excel; charset=utf-8");
 		header("Cache-Control: cache, must-revalidate");
 		header('Content-Description: File Transfer');
 		header('Last-Modified: ' . date('D, d M Y H:i:s'));
@@ -1973,11 +1973,11 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 			}
 
 
-			/* CSV output */
-			$csvName = $_GET["reporte"] . '.csv';
+			/* Excel output */
+			$csvName = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
-			header('Content-Type: text/csv; charset=UTF-8');
+			header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
 			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
@@ -2057,11 +2057,11 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 			}
 
 
-			/* CSV output */
-			$csvName = $_GET["reporte"] . '.csv';
+			/* Excel output */
+			$csvName = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
-			header('Content-Type: text/csv; charset=UTF-8');
+			header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
 			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
@@ -2156,11 +2156,11 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-			/* CSV output */
-			$csvName = $_GET["reporte"] . '.csv';
+			/* Excel output */
+			$csvName = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
-			header('Content-Type: text/csv; charset=UTF-8');
+			header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
 			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
@@ -2251,11 +2251,11 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-			/* CSV output */
-			$csvName = $_GET["reporte"] . '.csv';
+			/* Excel output */
+			$csvName = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
-			header('Content-Type: text/csv; charset=UTF-8');
+			header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
 			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
@@ -2352,11 +2352,11 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-			/* CSV output */
-			$csvName = $_GET["reporte"] . '.csv';
+			/* Excel output */
+			$csvName = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
-			header('Content-Type: text/csv; charset=UTF-8');
+			header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
 			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
@@ -3146,11 +3146,11 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			/* CSV - REPORTE COMISIONES */
-			$csvName = $_GET["reporte"] . ".csv";
+			/* Excel - REPORTE COMISIONES */
+			$csvName = $_GET["reporte"] . ".xls";
 			header("Expires: 0");
 			header("Cache-control: private");
-			header("Content-Type: text/csv; charset=UTF-8");
+			header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
 			header("Cache-Control: cache, must-revalidate");
 			header("Content-Description: File Transfer");
 			header("Last-Modified: " . date("D, d M Y H:i:s"));
@@ -4351,11 +4351,11 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			/* CSV output */
-			$csvName = $_GET["reporte"] . '.csv';
+			/* Excel output */
+			$csvName = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
-			header('Content-Type: text/csv; charset=UTF-8');
+			header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
 			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
@@ -4438,11 +4438,11 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			/* CSV output */
-			$csvName = $_GET["reporte"] . '.csv';
+			/* Excel output */
+			$csvName = $_GET["reporte"] . '.xls';
 			header('Expires: 0');
 			header('Cache-control: private');
-			header('Content-Type: text/csv; charset=UTF-8');
+			header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
 			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
@@ -4705,11 +4705,11 @@ AGREGAR ORDENES CON PARTIDAS LISTADAS
 
 			$ordenesInfo = ModeloOrdenes::mdlMostrarordenesParaValidar($tabla, $item, $valor);
 
-			/* CSV - REPORTE INFO ORDEN */
-			$csvName = $_GET["reporte"] . ".csv";
+			/* Excel - REPORTE INFO ORDEN */
+			$csvName = $_GET["reporte"] . ".xls";
 			header("Expires: 0");
 			header("Cache-control: private");
-			header("Content-Type: text/csv; charset=UTF-8");
+			header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
 			header("Cache-Control: cache, must-revalidate");
 			header("Content-Description: File Transfer");
 			header("Last-Modified: " . date("D, d M Y H:i:s"));

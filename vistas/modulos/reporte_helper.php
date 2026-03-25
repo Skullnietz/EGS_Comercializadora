@@ -19,16 +19,20 @@ if (!class_exists('ReporteHelper')) {
                 $filteredOrdenes[] = $orden;
             }
 
-            // CSV Headers
-            $csvName = $filename . '.csv';
+            usort($filteredOrdenes, function ($a, $b) {
+                return intval($a['id']) <=> intval($b['id']);
+            });
+
+            // Excel headers
+            $excelName = $filename . '.xls';
             header('Expires: 0');
             header('Cache-control: private');
-            header('Content-Type: text/csv; charset=UTF-8');
+            header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
             header('Cache-Control: cache, must-revalidate');
             header('Content-Description: File Transfer');
             header('Last-Modified: '.date('D, d M Y H:i:s'));
             header('Pragma: public');
-            header('Content-Disposition: attachment; filename="'.$csvName.'"');
+            header('Content-Disposition: attachment; filename="'.$excelName.'"');
             header('Content-Transfer-Encoding: binary');
 
             $output = fopen('php://output', 'w');
