@@ -622,6 +622,7 @@ $totalCols    = $isAdmin ? 12 : 10;
 
   var table = $table.DataTable({
     paging: true,
+    pagingType: 'simple_numbers',
     pageLength: 50,
     lengthChange: false,
     searching: true,
@@ -634,13 +635,38 @@ $totalCols    = $isAdmin ? 12 : 10;
       infoEmpty: "Sin órdenes",
       infoFiltered: "(filtrado de _MAX_ totales)",
       zeroRecords: '<div style="text-align:center;padding:30px;color:#94a3b8;"><i class="fa-solid fa-filter" style="font-size:28px;opacity:.3;display:block;margin-bottom:10px;"></i>Sin resultados con estos filtros</div>',
-      paginate: { first: "«", last: "»", next: "›", previous: "‹" }
+      paginate: { next: "Siguiente", previous: "Anterior" }
     },
     dom: '<"rpt-dt-top"r>t<"rpt-dt-bottom"ip>',
     columnDefs: [
       { orderable: false, targets: 0 } // columna #
     ]
   });
+
+  function normalizePaginatorUI(){
+    var $wrapper = $('#rptOrdenesTable_wrapper');
+    var $bottom = $wrapper.find('.rpt-dt-bottom');
+    var $allPagers = $wrapper.find('.dataTables_paginate');
+
+    if ($allPagers.length > 1) {
+      $allPagers.not($bottom.find('.dataTables_paginate')).remove();
+    }
+
+    var $pager = $bottom.find('.dataTables_paginate');
+    $pager.find('li.paginate_button > a').each(function(){
+      var txt = $.trim($(this).text());
+      if (txt) return;
+
+      var $li = $(this).parent();
+      if ($li.hasClass('previous')) {
+        $(this).text('Anterior');
+      } else if ($li.hasClass('next')) {
+        $(this).text('Siguiente');
+      } else {
+        $li.remove();
+      }
+    });
+  }
 
   /* ── Filtros por columna (inputs de texto) ── */
   $('.rpt-filter-input').on('keyup change', function(){
@@ -706,10 +732,14 @@ $totalCols    = $isAdmin ? 12 : 10;
     });
   }
 
-  table.on('draw', recalcKPIs);
+  table.on('draw', function(){
+    recalcKPIs();
+    normalizePaginatorUI();
+  });
 
   // Cálculo inicial
   recalcKPIs();
+  normalizePaginatorUI();
 
 })();
 </script>
