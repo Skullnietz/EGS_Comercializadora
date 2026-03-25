@@ -5,8 +5,6 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
 }
 ?>
 
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.11.5/datatables.min.css" />
-
 <style>
   :root {
     --crm-bg: #f8fafc;
@@ -153,25 +151,29 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     border-bottom-color: #e8eef5;
   }
 
-  /* Quita por completo los indicadores de sorting en la columna # */
-  #tablematerial thead th:first-child,
-  #tablematerial thead th:first-child.sorting,
-  #tablematerial thead th:first-child.sorting_asc,
-  #tablematerial thead th:first-child.sorting_desc,
-  #tablematerial thead th:first-child.sorting_disabled {
+  /* Oculta indicadores de sorting en toda la tabla, pero mantiene ordenamiento al dar click */
+  #tablematerial.dataTable thead .sorting,
+  #tablematerial.dataTable thead .sorting_asc,
+  #tablematerial.dataTable thead .sorting_desc,
+  #tablematerial.dataTable thead .sorting_asc_disabled,
+  #tablematerial.dataTable thead .sorting_desc_disabled,
+  #tablematerial.dataTable thead .sorting_disabled {
     background-image: none !important;
+    padding-right: 8px !important;
   }
 
-  #tablematerial thead th:first-child::before,
-  #tablematerial thead th:first-child::after,
-  #tablematerial thead th:first-child.sorting::before,
-  #tablematerial thead th:first-child.sorting::after,
-  #tablematerial thead th:first-child.sorting_asc::before,
-  #tablematerial thead th:first-child.sorting_asc::after,
-  #tablematerial thead th:first-child.sorting_desc::before,
-  #tablematerial thead th:first-child.sorting_desc::after,
-  #tablematerial thead th:first-child.sorting_disabled::before,
-  #tablematerial thead th:first-child.sorting_disabled::after {
+  #tablematerial.dataTable thead .sorting::before,
+  #tablematerial.dataTable thead .sorting::after,
+  #tablematerial.dataTable thead .sorting_asc::before,
+  #tablematerial.dataTable thead .sorting_asc::after,
+  #tablematerial.dataTable thead .sorting_desc::before,
+  #tablematerial.dataTable thead .sorting_desc::after,
+  #tablematerial.dataTable thead .sorting_asc_disabled::before,
+  #tablematerial.dataTable thead .sorting_asc_disabled::after,
+  #tablematerial.dataTable thead .sorting_desc_disabled::before,
+  #tablematerial.dataTable thead .sorting_desc_disabled::after,
+  #tablematerial.dataTable thead .sorting_disabled::before,
+  #tablematerial.dataTable thead .sorting_disabled::after {
     display: none !important;
     content: none !important;
   }
@@ -537,8 +539,6 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
   }
 </script>
 
-<script src="https://cdn.datatables.net/v/dt/dt-1.11.5/datatables.min.js"></script>
-
 <script>
   // ---- Modal de imagen (Plain JS) ----
   function openImageModal(imgElement) {
@@ -622,7 +622,7 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     var table = $('#tablematerial').DataTable({
       language: { url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
       orderCellsTop: true,
-      order: [[9, 'desc']],
+      order: [],
       pageLength: 25,
       lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
       autoWidth: false,
