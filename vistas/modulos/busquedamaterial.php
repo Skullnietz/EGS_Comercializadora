@@ -770,6 +770,29 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
       .replace(/\s+/g, ' ');
   }
 
+  // Convierte varios formatos de fecha a objeto Date valido.
+  function parseDateSafe(value) {
+    const raw = (value || '').toString().trim();
+    if (!raw) return null;
+
+    // yyyy-mm-dd o yyyy-mm-dd hh:mm:ss
+    const isoLike = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoLike) {
+      const d = new Date(isoLike[1] + '-' + isoLike[2] + '-' + isoLike[3] + 'T00:00:00');
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    // dd/mm/yyyy
+    const latam = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if (latam) {
+      const d = new Date(latam[3] + '-' + latam[2] + '-' + latam[1] + 'T00:00:00');
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    const d = new Date(raw);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
   function textFromCell($cell) {
     const dataState = $cell.attr('data-estado');
     if (dataState) return dataState.toString().trim();
@@ -830,6 +853,10 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
 
   // Filtro global extra: Total (rango) + Fecha (rango) + Estado (select)
   $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+    if (!settings || !settings.nTable || settings.nTable.id !== 'tablematerial') {
+      return true;
+    }
+
     const rowNode = settings.aoData[dataIndex] && settings.aoData[dataIndex].nTr
       ? settings.aoData[dataIndex].nTr
       : null;
@@ -848,16 +875,21 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     const minFechaStr = $('#minFecha').val(); // yyyy-mm-dd
     const maxFechaStr = $('#maxFecha').val();
     const fechaCell = $row.find('td:eq(9)');
-    const fechaStr = fechaCell.attr('data-fecha'); // ideal ISO
-    if (fechaStr) {
-      const f = new Date(fechaStr);
+    const hayFiltroFecha = !!(minFechaStr || maxFechaStr);
+    const fechaRaw = (fechaCell.attr('data-fecha') || fechaCell.text() || '').trim();
+    const f = parseDateSafe(fechaRaw);
+
+    // Si se está filtrando por fecha, una fila sin fecha valida no debe pasar.
+    if (hayFiltroFecha && !f) return false;
+
+    if (f) {
       if (minFechaStr) {
-        const fMin = new Date(minFechaStr);
-        if (isFinite(f) && isFinite(fMin) && f < fMin) return false;
+        const fMin = parseDateSafe(minFechaStr);
+        if (fMin && f < fMin) return false;
       }
       if (maxFechaStr) {
-        const fMax = new Date(maxFechaStr);
-        if (isFinite(f) && isFinite(fMax)) {
+        const fMax = parseDateSafe(maxFechaStr);
+        if (fMax) {
           fMax.setHours(23, 59, 59, 999);
           if (f > fMax) return false;
         }
