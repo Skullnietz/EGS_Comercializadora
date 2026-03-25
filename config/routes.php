@@ -48,6 +48,7 @@ return [
     'pedidos',
     'AgregarPedido',
     'infopedido',
+    'infopedidoML',
     'peticionorden',
 
     /* ── Cotizaciones ───────────────────────────── */

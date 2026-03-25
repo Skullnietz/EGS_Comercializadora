@@ -433,6 +433,74 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     color: #6366f1;
   }
 
+  /* ── Tabs de secciones ── */
+  .ped-tabs {
+    border-bottom: 2px solid #e2e8f0;
+    margin: 0 0 0;
+    padding: 0 4px;
+  }
+
+  .ped-tabs > li > a {
+    border: 1px solid transparent;
+    border-radius: 8px 8px 0 0;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    transition: all .15s ease;
+  }
+
+  .ped-tabs > li.active > a,
+  .ped-tabs > li.active > a:hover,
+  .ped-tabs > li.active > a:focus {
+    color: #6366f1;
+    background: #fff;
+    border-color: #e2e8f0 #e2e8f0 #fff;
+  }
+
+  .ped-tabs > li > a:hover {
+    color: #4f46e5;
+    background: #f0f4ff;
+    border-color: transparent;
+  }
+
+  .ped-tab-content {
+    border: none;
+    padding: 16px 0 0;
+    background: transparent;
+  }
+
+  /* ── Badges de estado ML ── */
+  .ml-status-badge {
+    display: inline-block;
+    padding: .3em .65em;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+
+  .ml-badge-paid      { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+  .ml-badge-pending   { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+  .ml-badge-cancelled { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+  .ml-badge-partial   { color: #0e7490; background: #ecfeff; border-color: #a5f3fc; }
+  .ml-badge-other     { color: #475569; background: #f1f5f9; border-color: #cbd5e1; }
+
+  #table-ml-pedidos thead th {
+    white-space: nowrap;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: var(--crm-text2);
+    padding: 12px 10px;
+  }
+
+  #table-ml-pedidos tbody tr td {
+    vertical-align: middle;
+    padding: 11px 10px;
+  }
+
 </style>
 
 <div class="content-wrapper">
@@ -463,6 +531,24 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
         <p>Organiza, monitorea y gestiona todos tus pedidos en una única vista mejorada.</p>
       </div>
     </div>
+
+    <!-- ── Navegación de tabs ───────────────────────────────────── -->
+    <ul class="nav nav-tabs ped-tabs" id="pedidosTabs" role="tablist">
+      <li role="presentation" class="active">
+        <a href="#tab-pedidos-sistema" aria-controls="tab-pedidos-sistema" role="tab" data-toggle="tab">
+          <i class="fa-solid fa-list"></i> Pedidos del Sistema
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#tab-ml" aria-controls="tab-ml" role="tab" data-toggle="tab" id="tab-ml-nav">
+          <i class="fa-solid fa-store"></i> MercadoLibre
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content ped-tab-content">
+
+    <div class="tab-pane active" id="tab-pedidos-sistema">
 
     <div class="row" id="PEDIDOS">
       <div class="col-12">
@@ -539,6 +625,82 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
         </div>
       </div>
     </div>
+
+    </div><!-- /tab-pane sistema -->
+
+    <!-- ── Tab MercadoLibre ─────────────────────────────────────── -->
+    <div class="tab-pane" id="tab-ml">
+      <div class="row">
+        <div class="col-12">
+          <div class="ped-card">
+            <div class="ped-card-head">
+              <h3 class="ped-card-title">
+                <i class="fa-solid fa-store"></i> Pedidos de MercadoLibre
+              </h3>
+              <div class="ped-actions-group">
+                <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador"): ?>
+                <button class="ped-btn ped-btn-primary" data-toggle="modal" data-target="#modalMLConfig">
+                  <i class="fa-solid fa-gear"></i> Configurar
+                </button>
+                <?php endif; ?>
+                <button class="ped-btn ped-btn-success" id="btn-ml-sync">
+                  <i class="fa-solid fa-rotate"></i> Sincronizar
+                </button>
+              </div>
+            </div>
+            <div class="ped-card-body">
+
+              <div id="ml-status-bar" style="display:none;" class="alert">
+                <span id="ml-status-msg"></span>
+              </div>
+
+              <div id="ml-loading" style="display:none; text-align:center; padding:30px;">
+                <i class="fa-solid fa-spinner fa-spin fa-2x" style="color:#6366f1;"></i>
+                <p style="margin-top:10px; color:#64748b; font-size:13px;">Cargando pedidos de MercadoLibre...</p>
+              </div>
+
+              <div class="table-responsive-wrap">
+                <table id="table-ml-pedidos" class="table stripe display compact cell-border hover row-border" width="100%">
+                  <thead>
+                    <tr>
+                      <th style="width:40px">#</th>
+                      <th>No. Orden ML</th>
+                      <th>Vendedor</th>
+                      <th>Estado</th>
+                      <th>Artículos</th>
+                      <th>Total</th>
+                      <th>Fecha</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ml-tbody">
+                    <tr>
+                      <td colspan="8" style="text-align:center; color:#94a3b8; padding:30px; font-size:13px;">
+                        Haz clic en <strong>Sincronizar</strong> para cargar los pedidos de MercadoLibre.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Paginación ML -->
+              <div id="ml-paginacion" style="display:none; margin-top:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <button class="ped-btn ped-btn-primary" id="btn-ml-anterior">
+                  <i class="fa-solid fa-chevron-left"></i> Anterior
+                </button>
+                <span id="ml-pag-info" style="font-size:12px; color:#475569; flex:1; text-align:center;"></span>
+                <button class="ped-btn ped-btn-primary" id="btn-ml-siguiente">
+                  Siguiente <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tab-pane ml -->
+
+    </div><!-- /tab-content -->
 
   </div>
 
@@ -1310,6 +1472,75 @@ MODAL AGREGAR PEDIDO
   </form>
 
 </div>
+
+<!--=====================================
+MODAL CONFIGURACIÓN MERCADOLIBRE
+======================================-->
+<?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador"): ?>
+<div id="modalMLConfig" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><i class="fa-solid fa-store"></i> Configuración de MercadoLibre</h4>
+      </div>
+      <div class="modal-body">
+
+        <div class="alert alert-info" style="font-size:12px; line-height:1.6;">
+          <i class="fa-solid fa-circle-info"></i>
+          Obtén tu <strong>Access Token</strong> e <strong>ID de Usuario</strong> desde el
+          <a href="https://developers.mercadolibre.com.mx" target="_blank">portal de desarrolladores de ML</a>.
+          Tu ID de usuario aparece al llamar:
+          <code>https://api.mercadolibre.com/users/me?access_token={tu_token}</code>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-key" style="color:#6366f1;"></i> Access Token <small class="text-muted">(requerido)</small></label>
+          <div class="input-group">
+            <span class="input-group-addon"><i class="fas fa-key"></i></span>
+            <input type="text" class="form-control" id="ml-cfg-access-token" placeholder="APP_USR-1234567890...">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-hashtag" style="color:#6366f1;"></i> ID de Usuario ML <small class="text-muted">(requerido)</small></label>
+          <div class="input-group">
+            <span class="input-group-addon"><i class="fas fa-hashtag"></i></span>
+            <input type="text" class="form-control" id="ml-cfg-seller-id" placeholder="123456789">
+          </div>
+        </div>
+
+        <hr>
+        <p style="font-size:12px; color:#64748b; margin-bottom:12px;">
+          <i class="fa-solid fa-rotate" style="color:#6366f1;"></i>
+          <strong>Renovación automática</strong> (opcional): si configuras estos campos el sistema
+          renovará el token automáticamente cuando expire.
+        </p>
+
+        <div class="form-group">
+          <label>Client ID</label>
+          <input type="text" class="form-control" id="ml-cfg-client-id" placeholder="123456789">
+        </div>
+        <div class="form-group">
+          <label>Client Secret</label>
+          <input type="password" class="form-control" id="ml-cfg-client-secret" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label>Refresh Token</label>
+          <input type="text" class="form-control" id="ml-cfg-refresh-token" placeholder="TG-...">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="ped-btn ped-btn-primary" id="btn-guardar-ml-config">
+          <i class="fa-solid fa-floppy-disk"></i> Guardar Configuración
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
 
 <script>
     /*=============================================
@@ -2484,6 +2715,255 @@ function listarNuevosPreciosDePedido(){
 
   $("#ListarPreciosActualizados").val(JSON.stringify(listarNuevosPrecios));
 
+}
+
+/*=============================================
+INTEGRACIÓN MERCADOLIBRE
+=============================================*/
+var mlOffset   = 0;
+var mlTotal    = 0;
+var mlLimit    = 50;
+var mlLoaded   = false;
+
+/* Activar tab ML → cargar pedidos la primera vez */
+$(document).on('shown.bs.tab', 'a[href="#tab-ml"]', function () {
+  if (!mlLoaded) {
+    verificarConfigML();
+  }
+});
+
+/* Botón sincronizar */
+$(document).on('click', '#btn-ml-sync', function () {
+  mlOffset = 0;
+  cargarPedidosML();
+});
+
+/* Paginación */
+$(document).on('click', '#btn-ml-siguiente', function () {
+  if (mlOffset + mlLimit < mlTotal) {
+    mlOffset += mlLimit;
+    cargarPedidosML();
+  }
+});
+$(document).on('click', '#btn-ml-anterior', function () {
+  if (mlOffset > 0) {
+    mlOffset = Math.max(0, mlOffset - mlLimit);
+    cargarPedidosML();
+  }
+});
+
+/* Guardar configuración */
+$(document).on('click', '#btn-guardar-ml-config', function () {
+  var $btn = $(this);
+  $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Guardando...');
+
+  var datos = new FormData();
+  datos.append('accion',        'guardarConfig');
+  datos.append('access_token',  $('#ml-cfg-access-token').val().trim());
+  datos.append('seller_id',     $('#ml-cfg-seller-id').val().trim());
+  datos.append('client_id',     $('#ml-cfg-client-id').val().trim());
+  datos.append('client_secret', $('#ml-cfg-client-secret').val().trim());
+  datos.append('refresh_token', $('#ml-cfg-refresh-token').val().trim());
+
+  $.ajax({
+    url:         'ajax/mercadolibre.ajax.php',
+    method:      'POST',
+    data:        datos,
+    cache:       false,
+    contentType: false,
+    processData: false,
+    dataType:    'json',
+    success: function (resp) {
+      $btn.prop('disabled', false).html('<i class="fa-solid fa-floppy-disk"></i> Guardar Configuración');
+      if (resp.status === 'ok') {
+        $('#modalMLConfig').modal('hide');
+        swal({ type: 'success', title: 'Configuración guardada correctamente', showConfirmButton: true, confirmButtonText: 'OK' });
+      } else {
+        swal({ type: 'error', title: 'Error', text: resp.error || 'No se pudo guardar.', showConfirmButton: true });
+      }
+    },
+    error: function () {
+      $btn.prop('disabled', false).html('<i class="fa-solid fa-floppy-disk"></i> Guardar Configuración');
+      swal({ type: 'error', title: 'Error de conexión', showConfirmButton: true });
+    }
+  });
+});
+
+function verificarConfigML() {
+  var datos = new FormData();
+  datos.append('accion', 'verificarConfig');
+
+  $.ajax({
+    url:         'ajax/mercadolibre.ajax.php',
+    method:      'POST',
+    data:        datos,
+    cache:       false,
+    contentType: false,
+    processData: false,
+    dataType:    'json',
+    success: function (resp) {
+      if (resp.configurado) {
+        cargarPedidosML();
+      } else {
+        mostrarStatusML('info',
+          '<i class="fa-solid fa-circle-info"></i> MercadoLibre no está configurado aún. ' +
+          'Haz clic en <strong>Configurar</strong> para ingresar tu Access Token y Seller ID.');
+      }
+      /* Pre-llenar campos si hay datos */
+      if (resp.seller_id) $('#ml-cfg-seller-id').val(resp.seller_id);
+      if (resp.client_id) $('#ml-cfg-client-id').val(resp.client_id);
+    }
+  });
+}
+
+function cargarPedidosML() {
+  $('#ml-loading').show();
+  $('#ml-status-bar').hide();
+  $('#ml-tbody').html(
+    '<tr><td colspan="8" style="text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin" style="color:#6366f1;"></i></td></tr>'
+  );
+
+  var datos = new FormData();
+  datos.append('accion', 'obtenerOrdenes');
+  datos.append('offset', mlOffset);
+
+  $.ajax({
+    url:         'ajax/mercadolibre.ajax.php',
+    method:      'POST',
+    data:        datos,
+    cache:       false,
+    contentType: false,
+    processData: false,
+    dataType:    'json',
+    success: function (resp) {
+      $('#ml-loading').hide();
+
+      if (!resp) {
+        mostrarStatusML('danger', '<i class="fa-solid fa-triangle-exclamation"></i> Respuesta vacía del servidor.');
+        return;
+      }
+
+      if (resp.error) {
+        if (resp.error === 'config_missing') {
+          mostrarStatusML('info',
+            '<i class="fa-solid fa-circle-info"></i> ' + resp.message +
+            ' Haz clic en <strong>Configurar</strong>.');
+        } else {
+          mostrarStatusML('danger',
+            '<i class="fa-solid fa-triangle-exclamation"></i> Error MercadoLibre: ' +
+            (resp.message || resp.error));
+        }
+        renderizarTablaML([]);
+        return;
+      }
+
+      if (!resp.results || resp.results.length === 0) {
+        mostrarStatusML('warning', '<i class="fa-solid fa-circle-info"></i> No se encontraron pedidos en MercadoLibre.');
+        renderizarTablaML([]);
+        return;
+      }
+
+      mlTotal  = resp.paging ? resp.paging.total : resp.results.length;
+      mlLoaded = true;
+      renderizarTablaML(resp.results);
+      actualizarPaginacionML();
+    },
+    error: function () {
+      $('#ml-loading').hide();
+      mostrarStatusML('danger', '<i class="fa-solid fa-triangle-exclamation"></i> Error de conexión al cargar pedidos de MercadoLibre.');
+    }
+  });
+}
+
+function renderizarTablaML(pedidos) {
+  var statusMap = {
+    'paid':           { text: 'Pagado',              css: 'ml-badge-paid'      },
+    'pending':        { text: 'Pendiente',            css: 'ml-badge-pending'   },
+    'cancelled':      { text: 'Cancelado',            css: 'ml-badge-cancelled' },
+    'partially_paid': { text: 'Pago Parcial',         css: 'ml-badge-partial'   },
+    'in_process':     { text: 'En Proceso',           css: 'ml-badge-other'     },
+    'on_hold':        { text: 'En Espera',            css: 'ml-badge-other'     },
+  };
+
+  if (!pedidos || pedidos.length === 0) {
+    $('#ml-tbody').html(
+      '<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:24px; font-size:13px;">Sin resultados</td></tr>'
+    );
+    return;
+  }
+
+  var html = '';
+  $.each(pedidos, function (i, p) {
+    var num    = mlOffset + i + 1;
+    var estado = statusMap[p.status] || { text: p.status || '—', css: 'ml-badge-other' };
+    var badge  = '<span class="ml-status-badge ' + estado.css + '">' + estado.text + '</span>';
+
+    var items = '—';
+    if (p.order_items && p.order_items.length > 0) {
+      items = p.order_items[0].item.title;
+      if (p.order_items.length > 1) {
+        items += ' <small style="color:#94a3b8;">(+' + (p.order_items.length - 1) + ' más)</small>';
+      }
+    }
+
+    var total = p.currency_id + ' ' + parseFloat(p.total_amount || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 });
+
+    var fecha = '—';
+    if (p.date_created) {
+      var d = new Date(p.date_created);
+      fecha = d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    var buyer = '—';
+    if (p.seller) {
+      buyer = p.seller.nickname || '—';
+    }
+
+    var urlML = 'https://www.mercadolibre.com.mx/compras/' + p.id + '/detalle';
+
+    html += '<tr>';
+    html += '<td>' + num + '</td>';
+    html += '<td><code style="font-size:11px; color:#4f46e5;">' + p.id + '</code></td>';
+    html += '<td>' + buyer + '</td>';
+    html += '<td>' + badge + '</td>';
+    html += '<td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + items + '</td>';
+    html += '<td><strong>' + total + '</strong></td>';
+    html += '<td>' + fecha + '</td>';
+    html += '<td style="white-space:nowrap;">';
+    html += '<a href="index.php?ruta=infopedidoML&order_id=' + p.id + '" class="btn btn-xs btn-info" title="Ver detalles en el sistema" style="margin-right:4px;"><i class="fas fa-eye"></i></a>';
+    html += '<a href="' + urlML + '" target="_blank" class="btn btn-xs btn-warning" title="Ver en MercadoLibre"><i class="fas fa-external-link-alt"></i></a>';
+    html += '</td>';
+    html += '</tr>';
+  });
+
+  $('#ml-tbody').html(html);
+}
+
+function actualizarPaginacionML() {
+  if (mlTotal <= mlLimit) {
+    $('#ml-paginacion').hide();
+    return;
+  }
+  var desde = mlOffset + 1;
+  var hasta = Math.min(mlOffset + mlLimit, mlTotal);
+  $('#ml-pag-info').text('Mostrando ' + desde + ' – ' + hasta + ' de ' + mlTotal + ' pedidos');
+  $('#btn-ml-anterior').prop('disabled', mlOffset === 0);
+  $('#btn-ml-siguiente').prop('disabled', mlOffset + mlLimit >= mlTotal);
+  $('#ml-paginacion').css('display', 'flex');
+}
+
+function mostrarStatusML(tipo, mensaje) {
+  var colores = {
+    'info':    'alert-info',
+    'warning': 'alert-warning',
+    'danger':  'alert-danger',
+    'success': 'alert-success'
+  };
+  $('#ml-status-bar')
+    .removeClass('alert-info alert-warning alert-danger alert-success')
+    .addClass(colores[tipo] || 'alert-info')
+    .html(mensaje)
+    .show();
 }
 
 </script>
