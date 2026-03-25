@@ -3023,10 +3023,8 @@ function renderizarTablaML(pedidos) {
     }
 
     var packId = p.pack_id || p.id;
-    var urlML  = 'ir.php?a=' + encodeURIComponent(
-                   'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
-                   + '/status?packId=' + packId + '&orderId=' + p.id
-                 );
+    var urlML  = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
+               + '/status?packId=' + packId + '&orderId=' + p.id;
 
     html += '<tr>';
     html += '<td>' + num + '</td>';
@@ -3038,7 +3036,7 @@ function renderizarTablaML(pedidos) {
     html += '<td>' + fecha + '</td>';
     html += '<td style="white-space:nowrap;">';
     html += '<a href="index.php?ruta=infopedidoML&order_id=' + p.id + '" class="btn btn-xs btn-info" title="Ver detalles en el sistema" style="margin-right:4px;"><i class="fas fa-eye"></i></a>';
-    html += '<a href="' + urlML + '" target="_blank" rel="noreferrer noopener" class="btn btn-xs btn-warning" title="Ver en MercadoLibre"><i class="fas fa-external-link-alt"></i></a>';
+    html += '<button type="button" class="btn btn-xs btn-warning btn-copiar-ml" data-url="' + urlML + '" title="Copiar link de MercadoLibre"><i class="fas fa-copy"></i></button>';
     html += '</td>';
     html += '</tr>';
   });
@@ -3072,5 +3070,27 @@ function mostrarStatusML(tipo, mensaje) {
     .html(mensaje)
     .show();
 }
+
+/* ── Copiar link de ML desde la tabla de pedidos ── */
+$(document).on('click', '.btn-copiar-ml', function () {
+  var url  = $(this).data('url');
+  var $btn = $(this);
+  if (!url) return;
+
+  navigator.clipboard.writeText(url).then(function () {
+    $btn.html('<i class="fas fa-check"></i>').addClass('btn-success').removeClass('btn-warning');
+    setTimeout(function () {
+      $btn.html('<i class="fas fa-copy"></i>').addClass('btn-warning').removeClass('btn-success');
+    }, 2000);
+  }).catch(function () {
+    var tmp = $('<textarea>').val(url).appendTo('body').select();
+    document.execCommand('copy');
+    tmp.remove();
+    $btn.html('<i class="fas fa-check"></i>').addClass('btn-success').removeClass('btn-warning');
+    setTimeout(function () {
+      $btn.html('<i class="fas fa-copy"></i>').addClass('btn-warning').removeClass('btn-success');
+    }, 2000);
+  });
+});
 
 </script>
