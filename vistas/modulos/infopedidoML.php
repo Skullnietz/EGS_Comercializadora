@@ -585,14 +585,14 @@ if (!$orderId) {
         cargarDetalleEnvio(p.shipping.id);
       }
 
-      /* ── Link ver en ML (via ir.php para evitar detección de referrer) ── */
-      // URL usando shipping.id como path (número visible en ML) + pack_id en query
+      /* ── Link ver en ML ── */
+      // path    = p.shipping.id  (2000012198329309)
+      // packId= = p.pack_id      (2000012198329313)
+      // orderId= = p.id          (2000015689832592)
       var shippingId = (p.shipping && p.shipping.id) ? p.shipping.id : null;
-      var packId     = p.pack_id || (p.shipping ? p.shipping.pack_id : null);
+      var packId     = p.pack_id || null;
       var urlML;
-      if (p.permalink) {
-        urlML = p.permalink;
-      } else if (shippingId && packId) {
+      if (shippingId && packId) {
         urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + shippingId
               + '/status?packId=' + packId + '&orderId=' + ORDER_ID;
       } else if (shippingId) {
