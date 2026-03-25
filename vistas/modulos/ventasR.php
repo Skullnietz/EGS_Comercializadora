@@ -739,28 +739,79 @@ const $input11 = document.querySelector(' #productoDiez');
       color: #0f172a;
       line-height: 1.1;
     }
-    .vr-actions {
+    .vr-toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
       margin-bottom: 12px;
     }
-    .vr-actions .btn {
-      border-radius: 999px;
-      font-weight: 600;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-    }
-    .vr-filtro-fechas {
+    .vr-primary-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       align-items: center;
+    }
+    .vr-primary-actions .btn,
+    .vr-filtro-fechas .btn {
+      border-radius: 999px;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+    }
+    .vr-btn-main {
+      min-height: 40px;
+      padding: 8px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .vr-filtro-fechas {
+      background: #fff;
+      border: 1px solid #dde7f2;
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      max-width: 700px;
+      width: 100%;
     }
     .vr-filtro-fechas .form-control {
       min-width: 145px;
       border-radius: 999px;
       border: 1px solid #d4dde8;
       box-shadow: none;
+    }
+    .vr-date-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #5b6f84;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-right: 2px;
+    }
+    .vr-filtro-presets {
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-left: 2px;
+    }
+    .vr-filtro-presets .btn {
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      box-shadow: none;
+    }
+    @media (max-width: 991px) {
+      .vr-toolbar {
+        flex-direction: column;
+      }
+      .vr-filtro-fechas {
+        justify-content: flex-start;
+      }
     }
     .vr-table-wrap {
       background: #fff;
@@ -901,27 +952,37 @@ const $input11 = document.querySelector(' #productoDiez');
           </div>
         </div>
 
-        <div class="vr-actions">
+        <div class="vr-toolbar">
+
+          <div class="vr-primary-actions">
 
             <a id="btnDescargarExcelVentasR" href="vistas/modulos/reporte.ventasR.php?reporte=compras&empresa=<?echo $_SESSION["empresa"]?>">
             
-              <button class="btn btn-success"><i class="fas fa-file-excel"></i> Descargar Reporte En Excel</button>
+              <button class="btn btn-success vr-btn-main"><i class="fas fa-file-excel"></i> Descargar Reporte En Excel</button>
 
-          </a>
+            </a>
 
 
-        <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarVenta">
+            <button class="btn btn-primary vr-btn-main" data-toggle="modal" data-target="#modalAgregarVenta">
           
-          <i class="fas fa-plus-circle"></i> Agregar Venta
+              <i class="fas fa-plus-circle"></i> Agregar Venta
 
-        </button>
+            </button>
+          </div>
 
-        <div class="vr-filtro-fechas">
+          <div class="vr-filtro-fechas">
+          <span class="vr-date-label">Desde</span>
           <input type="date" id="filtroFechaInicialR" class="form-control" placeholder="Fecha inicial">
+          <span class="vr-date-label">Hasta</span>
           <input type="date" id="filtroFechaFinalR" class="form-control" placeholder="Fecha final">
+          <div class="vr-filtro-presets">
+            <button class="btn btn-default" type="button" id="btnPresetHoyR">Hoy</button>
+            <button class="btn btn-default" type="button" id="btnPresetSemanaR">Semana</button>
+            <button class="btn btn-default" type="button" id="btnPresetMesR">Mes</button>
+          </div>
           <button class="btn btn-default" type="button" id="btnAplicarFiltroFechaR"><i class="fas fa-filter"></i> Filtrar</button>
           <button class="btn btn-default" type="button" id="btnLimpiarFiltroFechaR"><i class="fas fa-eraser"></i> Limpiar</button>
-        </div>
+          </div>
         
         <!--<div class="box-header with-border">
         

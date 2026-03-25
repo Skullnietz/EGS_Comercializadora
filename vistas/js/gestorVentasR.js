@@ -44,6 +44,18 @@ function updateExcelVentasRLink(){
   $("#btnDescargarExcelVentasR").attr("href", href);
 }
 
+function toInputDate(dateObj){
+  var y = dateObj.getFullYear();
+  var m = String(dateObj.getMonth() + 1).padStart(2, "0");
+  var d = String(dateObj.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + d;
+}
+
+function applyVentasRDateFilter(){
+  tablaVentasRapidas.ajax.url(buildVentasRAjaxUrl()).load();
+  updateExcelVentasRLink();
+}
+
 function parseCurrencyToFloat(value){
   if(value === null || value === undefined){
     return 0;
@@ -148,15 +160,42 @@ var tablaVentasRapidas = $(".tablaVentasRapidas").DataTable({
   updateExcelVentasRLink();
 
 $("#btnAplicarFiltroFechaR").on("click", function(){
-  tablaVentasRapidas.ajax.url(buildVentasRAjaxUrl()).load();
-  updateExcelVentasRLink();
+  applyVentasRDateFilter();
 });
 
 $("#btnLimpiarFiltroFechaR").on("click", function(){
   $("#filtroFechaInicialR").val("");
   $("#filtroFechaFinalR").val("");
-  tablaVentasRapidas.ajax.url(buildVentasRAjaxUrl()).load();
-  updateExcelVentasRLink();
+  applyVentasRDateFilter();
+});
+
+$("#btnPresetHoyR").on("click", function(){
+  var hoy = new Date();
+  var fecha = toInputDate(hoy);
+  $("#filtroFechaInicialR").val(fecha);
+  $("#filtroFechaFinalR").val(fecha);
+  applyVentasRDateFilter();
+});
+
+$("#btnPresetSemanaR").on("click", function(){
+  var hoy = new Date();
+  var dia = hoy.getDay();
+  var ajuste = dia === 0 ? -6 : 1 - dia;
+  var inicioSemana = new Date(hoy);
+  inicioSemana.setDate(hoy.getDate() + ajuste);
+
+  $("#filtroFechaInicialR").val(toInputDate(inicioSemana));
+  $("#filtroFechaFinalR").val(toInputDate(hoy));
+  applyVentasRDateFilter();
+});
+
+$("#btnPresetMesR").on("click", function(){
+  var hoy = new Date();
+  var inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+  $("#filtroFechaInicialR").val(toInputDate(inicioMes));
+  $("#filtroFechaFinalR").val(toInputDate(hoy));
+  applyVentasRDateFilter();
 });
 /*=============================================
 MANDAR EL TIPO DE USUARIO AL AJAX
