@@ -774,7 +774,7 @@
 
   <!-- Logo texto -->
   <a href="inicio" class="logo">
-    <span class="logo-mini"><span class="egs-logo-text">E<span class="egs-logo-dot">.</span></span></span>
+    <span class="logo-mini"><span class="egs-logo-text">EGS<span class="egs-logo-dot">.</span></span></span>
     <span class="logo-lg"><span class="egs-logo-text">EGS<span class="egs-logo-dot">.</span></span></span>
   </a>
 
