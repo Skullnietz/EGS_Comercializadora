@@ -279,6 +279,57 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
   }
 
+  /* Controles superiores DataTables: mostrar registros y buscar */
+  #tablematerial_wrapper .dataTables_length,
+  #tablematerial_wrapper .dataTables_filter {
+    margin-bottom: 12px;
+  }
+
+  #tablematerial_wrapper .dataTables_length label,
+  #tablematerial_wrapper .dataTables_filter label {
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+
+  #tablematerial_wrapper .dataTables_length select {
+    border: 1px solid #dbe3ef !important;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #334155;
+    height: 34px;
+    padding: 4px 26px 4px 10px;
+    margin: 0 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  #tablematerial_wrapper .dataTables_filter input {
+    border: 1px solid #dbe3ef !important;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #334155;
+    height: 36px;
+    min-width: 220px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all .15s ease;
+  }
+
+  #tablematerial_wrapper .dataTables_length select:focus,
+  #tablematerial_wrapper .dataTables_filter input:focus {
+    outline: none;
+    border-color: #a5b4fc !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+  }
+
+  #tablematerial_wrapper .dataTables_filter input::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
   /* Paginacion DataTables (Bootstrap) - override local para evitar estilo blanco por defecto */
   #tablematerial_wrapper .dataTables_paginate {
     margin-top: 14px;
@@ -435,6 +486,19 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
 
     .content {
       padding: 10px;
+    }
+
+    #tablematerial_wrapper .dataTables_length,
+    #tablematerial_wrapper .dataTables_filter {
+      float: none !important;
+      text-align: left !important;
+      width: 100%;
+    }
+
+    #tablematerial_wrapper .dataTables_filter input {
+      width: 100%;
+      min-width: 0;
+      margin-left: 0;
     }
   }
 </style>
