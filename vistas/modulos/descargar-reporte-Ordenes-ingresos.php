@@ -23,7 +23,7 @@ $valorEmpresa = $_GET["empresa"];
 $tabla = "ordenes";
 
 if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
-	$ordenes = ModeloOrdenes::mdlRangoFechasOrdenesingresadas($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], "id_empresa", $valorEmpresa);
+	$ordenes = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], "id_empresa", $valorEmpresa);
 } else {
 	$ordenes = ModeloOrdenes::mdlMostrarordenesParaValidar($tabla, "id_empresa", $valorEmpresa);
 }

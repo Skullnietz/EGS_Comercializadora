@@ -26,7 +26,25 @@ $valor = $_GET["empresa"];
 $tecnico = "id_tecnico"; 
 $valorTecnico = $_GET["tecnico"];
 
-$ordenes = ModeloOrdenes::mdlMostrarOrdenesPorEstadoEmpresayTecnico("ordenes", $estado, $item, $valor, $tecnico, $valorTecnico);
+if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+	$ordenesBase = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa("ordenes", $_GET["fechaInicial"], $_GET["fechaFinal"], "id_empresa", $valor);
+} else {
+	$ordenesBase = ModeloOrdenes::mdlMostrarordenesParaValidar("ordenes", "id_empresa", $valor);
+}
+
+$ordenes = array();
+if (is_array($ordenesBase)) {
+	foreach ($ordenesBase as $orden) {
+		if (($orden["estado"] ?? "") !== $estado) {
+			continue;
+		}
+		if ((string)($orden["id_tecnico"] ?? "") !== (string)$valorTecnico) {
+			continue;
+		}
+		$ordenes[] = $orden;
+	}
+}
+
 if (!is_array($ordenes)) {
 	$ordenes = array();
 }

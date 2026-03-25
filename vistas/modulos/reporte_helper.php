@@ -5,14 +5,25 @@ if (!class_exists('ReporteHelper')) {
     class ReporteHelper {
         public static function generarReporteExcel($statusFilter, $empresaId, $filename) {
 
-            $ordenes = ModeloOrdenes::mdlMostrarOrdenesNew("ordenes", null, null);
+            if (isset($_GET['fechaInicial']) && isset($_GET['fechaFinal'])) {
+                $ordenes = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa(
+                    'ordenes',
+                    $_GET['fechaInicial'],
+                    $_GET['fechaFinal'],
+                    'id_empresa',
+                    $empresaId
+                );
+            } else {
+                $ordenes = ModeloOrdenes::mdlMostrarordenesParaValidar('ordenes', 'id_empresa', $empresaId);
+            }
+
+            if (!is_array($ordenes)) {
+                $ordenes = array();
+            }
 
             // Filter by Status and Company in PHP
             $filteredOrdenes = [];
             foreach ($ordenes as $orden) {
-                if ($orden['id_empresa'] != $empresaId) {
-                    continue;
-                }
                 if ($statusFilter !== 'TODOS') {
                     if ($orden['estado'] != $statusFilter) {
                         continue;
@@ -28,6 +39,12 @@ if (!class_exists('ReporteHelper')) {
             usort($filteredOrdenes, function ($a, $b) {
                 return strtotime((string)($a['fecha'] ?? '')) <=> strtotime((string)($b['fecha'] ?? ''));
             });
+
+            $rangoTexto = (isset($_GET['fechaInicial']) && isset($_GET['fechaFinal']))
+                ? (($_GET['fechaInicial'] === $_GET['fechaFinal'])
+                    ? $_GET['fechaInicial']
+                    : $_GET['fechaInicial'] . ' a ' . $_GET['fechaFinal'])
+                : 'Todas las ordenes';
 
             $headers = array('#', 'Folio', 'Empresa', 'Cliente', 'Telefono', 'WhatsApp', 'Titulo', 'Estado', 'Total', 'Fecha');
             $rows = array();
@@ -81,7 +98,7 @@ if (!class_exists('ReporteHelper')) {
             ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
                 'sheetName' => 'Ordenes',
                 'title' => 'Reporte de Ordenes por Estado',
-                'subtitle' => 'Estado: ' . $statusFilter . ' | Generado: ' . date('Y-m-d H:i'),
+                'subtitle' => 'Estado: ' . $statusFilter . ' | Rango: ' . $rangoTexto . ' | Generado: ' . date('Y-m-d H:i'),
                 'currencyColumns' => array(8),
                 'dateColumns' => array(9),
                 'hyperlinkColumns' => array(5 => 'whatsapp_api'),
