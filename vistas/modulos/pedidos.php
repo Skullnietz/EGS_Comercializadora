@@ -638,11 +638,9 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 <i class="fa-solid fa-store"></i> Pedidos de MercadoLibre
               </h3>
               <div class="ped-actions-group">
-                <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador"): ?>
                 <button class="ped-btn ped-btn-primary" data-toggle="modal" data-target="#modalMLConfig">
                   <i class="fa-solid fa-gear"></i> Configurar
                 </button>
-                <?php endif; ?>
                 <button class="ped-btn ped-btn-success" id="btn-ml-sync">
                   <i class="fa-solid fa-rotate"></i> Sincronizar
                 </button>
@@ -1476,7 +1474,6 @@ MODAL AGREGAR PEDIDO
 <!--=====================================
 MODAL CONFIGURACIÓN MERCADOLIBRE
 ======================================-->
-<?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador"): ?>
 <div id="modalMLConfig" class="modal fade" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -1540,7 +1537,6 @@ MODAL CONFIGURACIÓN MERCADOLIBRE
     </div>
   </div>
 </div>
-<?php endif; ?>
 
 <script>
     /*=============================================

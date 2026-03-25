@@ -161,8 +161,8 @@ if ($accion === 'obtenerOrden') {
 // ── Guardar configuración (solo administradores) ──────────────────────────
 if ($accion === 'guardarConfig') {
 
-    if (!in_array($_SESSION['perfil'], ['administrador', 'Super-Administrador'])) {
-        echo json_encode(['error' => 'Solo administradores pueden cambiar esta configuración.']);
+    if (!in_array($_SESSION['perfil'], ['administrador', 'Super-Administrador', 'vendedor'])) {
+        echo json_encode(['error' => 'No tienes permisos para cambiar esta configuración.']);
         exit;
     }
 
