@@ -28,22 +28,29 @@ function _reportGetBadgeClass($estadoText) {
     return 'badge-otro';
 }
 
-/* ── Obtener datos ── */
-if(isset($_GET["fechaInicial"])){
-    $fechaInicial = $_GET["fechaInicial"];
-    $fechaFinal   = $_GET["fechaFinal"];
-}else{
-    $fechaInicial = null;
-    $fechaFinal   = null;
-}
+/* ── Obtener datos (solo si hay rango de fecha o se pidió mostrar todas) ── */
+$tieneRango    = isset($_GET["fechaInicial"]);
+$mostrarTodas  = isset($_GET["mostrarTodas"]);
+$cargarDatos   = $tieneRango || $mostrarTodas;
 
-if ($_SESSION["perfil"] == "Super-Administrador"){
-    $respuesta = controladorOrdenes::ctrRangoFechasOrdenesSuperAdmin($fechaInicial, $fechaFinal);
-}else{
-    $respuesta = controladorOrdenes::ctrRangoFechasOrdenes($fechaInicial, $fechaFinal, "id_empresa", $_SESSION["empresa"]);
-}
+$fechaInicial = null;
+$fechaFinal   = null;
+$respuesta    = [];
 
-if(!is_array($respuesta)) $respuesta = [];
+if($cargarDatos){
+    if($tieneRango){
+        $fechaInicial = $_GET["fechaInicial"];
+        $fechaFinal   = $_GET["fechaFinal"];
+    }
+
+    if ($_SESSION["perfil"] == "Super-Administrador"){
+        $respuesta = controladorOrdenes::ctrRangoFechasOrdenesSuperAdmin($fechaInicial, $fechaFinal);
+    }else{
+        $respuesta = controladorOrdenes::ctrRangoFechasOrdenes($fechaInicial, $fechaFinal, "id_empresa", $_SESSION["empresa"]);
+    }
+
+    if(!is_array($respuesta)) $respuesta = [];
+}
 
 /* ── Calcular resumen ── */
 $totalOrdenes   = count($respuesta);
@@ -78,7 +85,7 @@ function _dlLink($file, $reporte, $reporteFecha, $fechaParams, $empParam, $extra
     return "vistas/modulos/{$file}?reporte={$reporte}{$empParam}{$extra}";
 }
 
-$rangoTexto = "Todas las fechas";
+$rangoTexto = $mostrarTodas ? "Todas las órdenes" : "Selecciona un rango";
 if($fechaInicial && $fechaFinal){
     if($fechaInicial === $fechaFinal){
         $rangoTexto = date("d/m/Y", strtotime($fechaInicial));
@@ -298,6 +305,32 @@ $totalCols    = $isAdmin ? 12 : 10;
       </div>
     </div>
 
+    <?php if(!$cargarDatos): ?>
+    <!-- ═══ Landing / Preview ═══ -->
+    <div style="background:var(--rpt-card); border:1px solid var(--rpt-border); border-radius:16px; padding:60px 30px; text-align:center; max-width:600px; margin:40px auto;">
+      <i class="fa-solid fa-chart-bar" style="font-size:56px; color:var(--rpt-accent); opacity:.25; display:block; margin-bottom:20px;"></i>
+      <h3 style="font-size:20px; font-weight:700; color:var(--rpt-text); margin:0 0 8px;">Selecciona un rango de fechas</h3>
+      <p style="font-size:14px; color:var(--rpt-muted); margin:0 0 28px; line-height:1.6;">
+        Usa el botón <strong>Cambiar rango</strong> de arriba para filtrar las órdenes por periodo,<br>
+        o muestra todas las órdenes del sistema.
+      </p>
+      <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+        <button type="button" class="rpt-datepicker-btn" onclick="$('#daterange-btnOrdenes').click()">
+          <i class="fa-solid fa-calendar-days"></i>
+          Elegir rango de fechas
+        </button>
+        <a href="index.php?ruta=reportePorFecheOrdenes&mostrarTodas=1"
+           style="display:inline-flex; align-items:center; gap:8px; padding:9px 18px;
+                  background:var(--rpt-accent); color:#fff; border-radius:10px; font-size:13px;
+                  font-weight:600; text-decoration:none; transition:opacity .15s;"
+           onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          <i class="fa-solid fa-list"></i>
+          Mostrar todas las órdenes
+        </a>
+      </div>
+    </div>
+    <?php else: ?>
+
     <!-- ═══ KPI Cards ═══ -->
     <div class="rpt-kpi-row">
       <div class="rpt-kpi">
@@ -348,7 +381,7 @@ $totalCols    = $isAdmin ? 12 : 10;
     <div class="rpt-downloads">
       <?php if($perfil == "administrador"): ?>
         <a class="rpt-dl-btn green" href="<?= _dlLink('descargar-reporte-Ordenes.php','ordenes','reporte',$fechaParams,$empParam) ?>">
-          <i class="fa-solid fa-file-excel"></i> Excel General
+          <i class="fa-solid fa-file-csv"></i> Descargar Reporte
         </a>
         <a class="rpt-dl-btn blue" href="<?= _dlLink('descargar-reporte-infoOrden.php','infoordenes','infoordenes','',$empParam) ?>">
           <i class="fa-solid fa-circle-info"></i> Info Órdenes
@@ -525,7 +558,7 @@ $totalCols    = $isAdmin ? 12 : 10;
       </table>
     </div>
 
-    <?php if(empty($respuesta)): ?>
+    <?php if(empty($respuesta) && $cargarDatos): ?>
     <div style="text-align:center; padding:60px 20px; color:var(--rpt-muted);">
       <i class="fa-solid fa-inbox" style="font-size:48px; opacity:.3; display:block; margin-bottom:14px;"></i>
       <p style="font-size:15px; font-weight:600;">No hay órdenes para este rango</p>
@@ -533,10 +566,13 @@ $totalCols    = $isAdmin ? 12 : 10;
     </div>
     <?php endif; ?>
 
+    <?php endif; /* cierra if($cargarDatos) else */ ?>
+
   </section>
 </div>
 
 <!-- ═══ JS: DataTables + Filtros + Recálculo de KPIs ═══ -->
+<?php if($cargarDatos): ?>
 <script>
 (function(){
   var IS_ADMIN   = <?= $isAdmin ? 'true' : 'false' ?>;
@@ -644,3 +680,4 @@ $totalCols    = $isAdmin ? 12 : 10;
 
 })();
 </script>
+<?php endif; ?>

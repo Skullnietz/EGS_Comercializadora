@@ -1856,51 +1856,29 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 			$OrdenesFecha = ModeloOrdenes::mdlMostrarordenesParaValidar($tabla, "id_empresa", $valorEmpresa);
 		}
 
-		/* ── Generar Excel XML (formato nativo sin dependencias) ── */
-		$Name = $_GET["reporte"] . '.xls';
+		/* ── Generar CSV (compatible con Excel, Google Sheets, LibreOffice) ── */
+		$Name = $_GET["reporte"] . '.csv';
 
 		header('Expires: 0');
 		header('Cache-control: private');
-		header("Content-type: application/vnd.ms-excel; charset=utf-8");
+		header("Content-Type: text/csv; charset=utf-8");
 		header("Cache-Control: cache, must-revalidate");
 		header('Content-Description: File Transfer');
 		header('Last-Modified: ' . date('D, d M Y H:i:s'));
 		header("Pragma: public");
 		header('Content-Disposition: attachment; filename="' . $Name . '"');
-		header("Content-Transfer-Encoding: binary");
 
 		// BOM UTF-8 para que Excel interprete acentos correctamente
-		echo "\xEF\xBB\xBF";
-
-		$rangoTexto = "";
-		if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
-			$rangoTexto = $_GET["fechaInicial"] . " a " . $_GET["fechaFinal"];
-		} else {
-			$rangoTexto = "Todas las fechas";
-		}
-
-		echo '<table border="1">';
-
-		// Fila de título
-		echo '<tr><td colspan="14" style="font-size:16px; font-weight:bold; background:#1e40af; color:#ffffff; text-align:center; padding:8px;">Reporte de Órdenes — ' . htmlspecialchars($rangoTexto) . '</td></tr>';
+		$output = fopen('php://output', 'w');
+		fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
 		// Encabezados
-		echo '<tr>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">No. Orden</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Empresa</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Asesor</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Técnico</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Cliente</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Estado</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Marca</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Modelo</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">No. Serie</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Total</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Inversión</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Utilidad</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Fecha Ingreso</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Fecha Registro</td>
-		</tr>';
+		fputcsv($output, [
+			'No. Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado',
+			'Marca', 'Modelo', 'No. Serie',
+			'Total', 'Inversión', 'Utilidad',
+			'Fecha Ingreso', 'Fecha Registro'
+		]);
 
 		$sumaTotal = 0;
 		$sumaInversion = 0;
@@ -1926,50 +1904,36 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 			$sumaTotal     += $total;
 			$sumaInversion += $inversion;
 
-			$marca  = $value["marcaDelEquipo"] ?? "";
-			$modelo = $value["modeloDelEquipo"] ?? "";
-			$serie  = $value["numeroDeSerieDelEquipo"] ?? "";
-
-			$fechaIngreso = $value["fecha_ingreso"] ?? "";
-			$fechaRegistro = $value["fecha"] ?? "";
-
-			echo '<tr>
-				<td style="border:1px solid #ddd;">' . $value["id"] . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($NombreEmpresa) . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($NombreAsesor) . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($NombreTecnico) . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($NombreUsuario) . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($value["estado"]) . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($marca) . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($modelo) . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($serie) . '</td>
-				<td style="border:1px solid #ddd; text-align:right;">$' . number_format($total, 2) . '</td>
-				<td style="border:1px solid #ddd; text-align:right;">$' . number_format($inversion, 2) . '</td>
-				<td style="border:1px solid #ddd; text-align:right;">$' . number_format($utilidad, 2) . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($fechaIngreso) . '</td>
-				<td style="border:1px solid #ddd;">' . htmlspecialchars($fechaRegistro) . '</td>
-			</tr>';
+			fputcsv($output, [
+				$value["id"],
+				$NombreEmpresa,
+				$NombreAsesor,
+				$NombreTecnico,
+				$NombreUsuario,
+				$value["estado"],
+				$value["marcaDelEquipo"] ?? "",
+				$value["modeloDelEquipo"] ?? "",
+				$value["numeroDeSerieDelEquipo"] ?? "",
+				number_format($total, 2, '.', ''),
+				number_format($inversion, 2, '.', ''),
+				number_format($utilidad, 2, '.', ''),
+				$value["fecha_ingreso"] ?? "",
+				$value["fecha"] ?? ""
+			]);
 		}
 
-		// Fila de totales
-		$sumaUtilidad = $sumaTotal - $sumaInversion;
-		echo '<tr>
-			<td colspan="9" style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc; text-align:right;">TOTALES:</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc; text-align:right;">$' . number_format($sumaTotal, 2) . '</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc; text-align:right;">$' . number_format($sumaInversion, 2) . '</td>
-			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc; text-align:right;">$' . number_format($sumaUtilidad, 2) . '</td>
-			<td colspan="2" style="background:#f1f5f9; border:1px solid #ccc;"></td>
-		</tr>';
+		// Fila vacía + totales
+		fputcsv($output, []);
+		fputcsv($output, [
+			'', '', '', '', '', '', '', '', 'TOTALES:',
+			number_format($sumaTotal, 2, '.', ''),
+			number_format($sumaInversion, 2, '.', ''),
+			number_format($sumaTotal - $sumaInversion, 2, '.', ''),
+			'', ''
+		]);
+		fputcsv($output, ['Total Órdenes:', count($OrdenesFecha)]);
 
-		// Resumen
-		echo '<tr><td colspan="14"></td></tr>';
-		echo '<tr>
-			<td colspan="2" style="font-weight:bold;">Total Órdenes:</td>
-			<td>' . count($OrdenesFecha) . '</td>
-			<td colspan="11"></td>
-		</tr>';
-
-		echo '</table>';
+		fclose($output);
 	}
 
 
