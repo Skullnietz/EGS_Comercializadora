@@ -455,7 +455,7 @@ $totalCols    = $isAdmin ? 12 : 10;
 
     <!-- ═══ Tabla de órdenes ═══ -->
     <div class="rpt-table-wrap">
-      <table id="rptOrdenesTable" class="table dt-responsive" width="100%">
+      <table id="rptOrdenesTable" class="table" width="100%">
         <thead>
           <!-- Fila de títulos -->
           <tr>
@@ -583,8 +583,44 @@ $totalCols    = $isAdmin ? 12 : 10;
   var COL_ESTADO = <?= $colEstado ?>;
   var COL_TOTAL  = <?= $colTotal ?>;
 
-  // Inicializar DataTables
-  var table = $('#rptOrdenesTable').DataTable({
+  function normalizeText(value) {
+    return (value || '')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ');
+  }
+
+  $.fn.dataTable.ext.search.push(function(settings, data, dataIndex){
+    if (!settings || !settings.nTable || settings.nTable.id !== 'rptOrdenesTable') {
+      return true;
+    }
+
+    var selectedEstado = normalizeText($('.rpt-filter-select[data-col="' + COL_ESTADO + '"]').val());
+    if (!selectedEstado) {
+      return true;
+    }
+
+    var rowNode = settings.aoData[dataIndex] && settings.aoData[dataIndex].nTr
+      ? settings.aoData[dataIndex].nTr
+      : null;
+    if (!rowNode) {
+      return true;
+    }
+
+    var rowEstado = normalizeText($(rowNode).attr('data-estado'));
+    return rowEstado === selectedEstado;
+  });
+
+  // Inicializar DataTables sin duplicar wrappers/paginacion si el script se ejecuta otra vez
+  var $table = $('#rptOrdenesTable');
+  if ($.fn.DataTable.isDataTable($table)) {
+    $table.DataTable().destroy();
+  }
+
+  var table = $table.DataTable({
     paging: true,
     pageLength: 50,
     lengthChange: false,
@@ -614,14 +650,7 @@ $totalCols    = $isAdmin ? 12 : 10;
 
   /* ── Filtro selector de estado ── */
   $('.rpt-filter-select').on('change', function(){
-    var col = parseInt($(this).data('col'));
-    var val = $(this).val();
-    // Búsqueda exacta con regex
-    if(val){
-      table.column(col).search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
-    } else {
-      table.column(col).search('').draw();
-    }
+    table.draw();
   });
 
   /* ── Click en chips de estado para filtrar rápido ── */
