@@ -153,6 +153,29 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     border-bottom-color: #e8eef5;
   }
 
+  /* Quita por completo los indicadores de sorting en la columna # */
+  #tablematerial thead th:first-child,
+  #tablematerial thead th:first-child.sorting,
+  #tablematerial thead th:first-child.sorting_asc,
+  #tablematerial thead th:first-child.sorting_desc,
+  #tablematerial thead th:first-child.sorting_disabled {
+    background-image: none !important;
+  }
+
+  #tablematerial thead th:first-child::before,
+  #tablematerial thead th:first-child::after,
+  #tablematerial thead th:first-child.sorting::before,
+  #tablematerial thead th:first-child.sorting::after,
+  #tablematerial thead th:first-child.sorting_asc::before,
+  #tablematerial thead th:first-child.sorting_asc::after,
+  #tablematerial thead th:first-child.sorting_desc::before,
+  #tablematerial thead th:first-child.sorting_desc::after,
+  #tablematerial thead th:first-child.sorting_disabled::before,
+  #tablematerial thead th:first-child.sorting_disabled::after {
+    display: none !important;
+    content: none !important;
+  }
+
   #tablematerial.dataTable tbody tr td {
     vertical-align: middle;
   }
@@ -599,6 +622,7 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     var table = $('#tablematerial').DataTable({
       language: { url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
       orderCellsTop: true,
+      order: [[9, 'desc']],
       pageLength: 25,
       lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
       autoWidth: false,
