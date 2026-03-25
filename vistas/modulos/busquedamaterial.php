@@ -8,8 +8,125 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.11.5/datatables.min.css" />
 
 <style>
+  :root {
+    --crm-bg: #f8fafc;
+    --crm-surface: #ffffff;
+    --crm-border: #e2e8f0;
+    --crm-text: #0f172a;
+    --crm-text2: #475569;
+    --crm-muted: #94a3b8;
+    --crm-accent: #6366f1;
+    --crm-radius: 14px;
+    --crm-radius-sm: 10px;
+    --crm-shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 4px 14px rgba(15, 23, 42, .04);
+    --crm-shadow-lg: 0 4px 24px rgba(15, 23, 42, .10);
+    --crm-ease: cubic-bezier(.4, 0, .2, 1);
+  }
+
+  .content {
+    background: var(--crm-bg);
+    padding: 14px 15px 20px;
+  }
+
   .content-header .breadcrumb {
     margin-bottom: 0;
+  }
+
+  .content-header h1 {
+    margin: 0;
+    color: var(--crm-text);
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -.01em;
+  }
+
+  .content-header h1 small {
+    color: var(--crm-muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .bm-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 6px 0 16px;
+    padding: 0 4px;
+  }
+
+  .bm-section-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    flex-shrink: 0;
+  }
+
+  .bm-section h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--crm-text);
+  }
+
+  .bm-section p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--crm-muted);
+  }
+
+  .bm-card {
+    background: var(--crm-surface);
+    border: 1px solid var(--crm-border);
+    border-radius: var(--crm-radius);
+    box-shadow: var(--crm-shadow);
+    overflow: hidden;
+    transition: box-shadow .2s var(--crm-ease), transform .2s var(--crm-ease);
+  }
+
+  .bm-card:hover {
+    box-shadow: var(--crm-shadow-lg);
+  }
+
+  .bm-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .bm-card-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--crm-text);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .bm-card-title i {
+    color: var(--crm-accent);
+  }
+
+  .bm-card-subtitle {
+    color: var(--crm-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+
+  .bm-card-body {
+    padding: 18px 20px 20px;
   }
 
   .box-header h3 {
@@ -25,10 +142,15 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
   #tablematerial thead th {
     position: sticky;
     top: 0;
-    background: #fff;
+    background: #f8fafc;
     z-index: 2;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, .06);
+    box-shadow: 0 1px 0 rgba(15, 23, 42, .08);
     white-space: nowrap;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: var(--crm-text2);
+    border-bottom-color: #e8eef5;
   }
 
   #tablematerial.dataTable tbody tr td {
@@ -65,10 +187,11 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     display: inline-block;
     padding: .35em .6em;
     border-radius: 999px;
-    font-size: 0.95rem;
+    font-size: 11px;
     font-weight: 600;
     border: 1px solid transparent;
     white-space: nowrap;
+    letter-spacing: .2px;
   }
 
   /* ── Estados estandarizados ── */
@@ -97,7 +220,11 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
 
   table.dataTable.stripe tbody tr.odd,
   table.dataTable.display tbody tr.odd {
-    background-color: #fafafa;
+    background-color: #fbfdff;
+  }
+
+  table.dataTable tbody tr:hover {
+    background-color: #f4f7ff !important;
   }
 
   /* Fila de filtros */
@@ -112,8 +239,19 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
   #tablematerial thead tr.filters select {
     width: 100%;
     box-sizing: border-box;
-    padding: .35rem .5rem;
-    font-size: 1.1rem;
+    padding: 6px 8px;
+    font-size: 12px;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    color: var(--crm-text2);
+    background: #fff;
+  }
+
+  #tablematerial thead tr.filters input:focus,
+  #tablematerial thead tr.filters select:focus {
+    outline: none;
+    border-color: #a5b4fc;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
   }
 
   /* Tooltips */
@@ -172,25 +310,50 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     line-height: 1;
     opacity: .9;
   }
+
+  @media (max-width: 767px) {
+    .bm-card-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .bm-card-body {
+      padding: 12px;
+    }
+
+    .content {
+      padding: 10px;
+    }
+  }
 </style>
 
 <div class="content-wrapper">
   <section class="content-header">
+    <h1>Búsqueda de Material <small>Panel de control</small></h1>
     <ol class="breadcrumb">
-      <li><a href="#"><i class="fas fa-dashboard"></i></a></li>
-      <li class="active">Búsqueda de Producto</li>
+      <li><a href="index.php?ruta=inicio"><i class="fa-solid fa-gauge"></i> Inicio</a></li>
+      <li class="active">Búsqueda de Material</li>
     </ol>
   </section>
 
   <div class="content">
+    <div class="bm-section">
+      <div class="bm-section-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <div>
+        <h3>Explorador de equipos y órdenes</h3>
+        <p>Filtra por técnico, estado, total y fecha para encontrar materiales más rápido.</p>
+      </div>
+    </div>
+
     <div class="row" id="ORDEN">
       <div class="col-12">
-        <div class="box box-success">
-          <div class="box-header whith-border">
-            <h3>Búsqueda de Producto</h3>
+        <div class="bm-card">
+          <div class="bm-card-head">
+            <h3 class="bm-card-title"><i class="fa-solid fa-table"></i> Búsqueda de Producto</h3>
+            <span class="bm-card-subtitle">Vista avanzada de resultados</span>
           </div>
-          <div class="box-body">
-            <div class="box table-responsive-wrap">
+          <div class="bm-card-body">
+            <div class="table-responsive-wrap">
 
               <table id="tablematerial"
                 class="table stripe ordenes order-table display compact cell-border hover row-border"
