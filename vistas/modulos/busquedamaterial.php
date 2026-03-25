@@ -664,7 +664,10 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
                     // Total + Fecha
                     $totalNum = (float) $value["total"];
                     $totalFmt = number_format($totalNum, 2, '.', ',');
-                    $fechaIngreso = htmlspecialchars($value["fecha_ingreso"]); // ideal: YYYY-MM-DD
+                    $fechaIngresoRaw = isset($value["fecha_ingreso"]) ? trim((string)$value["fecha_ingreso"]) : '';
+                    $fechaTs = strtotime($fechaIngresoRaw);
+                    $fechaIngresoIso = $fechaTs ? date('Y-m-d', $fechaTs) : '';
+                    $fechaIngreso = htmlspecialchars($fechaIngresoRaw);
                   
                     // Primer thumbnail
                     $thumbHtml = '';
@@ -690,7 +693,7 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
                     echo '  <td>' . $thumbHtml . '</td>';
                     echo '  <td class="td-estado" data-estado="' . htmlspecialchars($estadoText) . '"><span class="badge ' . $estadoClass . '">' . htmlspecialchars($estadoText) . '</span></td>';
                     echo '  <td data-total="' . $totalNum . '">$ ' . $totalFmt . '</td>';
-                    echo '  <td data-fecha="' . $fechaIngreso . '">' . $fechaIngreso . '</td>';
+                    echo '  <td data-fecha="' . htmlspecialchars($fechaIngresoIso) . '">' . $fechaIngreso . '</td>';
                     echo '  <td class="td-actions">' . $InfoOrdenes . '</td>';
                     echo '</tr>';
                   }
@@ -770,26 +773,11 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
       .replace(/\s+/g, ' ');
   }
 
-  // Convierte varios formatos de fecha a objeto Date valido.
-  function parseDateSafe(value) {
+  function parseIsoDateOnly(value) {
     const raw = (value || '').toString().trim();
-    if (!raw) return null;
-
-    // yyyy-mm-dd o yyyy-mm-dd hh:mm:ss
-    const isoLike = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (isoLike) {
-      const d = new Date(isoLike[1] + '-' + isoLike[2] + '-' + isoLike[3] + 'T00:00:00');
-      return isNaN(d.getTime()) ? null : d;
-    }
-
-    // dd/mm/yyyy
-    const latam = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-    if (latam) {
-      const d = new Date(latam[3] + '-' + latam[2] + '-' + latam[1] + 'T00:00:00');
-      return isNaN(d.getTime()) ? null : d;
-    }
-
-    const d = new Date(raw);
+    const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return null;
+    const d = new Date(raw + 'T00:00:00');
     return isNaN(d.getTime()) ? null : d;
   }
 
@@ -876,19 +864,19 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     const maxFechaStr = $('#maxFecha').val();
     const fechaCell = $row.find('td:eq(9)');
     const hayFiltroFecha = !!(minFechaStr || maxFechaStr);
-    const fechaRaw = (fechaCell.attr('data-fecha') || fechaCell.text() || '').trim();
-    const f = parseDateSafe(fechaRaw);
+    const fechaIso = (fechaCell.attr('data-fecha') || '').trim();
+    const f = parseIsoDateOnly(fechaIso);
 
     // Si se está filtrando por fecha, una fila sin fecha valida no debe pasar.
     if (hayFiltroFecha && !f) return false;
 
     if (f) {
       if (minFechaStr) {
-        const fMin = parseDateSafe(minFechaStr);
+        const fMin = parseIsoDateOnly(minFechaStr);
         if (fMin && f < fMin) return false;
       }
       if (maxFechaStr) {
-        const fMax = parseDateSafe(maxFechaStr);
+        const fMax = parseIsoDateOnly(maxFechaStr);
         if (fMax) {
           fMax.setHours(23, 59, 59, 999);
           if (f > fMax) return false;
