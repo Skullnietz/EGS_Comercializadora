@@ -1973,164 +1973,49 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 			}
 
 
-			/*=============================================
-			CREAMOS EL ARCHIVO DE EXCEL
-			=============================================*/
-
-			$Name = $_GET["reporte"] . '.xls';
-
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
 			header('Expires: 0');
-
 			header('Cache-control: private');
-
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-
-			header("Cache-Control: cache, must-revalidate");
-
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
-
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			header("Pragma: public");
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado', 'Total Cobrado', 'Ganancia Neta', 'Fecha Salida']);
 
-			header('Content-Disposition:; filename="' . $Name . '"');
-
-			header("Content-Transfer-Encoding: binary");
-
-
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-					<tr> 
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Total Cobrado</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Ganancia neta</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha salida</td>
-
-					</tr>");
-
-
+			$suma = 0;
 			foreach ($OrdenesFecha as $key => $value) {
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+				$invercion = $value["totalInversion"]; $totalNetoOrden = $value["total"] - $invercion;
 
-
-
-				$item = "id";
-
-				$valor = $value["id_empresa"];
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-				//TRAER ASESOR
-				$item = "id";
-				$valor = $value["id_Asesor"];
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-				$NombreAsesor = $asesor["nombre"];
-				$departamentoAsesor = $asesor["departamento"];
-
-				//TRAER CLIENTE (USUARIO)
-				$item = "id";
-				$valor = $value["id_usuario"];
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-				$NombreUsuario = $usuario["nombre"];
-				//TRAER TECNICO
-				$item = "id";
-				$valor = $value["id_tecnico"];
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-				$NombreTecnico = $tecnico["nombre"];
-				$departamento = $tecnico["departamento"];
-
-				//$ElTotal = number_format($total["total"],2);
-				//CALCULO DEL TOTAL DESCONTANDO INVERCION
-
-				$invercion = $value["totalInversion"];
-				$totalNetoOrden = $value["total"] - $invercion;
-
-				if ($departamento == "sistemas") {
-
-					$comision = $totalNetoOrden / 1.16 * 0.04;
-
-				} elseif ($departamento == "electronica") {
-
-					$comision = $totalNetoOrden / 1.16 * 0.2;
-
-				} elseif ($departamento == "impresoras") {
-
-
-					$comision = $totalNetoOrden / 1.16 * 0.2;
-
-				}
-
-				if ($departamentoAsesor = "ventas") {
-
-					$comision = $totalNetoOrden / 1.16 * 0.03;
-				}
-
-				/*=============================================
-			  TRAER EMAIL DATOS DE COMPRA
-			  =============================================*/
-				echo utf8_decode("</td>
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $totalNetoOrden . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha_Salida"] . "</td>
-			 					  	 </tr>");
-
-
-
+				fputcsv($output, [$value["id"], $NameEmpresa["empresa"], $asesor["nombre"], $tecnico["nombre"], $usuario["nombre"], $value["estado"], $value["total"], $totalNetoOrden, $value["fecha_Salida"]]);
 				$suma += $totalNetoOrden;
-
-
 			}
 
-			echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL GANANCIA</td></tr>");
-
-			echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $suma . "</td>
-
-						</tr>");
-
-			/*=============================
-			AQUI VA EL TOTAL
-			==============================*/
-			$tabla = "ordenes";
-
-			$estado = "Entregado (Ent)";
-
-			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
-
-			foreach ($total as $key => $valueTotal) {
-
-				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL  COBRADO</td></tr>");
-
-				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
-
-						</tr>");
-
+			// Total
+			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+				$tabla = "ordenes";
+				$estado = "Entregado (Ent)";
+				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
+				foreach ($total as $valueTotal) {
+					fputcsv($output, ["TOTAL", "", "", "", "", "", "", "", ""]);
+					fputcsv($output, [$valueTotal["total"], "", "", "", "", "", "", "", ""]);
+				}
 			}
+			fputcsv($output, ["TOTAL GANANCIA", "", "", "", "", "", "", $suma, ""]);
 
-
-
-
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -2172,131 +2057,45 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 			}
 
 
-			/*=============================================
-			CREAMOS EL ARCHIVO DE EXCEL
-			=============================================*/
-
-			$Name = $_GET["reporte"] . '.xls';
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
 			header('Expires: 0');
 			header('Cache-control: private');
-			header("Content-type: application/xls"); // Archivo de Excel
-			header("Cache-Control: cache, must-revalidate");
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
-			header("Pragma: public");
-			header('Content-Disposition:; filename="' . $Name . '"');
-			header("Content-Transfer-Encoding: binary");
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			echo utf8_decode("<table border='0'> 
-
-					<tr> 
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha</td>
-
-					</tr>");
-
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado', 'Total', 'Fecha']);
 
 			foreach ($OrdenesFecha as $key => $value) {
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
 
-
-				$item = "id";
-				$valor = $value["id_empresa"];
-
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-				//TRAER ASESOR
-				$item = "id";
-				$valor = $value["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
-				//TRAER CLIENTE (USUARIO)
-
-				$item = "id";
-				$valor = $value["id_usuario"];
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-				$NombreUsuario = $usuario["nombre"];
-
-				//$ElTotal = number_format($total["total"],2);
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $value["id_tecnico"];
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-				$NombreTecnico = $tecnico["nombre"];
-
-				/*=============================================
-				TRAER EMAIL DATOS DE COMPRA
-				=============================================*/
-
-				echo utf8_decode("<tr>
-
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
-
-			 					  	 </tr>");
-
+				fputcsv($output, [$value["id"], $NameEmpresa["empresa"], $asesor["nombre"], $tecnico["nombre"], $usuario["nombre"], $value["estado"], $value["total"], $value["fecha"]]);
 			}
 
-			/*=============================================
-			TRAER TOTAL
-			=============================================*/
-
-			$tabla = "ordenes";
-
-			$estado = "Aceptado (ok)";
-
-			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
-
-			foreach ($total as $key => $valueTotal) {
-
-				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
-
-				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
-
-						</tr>");
-
+			// Total
+			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+				$tabla = "ordenes";
+				$estado = "Aceptado (ok)";
+				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
+				foreach ($total as $valueTotal) {
+					fputcsv($output, ["TOTAL", "", "", "", "", "", "", ""]);
+					fputcsv($output, [$valueTotal["total"], "", "", "", "", "", "", ""]);
+				}
 			}
 
-			echo utf8_decode("</table>
-
-					");
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -2357,211 +2156,45 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-			/*=============================================
-
-			CREAMOS EL ARCHIVO DE EXCEL
-
-			=============================================*/
-
-
-
-			$Name = $_GET["reporte"] . '.xls';
-
-
-
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
 			header('Expires: 0');
-
 			header('Cache-control: private');
-
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-
-			header("Cache-Control: cache, must-revalidate");
-
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
-
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			header("Pragma: public");
-
-			header('Content-Disposition:; filename="' . $Name . '"');
-
-			header("Content-Transfer-Encoding: binary");
-
-
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-					<tr> 
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>total</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha</td>
-
-					</tr>");
-
-
-
-
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado', 'Total', 'Fecha']);
 
 			foreach ($OrdenesFecha as $key => $value) {
-
-
-
-				$item = "id";
-
-				$valor = $value["id_empresa"];
-
-
-
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-
-
-				//TRAER ASESOR
-
-
-
-				$item = "id";
-
-				$valor = $value["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
-
-
-				//TRAER CLIENTE (USUARIO)
-
-
-
-				$item = "id";
-
-				$valor = $value["id_usuario"];
-
-
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-
-
-				$NombreUsuario = $usuario["nombre"];
-
-
-
-				//$ElTotal = number_format($total["total"],2);
-
-
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $value["id_tecnico"];
-
-
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-
-
-				$NombreTecnico = $tecnico["nombre"];
-
-
-
-				/*=============================================
-
-				TRAER EMAIL DATOS DE COMPRA
-
-				=============================================*/
-
-
-
-				echo utf8_decode("</td>
-
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
-
-			 					  	 </tr>");
-
-
-
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+				fputcsv($output, [$value["id"], $NameEmpresa["empresa"], $asesor["nombre"], $tecnico["nombre"], $usuario["nombre"], $value["estado"], $value["total"], $value["fecha"]]);
 			}
 
-			/*=============================================
-
-			TRAER TOTAL
-
-			=============================================*/
-
-			$tabla = "ordenes";
-
-			$estado = "Terminada (ter)";
-
-			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
-
-			foreach ($total as $key => $valueTotal) {
-
-				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
-
-
-
-				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
-
-			 					  	 	</tr>");
-
+			// Total
+			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+				$tabla = "ordenes";
+				$estado = "Terminada (ter)";
+				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
+				foreach ($total as $valueTotal) {
+					fputcsv($output, ["TOTAL", "", "", "", "", "", "", ""]);
+					fputcsv($output, [$valueTotal["total"], "", "", "", "", "", "", ""]);
+				}
 			}
 
-
-
-
-
-
-
-			echo utf8_decode("</table>
-
-
-
-					");
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -2618,209 +2251,45 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-			/*=============================================
-
-			CREAMOS EL ARCHIVO DE EXCEL
-
-			=============================================*/
-
-
-
-			$Name = $_GET["reporte"] . '.xls';
-
-
-
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
 			header('Expires: 0');
-
 			header('Cache-control: private');
-
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-
-			header("Cache-Control: cache, must-revalidate");
-
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
-
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			header("Pragma: public");
-
-			header('Content-Disposition:; filename="' . $Name . '"');
-
-			header("Content-Transfer-Encoding: binary");
-
-
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-					<tr> 
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>total</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha</td>
-
-					</tr>");
-
-
-
-
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado', 'Total', 'Fecha']);
 
 			foreach ($OrdenesFecha as $key => $value) {
-
-
-
-				$item = "id";
-
-				$valor = $value["id_empresa"];
-
-
-
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-
-
-				//TRAER ASESOR
-
-
-
-				$item = "id";
-
-				$valor = $value["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
-
-
-				//TRAER CLIENTE (USUARIO)
-
-
-
-				$item = "id";
-
-				$valor = $value["id_usuario"];
-
-
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-
-
-				$NombreUsuario = $usuario["nombre"];
-
-
-
-				//$ElTotal = number_format($total["total"],2);
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $value["id_tecnico"];
-
-
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-
-
-				$NombreTecnico = $tecnico["nombre"];
-
-
-
-				/*=============================================
-
-				TRAER EMAIL DATOS DE COMPRA
-
-				=============================================*/
-
-
-
-				echo utf8_decode("</td>
-
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
-
-			 					  	 </tr>");
-
-
-
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+				fputcsv($output, [$value["id"], $NameEmpresa["empresa"], $asesor["nombre"], $tecnico["nombre"], $usuario["nombre"], $value["estado"], $value["total"], $value["fecha"]]);
 			}
 
-			/*=============================================
-
-			TRAER TOTAL
-
-			=============================================*/
-
-			$tabla = "ordenes";
-
-			$estado = "Pendiente de autorización (AUT";
-
-			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
-
-			foreach ($total as $key => $valueTotal) {
-
-				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
-
-
-
-				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
-
-			 					  	 	</tr>");
-
+			// Total
+			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+				$tabla = "ordenes";
+				$estado = "Pendiente de autorización (AUT";
+				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
+				foreach ($total as $valueTotal) {
+					fputcsv($output, ["TOTAL", "", "", "", "", "", "", ""]);
+					fputcsv($output, [$valueTotal["total"], "", "", "", "", "", "", ""]);
+				}
 			}
 
-
-
-
-
-
-
-			echo utf8_decode("</table>
-
-
-
-					");
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -2883,209 +2352,45 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-			/*=============================================
-
-			CREAMOS EL ARCHIVO DE EXCEL
-
-			=============================================*/
-
-
-
-			$Name = $_GET["reporte"] . '.xls';
-
-
-
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
+			header('Expires: 0');
 			header('Cache-control: private');
-
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-
-			header("Cache-Control: cache, must-revalidate");
-
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
-
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			header("Pragma: public");
-
-			header('Content-Disposition:; filename="' . $Name . '"');
-
-			header("Content-Transfer-Encoding: binary");
-
-
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-					<tr> 
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>total</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha</td>
-
-					</tr>");
-
-
-
-
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado', 'Total', 'Fecha']);
 
 			foreach ($OrdenesFecha as $key => $value) {
-
-
-
-				$item = "id";
-
-				$valor = $value["id_empresa"];
-
-
-
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-
-
-				//TRAER ASESOR
-
-
-
-				$item = "id";
-
-				$valor = $value["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
-
-
-				//TRAER CLIENTE (USUARIO)
-
-
-
-				$item = "id";
-
-				$valor = $value["id_usuario"];
-
-
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-
-
-				$NombreUsuario = $usuario["nombre"];
-
-
-
-				//$ElTotal = number_format($total["total"],2);
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $value["id_tecnico"];
-
-
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-
-
-				$NombreTecnico = $tecnico["nombre"];
-
-
-
-				/*=============================================
-
-				TRAER EMAIL DATOS DE COMPRA
-
-				=============================================*/
-
-
-
-				echo utf8_decode("</td>
-
-					                
-
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
-
-			 					  	 </tr>");
-
-
-
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+				fputcsv($output, [$value["id"], $NameEmpresa["empresa"], $asesor["nombre"], $tecnico["nombre"], $usuario["nombre"], $value["estado"], $value["total"], $value["fecha"]]);
 			}
 
-			/*=============================================
-
-		   TRAER TOTAL
-
-		   =============================================*/
-
-			$tabla = "ordenes";
-
-			$estado = "Supervisión (SUP)";
-
-			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
-
-			foreach ($total as $key => $valueTotal) {
-
-				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
-
-
-
-				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
-
-			 					  	 	</tr>");
-
+			// Total
+			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+				$tabla = "ordenes";
+				$estado = "Supervisión (SUP)";
+				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
+				foreach ($total as $valueTotal) {
+					fputcsv($output, ["TOTAL", "", "", "", "", "", "", ""]);
+					fputcsv($output, [$valueTotal["total"], "", "", "", "", "", "", ""]);
+				}
 			}
 
-
-
-
-
-
-
-			echo utf8_decode("</table>
-
-
-
-					");
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -3152,209 +2457,45 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-			/*=============================================
-
-			CREAMOS EL ARCHIVO DE EXCEL
-
-			=============================================*/
-
-
-
-			$Name = $_GET["reporte"] . '.xls';
-
-
-
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
 			header('Expires: 0');
-
 			header('Cache-control: private');
-
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-
-			header("Cache-Control: cache, must-revalidate");
-
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
-
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			header("Pragma: public");
-
-			header('Content-Disposition:; filename="' . $Name . '"');
-
-			header("Content-Transfer-Encoding: binary");
-
-
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-					<tr> 
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>total</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha</td>
-
-					</tr>");
-
-
-
-
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado', 'Total', 'Fecha']);
 
 			foreach ($OrdenesFecha as $key => $value) {
-
-
-
-				$item = "id";
-
-				$valor = $value["id_empresa"];
-
-
-
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-
-
-				//TRAER ASESOR
-
-
-
-				$item = "id";
-
-				$valor = $value["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
-
-
-				//TRAER CLIENTE (USUARIO)
-
-
-
-				$item = "id";
-
-				$valor = $value["id_usuario"];
-
-
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-
-
-				$NombreUsuario = $usuario["nombre"];
-
-
-
-				//$ElTotal = number_format($total["total"],2);
-
-
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $value["id_tecnico"];
-
-
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-
-
-				$NombreTecnico = $tecnico["nombre"];
-
-				/*=============================================
-
-				TRAER EMAIL DATOS DE COMPRA
-
-				=============================================*/
-
-
-
-				echo utf8_decode("</td>
-
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
-
-			 					  	 </tr>");
-
-
-
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+				fputcsv($output, [$value["id"], $NameEmpresa["empresa"], $asesor["nombre"], $tecnico["nombre"], $usuario["nombre"], $value["estado"], $value["total"], $value["fecha"]]);
 			}
 
-			/*=============================================
-
-		   TRAER TOTAL
-
-		   =============================================*/
-
-			$tabla = "ordenes";
-
-			$estado = "En revisión (REV)";
-
-			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
-
-			foreach ($total as $key => $valueTotal) {
-
-				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
-
-
-
-				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
-
-			 					  	 	</tr>");
-
+			// Total
+			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+				$tabla = "ordenes";
+				$estado = "En revisión (REV)";
+				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
+				foreach ($total as $valueTotal) {
+					fputcsv($output, ["TOTAL", "", "", "", "", "", "", ""]);
+					fputcsv($output, [$valueTotal["total"], "", "", "", "", "", "", ""]);
+				}
 			}
 
-
-
-
-
-
-
-			echo utf8_decode("</table>
-
-
-
-					");
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -4005,249 +3146,82 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			/*=============================================
-
-				CREAMOS EL ARCHIVO DE EXCEL
-
-			=============================================*/
-
-
-
-			$Name = $_GET["reporte"] . '.xls';
-
-
-
-			header('Expires: 0');
-
-			header('Cache-control: private');
-
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-
+			/* CSV - REPORTE COMISIONES */
+			$csvName = $_GET["reporte"] . ".csv";
+			header("Expires: 0");
+			header("Cache-control: private");
+			header("Content-Type: text/csv; charset=UTF-8");
 			header("Cache-Control: cache, must-revalidate");
-
-			header('Content-Description: File Transfer');
-
-			header('Last-Modified: ' . date('D, d M Y H:i:s'));
-
+			header("Content-Description: File Transfer");
+			header("Last-Modified: " . date("D, d M Y H:i:s"));
 			header("Pragma: public");
-
-			header('Content-Disposition:; filename="' . $Name . '"');
-
+			header("Content-Disposition: attachment; filename=\"" . $csvName . "\"");
 			header("Content-Transfer-Encoding: binary");
 
+			$output = fopen("php://output", "w");
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ["Orden", "Técnico", "Estado", "Ingreso Bruto", "Utilidad Antes IVA", "Inversión", "Comisión Técnico", "Comisión Vendedor", "Fecha Salida"]);
 
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-				<tr> 
-
-					
-
-					<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Ingreso Bruto</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Utilidad Antes IVA</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Inversión</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>comisión Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>comisión Vendedor</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha salida</td>
-
-			</tr>");
-
-
-
-
+			$sumaGanancia = 0;
+			$sumaCobrado = 0;
+			$sumaComisionesTec = 0;
+			$sumaComisionesVend = 0;
 
 			foreach ($OrdenesFecha as $key => $valueComisiones) {
-
-
-
-				//TRAER ASESOR
-
-
-
-				$item = "id";
-
-				$valor = $valueComisiones["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $valueComisiones["id_Asesor"]);
 				$departamentoAsesor = $asesor["departamento"];
 
-
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $valueComisiones["id_tecnico"];
-
-
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-
-
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $valueComisiones["id_tecnico"]);
 				$NombreTecnico = $tecnico["nombre"];
-
 				$departamento = $tecnico["departamento"];
 
-
-
-				//CALCULO DEL TOTAL DESCONTANDO INVERCION
-
 				if ($valueComisiones["totalInversion"] == 0) {
-
-
-
-
-
 					$invercion = 0;
-
 					$totalNetoOrden = $valueComisiones["total"];
-
 					$utilidadAntesIva = $valueComisiones["total"] / 1.16;
-
-
-
 				} else {
-
-
-
 					$invercion = $valueComisiones["totalInversion"];
-
 					$totalNetoOrden = $valueComisiones["total"] - $invercion;
-
 					$utilidadAntesIva = $valueComisiones["total"] / 1.16;
-
-
-
 				}
 
-				//var_dump($valueComisiones["id"],$valueComisiones["total"],$invercion);
-
-
-
+				$comisionTec = 0;
 				if ($departamento == "sistemas") {
-
-
-
 					$comisionTec = $totalNetoOrden / 1.16 * 0.04;
-
-
-
 				} elseif ($departamento == "electronica") {
-
-
-
 					$comisionTec = $totalNetoOrden / 1.16 * 0.2;
-
-
-
 				} elseif ($departamento == "impresoras") {
-
-
-
 					$comisionTec = $totalNetoOrden / 1.16 * 0.2;
-
-					$sumaComisionesTec += $comisionTec;
-
 				}
+				$sumaComisionesTec += $comisionTec;
 
-
-
-				if ($departamentoAsesor = "ventas") {
-
-
-
+				$comisionVededor = 0;
+				if ($departamentoAsesor == "ventas") {
 					$comisionVededor = $totalNetoOrden / 1.16 * 0.03;
-
 					$sumaComisionesVend += $comisionVededor;
-
 				}
-
-
-
-				/*=============================================
-
-			  TRAER EMAIL DATOS DE COMPRA
-
-			  =============================================*/
-
-
-
-
 
 				$sumaGanancia += $totalNetoOrden;
-
 				$sumaCobrado += $valueComisiones["total"];
 
-				echo utf8_decode("</td>
-
-						
-
-						<td style='border:1px solid #eee;'>" . $valueComisiones["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $valueComisiones["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $valueComisiones["total"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $utilidadAntesIva . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $invercion . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $comisionTec . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $comisionVededor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $valueComisiones["fecha_Salida"] . "</td>
-
-				 	</tr>");
-
+				fputcsv($output, [
+					$valueComisiones["id"],
+					$NombreTecnico,
+					$valueComisiones["estado"],
+					$valueComisiones["total"],
+					number_format($utilidadAntesIva, 2),
+					$invercion,
+					number_format($comisionTec, 2),
+					number_format($comisionVededor, 2),
+					$valueComisiones["fecha_Salida"]
+				]);
 			}
 
+			// Totals
+			fputcsv($output, []);
+			fputcsv($output, ["Total Cobrado", $sumaCobrado, "Total Ganancia", $sumaGanancia, "Total Comisión Técnico", number_format($sumaComisionesTec, 2), "Total Comisión Vendedor", number_format($sumaComisionesVend, 2), ""]);
 
-
-			echo utf8_decode("</br></br><td style='font-weight:bold; border:1px solid #eee;'>total cobrado</td>
-
-					<td style='border:1px solid #eee;'>" . $sumaCobrado . "</td>
-
-					<td style='font-weight:bold; border:1px solid #eee;'>total ganancia</td>
-
-					<td style='border:1px solid #eee;'>" . $sumaGanancia . "</td>
-
-					<td style='font-weight:bold; border:1px solid #eee;'>total comision Técnico</td>
-
-					<td style='border:1px solid #eee;'>" . $sumaComisionesTec . "</td>
-
-					<td style='font-weight:bold; border:1px solid #eee;'>total comision Vendedor</td>
-
-					<td style='border:1px solid #eee;'>" . $sumaComisionesVend . "</td>");
-
-			echo utf8_decode("</table>
-
-
-
-						");
+			fclose($output);
 
 		}
 
@@ -5377,177 +4351,35 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			/*=============================================
-
-			REPORTE DE INGRESOS DE ORDENES
-
-			=============================================*/
-
-
-
-			$Name = $_GET["reporte"] . '.xls';
-
-
-
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
 			header('Expires: 0');
-
 			header('Cache-control: private');
-
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-
-			header("Cache-Control: cache, must-revalidate");
-
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
-
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			header("Pragma: public");
-
-			header('Content-Disposition:; filename="' . $Name . '"');
-
-			header("Content-Transfer-Encoding: binary");
-
-
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-					<tr> 
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Fecha Ingreso</td>
-
-					</tr>");
-
-
-
-
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado', 'Fecha Ingreso']);
 
 			foreach ($OrdenesFecha as $key => $value) {
-
-
-
-				$item = "id";
-
-				$valor = $value["id_empresa"];
-
-
-
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-
-
-				//TRAER ASESOR
-
-
-
-				$item = "id";
-
-				$valor = $value["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
-
-
-				//TRAER CLIENTE (USUARIO)
-
-
-
-				$item = "id";
-
-				$valor = $value["id_usuario"];
-
-
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-
-
-				$NombreUsuario = $usuario["nombre"];
-
-
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $value["id_tecnico"];
-
-
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-
-
-				$NombreTecnico = $tecnico["nombre"];
-
-
-
-				//$ElTotal = number_format($total["total"],2);
-
-
-
-
-
-				/*=============================================
-
-				TRAER EMAIL DATOS DE COMPRA
-
-				=============================================*/
-
-
-
-				echo utf8_decode("<tr>
-
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha_ingreso"] . "</td>
-
-			 					  	 </tr>");
-
-
-
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+				fputcsv($output, [$value["id"], $NameEmpresa["empresa"], $asesor["nombre"], $tecnico["nombre"], $usuario["nombre"], $value["estado"], $value["fecha_ingreso"]]);
 			}
 
 
-
-			echo utf8_decode("</table>");
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -5606,209 +4438,45 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			/*=============================================
-
-			CREAMOS EL ARCHIVO DE EXCEL
-
-			=============================================*/
-
-
-
-			$Name = $_GET["reporte"] . '.xls';
-
-
-
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
 			header('Expires: 0');
-
 			header('Cache-control: private');
-
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-
-			header("Cache-Control: cache, must-revalidate");
-
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
-
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			header("Pragma: public");
-
-			header('Content-Disposition:; filename="' . $Name . '"');
-
-			header("Content-Transfer-Encoding: binary");
-
-
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-					<tr> 
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>total</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha</td>
-
-					</tr>");
-
-
-
-
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado', 'Total', 'Fecha']);
 
 			foreach ($OrdenesFecha as $key => $value) {
-
-
-
-				$item = "id";
-
-				$valor = $value["id_empresa"];
-
-
-
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-
-
-				//TRAER ASESOR
-
-
-
-				$item = "id";
-
-				$valor = $value["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
-
-
-				//TRAER CLIENTE (USUARIO)
-
-
-
-				$item = "id";
-
-				$valor = $value["id_usuario"];
-
-
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-
-
-				$NombreUsuario = $usuario["nombre"];
-
-
-
-				//$ElTotal = number_format($total["total"],2);
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $value["id_tecnico"];
-
-
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-
-
-				$NombreTecnico = $tecnico["nombre"];
-
-
-
-				/*=============================================
-
-				TRAER EMAIL DATOS DE COMPRA
-
-				=============================================*/
-
-
-
-				echo utf8_decode("</td>
-
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
-
-			 					  	 </tr>");
-
-
-
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+				fputcsv($output, [$value["id"], $NameEmpresa["empresa"], $asesor["nombre"], $tecnico["nombre"], $usuario["nombre"], $value["estado"], $value["total"], $value["fecha"]]);
 			}
 
-			/*=============================================
-
-			TRAER TOTAL
-
-			=============================================*/
-
-			$tabla = "ordenes";
-
-			$estado = "Pendiente de autorización (AUT";
-
-			$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
-
-			foreach ($total as $key => $valueTotal) {
-
-				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
-
-
-
-				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
-
-			 					  	 	</tr>");
-
+			// Total
+			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+				$tabla = "ordenes";
+				$estado = "Pendiente de autorización (AUT";
+				$total = ModeloOrdenes::mdlSumarTotalOrdenes($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa, $estado);
+				foreach ($total as $valueTotal) {
+					fputcsv($output, ["TOTAL", "", "", "", "", "", "", ""]);
+					fputcsv($output, [$valueTotal["total"], "", "", "", "", "", "", ""]);
+				}
 			}
 
-
-
-
-
-
-
-			echo utf8_decode("</table>
-
-
-
-					");
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -5858,187 +4526,35 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			/*=============================================
-
-			CREAMOS EL ARCHIVO DE EXCEL
-
-			=============================================*/
-
-
-
-			$Name = $_GET["reporte"] . '.xls';
-
-
-
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
 			header('Expires: 0');
-
 			header('Cache-control: private');
-
-			header("Content-type: application/xls"); // Archivo de Excel
-
-			header("Cache-Control: cache, must-revalidate");
-
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
-
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			header("Pragma: public");
-
-			header('Content-Disposition:; filename="' . $Name . '"');
-
-			header("Content-Transfer-Encoding: binary");
-
-
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-					<tr> 
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Monto</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha</td>
-
-					</tr>");
-
-
-
-
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Empresa', 'Asesor', 'Técnico', 'Cliente', 'Estado', 'Monto', 'Fecha']);
 
 			foreach ($OrdenesFecha as $key => $value) {
-
-
-
-				$item = "id";
-
-				$valor = $value["id_empresa"];
-
-
-
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-
-
-				//TRAER ASESOR
-
-
-
-				$item = "id";
-
-				$valor = $value["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
-
-
-				//TRAER CLIENTE (USUARIO)
-
-
-
-				$item = "id";
-
-				$valor = $value["id_usuario"];
-
-
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-
-
-				$NombreUsuario = $usuario["nombre"];
-
-
-
-				//$ElTotal = number_format($total["total"],2);
-
-
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $value["id_tecnico"];
-
-
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-
-
-				$NombreTecnico = $tecnico["nombre"];
-
-
-
-
-
-				/*=============================================
-
-				TRAER EMAIL DATOS DE COMPRA
-
-				=============================================*/
-
-
-
-				echo utf8_decode("<tr>
-
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["total"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
-
-			 					  	 </tr>");
-
+				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+				fputcsv($output, [$value["id"], $NameEmpresa["empresa"], $asesor["nombre"], $tecnico["nombre"], $usuario["nombre"], $value["estado"], $value["total"], $value["fecha"]]);
 			}
 
 
-
-
-
-
-
-			echo utf8_decode("</table>
-
-
-
-					");
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -6142,86 +4658,33 @@ AGREGAR ORDENES CON PARTIDAS LISTADAS
 
 
 
-			/*=============================================
-			CREAMOS EL ARCHIVO DE EXCEL
-			=============================================*/
-			$Name = $_GET["reporte"] . '.xls';
+			/* CSV output */
+			$csvName = $_GET["reporte"] . '.csv';
 			header('Expires: 0');
 			header('Cache-control: private');
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-			header("Cache-Control: cache, must-revalidate");
+			header('Content-Type: text/csv; charset=UTF-8');
+			header('Cache-Control: cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Last-Modified: ' . date('D, d M Y H:i:s'));
-			header("Pragma: public");
-			header('Content-Disposition:; filename="' . $Name . '"');
-			header("Content-Transfer-Encoding: binary");
+			header('Pragma: public');
+			header('Content-Disposition: attachment; filename="' . $csvName . '"');
+			header('Content-Transfer-Encoding: binary');
 
-			echo utf8_decode("<table border='0'> 
-
-					<tr> 
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Marca</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Modelo</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Serie</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-					</tr>");
+			$output = fopen('php://output', 'w');
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ['Orden', 'Técnico', 'Marca', 'Modelo', 'Serie', 'Estado', 'Cliente']);
 
 			foreach ($OrdenesFecha as $key => $value) {
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
 
-				$item = "id";
-				$valor = $value["id_empresa"];
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-				//TRAER ASESOR                   
-
-				$item = "id";
-				$valor = $value["id_Asesor"];
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-				$NombreAsesor = $asesor["nombre"];
-				$departamentoAsesor = $asesor["departamento"];
-
-				//TRAER CLIENTE (USUARIO)
-				$item = "id";
-				$valor = $value["id_usuario"];
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-				$NombreUsuario = $usuario["nombre"];
-
-				//TRAER TECNICO
-				$item = "id";
-				$valor = $value["id_tecnico"];
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-				$NombreTecnico = $tecnico["nombre"];
-				$departamento = $tecnico["departamento"];
-
-				//$ElTotal = number_format($total["total"],2);
-
-				/*=============================================
-				TRAER EMAIL DATOS DE COMPRA
-				=============================================*/
-
-				echo utf8_decode("</td>
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-									 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $value["marcaDelEquipo"] . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $value["modeloDelEquipo"] . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $value["numeroDeSerieDelEquipo"] . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-			 					  	 </tr>");
-
-
+				fputcsv($output, [$value["id"], $tecnico["nombre"], $value["marcaDelEquipo"], $value["modeloDelEquipo"], $value["numeroDeSerieDelEquipo"], $value["estado"], $usuario["nombre"]]);
 			}
 
 
+			fclose($output);
 
 		}
-
-
 
 	}
 
@@ -6242,116 +4705,61 @@ AGREGAR ORDENES CON PARTIDAS LISTADAS
 
 			$ordenesInfo = ModeloOrdenes::mdlMostrarordenesParaValidar($tabla, $item, $valor);
 
-			/*=============================================
-			CREAMOS EL ARCHIVO DE EXCEL
-			=============================================*/
-			$Name = $_GET["reporte"] . '.xls';
-			header('Expires: 0');
-			header('Cache-control: private');
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
+			/* CSV - REPORTE INFO ORDEN */
+			$csvName = $_GET["reporte"] . ".csv";
+			header("Expires: 0");
+			header("Cache-control: private");
+			header("Content-Type: text/csv; charset=UTF-8");
 			header("Cache-Control: cache, must-revalidate");
-			header('Content-Description: File Transfer');
-			header('Last-Modified: ' . date('D, d M Y H:i:s'));
+			header("Content-Description: File Transfer");
+			header("Last-Modified: " . date("D, d M Y H:i:s"));
 			header("Pragma: public");
-			header('Content-Disposition:; filename="' . $Name . '"');
+			header("Content-Disposition: attachment; filename=\"" . $csvName . "\"");
 			header("Content-Transfer-Encoding: binary");
 
-			echo utf8_decode("<table border='0'> 
-
-					<tr> 
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Técnico</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Partidas recepción</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Partidas</td>
-						<td style='font-weight:bold; border:1px solid #eee;'>Costo</td>
-						
-					");
+			$output = fopen("php://output", "w");
+			fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+			fputcsv($output, ["Orden", "Técnico", "Estado", "Cliente", "Partidas Recepción", "Partidas", "Costo", "Observaciones"]);
 
 			foreach ($ordenesInfo as $key => $valuOrdenesInfo) {
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $valuOrdenesInfo["id_usuario"]);
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $valuOrdenesInfo["id_tecnico"]);
 
-				$item = "id";
-				$valor = $valuOrdenesInfo["id_empresa"];
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-				//TRAER ASESOR                   
-
-				$item = "id";
-				$valor = $valuOrdenesInfo["id_Asesor"];
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-				$NombreAsesor = $asesor["nombre"];
-				$departamentoAsesor = $asesor["departamento"];
-
-				//TRAER CLIENTE (USUARIO)
-				$item = "id";
-				$valor = $valuOrdenesInfo["id_usuario"];
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-				$NombreUsuario = $usuario["nombre"];
-
-				//TRAER TECNICO
-				$item = "id";
-				$valor = $valuOrdenesInfo["id_tecnico"];
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-				$NombreTecnico = $tecnico["nombre"];
-				$departamento = $tecnico["departamento"];
-
-				//$ElTotal = number_format($total["total"],2);
-
-				/*=============================================
-				TRAER EMAIL DATOS DE COMPRA
-				=============================================*/
 				$partidas = json_decode($valuOrdenesInfo["partidas"], true);
-
-				foreach ($partidas as $key => $itemDetallesPartidas) {
-
-					$descripcioPartida = $itemDetallesPartidas["descripcion"];
-					$valorProducto = $itemDetallesPartidas["precioPartida"];
-
+				$descripcioPartida = "";
+				$valorProducto = "";
+				if (is_array($partidas)) {
+					foreach ($partidas as $itemDetallesPartidas) {
+						$descripcioPartida = $itemDetallesPartidas["descripcion"];
+						$valorProducto = $itemDetallesPartidas["precioPartida"];
+					}
 				}
 
 				$observaciones = json_decode($valuOrdenesInfo["observaciones"], true);
-
-
-				foreach ($observaciones as $key => $itemobservaciones) {
-
-
-					echo utf8_decode("<td style='border:1px solid #eee;'>Observaciones</td>");
-
-
-
+				$obsText = "";
+				if (is_array($observaciones)) {
+					$obsList = [];
+					foreach ($observaciones as $itemobs) {
+						$obsList[] = $itemobs["observacion"];
+					}
+					$obsText = implode(" | ", $obsList);
 				}
-				echo utf8_decode("</tr>");
-				echo utf8_decode("</td>
-									 <td style='border:1px solid #eee;'>" . $valuOrdenesInfo["id"] . "</td>
-									 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $valuOrdenesInfo["estado"] . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $valuOrdenesInfo["partidaUno"] . "</br>
-			 					  	 " . $valuOrdenesInfo["partidaDos"] . "
-			 					  	 " . $valuOrdenesInfo["partidaDos"] . "
-			 					  	 </td>
-			 					  	 <td style='border:1px solid #eee;'>" . $descripcioPartida . "</td>
-			 					  	 <td style='border:1px solid #eee;'>" . $valorProducto . "</td>
-			 					  	");
 
-				foreach ($observaciones as $key => $itemobservaciones) {
+				$partidasRecepcion = trim($valuOrdenesInfo["partidaUno"] . " " . $valuOrdenesInfo["partidaDos"]);
 
-					$obs = $itemobservaciones["observacion"];
-					echo utf8_decode("<td style='border:1px solid #eee;'>" . $obs . "</td>");
-
-
-
-				}
-				echo utf8_decode("</tr>");
-
-
-
-
+				fputcsv($output, [
+					$valuOrdenesInfo["id"],
+					$tecnico["nombre"],
+					$valuOrdenesInfo["estado"],
+					$usuario["nombre"],
+					$partidasRecepcion,
+					$descripcioPartida,
+					$valorProducto,
+					$obsText
+				]);
 			}
+
+			fclose($output);
 
 		}
 

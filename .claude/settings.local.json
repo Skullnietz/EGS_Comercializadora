@@ -168,7 +168,12 @@
       "Read(//tmp/**)",
       "Bash(/c/xampp/php/php -l vistas/modulos/reportePorFecheOrdenes.php)",
       "Bash(/c/xampp/php/php -l modelos/ordenes.modelo.php)",
-      "Bash(/c/xampp/php/php -l controladores/ordenes.controlador.php)"
+      "Bash(/c/xampp/php/php -l controladores/ordenes.controlador.php)",
+      "Bash(php -r:*)",
+      "Bash(php -l vistas/modulos/reporte_helper.php)",
+      "Bash(php fix_csv.php)",
+      "Bash(git checkout:*)",
+      "Bash(grep -rn \"\\\\.xls\" vistas/modulos/descargar-reporte-*.php vistas/modulos/reporte_helper.php)"
     ]
   }
 }
