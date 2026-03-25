@@ -1,5 +1,14 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+	session_start();
+}
+
+if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "vendedor") {
+	http_response_code(403);
+	exit("No autorizado");
+}
+
 require_once "../../controladores/reportes.controlador.php";
 require_once "../../modelos/reportes.modelo.php";
 

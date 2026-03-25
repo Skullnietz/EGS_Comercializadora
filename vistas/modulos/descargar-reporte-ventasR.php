@@ -1,5 +1,15 @@
 <?php
 require_once "../../config/env.php";
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "vendedor") {
+    http_response_code(403);
+    exit("No autorizado");
+}
+
 require_once "../../controladores/ventas.controlador.php";
 require_once "../../modelos/ventas.modelo.php";
 require_once __DIR__ . "/excel_export_helper.php";

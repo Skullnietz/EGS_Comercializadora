@@ -11,6 +11,8 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 
 }
 
+$esVendedorVentasR = ($_SESSION["perfil"] === "vendedor");
+
 ?>
 
 <script>
@@ -1059,6 +1061,7 @@ const $input11 = document.querySelector(' #productoDiez');
           </div>
         </div>
 
+        <?php if(!$esVendedorVentasR): ?>
         <div class="vr-kpi-grid">
           <div class="vr-kpi-card">
             <span class="vr-kpi-title">Ventas visibles</span>
@@ -1077,16 +1080,19 @@ const $input11 = document.querySelector(' #productoDiez');
             <span class="vr-kpi-value" id="kpiProductosTotal">0</span>
           </div>
         </div>
+        <?php endif; ?>
 
         <div class="vr-toolbar">
 
           <div class="vr-primary-actions">
 
+            <?php if(!$esVendedorVentasR): ?>
             <a id="btnDescargarExcelVentasR" href="vistas/modulos/descargar-reporte-ventasR.php?reporte=ventasR&empresa=<?echo $_SESSION["empresa"]?>">
             
               <button class="btn btn-success vr-btn-main"><i class="fas fa-file-excel"></i> Descargar Reporte En Excel</button>
 
             </a>
+            <?php endif; ?>
 
 
             <button class="btn btn-primary vr-btn-main" data-toggle="modal" data-target="#modalAgregarVenta">
