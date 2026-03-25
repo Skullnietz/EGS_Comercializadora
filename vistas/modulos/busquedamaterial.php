@@ -574,9 +574,24 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
 
   const fmtMXN = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
 
+  // Normaliza texto para comparaciones de filtros (acentos, espacios y mayúsculas).
+  function normalizeText(value) {
+    return (value || '')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ');
+  }
+
   // Filtro global extra: Total (rango) + Fecha (rango) + Estado (select)
   $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-    const $row = $('#tablematerial tbody tr').eq(dataIndex);
+    const rowNode = settings.aoData[dataIndex] && settings.aoData[dataIndex].nTr
+      ? settings.aoData[dataIndex].nTr
+      : null;
+    if (!rowNode) return true;
+    const $row = $(rowNode);
 
     // ----- Total (col 8) -----
     const minTotal = parseFloat($('#minTotal').val());
@@ -607,10 +622,10 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     }
 
     // ----- Estado (col 7) -----
-    const estadoSel = ($('#estadoFilter').val() || '').trim().toLowerCase();
+    const estadoSel = normalizeText($('#estadoFilter').val());
     if (estadoSel) {
       const estadoCell = $row.find('td:eq(7)');
-      const estadoTxt = (estadoCell.attr('data-estado') || '').trim().toLowerCase();
+      const estadoTxt = normalizeText(estadoCell.attr('data-estado') || estadoCell.text());
       if (estadoTxt !== estadoSel) return false;
     }
 
@@ -645,18 +660,19 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     });
 
     // ---- Poblar el select de Estado (col 7) ----
-    const estadosSet = new Set();
+    const estadosMap = new Map();
     table.column(7).data().each(function (val) {
       const div = document.createElement('div'); div.innerHTML = val;
       const txt = (div.textContent || div.innerText || '').trim();
-      if (txt) estadosSet.add(txt);
+      const key = normalizeText(txt);
+      if (key && !estadosMap.has(key)) estadosMap.set(key, txt);
     });
-    const estados = Array.from(estadosSet).sort((a, b) => a.localeCompare(b, 'es'));
+    const estados = Array.from(estadosMap.entries()).sort((a, b) => a[1].localeCompare(b[1], 'es'));
     const $estado = $('#estadoFilter');
-    estados.forEach(e => {
+    estados.forEach(([key, label]) => {
       const opt = document.createElement('option');
-      opt.value = e.toLowerCase();
-      opt.textContent = e;
+      opt.value = key;
+      opt.textContent = label;
       $estado.append(opt);
     });
 
