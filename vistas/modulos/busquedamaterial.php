@@ -284,8 +284,8 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     margin-top: 14px;
   }
 
-  /* Estructura clasica de DataTables: a.paginate_button */
-  #tablematerial_wrapper .dataTables_paginate a.paginate_button {
+  /* Estructura real en esta vista: ul.pagination > li.paginate_button > a */
+  #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
     border-radius: 8px !important;
     border: 1px solid #dbe3ef !important;
     background: #ffffff !important;
@@ -296,27 +296,34 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     transition: all .15s ease;
   }
 
-  #tablematerial_wrapper .dataTables_paginate a.paginate_button:hover {
+  #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover {
     background: #eef2ff !important;
     border-color: #a5b4fc !important;
     color: #3730a3 !important;
   }
 
-  #tablematerial_wrapper .dataTables_paginate a.paginate_button.current,
-  #tablematerial_wrapper .dataTables_paginate a.paginate_button.current:hover,
-  #tablematerial_wrapper .dataTables_paginate a.paginate_button.current:focus {
+  #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a,
+  #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:hover,
+  #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:focus {
     background: #1a3152 !important;
     border-color: #1a3152 !important;
     color: #ffffff !important;
   }
 
-  #tablematerial_wrapper .dataTables_paginate a.paginate_button.disabled,
-  #tablematerial_wrapper .dataTables_paginate a.paginate_button.disabled:hover,
-  #tablematerial_wrapper .dataTables_paginate a.paginate_button.disabled:focus {
+  #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a,
+  #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:hover,
+  #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:focus {
     background: #f8fafc !important;
     border-color: #e2e8f0 !important;
     color: #94a3b8 !important;
     cursor: not-allowed;
+  }
+
+  /* Limpia estilos residuales sobre el <li> para que no tape el boton interno */
+  #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
   }
 
   #tablematerial_wrapper .dataTables_paginate .pagination > li > a,
