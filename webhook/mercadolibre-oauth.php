@@ -54,8 +54,12 @@ if ($stateRecibido !== $stateEsperado || empty($stateEsperado)) {
 }
 unset($_SESSION['ml_oauth_state']);
 
-/* ── Necesitamos client_id y client_secret ──────────────────────────────── */
-if (empty($config['client_id']) || empty($config['client_secret'])) {
+// Recuperar code_verifier PKCE guardado en sesión
+$codeVerifier = $_SESSION['ml_code_verifier'] ?? '';
+unset($_SESSION['ml_code_verifier']);
+
+/* ── Necesitamos client_id ───────────────────────────────────────────────── */
+if (empty($config['client_id'])) {
     header("Location: {$pedidosUrl}&ml_status=no_credentials");
     exit;
 }
@@ -66,18 +70,25 @@ $protocol    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'htt
 $host        = $_SERVER['HTTP_HOST'];
 $redirectUri = $protocol . '://' . $host . $_SERVER['SCRIPT_NAME'];
 
-/* ── Canjear code por tokens ─────────────────────────────────────────────── */
+/* ── Canjear code por tokens (con PKCE code_verifier) ───────────────────── */
+$tokenParams = [
+    'grant_type'    => 'authorization_code',
+    'client_id'     => $config['client_id'],
+    'code'          => $_GET['code'],
+    'redirect_uri'  => $redirectUri,
+    'code_verifier' => $codeVerifier,
+];
+
+// client_secret es opcional cuando se usa PKCE; incluirlo si está configurado
+if (!empty($config['client_secret'])) {
+    $tokenParams['client_secret'] = $config['client_secret'];
+}
+
 $ch = curl_init('https://api.mercadolibre.com/oauth/token');
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_POST           => true,
-    CURLOPT_POSTFIELDS     => http_build_query([
-        'grant_type'   => 'authorization_code',
-        'client_id'    => $config['client_id'],
-        'client_secret'=> $config['client_secret'],
-        'code'         => $_GET['code'],
-        'redirect_uri' => $redirectUri,
-    ]),
+    CURLOPT_POSTFIELDS     => http_build_query($tokenParams),
     CURLOPT_HTTPHEADER => [
         'Accept: application/json',
         'Content-Type: application/x-www-form-urlencoded',

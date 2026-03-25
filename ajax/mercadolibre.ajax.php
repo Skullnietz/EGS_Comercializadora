@@ -223,15 +223,22 @@ if ($accion === 'generarURLOAuth') {
     $baseDir     = rtrim(dirname($scriptDir), '/');  // proyecto raíz
     $redirectUri = $protocol . '://' . $host . $baseDir . '/webhook/mercadolibre-oauth.php';
 
-    // State CSRF (session ya está abierta al inicio del archivo)
+    // State CSRF
     $state = bin2hex(random_bytes(16));
     $_SESSION['ml_oauth_state'] = $state;
 
+    // PKCE — code_verifier (43-128 chars URL-safe) y code_challenge (S256)
+    $codeVerifier  = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+    $codeChallenge = rtrim(strtr(base64_encode(hash('sha256', $codeVerifier, true)), '+/', '-_'), '=');
+    $_SESSION['ml_code_verifier'] = $codeVerifier;
+
     $authUrl = 'https://auth.mercadolibre.com.mx/authorization'
              . '?response_type=code'
-             . '&client_id='    . urlencode($config['client_id'])
-             . '&redirect_uri=' . urlencode($redirectUri)
-             . '&state='        . $state;
+             . '&client_id='             . urlencode($config['client_id'])
+             . '&redirect_uri='          . urlencode($redirectUri)
+             . '&state='                 . $state
+             . '&code_challenge='        . $codeChallenge
+             . '&code_challenge_method=S256';
 
     echo json_encode([
         'status'       => 'ok',
