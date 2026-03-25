@@ -300,6 +300,104 @@ $(".tituloProducto").change(function(){
 
 })
 
+$(".tituloProducto").on("keyup", function(){
+	var modalAgregar = $("#modalAgregarProducto");
+	if(modalAgregar.is(":visible")){
+		modalAgregar.find(".rutaProducto").val(limpiarUrl($(this).val()));
+		actualizarAsistenteAltaProducto();
+	}
+})
+
+function actualizarAsistenteAltaProducto(){
+	var modal = $("#modalAgregarProducto");
+	if(!modal.length){
+		return;
+	}
+
+	var titulo = $.trim(modal.find(".tituloProducto").val());
+	var ruta = $.trim(modal.find(".rutaProducto").val());
+	var tipoProducto = $.trim(modal.find(".seleccionarTipo").val());
+	var categoria = $.trim(modal.find(".seleccionarCategoria").val());
+	var subCategoria = $.trim(modal.find(".seleccionarSubCategoria").val());
+	var descripcion = $.trim(modal.find(".descripcionProducto").val());
+	var palabras = $.trim(modal.find(".pClavesProducto").val());
+	var precio = $.trim(modal.find(".precio").val());
+	var disponibilidad = $.trim(modal.find(".disponibilidad").val());
+	var proveedor = $.trim(modal.find(".Proveedor").val());
+
+	var camposClave = [titulo, tipoProducto, categoria, subCategoria, descripcion, palabras, precio];
+	var completados = 0;
+
+	for(var i = 0; i < camposClave.length; i++){
+		if(camposClave[i] !== ""){
+			completados++;
+		}
+	}
+
+	var porcentaje = Math.round((completados / camposClave.length) * 100);
+
+	$("#altaProgressBar").css("width", porcentaje + "%");
+	$("#altaProgressText").text("Completitud de campos clave: " + porcentaje + "%");
+	$("#resumenTituloProducto").text(titulo || "Sin definir");
+	$("#resumenRutaProducto").text(ruta || "Sin generar");
+	$("#resumenPrecioProducto").text(precio !== "" ? Number(precio).toFixed(2) : "0.00");
+	$("#resumenDisponibilidadProducto").text(disponibilidad || "0");
+	$("#resumenProveedorProducto").text(proveedor || "No definido");
+}
+
+$("#modalAgregarProducto").on("shown.bs.modal", function(){
+	actualizarAsistenteAltaProducto();
+})
+
+$("#modalAgregarProducto").on("keyup change", ".tituloProducto, .rutaProducto, .seleccionarTipo, .seleccionarCategoria, .seleccionarSubCategoria, .descripcionProducto, .pClavesProducto, .precio, .disponibilidad, .Proveedor", function(){
+	actualizarAsistenteAltaProducto();
+})
+
+$("#modalAgregarProducto").on("click", ".alta-template-btn", function(){
+	var modal = $("#modalAgregarProducto");
+	var template = $(this).attr("data-template");
+
+	$("#modalAgregarProducto .alta-template-btn").removeClass("active");
+	$(this).addClass("active");
+
+	if(template == "fisico"){
+		modal.find(".seleccionarTipo").val("fisico").trigger("change");
+		modal.find(".entrega").val(2);
+		modal.find(".peso").val(0.5);
+		modal.find(".disponibilidad").val(10);
+		modal.find(".seleccionarMedida").val("PZAS");
+	}
+
+	if(template == "servicio"){
+		modal.find(".seleccionarTipo").val("virtual").trigger("change");
+		modal.find(".entrega").val(0);
+		modal.find(".peso").val(0);
+		modal.find(".disponibilidad").val(1);
+		modal.find(".seleccionarMedida").val("PZAS");
+	}
+
+	if(template == "express"){
+		if(modal.find(".SubircodigoProducto").val() == ""){
+			modal.find(".SubircodigoProducto").val("PRD-" + Date.now());
+		}
+		if(modal.find(".Proveedor").val() == ""){
+			modal.find(".Proveedor").val("Proveedor local");
+		}
+		if(modal.find(".precio").val() == ""){
+			modal.find(".precio").val(0);
+		}
+	}
+
+	actualizarAsistenteAltaProducto();
+})
+
+$(document).on("keydown", function(e){
+	if(e.ctrlKey && e.keyCode === 13 && $("#modalAgregarProducto").is(":visible")){
+		e.preventDefault();
+		$("#modalAgregarProducto .guardarProducto").trigger("click");
+	}
+})
+
 /*=============================================
 
 AGREGAR MULTIMEDIA

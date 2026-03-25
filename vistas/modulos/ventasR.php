@@ -668,45 +668,100 @@ const $input11 = document.querySelector(' #productoDiez');
    });
  </script> 
 <style>
-    .productosp{
-        margin-left:-100px;
-    }
-    
-    .circulo{
-        margin-top:8px;
-    }
-    .negativo{
-       border-color: #dc143c;
-    }
-    .positivo{
-        
-        border-color: #7cfc00;
-    }
-    #pagoCliente{
-        font-size: 40px;
-        
-    }
-    #Resultado{
-        font-size: 40px;
-        
-    }
-    #cambio{
-        font-size: 40px;
-        
-    }
-    .plus{
-        margin-left:20px;
-    }
+    .productosp{ margin-left:-100px; }
+    .circulo{ margin-top:8px; }
+    .negativo{ border-color: #dc143c; }
+    .positivo{ border-color: #7cfc00; }
+    #pagoCliente, #Resultado, #cambio{ font-size: 40px; }
+    .plus{ margin-left:20px; }
     .btn-circle {
-    width: 30px;
-    height: 30px;
-    padding: 6px 0px;
-    border-radius: 15px;
-    text-align: center;
-    font-size: 12px;
-    line-height: 1.42857;
-}
-    
+      width: 30px;
+      height: 30px;
+      padding: 6px 0px;
+      border-radius: 15px;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.42857;
+    }
+
+    .vr-dashboard-shell {
+      background: linear-gradient(125deg, #f5f8ff 0%, #f2f8f4 45%, #fff5ea 100%);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(16, 24, 40, 0.08);
+    }
+    .vr-hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .vr-hero h3 {
+      margin: 0;
+      font-weight: 700;
+      color: #1a2f44;
+      letter-spacing: .2px;
+    }
+    .vr-hero p {
+      margin: 2px 0 0;
+      color: #506177;
+      font-size: 13px;
+    }
+    .vr-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .vr-kpi-card {
+      background: #fff;
+      border: 1px solid #e6ebf2;
+      border-left: 4px solid #1f8d61;
+      border-radius: 10px;
+      padding: 10px 12px;
+      box-shadow: 0 6px 14px rgba(30, 41, 59, 0.07);
+    }
+    .vr-kpi-card .vr-kpi-title {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #5f7085;
+      letter-spacing: .8px;
+      margin-bottom: 2px;
+      font-weight: 700;
+    }
+    .vr-kpi-card .vr-kpi-value {
+      display: block;
+      font-size: 25px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+    .vr-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .vr-actions .btn {
+      border-radius: 999px;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+    }
+    .vr-table-wrap {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid #e7edf4;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    .vr-table-wrap .dataTables_filter input {
+      border-radius: 20px;
+      border: 1px solid #d4dde8;
+      padding: 4px 10px;
+    }
 </style>
 
 <div class="content-wrapper">
@@ -730,7 +785,7 @@ const $input11 = document.querySelector(' #productoDiez');
 
   <section class="content">
 
-    <div class="box"> 
+    <div class="box vr-dashboard-shell"> 
 
       <div class="box-header with-border">
         
@@ -744,18 +799,44 @@ const $input11 = document.querySelector(' #productoDiez');
 
       <div class="box-body">
 
-        <div class="box-tools">
+        <div class="vr-hero">
+          <div>
+            <h3>Centro de Ventas R</h3>
+            <p>Panel operativo con indicadores en vivo y acceso rapido a captura y reportes.</p>
+          </div>
+        </div>
+
+        <div class="vr-kpi-grid">
+          <div class="vr-kpi-card">
+            <span class="vr-kpi-title">Ventas visibles</span>
+            <span class="vr-kpi-value" id="kpiVentasTotal">0</span>
+          </div>
+          <div class="vr-kpi-card">
+            <span class="vr-kpi-title">Ingreso visible</span>
+            <span class="vr-kpi-value" id="kpiIngresoTotal">$0.00</span>
+          </div>
+          <div class="vr-kpi-card">
+            <span class="vr-kpi-title">Ticket promedio</span>
+            <span class="vr-kpi-value" id="kpiTicketPromedio">$0.00</span>
+          </div>
+          <div class="vr-kpi-card">
+            <span class="vr-kpi-title">Productos vendidos</span>
+            <span class="vr-kpi-value" id="kpiProductosTotal">0</span>
+          </div>
+        </div>
+
+        <div class="vr-actions">
 
           <a href="vistas/modulos/reporte.ventasR.php?reporte=compras&empresa=<?echo $_SESSION["empresa"]?>">
             
-              <button class="btn btn-success">Descargar Reporte En Excel</button>
+              <button class="btn btn-success"><i class="fas fa-file-excel"></i> Descargar Reporte En Excel</button>
 
           </a>
 
 
         <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarVenta">
           
-          Agregar Venta
+          <i class="fas fa-plus-circle"></i> Agregar Venta
 
         </button>
         
@@ -776,7 +857,9 @@ const $input11 = document.querySelector(' #productoDiez');
         </div>-->
   
 
-        <br>
+        </div>
+        
+        <div class="vr-table-wrap">
         
         <table class="table table-bordered table-striped dt-responsive tablaVentasRapidas" width="100%">
         
@@ -812,6 +895,7 @@ const $input11 = document.querySelector(' #productoDiez');
             ?>
         
         </table>
+        </div>
 
 
       </div>

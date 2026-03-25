@@ -12,6 +12,88 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor")
 
 }
 ?>
+<style>
+  .alta-helper {
+    border: 1px solid #dce7f3;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #f4fbff 0%, #f6fff7 100%);
+    padding: 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  }
+  .alta-helper h5 {
+    margin: 0 0 6px;
+    font-weight: 700;
+    color: #1d3550;
+  }
+  .alta-helper p {
+    margin: 0 0 10px;
+    color: #51657d;
+    font-size: 12px;
+  }
+  .alta-templates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .alta-template-btn {
+    border-radius: 999px;
+    border: 1px solid #c8d9ea;
+    background: #fff;
+    color: #22415f;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  .alta-template-btn:hover,
+  .alta-template-btn.active {
+    background: #1f8d61;
+    border-color: #1f8d61;
+    color: #fff;
+  }
+  .alta-progress {
+    height: 8px;
+    border-radius: 999px;
+    background: #e5edf6;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .alta-progress-bar {
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #1f8d61 0%, #3aaf73 100%);
+    transition: width .25s ease;
+  }
+  .alta-progress-text {
+    font-size: 12px;
+    color: #40556d;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .alta-resumen {
+    background: #fff;
+    border: 1px solid #e3eaf3;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #1d2b3a;
+  }
+  .alta-resumen .row {
+    margin: 0;
+  }
+  .alta-resumen .row + .row {
+    margin-top: 3px;
+  }
+  .alta-kbd {
+    border: 1px solid #cfd9e6;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: #fff;
+    padding: 1px 5px;
+    font-size: 11px;
+  }
+</style>
 <div class="content-wrapper">
 
   <section class="content-header">
@@ -150,7 +232,7 @@ MODAL AGREGAR PRODUCTO
 ======================================-->
 <div id="modalAgregarProducto" class="modal fade" role="dialog">
 
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
 
     <div class="modal-content">
 
@@ -173,6 +255,31 @@ MODAL AGREGAR PRODUCTO
       <div class="modal-body">
 
         <div class="box-body">
+
+          <div class="alta-helper" id="altaHelperProducto">
+            <h5>Asistente de Alta Inteligente</h5>
+            <p>Usa una plantilla para precargar campos y revisa el avance antes de guardar.</p>
+
+            <div class="alta-templates">
+              <button type="button" class="alta-template-btn" data-template="fisico">Plantilla producto fisico</button>
+              <button type="button" class="alta-template-btn" data-template="servicio">Plantilla servicio</button>
+              <button type="button" class="alta-template-btn" data-template="express">Alta express</button>
+            </div>
+
+            <div class="alta-progress">
+              <div class="alta-progress-bar" id="altaProgressBar"></div>
+            </div>
+            <span class="alta-progress-text" id="altaProgressText">Completitud de campos clave: 0%</span>
+
+            <div class="alta-resumen" id="altaResumenProducto">
+              <div class="row"><strong>Titulo:</strong> <span id="resumenTituloProducto">Sin definir</span></div>
+              <div class="row"><strong>Ruta:</strong> <span id="resumenRutaProducto">Sin generar</span></div>
+              <div class="row"><strong>Precio:</strong> <span id="resumenPrecioProducto">0.00</span></div>
+              <div class="row"><strong>Disponibilidad:</strong> <span id="resumenDisponibilidadProducto">0</span></div>
+              <div class="row"><strong>Proveedor:</strong> <span id="resumenProveedorProducto">No definido</span></div>
+              <div class="row"><strong>Atajo:</strong> <span class="alta-kbd">Ctrl + Enter</span> para guardar rapido</div>
+            </div>
+          </div>
 
           <!--=====================================
           ENTRADA PARA LA EMPRESA QUE VENDE EL PRODUCTO

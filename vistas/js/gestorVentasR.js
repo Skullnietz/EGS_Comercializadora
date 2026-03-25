@@ -3,11 +3,48 @@ CARGAR LA TABLA DINÁMICA DE VENTAS
 =============================================*/
 var tipoDePerfil = $("#tipoDePerfil").val();
 
-$(".tablaVentasRapidas").DataTable({
+function parseCurrencyToFloat(value){
+  if(value === null || value === undefined){
+    return 0;
+  }
+
+  var clean = String(value).replace(/[^0-9.-]/g, "");
+  var parsed = parseFloat(clean);
+
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+function renderVentasRKpis(tableApi){
+  if(!tableApi || !$("#kpiVentasTotal").length){
+    return;
+  }
+
+  var rows = tableApi.rows({ search: "applied" }).data();
+  var totalVentas = rows.length;
+  var totalIngreso = 0;
+  var totalProductos = 0;
+
+  for(var i = 0; i < rows.length; i++){
+    totalProductos += parseCurrencyToFloat(rows[i][4]);
+    totalIngreso += parseCurrencyToFloat(rows[i][5]);
+  }
+
+  var ticketPromedio = totalVentas > 0 ? (totalIngreso / totalVentas) : 0;
+
+  $("#kpiVentasTotal").text(totalVentas);
+  $("#kpiIngresoTotal").text("$" + totalIngreso.toFixed(2));
+  $("#kpiTicketPromedio").text("$" + ticketPromedio.toFixed(2));
+  $("#kpiProductosTotal").text(totalProductos);
+}
+
+var tablaVentasRapidas = $(".tablaVentasRapidas").DataTable({
     "ajax": "ajax/tablaVentasR.ajax.php?perfil=" + $("#tipoDePerfil").val() + "&empresa=" + $("#id_empresa").val(),
     "deferRender": true,
     "retrieve": true,
     "processing": true,
+  "drawCallback": function(){
+    renderVentasRKpis(this.api());
+  },
     "language": {
         "sProcessing": "Procesando...",
         "sLengthMenu": "Mostrar _MENU_ registros",
@@ -33,6 +70,8 @@ $(".tablaVentasRapidas").DataTable({
         }
     }
 });
+
+    renderVentasRKpis(tablaVentasRapidas);
 /*=============================================
 MANDAR EL TIPO DE USUARIO AL AJAX
 =============================================
