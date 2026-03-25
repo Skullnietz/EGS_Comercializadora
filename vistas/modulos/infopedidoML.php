@@ -216,9 +216,9 @@ if (!$orderId) {
         Orden de MercadoLibre
         <small id="ml-order-id-title">#<?php echo $orderId; ?></small>
       </h2>
-      <button type="button" id="ml-header-link-ml" class="ml-btn ml-btn-ml">
-        <i class="fa-solid fa-copy"></i> Copiar link de ML
-      </button>
+      <a href="#" target="_blank" rel="noopener noreferrer" id="ml-header-link-ml" class="ml-btn ml-btn-ml">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir compra en ML
+      </a>
     </div>
 
     <!-- Estado de alerta -->
@@ -398,9 +398,9 @@ if (!$orderId) {
         <a href="index.php?ruta=pedidos" class="ml-btn ml-btn-back">
           <i class="fa-solid fa-arrow-left"></i> Regresar a Pedidos
         </a>
-        <button id="ml-link-ver-ml" type="button" class="ml-btn ml-btn-ml">
-          <i class="fa-solid fa-copy"></i> Copiar link de ML
-        </button>
+        <a href="#" target="_blank" rel="noopener noreferrer" id="ml-link-ver-ml" class="ml-btn ml-btn-ml">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir compra en ML
+        </a>
       </div>
 
     </div><!-- /ml-detail-content -->
@@ -603,8 +603,8 @@ if (!$orderId) {
               + '/status?orderId=' + ORDER_ID;
       }
       // Guardar la URL real en data-url para copiar al portapapeles
-      $('#ml-link-ver-ml').attr('data-url', urlML);
-      $('#ml-header-link-ml').attr('data-url', urlML);
+      $('#ml-link-ver-ml').attr('href', urlML);
+      $('#ml-header-link-ml').attr('href', urlML);
 
       /* ── Mostrar contenido ── */
       $('#ml-detail-content').show();
@@ -710,27 +710,6 @@ if (!$orderId) {
       }
     });
   }
-
-  /* ── Copiar link de ML al portapapeles ── */
-  $(document).on('click', '#ml-link-ver-ml, #ml-header-link-ml', function () {
-    var url = $(this).attr('data-url');
-    if (!url) return;
-    var $btn = $(this);
-
-    navigator.clipboard.writeText(url).then(function () {
-      var orig = $btn.html();
-      $btn.html('<i class="fa-solid fa-check"></i> ¡Copiado!');
-      setTimeout(function () { $btn.html(orig); }, 2000);
-    }).catch(function () {
-      // Fallback para navegadores sin clipboard API
-      var tmp = $('<textarea>').val(url).appendTo('body').select();
-      document.execCommand('copy');
-      tmp.remove();
-      var orig = $btn.html();
-      $btn.html('<i class="fa-solid fa-check"></i> ¡Copiado!');
-      setTimeout(function () { $btn.html(orig); }, 2000);
-    });
-  });
 
 })();
 </script>

@@ -3022,10 +3022,23 @@ function renderizarTablaML(pedidos) {
       buyer = p.seller.nickname || '—';
     }
 
+    var shippingId = (p.shipping && p.shipping.id) ? p.shipping.id : null;
     var packId = p.pack_id || null;
-    var urlML  = packId
-      ? 'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId + '/status?packId=' + packId + '&orderId=' + p.id
-      : 'https://myaccount.mercadolibre.com.mx/my_purchases/' + p.id + '/status?orderId=' + p.id;
+    var urlML;
+
+    if (shippingId && packId) {
+      urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + shippingId
+            + '/status?packId=' + packId + '&orderId=' + p.id;
+    } else if (shippingId) {
+      urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + shippingId
+            + '/status?orderId=' + p.id;
+    } else if (packId) {
+      urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + p.id
+            + '/status?packId=' + packId + '&orderId=' + p.id;
+    } else {
+      urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + p.id
+            + '/status?orderId=' + p.id;
+    }
 
     html += '<tr>';
     html += '<td>' + num + '</td>';
@@ -3037,7 +3050,7 @@ function renderizarTablaML(pedidos) {
     html += '<td>' + fecha + '</td>';
     html += '<td style="white-space:nowrap;">';
     html += '<a href="index.php?ruta=infopedidoML&order_id=' + p.id + '" class="btn btn-xs btn-info" title="Ver detalles en el sistema" style="margin-right:4px;"><i class="fas fa-eye"></i></a>';
-    html += '<button type="button" class="btn btn-xs btn-warning btn-copiar-ml" data-url="' + urlML + '" title="Copiar link de MercadoLibre"><i class="fas fa-copy"></i></button>';
+    html += '<a href="' + urlML + '" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-warning" title="Abrir compra en MercadoLibre"><i class="fas fa-external-link-alt"></i></a>';
     html += '</td>';
     html += '</tr>';
   });
@@ -3071,27 +3084,5 @@ function mostrarStatusML(tipo, mensaje) {
     .html(mensaje)
     .show();
 }
-
-/* ── Copiar link de ML desde la tabla de pedidos ── */
-$(document).on('click', '.btn-copiar-ml', function () {
-  var url  = $(this).data('url');
-  var $btn = $(this);
-  if (!url) return;
-
-  navigator.clipboard.writeText(url).then(function () {
-    $btn.html('<i class="fas fa-check"></i>').addClass('btn-success').removeClass('btn-warning');
-    setTimeout(function () {
-      $btn.html('<i class="fas fa-copy"></i>').addClass('btn-warning').removeClass('btn-success');
-    }, 2000);
-  }).catch(function () {
-    var tmp = $('<textarea>').val(url).appendTo('body').select();
-    document.execCommand('copy');
-    tmp.remove();
-    $btn.html('<i class="fas fa-check"></i>').addClass('btn-success').removeClass('btn-warning');
-    setTimeout(function () {
-      $btn.html('<i class="fas fa-copy"></i>').addClass('btn-warning').removeClass('btn-success');
-    }, 2000);
-  });
-});
 
 </script>
