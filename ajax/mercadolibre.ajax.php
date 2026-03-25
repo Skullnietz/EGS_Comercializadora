@@ -226,6 +226,26 @@ if ($accion === 'obtenerEnvio') {
     exit;
 }
 
+// ── Obtener datos de un usuario ML ───────────────────────────────────────
+if ($accion === 'obtenerUsuario') {
+
+    if (empty($config['access_token'])) {
+        echo json_encode(['error' => 'Sin token configurado.']);
+        exit;
+    }
+
+    $userId = intval($_POST['user_id'] ?? 0);
+    if (!$userId) {
+        echo json_encode(['error' => 'ID de usuario inválido.']);
+        exit;
+    }
+
+    $url    = "https://api.mercadolibre.com/users/{$userId}";
+    $result = mlCallWithRefresh($url, $config, $configPath);
+    echo json_encode($result['body']);
+    exit;
+}
+
 // ── Generar URL de autorización OAuth ────────────────────────────────────
 if ($accion === 'generarURLOAuth') {
 

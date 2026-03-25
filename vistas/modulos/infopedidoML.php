@@ -482,14 +482,53 @@ if (!$orderId) {
       $('#ml-d-fecha-update').text(formatFecha(p.last_updated || p.date_last_updated));
       $('#ml-d-total').html('<strong>' + formatMoney(p.total_amount, p.currency_id) + '</strong>');
       $('#ml-d-moneda').text(p.currency_id || '—');
-      $('#ml-d-status-detail').text(p.status_detail || '—');
+
+      // status_detail viene vacío en órdenes completadas — mostrar texto legible
+      var statusDetailMap = {
+        'confirmed'             : 'Confirmado',
+        'payment_required'      : 'Pago requerido',
+        'payment_in_process'    : 'Pago en proceso',
+        'partially_refunded'    : 'Parcialmente reembolsado',
+        'pending_cancel'        : 'Cancelación pendiente',
+        'cancelled'             : 'Cancelado',
+        'waiting_transfer'      : 'Esperando transferencia',
+        'mediating'             : 'En mediación',
+        'null'                  : '—',
+      };
+      var rawDetail = p.status_detail || '';
+      var detailText = rawDetail
+        ? (statusDetailMap[rawDetail] || rawDetail)
+        : (estado.text); // si viene vacío, repetir el estado principal
+      $('#ml-d-status-detail').text(detailText);
 
       /* ── Vendedor ── */
-      if (p.seller) {
-        $('#ml-d-buyer-nick').text(p.seller.nickname || '—');
-        $('#ml-d-buyer-id').text(p.seller.id || '—');
-        var sellerUrl = 'https://www.mercadolibre.com.mx/perfil/' + (p.seller.nickname || '');
-        $('#ml-d-seller-link').attr('href', sellerUrl);
+      if (p.seller && p.seller.id) {
+        $('#ml-d-buyer-id').text(p.seller.id);
+
+        if (p.seller.nickname) {
+          // La orden ya trae el nickname — usarlo directo
+          var nick = p.seller.nickname;
+          $('#ml-d-buyer-nick').text(nick);
+          $('#ml-d-seller-link').attr('href', 'https://www.mercadolibre.com.mx/perfil/' + nick);
+        } else {
+          // El nickname no viene en la orden — consultar /users/{id}
+          $('#ml-d-buyer-nick').html('<i class="fa-solid fa-spinner fa-spin"></i>');
+          var dU = new FormData();
+          dU.append('accion',  'obtenerUsuario');
+          dU.append('user_id', p.seller.id);
+          $.ajax({
+            url: 'ajax/mercadolibre.ajax.php', method: 'POST', data: dU,
+            cache: false, contentType: false, processData: false, dataType: 'json',
+            success: function (u) {
+              var nick = u.nickname || u.id || '—';
+              $('#ml-d-buyer-nick').text(nick);
+              if (u.nickname) {
+                $('#ml-d-seller-link').attr('href', 'https://www.mercadolibre.com.mx/perfil/' + u.nickname);
+              }
+            },
+            error: function () { $('#ml-d-buyer-nick').text('—'); }
+          });
+        }
       }
 
       /* ── Artículos ── */
@@ -543,8 +582,11 @@ if (!$orderId) {
       }
 
       /* ── Link ver en ML ── */
-      var urlML = p.permalink
-               || ('https://myorders.mercadolibre.com.mx/purchases/' + ORDER_ID);
+      // Sintaxis oficial: /my_purchases/{packId}/status?packId=...&orderId=...
+      var packId  = p.pack_id || (p.shipping ? p.shipping.pack_id : null) || ORDER_ID;
+      var urlML   = p.permalink
+                 || ('https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
+                     + '/status?packId=' + packId + '&orderId=' + ORDER_ID);
       $('#ml-link-ver-ml').attr('href', urlML);
       $('#ml-header-link-ml').attr('href', urlML);
 
@@ -593,12 +635,28 @@ if (!$orderId) {
         $('#ml-d-shipping-substatus').text(subText);
         $('#ml-d-envio-badge').html('<span class="ml-shipping-badge">' + statusText + '</span>');
 
-        // Fecha estimada de entrega
+        // Fecha estimada de entrega — ML puede devolverla en distintos campos
         var eta = '—';
-        if (s.estimated_delivery_time && s.estimated_delivery_time.date) {
-          eta = formatFecha(s.estimated_delivery_time.date);
-        } else if (s.estimated_delivery_final && s.estimated_delivery_final.date) {
-          eta = formatFecha(s.estimated_delivery_final.date);
+        var etaDate =
+             (s.estimated_delivery_time   && s.estimated_delivery_time.date)
+          ?   s.estimated_delivery_time.date
+          : ( (s.estimated_delivery_final && s.estimated_delivery_final.date)
+          ?   s.estimated_delivery_final.date
+          : ( (s.estimated_delivery_limit && s.estimated_delivery_limit.date)
+          ?   s.estimated_delivery_limit.date
+          : ( (s.estimated_handle_time    && s.estimated_handle_time.date)
+          ?   s.estimated_handle_time.date
+          :   null ) ) );
+
+        // También puede venir como rango: from / to
+        if (!etaDate && s.estimated_delivery_time) {
+          etaDate = s.estimated_delivery_time.to || s.estimated_delivery_time.from || null;
+        }
+
+        if (etaDate) {
+          eta = formatFecha(etaDate);
+        } else if (s.status === 'delivered') {
+          eta = 'Entregado';
         }
         $('#ml-d-shipping-eta').text(eta);
 
