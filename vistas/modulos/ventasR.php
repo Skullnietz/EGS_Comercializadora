@@ -762,6 +762,70 @@ const $input11 = document.querySelector(' #productoDiez');
       border: 1px solid #d4dde8;
       padding: 4px 10px;
     }
+
+    #modalAgregarVenta .modal-content {
+      border-radius: 14px;
+      border: 1px solid #dae5f1;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, .24);
+      overflow: hidden;
+    }
+    #modalAgregarVenta .modal-header {
+      background: linear-gradient(90deg, #1f8d61 0%, #2eaf78 100%) !important;
+      border-bottom: 0;
+      padding: 14px 18px;
+    }
+    #modalAgregarVenta .modal-title {
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    #modalAgregarVenta .modal-body {
+      background: #f7fbff;
+      padding: 16px;
+    }
+    #modalAgregarVenta .box-body {
+      background: #fff;
+      border: 1px solid #e2eaf3;
+      border-radius: 10px;
+      padding: 14px;
+    }
+    #modalAgregarVenta .input-group-addon {
+      background: #f3f7fc;
+      color: #35506d;
+      border-color: #d7e2ef;
+      font-weight: 600;
+    }
+    #modalAgregarVenta .form-control {
+      border-color: #d7e2ef;
+      border-radius: 8px;
+      box-shadow: none;
+    }
+    #modalAgregarVenta .form-control:focus {
+      border-color: #41a776;
+      box-shadow: 0 0 0 2px rgba(31, 141, 97, .12);
+    }
+    #modalAgregarVenta #Caltotal {
+      background: linear-gradient(90deg, #f3fbf6 0%, #f2f8ff 100%);
+      border: 1px dashed #c8ddcf;
+      border-radius: 12px;
+      padding: 10px 0;
+    }
+    #modalAgregarVenta #Resultado,
+    #modalAgregarVenta #pagoCliente,
+    #modalAgregarVenta #cambio {
+      font-size: 34px;
+      font-weight: 700;
+      color: #10243a;
+      text-align: center;
+    }
+    #modalAgregarVenta .modal-footer {
+      border-top: 1px solid #dde7f2;
+      background: #f8fbff;
+    }
+    #modalAgregarVenta .modal-footer .btn {
+      border-radius: 999px;
+      font-weight: 600;
+      min-width: 120px;
+    }
 </style>
 
 <div class="content-wrapper">

@@ -14,6 +14,38 @@ function parseCurrencyToFloat(value){
   return isNaN(parsed) ? 0 : parsed;
 }
 
+function formatCompactNumber(value){
+  var absValue = Math.abs(value);
+
+  if(absValue >= 1000000){
+    return (value / 1000000).toFixed(2).replace(/\.00$/, "") + " M";
+  }
+
+  if(absValue >= 1000){
+    return (value / 1000).toFixed(2).replace(/\.00$/, "") + " K";
+  }
+
+  return Number(value).toLocaleString("es-MX", { maximumFractionDigits: 2 });
+}
+
+function formatCurrencyCompact(value){
+  var absValue = Math.abs(value);
+
+  if(absValue >= 1000000){
+    return "$" + (value / 1000000).toFixed(2).replace(/\.00$/, "") + " M";
+  }
+
+  if(absValue >= 1000){
+    return "$" + (value / 1000).toFixed(2).replace(/\.00$/, "") + " K";
+  }
+
+  return "$" + Number(value).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatCurrencyFull(value){
+  return "$" + Number(value).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function renderVentasRKpis(tableApi){
   if(!tableApi || !$("#kpiVentasTotal").length){
     return;
@@ -31,10 +63,10 @@ function renderVentasRKpis(tableApi){
 
   var ticketPromedio = totalVentas > 0 ? (totalIngreso / totalVentas) : 0;
 
-  $("#kpiVentasTotal").text(totalVentas);
-  $("#kpiIngresoTotal").text("$" + totalIngreso.toFixed(2));
-  $("#kpiTicketPromedio").text("$" + ticketPromedio.toFixed(2));
-  $("#kpiProductosTotal").text(totalProductos);
+  $("#kpiVentasTotal").text(formatCompactNumber(totalVentas)).attr("title", Number(totalVentas).toLocaleString("es-MX"));
+  $("#kpiIngresoTotal").text(formatCurrencyCompact(totalIngreso)).attr("title", formatCurrencyFull(totalIngreso));
+  $("#kpiTicketPromedio").text(formatCurrencyCompact(ticketPromedio)).attr("title", formatCurrencyFull(ticketPromedio));
+  $("#kpiProductosTotal").text(formatCompactNumber(totalProductos)).attr("title", Number(totalProductos).toLocaleString("es-MX", { maximumFractionDigits: 2 }));
 }
 
 var tablaVentasRapidas = $(".tablaVentasRapidas").DataTable({
