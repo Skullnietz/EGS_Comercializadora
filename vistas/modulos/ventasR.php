@@ -1102,6 +1102,7 @@ const $input11 = document.querySelector(' #productoDiez');
             </button>
           </div>
 
+          <?php if(!$esVendedorVentasR): ?>
           <div class="vr-filtro-fechas">
           <span class="vr-date-label">Desde</span>
           <input type="date" id="filtroFechaInicialR" class="form-control" placeholder="Fecha inicial">
@@ -1115,6 +1116,7 @@ const $input11 = document.querySelector(' #productoDiez');
           <button class="btn btn-default" type="button" id="btnAplicarFiltroFechaR"><i class="fas fa-filter"></i> Filtrar</button>
           <button class="btn btn-default" type="button" id="btnLimpiarFiltroFechaR"><i class="fas fa-eraser"></i> Limpiar</button>
           </div>
+          <?php endif; ?>
         
         <!--<div class="box-header with-border">
         
