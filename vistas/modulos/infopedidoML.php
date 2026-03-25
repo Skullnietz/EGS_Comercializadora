@@ -242,7 +242,11 @@ if (!$orderId) {
         <div class="ml-card-body">
           <div class="ml-info-grid">
             <div class="ml-info-item">
-              <label>Número de Orden</label>
+              <label># Compra ML <small style="color:#94a3b8;">(visible en ML)</small></label>
+              <div class="valor" id="ml-d-shipping-ref">—</div>
+            </div>
+            <div class="ml-info-item">
+              <label># Orden API <small style="color:#94a3b8;">(ID interno)</small></label>
               <div class="valor" id="ml-d-order-id">—</div>
             </div>
             <div class="ml-info-item">
@@ -475,6 +479,9 @@ if (!$orderId) {
       var estado = statusMap[p.status] || { text: p.status || '—', css: 'ml-badge-other' };
       $('#ml-badge-estado').html('<span class="ml-badge ' + estado.css + '">' + estado.text + '</span>');
       $('#ml-d-order-id').text(p.id || ORDER_ID);
+      // Número que ML muestra en "detalle de compra" = shipping.id
+      var shippingRef = (p.shipping && p.shipping.id) ? p.shipping.id : '—';
+      $('#ml-d-shipping-ref').text(shippingRef);
       $('#ml-d-fecha-creacion').text(formatFecha(p.date_created));
       $('#ml-d-fecha-update').text(formatFecha(p.last_updated || p.date_last_updated));
       $('#ml-d-total').html('<strong>' + formatMoney(p.total_amount, p.currency_id) + '</strong>');
@@ -579,16 +586,19 @@ if (!$orderId) {
       }
 
       /* ── Link ver en ML (via ir.php para evitar detección de referrer) ── */
-      // packId debe ser el mismo en el path y en el query string
-      var packId = p.pack_id || (p.shipping ? p.shipping.pack_id : null);
+      // URL usando shipping.id como path (número visible en ML) + pack_id en query
+      var shippingId = (p.shipping && p.shipping.id) ? p.shipping.id : null;
+      var packId     = p.pack_id || (p.shipping ? p.shipping.pack_id : null);
       var urlML;
       if (p.permalink) {
         urlML = p.permalink;
-      } else if (packId) {
-        urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
+      } else if (shippingId && packId) {
+        urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + shippingId
               + '/status?packId=' + packId + '&orderId=' + ORDER_ID;
+      } else if (shippingId) {
+        urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + shippingId
+              + '/status?orderId=' + ORDER_ID;
       } else {
-        // Sin pack_id: orden simple, solo orderId
         urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + ORDER_ID
               + '/status?orderId=' + ORDER_ID;
       }
