@@ -279,6 +279,51 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
   }
 
+  /* Paginacion DataTables (Bootstrap) - override local para evitar estilo blanco por defecto */
+  #tablematerial_wrapper .dataTables_paginate {
+    margin-top: 14px;
+  }
+
+  #tablematerial_wrapper .dataTables_paginate .pagination > li > a,
+  #tablematerial_wrapper .dataTables_paginate .pagination > li > span {
+    border-radius: 8px !important;
+    border: 1px solid #dbe3ef !important;
+    background: #ffffff !important;
+    color: #334155 !important;
+    margin-left: 6px;
+    padding: 6px 12px;
+    font-weight: 600;
+    transition: all .15s ease;
+  }
+
+  #tablematerial_wrapper .dataTables_paginate .pagination > li > a:hover,
+  #tablematerial_wrapper .dataTables_paginate .pagination > li > span:hover {
+    background: #eef2ff !important;
+    border-color: #a5b4fc !important;
+    color: #3730a3 !important;
+  }
+
+  #tablematerial_wrapper .dataTables_paginate .pagination > .active > a,
+  #tablematerial_wrapper .dataTables_paginate .pagination > .active > span,
+  #tablematerial_wrapper .dataTables_paginate .pagination > .active > a:hover,
+  #tablematerial_wrapper .dataTables_paginate .pagination > .active > span:hover,
+  #tablematerial_wrapper .dataTables_paginate .pagination > .active > a:focus,
+  #tablematerial_wrapper .dataTables_paginate .pagination > .active > span:focus {
+    background: #1a3152 !important;
+    border-color: #1a3152 !important;
+    color: #ffffff !important;
+  }
+
+  #tablematerial_wrapper .dataTables_paginate .pagination > .disabled > a,
+  #tablematerial_wrapper .dataTables_paginate .pagination > .disabled > span,
+  #tablematerial_wrapper .dataTables_paginate .pagination > .disabled > a:hover,
+  #tablematerial_wrapper .dataTables_paginate .pagination > .disabled > span:hover {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed;
+  }
+
   /* Tooltips */
   [data-tooltip] {
     position: relative;
