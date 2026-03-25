@@ -217,18 +217,18 @@
     require_once 'config/Router.php';
     $router = new Router(require 'config/routes.php');
 
-    if (isset($_GET["ruta"])) {
+    if (!isset($_GET["ruta"]) || $_GET["ruta"] === "") {
 
-      if ($router->isAllowed($_GET["ruta"])) {
+      echo '<script>window.location = "?ruta=inicio";</script>';
 
-        include_once "modulos/" . $_GET["ruta"] . ".php";
+    } elseif ($router->isAllowed($_GET["ruta"])) {
 
-      } else {
+      include_once "modulos/" . $_GET["ruta"] . ".php";
 
-        include_once "modulos/error404.php";
-        include_once "extensiones/tcpdf/pdf/pdf.php";
+    } else {
 
-      }
+      include_once "modulos/error404.php";
+      include_once "extensiones/tcpdf/pdf/pdf.php";
 
     }
 

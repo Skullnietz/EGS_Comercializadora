@@ -682,7 +682,7 @@
     border-radius: 10px;
     box-shadow: 0 10px 40px rgba(15, 23, 42, .16);
     z-index: 9999;
-    max-height: 320px;
+    max-height: 440px;
     overflow-y: auto;
     padding: 6px 0;
   }
@@ -712,10 +712,6 @@
     cursor: pointer;
   }
 
-  .egs-search-results .egs-sr-item:hover {
-    background: #f1f5f9;
-  }
-
   .egs-search-results .egs-sr-item i {
     color: #94a3b8;
     width: 16px;
@@ -723,11 +719,46 @@
     font-size: 13px;
   }
 
+  .egs-search-results .egs-sr-item.focused,
+  .egs-search-results .egs-sr-item:hover {
+    background: #f1f5f9;
+  }
+
+  .egs-search-results .egs-sr-item .egs-sr-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .egs-search-results .egs-sr-item .egs-sr-sub {
+    font-size: 11px;
+    color: #94a3b8;
+    white-space: nowrap;
+    flex-shrink: 0;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .egs-search-results .egs-sr-empty {
     padding: 16px;
     text-align: center;
     color: #94a3b8;
     font-size: 13px;
+  }
+
+  .egs-search-results .egs-sr-loading {
+    padding: 12px 16px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+  }
+
+  .egs-search-results .egs-sr-group + .egs-sr-group {
+    margin-top: 4px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 8px;
   }
 
   /* Responsive: ocultar search en mobile */
@@ -787,11 +818,12 @@
 <!-- ═══ JS: Búsqueda global del navbar ═══ -->
 <script>
   (function () {
-    var $input = $('#egsSearchInput');
+    var $input   = $('#egsSearchInput');
     var $results = $('#egsSearchResults');
-    var timer = null;
+    var timer    = null;
+    var ajaxReq  = null; // para cancelar peticiones previas
 
-    // Atajos rápidos (navegación directa) — no requiere backend
+    // Atajos rápidos de navegación (sin backend)
     var quickLinks = [
       { label: 'Tablero', icon: 'fa-solid fa-home', url: 'index.php?ruta=inicio', tags: 'inicio dashboard home tablero' },
       { label: 'Gestor Productos', icon: 'fab fa-product-hunt', url: 'index.php?ruta=productos', tags: 'productos inventario stock' },
@@ -814,36 +846,106 @@
       { label: 'Ayuda', icon: 'fa-regular fa-circle-question', url: 'index.php?ruta=preguntas', tags: 'ayuda faq preguntas soporte' }
     ];
 
+    /* ── Escapar HTML para evitar XSS ── */
+    function esc(str) {
+      var d = document.createElement('div');
+      d.appendChild(document.createTextNode(str));
+      return d.innerHTML;
+    }
+
+    /* ── Renderizar quickLinks filtrados ── */
+    function renderQuickLinks(q) {
+      var matches = quickLinks.filter(function (item) {
+        return item.label.toLowerCase().indexOf(q) > -1 ||
+          item.tags.indexOf(q) > -1;
+      });
+      if (!matches.length) return '';
+      var html = '<div class="egs-sr-group"><i class="fa-solid fa-arrow-right" style="margin-right:5px;opacity:.5"></i>Ir a</div>';
+      for (var i = 0; i < Math.min(matches.length, 5); i++) {
+        html += '<a class="egs-sr-item" href="' + matches[i].url + '">' +
+          '<i class="' + matches[i].icon + '"></i>' +
+          esc(matches[i].label) + '</a>';
+      }
+      return html;
+    }
+
+    /* ── Renderizar resultados del backend ── */
+    function renderBackendResults(groups) {
+      var html = '';
+      for (var g = 0; g < groups.length; g++) {
+        var grp = groups[g];
+        html += '<div class="egs-sr-group"><i class="fa-solid fa-database" style="margin-right:5px;opacity:.5"></i>' + esc(grp.group) + '</div>';
+        for (var i = 0; i < grp.items.length; i++) {
+          var it = grp.items[i];
+          html += '<a class="egs-sr-item" href="' + it.url + '">' +
+            '<i class="' + it.icon + '"></i>' +
+            '<span class="egs-sr-label">' + esc(it.label) + '</span>' +
+            '<span class="egs-sr-sub">' + esc(it.sub || '') + '</span>' +
+            '</a>';
+        }
+      }
+      return html;
+    }
+
+    /* ── Búsqueda principal ── */
     function search(query) {
       if (!query || query.length < 2) {
         $results.removeClass('active').empty();
         return;
       }
-      var q = query.toLowerCase();
-      var matches = quickLinks.filter(function (item) {
-        return item.label.toLowerCase().indexOf(q) > -1 ||
-          item.tags.indexOf(q) > -1;
-      });
 
-      var html = '';
-      if (matches.length) {
-        html += '<div class="egs-sr-group">Ir a</div>';
-        for (var i = 0; i < Math.min(matches.length, 8); i++) {
-          html += '<a class="egs-sr-item" href="' + matches[i].url + '">' +
-            '<i class="' + matches[i].icon + '"></i>' +
-            matches[i].label + '</a>';
+      var q = query.toLowerCase();
+
+      // Mostrar quickLinks inmediatamente + spinner de carga
+      var quickHtml = renderQuickLinks(q);
+      var loadingHtml = '<div class="egs-sr-loading"><i class="fa-solid fa-spinner fa-spin"></i> Buscando en registros...</div>';
+      $results.html(quickHtml + loadingHtml).addClass('active');
+
+      // Cancelar petición anterior si existe
+      if (ajaxReq && ajaxReq.readyState !== 4) ajaxReq.abort();
+
+      // Búsqueda en backend
+      ajaxReq = $.ajax({
+        url: 'ajax/busquedaGlobal.ajax.php',
+        type: 'POST',
+        data: { q: query },
+        dataType: 'json',
+        global: false, // no activar la barra de carga global
+        success: function (resp) {
+          var html = '';
+
+          // Resultados del backend
+          if (resp.results && resp.results.length) {
+            html += renderBackendResults(resp.results);
+          }
+
+          // QuickLinks después
+          var ql = renderQuickLinks(q);
+          if (ql) html += ql;
+
+          if (!html) {
+            html = '<div class="egs-sr-empty"><i class="fa-solid fa-magnifying-glass" style="margin-right:6px;opacity:.5"></i>Sin resultados para "' + esc(query) + '"</div>';
+          }
+
+          $results.html(html).addClass('active');
+        },
+        error: function (xhr) {
+          if (xhr.statusText === 'abort') return; // cancelación normal
+          // Si falla el backend, al menos mostrar quickLinks
+          var html = renderQuickLinks(q);
+          if (!html) {
+            html = '<div class="egs-sr-empty"><i class="fa-solid fa-magnifying-glass" style="margin-right:6px;opacity:.5"></i>Sin resultados para "' + esc(query) + '"</div>';
+          }
+          $results.html(html).addClass('active');
         }
-      } else {
-        html = '<div class="egs-sr-empty"><i class="fa-solid fa-magnifying-glass" style="margin-right:6px;opacity:.5"></i>Sin resultados para "' + query + '"</div>';
-      }
-      $results.html(html).addClass('active');
+      });
     }
 
-    // Eventos
+    // ── Eventos ──
     $input.on('input', function () {
       clearTimeout(timer);
       var val = $(this).val().trim();
-      timer = setTimeout(function () { search(val); }, 150);
+      timer = setTimeout(function () { search(val); }, 300);
     });
 
     $input.on('focus', function () {
@@ -857,15 +959,49 @@
       }
     });
 
-    // Atajo Ctrl+K
+    // Navegación con teclado en resultados
     $(document).on('keydown', function (e) {
+      // Ctrl+K para enfocar
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         $input.focus();
+        return;
       }
+      // Escape para cerrar
       if (e.key === 'Escape') {
         $results.removeClass('active');
         $input.blur();
+        return;
+      }
+      // Flechas arriba/abajo para navegar resultados
+      if (!$results.hasClass('active')) return;
+      var $items = $results.find('.egs-sr-item');
+      if (!$items.length) return;
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        var $focused = $results.find('.egs-sr-item.focused');
+        var idx = $items.index($focused);
+
+        if (e.key === 'ArrowDown') {
+          idx = (idx + 1) % $items.length;
+        } else {
+          idx = idx <= 0 ? $items.length - 1 : idx - 1;
+        }
+
+        $items.removeClass('focused');
+        $items.eq(idx).addClass('focused');
+        // Scroll into view
+        $items.eq(idx)[0].scrollIntoView({ block: 'nearest' });
+      }
+
+      // Enter para navegar al resultado enfocado
+      if (e.key === 'Enter') {
+        var $f = $results.find('.egs-sr-item.focused');
+        if ($f.length) {
+          e.preventDefault();
+          window.location = $f.attr('href');
+        }
       }
     });
 
