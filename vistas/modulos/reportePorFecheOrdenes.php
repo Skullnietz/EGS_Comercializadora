@@ -259,10 +259,28 @@ $totalCols    = $isAdmin ? 12 : 10;
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate {
   padding: 0; margin: 0;
 }
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li {
+  list-style: none;
+}
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li::marker {
+  content: '';
+}
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button {
   padding: 5px 11px !important; border-radius: 6px !important; font-size: 12px !important;
   border: 1px solid var(--rpt-border) !important; margin: 0 2px;
   background: #fff !important; color: var(--rpt-text) !important;
+}
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button a {
+  color: inherit !important;
+  text-decoration: none !important;
+  display: inline-block;
+  min-width: 18px;
+  text-align: center;
 }
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button.current {
   background: var(--rpt-accent) !important; color: #fff !important;
