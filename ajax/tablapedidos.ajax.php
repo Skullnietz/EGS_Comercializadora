@@ -79,9 +79,15 @@ class TablaOrdenes{
 
       $NombreUsuario = $usuario["nombre"];
 
-	  // Procesar fechas (si existen en la BD)
-	  $fechaRegistro = isset($pedidos[$i]["fecha_creacion"]) ? date('d/m/Y H:i', strtotime($pedidos[$i]["fecha_creacion"])) : (isset($pedidos[$i]["created_at"]) ? date('d/m/Y H:i', strtotime($pedidos[$i]["created_at"])) : '—');
-	  $fechaModificacion = isset($pedidos[$i]["fecha_actualizacion"]) ? date('d/m/Y H:i', strtotime($pedidos[$i]["fecha_actualizacion"])) : (isset($pedidos[$i]["updated_at"]) ? date('d/m/Y H:i', strtotime($pedidos[$i]["updated_at"])) : '—');
+	  // Usar campos solicitados por negocio: fechaDePedido y fechaEntrega
+	  $fechaDePedidoRaw = isset($pedidos[$i]["fechaDePedido"]) ? trim((string)$pedidos[$i]["fechaDePedido"]) : '';
+	  $fechaEntregaRaw = isset($pedidos[$i]["fechaEntrega"]) ? trim((string)$pedidos[$i]["fechaEntrega"]) : '';
+	  $fechaRegistro = ($fechaDePedidoRaw !== '' && $fechaDePedidoRaw !== '0000-00-00' && $fechaDePedidoRaw !== '0000-00-00 00:00:00')
+	    ? date('d/m/Y H:i', strtotime($fechaDePedidoRaw))
+	    : '—';
+	  $fechaModificacion = ($fechaEntregaRaw !== '' && $fechaEntregaRaw !== '0000-00-00' && $fechaEntregaRaw !== '0000-00-00 00:00:00')
+	    ? date('d/m/Y H:i', strtotime($fechaEntregaRaw))
+	    : '—';
 
 	  $InfoPedido = "<button class='btn btn-sm btn-info btnVerInfoPedido' idPedido='".$pedidos[$i]["id"]."' cliente='".$pedidos[$i]["id_cliente"]."' asesor='".$pedidos[$i]["id_Asesor"]."' empresa='".$pedidos[$i]["id_empresa"]."' title='Ver detalles' style='padding:6px 10px;'><i class='fas fa-eye'></i></button>";
          		
@@ -95,7 +101,7 @@ class TablaOrdenes{
 
 			      		"'.$NombreEmpresa.'",
 
-			      		"<b>PEDIDO: '.$pedidos[$i]["id"].'</b>",
+			      		"<b>'.$pedidos[$i]["id"].'</b>",
 
 			      		"'.$NombreUsuario.'",
 

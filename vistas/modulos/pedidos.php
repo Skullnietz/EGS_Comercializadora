@@ -178,7 +178,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     -webkit-overflow-scrolling: touch;
   }
 
-  .tablaPedidos thead th {
+  #tablepedidos thead th {
     position: sticky;
     top: 0;
     background: #f8fafc;
@@ -193,14 +193,33 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     padding: 12px 10px;
   }
 
-  .tablaPedidos.dataTable thead .sorting,
-  .tablaPedidos.dataTable thead .sorting_asc,
-  .tablaPedidos.dataTable thead .sorting_desc {
+  #tablepedidos.dataTable thead .sorting,
+  #tablepedidos.dataTable thead .sorting_asc,
+  #tablepedidos.dataTable thead .sorting_desc,
+  #tablepedidos.dataTable thead .sorting_asc_disabled,
+  #tablepedidos.dataTable thead .sorting_desc_disabled,
+  #tablepedidos.dataTable thead .sorting_disabled {
     background-image: none !important;
     padding-right: 8px !important;
   }
 
-  .tablaPedidos.dataTable tbody tr td {
+  #tablepedidos.dataTable thead .sorting::before,
+  #tablepedidos.dataTable thead .sorting::after,
+  #tablepedidos.dataTable thead .sorting_asc::before,
+  #tablepedidos.dataTable thead .sorting_asc::after,
+  #tablepedidos.dataTable thead .sorting_desc::before,
+  #tablepedidos.dataTable thead .sorting_desc::after,
+  #tablepedidos.dataTable thead .sorting_asc_disabled::before,
+  #tablepedidos.dataTable thead .sorting_asc_disabled::after,
+  #tablepedidos.dataTable thead .sorting_desc_disabled::before,
+  #tablepedidos.dataTable thead .sorting_desc_disabled::after,
+  #tablepedidos.dataTable thead .sorting_disabled::before,
+  #tablepedidos.dataTable thead .sorting_disabled::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  #tablepedidos.dataTable tbody tr td {
     vertical-align: middle;
     padding: 12px 10px;
   }
@@ -238,20 +257,20 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     background-color: #f4f7ff !important;
   }
 
-  .tablaPedidos_wrapper .dataTables_length,
-  .tablaPedidos_wrapper .dataTables_filter {
+  #tablepedidos_wrapper .dataTables_length,
+  #tablepedidos_wrapper .dataTables_filter {
     margin-bottom: 12px;
   }
 
-  .tablaPedidos_wrapper .dataTables_length label,
-  .tablaPedidos_wrapper .dataTables_filter label {
+  #tablepedidos_wrapper .dataTables_length label,
+  #tablepedidos_wrapper .dataTables_filter label {
     color: #475569;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: .2px;
   }
 
-  .tablaPedidos_wrapper .dataTables_length select {
+  #tablepedidos_wrapper .dataTables_length select {
     border: 1px solid #dbe3ef !important;
     border-radius: 8px;
     background: #ffffff;
@@ -263,7 +282,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     font-weight: 600;
   }
 
-  .tablaPedidos_wrapper .dataTables_filter input {
+  #tablepedidos_wrapper .dataTables_filter input {
     border: 1px solid #dbe3ef !important;
     border-radius: 10px;
     background: #ffffff;
@@ -276,14 +295,14 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     transition: all .15s ease;
   }
 
-  .tablaPedidos_wrapper .dataTables_length select:focus,
-  .tablaPedidos_wrapper .dataTables_filter input:focus {
+  #tablepedidos_wrapper .dataTables_length select:focus,
+  #tablepedidos_wrapper .dataTables_filter input:focus {
     outline: none;
     border-color: #a5b4fc !important;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
   }
 
-  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
+  #tablepedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
     border-radius: 8px !important;
     border: 1px solid #dbe3ef !important;
     background: #ffffff !important;
@@ -294,26 +313,26 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     transition: all .15s ease;
   }
 
-  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover {
+  #tablepedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover {
     background: #eef2ff !important;
     border-color: #a5b4fc !important;
     color: #3730a3 !important;
   }
 
-  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a {
+  #tablepedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a {
     background: #1a3152 !important;
     border-color: #1a3152 !important;
     color: #ffffff !important;
   }
 
-  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a {
+  #tablepedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a {
     background: #f8fafc !important;
     border-color: #e2e8f0 !important;
     color: #94a3b8 !important;
     cursor: not-allowed;
   }
 
-  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+  #tablepedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
@@ -333,14 +352,14 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
       padding: 10px;
     }
 
-    .tablaPedidos_wrapper .dataTables_length,
-    .tablaPedidos_wrapper .dataTables_filter {
+    #tablepedidos_wrapper .dataTables_length,
+    #tablepedidos_wrapper .dataTables_filter {
       float: none !important;
       text-align: left !important;
       width: 100%;
     }
 
-    .tablaPedidos_wrapper .dataTables_filter input {
+    #tablepedidos_wrapper .dataTables_filter input {
       width: 100%;
       min-width: 0;
     }
@@ -480,7 +499,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
           </div>
           <div class="ped-card-body">
             <div class="table-responsive-wrap">
-              <table class="table stripe ordenes order-table display compact cell-border hover row-border tablaPedidos" width="100%">
+              <table id="tablepedidos" class="table stripe ordenes order-table display compact cell-border hover row-border tablaPedidos" width="100%">
               
                 <thead>
                   
@@ -493,8 +512,8 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                     <th>Estado</th>
                     <th>Total del pedido</th>
                     <th>Método de pago</th>
-                    <th>Registro</th>
-                    <th>Modificación</th>
+                    <th>Fecha de pedido</th>
+                    <th>Fecha de entrega</th>
                     <th>Acciones</th>
                     <th>Detalles</th>
 
@@ -1299,11 +1318,11 @@ CARGAR LA TABLA DINÁMICA DE PEDIDOS
 $.ajax({
   url:"ajax/tablapedidos.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
  	success:function(respuesta){
-		console.log("Tabla de pedidos cargada");
+    // Carga previa para validar disponibilidad de datos
  	}
  })
 
-$(".tablaPedidos").DataTable({
+$("#tablepedidos").DataTable({
   "ajax": "ajax/tablapedidos.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
 	 "deferRender": true,
 	 "retrieve": true,
