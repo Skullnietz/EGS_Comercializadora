@@ -270,32 +270,49 @@ $totalCols    = $isAdmin ? 12 : 10;
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li::marker {
   content: '';
 }
-.rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button {
-  padding: 5px 11px !important; border-radius: 6px !important; font-size: 12px !important;
-  border: 1px solid var(--rpt-border) !important; margin: 0 2px;
-  background: #fff !important; color: var(--rpt-text) !important;
-}
-.rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button a {
-  color: inherit !important;
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
+  border-radius: 8px !important;
+  border: 1px solid #dbe3ef !important;
+  background: #ffffff !important;
+  color: #334155 !important;
+  margin-left: 6px;
+  padding: 6px 12px !important;
+  font-weight: 600;
   text-decoration: none !important;
   display: inline-block;
-  min-width: 18px;
+  min-width: 36px;
   text-align: center;
+  transition: all .15s ease;
 }
-.rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-  background: var(--rpt-accent) !important; color: #fff !important;
-  border-color: var(--rpt-accent) !important;
+
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover {
+  background: #eef2ff !important;
+  border-color: #a5b4fc !important;
+  color: #3730a3 !important;
 }
-.rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-  background: #eff6ff !important; color: var(--rpt-accent) !important;
-  border-color: var(--rpt-accent) !important;
+
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a,
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:hover,
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:focus {
+  background: #1a3152 !important;
+  border-color: #1a3152 !important;
+  color: #ffffff !important;
 }
-.rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-  opacity: .4; cursor: default;
+
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a,
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:hover,
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:focus {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed;
 }
-.rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
-  background: #fff !important; color: var(--rpt-text) !important;
-  border-color: var(--rpt-border) !important;
+
+/* Limpia estilos residuales sobre el <li> para que no tape el boton interno */
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 
 /* ── Responsive ── */
