@@ -977,22 +977,10 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
       <div class="crm-card-body" style="padding:16px 18px">
         <div style="display:flex;flex-direction:column;gap:8px">
           <a href="index.php?ruta=ventasR" class="crm-quick">
-            <div class="crm-quick-icon" style="background:linear-gradient(135deg,#22c55e,#06b6d4)">
-              <i class="fa-solid fa-plus"></i>
-            </div>
-            <div class="crm-quick-text">Nueva Venta R<small>Registrar una venta rápida</small></div>
-          </a>
-          <a href="index.php?ruta=ventasR" class="crm-quick">
             <div class="crm-quick-icon" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)">
               <i class="fa-solid fa-list-check"></i>
             </div>
-            <div class="crm-quick-text">Gestor Ventas R<small>Ver y gestionar operaciones</small></div>
-          </a>
-          <a href="index.php?ruta=CorteTotal" class="crm-quick">
-            <div class="crm-quick-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316)">
-              <i class="fa-solid fa-file-invoice-dollar"></i>
-            </div>
-            <div class="crm-quick-text">Corte de Ventas R<small>Consultar corte y totales</small></div>
+            <div class="crm-quick-text">Gestor de Ventas Rapidas<small>Ver y gestionar operaciones</small></div>
           </a>
         </div>
       </div>
