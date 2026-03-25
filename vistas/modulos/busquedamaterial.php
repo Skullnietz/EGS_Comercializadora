@@ -284,6 +284,41 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     margin-top: 14px;
   }
 
+  /* Estructura clasica de DataTables: a.paginate_button */
+  #tablematerial_wrapper .dataTables_paginate a.paginate_button {
+    border-radius: 8px !important;
+    border: 1px solid #dbe3ef !important;
+    background: #ffffff !important;
+    color: #334155 !important;
+    margin-left: 6px;
+    padding: 6px 12px !important;
+    font-weight: 600;
+    transition: all .15s ease;
+  }
+
+  #tablematerial_wrapper .dataTables_paginate a.paginate_button:hover {
+    background: #eef2ff !important;
+    border-color: #a5b4fc !important;
+    color: #3730a3 !important;
+  }
+
+  #tablematerial_wrapper .dataTables_paginate a.paginate_button.current,
+  #tablematerial_wrapper .dataTables_paginate a.paginate_button.current:hover,
+  #tablematerial_wrapper .dataTables_paginate a.paginate_button.current:focus {
+    background: #1a3152 !important;
+    border-color: #1a3152 !important;
+    color: #ffffff !important;
+  }
+
+  #tablematerial_wrapper .dataTables_paginate a.paginate_button.disabled,
+  #tablematerial_wrapper .dataTables_paginate a.paginate_button.disabled:hover,
+  #tablematerial_wrapper .dataTables_paginate a.paginate_button.disabled:focus {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed;
+  }
+
   #tablematerial_wrapper .dataTables_paginate .pagination > li > a,
   #tablematerial_wrapper .dataTables_paginate .pagination > li > span {
     border-radius: 8px !important;
