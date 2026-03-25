@@ -236,15 +236,22 @@ $totalCols    = $isAdmin ? 12 : 10;
 .rpt-table-wrap .dataTables_wrapper { padding: 0; }
 .rpt-table-wrap .dataTables_wrapper .dataTables_length,
 .rpt-table-wrap .dataTables_wrapper .dataTables_filter { display: none; }
+.rpt-table-wrap .rpt-dt-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+  padding: 12px 16px; border-top: 1px solid var(--rpt-border);
+  background: #f8fafc;
+}
 .rpt-table-wrap .dataTables_wrapper .dataTables_info {
-  padding: 12px 16px; font-size: 12px; color: var(--rpt-muted);
+  padding: 0; font-size: 12px; color: var(--rpt-muted); margin: 0;
 }
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate {
-  padding: 10px 16px;
+  padding: 0; margin: 0;
 }
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button {
-  padding: 4px 10px !important; border-radius: 6px !important; font-size: 12px !important;
+  padding: 5px 11px !important; border-radius: 6px !important; font-size: 12px !important;
   border: 1px solid var(--rpt-border) !important; margin: 0 2px;
+  background: #fff !important; color: var(--rpt-text) !important;
 }
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button.current {
   background: var(--rpt-accent) !important; color: #fff !important;
@@ -253,6 +260,13 @@ $totalCols    = $isAdmin ? 12 : 10;
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
   background: #eff6ff !important; color: var(--rpt-accent) !important;
   border-color: var(--rpt-accent) !important;
+}
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+  opacity: .4; cursor: default;
+}
+.rpt-table-wrap .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+  background: #fff !important; color: var(--rpt-text) !important;
+  border-color: var(--rpt-border) !important;
 }
 
 /* ── Responsive ── */

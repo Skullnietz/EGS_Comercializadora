@@ -1846,257 +1846,130 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 	public function ctrDescargarReporteVOrdenes($valorEmpresa)
 	{
+		if (!isset($_GET["reporte"])) return;
 
+		$tabla = "ordenes";
 
-
-		if (isset($_GET["reporte"])) {
-
-
-
-			$tabla = "ordenes";
-
-
-
-			if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
-
-
-
-				$itemUno = "id_empresa";
-
-				$valorUno = $valorEmpresa;
-
-				$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $itemUno, $valorUno);
-
-
-
-
-
-			} else {
-
-
-
-				$item = "id_empresa";
-
-				$valor = $valorEmpresa;
-
-
-
-				$OrdenesFecha = ModeloOrdenes::mdlMostrarordenesParaValidar($tabla, $item, $valor);
-
-			}
-
-
-
-
-
-
-
-			/*=============================================
-
-			CREAMOS EL ARCHIVO DE EXCEL
-
-			=============================================*/
-
-
-
-			$Name = $_GET["reporte"] . '.xls';
-
-
-
-			header('Expires: 0');
-
-			header('Cache-control: private');
-
-			header("Content-type: application/vnd.ms-excel"); // Archivo de Excel
-
-			header("Cache-Control: cache, must-revalidate");
-
-			header('Content-Description: File Transfer');
-
-			header('Last-Modified: ' . date('D, d M Y H:i:s'));
-
-			header("Pragma: public");
-
-			header('Content-Disposition:; filename="' . $Name . '"');
-
-			header("Content-Transfer-Encoding: binary");
-
-
-
-			echo utf8_decode("<table border='0'> 
-
-
-
-					<tr> 
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Orden</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Empresa</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Asesor</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Tecnico</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Cliente</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>Estado</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>total</td>
-
-						<td style='font-weight:bold; border:1px solid #eee;'>fecha</td>
-
-					</tr>");
-
-
-
-
-
-			foreach ($OrdenesFecha as $key => $value) {
-
-
-
-				$item = "id";
-
-				$valor = $value["id_empresa"];
-
-
-
-				$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-
-
-				$NombreEmpresa = $NameEmpresa["empresa"];
-
-
-
-				//TRAER ASESOR
-
-
-
-				$item = "id";
-
-				$valor = $value["id_Asesor"];
-
-
-
-				$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-
-
-				$NombreAsesor = $asesor["nombre"];
-
-
-
-				//TRAER CLIENTE (USUARIO)
-
-
-
-				$item = "id";
-
-				$valor = $value["id_usuario"];
-
-
-
-				$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-
-
-				$NombreUsuario = $usuario["nombre"];
-
-
-
-				//TRAER TECNICO
-
-				$item = "id";
-
-				$valor = $value["id_tecnico"];
-
-
-
-				$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-
-
-				$NombreTecnico = $tecnico["nombre"];
-
-
-
-				//$ElTotal = number_format($total["total"],2);
-
-
-
-
-
-				/*=============================================
-
-				TRAER EMAIL DATOS DE COMPRA
-
-				=============================================*/
-
-
-
-				echo utf8_decode("<tr>
-
-									 <td style='border:1px solid #eee;'>" . $value["id"] . "</td>
-
-									 <td style='border:1px solid #eee;'>" . $NombreEmpresa . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreAsesor . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreTecnico . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $NombreUsuario . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["estado"] . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . money_format("%i", $value["total"]) . "</td>
-
-			 					  	 <td style='border:1px solid #eee;'>" . $value["fecha"] . "</td>
-
-			 					  	 </tr>");
-
-
-
-			}
-
-			/*=============================================
-
-		   TRAER TOTAL
-
-		   =============================================*/
-
-			$tabla = "ordenes";
-
-			$total = ModeloOrdenes::mdlSumarTotalOrdenesGeneral($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], $valorEmpresa);
-
-			foreach ($total as $key => $valueTotal) {
-
-				echo utf8_decode("<tr><td style='font-weight:bold; border:1px solid #eee;'>TOTAL</td></tr>");
-
-
-
-				echo utf8_decode("<tr><td style='border:1px solid #eee;'>$" . $valueTotal["total"] . "</td>
-
-			 					  	 	</tr>");
-
-			}
-
-
-
-
-
-
-
-			echo utf8_decode("</table>
-
-
-
-					");
-
+		if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+			$OrdenesFecha = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa($tabla, $_GET["fechaInicial"], $_GET["fechaFinal"], "id_empresa", $valorEmpresa);
+		} else {
+			$OrdenesFecha = ModeloOrdenes::mdlMostrarordenesParaValidar($tabla, "id_empresa", $valorEmpresa);
 		}
 
+		/* ── Generar Excel XML (formato nativo sin dependencias) ── */
+		$Name = $_GET["reporte"] . '.xls';
 
+		header('Expires: 0');
+		header('Cache-control: private');
+		header("Content-type: application/vnd.ms-excel; charset=utf-8");
+		header("Cache-Control: cache, must-revalidate");
+		header('Content-Description: File Transfer');
+		header('Last-Modified: ' . date('D, d M Y H:i:s'));
+		header("Pragma: public");
+		header('Content-Disposition: attachment; filename="' . $Name . '"');
+		header("Content-Transfer-Encoding: binary");
 
+		// BOM UTF-8 para que Excel interprete acentos correctamente
+		echo "\xEF\xBB\xBF";
+
+		$rangoTexto = "";
+		if (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"])) {
+			$rangoTexto = $_GET["fechaInicial"] . " a " . $_GET["fechaFinal"];
+		} else {
+			$rangoTexto = "Todas las fechas";
+		}
+
+		echo '<table border="1">';
+
+		// Fila de título
+		echo '<tr><td colspan="14" style="font-size:16px; font-weight:bold; background:#1e40af; color:#ffffff; text-align:center; padding:8px;">Reporte de Órdenes — ' . htmlspecialchars($rangoTexto) . '</td></tr>';
+
+		// Encabezados
+		echo '<tr>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">No. Orden</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Empresa</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Asesor</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Técnico</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Cliente</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Estado</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Marca</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Modelo</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">No. Serie</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Total</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Inversión</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Utilidad</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Fecha Ingreso</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc;">Fecha Registro</td>
+		</tr>';
+
+		$sumaTotal = 0;
+		$sumaInversion = 0;
+
+		foreach ($OrdenesFecha as $key => $value) {
+
+			$NameEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+			$NombreEmpresa = $NameEmpresa["empresa"] ?? "";
+
+			$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+			$NombreAsesor = $asesor["nombre"] ?? "";
+
+			$usuario = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
+			$NombreUsuario = $usuario["nombre"] ?? "";
+
+			$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+			$NombreTecnico = $tecnico["nombre"] ?? "";
+
+			$total     = floatval($value["total"]);
+			$inversion = floatval($value["totalInversion"] ?? 0);
+			$utilidad  = $total - $inversion;
+
+			$sumaTotal     += $total;
+			$sumaInversion += $inversion;
+
+			$marca  = $value["marcaDelEquipo"] ?? "";
+			$modelo = $value["modeloDelEquipo"] ?? "";
+			$serie  = $value["numeroDeSerieDelEquipo"] ?? "";
+
+			$fechaIngreso = $value["fecha_ingreso"] ?? "";
+			$fechaRegistro = $value["fecha"] ?? "";
+
+			echo '<tr>
+				<td style="border:1px solid #ddd;">' . $value["id"] . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($NombreEmpresa) . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($NombreAsesor) . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($NombreTecnico) . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($NombreUsuario) . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($value["estado"]) . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($marca) . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($modelo) . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($serie) . '</td>
+				<td style="border:1px solid #ddd; text-align:right;">$' . number_format($total, 2) . '</td>
+				<td style="border:1px solid #ddd; text-align:right;">$' . number_format($inversion, 2) . '</td>
+				<td style="border:1px solid #ddd; text-align:right;">$' . number_format($utilidad, 2) . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($fechaIngreso) . '</td>
+				<td style="border:1px solid #ddd;">' . htmlspecialchars($fechaRegistro) . '</td>
+			</tr>';
+		}
+
+		// Fila de totales
+		$sumaUtilidad = $sumaTotal - $sumaInversion;
+		echo '<tr>
+			<td colspan="9" style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc; text-align:right;">TOTALES:</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc; text-align:right;">$' . number_format($sumaTotal, 2) . '</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc; text-align:right;">$' . number_format($sumaInversion, 2) . '</td>
+			<td style="font-weight:bold; background:#f1f5f9; border:1px solid #ccc; text-align:right;">$' . number_format($sumaUtilidad, 2) . '</td>
+			<td colspan="2" style="background:#f1f5f9; border:1px solid #ccc;"></td>
+		</tr>';
+
+		// Resumen
+		echo '<tr><td colspan="14"></td></tr>';
+		echo '<tr>
+			<td colspan="2" style="font-weight:bold;">Total Órdenes:</td>
+			<td>' . count($OrdenesFecha) . '</td>
+			<td colspan="11"></td>
+		</tr>';
+
+		echo '</table>';
 	}
 
 

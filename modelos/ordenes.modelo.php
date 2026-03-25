@@ -965,105 +965,29 @@ class ModeloOrdenes{
 
 
 
-	static public function mdlRangoFechasOrdenesPorEmpresa($tabla, $fechaInicial, $fechaFinal , $itemUno, $valorUno){
+	static public function mdlRangoFechasOrdenesPorEmpresa(\, \, \ , \, \){
 
+		if(\ == null){
 
-
-		if($fechaInicial == null){
-
-
-
-			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE $itemUno = $valorUno ORDER BY id DESC");
-
-
-
-			$stmt -> execute();
-
-
-
-			return $stmt -> fetchAll();	
-
-
-
-
-
-		}else if($fechaInicial == $fechaFinal){
-
-
-
-			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha like '%$fechaFinal%' AND $itemUno = :$itemUno ORDER BY id DESC");
-
-
-
-			$stmt -> bindParam(":fecha", $fechaFinal, PDO::PARAM_STR);
-
-
-
-			$stmt -> bindParam(":".$itemUno, $valorUno, PDO::PARAM_STR);
-
-
-
-			$stmt -> execute();
-
-
-
-			return $stmt -> fetchAll();
-
-
+			\ = ConexionWP::conectarWP()->prepare("SELECT * FROM \ WHERE \ = :emp ORDER BY id DESC");
+			\->bindParam(":emp", \, PDO::PARAM_INT);
+			\->execute();
+			return \->fetchAll();
 
 		}else{
 
+			\ = new DateTime(\);
+			\->add(new DateInterval("P1D"));
+			\ = \->format("Y-m-d");
 
-
-			$fechaActual = new DateTime();
-
-			$fechaActual ->add(new DateInterval("P1D"));
-
-			$fechaActualMasUno = $fechaActual->format("Y-m-d");
-
-
-
-			$fechaFinal2 = new DateTime($fechaFinal);
-
-			$fechaFinal2 ->add(new DateInterval("P1D"));
-
-			$fechaFinalMasUno = $fechaFinal2->format("Y-m-d");
-
-
-
-			if($fechaFinalMasUno == $fechaActualMasUno){
-
-
-
-				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha BETWEEN '$fechaInicial' AND '$fechaFinalMasUno' AND $itemUno = $valorUno ORDER BY id DESC");
-
-
-
-			}else{
-
-
-
-
-
-				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha BETWEEN '$fechaInicial' AND '$fechaFinal' AND $itemUno = $valorUno ORDER BY id DESC");
-
-
-
-			}
-
-		
-
-			$stmt -> execute();
-
-
-
-			return $stmt -> fetchAll();
-
-
+			\ = ConexionWP::conectarWP()->prepare("SELECT * FROM \ WHERE fecha >= :fi AND fecha < :ff AND \ = :emp ORDER BY id DESC");
+			\->bindParam(":fi", \, PDO::PARAM_STR);
+			\->bindParam(":ff", \, PDO::PARAM_STR);
+			\->bindParam(":emp", \, PDO::PARAM_INT);
+			\->execute();
+			return \->fetchAll();
 
 		}
-
-
 
 	}
 
@@ -1075,99 +999,26 @@ class ModeloOrdenes{
 
 	static public function mdlRangoFechasOrdenesParSuperAdmin($tabla, $fechaInicial, $fechaFinal){
 
-
-
 		if($fechaInicial == null){
 
-
-
 			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla ORDER BY id DESC");
-
-
-
 			$stmt -> execute();
-
-
-
-			return $stmt -> fetchAll();	
-
-
-
-
-
-		}else if($fechaInicial == $fechaFinal){
-
-
-
-			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha like '%$fechaFinal%' ORDER BY id DESC");
-
-
-
-			$stmt -> bindParam(":fecha", $fechaFinal, PDO::PARAM_STR);
-
-
-
-			$stmt -> execute();
-
-
-
 			return $stmt -> fetchAll();
-
-
 
 		}else{
 
-
-
-			$fechaActual = new DateTime();
-
-			$fechaActual ->add(new DateInterval("P1D"));
-
-			$fechaActualMasUno = $fechaActual->format("Y-m-d");
-
-
-
+			// Siempre sumar 1 día al final para incluir registros del último día completo
 			$fechaFinal2 = new DateTime($fechaFinal);
-
-			$fechaFinal2 ->add(new DateInterval("P1D"));
-
+			$fechaFinal2->add(new DateInterval("P1D"));
 			$fechaFinalMasUno = $fechaFinal2->format("Y-m-d");
 
-
-
-			if($fechaFinalMasUno == $fechaActualMasUno){
-
-
-
-				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha BETWEEN '$fechaInicial' AND '$fechaFinalMasUno' ORDER BY id DESC");
-
-
-
-			}else{
-
-
-
-
-
-				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha BETWEEN '$fechaInicial' AND '$fechaFinal' ORDER BY id DESC");
-
-
-
-			}
-
-		
-
-			$stmt -> execute();
-
-
-
-			return $stmt -> fetchAll();
-
-
+			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha >= :fi AND fecha < :ff ORDER BY id DESC");
+			$stmt->bindParam(":fi", $fechaInicial, PDO::PARAM_STR);
+			$stmt->bindParam(":ff", $fechaFinalMasUno, PDO::PARAM_STR);
+			$stmt->execute();
+			return $stmt->fetchAll();
 
 		}
-
-
 
 	}
 
@@ -1179,101 +1030,28 @@ class ModeloOrdenes{
 
 	static public function mdlRangoFechasOrdenes($tabla, $fechaInicial, $fechaFinal, $itemUno, $valorUno){
 
-
-
 		if($fechaInicial == null){
 
-
-
-			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE $itemUno = $valorUno ORDER BY id DESC");
-
-
-
-			$stmt -> execute();
-
-
-
-			return $stmt -> fetchAll();	
-
-
-
-
-
-		}else if($fechaInicial == $fechaFinal){
-
-
-
-			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha like '%$fechaFinal%' AND $itemUno = :$itemUno ORDER BY id DESC");
-
-
-
-			$stmt -> bindParam(":fecha", $fechaFinal, PDO::PARAM_STR);
-
-			$stmt -> bindParam(":".$itemUno, $valorUno, PDO::PARAM_STR);
-
-
-
-			$stmt -> execute();
-
-
-
-			return $stmt -> fetchAll();
-
-
+			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE $itemUno = :emp ORDER BY id DESC");
+			$stmt->bindParam(":emp", $valorUno, PDO::PARAM_INT);
+			$stmt->execute();
+			return $stmt->fetchAll();
 
 		}else{
 
-
-
-			$fechaActual = new DateTime();
-
-			$fechaActual ->add(new DateInterval("P1D"));
-
-			$fechaActualMasUno = $fechaActual->format("Y-m-d");
-
-
-
+			// Siempre sumar 1 día al final para incluir registros del último día completo
 			$fechaFinal2 = new DateTime($fechaFinal);
-
-			$fechaFinal2 ->add(new DateInterval("P1D"));
-
+			$fechaFinal2->add(new DateInterval("P1D"));
 			$fechaFinalMasUno = $fechaFinal2->format("Y-m-d");
 
-
-
-			if($fechaFinalMasUno == $fechaActualMasUno){
-
-
-
-				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha BETWEEN '$fechaInicial' AND '$fechaFinalMasUno' AND $itemUno = $valorUno ORDER BY id DESC");
-
-
-
-			}else{
-
-
-
-
-
-				$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha BETWEEN '$fechaInicial' AND '$fechaFinal' AND $itemUno = $valorUno ORDER BY id DESC");
-
-
-
-			}
-
-		
-
-			$stmt -> execute();
-
-
-
-			return $stmt -> fetchAll();
-
-
+			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha >= :fi AND fecha < :ff AND $itemUno = :emp ORDER BY id DESC");
+			$stmt->bindParam(":fi", $fechaInicial, PDO::PARAM_STR);
+			$stmt->bindParam(":ff", $fechaFinalMasUno, PDO::PARAM_STR);
+			$stmt->bindParam(":emp", $valorUno, PDO::PARAM_INT);
+			$stmt->execute();
+			return $stmt->fetchAll();
 
 		}
-
-
 
 	}
 
