@@ -165,7 +165,10 @@
       "Bash(find /c/Users/black/Desktop/EGS/vistas/modulos/inicio -type f -name *.php)",
       "Bash(grep -n \"ctrMostrarCotizaciones\" /c/Users/black/Desktop/EGS/controladores/*.php)",
       "Bash(sed -n '968,1068p' \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\modelos\\\\ordenes.modelo.php\")",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(/c/xampp/php/php -l vistas/modulos/reportePorFecheOrdenes.php)",
+      "Bash(/c/xampp/php/php -l modelos/ordenes.modelo.php)",
+      "Bash(/c/xampp/php/php -l controladores/ordenes.controlador.php)"
     ]
   }
 }

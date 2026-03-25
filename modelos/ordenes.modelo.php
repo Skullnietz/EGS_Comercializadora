@@ -965,27 +965,27 @@ class ModeloOrdenes{
 
 
 
-	static public function mdlRangoFechasOrdenesPorEmpresa(\, \, \ , \, \){
+	static public function mdlRangoFechasOrdenesPorEmpresa($tabla, $fechaInicial, $fechaFinal, $itemUno, $valorUno){
 
-		if(\ == null){
+		if($fechaInicial == null){
 
-			\ = ConexionWP::conectarWP()->prepare("SELECT * FROM \ WHERE \ = :emp ORDER BY id DESC");
-			\->bindParam(":emp", \, PDO::PARAM_INT);
-			\->execute();
-			return \->fetchAll();
+			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE $itemUno = :emp ORDER BY id DESC");
+			$stmt->bindParam(":emp", $valorUno, PDO::PARAM_INT);
+			$stmt->execute();
+			return $stmt->fetchAll();
 
 		}else{
 
-			\ = new DateTime(\);
-			\->add(new DateInterval("P1D"));
-			\ = \->format("Y-m-d");
+			$fechaFinal2 = new DateTime($fechaFinal);
+			$fechaFinal2->add(new DateInterval("P1D"));
+			$fechaFinalMasUno = $fechaFinal2->format("Y-m-d");
 
-			\ = ConexionWP::conectarWP()->prepare("SELECT * FROM \ WHERE fecha >= :fi AND fecha < :ff AND \ = :emp ORDER BY id DESC");
-			\->bindParam(":fi", \, PDO::PARAM_STR);
-			\->bindParam(":ff", \, PDO::PARAM_STR);
-			\->bindParam(":emp", \, PDO::PARAM_INT);
-			\->execute();
-			return \->fetchAll();
+			$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE fecha >= :fi AND fecha < :ff AND $itemUno = :emp ORDER BY id DESC");
+			$stmt->bindParam(":fi", $fechaInicial, PDO::PARAM_STR);
+			$stmt->bindParam(":ff", $fechaFinalMasUno, PDO::PARAM_STR);
+			$stmt->bindParam(":emp", $valorUno, PDO::PARAM_INT);
+			$stmt->execute();
+			return $stmt->fetchAll();
 
 		}
 
