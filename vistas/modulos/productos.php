@@ -93,6 +93,34 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor")
     padding: 1px 5px;
     font-size: 11px;
   }
+  .alta-wizard-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .alta-step-chip {
+    border: 1px solid #d6e0ec;
+    border-radius: 10px;
+    background: #fff;
+    color: #56708a;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px;
+  }
+  .alta-step-chip.active {
+    background: #1f8d61;
+    border-color: #1f8d61;
+    color: #fff;
+    box-shadow: 0 5px 12px rgba(31, 141, 97, .3);
+  }
+  .alta-step {
+    display: none;
+  }
+  .alta-step.active {
+    display: block;
+  }
 </style>
 <div class="content-wrapper">
 
@@ -281,6 +309,14 @@ MODAL AGREGAR PRODUCTO
             </div>
           </div>
 
+          <div class="alta-wizard-nav" id="altaWizardNav">
+            <div class="alta-step-chip active" data-wizard-chip="1">Paso 1: Base</div>
+            <div class="alta-step-chip" data-wizard-chip="2">Paso 2: Contenido</div>
+            <div class="alta-step-chip" data-wizard-chip="3">Paso 3: Precio y oferta</div>
+          </div>
+
+          <div class="alta-step active" data-step="1">
+
           <!--=====================================
           ENTRADA PARA LA EMPRESA QUE VENDE EL PRODUCTO
           ======================================-->
@@ -422,6 +458,10 @@ MODAL AGREGAR PRODUCTO
 
             </div>
           </div>
+
+          </div>
+
+          <div class="alta-step" data-step="2">
           <!--=====================================
           ENTRADA PARA AGREGAR MULTIMEDIA
           ======================================-->
@@ -664,6 +704,10 @@ MODAL AGREGAR PRODUCTO
                   <img loading="lazy" src="vistas/img/default/default.png" class="img-thumbnail previsualizarPrincipal" width="200px">
 
               </div>
+
+                  </div>
+
+                  <div class="alta-step" data-step="3">
               <!--=====================================
               AGREGAR PRECIO, PESO Y ENTREGA
               ======================================-->
@@ -892,6 +936,7 @@ MODAL AGREGAR PRODUCTO
                         </div>
 
                       </div> 
+                      </div>
                       <!--=====================================
                       PIE DEL MODAL
                       ======================================-->
@@ -900,7 +945,9 @@ MODAL AGREGAR PRODUCTO
                         <div class="preload"></div>
 
                           <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Salir</button>
-                          <button type="button" class="btn btn-primary guardarProducto">Guardar producto</button>
+                          <button type="button" class="btn btn-info pull-left wizardPrev" style="display:none; margin-left:8px;">Anterior</button>
+                          <button type="button" class="btn btn-primary wizardNext">Siguiente</button>
+                          <button type="button" class="btn btn-primary guardarProducto wizardFinishBtn" style="display:none;">Guardar producto</button>
 
                         </div>
 

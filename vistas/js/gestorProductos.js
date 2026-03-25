@@ -345,8 +345,92 @@ function actualizarAsistenteAltaProducto(){
 	$("#resumenProveedorProducto").text(proveedor || "No definido");
 }
 
+var altaWizardStep = 1;
+
+function renderAltaWizardStep(step){
+	altaWizardStep = step;
+
+	var modal = $("#modalAgregarProducto");
+	modal.find(".alta-step").removeClass("active");
+	modal.find('.alta-step[data-step="' + step + '"]').addClass("active");
+
+	modal.find(".alta-step-chip").removeClass("active");
+	modal.find('.alta-step-chip[data-wizard-chip="' + step + '"]').addClass("active");
+
+	if(step === 1){
+		modal.find(".wizardPrev").hide();
+		modal.find(".wizardNext").show();
+		modal.find(".wizardFinishBtn").hide();
+	}else if(step === 2){
+		modal.find(".wizardPrev").show();
+		modal.find(".wizardNext").show();
+		modal.find(".wizardFinishBtn").hide();
+	}else{
+		modal.find(".wizardPrev").show();
+		modal.find(".wizardNext").hide();
+		modal.find(".wizardFinishBtn").show();
+	}
+}
+
+function validarPasoWizard(step){
+	var modal = $("#modalAgregarProducto");
+
+	if(step === 1){
+		if($.trim(modal.find(".tituloProducto").val()) === "" || $.trim(modal.find(".seleccionarTipo").val()) === ""){
+			swal({
+				title: "Completa los datos base",
+				text: "Ingresa titulo y tipo de producto para continuar.",
+				type: "warning",
+				confirmButtonText: "Cerrar"
+			});
+			return false;
+		}
+	}
+
+	if(step === 2){
+		if($.trim(modal.find(".seleccionarCategoria").val()) === "" ||
+		   $.trim(modal.find(".seleccionarSubCategoria").val()) === "" ||
+		   $.trim(modal.find(".descripcionProducto").val()) === "" ||
+		   $.trim(modal.find(".pClavesProducto").val()) === ""){
+			swal({
+				title: "Faltan datos de contenido",
+				text: "Selecciona categoria/subcategoria y completa descripcion y palabras clave.",
+				type: "warning",
+				confirmButtonText: "Cerrar"
+			});
+			return false;
+		}
+	}
+
+	return true;
+}
+
 $("#modalAgregarProducto").on("shown.bs.modal", function(){
+	renderAltaWizardStep(1);
 	actualizarAsistenteAltaProducto();
+})
+
+$("#modalAgregarProducto").on("click", ".wizardNext", function(){
+	if(!validarPasoWizard(altaWizardStep)){
+		return;
+	}
+	renderAltaWizardStep(Math.min(3, altaWizardStep + 1));
+})
+
+$("#modalAgregarProducto").on("click", ".wizardPrev", function(){
+	renderAltaWizardStep(Math.max(1, altaWizardStep - 1));
+})
+
+$("#modalAgregarProducto").on("click", ".alta-step-chip", function(){
+	var targetStep = parseInt($(this).attr("data-wizard-chip"), 10);
+	if(targetStep <= altaWizardStep){
+		renderAltaWizardStep(targetStep);
+		return;
+	}
+
+	if(validarPasoWizard(altaWizardStep)){
+		renderAltaWizardStep(targetStep);
+	}
 })
 
 $("#modalAgregarProducto").on("keyup change", ".tituloProducto, .rutaProducto, .seleccionarTipo, .seleccionarCategoria, .seleccionarSubCategoria, .descripcionProducto, .pClavesProducto, .precio, .disponibilidad, .Proveedor", function(){
