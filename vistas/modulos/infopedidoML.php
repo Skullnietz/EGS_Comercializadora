@@ -582,14 +582,14 @@ if (!$orderId) {
         cargarDetalleEnvio(p.shipping.id);
       }
 
-      /* ── Link ver en ML ── */
-      // Sintaxis oficial: /my_purchases/{packId}/status?packId=...&orderId=...
+      /* ── Link ver en ML (via ir.php para evitar detección de referrer) ── */
       var packId  = p.pack_id || (p.shipping ? p.shipping.pack_id : null) || ORDER_ID;
       var urlML   = p.permalink
                  || ('https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
                      + '/status?packId=' + packId + '&orderId=' + ORDER_ID);
-      $('#ml-link-ver-ml').attr('href', urlML);
-      $('#ml-header-link-ml').attr('href', urlML);
+      var safeML  = 'ir.php?a=' + encodeURIComponent(urlML);
+      $('#ml-link-ver-ml').attr('href', safeML);
+      $('#ml-header-link-ml').attr('href', safeML);
 
       /* ── Mostrar contenido ── */
       $('#ml-detail-content').show();

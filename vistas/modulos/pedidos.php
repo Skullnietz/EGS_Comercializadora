@@ -3023,8 +3023,10 @@ function renderizarTablaML(pedidos) {
     }
 
     var packId = p.pack_id || p.id;
-    var urlML  = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
-               + '/status?packId=' + packId + '&orderId=' + p.id;
+    var urlML  = 'ir.php?a=' + encodeURIComponent(
+                   'https://myaccount.mercadolibre.com.mx/my_purchases/' + packId
+                   + '/status?packId=' + packId + '&orderId=' + p.id
+                 );
 
     html += '<tr>';
     html += '<td>' + num + '</td>';
