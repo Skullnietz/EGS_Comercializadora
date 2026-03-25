@@ -750,6 +750,18 @@ const $input11 = document.querySelector(' #productoDiez');
       font-weight: 600;
       box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
     }
+    .vr-filtro-fechas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .vr-filtro-fechas .form-control {
+      min-width: 145px;
+      border-radius: 999px;
+      border: 1px solid #d4dde8;
+      box-shadow: none;
+    }
     .vr-table-wrap {
       background: #fff;
       border-radius: 12px;
@@ -891,7 +903,7 @@ const $input11 = document.querySelector(' #productoDiez');
 
         <div class="vr-actions">
 
-          <a href="vistas/modulos/reporte.ventasR.php?reporte=compras&empresa=<?echo $_SESSION["empresa"]?>">
+            <a id="btnDescargarExcelVentasR" href="vistas/modulos/reporte.ventasR.php?reporte=compras&empresa=<?echo $_SESSION["empresa"]?>">
             
               <button class="btn btn-success"><i class="fas fa-file-excel"></i> Descargar Reporte En Excel</button>
 
@@ -903,6 +915,13 @@ const $input11 = document.querySelector(' #productoDiez');
           <i class="fas fa-plus-circle"></i> Agregar Venta
 
         </button>
+
+        <div class="vr-filtro-fechas">
+          <input type="date" id="filtroFechaInicialR" class="form-control" placeholder="Fecha inicial">
+          <input type="date" id="filtroFechaFinalR" class="form-control" placeholder="Fecha final">
+          <button class="btn btn-default" type="button" id="btnAplicarFiltroFechaR"><i class="fas fa-filter"></i> Filtrar</button>
+          <button class="btn btn-default" type="button" id="btnLimpiarFiltroFechaR"><i class="fas fa-eraser"></i> Limpiar</button>
+        </div>
         
         <!--<div class="box-header with-border">
         

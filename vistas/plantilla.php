@@ -1,4 +1,4 @@
-<?php $jsVer = '1.2.5'; ?>
+<?php $jsVer = '1.2.6'; ?>
 <!DOCTYPE html>
 <html lang="es">
 

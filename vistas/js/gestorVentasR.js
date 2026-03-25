@@ -3,6 +3,47 @@ CARGAR LA TABLA DINÁMICA DE VENTAS
 =============================================*/
 var tipoDePerfil = $("#tipoDePerfil").val();
 
+function getVentasRDateFilters(){
+  return {
+    fechaInicial: $.trim($("#filtroFechaInicialR").val()),
+    fechaFinal: $.trim($("#filtroFechaFinalR").val())
+  };
+}
+
+function buildVentasRAjaxUrl(){
+  var perfil = $("#tipoDePerfil").val();
+  var empresa = $("#id_empresa").val();
+  var filtros = getVentasRDateFilters();
+
+  var url = "ajax/tablaVentasR.ajax.php?perfil=" + encodeURIComponent(perfil) + "&empresa=" + encodeURIComponent(empresa);
+
+  if(filtros.fechaInicial !== ""){
+    url += "&fechaInicial=" + encodeURIComponent(filtros.fechaInicial);
+  }
+
+  if(filtros.fechaFinal !== ""){
+    url += "&fechaFinal=" + encodeURIComponent(filtros.fechaFinal);
+  }
+
+  return url;
+}
+
+function updateExcelVentasRLink(){
+  var empresa = $("#id_empresa").val();
+  var filtros = getVentasRDateFilters();
+  var href = "vistas/modulos/reporte.ventasR.php?reporte=compras&empresa=" + encodeURIComponent(empresa);
+
+  if(filtros.fechaInicial !== ""){
+    href += "&fechaInicial=" + encodeURIComponent(filtros.fechaInicial);
+  }
+
+  if(filtros.fechaFinal !== ""){
+    href += "&fechaFinal=" + encodeURIComponent(filtros.fechaFinal);
+  }
+
+  $("#btnDescargarExcelVentasR").attr("href", href);
+}
+
 function parseCurrencyToFloat(value){
   if(value === null || value === undefined){
     return 0;
@@ -70,7 +111,7 @@ function renderVentasRKpis(tableApi){
 }
 
 var tablaVentasRapidas = $(".tablaVentasRapidas").DataTable({
-    "ajax": "ajax/tablaVentasR.ajax.php?perfil=" + $("#tipoDePerfil").val() + "&empresa=" + $("#id_empresa").val(),
+  "ajax": buildVentasRAjaxUrl(),
     "deferRender": true,
     "retrieve": true,
     "processing": true,
@@ -104,6 +145,19 @@ var tablaVentasRapidas = $(".tablaVentasRapidas").DataTable({
 });
 
     renderVentasRKpis(tablaVentasRapidas);
+  updateExcelVentasRLink();
+
+$("#btnAplicarFiltroFechaR").on("click", function(){
+  tablaVentasRapidas.ajax.url(buildVentasRAjaxUrl()).load();
+  updateExcelVentasRLink();
+});
+
+$("#btnLimpiarFiltroFechaR").on("click", function(){
+  $("#filtroFechaInicialR").val("");
+  $("#filtroFechaFinalR").val("");
+  tablaVentasRapidas.ajax.url(buildVentasRAjaxUrl()).load();
+  updateExcelVentasRLink();
+});
 /*=============================================
 MANDAR EL TIPO DE USUARIO AL AJAX
 =============================================

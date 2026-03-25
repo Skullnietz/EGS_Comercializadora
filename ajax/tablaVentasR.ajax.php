@@ -24,6 +24,37 @@ class TablaVentas{
             $ventas = ControladorVentas::ctrMostrarVentasParaEmpresa($item, $valor);
         }
 
+        $fechaInicial = isset($_GET["fechaInicial"]) ? trim($_GET["fechaInicial"]) : "";
+        $fechaFinal = isset($_GET["fechaFinal"]) ? trim($_GET["fechaFinal"]) : "";
+
+        if ($fechaInicial !== "" || $fechaFinal !== "") {
+            if ($fechaInicial === "") {
+                $fechaInicial = $fechaFinal;
+            }
+
+            if ($fechaFinal === "") {
+                $fechaFinal = $fechaInicial;
+            }
+
+            $inicioTs = strtotime($fechaInicial . " 00:00:00");
+            $finTs = strtotime($fechaFinal . " 23:59:59");
+
+            if ($inicioTs !== false && $finTs !== false) {
+                $ventas = array_values(array_filter($ventas, function($venta) use ($inicioTs, $finTs) {
+                    if (!isset($venta["fecha"])) {
+                        return false;
+                    }
+
+                    $ventaTs = strtotime($venta["fecha"]);
+                    if ($ventaTs === false) {
+                        return false;
+                    }
+
+                    return $ventaTs >= $inicioTs && $ventaTs <= $finTs;
+                }));
+            }
+        }
+
         $datos = array(); // Inicializar el array de datos
 
         for ($i = 0; $i < count($ventas); $i++) {
