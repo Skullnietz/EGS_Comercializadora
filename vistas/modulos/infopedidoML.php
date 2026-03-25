@@ -216,8 +216,9 @@ if (!$orderId) {
         Orden de MercadoLibre
         <small id="ml-order-id-title">#<?php echo $orderId; ?></small>
       </h2>
-      <a href="https://www.mercadolibre.com.mx/compras/<?php echo $orderId; ?>/detalle"
+      <a href="https://myorders.mercadolibre.com.mx/purchases/<?php echo $orderId; ?>"
          target="_blank"
+         id="ml-header-link-ml"
          class="ml-btn ml-btn-ml">
         <i class="fa-solid fa-external-link-alt"></i> Ver en MercadoLibre
       </a>
@@ -352,18 +353,40 @@ if (!$orderId) {
           <span id="ml-d-envio-badge"></span>
         </div>
         <div class="ml-card-body">
-          <div class="ml-info-grid">
-            <div class="ml-info-item">
-              <label>ID de Envío</label>
-              <div class="valor" id="ml-d-shipping-id">—</div>
+          <div id="ml-envio-loading" style="text-align:center; padding:20px; color:#94a3b8;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Cargando datos de envío...
+          </div>
+          <div id="ml-envio-info" style="display:none;">
+            <div class="ml-info-grid">
+              <div class="ml-info-item">
+                <label>ID de Envío</label>
+                <div class="valor" id="ml-d-shipping-id">—</div>
+              </div>
+              <div class="ml-info-item">
+                <label>Estado</label>
+                <div class="valor" id="ml-d-shipping-status">—</div>
+              </div>
+              <div class="ml-info-item">
+                <label>Subestado</label>
+                <div class="valor" id="ml-d-shipping-substatus">—</div>
+              </div>
+              <div class="ml-info-item">
+                <label><i class="fa-solid fa-calendar-check" style="color:#16a34a;"></i> Fecha estimada de entrega</label>
+                <div class="valor" id="ml-d-shipping-eta" style="color:#16a34a;">—</div>
+              </div>
+              <div class="ml-info-item">
+                <label>Número de seguimiento</label>
+                <div class="valor" id="ml-d-shipping-tracking">—</div>
+              </div>
+              <div class="ml-info-item">
+                <label>Servicio de envío</label>
+                <div class="valor" id="ml-d-shipping-service">—</div>
+              </div>
             </div>
-            <div class="ml-info-item">
-              <label>Estado</label>
-              <div class="valor" id="ml-d-shipping-status">—</div>
-            </div>
-            <div class="ml-info-item">
-              <label>Subestado</label>
-              <div class="valor" id="ml-d-shipping-substatus">—</div>
+            <div id="ml-tracking-link-wrap" style="margin-top:14px; display:none;">
+              <a id="ml-tracking-link" href="#" target="_blank" class="ml-btn ml-btn-primary" style="font-size:12px;">
+                <i class="fa-solid fa-route"></i> Rastrear envío
+              </a>
             </div>
           </div>
         </div>
@@ -514,11 +537,16 @@ if (!$orderId) {
           $('#ml-d-envio-badge').html('<span class="ml-shipping-badge">' + p.shipping.status + '</span>');
         }
         $('#ml-card-envio').show();
+
+        // Consultar shipment completo para fecha de entrega y tracking
+        cargarDetalleEnvio(p.shipping.id);
       }
 
       /* ── Link ver en ML ── */
-      var urlML = 'https://www.mercadolibre.com.mx/compras/' + ORDER_ID + '/detalle';
+      var urlML = p.permalink
+               || ('https://myorders.mercadolibre.com.mx/purchases/' + ORDER_ID);
       $('#ml-link-ver-ml').attr('href', urlML);
+      $('#ml-header-link-ml').attr('href', urlML);
 
       /* ── Mostrar contenido ── */
       $('#ml-detail-content').show();
@@ -529,6 +557,85 @@ if (!$orderId) {
         '<i class="fa-solid fa-triangle-exclamation"></i> Error de conexión al cargar la orden.');
     }
   });
+
+  /* ── Cargar detalle completo del envío ── */
+  function cargarDetalleEnvio(shippingId) {
+    var d = new FormData();
+    d.append('accion',      'obtenerEnvio');
+    d.append('shipping_id', shippingId);
+
+    var shipStatusMap = {
+      'ready_to_ship'  : 'Listo para enviar',
+      'shipped'        : 'En camino',
+      'delivered'      : 'Entregado',
+      'not_delivered'  : 'No entregado',
+      'cancelled'      : 'Cancelado',
+      'handling'       : 'Preparando',
+      'in_transit'     : 'En tránsito',
+      'pending'        : 'Pendiente',
+    };
+
+    $.ajax({
+      url: 'ajax/mercadolibre.ajax.php', method: 'POST', data: d,
+      cache: false, contentType: false, processData: false, dataType: 'json',
+      success: function (s) {
+        $('#ml-envio-loading').hide();
+
+        if (!s || s.error) {
+          $('#ml-envio-info').html('<p style="color:#94a3b8; font-size:13px;">No se pudo cargar el detalle del envío.</p>').show();
+          return;
+        }
+
+        // Estado legible
+        var statusText = shipStatusMap[s.status] || s.status || '—';
+        var subText    = s.substatus || '—';
+        $('#ml-d-shipping-status').text(statusText);
+        $('#ml-d-shipping-substatus').text(subText);
+        $('#ml-d-envio-badge').html('<span class="ml-shipping-badge">' + statusText + '</span>');
+
+        // Fecha estimada de entrega
+        var eta = '—';
+        if (s.estimated_delivery_time && s.estimated_delivery_time.date) {
+          eta = formatFecha(s.estimated_delivery_time.date);
+        } else if (s.estimated_delivery_final && s.estimated_delivery_final.date) {
+          eta = formatFecha(s.estimated_delivery_final.date);
+        }
+        $('#ml-d-shipping-eta').text(eta);
+
+        // Número de seguimiento
+        var tracking = '—';
+        if (s.tracking_number) {
+          tracking = s.tracking_number;
+        } else if (s.tracking_method) {
+          tracking = s.tracking_method;
+        }
+        $('#ml-d-shipping-tracking').text(tracking);
+
+        // Servicio de envío
+        var servicio = s.shipping_option
+                     ? (s.shipping_option.name || s.service_id || '—')
+                     : (s.service_id || '—');
+        $('#ml-d-shipping-service').text(servicio);
+
+        // Link de rastreo
+        if (s.tracking_url) {
+          $('#ml-tracking-link').attr('href', s.tracking_url);
+          $('#ml-tracking-link-wrap').show();
+        } else if (s.tracking_number) {
+          // Enlace genérico a correos/estafeta si no hay URL directa
+          var trackUrl = 'https://www.correosdemexico.gob.mx/SSLServicios/ConsultaCP/Seguimiento.aspx?tipo=masivo&numero=' + s.tracking_number;
+          $('#ml-tracking-link').attr('href', trackUrl);
+          $('#ml-tracking-link-wrap').show();
+        }
+
+        $('#ml-envio-info').show();
+      },
+      error: function () {
+        $('#ml-envio-loading').hide();
+        $('#ml-envio-info').html('<p style="color:#94a3b8; font-size:13px;">Error al consultar el envío.</p>').show();
+      }
+    });
+  }
 
 })();
 </script>

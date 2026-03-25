@@ -206,6 +206,26 @@ if ($accion === 'verificarConfig') {
     exit;
 }
 
+// ── Obtener detalle de envío ──────────────────────────────────────────────
+if ($accion === 'obtenerEnvio') {
+
+    if (empty($config['access_token'])) {
+        echo json_encode(['error' => 'Sin token configurado.']);
+        exit;
+    }
+
+    $shippingId = intval($_POST['shipping_id'] ?? 0);
+    if (!$shippingId) {
+        echo json_encode(['error' => 'ID de envío inválido.']);
+        exit;
+    }
+
+    $url    = "https://api.mercadolibre.com/shipments/{$shippingId}";
+    $result = mlCallWithRefresh($url, $config, $configPath);
+    echo json_encode($result['body']);
+    exit;
+}
+
 // ── Generar URL de autorización OAuth ────────────────────────────────────
 if ($accion === 'generarURLOAuth') {
 
