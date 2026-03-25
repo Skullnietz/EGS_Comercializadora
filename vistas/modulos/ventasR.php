@@ -825,6 +825,132 @@ const $input11 = document.querySelector(' #productoDiez');
       border: 1px solid #d4dde8;
       padding: 4px 10px;
     }
+    #tablaVentasRapidasUI thead th {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      z-index: 2;
+      box-shadow: 0 1px 0 rgba(15, 23, 42, .08);
+      white-space: nowrap;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      color: #475569;
+      border-bottom-color: #e8eef5;
+    }
+    #tablaVentasRapidasUI.dataTable thead .sorting,
+    #tablaVentasRapidasUI.dataTable thead .sorting_asc,
+    #tablaVentasRapidasUI.dataTable thead .sorting_desc,
+    #tablaVentasRapidasUI.dataTable thead .sorting_asc_disabled,
+    #tablaVentasRapidasUI.dataTable thead .sorting_desc_disabled,
+    #tablaVentasRapidasUI.dataTable thead .sorting_disabled {
+      background-image: none !important;
+      padding-right: 8px !important;
+    }
+    #tablaVentasRapidasUI.dataTable thead .sorting::before,
+    #tablaVentasRapidasUI.dataTable thead .sorting::after,
+    #tablaVentasRapidasUI.dataTable thead .sorting_asc::before,
+    #tablaVentasRapidasUI.dataTable thead .sorting_asc::after,
+    #tablaVentasRapidasUI.dataTable thead .sorting_desc::before,
+    #tablaVentasRapidasUI.dataTable thead .sorting_desc::after,
+    #tablaVentasRapidasUI.dataTable thead .sorting_asc_disabled::before,
+    #tablaVentasRapidasUI.dataTable thead .sorting_asc_disabled::after,
+    #tablaVentasRapidasUI.dataTable thead .sorting_desc_disabled::before,
+    #tablaVentasRapidasUI.dataTable thead .sorting_desc_disabled::after,
+    #tablaVentasRapidasUI.dataTable thead .sorting_disabled::before,
+    #tablaVentasRapidasUI.dataTable thead .sorting_disabled::after {
+      display: none !important;
+      content: none !important;
+    }
+    #tablaVentasRapidasUI tbody tr td {
+      vertical-align: middle;
+    }
+    #tablaVentasRapidasUI.dataTable.stripe tbody tr.odd,
+    #tablaVentasRapidasUI.dataTable.display tbody tr.odd,
+    #tablaVentasRapidasUI.table-striped > tbody > tr:nth-of-type(odd) {
+      background-color: #fbfdff;
+    }
+    #tablaVentasRapidasUI tbody tr:hover {
+      background-color: #f4f7ff !important;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_length,
+    #tablaVentasRapidasUI_wrapper .dataTables_filter {
+      margin-bottom: 12px;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_length label,
+    #tablaVentasRapidasUI_wrapper .dataTables_filter label {
+      color: #475569;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_length select {
+      border: 1px solid #dbe3ef !important;
+      border-radius: 8px;
+      background: #fff;
+      color: #334155;
+      height: 34px;
+      padding: 4px 26px 4px 10px;
+      margin: 0 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_filter input {
+      border: 1px solid #dbe3ef !important;
+      border-radius: 10px;
+      background: #fff;
+      color: #334155;
+      height: 36px;
+      min-width: 220px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all .15s ease;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_length select:focus,
+    #tablaVentasRapidasUI_wrapper .dataTables_filter input:focus {
+      outline: none;
+      border-color: #a5b4fc !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate {
+      margin-top: 14px;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
+      border-radius: 8px !important;
+      border: 1px solid #dbe3ef !important;
+      background: #fff !important;
+      color: #334155 !important;
+      margin-left: 6px;
+      padding: 6px 12px !important;
+      font-weight: 600;
+      transition: all .15s ease;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover {
+      background: #eef2ff !important;
+      border-color: #a5b4fc !important;
+      color: #3730a3 !important;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a,
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:hover,
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:focus {
+      background: #1a3152 !important;
+      border-color: #1a3152 !important;
+      color: #fff !important;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a,
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:hover,
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:focus {
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+      color: #94a3b8 !important;
+      cursor: not-allowed;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
 
     #modalAgregarVenta .modal-content {
       border-radius: 14px;
@@ -1005,7 +1131,7 @@ const $input11 = document.querySelector(' #productoDiez');
         
         <div class="vr-table-wrap">
         
-        <table class="table table-bordered table-striped dt-responsive tablaVentasRapidas" width="100%">
+        <table id="tablaVentasRapidasUI" class="table table-bordered table-striped dt-responsive tablaVentasRapidas" width="100%">
         
           <thead>
             
