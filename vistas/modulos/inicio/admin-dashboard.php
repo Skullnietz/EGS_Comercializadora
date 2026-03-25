@@ -906,7 +906,7 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
   <div class="col-lg-8 col-md-7 col-xs-12">
     <div class="crm-card" style="margin-bottom:20px">
       <div class="crm-card-head">
-        <h4 class="crm-card-title"><i class="fa-solid fa-cart-arrow-down"></i> VentasR</h4>
+        <h4 class="crm-card-title"><i class="fa-solid fa-cart-arrow-down"></i> Ventas Rapidas</h4>
         <div style="display:flex;align-items:center;gap:8px">
           <a href="index.php?ruta=ventasR" class="crm-badge" style="background:#eff6ff;color:#1d4ed8;text-decoration:none">
             <i class="fa-solid fa-arrow-up-right-from-square" style="margin-right:4px"></i> Abrir gestor
@@ -972,7 +972,7 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
   <div class="col-lg-4 col-md-5 col-xs-12">
     <div class="crm-card" style="margin-bottom:20px">
       <div class="crm-card-head">
-        <h4 class="crm-card-title"><i class="fa-solid fa-bolt"></i> Acciones de Ventas R</h4>
+        <h4 class="crm-card-title"><i class="fa-solid fa-bolt"></i> Acciones de Ventas Rapidas</h4>
       </div>
       <div class="crm-card-body" style="padding:16px 18px">
         <div style="display:flex;flex-direction:column;gap:8px">
