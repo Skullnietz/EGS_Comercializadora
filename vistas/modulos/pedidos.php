@@ -14,173 +14,514 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 
 ?>
 
+<style>
+  :root {
+    --crm-bg: #f8fafc;
+    --crm-surface: #ffffff;
+    --crm-border: #e2e8f0;
+    --crm-text: #0f172a;
+    --crm-text2: #475569;
+    --crm-muted: #94a3b8;
+    --crm-accent: #6366f1;
+    --crm-radius: 14px;
+    --crm-radius-sm: 10px;
+    --crm-shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 4px 14px rgba(15, 23, 42, .04);
+    --crm-shadow-lg: 0 4px 24px rgba(15, 23, 42, .10);
+    --crm-ease: cubic-bezier(.4, 0, .2, 1);
+  }
+
+  .content {
+    background: var(--crm-bg);
+    padding: 14px 15px 20px;
+  }
+
+  .content-header .breadcrumb {
+    margin-bottom: 0;
+  }
+
+  .content-header h1 {
+    margin: 0;
+    color: var(--crm-text);
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -.01em;
+  }
+
+  .content-header h1 small {
+    color: var(--crm-muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .ped-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 6px 0 16px;
+    padding: 0 4px;
+  }
+
+  .ped-section-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    flex-shrink: 0;
+  }
+
+  .ped-section h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--crm-text);
+  }
+
+  .ped-section p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--crm-muted);
+  }
+
+  .ped-card {
+    background: var(--crm-surface);
+    border: 1px solid var(--crm-border);
+    border-radius: var(--crm-radius);
+    box-shadow: var(--crm-shadow);
+    overflow: hidden;
+    transition: box-shadow .2s var(--crm-ease), transform .2s var(--crm-ease);
+  }
+
+  .ped-card:hover {
+    box-shadow: var(--crm-shadow-lg);
+  }
+
+  .ped-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    flex-wrap: wrap;
+  }
+
+  .ped-card-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--crm-text);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .ped-card-title i {
+    color: var(--crm-accent);
+  }
+
+  .ped-card-body {
+    padding: 18px 20px 20px;
+  }
+
+  .ped-actions-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .ped-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s ease;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .ped-btn-primary {
+    background: #6366f1;
+    color: #fff;
+    border-color: #4f46e5;
+  }
+
+  .ped-btn-primary:hover {
+    background: #4f46e5;
+    border-color: #4338ca;
+  }
+
+  .ped-btn-success {
+    background: #16a34a;
+    color: #fff;
+    border-color: #15803d;
+  }
+
+  .ped-btn-success:hover {
+    background: #15803d;
+    border-color: #166534;
+  }
+
+  .table-responsive-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tablaPedidos thead th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    z-index: 2;
+    box-shadow: 0 1px 0 rgba(15, 23, 42, .08);
+    white-space: nowrap;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: var(--crm-text2);
+    border-bottom-color: #e8eef5;
+    padding: 12px 10px;
+  }
+
+  .tablaPedidos.dataTable thead .sorting,
+  .tablaPedidos.dataTable thead .sorting_asc,
+  .tablaPedidos.dataTable thead .sorting_desc {
+    background-image: none !important;
+    padding-right: 8px !important;
+  }
+
+  .tablaPedidos.dataTable tbody tr td {
+    vertical-align: middle;
+    padding: 12px 10px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: .35em .6em;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    letter-spacing: .2px;
+  }
+
+  /* ── Estados estandarizados ── */
+  .badge-pedido-pendiente { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+  .badge-adquirido { color: #0e7490; background: #ecfeff; border-color: #a5f3fc; }
+  .badge-almacen { color: #c2410c; background: #fff7ed; border-color: #fed7aa; }
+  .badge-asesor { color: #065f46; background: #ecfdf5; border-color: #a7f3d0; }
+  .badge-pagado { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+  .badge-credito { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+
+  .td-actions {
+    white-space: nowrap;
+    width: 1%;
+  }
+
+  table.dataTable.stripe tbody tr.odd,
+  table.dataTable.display tbody tr.odd {
+    background-color: #fbfdff;
+  }
+
+  table.dataTable tbody tr:hover {
+    background-color: #f4f7ff !important;
+  }
+
+  .tablaPedidos_wrapper .dataTables_length,
+  .tablaPedidos_wrapper .dataTables_filter {
+    margin-bottom: 12px;
+  }
+
+  .tablaPedidos_wrapper .dataTables_length label,
+  .tablaPedidos_wrapper .dataTables_filter label {
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+
+  .tablaPedidos_wrapper .dataTables_length select {
+    border: 1px solid #dbe3ef !important;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #334155;
+    height: 34px;
+    padding: 4px 26px 4px 10px;
+    margin: 0 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .tablaPedidos_wrapper .dataTables_filter input {
+    border: 1px solid #dbe3ef !important;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #334155;
+    height: 36px;
+    min-width: 220px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all .15s ease;
+  }
+
+  .tablaPedidos_wrapper .dataTables_length select:focus,
+  .tablaPedidos_wrapper .dataTables_filter input:focus {
+    outline: none;
+    border-color: #a5b4fc !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+  }
+
+  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
+    border-radius: 8px !important;
+    border: 1px solid #dbe3ef !important;
+    background: #ffffff !important;
+    color: #334155 !important;
+    margin-left: 6px;
+    padding: 6px 12px !important;
+    font-weight: 600;
+    transition: all .15s ease;
+  }
+
+  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover {
+    background: #eef2ff !important;
+    border-color: #a5b4fc !important;
+    color: #3730a3 !important;
+  }
+
+  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a {
+    background: #1a3152 !important;
+    border-color: #1a3152 !important;
+    color: #ffffff !important;
+  }
+
+  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed;
+  }
+
+  .tablaPedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  @media (max-width: 767px) {
+    .ped-card-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .ped-card-body {
+      padding: 12px;
+    }
+
+    .content {
+      padding: 10px;
+    }
+
+    .tablaPedidos_wrapper .dataTables_length,
+    .tablaPedidos_wrapper .dataTables_filter {
+      float: none !important;
+      text-align: left !important;
+      width: 100%;
+    }
+
+    .tablaPedidos_wrapper .dataTables_filter input {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .ped-actions-group {
+      width: 100%;
+    }
+  }
+
+  /* ── Estilos para modales mejorados ── */
+  .modal-header {
+    background: linear-gradient(135deg, #6366f1, #818cf8) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 20px !important;
+  }
+
+  .modal-header .close {
+    color: #fff !important;
+    opacity: 0.8;
+    text-shadow: none;
+  }
+
+  .modal-header .close:hover,
+  .modal-header .close:focus {
+    opacity: 1;
+  }
+
+  .modal-header h2,
+  .modal-header h3,
+  .modal-header h4 {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .modal-body {
+    padding: 24px;
+    background: #f8fafc;
+  }
+
+  .modal-footer {
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    padding: 16px;
+  }
+
+  .modal-body .form-group {
+    margin-bottom: 16px;
+  }
+
+  .modal-body .input-group {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .modal-body .form-control {
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .modal-body .form-control:focus {
+    border-color: #a5b4fc;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+  }
+
+  .modal-body .input-group-addon {
+    background: #f0f4f8;
+    border: 1px solid #dbe3ef;
+    color: #6366f1;
+  }
+
+</style>
 
 <div class="content-wrapper">
   
    <section class="content-header">
       
     <h1>
-      Gestor Pedidos
+      Gestor de Pedidos <small>Panel de control</small>
     </h1>
 
     <ol class="breadcrumb">
 
       <li><a href="inicio"><i class="fas fa-dashboard"></i>Inicio</a></li>
 
-      <li class="active">Gestor Pedidos</li>
+      <li class="active">Gestor de Pedidos</li>
       
     </ol>
 
   </section>
 
 
-  <section class="content">
+  <div class="content">
 
-    <div class="box"> 
-
-      <div class="box-header with-border">
-        
-        <?php
-
-        //include "inicio/grafico-ventas.php";
-
-        ?>
-
+    <div class="ped-section">
+      <div class="ped-section-icon"><i class="fa-solid fa-shopping-cart"></i></div>
+      <div>
+        <h3>Administrador de Pedidos</h3>
+        <p>Organiza, monitorea y gestiona todos tus pedidos en una única vista mejorada.</p>
       </div>
-
-      <div class="box-body">
-
-        <div class="box-tools">
-
-
-          <?php
-        if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "editor" || $_SESSION["perfil"] == "vendedor") {
-
-             echo '<a href="vistas/modulos/descargar-reporte-pedidos.php?reporte=pedidos&empresa='.$_SESSION["empresa"].'">';     
-
-
-              echo'<button class="btn btn-success" style="margin-top:5px">Descargar reporte en Excel</button>
-
-            </a>';
-          
-            //REPORTE DE PEDIDOS PENDIENTES
-            echo '<a href="vistas/modulos/descargar-reporte-pedidos-pendientes.php?reporte=pedidosPendientes&empresa='.$_SESSION["empresa"].'">';     
-
-
-            echo'<button class="btn btn-success" style="margin-top:5px">Descargar reporte pedidos pendientes </button>
-
-          </a>';
-          
-          //REPORTE DE PEDIDOS ADQUIRIDOS /1
-           echo '<a href="vistas/modulos/descargar-reporte-pedidos-adquiridos.php?reporte=pedidosAdquiridos&empresa='.$_SESSION["empresa"].'">';     
-
-          
-            echo'<button class="btn btn-success" style="margin-top:5px">Descargar reporte pedidos adquiridos</button>
-
-          </a>';
-          
-
-          //REPORTE DE PEDIDOS ASESOR /2
-           echo '<a href="vistas/modulos/descargar-reporte-pedidos-asesor.php?reporte=pedidosAsesor&empresa='.$_SESSION["empresa"].'">';     
-
-          
-            echo'<button class="btn btn-success" style="margin-top:5px">Descargar reporte pedidos entregados al asesor</button>
-
-          </a>';
-          
-
-          //REPORTE DE PEDIDOS PAGADOS /3
-            echo '<a href="vistas/modulos/descargar-reporte-pedidos-pagados.php?reporte=pedidosPagados&empresa='.$_SESSION["empresa"].'">';     
-
-
-            echo'<button class="btn btn-success" style="margin-top:5px">Descargar reporte pedidos pagados</button>
-
-          </a>';
-          
-          //REPORTE DE PEDIDOS CREDITO /4
-            echo '<a href="vistas/modulos/descargar-reporte-pedidos-credito.php?reporte=pedidosCredito&empresa='.$_SESSION["empresa"].'">';     
-
-          
-            echo'<button class="btn btn-success" style="margin-top:5px">Descargar reporte pedidos crédito</button>
-
-          </a>';
-          
-        }  
-
-        if ($_SESSION["perfil"] == "administrador") {
-          
-          echo '<a href="vistas/modulos/descargar-reporte-pedidos-sin-enlace.php?reporte=enlace&empresa='.$_SESSION["empresa"].'">';     
-
-          
-            echo'<button class="btn btn-success" style="margin-top:5px">Descargar reporte pedidos enlace</button>
-
-          </a>';
-        }
-
-        if ($_SESSION["perfil"] !== "tecnico") {
-          
-          echo'<button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarPedido">
-          
-            Agregar Pedido
-
-          </button>';
-        }
-
-        
-      ?>
-
-
-    
-
-    
-        </div>
-  
-
-        <br>
-        
-        <table class="table table-bordered table-striped dt-responsive tablaPedidos" width="100%">
-        
-          <thead>
-            
-            <tr>
-              
-              <th style="width:10px">#</th>
-              <th>Empresa</th>
-              <th>No. Pedido</th>
-              <th>Cliente</th>
-              <th>Estado</th>
-              <th>Total del pedido</th>
-              <th>Método de pago</th>
-              <th>Acciones</th>
-              <th>Info Pedido</th>
-       
-
-            </tr>
-
-          </thead> 
-
-                  <?php
-            
-             // $administrador = ControladorAdministradores::ctrMostrarAdministradores($item, $valor);
-               //foreach ($administrador as $key => $valueA) {
-                 echo'
-
-                 <input  type="hidden" id="tipoDePerfil" value="'.$_SESSION["perfil"].'"  placeholder="'.$_SESSION["perfil"].'">
-                 <input  type="hidden" id="tipoidperfil" value="'.$_SESSION["id"].'"  placeholder="'.$_SESSION["id"].'">
-
-                <input  type="hidden" id="id_empresa" value="'.$_SESSION["empresa"].'">';
-                
-                //}
-            ?>
-        
-        </table>
-
-
-      </div>
-
     </div>
 
-  </section>
+    <div class="row" id="PEDIDOS">
+      <div class="col-12">
+        <div class="ped-card">
+          <div class="ped-card-head">
+            <h3 class="ped-card-title"><i class="fa-solid fa-table"></i> Listado de Pedidos</h3>
+            <div class="ped-actions-group">
+              <?php
+              if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "editor" || $_SESSION["perfil"] == "vendedor") {
+
+                echo '<a href="vistas/modulos/descargar-reporte-pedidos.php?reporte=pedidos&empresa='.$_SESSION["empresa"].'" class="ped-btn ped-btn-success"><i class="fa-solid fa-file-excel"></i> Todos</a>';     
+              
+                echo '<a href="vistas/modulos/descargar-reporte-pedidos-pendientes.php?reporte=pedidosPendientes&empresa='.$_SESSION["empresa"].'" class="ped-btn ped-btn-success"><i class="fa-solid fa-file-excel"></i> Pendientes</a>';     
+              
+                echo '<a href="vistas/modulos/descargar-reporte-pedidos-adquiridos.php?reporte=pedidosAdquiridos&empresa='.$_SESSION["empresa"].'" class="ped-btn ped-btn-success"><i class="fa-solid fa-file-excel"></i> Adquiridos</a>';     
+
+                echo '<a href="vistas/modulos/descargar-reporte-pedidos-asesor.php?reporte=pedidosAsesor&empresa='.$_SESSION["empresa"].'" class="ped-btn ped-btn-success"><i class="fa-solid fa-file-excel"></i> Asesor</a>';     
+
+                echo '<a href="vistas/modulos/descargar-reporte-pedidos-pagados.php?reporte=pedidosPagados&empresa='.$_SESSION["empresa"].'" class="ped-btn ped-btn-success"><i class="fa-solid fa-file-excel"></i> Pagados</a>';     
+
+                echo '<a href="vistas/modulos/descargar-reporte-pedidos-credito.php?reporte=pedidosCredito&empresa='.$_SESSION["empresa"].'" class="ped-btn ped-btn-success"><i class="fa-solid fa-file-excel"></i> Crédito</a>';     
+                
+              }  
+
+              if ($_SESSION["perfil"] == "administrador") {
+                echo '<a href="vistas/modulos/descargar-reporte-pedidos-sin-enlace.php?reporte=enlace&empresa='.$_SESSION["empresa"].'" class="ped-btn ped-btn-success"><i class="fa-solid fa-file-excel"></i> Enlace</a>';     
+              }
+
+              if ($_SESSION["perfil"] !== "tecnico") {
+                echo '<button class="ped-btn ped-btn-primary" data-toggle="modal" data-target="#modalAgregarPedido"><i class="fa-solid fa-plus"></i> Nuevo Pedido</button>';
+              }
+              ?>
+            </div>
+          </div>
+          <div class="ped-card-body">
+            <div class="table-responsive-wrap">
+              <table class="table stripe ordenes order-table display compact cell-border hover row-border tablaPedidos" width="100%">
+              
+                <thead>
+                  
+                  <tr>
+                    
+                    <th style="width:40px">#</th>
+                    <th>Empresa</th>
+                    <th>No. Pedido</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>Total del pedido</th>
+                    <th>Método de pago</th>
+                    <th>Registro</th>
+                    <th>Modificación</th>
+                    <th>Acciones</th>
+                    <th>Detalles</th>
+
+                  </tr>
+
+                </thead> 
+
+                <tbody>
+                  
+                  <?php
+                    echo'
+
+                    <input  type="hidden" id="tipoDePerfil" value="'.$_SESSION["perfil"].'"  placeholder="'.$_SESSION["perfil"].'">
+                    <input  type="hidden" id="tipoidperfil" value="'.$_SESSION["id"].'"  placeholder="'.$_SESSION["id"].'">
+                    <input  type="hidden" id="id_empresa" value="'.$_SESSION["empresa"].'">';
+                  ?>
+                
+                </tbody>
+
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 
 </div>
 <!--=====================================
@@ -640,8 +981,8 @@ MODAL EDITAR PEDIDO
         ======================================-->
         <div class="modal-footer">
           
-          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Salir</button>
-          <button type="submit" class="btn btn-primary botonGuardarPedido">Guardar Pedido</button>
+          <button type="button" class="btn btn-light" data-dismiss="modal" style="border: 1px solid #dbe3ef; color: #334155; font-weight: 600;">Cancelar</button>
+          <button type="submit" class="btn btn-primary botonGuardarPedido" style="background: #6366f1; border: none; color: white; font-weight: 600; padding: 8px 20px; border-radius: 8px;">Guardar Pedido</button>
 
         </div>
 
@@ -927,9 +1268,9 @@ MODAL AGREGAR PEDIDO
 
         <div class="modal-footer">
 
-          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Salir</button>
+          <button type="button" class="btn btn-light" data-dismiss="modal" style="border: 1px solid #dbe3ef; color: #334155; font-weight: 600;">Cancelar</button>
 
-          <button type="submit" class="btn btn-primary guardarPedidoEditado">Guardar Pedido</button>
+          <button type="submit" class="btn btn-primary guardarPedidoEditado" style="background: #6366f1; border: none; color: white; font-weight: 600; padding: 8px 20px; border-radius: 8px;">Guardar Cambios</button>
 
         </div>
 
@@ -953,16 +1294,12 @@ MODAL AGREGAR PEDIDO
 
 <script>
     /*=============================================
-CARGAR LA TABLA DINÁMICA DE VENTAS
+CARGAR LA TABLA DINÁMICA DE PEDIDOS
 =============================================*/
-//var Perfil = $("#Perfil").val();
 $.ajax({
-	//url:"ajax/tablapedidos.ajax.php?perfil="+$("#Perfil").val(),
   url:"ajax/tablapedidos.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
  	success:function(respuesta){
-		
- 		//console.log("respuesta", respuesta);
-
+		console.log("Tabla de pedidos cargada");
  	}
  })
 
@@ -971,8 +1308,15 @@ $(".tablaPedidos").DataTable({
 	 "deferRender": true,
 	 "retrieve": true,
 	 "processing": true,
+	 "pageLength": 25,
+	 "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+	 "autoWidth": false,
+	 "order": [[0, 'desc']],
+	 "columnDefs": [
+	   { "targets": [9, 10], "orderable": false },
+	   { "targets": [9, 10], "searchable": false }
+	 ],
 	 "language": {
-
 	 	"sProcessing":     "Procesando...",
 		"sLengthMenu":     "Mostrar _MENU_ registros",
 		"sZeroRecords":    "No se encontraron resultados",

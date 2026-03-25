@@ -45,13 +45,21 @@ class TablaOrdenes{
 
 		if ($_GET["perfil"] == "administrador" || $_GET["perfil"] == "editor" || $_GET["perfil"] == "vendedor") {
 		
-				$detallesPedido = "<button class='btn btn-warning btnAgregarDetallePedido' idPedido='".$pedidos[$i]["id"]."' data-toggle='modal' data-target='#modalEditarPedido'><i class='fas fa-edit'></i></button>";
+			$detallesPedido = "<button class='btn btn-warning btnAgregarDetallePedido' idPedido='".$pedidos[$i]["id"]."' data-toggle='modal' data-target='#modalEditarPedido'><i class='fas fa-edit'></i></button>";
 
-		//if($_GET["perfil"] == "administrador"){
+			// Determinar estado con badge
+			$estado = $pedidos[$i]["estado"];
+			$estadoClass = 'badge-otro';
+			if (strpos(strtolower($estado), 'pendiente') !== false) $estadoClass = 'badge-pedido-pendiente';
+			elseif (strpos(strtolower($estado), 'adquirido') !== false) $estadoClass = 'badge-adquirido';
+			elseif (strpos(strtolower($estado), 'almacen') !== false) $estadoClass = 'badge-almacen';
+			elseif (strpos(strtolower($estado), 'asesor') !== false) $estadoClass = 'badge-asesor';
+			elseif (strpos(strtolower($estado), 'pagado') !== false) $estadoClass = 'badge-pagado';
+			elseif (strpos(strtolower($estado), 'credito') !== false) $estadoClass = 'badge-credito';
 
-		//}
+			$estadoHtml = "<span class='badge " . $estadoClass . "'>" . htmlspecialchars($estado) . "</span>";
 
-		$acciones = "<div class='btn-group'><button class='btn btn-danger btnEliminarPedido' idPedido='".$pedidos[$i]["id"]."'><i class='fa fa-times'></i></button><button class='btn btn-warning btnImprimirTicketPedido' idPedido='".$pedidos[$i]["id"]."' cliente='".$pedidos[$i]["id_cliente"]."'  asesor='".$pedidos[$i]["id_Asesor"]."' empresa='".$pedidos[$i]["id_empresa"]."' data-toggle='modal'><i class='fas fa-ticket-alt'></i></button></div>";
+			$acciones = "<div class='btn-group' style='gap:4px;'><button class='btn btn-sm btn-danger btnEliminarPedido' idPedido='".$pedidos[$i]["id"]."' title='Eliminar' style='padding:6px 10px;'><i class='fa fa-trash'></i></button><button class='btn btn-sm btn-warning btnImprimirTicketPedido' idPedido='".$pedidos[$i]["id"]."' cliente='".$pedidos[$i]["id_cliente"]."'  asesor='".$pedidos[$i]["id_Asesor"]."' empresa='".$pedidos[$i]["id_empresa"]."' title='Imprimir' style='padding:6px 10px;'><i class='fas fa-print'></i></button></div>";
 
 		}
 
@@ -71,10 +79,14 @@ class TablaOrdenes{
 
       $NombreUsuario = $usuario["nombre"];
 
-	  $InfoPedido = "<button class='btn btn-warning btnVerInfoPedido' idPedido='".$pedidos[$i]["id"]."' cliente='".$pedidos[$i]["id_cliente"]."' asesor='".$pedidos[$i]["id_Asesor"]."' empresa='".$pedidos[$i]["id_empresa"]."' data-toggle='modal'><i class='fas fa-edit'></i></button>";
+	  // Procesar fechas (si existen en la BD)
+	  $fechaRegistro = isset($pedidos[$i]["fecha_creacion"]) ? date('d/m/Y H:i', strtotime($pedidos[$i]["fecha_creacion"])) : (isset($pedidos[$i]["created_at"]) ? date('d/m/Y H:i', strtotime($pedidos[$i]["created_at"])) : '—');
+	  $fechaModificacion = isset($pedidos[$i]["fecha_actualizacion"]) ? date('d/m/Y H:i', strtotime($pedidos[$i]["fecha_actualizacion"])) : (isset($pedidos[$i]["updated_at"]) ? date('d/m/Y H:i', strtotime($pedidos[$i]["updated_at"])) : '—');
+
+	  $InfoPedido = "<button class='btn btn-sm btn-info btnVerInfoPedido' idPedido='".$pedidos[$i]["id"]."' cliente='".$pedidos[$i]["id_cliente"]."' asesor='".$pedidos[$i]["id_Asesor"]."' empresa='".$pedidos[$i]["id_empresa"]."' title='Ver detalles' style='padding:6px 10px;'><i class='fas fa-eye'></i></button>";
          		
 		/*=============================================
-		DEVOLVER DATOS JSON
+		DEVOLVER DATOS JSON MEJORADO
 		=============================================*/
 
 		$datosJson	 .= '[
@@ -83,15 +95,19 @@ class TablaOrdenes{
 
 			      		"'.$NombreEmpresa.'",
 
-			      		"<b> PEDIDO: '.$pedidos[$i]["id"].'</b>",
+			      		"<b>PEDIDO: '.$pedidos[$i]["id"].'</b>",
 
 			      		"'.$NombreUsuario.'",
 
-			      		"<b>'.$pedidos[$i]["estado"].'</b>",
+			      		"'.$estadoHtml.'",
 			      		
-			      		"'.$pedidos[$i]["total"].'",
+			      		"$ '.number_format($pedidos[$i]["total"], 2).'",
 
 			      		"'.$pedidos[$i]["metodo"].'",
+
+			      		"'.$fechaRegistro.'",
+
+			      		"'.$fechaModificacion.'",
 
 			      	   	"'.$acciones.'",
 
