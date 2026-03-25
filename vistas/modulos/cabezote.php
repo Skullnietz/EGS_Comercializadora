@@ -595,7 +595,7 @@
     display: flex;
     align-items: center;
     padding: 10px 0 10px 8px;
-    max-width: 380px;
+    max-width: 520px;
     flex: 1;
   }
 
@@ -675,14 +675,14 @@
     position: absolute;
     top: 100%;
     left: 0;
-    right: 0;
+    min-width: 480px;
     margin-top: 6px;
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     box-shadow: 0 10px 40px rgba(15, 23, 42, .16);
     z-index: 9999;
-    max-height: 440px;
+    max-height: 480px;
     overflow-y: auto;
     padding: 6px 0;
   }
@@ -783,7 +783,6 @@
 
     <!-- Sidebar toggle -->
     <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-      <i class="fa-solid fa-bars"></i>
       <span class="sr-only">Toggle navigation</span>
     </a>
 
