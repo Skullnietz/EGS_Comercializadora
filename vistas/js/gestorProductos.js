@@ -343,9 +343,77 @@ function actualizarAsistenteAltaProducto(){
 	$("#resumenPrecioProducto").text(precio !== "" ? Number(precio).toFixed(2) : "0.00");
 	$("#resumenDisponibilidadProducto").text(disponibilidad || "0");
 	$("#resumenProveedorProducto").text(proveedor || "No definido");
+	actualizarChecklistAltaProducto();
 }
 
 var altaWizardStep = 1;
+
+function setChecklistState(selector, done){
+	var item = $(selector);
+	if(!item.length){
+		return;
+	}
+
+	item.toggleClass("done", done);
+	item.find(".check-icon").text(done ? "OK" : "...");
+}
+
+function pasoChecklistCompleto(paso){
+	if(paso === 1){
+		return $("#chkPaso1Titulo").hasClass("done") && $("#chkPaso1Tipo").hasClass("done") && $("#chkPaso1Almacen").hasClass("done");
+	}
+
+	if(paso === 2){
+		return $("#chkPaso2Categoria").hasClass("done") && $("#chkPaso2Subcategoria").hasClass("done") && $("#chkPaso2Contenido").hasClass("done");
+	}
+
+	if(paso === 3){
+		return $("#chkPaso3Precio").hasClass("done") && $("#chkPaso3Stock").hasClass("done") && $("#chkPaso3Proveedor").hasClass("done");
+	}
+
+	return false;
+}
+
+function actualizarChecklistAltaProducto(){
+	var modal = $("#modalAgregarProducto");
+
+	var titulo = $.trim(modal.find(".tituloProducto").val()) !== "";
+	var tipoProducto = $.trim(modal.find(".seleccionarTipo").val()) !== "";
+	var almacen = $.trim(modal.find(".id_almacen").val()) !== "";
+
+	var categoria = $.trim(modal.find(".seleccionarCategoria").val()) !== "";
+	var subCategoria = $.trim(modal.find(".seleccionarSubCategoria").val()) !== "";
+	var contenido = $.trim(modal.find(".descripcionProducto").val()) !== "" && $.trim(modal.find(".pClavesProducto").val()) !== "";
+
+	var precio = $.trim(modal.find(".precio").val()) !== "";
+	var stock = $.trim(modal.find(".disponibilidad").val()) !== "";
+	var proveedor = $.trim(modal.find(".Proveedor").val()) !== "";
+
+	setChecklistState("#chkPaso1Titulo", titulo);
+	setChecklistState("#chkPaso1Tipo", tipoProducto);
+	setChecklistState("#chkPaso1Almacen", almacen);
+
+	setChecklistState("#chkPaso2Categoria", categoria);
+	setChecklistState("#chkPaso2Subcategoria", subCategoria);
+	setChecklistState("#chkPaso2Contenido", contenido);
+
+	setChecklistState("#chkPaso3Precio", precio);
+	setChecklistState("#chkPaso3Stock", stock);
+	setChecklistState("#chkPaso3Proveedor", proveedor);
+
+	var chips = $("#modalAgregarProducto .alta-step-chip");
+	chips.removeClass("done");
+
+	if(pasoChecklistCompleto(1)){
+		$("#modalAgregarProducto .alta-step-chip[data-wizard-chip='1']").addClass("done");
+	}
+	if(pasoChecklistCompleto(2)){
+		$("#modalAgregarProducto .alta-step-chip[data-wizard-chip='2']").addClass("done");
+	}
+	if(pasoChecklistCompleto(3)){
+		$("#modalAgregarProducto .alta-step-chip[data-wizard-chip='3']").addClass("done");
+	}
+}
 
 function renderAltaWizardStep(step){
 	altaWizardStep = step;
@@ -370,6 +438,8 @@ function renderAltaWizardStep(step){
 		modal.find(".wizardNext").hide();
 		modal.find(".wizardFinishBtn").show();
 	}
+
+	actualizarChecklistAltaProducto();
 }
 
 function validarPasoWizard(step){

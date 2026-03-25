@@ -85,6 +85,55 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor")
   .alta-resumen .row + .row {
     margin-top: 3px;
   }
+  .alta-checklist {
+    margin-top: 10px;
+    border-top: 1px solid #dbe6f1;
+    padding-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .alta-check-group {
+    background: #fff;
+    border: 1px solid #e1eaf3;
+    border-radius: 8px;
+    padding: 8px;
+  }
+  .alta-check-group h6 {
+    margin: 0 0 6px;
+    font-size: 11px;
+    color: #334e68;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .alta-check-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #5c6f82;
+    margin: 4px 0;
+  }
+  .alta-check-item .check-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid #c7d6e6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    background: #fff;
+  }
+  .alta-check-item.done {
+    color: #226745;
+  }
+  .alta-check-item.done .check-icon {
+    background: #1f8d61;
+    border-color: #1f8d61;
+    color: #fff;
+  }
   .alta-kbd {
     border: 1px solid #cfd9e6;
     border-bottom-width: 2px;
@@ -120,6 +169,22 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor")
   }
   .alta-step.active {
     display: block;
+    animation: altaStepIn .22s ease;
+  }
+  .alta-step-chip.done {
+    border-color: #bfe3cf;
+    background: #eff9f3;
+    color: #1f8d61;
+  }
+  @keyframes altaStepIn {
+    from {
+      opacity: .15;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 </style>
 <div class="content-wrapper">
@@ -306,6 +371,27 @@ MODAL AGREGAR PRODUCTO
               <div class="row"><strong>Disponibilidad:</strong> <span id="resumenDisponibilidadProducto">0</span></div>
               <div class="row"><strong>Proveedor:</strong> <span id="resumenProveedorProducto">No definido</span></div>
               <div class="row"><strong>Atajo:</strong> <span class="alta-kbd">Ctrl + Enter</span> para guardar rapido</div>
+            </div>
+
+            <div class="alta-checklist" id="altaChecklist">
+              <div class="alta-check-group">
+                <h6>Paso 1 Base</h6>
+                <div class="alta-check-item" id="chkPaso1Titulo"><span class="check-icon">...</span><span>Titulo capturado</span></div>
+                <div class="alta-check-item" id="chkPaso1Tipo"><span class="check-icon">...</span><span>Tipo definido</span></div>
+                <div class="alta-check-item" id="chkPaso1Almacen"><span class="check-icon">...</span><span>Almacen asignado</span></div>
+              </div>
+              <div class="alta-check-group">
+                <h6>Paso 2 Contenido</h6>
+                <div class="alta-check-item" id="chkPaso2Categoria"><span class="check-icon">...</span><span>Categoria elegida</span></div>
+                <div class="alta-check-item" id="chkPaso2Subcategoria"><span class="check-icon">...</span><span>Subcategoria elegida</span></div>
+                <div class="alta-check-item" id="chkPaso2Contenido"><span class="check-icon">...</span><span>Descripcion y keywords</span></div>
+              </div>
+              <div class="alta-check-group">
+                <h6>Paso 3 Precio</h6>
+                <div class="alta-check-item" id="chkPaso3Precio"><span class="check-icon">...</span><span>Precio configurado</span></div>
+                <div class="alta-check-item" id="chkPaso3Stock"><span class="check-icon">...</span><span>Disponibilidad configurada</span></div>
+                <div class="alta-check-item" id="chkPaso3Proveedor"><span class="check-icon">...</span><span>Proveedor definido</span></div>
+              </div>
             </div>
           </div>
 
