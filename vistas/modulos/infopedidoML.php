@@ -374,9 +374,6 @@ if (!$orderId) {
         Orden de MercadoLibre
         <small id="ml-order-id-title">#<?php echo $orderId; ?></small>
       </h2>
-      <a href="#" target="_blank" rel="noopener noreferrer" id="ml-header-link-ml" class="ml-btn ml-btn-ml">
-        <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir compra en ML
-      </a>
     </div>
 
     <!-- Estado de alerta -->
@@ -511,7 +508,7 @@ if (!$orderId) {
                   <th>Cantidad</th>
                   <th>Precio Unitario</th>
                   <th>Subtotal</th>
-                  <th>Ver en ML</th>
+                  <th>Copiar producto</th>
                 </tr>
               </thead>
               <tbody id="ml-d-items-body">
@@ -737,22 +734,6 @@ if (!$orderId) {
         <a href="index.php?ruta=pedidos" class="ml-btn ml-btn-back">
           <i class="fa-solid fa-arrow-left"></i> Regresar a Pedidos
         </a>
-        <a href="#" target="_blank" rel="noopener noreferrer" id="ml-link-ver-ml" class="ml-btn ml-btn-ml">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir compra en ML
-        </a>
-      </div>
-
-      <div class="ml-alt-links" id="ml-alt-links">
-        <h4>Enlaces alternativos</h4>
-        <p>
-          Si el boton principal no abre la compra, prueba estas variantes. En tu caso suele funcionar mejor
-          la ruta armada con <code>order.id</code> que con <code>shipping.id</code>.
-        </p>
-        <div class="ml-alt-links-list">
-          <a href="#" target="_blank" rel="noopener noreferrer" id="ml-alt-link-order" class="ml-btn ml-btn-back">Ruta por order.id</a>
-          <a href="#" target="_blank" rel="noopener noreferrer" id="ml-alt-link-shipping" class="ml-btn ml-btn-back">Ruta por shipping.id</a>
-          <a href="#" target="_blank" rel="noopener noreferrer" id="ml-alt-link-simple" class="ml-btn ml-btn-back">Ruta simple</a>
-        </div>
       </div>
 
     </div><!-- /ml-detail-content -->
@@ -896,29 +877,36 @@ if (!$orderId) {
     });
   }
 
-  function construirUrlsCompraML(orderId, shippingId, packId) {
-    var base = 'https://myaccount.mercadolibre.com.mx/my_purchases/';
-    var urls = {
-      byOrder: base + orderId + '/status?orderId=' + orderId,
-      byOrderWithPack: base + orderId + '/status?packId=' + packId + '&orderId=' + orderId,
-      byShipping: shippingId ? (base + shippingId + '/status?orderId=' + orderId) : '',
-      byShippingWithPack: (shippingId && packId) ? (base + shippingId + '/status?packId=' + packId + '&orderId=' + orderId) : '',
-      simple: base + orderId + '/status'
-    };
+  function copiarTextoPortapapeles(texto, onSuccess, onError) {
+    if (!texto) {
+      if (onError) onError();
+      return;
+    }
 
-    urls.primary = packId ? urls.byOrderWithPack : urls.byOrder;
-    return urls;
-  }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(function () {
+        if (onSuccess) onSuccess();
+      }).catch(function () {
+        var tmp = $('<textarea>').val(texto).appendTo('body').select();
+        var ok = document.execCommand('copy');
+        tmp.remove();
+        if (ok) {
+          if (onSuccess) onSuccess();
+        } else if (onError) {
+          onError();
+        }
+      });
+      return;
+    }
 
-  function configurarLinksCompraML(orderId, shippingId, packId) {
-    var urls = construirUrlsCompraML(orderId, shippingId, packId);
-
-    $('#ml-link-ver-ml').attr('href', urls.primary);
-    $('#ml-header-link-ml').attr('href', urls.primary);
-    $('#ml-alt-link-order').attr('href', urls.byOrderWithPack || urls.byOrder);
-    $('#ml-alt-link-shipping').attr('href', urls.byShippingWithPack || urls.byShipping || urls.byOrder);
-    $('#ml-alt-link-simple').attr('href', urls.simple);
-    $('#ml-alt-links').show();
+    var tmp = $('<textarea>').val(texto).appendTo('body').select();
+    var ok = document.execCommand('copy');
+    tmp.remove();
+    if (ok) {
+      if (onSuccess) onSuccess();
+    } else if (onError) {
+      onError();
+    }
   }
 
   function textoLista(values) {
@@ -1219,14 +1207,14 @@ if (!$orderId) {
         var itemsHtml = '';
         $.each(p.order_items, function (i, item) {
           var subtotal = parseFloat(item.unit_price || 0) * parseInt(item.quantity || 1);
-          var mlItemUrl = 'https://www.mercadolibre.com.mx/p/' + (item.item.id || '');
+          var textoBusqueda = textoPlano(item.item && item.item.title, item.item && item.item.id);
           itemsHtml += '<tr>';
           itemsHtml += '<td><code style="font-size:11px; color:#4f46e5;">' + (item.item.id || '—') + '</code></td>';
           itemsHtml += '<td>' + (item.item.title || '—') + '</td>';
           itemsHtml += '<td style="text-align:center;">' + (item.quantity || 1) + '</td>';
           itemsHtml += '<td>' + formatMoney(item.unit_price, p.currency_id) + '</td>';
           itemsHtml += '<td><strong>' + formatMoney(subtotal, p.currency_id) + '</strong></td>';
-          itemsHtml += '<td><a href="' + mlItemUrl + '" target="_blank" class="btn btn-xs btn-warning" title="Ver artículo en ML"><i class="fas fa-external-link-alt"></i></a></td>';
+          itemsHtml += '<td><button type="button" class="btn btn-xs btn-warning btn-copiar-producto-ml" data-producto="' + escapeHtml(textoBusqueda) + '" title="Copiar producto para buscarlo en MercadoLibre"><i class="fas fa-copy"></i></button></td>';
           itemsHtml += '</tr>';
         });
         $('#ml-d-items-body').html(itemsHtml);
@@ -1267,14 +1255,6 @@ if (!$orderId) {
           note: 'La orden no incluye shipping.id'
         });
       }
-
-      /* ── Link ver en ML ── */
-      // path    = p.shipping.id  (2000012198329309)
-      // packId= = p.pack_id      (2000012198329313)
-      // orderId= = p.id          (2000015689832592)
-      var shippingId = (p.shipping && p.shipping.id) ? p.shipping.id : null;
-      var packId     = p.pack_id || null;
-      configurarLinksCompraML(ORDER_ID, shippingId, packId);
 
       /* ── Mostrar contenido ── */
       $('#ml-detail-content').show();
@@ -1388,6 +1368,21 @@ if (!$orderId) {
       }
     });
   }
+
+  $(document).on('click', '.btn-copiar-producto-ml', function () {
+    var $btn = $(this);
+    var producto = $btn.attr('data-producto') || '';
+    var original = $btn.html();
+
+    copiarTextoPortapapeles(producto, function () {
+      $btn.html('<i class="fas fa-check"></i>').removeClass('btn-warning').addClass('btn-success');
+      setTimeout(function () {
+        $btn.html(original).removeClass('btn-success').addClass('btn-warning');
+      }, 1800);
+    }, function () {
+      mostrarAlerta('warning', '<i class="fa-solid fa-circle-info"></i> No se pudo copiar el producto al portapapeles.');
+    });
+  });
 
 })();
 </script>

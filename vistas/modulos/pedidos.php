@@ -3006,14 +3006,6 @@ function renderizarTablaML(pedidos) {
 
   var html = '';
 
-  function construirUrlCompraML(orderId, shippingId, packId) {
-    var base = 'https://myaccount.mercadolibre.com.mx/my_purchases/';
-    if (packId) {
-      return base + orderId + '/status?packId=' + packId + '&orderId=' + orderId;
-    }
-    return base + orderId + '/status?orderId=' + orderId;
-  }
-
   $.each(pedidos, function (i, p) {
     var num    = mlOffset + i + 1;
     var estado = statusMap[p.status] || { text: p.status || '—', css: 'ml-badge-other' };
@@ -3040,10 +3032,6 @@ function renderizarTablaML(pedidos) {
       sellerName = p.seller.nickname || '—';
     }
 
-    var shippingId = (p.shipping && p.shipping.id) ? p.shipping.id : null;
-    var packId = p.pack_id || null;
-    var urlML = construirUrlCompraML(p.id, shippingId, packId);
-
     html += '<tr>';
     html += '<td>' + num + '</td>';
     html += '<td><code style="font-size:11px; color:#4f46e5;">' + p.id + '</code></td>';
@@ -3054,7 +3042,6 @@ function renderizarTablaML(pedidos) {
     html += '<td>' + fecha + '</td>';
     html += '<td style="white-space:nowrap;">';
     html += '<a href="index.php?ruta=infopedidoML&order_id=' + p.id + '" class="btn btn-xs btn-info" title="Ver detalles en el sistema" style="margin-right:4px;"><i class="fas fa-eye"></i></a>';
-    html += '<a href="' + urlML + '" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-warning" title="Abrir compra en MercadoLibre"><i class="fas fa-external-link-alt"></i></a>';
     html += '</td>';
     html += '</tr>';
   });
