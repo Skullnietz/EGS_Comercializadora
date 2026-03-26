@@ -186,6 +186,56 @@ if (!$orderId) {
     border: 1px solid #bfdbfe;
   }
 
+  .ml-section-note {
+    margin: 0 0 14px;
+    color: var(--crm-text2);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .ml-json-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .ml-json-box {
+    border: 1px solid var(--crm-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8fafc;
+  }
+
+  .ml-json-box h4 {
+    margin: 0;
+    padding: 12px 14px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--crm-text);
+    border-bottom: 1px solid #e2e8f0;
+    background: #fff;
+  }
+
+  .ml-json-box pre {
+    margin: 0;
+    padding: 14px;
+    min-height: 180px;
+    max-height: 360px;
+    overflow: auto;
+    background: #0f172a;
+    color: #e2e8f0;
+    font-size: 12px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .ml-link-disabled {
+    color: var(--crm-muted) !important;
+    pointer-events: none;
+    text-decoration: none;
+  }
+
   @media (max-width: 767px) {
     .ml-header-bar { flex-direction: column; align-items: flex-start; }
     .ml-card-body  { padding: 14px; }
@@ -272,24 +322,66 @@ if (!$orderId) {
         </div>
       </div>
 
-      <!-- ── Vendedor ─────────────────────────────────────────── -->
+      <!-- Datos de buyer y seller -->
       <div class="ml-card">
         <div class="ml-card-head">
-          <h3 class="ml-card-title"><i class="fa-solid fa-store"></i> Vendedor</h3>
+          <h3 class="ml-card-title"><i class="fa-solid fa-user"></i> Buyer (Comprador)</h3>
+        </div>
+        <div class="ml-card-body">
+          <p class="ml-section-note">
+            Estos datos salen directamente de la orden y, cuando es posible, tambien se complementan con
+            la consulta a <code>/users/{id}</code>.
+          </p>
+          <div class="ml-info-grid">
+            <div class="ml-info-item">
+              <label>Nickname</label>
+              <div class="valor" id="ml-d-buyer-order-nick">—</div>
+            </div>
+            <div class="ml-info-item">
+              <label>ID de Buyer</label>
+              <div class="valor" id="ml-d-buyer-order-id">—</div>
+            </div>
+            <div class="ml-info-item">
+              <label>Nombre</label>
+              <div class="valor" id="ml-d-buyer-name">—</div>
+            </div>
+            <div class="ml-info-item">
+              <label>Documento</label>
+              <div class="valor" id="ml-d-buyer-doc">—</div>
+            </div>
+            <div class="ml-info-item">
+              <label>Perfil ML</label>
+              <div class="valor"><a id="ml-d-buyer-link" href="#" target="_blank" class="ml-link-disabled" style="color:#6366f1; font-weight:600;">Sin nickname disponible</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ml-card">
+        <div class="ml-card-head">
+          <h3 class="ml-card-title"><i class="fa-solid fa-store"></i> Seller (Vendedor)</h3>
         </div>
         <div class="ml-card-body">
           <div class="ml-info-grid">
             <div class="ml-info-item">
               <label>Nickname</label>
-              <div class="valor" id="ml-d-buyer-nick">—</div>
+              <div class="valor" id="ml-d-seller-order-nick">—</div>
             </div>
             <div class="ml-info-item">
-              <label>ID de Vendedor</label>
-              <div class="valor" id="ml-d-buyer-id">—</div>
+              <label>ID de Seller</label>
+              <div class="valor" id="ml-d-seller-order-id">—</div>
             </div>
             <div class="ml-info-item">
-              <label>Ver tienda</label>
-              <div class="valor"><a id="ml-d-seller-link" href="#" target="_blank" style="color:#6366f1; font-weight:600;">Abrir en MercadoLibre</a></div>
+              <label>Nombre</label>
+              <div class="valor" id="ml-d-seller-name">—</div>
+            </div>
+            <div class="ml-info-item">
+              <label>Documento</label>
+              <div class="valor" id="ml-d-seller-doc">—</div>
+            </div>
+            <div class="ml-info-item">
+              <label>Perfil ML</label>
+              <div class="valor"><a id="ml-d-seller-link" href="#" target="_blank" class="ml-link-disabled" style="color:#6366f1; font-weight:600;">Sin nickname disponible</a></div>
             </div>
           </div>
         </div>
@@ -392,6 +484,44 @@ if (!$orderId) {
         </div>
       </div>
 
+      <div class="ml-card">
+        <div class="ml-card-head">
+          <h3 class="ml-card-title"><i class="fa-solid fa-code"></i> Payload API</h3>
+        </div>
+        <div class="ml-card-body">
+          <p class="ml-section-note">
+            Aqui puedes ver exactamente lo que responde Mercado Libre para esta compra.
+            Esto te sirve para validar que campos puedes usar del lado buyer.
+          </p>
+          <div class="ml-json-grid">
+            <div class="ml-json-box">
+              <h4>Orden completa /orders/{id}</h4>
+              <pre id="ml-json-order">Cargando...</pre>
+            </div>
+            <div class="ml-json-box">
+              <h4>Buyer dentro de la orden</h4>
+              <pre id="ml-json-buyer">Sin datos</pre>
+            </div>
+            <div class="ml-json-box">
+              <h4>Seller dentro de la orden</h4>
+              <pre id="ml-json-seller">Sin datos</pre>
+            </div>
+            <div class="ml-json-box">
+              <h4>Buyer /users/{id}</h4>
+              <pre id="ml-json-buyer-user">Sin datos</pre>
+            </div>
+            <div class="ml-json-box">
+              <h4>Seller /users/{id}</h4>
+              <pre id="ml-json-seller-user">Sin datos</pre>
+            </div>
+            <div class="ml-json-box">
+              <h4>Envio /shipments/{id}</h4>
+              <pre id="ml-json-shipping">Sin datos</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── Acciones ───────────────────────────────────────────── -->
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
         <a href="index.php?ruta=pedidos" class="ml-btn ml-btn-back">
@@ -427,6 +557,120 @@ if (!$orderId) {
     'cancelled':  { text: 'Cancelado', css: 'ml-badge-cancelled' },
     'in_process': { text: 'En Proceso',css: 'ml-badge-other'     },
   };
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderJson(selector, data) {
+    var isEmptyObject = data && typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length === 0;
+    var isEmptyArray = Array.isArray(data) && data.length === 0;
+
+    if (data == null || isEmptyObject || isEmptyArray) {
+      $(selector).text('Sin datos');
+      return;
+    }
+
+    try {
+      $(selector).html(escapeHtml(JSON.stringify(data, null, 2)));
+    } catch (e) {
+      $(selector).text(String(data));
+    }
+  }
+
+  function textoPlano() {
+    for (var i = 0; i < arguments.length; i++) {
+      var value = arguments[i];
+      if (typeof value === 'string' && value.trim() !== '') return value.trim();
+      if (value !== null && value !== undefined && value !== '') return String(value);
+    }
+    return '—';
+  }
+
+  function nombreCompleto(data) {
+    if (!data) return '—';
+    var fullName = [data.first_name || '', data.last_name || ''].join(' ').trim();
+    return textoPlano(fullName, data.registration_name, data.name);
+  }
+
+  function documentoTexto(data) {
+    if (!data) return '—';
+
+    var identification = data.identification || {};
+    var billingInfo = data.billing_info || {};
+
+    if (identification.number) {
+      return textoPlano(
+        ((identification.type || '') + ' ' + identification.number).trim()
+      );
+    }
+
+    if (billingInfo.doc_number) {
+      return textoPlano(
+        ((billingInfo.doc_type || '') + ' ' + billingInfo.doc_number).trim()
+      );
+    }
+
+    return '—';
+  }
+
+  function setPerfilLink(selector, nickname) {
+    if (nickname && nickname !== '—') {
+      $(selector)
+        .attr('href', 'https://www.mercadolibre.com.mx/perfil/' + nickname)
+        .removeClass('ml-link-disabled')
+        .text('Abrir perfil en MercadoLibre');
+      return;
+    }
+
+    $(selector)
+      .attr('href', '#')
+      .addClass('ml-link-disabled')
+      .text('Sin nickname disponible');
+  }
+
+  function renderParty(role, orderData, userData) {
+    var merged = $.extend(true, {}, orderData || {}, userData || {});
+    var nickname = textoPlano(merged.nickname);
+
+    $('#ml-d-' + role + '-order-id').text(textoPlano(merged.id));
+    $('#ml-d-' + role + '-order-nick').text(nickname);
+    $('#ml-d-' + role + '-name').text(nombreCompleto(merged));
+    $('#ml-d-' + role + '-doc').text(documentoTexto(merged));
+    setPerfilLink('#ml-d-' + role + '-link', nickname === '—' ? '' : nickname);
+  }
+
+  function cargarUsuarioMl(userId, role, orderData) {
+    renderJson('#ml-json-' + role + '-user', { loading: true, user_id: userId });
+
+    var dU = new FormData();
+    dU.append('accion', 'obtenerUsuario');
+    dU.append('user_id', userId);
+
+    $.ajax({
+      url: 'ajax/mercadolibre.ajax.php',
+      method: 'POST',
+      data: dU,
+      cache: false,
+      contentType: false,
+      processData: false,
+      dataType: 'json',
+      success: function (u) {
+        renderJson('#ml-json-' + role + '-user', u || {});
+        renderParty(role, orderData, u || {});
+      },
+      error: function () {
+        renderJson('#ml-json-' + role + '-user', {
+          error: 'No se pudo consultar /users/' + userId
+        });
+      }
+    });
+  }
 
   function formatFecha(iso) {
     if (!iso) return '—';
@@ -474,6 +718,10 @@ if (!$orderId) {
         return;
       }
 
+      renderJson('#ml-json-order', p);
+      renderJson('#ml-json-buyer', p.buyer || {});
+      renderJson('#ml-json-seller', p.seller || {});
+
       /* ── Info general ── */
       var estado = statusMap[p.status] || { text: p.status || '—', css: 'ml-badge-other' };
       $('#ml-badge-estado').html('<span class="ml-badge ' + estado.css + '">' + estado.text + '</span>');
@@ -504,34 +752,16 @@ if (!$orderId) {
         : (estado.text); // si viene vacío, repetir el estado principal
       $('#ml-d-status-detail').text(detailText);
 
-      /* ── Vendedor ── */
-      if (p.seller && p.seller.id) {
-        $('#ml-d-buyer-id').text(p.seller.id);
+      /* ── Buyer y Seller ── */
+      renderParty('buyer', p.buyer || {}, null);
+      renderParty('seller', p.seller || {}, null);
 
-        if (p.seller.nickname) {
-          // La orden ya trae el nickname — usarlo directo
-          var nick = p.seller.nickname;
-          $('#ml-d-buyer-nick').text(nick);
-          $('#ml-d-seller-link').attr('href', 'https://www.mercadolibre.com.mx/perfil/' + nick);
-        } else {
-          // El nickname no viene en la orden — consultar /users/{id}
-          $('#ml-d-buyer-nick').html('<i class="fa-solid fa-spinner fa-spin"></i>');
-          var dU = new FormData();
-          dU.append('accion',  'obtenerUsuario');
-          dU.append('user_id', p.seller.id);
-          $.ajax({
-            url: 'ajax/mercadolibre.ajax.php', method: 'POST', data: dU,
-            cache: false, contentType: false, processData: false, dataType: 'json',
-            success: function (u) {
-              var nick = u.nickname || u.id || '—';
-              $('#ml-d-buyer-nick').text(nick);
-              if (u.nickname) {
-                $('#ml-d-seller-link').attr('href', 'https://www.mercadolibre.com.mx/perfil/' + u.nickname);
-              }
-            },
-            error: function () { $('#ml-d-buyer-nick').text('—'); }
-          });
-        }
+      if (p.buyer && p.buyer.id) {
+        cargarUsuarioMl(p.buyer.id, 'buyer', p.buyer || {});
+      }
+
+      if (p.seller && p.seller.id) {
+        cargarUsuarioMl(p.seller.id, 'seller', p.seller || {});
       }
 
       /* ── Artículos ── */
@@ -582,6 +812,10 @@ if (!$orderId) {
 
         // Consultar shipment completo para fecha de entrega y tracking
         cargarDetalleEnvio(p.shipping.id);
+      } else {
+        renderJson('#ml-json-shipping', {
+          note: 'La orden no incluye shipping.id'
+        });
       }
 
       /* ── Link ver en ML ── */
@@ -637,6 +871,7 @@ if (!$orderId) {
       cache: false, contentType: false, processData: false, dataType: 'json',
       success: function (s) {
         $('#ml-envio-loading').hide();
+        renderJson('#ml-json-shipping', s || {});
 
         if (!s || s.error) {
           $('#ml-envio-info').html('<p style="color:#94a3b8; font-size:13px;">No se pudo cargar el detalle del envío.</p>').show();
@@ -705,6 +940,9 @@ if (!$orderId) {
       },
       error: function () {
         $('#ml-envio-loading').hide();
+        renderJson('#ml-json-shipping', {
+          error: 'No se pudo consultar el shipment ' + shippingId
+        });
         $('#ml-envio-info').html('<p style="color:#94a3b8; font-size:13px;">Error al consultar el envío.</p>').show();
       }
     });

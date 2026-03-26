@@ -117,7 +117,7 @@ if ($accion === 'obtenerOrdenes') {
     if (empty($config['access_token']) || empty($config['seller_id'])) {
         echo json_encode([
             'error'   => 'config_missing',
-            'message' => 'Configura el Access Token y el Seller ID de MercadoLibre.',
+            'message' => 'Configura el Access Token y el ID de Usuario ML.',
         ]);
         exit;
     }

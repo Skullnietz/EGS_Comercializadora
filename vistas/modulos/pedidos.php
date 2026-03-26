@@ -2918,8 +2918,8 @@ function verificarConfigML() {
         cargarPedidosML();
       } else {
         mostrarStatusML('info',
-          '<i class="fa-solid fa-circle-info"></i> MercadoLibre no está configurado aún. ' +
-          'Haz clic en <strong>Configurar</strong> para ingresar tu Access Token y Seller ID.');
+            '<i class="fa-solid fa-circle-info"></i> MercadoLibre no está configurado aún. ' +
+           'Haz clic en <strong>Configurar</strong> para ingresar tu Access Token y tu ID de Usuario ML.');
       }
       /* Pre-llenar campos si hay datos */
       if (resp.seller_id) $('#ml-cfg-seller-id').val(resp.seller_id);
@@ -3026,9 +3026,9 @@ function renderizarTablaML(pedidos) {
       fecha = d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    var buyer = '—';
+    var sellerName = '—';
     if (p.seller) {
-      buyer = p.seller.nickname || '—';
+      sellerName = p.seller.nickname || '—';
     }
 
     var shippingId = (p.shipping && p.shipping.id) ? p.shipping.id : null;
@@ -3052,7 +3052,7 @@ function renderizarTablaML(pedidos) {
     html += '<tr>';
     html += '<td>' + num + '</td>';
     html += '<td><code style="font-size:11px; color:#4f46e5;">' + p.id + '</code></td>';
-    html += '<td>' + buyer + '</td>';
+    html += '<td>' + sellerName + '</td>';
     html += '<td>' + badge + '</td>';
     html += '<td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + items + '</td>';
     html += '<td><strong>' + total + '</strong></td>';
