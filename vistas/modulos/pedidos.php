@@ -1587,7 +1587,7 @@ $("#tablepedidos").DataTable({
 	 "pageLength": 25,
 	 "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
 	 "autoWidth": false,
-	 "order": [[0, 'desc']],
+	 "order": [[0, 'asc']],
 	 "columnDefs": [
 	   { "targets": [9, 10], "orderable": false },
 	   { "targets": [9, 10], "searchable": false }

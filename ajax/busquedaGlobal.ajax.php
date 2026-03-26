@@ -215,7 +215,7 @@ try {
 try {
     $pdo = Database::conectar(Database::ECOMMERCE);
 
-    $sql = "SELECT p.id, p.estado, p.total, c.nombre AS cliente
+    $sql = "SELECT p.id, p.estado, p.total, p.id_empresa, p.id_Asesor, p.id_cliente, c.nombre AS cliente
             FROM pedidos p
             LEFT JOIN clientesTienda c ON c.id = p.id_cliente
             WHERE (p.id LIKE :q1
@@ -243,7 +243,10 @@ try {
                 "label" => "Pedido #" . $r["id"] . ($r["cliente"] ? " — " . $r["cliente"] : ""),
                 "sub"   => "$" . number_format($r["total"], 2) . " · " . $r["estado"],
                 "icon"  => "fa-solid fa-box-open",
-                "url"   => "index.php?ruta=pedidos&idPedido=" . $r["id"],
+                "url"   => "index.php?ruta=infopedido&idPedido=" . $r["id"]
+                         . "&empresa=" . $r["id_empresa"]
+                         . "&asesor=" . $r["id_Asesor"]
+                         . "&cliente=" . $r["id_cliente"],
             ];
         }
         $results[] = ["group" => "Pedidos", "items" => $items];
