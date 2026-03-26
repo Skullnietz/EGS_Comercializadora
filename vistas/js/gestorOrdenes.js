@@ -1413,6 +1413,13 @@ VARIABLE LOCAL STORAGE
 =============================================*/
 if($("#daterange-btnOrdenes").length){
 
+	// Limpia una posible instancia previa del plugin daterangepicker
+	if ($("#daterange-btnOrdenes").data("daterangepicker")) {
+		$("#daterange-btnOrdenes").data("daterangepicker").remove();
+		$("#daterange-btnOrdenes").removeData("daterangepicker");
+	}
+	$("#daterange-btnOrdenes").off();
+
 	if(localStorage.getItem("btnOrdenes") != null){
 		$("#daterange-btnOrdenes span").html(localStorage.getItem("btnOrdenes"));
 	}else{
