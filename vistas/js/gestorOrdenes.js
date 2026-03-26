@@ -1464,51 +1464,80 @@ if($("#daterange-btnOrdenes").length){
 	var $hiddenRangeInput = $('<input type="text" id="flatpickrRangoOrdenes" style="position:fixed;left:-9999px;top:-9999px;opacity:0;" />');
 	$('body').append($hiddenRangeInput);
 
-	var flatpickrRangoOrdenes = flatpickr("#flatpickrRangoOrdenes", {
-		mode: "range",
-		dateFormat: "Y-m-d",
-		allowInput: false,
-		onClose: function(selectedDates){
-			if(selectedDates.length === 2){
-				var start = moment(selectedDates[0]);
-				var end = moment(selectedDates[1]);
-				irAReporteConRango(start, end, "Rango personalizado");
-			}
-		}
-	});
-
-	$("#daterange-btnOrdenes").on("click", function(){
-		Swal.fire({
-			title: "Selecciona un rango",
-			input: "select",
-			inputOptions: {
-				mes_actual: "Mes actual",
-				mes_anterior: "Mes anterior",
-				tres_meses: "Ultimos 3 meses",
-				seis_meses: "Ultimos 6 meses",
-				doce_meses: "Ultimos 12 meses",
-				personalizado: "Rango personalizado"
-			},
-			inputPlaceholder: "Selecciona una opcion",
-			showCancelButton: true,
-			confirmButtonText: "Aplicar",
-			cancelButtonText: "Cancelar"
-		}).then(function(result){
-			if(!result.isConfirmed || !result.value){
-				return;
-			}
-
-			if(result.value === "personalizado"){
-				flatpickrRangoOrdenes.clear();
-				flatpickrRangoOrdenes.open();
-				return;
-			}
-
-			if(presetRanges[result.value]){
-				var rango = presetRanges[result.value];
-				irAReporteConRango(rango.start, rango.end, rango.label);
+	var flatpickrRangoOrdenes = null;
+	if (typeof flatpickr !== "undefined") {
+		flatpickrRangoOrdenes = flatpickr(document.getElementById("flatpickrRangoOrdenes"), {
+			mode: "range",
+			dateFormat: "Y-m-d",
+			allowInput: false,
+			onClose: function(selectedDates){
+				if(selectedDates.length === 2){
+					var start = moment(selectedDates[0]);
+					var end = moment(selectedDates[1]);
+					irAReporteConRango(start, end, "Rango personalizado");
+				}
 			}
 		});
+	}
+
+	function abrirSelectorPersonalizado(){
+		if (flatpickrRangoOrdenes && typeof flatpickrRangoOrdenes.clear === "function") {
+			flatpickrRangoOrdenes.clear();
+			flatpickrRangoOrdenes.open();
+			return;
+		}
+		Swal.fire({
+			icon: "warning",
+			title: "No disponible",
+			text: "No se pudo abrir el selector personalizado en este momento."
+		});
+	}
+
+	function manejarSeleccionRango(valor){
+		if(!valor){
+			return;
+		}
+		if(valor === "personalizado"){
+			abrirSelectorPersonalizado();
+			return;
+		}
+		if(presetRanges[valor]){
+			var rango = presetRanges[valor];
+			irAReporteConRango(rango.start, rango.end, rango.label);
+		}
+	}
+
+	$("#daterange-btnOrdenes").on("click", function(){
+		if (typeof Swal !== "undefined" && typeof Swal.fire === "function") {
+			Swal.fire({
+				title: "Selecciona un rango",
+				input: "select",
+				inputOptions: {
+					mes_actual: "Mes actual",
+					mes_anterior: "Mes anterior",
+					tres_meses: "Ultimos 3 meses",
+					seis_meses: "Ultimos 6 meses",
+					doce_meses: "Ultimos 12 meses",
+					personalizado: "Rango personalizado"
+				},
+				inputPlaceholder: "Selecciona una opcion",
+				showCancelButton: true,
+				confirmButtonText: "Aplicar",
+				cancelButtonText: "Cancelar"
+			}).then(function(result){
+				if(!result.isConfirmed || !result.value){
+					return;
+				}
+				manejarSeleccionRango(result.value);
+			});
+			return;
+		}
+
+		var valor = window.prompt(
+			"Escribe una opcion: mes_actual, mes_anterior, tres_meses, seis_meses, doce_meses, personalizado",
+			"mes_actual"
+		);
+		manejarSeleccionRango(valor ? valor.trim() : "");
 	});
 }
 
