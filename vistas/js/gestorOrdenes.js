@@ -1508,36 +1508,25 @@ if($("#daterange-btnOrdenes").length){
 	}
 
 	$("#daterange-btnOrdenes").on("click", function(){
-		if (typeof Swal !== "undefined" && typeof Swal.fire === "function") {
-			Swal.fire({
-				title: "Selecciona un rango",
-				input: "select",
-				inputOptions: {
-					mes_actual: "Mes actual",
-					mes_anterior: "Mes anterior",
-					tres_meses: "Ultimos 3 meses",
-					seis_meses: "Ultimos 6 meses",
-					doce_meses: "Ultimos 12 meses",
-					personalizado: "Rango personalizado"
-				},
-				inputPlaceholder: "Selecciona una opcion",
-				showCancelButton: true,
-				confirmButtonText: "Aplicar",
-				cancelButtonText: "Cancelar"
-			}).then(function(result){
-				if(!result.isConfirmed || !result.value){
-					return;
-				}
-				manejarSeleccionRango(result.value);
-			});
-			return;
-		}
-
-		var valor = window.prompt(
-			"Escribe una opcion: mes_actual, mes_anterior, tres_meses, seis_meses, doce_meses, personalizado",
-			"mes_actual"
-		);
-		manejarSeleccionRango(valor ? valor.trim() : "");
+		swal({
+			title: "Selecciona un rango",
+			input: "select",
+			inputOptions: {
+				mes_actual: "Mes actual",
+				mes_anterior: "Mes anterior",
+				tres_meses: "Ultimos 3 meses",
+				seis_meses: "Ultimos 6 meses",
+				doce_meses: "Ultimos 12 meses",
+				personalizado: "Rango personalizado"
+			},
+			inputPlaceholder: "Selecciona una opcion",
+			showCancelButton: true,
+			confirmButtonText: "Aplicar",
+			cancelButtonText: "Cancelar"
+		}).then(function(value){
+			if(!value) return;
+			manejarSeleccionRango(value);
+		}).catch(swal.noop);
 	});
 }
 
