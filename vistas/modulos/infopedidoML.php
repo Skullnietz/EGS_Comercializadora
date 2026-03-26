@@ -1257,9 +1257,18 @@ if (!$orderId) {
         $('#ml-d-envio-badge').html('<span class="ml-shipping-badge">' + statusText + '</span>');
 
         // Fecha estimada de entrega — ML puede devolverla en distintos campos
+        var shippingOption = s.shipping_option || {};
         var eta = '—';
         var etaDate =
-             (s.estimated_delivery_time   && s.estimated_delivery_time.date)
+             (shippingOption.estimated_delivery_extended && shippingOption.estimated_delivery_extended.date)
+          ?   shippingOption.estimated_delivery_extended.date
+          : ( (shippingOption.estimated_delivery_time && shippingOption.estimated_delivery_time.date)
+          ?   shippingOption.estimated_delivery_time.date
+          : ( (shippingOption.estimated_delivery_final && shippingOption.estimated_delivery_final.date)
+          ?   shippingOption.estimated_delivery_final.date
+          : ( (shippingOption.estimated_delivery_limit && shippingOption.estimated_delivery_limit.date)
+          ?   shippingOption.estimated_delivery_limit.date
+          : ( (s.estimated_delivery_time   && s.estimated_delivery_time.date)
           ?   s.estimated_delivery_time.date
           : ( (s.estimated_delivery_final && s.estimated_delivery_final.date)
           ?   s.estimated_delivery_final.date
@@ -1267,9 +1276,12 @@ if (!$orderId) {
           ?   s.estimated_delivery_limit.date
           : ( (s.estimated_handle_time    && s.estimated_handle_time.date)
           ?   s.estimated_handle_time.date
-          :   null ) ) );
+          :   null ) ) ) ) ) );
 
         // También puede venir como rango: from / to
+        if (!etaDate && shippingOption.estimated_delivery_time) {
+          etaDate = shippingOption.estimated_delivery_time.to || shippingOption.estimated_delivery_time.from || null;
+        }
         if (!etaDate && s.estimated_delivery_time) {
           etaDate = s.estimated_delivery_time.to || s.estimated_delivery_time.from || null;
         }
