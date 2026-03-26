@@ -107,6 +107,206 @@ if (!class_exists('ReporteHelper')) {
                 )
             ));
         }
+
+        /**
+         * CRM Contact Export: Pendiente de Autorización + Terminada
+         * For vendedor to contact clients by phone/WhatsApp
+         */
+        public static function generarReporteCRMContacto($empresaId, $filename) {
+            $statusFiltros = array(
+                'Pendiente de autorización (AUT',
+                'Terminada (ter)'
+            );
+
+            $ordenes = self::obtenerOrdenesFiltradas($empresaId, $statusFiltros);
+
+            $rangoTexto = self::obtenerRangoTexto();
+
+            $headers = array('#', 'Folio', 'Cliente', 'Teléfono', 'Teléfono 2', 'WhatsApp', 'Equipo', 'Estado', 'Total', 'Días pendiente', 'Fecha Ingreso', 'Asesor');
+            $rows = array();
+            $sumaTotal = 0.0;
+
+            foreach ($ordenes as $key => $value) {
+                $cliente = ModeloClientes::mdlMostrarClientes("clientesTienda", "id", $value["id_usuario"]);
+                $clienteData = $cliente[0] ?? null;
+
+                $nombreCliente = $clienteData ? $clienteData["nombre"] : "Desconocido";
+                $telefono = "";
+                $telefonoDos = "";
+                $whatsapp = "";
+
+                if ($clienteData) {
+                    $t1 = (string)($clienteData["telefono"] ?? "");
+                    $t2 = (string)($clienteData["telefonoDos"] ?? "");
+
+                    $telefono = (strlen($t1) == 10 && is_numeric($t1)) ? $t1 : "";
+                    $telefonoDos = (strlen($t2) == 10 && is_numeric($t2)) ? $t2 : "";
+
+                    $finalPhone = $telefono != "" ? $telefono : $telefonoDos;
+                    $whatsapp = ($finalPhone != "") ? "52" . $finalPhone : "";
+                }
+
+                $asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+                $nombreAsesor = $asesor["nombre"] ?? "";
+
+                $marca = $value["marcaDelEquipo"] ?? "";
+                $modelo = $value["modeloDelEquipo"] ?? "";
+                $equipo = trim($marca . " " . $modelo);
+
+                $diasPendiente = "";
+                $fechaIng = $value["fecha_ingreso"] ?? "";
+                if ($fechaIng != "") {
+                    $diff = (new \DateTime($fechaIng))->diff(new \DateTime());
+                    $diasPendiente = $diff->days;
+                }
+
+                $rows[] = array(
+                    $key + 1,
+                    $value["id"],
+                    $nombreCliente,
+                    $telefono,
+                    $telefonoDos,
+                    $whatsapp,
+                    $equipo,
+                    $value["estado"],
+                    floatval($value["total"]),
+                    $diasPendiente,
+                    $fechaIng,
+                    $nombreAsesor
+                );
+
+                $sumaTotal += floatval($value["total"]);
+            }
+
+            ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
+                'sheetName' => 'CRM Contacto',
+                'title' => 'CRM — Seguimiento a Clientes',
+                'subtitle' => 'Estados: Pendiente de Autorización + Terminada | Rango: ' . $rangoTexto . ' | Generado: ' . date('Y-m-d H:i'),
+                'currencyColumns' => array(8),
+                'dateColumns' => array(10),
+                'hyperlinkColumns' => array(5 => 'whatsapp_api'),
+                'footerRows' => array(
+                    array('values' => array(0 => 'Registros', 1 => count($rows), 7 => 'Total', 8 => $sumaTotal))
+                )
+            ));
+        }
+
+        /**
+         * CRM Technician Follow-up Export: Aceptada + Revisión
+         * For vendedor to pressure technicians to advance orders
+         */
+        public static function generarReporteCRMSeguimiento($empresaId, $filename) {
+            $statusFiltros = array(
+                'Aceptado (ok)',
+                'En revisión (REV)'
+            );
+
+            $ordenes = self::obtenerOrdenesFiltradas($empresaId, $statusFiltros);
+
+            $rangoTexto = self::obtenerRangoTexto();
+
+            $headers = array('#', 'Folio', 'Técnico', 'Cliente', 'Tel. Cliente', 'Equipo', 'Estado', 'Total', 'Días en taller', 'Fecha Ingreso', 'Asesor');
+            $rows = array();
+            $sumaTotal = 0.0;
+
+            foreach ($ordenes as $key => $value) {
+                $tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+                $nombreTecnico = $tecnico["nombre"] ?? "Sin asignar";
+
+                $cliente = ModeloClientes::mdlMostrarClientes("clientesTienda", "id", $value["id_usuario"]);
+                $clienteData = $cliente[0] ?? null;
+                $nombreCliente = $clienteData ? $clienteData["nombre"] : "Desconocido";
+
+                $telefono = "";
+                if ($clienteData) {
+                    $t1 = (string)($clienteData["telefono"] ?? "");
+                    $t2 = (string)($clienteData["telefonoDos"] ?? "");
+                    $telefono = (strlen($t1) == 10 && is_numeric($t1)) ? $t1 : ((strlen($t2) == 10 && is_numeric($t2)) ? $t2 : "");
+                }
+
+                $asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+                $nombreAsesor = $asesor["nombre"] ?? "";
+
+                $marca = $value["marcaDelEquipo"] ?? "";
+                $modelo = $value["modeloDelEquipo"] ?? "";
+                $equipo = trim($marca . " " . $modelo);
+
+                $diasEnTaller = "";
+                $fechaIng = $value["fecha_ingreso"] ?? "";
+                if ($fechaIng != "") {
+                    $diff = (new \DateTime($fechaIng))->diff(new \DateTime());
+                    $diasEnTaller = $diff->days;
+                }
+
+                $rows[] = array(
+                    $key + 1,
+                    $value["id"],
+                    $nombreTecnico,
+                    $nombreCliente,
+                    $telefono,
+                    $equipo,
+                    $value["estado"],
+                    floatval($value["total"]),
+                    $diasEnTaller,
+                    $fechaIng,
+                    $nombreAsesor
+                );
+
+                $sumaTotal += floatval($value["total"]);
+            }
+
+            ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
+                'sheetName' => 'CRM Tecnicos',
+                'title' => 'CRM — Seguimiento a Técnicos',
+                'subtitle' => 'Estados: Aceptada + En Revisión | Rango: ' . $rangoTexto . ' | Generado: ' . date('Y-m-d H:i'),
+                'currencyColumns' => array(7),
+                'dateColumns' => array(9),
+                'footerRows' => array(
+                    array('values' => array(0 => 'Registros', 1 => count($rows), 6 => 'Total', 7 => $sumaTotal))
+                )
+            ));
+        }
+
+        /* ── Helpers internos ── */
+
+        private static function obtenerOrdenesFiltradas($empresaId, array $statusFiltros) {
+            if (isset($_GET['fechaInicial']) && isset($_GET['fechaFinal'])) {
+                $ordenes = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa(
+                    'ordenes',
+                    $_GET['fechaInicial'],
+                    $_GET['fechaFinal'],
+                    'id_empresa',
+                    $empresaId
+                );
+            } else {
+                $ordenes = ModeloOrdenes::mdlMostrarordenesParaValidar('ordenes', 'id_empresa', $empresaId);
+            }
+
+            if (!is_array($ordenes)) {
+                $ordenes = array();
+            }
+
+            $filteredOrdenes = array();
+            foreach ($ordenes as $orden) {
+                if (in_array($orden['estado'], $statusFiltros, true)) {
+                    $filteredOrdenes[] = $orden;
+                }
+            }
+
+            usort($filteredOrdenes, function ($a, $b) {
+                return strtotime((string)($a['fecha_ingreso'] ?? '')) <=> strtotime((string)($b['fecha_ingreso'] ?? ''));
+            });
+
+            return $filteredOrdenes;
+        }
+
+        private static function obtenerRangoTexto() {
+            return (isset($_GET['fechaInicial']) && isset($_GET['fechaFinal']))
+                ? (($_GET['fechaInicial'] === $_GET['fechaFinal'])
+                    ? $_GET['fechaInicial']
+                    : $_GET['fechaInicial'] . ' a ' . $_GET['fechaFinal'])
+                : 'Todas las ordenes';
+        }
     }
 }
 ?>

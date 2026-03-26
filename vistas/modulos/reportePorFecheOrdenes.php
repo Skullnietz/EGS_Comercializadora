@@ -320,6 +320,7 @@ $totalCols    = $isAdmin ? 12 : 10;
   .rpt-kpi-row { grid-template-columns: repeat(2, 1fr); }
   .rpt-header { flex-direction: column; align-items: flex-start; }
   .rpt-table-wrap { overflow-x: auto; }
+  .rpt-crm-grid { grid-template-columns: 1fr !important; }
 }
 </style>
 
@@ -413,6 +414,55 @@ $totalCols    = $isAdmin ? 12 : 10;
           <span class="count" data-estado-count="<?= htmlspecialchars($est) ?>"><?= $cnt ?></span>
         </span>
       <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- ═══ CRM — Seguimiento de Órdenes ═══ -->
+    <?php if(in_array($perfil, ['administrador','vendedor','Super-Administrador'])): ?>
+    <div style="background:var(--rpt-card); border:1px solid var(--rpt-border); border-radius:14px; padding:20px 24px; margin-bottom:20px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+        <div style="width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#8b5cf6,#a78bfa); display:flex; align-items:center; justify-content:center;">
+          <i class="fa-solid fa-headset" style="color:#fff; font-size:16px;"></i>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--rpt-text);">CRM — Seguimiento de Órdenes</h3>
+          <p style="margin:0; font-size:12px; color:var(--rpt-muted);">Exporta información de contacto para dar seguimiento a clientes y técnicos</p>
+        </div>
+      </div>
+
+      <div class="rpt-crm-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+        <!-- Card: Contactar Clientes -->
+        <div style="border:1px solid #e0e7ff; border-radius:12px; padding:18px; background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+            <i class="fa-solid fa-phone-volume" style="color:#16a34a; font-size:18px;"></i>
+            <h4 style="margin:0; font-size:14px; font-weight:700; color:#15803d;">Contactar Clientes</h4>
+          </div>
+          <p style="font-size:12px; color:#64748b; margin:0 0 14px; line-height:1.5;">
+            Órdenes <strong>Pendiente de Autorización</strong> y <strong>Terminadas</strong> — para contactar por teléfono y WhatsApp.
+            Incluye: nombre, teléfonos, enlace WhatsApp, equipo, días pendiente.
+          </p>
+          <a class="rpt-dl-btn green" style="font-size:13px; padding:9px 18px;"
+             href="<?= _dlLink('descargar-reporte-CRM-Contacto.php','crmContacto','crmContacto',$fechaParams,$empParam) ?>">
+            <i class="fa-solid fa-file-excel"></i> Exportar CRM Clientes
+          </a>
+        </div>
+
+        <!-- Card: Seguimiento Técnicos -->
+        <div style="border:1px solid #e0e7ff; border-radius:12px; padding:18px; background:linear-gradient(135deg,#eff6ff 0%,#eef2ff 100%);">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+            <i class="fa-solid fa-screwdriver-wrench" style="color:#2563eb; font-size:18px;"></i>
+            <h4 style="margin:0; font-size:14px; font-weight:700; color:#1d4ed8;">Seguimiento a Técnicos</h4>
+          </div>
+          <p style="font-size:12px; color:#64748b; margin:0 0 14px; line-height:1.5;">
+            Órdenes <strong>Aceptadas</strong> y en <strong>Revisión</strong> — para presionar avance en taller.
+            Incluye: técnico asignado, cliente, equipo, días en taller.
+          </p>
+          <a class="rpt-dl-btn blue" style="font-size:13px; padding:9px 18px;"
+             href="<?= _dlLink('descargar-reporte-CRM-Seguimiento.php','crmSeguimiento','crmSeguimiento',$fechaParams,$empParam) ?>">
+            <i class="fa-solid fa-file-excel"></i> Exportar Seguimiento Técnicos
+          </a>
+        </div>
+      </div>
     </div>
     <?php endif; ?>
 
