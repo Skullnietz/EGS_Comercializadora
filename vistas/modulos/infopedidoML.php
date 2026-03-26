@@ -421,7 +421,7 @@ if (!$orderId) {
       </div>
 
       <!-- Datos de buyer y seller -->
-      <div class="ml-card">
+      <div class="ml-card" id="ml-card-buyer" style="display:none;">
         <div class="ml-card-head">
           <h3 class="ml-card-title"><i class="fa-solid fa-user"></i> Buyer (Comprador)</h3>
         </div>
