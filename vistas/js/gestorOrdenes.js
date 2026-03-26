@@ -1409,125 +1409,55 @@ function agregarMiObservacion(){
 });
 
 /*=============================================
-VARIABLE LOCAL STORAGE
+DATERANGEPICKER - REPORTE DE ÓRDENES
 =============================================*/
 if($("#daterange-btnOrdenes").length){
 
-	// Limpia una posible instancia previa del plugin daterangepicker
+	// Limpia una posible instancia previa
 	if ($("#daterange-btnOrdenes").data("daterangepicker")) {
 		$("#daterange-btnOrdenes").data("daterangepicker").remove();
 		$("#daterange-btnOrdenes").removeData("daterangepicker");
 	}
 	$("#daterange-btnOrdenes").off();
 
+	var startDate = moment().startOf('month');
+	var endDate   = moment().endOf('month');
+
 	if(localStorage.getItem("btnOrdenes") != null){
 		$("#daterange-btnOrdenes span").html(localStorage.getItem("btnOrdenes"));
 	}else{
-		$("#daterange-btnOrdenes span").text("Mes actual");
+		$("#daterange-btnOrdenes span").text(startDate.format('MMMM D, YYYY') + ' - ' + endDate.format('MMMM D, YYYY'));
 	}
 
-	var presetRanges = {
-		mes_actual: {
-			label: "Mes actual",
-			start: moment().startOf('month'),
-			end: moment().endOf('month')
+	$("#daterange-btnOrdenes").daterangepicker({
+		startDate: startDate,
+		endDate: endDate,
+		opens: 'left',
+		locale: {
+			format: 'MMMM D, YYYY',
+			applyLabel: 'Aplicar',
+			cancelLabel: 'Cancelar',
+			customRangeLabel: 'Rango personalizado',
+			daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
+			monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+			             'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+			firstDay: 1
 		},
-		mes_anterior: {
-			label: "Mes anterior",
-			start: moment().subtract(1, 'month').startOf('month'),
-			end: moment().subtract(1, 'month').endOf('month')
-		},
-		tres_meses: {
-			label: "Ultimos 3 meses",
-			start: moment().subtract(2, 'months').startOf('month'),
-			end: moment().endOf('month')
-		},
-		seis_meses: {
-			label: "Ultimos 6 meses",
-			start: moment().subtract(5, 'months').startOf('month'),
-			end: moment().endOf('month')
-		},
-		doce_meses: {
-			label: "Ultimos 12 meses",
-			start: moment().subtract(11, 'months').startOf('month'),
-			end: moment().endOf('month')
+		ranges: {
+			'Mes actual':        [moment().startOf('month'),  moment().endOf('month')],
+			'Mes anterior':      [moment().subtract(1,'month').startOf('month'), moment().subtract(1,'month').endOf('month')],
+			'Últimos 3 meses':   [moment().subtract(2,'months').startOf('month'), moment().endOf('month')],
+			'Últimos 6 meses':   [moment().subtract(5,'months').startOf('month'), moment().endOf('month')],
+			'Últimos 12 meses':  [moment().subtract(11,'months').startOf('month'), moment().endOf('month')]
 		}
-	};
+	}, function(start, end, label){
+		var textoBtn = start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY');
+		localStorage.setItem("btnOrdenes", textoBtn);
+		$("#daterange-btnOrdenes span").html(textoBtn);
 
-	function irAReporteConRango(startMoment, endMoment, label){
-		localStorage.setItem("btnOrdenes", label);
-		var fechaInicial = startMoment.format('YYYY-MM-DD');
-		var fechaFinal = endMoment.format('YYYY-MM-DD');
-		window.location = "index.php?ruta=reportePorFecheOrdenes&fechaInicial=" + fechaInicial + "&fechaFinal=" + fechaFinal;
-	}
-
-	var $hiddenRangeInput = $('<input type="text" id="flatpickrRangoOrdenes" style="position:fixed;left:-9999px;top:-9999px;opacity:0;" />');
-	$('body').append($hiddenRangeInput);
-
-	var flatpickrRangoOrdenes = null;
-	if (typeof flatpickr !== "undefined") {
-		flatpickrRangoOrdenes = flatpickr(document.getElementById("flatpickrRangoOrdenes"), {
-			mode: "range",
-			dateFormat: "Y-m-d",
-			allowInput: false,
-			onClose: function(selectedDates){
-				if(selectedDates.length === 2){
-					var start = moment(selectedDates[0]);
-					var end = moment(selectedDates[1]);
-					irAReporteConRango(start, end, "Rango personalizado");
-				}
-			}
-		});
-	}
-
-	function abrirSelectorPersonalizado(){
-		if (flatpickrRangoOrdenes && typeof flatpickrRangoOrdenes.clear === "function") {
-			flatpickrRangoOrdenes.clear();
-			flatpickrRangoOrdenes.open();
-			return;
-		}
-		Swal.fire({
-			icon: "warning",
-			title: "No disponible",
-			text: "No se pudo abrir el selector personalizado en este momento."
-		});
-	}
-
-	function manejarSeleccionRango(valor){
-		if(!valor){
-			return;
-		}
-		if(valor === "personalizado"){
-			abrirSelectorPersonalizado();
-			return;
-		}
-		if(presetRanges[valor]){
-			var rango = presetRanges[valor];
-			irAReporteConRango(rango.start, rango.end, rango.label);
-		}
-	}
-
-	$("#daterange-btnOrdenes").on("click", function(){
-		swal({
-			title: "Selecciona un rango",
-			input: "select",
-			inputOptions: {
-				mes_actual: "Mes actual",
-				mes_anterior: "Mes anterior",
-				tres_meses: "Ultimos 3 meses",
-				seis_meses: "Ultimos 6 meses",
-				doce_meses: "Ultimos 12 meses",
-				personalizado: "Rango personalizado"
-			},
-			inputPlaceholder: "Selecciona una opcion",
-			showCancelButton: true,
-			confirmButtonText: "Aplicar",
-			cancelButtonText: "Cancelar"
-		}).then(function(result){
-			if(result.value){
-				manejarSeleccionRango(result.value);
-			}
-		});
+		var fechaInicial = start.format('YYYY-MM-DD');
+		var fechaFinal   = end.format('YYYY-MM-DD');
+		window.location = "index.php?ruta=reportePorFecheOrdenes&fechaInicial=" + encodeURIComponent(fechaInicial) + "&fechaFinal=" + encodeURIComponent(fechaFinal);
 	});
 }
 
