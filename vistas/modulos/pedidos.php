@@ -426,7 +426,6 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
 
   .modal-body .input-group {
     border-radius: 8px;
-    overflow: hidden;
   }
 
   .modal-body .form-control {
@@ -466,8 +465,30 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
     margin-bottom: 5px; display: block;
   }
   .pm-row { display: flex; gap: 12px; flex-wrap: wrap; }
-  .pm-row > .pm-col { flex: 1; min-width: 140px; }
+  .pm-row > .pm-col { flex: 1; min-width: 180px; }
   .pm-divider { border: none; border-top: 1px dashed #e2e8f0; margin: 4px 0 14px; }
+
+  /* ── Fix selects inside modals ── */
+  .pm-section select.form-control,
+  .modal-body select.form-control {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    appearance: auto;
+    -webkit-appearance: menulist;
+    padding-right: 28px;
+  }
+  .pm-section .input-group {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+  .pm-section .input-group .form-control {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
 
   /* ── Modal header subtitle ── */
   .pm-header-sub {
@@ -575,7 +596,7 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
   <div class="content">
 
     <div class="ped-section">
-      <div class="ped-section-icon"><i class="fa-solid fa-shopping-cart"></i></div>
+      <div class="ped-section-icon"><i class="fa-solid fa-box"></i></div>
       <div>
         <h3>Administrador de Pedidos</h3>
         <p>Organiza, monitorea y gestiona todos tus pedidos en una única vista mejorada.</p>
@@ -1024,7 +1045,7 @@ MODAL AGREGAR PEDIDO
         <!-- Header -->
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <span class="pm-header-icon"><i class="fa-solid fa-cart-plus"></i></span>
+          <span class="pm-header-icon"><i class="fa-solid fa-box-open"></i></span>
           <span class="pm-header-id">Nuevo Pedido</span>
           <p class="pm-header-sub">Completa los datos para registrar un pedido</p>
         </div>
