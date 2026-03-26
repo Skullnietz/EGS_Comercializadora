@@ -1455,7 +1455,7 @@ MODAL AGREGAR PEDIDO
 
           <button type="button" class="btn btn-light" data-dismiss="modal" style="border: 1px solid #dbe3ef; color: #334155; font-weight: 600;">Cancelar</button>
 
-          <button type="submit" class="btn btn-primary guardarPedidoEditado" style="background: #6366f1; border: none; color: white; font-weight: 600; padding: 8px 20px; border-radius: 8px;">Guardar Cambios</button>
+          <button type="submit" class="btn btn-primary guardarPedidoDinamico" style="background: #6366f1; border: none; color: white; font-weight: 600; padding: 8px 20px; border-radius: 8px;">Guardar Cambios</button>
 
         </div>
 
@@ -1560,6 +1560,15 @@ MODAL CONFIGURACIÓN MERCADOLIBRE
 <?php } ?>
 
 <script>
+/*=============================================
+SERIALIZAR PRODUCTOS ANTES DE ENVIAR EL FORMULARIO
+=============================================*/
+$(".formularioPedidosDinamicos").on("submit", function(){
+  if(typeof listarProductosPedidos === "function"){
+    listarProductosPedidos();
+  }
+});
+
     /*=============================================
 CARGAR LA TABLA DINÁMICA DE PEDIDOS
 =============================================*/

@@ -1523,10 +1523,11 @@ if($("#daterange-btnOrdenes").length){
 			showCancelButton: true,
 			confirmButtonText: "Aplicar",
 			cancelButtonText: "Cancelar"
-		}).then(function(value){
-			if(!value) return;
-			manejarSeleccionRango(value);
-		}).catch(swal.noop);
+		}).then(function(result){
+			if(result.value){
+				manejarSeleccionRango(result.value);
+			}
+		});
 	});
 }
 
