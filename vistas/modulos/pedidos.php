@@ -480,14 +480,22 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
     -webkit-appearance: menulist;
     padding-right: 28px;
   }
+  /* Keep Bootstrap 3 table layout for input-group (addon + input) */
   .pm-section .input-group {
-    display: flex;
-    flex-wrap: nowrap;
+    display: table;
+    width: 100%;
+  }
+  .pm-section .input-group .input-group-addon {
+    display: table-cell;
+    width: 1%;
+    white-space: nowrap;
+    vertical-align: middle;
+    border-radius: 8px 0 0 8px;
   }
   .pm-section .input-group .form-control {
-    flex: 1;
-    min-width: 0;
-    width: auto;
+    display: table-cell;
+    width: 100%;
+    border-radius: 0 8px 8px 0;
   }
 
   /* ── Modal header subtitle ── */
