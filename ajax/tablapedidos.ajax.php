@@ -121,7 +121,7 @@ class TablaOrdenes{
 			      		
 			      		"$ '.number_format($pedidos[$i]["total"], 2).'",
 
-			      		"'.$pedidos[$i]["metodo"].'",
+			      		"'.(!empty($pedidos[$i]["id_orden"]) && $pedidos[$i]["id_orden"] != '0' ? '<span style=\"color:#6366f1;font-weight:600\">#'.$pedidos[$i]["id_orden"].'</span>' : '<span style=\"color:#94a3b8\">Sin orden</span>').'",
 
 			      		"'.$fechaRegistro.'",
 

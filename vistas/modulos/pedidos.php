@@ -681,7 +681,7 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
                     <th>Cliente</th>
                     <th>Estado</th>
                     <th>Total del pedido</th>
-                    <th>Método de pago</th>
+                    <th>Orden asignada</th>
                     <th>Fecha de pedido</th>
                     <th>Fecha de entrega</th>
                     <th>Acciones</th>
@@ -1539,7 +1539,7 @@ function agregarMiPedido(){
        var pagoClientePedido = $(".pagoClientePedido").val();
        var pagoPedido = $(".pagoPedido").val();
        var adeudo = $(".adeudo").val();
-       var fechaEntrega = $(".fechaEntrega").val();
+       var fechaEntrega = $(".fechaPagoVentaModal").val();
          
         var datospedido = new FormData();
         datospedido.append("empresaPedido", empresaPedido);
