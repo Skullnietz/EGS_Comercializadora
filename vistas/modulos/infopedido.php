@@ -305,10 +305,114 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 }
 .ped-back:hover { color: var(--crm-accent); text-decoration: none; }
 
+/* ─── WhatsApp button ─── */
+.ped-wa-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 8px;
+  background: #25d366; color: #fff; font-size: 14px;
+  border: none; cursor: pointer; flex-shrink: 0;
+  transition: all .2s var(--crm-ease); text-decoration: none;
+}
+.ped-wa-btn:hover {
+  background: #128c7e; transform: scale(1.08);
+  color: #fff; text-decoration: none;
+}
+
+/* ─── New payment inline form ─── */
+.ped-new-payment {
+  background: #f8fafc; border: 2px dashed var(--crm-border);
+  border-radius: var(--crm-radius-sm); padding: 14px 16px;
+  margin-top: 12px; display: none;
+  animation: pedSlideIn .25s var(--crm-ease);
+}
+.ped-new-payment.active { display: block; }
+@keyframes pedSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ped-new-payment-title {
+  font-size: 12px; font-weight: 700; color: var(--crm-accent);
+  text-transform: uppercase; letter-spacing: .4px;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.ped-new-payment-row {
+  display: flex; gap: 10px; align-items: flex-end;
+}
+.ped-new-payment-field {
+  flex: 1;
+}
+.ped-new-payment-field label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: var(--crm-text2); margin-bottom: 4px;
+}
+.ped-new-payment-field input {
+  width: 100%; border: 1px solid var(--crm-border); border-radius: 8px;
+  padding: 8px 12px; font-size: 13px; font-weight: 500;
+  color: var(--crm-text); transition: border-color .2s, box-shadow .2s;
+}
+.ped-new-payment-field input:focus {
+  outline: none; border-color: var(--crm-accent);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+
+/* ─── Modal enhanced ─── */
+.ped-modal-body { padding: 28px; }
+.ped-modal-illustration {
+  text-align: center; padding: 20px 0 24px;
+}
+.ped-modal-illustration i {
+  font-size: 48px; color: var(--crm-accent); opacity: .15;
+}
+.ped-modal-section-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--crm-muted); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.ped-modal-section-title i { font-size: 12px; color: var(--crm-accent); }
+.ped-modal-info-box {
+  background: #f8fafc; border: 1px solid #f1f5f9;
+  border-radius: var(--crm-radius-sm); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+}
+.ped-modal-info-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(99,102,241,.08); color: var(--crm-accent);
+  font-size: 16px; flex-shrink: 0;
+}
+.ped-modal-info-label { font-size: 11px; color: var(--crm-muted); }
+.ped-modal-info-value { font-size: 16px; font-weight: 700; color: var(--crm-text); }
+
+/* Choices.js override inside modal */
+#modalAsignarPedido .choices {
+  margin-bottom: 0;
+}
+#modalAsignarPedido .choices__inner {
+  border: 1px solid var(--crm-border); border-radius: 10px;
+  padding: 8px 12px; font-size: 14px; min-height: 44px;
+  background: var(--crm-surface);
+}
+#modalAsignarPedido .choices__inner:focus-within {
+  border-color: var(--crm-accent);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+#modalAsignarPedido .choices__list--dropdown {
+  border-radius: 10px; border-color: var(--crm-border);
+  box-shadow: var(--crm-shadow-lg);
+  z-index: 9999 !important;
+}
+#modalAsignarPedido .choices__list--dropdown .choices__item--selectable.is-highlighted {
+  background: rgba(99,102,241,.08); color: var(--crm-text);
+}
+#modalAsignarPedido .choices__input {
+  font-size: 14px; color: var(--crm-text);
+}
+
 /* ─── Responsive ─── */
 @media(max-width: 991px) {
   .ped-summary-box { flex-direction: column; }
   .ped-header-bar { flex-direction: column; align-items: flex-start; }
+  .ped-new-payment-row { flex-direction: column; }
 }
 </style>
 
@@ -404,18 +508,26 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
             </div>
             <div class="ped-info-row">
               <div class="ped-info-icon green"><i class="fa-solid fa-phone"></i></div>
-              <div>
+              <div style="flex:1;">
                 <div class="ped-info-label">Teléfono</div>
                 <div class="ped-info-value"><?php echo htmlspecialchars($usuario["telefono"]); ?></div>
               </div>
+              <?php if (!empty($usuario["telefono"])): ?>
+                <a href="https://wa.me/52<?php echo preg_replace('/[^0-9]/', '', $usuario["telefono"]); ?>" target="_blank" class="ped-wa-btn" title="Enviar WhatsApp">
+                  <i class="fa-brands fa-whatsapp"></i>
+                </a>
+              <?php endif; ?>
             </div>
             <?php if (!empty($usuario["telefonoDos"])): ?>
             <div class="ped-info-row">
               <div class="ped-info-icon green"><i class="fa-solid fa-phone"></i></div>
-              <div>
+              <div style="flex:1;">
                 <div class="ped-info-label">Teléfono 2</div>
                 <div class="ped-info-value"><?php echo htmlspecialchars($usuario["telefonoDos"]); ?></div>
               </div>
+              <a href="https://wa.me/52<?php echo preg_replace('/[^0-9]/', '', $usuario["telefonoDos"]); ?>" target="_blank" class="ped-wa-btn" title="Enviar WhatsApp">
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
             </div>
             <?php endif; ?>
           </div>
@@ -474,99 +586,6 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
             </div>
           </div>
         </div>
-
-        <!-- ══════════════════════════════════════
-             PAYMENTS CARD (left column)
-        ══════════════════════════════════════ -->
-        <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "editor" || $_SESSION["perfil"] == "vendedor"): ?>
-        <div class="ped-card">
-          <div class="ped-card-head">
-            <h4 class="ped-card-title"><i class="fa-solid fa-credit-card"></i> Pagos y Abonos</h4>
-            <button type="button" class="ped-btn ped-btn-outline agregarCamposPagoPedido" style="padding:6px 14px; font-size:12px;">
-              <i class="fa-solid fa-plus"></i> Nuevo Pago
-            </button>
-          </div>
-          <div class="ped-card-body">
-
-            <?php
-              $pagos = json_decode($valuePedidos["pagos"], true);
-
-              // Show initial payment
-              if ($valuePedidos["pagoPedido"] != null && $valuePedidos["pagoPedido"] != "" && $valuePedidos["pagoPedido"] != 0):
-            ?>
-              <div class="ped-payment-item">
-                <div class="ped-payment-icon"><i class="fa-solid fa-coins"></i></div>
-                <div>
-                  <div class="ped-info-label">Pago Inicial</div>
-                  <div class="ped-payment-amount">$<?php echo number_format((float)$valuePedidos["pagoPedido"], 2); ?></div>
-                </div>
-              </div>
-              <input type="hidden" value="<?php echo htmlspecialchars($valuePedidos["pagoPedido"]); ?>">
-            <?php endif; ?>
-
-            <!-- Existing payments list -->
-            <div class="agregarCamposPago">
-            <?php
-              if ($pagos != null && $pagos != ""):
-                foreach ($pagos as $key => $valuePagos):
-            ?>
-              <div class="ped-payment-item">
-                <div class="ped-payment-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
-                <div>
-                  <div class="ped-info-label">Abono</div>
-                  <input type="number" class="form-control pagoAbonado" value="<?php echo htmlspecialchars($valuePagos["pago"]); ?>" readonly style="border:none;background:transparent;font-size:14px;font-weight:700;padding:0;height:auto;color:var(--crm-text);box-shadow:none;">
-                </div>
-                <div class="ped-payment-date">
-                  <input type="date" class="form-control fechaAbono" value="<?php echo htmlspecialchars($valuePagos["fecha"]); ?>" readonly style="border:none;background:transparent;font-size:12px;color:var(--crm-muted);box-shadow:none;">
-                </div>
-              </div>
-            <?php
-                endforeach;
-              endif;
-            ?>
-            </div>
-
-            <!-- Dynamic new payment fields -->
-            <div class="nuevoCampoPagoPedido" style="display:none;">
-              <!-- Hidden structure for date fields appended by JS -->
-            </div>
-
-            <input type="hidden" class="PagosListados" name="PagosListados">
-            <input type="hidden" value="<?php echo htmlspecialchars($_GET["idPedido"]); ?>" name="idPedido">
-
-            <!-- Summary boxes -->
-            <div class="ped-summary-box">
-              <div class="ped-summary-item total">
-                <div class="ped-summary-label">Total</div>
-                <div class="ped-summary-value">
-                  <input type="number" class="form-control totalPagosPeiddoDinamico" readonly
-                    style="border:none;background:transparent;text-align:center;font-size:18px;font-weight:800;color:#1e40af;box-shadow:none;padding:0;height:auto;">
-                </div>
-              </div>
-              <div class="ped-summary-item debt">
-                <div class="ped-summary-label">Adeudo</div>
-                <div class="ped-summary-value">
-                  <input type="number" class="form-control adeudoPedidoDinamico" name="adeudoPedidoDinamico" readonly
-                    style="border:none;background:transparent;text-align:center;font-size:18px;font-weight:800;color:#991b1b;box-shadow:none;padding:0;height:auto;">
-                </div>
-              </div>
-            </div>
-
-            <div style="margin-top:16px; text-align:right;">
-              <button type="submit" class="ped-btn ped-btn-success">
-                <i class="fa-solid fa-floppy-disk"></i> Guardar Pedido
-              </button>
-            </div>
-
-          </div>
-        </div>
-
-        <?php
-          $editarOrdenDinamica = new ControladorPedidos();
-          $editarOrdenDinamica->ctrEditarOrdenDinamica();
-        ?>
-        </form>
-        <?php endif; ?>
 
       </div>
 
@@ -674,6 +693,117 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
           </div>
         </div>
 
+        <!-- ══════════════════════════════════════
+             PAYMENTS CARD
+        ══════════════════════════════════════ -->
+        <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "editor" || $_SESSION["perfil"] == "vendedor"): ?>
+        <div class="ped-card">
+          <div class="ped-card-head">
+            <h4 class="ped-card-title"><i class="fa-solid fa-credit-card"></i> Pagos y Abonos</h4>
+            <button type="button" class="ped-btn ped-btn-outline btnToggleNewPayment" style="padding:6px 14px; font-size:12px;">
+              <i class="fa-solid fa-plus"></i> Nuevo Pago
+            </button>
+          </div>
+          <div class="ped-card-body">
+
+            <?php
+              $pagos = json_decode($valuePedidos["pagos"], true);
+
+              // Show initial payment
+              if ($valuePedidos["pagoPedido"] != null && $valuePedidos["pagoPedido"] != "" && $valuePedidos["pagoPedido"] != 0):
+            ?>
+              <div class="ped-payment-item">
+                <div class="ped-payment-icon"><i class="fa-solid fa-coins"></i></div>
+                <div style="flex:1;">
+                  <div class="ped-info-label">Pago Inicial</div>
+                  <div class="ped-payment-amount">$<?php echo number_format((float)$valuePedidos["pagoPedido"], 2); ?></div>
+                </div>
+                <div class="ped-payment-date" style="font-size:11px; color:var(--crm-muted);">Primer pago</div>
+              </div>
+              <input type="hidden" value="<?php echo htmlspecialchars($valuePedidos["pagoPedido"]); ?>">
+            <?php endif; ?>
+
+            <!-- Existing payments list -->
+            <div class="agregarCamposPago">
+            <?php
+              if ($pagos != null && $pagos != ""):
+                $abonoNum = 1;
+                foreach ($pagos as $key => $valuePagos):
+            ?>
+              <div class="ped-payment-item">
+                <div class="ped-payment-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                <div style="flex:1;">
+                  <div class="ped-info-label">Abono #<?php echo $abonoNum; ?></div>
+                  <input type="number" class="form-control pagoAbonado" value="<?php echo htmlspecialchars($valuePagos["pago"]); ?>" readonly style="border:none;background:transparent;font-size:14px;font-weight:700;padding:0;height:auto;color:var(--crm-text);box-shadow:none;">
+                </div>
+                <div class="ped-payment-date">
+                  <input type="date" class="form-control fechaAbono" value="<?php echo htmlspecialchars($valuePagos["fecha"]); ?>" readonly style="border:none;background:transparent;font-size:12px;color:var(--crm-muted);box-shadow:none;text-align:right;">
+                </div>
+              </div>
+            <?php
+                  $abonoNum++;
+                endforeach;
+              endif;
+            ?>
+            </div>
+
+            <!-- New payment inline form -->
+            <div class="ped-new-payment" id="pedNewPaymentForm">
+              <div class="ped-new-payment-title">
+                <i class="fa-solid fa-plus-circle"></i> Registrar Nuevo Abono
+              </div>
+              <div class="ped-new-payment-row">
+                <div class="ped-new-payment-field">
+                  <label>Monto del abono</label>
+                  <input type="number" class="pagoAbonado" placeholder="$0.00" min="0" step="any">
+                </div>
+                <div class="ped-new-payment-field">
+                  <label>Fecha del pago</label>
+                  <input type="date" class="fechaAbono">
+                </div>
+              </div>
+            </div>
+
+            <!-- Hidden structure for legacy JS compatibility -->
+            <div class="nuevoCampoPagoPedido" style="display:none;"></div>
+
+            <input type="hidden" class="PagosListados" name="PagosListados">
+            <input type="hidden" value="<?php echo htmlspecialchars($_GET["idPedido"]); ?>" name="idPedido">
+
+            <!-- Summary boxes -->
+            <div class="ped-summary-box">
+              <div class="ped-summary-item total">
+                <div class="ped-summary-label">Total Pagado</div>
+                <div class="ped-summary-value">
+                  <input type="number" class="form-control totalPagosPeiddoDinamico" readonly
+                    style="border:none;background:transparent;text-align:center;font-size:18px;font-weight:800;color:#1e40af;box-shadow:none;padding:0;height:auto;">
+                </div>
+              </div>
+              <div class="ped-summary-item debt">
+                <div class="ped-summary-label">Adeudo</div>
+                <div class="ped-summary-value">
+                  <input type="number" class="form-control adeudoPedidoDinamico" name="adeudoPedidoDinamico" readonly
+                    style="border:none;background:transparent;text-align:center;font-size:18px;font-weight:800;color:#991b1b;box-shadow:none;padding:0;height:auto;">
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:16px; text-align:right;">
+              <button type="submit" class="ped-btn ped-btn-success">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar Pedido
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <?php
+          $editarOrdenDinamica = new ControladorPedidos();
+          $editarOrdenDinamica->ctrEditarOrdenDinamica();
+        ?>
+        </form>
+        <?php endif; ?>
+
         <!-- Observations Card -->
         <div class="ped-card">
           <div class="ped-card-head">
@@ -748,38 +878,57 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     <div class="modal-dialog">
       <div class="modal-content" style="border-radius:var(--crm-radius); overflow:hidden; border:none; box-shadow:var(--crm-shadow-lg);">
 
-        <div class="modal-header" style="background:var(--crm-accent); color:#fff; border:none; padding:18px 24px;">
-          <button type="button" class="close" data-dismiss="modal" style="color:#fff; opacity:.8;">&times;</button>
-          <h4 style="margin:0; font-weight:700; font-size:16px;">
-            <i class="fa-solid fa-link" style="margin-right:8px;"></i> Asignar Pedido a Orden
+        <!-- Header -->
+        <div class="modal-header" style="background:linear-gradient(135deg, #6366f1 0%, #818cf8 100%); color:#fff; border:none; padding:22px 28px 18px;">
+          <button type="button" class="close" data-dismiss="modal" style="color:#fff; opacity:.7; font-size:22px; margin-top:-4px;">&times;</button>
+          <h4 style="margin:0; font-weight:800; font-size:17px; letter-spacing:-.01em;">
+            <i class="fa-solid fa-link" style="margin-right:10px; opacity:.8;"></i> Asignar Pedido a Orden
           </h4>
+          <p style="margin:4px 0 0; font-size:12px; opacity:.7;">Vincula este pedido con una orden de trabajo existente</p>
         </div>
 
-        <div class="modal-body" style="padding:24px;">
-          <div class="form-group">
-            <label style="font-size:12px; font-weight:600; color:var(--crm-text2); margin-bottom:6px;">Pedido</label>
-            <select class="ped-select" name="AsignarPedidoDinamico">
-              <option value="<?php echo htmlspecialchars($_GET["idPedido"]); ?>">#<?php echo htmlspecialchars($_GET["idPedido"]); ?></option>
-            </select>
+        <!-- Body -->
+        <div class="ped-modal-body">
+
+          <!-- Pedido info box -->
+          <div class="ped-modal-section-title">
+            <i class="fa-solid fa-file-invoice"></i> Pedido actual
           </div>
-          <div class="form-group" style="margin-top:16px;">
-            <label style="font-size:12px; font-weight:600; color:var(--crm-text2); margin-bottom:6px;">Asignar a Orden</label>
-            <select class="ped-select select2" name="AsignarOrdenDinamico">
-              <option>Seleccionar Orden...</option>
+          <div class="ped-modal-info-box">
+            <div class="ped-modal-info-icon"><i class="fa-solid fa-file-invoice"></i></div>
+            <div>
+              <div class="ped-modal-info-label">Pedido seleccionado</div>
+              <div class="ped-modal-info-value">#<?php echo htmlspecialchars($_GET["idPedido"]); ?></div>
+            </div>
+            <input type="hidden" name="AsignarPedidoDinamico" value="<?php echo htmlspecialchars($_GET["idPedido"]); ?>">
+          </div>
+
+          <!-- Orden selector -->
+          <div class="ped-modal-section-title">
+            <i class="fa-solid fa-clipboard-list"></i> Seleccionar orden destino
+          </div>
+          <div style="margin-bottom:8px;">
+            <select class="ped-select" id="selectorOrdenChoices" name="AsignarOrdenDinamico">
+              <option value="" placeholder>Buscar orden por número...</option>
               <?php
                 $orden = controladorOrdenes::ctrMostrarOrdenesSuma();
                 foreach ($orden as $key => $valueOrden) {
-                  echo '<option value="'.htmlspecialchars($valueOrden["id"]).'">#'.htmlspecialchars($valueOrden["id"]).'</option>';
+                  echo '<option value="'.htmlspecialchars($valueOrden["id"]).'">Orden #'.htmlspecialchars($valueOrden["id"]).'</option>';
                 }
               ?>
             </select>
           </div>
+          <p style="font-size:11px; color:var(--crm-muted); margin:0;"><i class="fa-solid fa-circle-info" style="margin-right:4px;"></i> Escribe el número de orden para filtrar resultados</p>
+
         </div>
 
-        <div class="modal-footer" style="border-top:1px solid var(--crm-border); padding:14px 24px;">
-          <button type="button" class="ped-btn ped-btn-outline" data-dismiss="modal">Cancelar</button>
+        <!-- Footer -->
+        <div class="modal-footer" style="border-top:1px solid var(--crm-border); padding:16px 28px; display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="ped-btn ped-btn-outline" data-dismiss="modal">
+            <i class="fa-solid fa-xmark"></i> Cancelar
+          </button>
           <button type="submit" class="ped-btn ped-btn-primary">
-            <i class="fa-solid fa-check"></i> Guardar
+            <i class="fa-solid fa-check"></i> Asignar Orden
           </button>
         </div>
 
@@ -794,8 +943,24 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 
 <script>
 /*=============================================
-PAGE INIT
+INIT CHOICES.JS ON MODAL OPEN
 =============================================*/
+var ordenChoicesInstance = null;
+$('#modalAsignarPedido').on('shown.bs.modal', function() {
+  if (!ordenChoicesInstance) {
+    ordenChoicesInstance = new Choices('#selectorOrdenChoices', {
+      searchEnabled: true,
+      searchPlaceholderValue: 'Escribe para buscar...',
+      placeholderValue: 'Buscar orden...',
+      itemSelectText: 'Seleccionar',
+      noResultsText: 'Sin resultados',
+      noChoicesText: 'No hay opciones',
+      shouldSort: false,
+      searchResultLimit: 20
+    });
+  }
+});
+
 /*=============================================
 AGREGAR CAMPOS DINAMICAMENTE OBSERVACION
 =============================================*/
@@ -1548,26 +1713,60 @@ $(".tablaPedidos").on("click", ".btnVerInfoPedido", function(){
 
 
 /*=============================================
-AGREGAR CAMPOS PAGO PEDIDO DINAMICO
+TOGGLE NEW PAYMENT FORM
 =============================================*/
-$('.agregarCamposPagoPedido').click(function() {
+$('.btnToggleNewPayment').click(function() {
+  var $form = $('#pedNewPaymentForm');
+  if ($form.hasClass('active')) {
+    $form.removeClass('active');
+  } else {
+    $form.addClass('active');
+    $form.find('input[type=number]').focus();
+  }
+});
 
-  $(".agregarCamposPago").append(
-    '<div class="ped-payment-item" style="padding:8px 0;">'+
-      '<div class="ped-payment-icon" style="background:#eef2ff;color:#6366f1;"><i class="fa-solid fa-plus"></i></div>'+
-      '<div style="flex:1;">'+
-        '<input type="number" class="form-control input-sm pagoAbonado" placeholder="Monto" style="border-radius:8px;border:1px solid #e2e8f0;padding:6px 10px;">'+
-      '</div>'+
-      '<div>'+
-        '<input type="date" class="form-control input-sm fechaAbono" style="border-radius:8px;border:1px solid #e2e8f0;padding:6px 10px;">'+
-      '</div>'+
-    '</div>'
-  );
+/*=============================================
+AGREGAR CAMPOS PAGO PEDIDO DINAMICO (legacy class kept)
+=============================================*/
+$(document).on('change', '#pedNewPaymentForm input', function() {
+  var $form = $('#pedNewPaymentForm');
+  var monto = $form.find('input.pagoAbonado').val();
+  var fecha = $form.find('input.fechaAbono').val();
 
-  listarPrimerPago();
-  listarObservacionesPedidos();
-  listarNuevosPreciosDePedido();
-  listarProductosPedidoDinamico();
+  if (monto && fecha && parseFloat(monto) > 0) {
+    // Move to confirmed payments list
+    var numAbono = $('.agregarCamposPago .ped-payment-item').length + 1;
+    $(".agregarCamposPago").append(
+      '<div class="ped-payment-item" style="animation:pedSlideIn .25s ease;">'+
+        '<div class="ped-payment-icon" style="background:#f0fdf4;color:#22c55e;"><i class="fa-solid fa-check"></i></div>'+
+        '<div style="flex:1;">'+
+          '<div class="ped-info-label">Abono #'+numAbono+'</div>'+
+          '<input type="number" class="form-control pagoAbonado" value="'+monto+'" readonly style="border:none;background:transparent;font-size:14px;font-weight:700;padding:0;height:auto;color:var(--crm-text);box-shadow:none;">'+
+        '</div>'+
+        '<div class="ped-payment-date">'+
+          '<input type="date" class="form-control fechaAbono" value="'+fecha+'" readonly style="border:none;background:transparent;font-size:12px;color:var(--crm-muted);box-shadow:none;text-align:right;">'+
+        '</div>'+
+      '</div>'
+    );
+
+    // Reset form
+    $form.find('input.pagoAbonado').val('');
+    $form.find('input.fechaAbono').val('');
+    $form.removeClass('active');
+
+    // Recalculate
+    listarPrimerPago();
+    listarObservacionesPedidos();
+    listarNuevosPreciosDePedido();
+    listarProductosPedidoDinamico();
+
+    // Recalc totals
+    var sumaDos = 0;
+    $(".pagoAbonado").each(function(){ sumaDos += +$(this).val(); });
+    $(".totalPagosPeiddoDinamico").val(sumaDos);
+    var totalPagar = $(".totalPagarPedidoDinamico").val();
+    $(".adeudoPedidoDinamico").val(parseFloat(totalPagar) - parseFloat(sumaDos));
+  }
 });
 
 
