@@ -177,63 +177,63 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 .ped-summary-item.debt .ped-summary-label  { color: #ef4444; }
 .ped-summary-item.debt .ped-summary-value  { color: #991b1b; }
 
-/* ─── Observations timeline ─── */
-.ped-obs-timeline { position: relative; padding-left: 24px; }
-.ped-obs-timeline::before {
-  content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
-  width: 2px; background: #e2e8f0; border-radius: 2px;
-}
-.ped-obs-item {
-  position: relative; margin-bottom: 16px;
-  background: #f8fafc; border: 1px solid #f1f5f9;
-  border-radius: var(--crm-radius-sm); padding: 12px 16px;
-}
-.ped-obs-item::before {
-  content: ''; position: absolute; left: -20px; top: 16px;
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--crm-accent); border: 2px solid #fff;
-  box-shadow: 0 0 0 2px rgba(99,102,241,.2);
-}
-.ped-obs-meta {
-  font-size: 11px; color: var(--crm-muted); margin-bottom: 6px;
-  display: flex; align-items: center; gap: 8px;
-}
-.ped-obs-meta i { font-size: 10px; }
-.ped-obs-text {
-  font-size: 13px; color: var(--crm-text); font-weight: 500;
-  line-height: 1.5;
-}
-.ped-obs-text textarea.nuevaObservacion {
-  width: 100%; border: 1px solid var(--crm-border); border-radius: 8px;
-  padding: 8px 12px; font-size: 13px; font-weight: 500;
-  color: var(--crm-text); resize: vertical; min-height: 60px;
-  font-family: inherit;
-}
-.ped-obs-text textarea.nuevaObservacion:focus {
-  outline: none; border-color: var(--crm-accent);
-  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
-}
-.ped-obs-text textarea.nuevaObservacion[readonly] {
-  background: transparent; border-color: transparent; resize: none;
+/* ─── Observation avatars ─── */
+.ped-obs-avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 800;
+  letter-spacing: .3px;
 }
 
-/* ─── New observation area ─── */
-.agregarcampoobervacionesPedidos .form-group {
-  margin-bottom: 12px;
+/* ─── Observations list ─── */
+.ped-obs-list { display: flex; flex-direction: column; gap: 0; }
+.ped-obs-item {
+  display: flex; gap: 12px; padding: 14px 0;
+  border-bottom: 1px solid #f1f5f9;
 }
-.agregarcampoobervacionesPedidos .input-group {
-  display: flex; align-items: stretch; gap: 0;
+.ped-obs-item:last-child { border-bottom: none; }
+.ped-obs-body { flex: 1; min-width: 0; }
+.ped-obs-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
 }
-.agregarcampoobervacionesPedidos textarea.nuevaObservacion {
-  width: 100%; border: 1px solid var(--crm-border); border-radius: 0 8px 8px 0;
-  padding: 8px 12px; font-size: 13px; font-weight: 500;
+.ped-obs-name { font-size: 13px; font-weight: 700; color: var(--crm-text); }
+.ped-obs-date { font-size: 11px; color: var(--crm-muted); }
+.ped-obs-content {
+  font-size: 13px; color: var(--crm-text2); line-height: 1.55;
+  white-space: pre-wrap; word-break: break-word;
+}
+.ped-obs-content textarea.nuevaObservacion {
+  width: 100%; border: none; background: transparent;
+  padding: 0; font-size: 13px; font-weight: 400;
+  color: var(--crm-text2); resize: none; min-height: 20px;
+  font-family: inherit; line-height: 1.55;
+  overflow: hidden;
+}
+
+/* ─── Compose observation ─── */
+.ped-obs-compose {
+  display: flex; gap: 12px; padding: 16px;
+  background: #f8fafc; border-radius: var(--crm-radius-sm);
+  border: 1px solid #f1f5f9; margin-bottom: 16px;
+}
+.ped-obs-compose-body { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.ped-obs-compose textarea {
+  width: 100%; border: 1px solid var(--crm-border); border-radius: 8px;
+  padding: 10px 14px; font-size: 13px; font-weight: 500;
   color: var(--crm-text); resize: vertical; min-height: 60px;
-  font-family: inherit;
+  font-family: inherit; transition: border-color .2s, box-shadow .2s;
 }
-.agregarcampoobervacionesPedidos textarea.nuevaObservacion:focus {
+.ped-obs-compose textarea:focus {
   outline: none; border-color: var(--crm-accent);
   box-shadow: 0 0 0 3px rgba(99,102,241,.1);
 }
+.ped-obs-compose-actions {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+}
+
+/* Legacy classes kept for JS compatibility */
+.agregarcampoobervacionesPedidos { display: none; }
 
 /* ─── Dynamic payment inputs ─── */
 .agregarCamposPago .input-group,
@@ -433,10 +433,43 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
   $itemOrdenes = "id";
   $valorOrdenes = $valuePedidos["id_orden"];
   $ordenes = controladorOrdenes::ctrMostrarordenesParaValidar($itemOrdenes, $valorOrdenes);
-  foreach ($ordenes as $key => $valueOrdenes) {}
-  $itemTec = "id";
-  $valorTec = $valueOrdenes["id_tecnico"];
-  $respuesta = ControladorTecnicos::ctrMostrarTecnicos($itemTec, $valorTec);
+  $valueOrdenes = [];
+  if (!empty($ordenes) && is_array($ordenes)) {
+    foreach ($ordenes as $key => $valueOrdenes) {}
+  }
+  // Orden & Técnico: only resolve if order is assigned
+  $tieneOrden = !empty($valuePedidos["id_orden"]) && $valuePedidos["id_orden"] != '0';
+  $tieneTecnico = false;
+  $respuesta = null;
+  if ($tieneOrden) {
+    $itemTec = "id";
+    $valorTec = isset($valueOrdenes["id_tecnico"]) ? $valueOrdenes["id_tecnico"] : 0;
+    if (!empty($valorTec)) {
+      $respuesta = ControladorTecnicos::ctrMostrarTecnicos($itemTec, $valorTec);
+      $tieneTecnico = !empty($respuesta) && !empty($respuesta["nombre"]);
+    }
+  }
+
+  // Avatar gradient palette (matches dashboard)
+  $_obsGrads = [
+    'linear-gradient(135deg,#6366f1,#818cf8)',
+    'linear-gradient(135deg,#3b82f6,#60a5fa)',
+    'linear-gradient(135deg,#06b6d4,#22d3ee)',
+    'linear-gradient(135deg,#22c55e,#4ade80)',
+    'linear-gradient(135deg,#f59e0b,#fbbf24)',
+    'linear-gradient(135deg,#ef4444,#f87171)',
+    'linear-gradient(135deg,#8b5cf6,#a78bfa)',
+    'linear-gradient(135deg,#ec4899,#f472b6)',
+  ];
+  function pedGetInitials($name) {
+    $parts = array_filter(explode(' ', trim($name)));
+    if (count($parts) >= 2) return mb_strtoupper(mb_substr($parts[0],0,1) . mb_substr($parts[1],0,1));
+    return mb_strtoupper(mb_substr($name,0,2));
+  }
+  function pedGetGrad($name, $grads) {
+    $hash = crc32($name);
+    return $grads[abs($hash) % count($grads)];
+  }
 
   // Determine status class
   $estadoRaw = $valuePedidos["estado"];
@@ -570,6 +603,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 <div class="ped-info-value"><?php echo htmlspecialchars($asesor["nombre"]); ?></div>
               </div>
             </div>
+            <?php if ($tieneOrden): ?>
             <div class="ped-info-row">
               <div class="ped-info-icon blue"><i class="fa-solid fa-hashtag"></i></div>
               <div>
@@ -577,6 +611,8 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 <div class="ped-info-value">#<?php echo htmlspecialchars($valuePedidos["id_orden"]); ?></div>
               </div>
             </div>
+            <?php endif; ?>
+            <?php if ($tieneTecnico): ?>
             <div class="ped-info-row">
               <div class="ped-info-icon purple"><i class="fa-solid fa-screwdriver-wrench"></i></div>
               <div>
@@ -584,6 +620,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 <div class="ped-info-value"><?php echo htmlspecialchars($respuesta["nombre"]); ?></div>
               </div>
             </div>
+            <?php endif; ?>
           </div>
         </div>
 
@@ -808,11 +845,13 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
         <div class="ped-card">
           <div class="ped-card-head">
             <h4 class="ped-card-title"><i class="fa-solid fa-comments"></i> Observaciones</h4>
-            <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor"): ?>
-              <button type="button" class="ped-btn ped-btn-outline AgregarCampoDeObservacionPedidos" style="padding:6px 14px; font-size:12px;">
-                <i class="fa-solid fa-plus"></i> Nueva Observación
-              </button>
-            <?php endif; ?>
+            <span style="font-size:12px; color:var(--crm-muted); font-weight:500;">
+              <?php
+                $observaciones = json_decode($valuePedidos["observaciones"], true);
+                $obsCount = is_array($observaciones) ? count($observaciones) : 0;
+                echo $obsCount . ' comentario' . ($obsCount != 1 ? 's' : '');
+              ?>
+            </span>
           </div>
           <div class="ped-card-body">
 
@@ -820,38 +859,56 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
             <textarea class="form-control input-lg" id="fechaVista" style="display:none;"></textarea>
             <input type="hidden" id="listarObservacionesPedidos" name="listarObservacionesPedidos">
 
-            <!-- New observations area -->
-            <div class="cajaObervacionesPedidos" style="display:none; margin-bottom:16px;">
+            <!-- Compose new observation (inline, always visible for authorized users) -->
+            <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor"): ?>
+              <?php
+                $sesIni = pedGetInitials($_SESSION["nombre"]);
+                $sesGrad = pedGetGrad($_SESSION["nombre"], $_obsGrads);
+              ?>
+              <div class="ped-obs-compose" id="pedObsCompose">
+                <div class="ped-obs-avatar" style="background:<?php echo $sesGrad; ?>;"><?php echo $sesIni; ?></div>
+                <div class="ped-obs-compose-body">
+                  <textarea id="pedNewObsText" class="form-control" placeholder="Escribe una observación..." rows="2"></textarea>
+                  <div class="ped-obs-compose-actions">
+                    <button type="button" class="ped-btn ped-btn-primary AgregarCampoDeObservacionPedidos" style="padding:7px 16px; font-size:12px;">
+                      <i class="fa-solid fa-paper-plane"></i> Agregar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            <?php endif; ?>
+
+            <!-- Hidden legacy container for JS serialization -->
+            <div class="cajaObervacionesPedidos" style="display:none;">
               <div class="agregarcampoobervacionesPedidos"></div>
             </div>
 
-            <!-- Existing observations timeline -->
-            <?php
-              $observaciones = json_decode($valuePedidos["observaciones"], true);
-              if (is_array($observaciones) || is_object($observaciones)):
-            ?>
-              <div class="ped-obs-timeline">
+            <!-- Existing observations -->
+            <?php if (is_array($observaciones) && count($observaciones) > 0): ?>
+              <div class="ped-obs-list">
                 <?php foreach ($observaciones as $key => $valueObservaciones):
                   if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "tecnico"):
+                    $obsName = isset($valueObservaciones["creador"]) ? $valueObservaciones["creador"] : 'Usuario';
+                    $obsIni  = pedGetInitials($obsName);
+                    $obsGrad = pedGetGrad($obsName, $_obsGrads);
                 ?>
                   <div class="ped-obs-item">
-                    <div class="ped-obs-meta">
-                      <i class="fa-solid fa-user-circle"></i>
-                      <strong><?php echo htmlspecialchars($valueObservaciones["creador"]); ?></strong>
-                      <span>&middot;</span>
-                      <span><?php echo htmlspecialchars($valueObservaciones["fecha"]); ?></span>
-                    </div>
-                    <div class="ped-obs-text">
-                      <textarea class="nuevaObservacion" readonly><?php echo htmlspecialchars($valueObservaciones["observacion"]); ?></textarea>
+                    <div class="ped-obs-avatar" style="background:<?php echo $obsGrad; ?>;"><?php echo $obsIni; ?></div>
+                    <div class="ped-obs-body">
+                      <div class="ped-obs-header">
+                        <span class="ped-obs-name"><?php echo htmlspecialchars($obsName); ?></span>
+                        <span class="ped-obs-date"><?php echo htmlspecialchars($valueObservaciones["fecha"]); ?></span>
+                      </div>
+                      <div class="ped-obs-content">
+                        <textarea class="nuevaObservacion" readonly><?php echo htmlspecialchars($valueObservaciones["observacion"]); ?></textarea>
+                      </div>
                     </div>
                   </div>
                 <?php
                   endif;
                 endforeach; ?>
               </div>
-            <?php endif; ?>
-
-            <?php if (empty($observaciones) || !is_array($observaciones)): ?>
+            <?php else: ?>
               <div style="text-align:center; padding:24px 0; color:var(--crm-muted);">
                 <i class="fa-solid fa-message" style="font-size:28px; opacity:.3; margin-bottom:8px;"></i>
                 <p style="margin:0; font-size:13px;">No hay observaciones registradas</p>
@@ -1902,6 +1959,15 @@ $(document).on("change", "input.fechaPagoVentaModal", function(){
 
 });
 /*=============================================
+AUTO-RESIZE READONLY OBSERVATION TEXTAREAS
+=============================================*/
+$(document).ready(function(){
+  $('.ped-obs-content textarea.nuevaObservacion[readonly]').each(function(){
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+  });
+});
+/*=============================================
 LISTAR PRIMER PAGO
 =============================================*/
 function listarPrimerPago(){
@@ -1967,26 +2033,88 @@ $("#fechaVista").attr("fecha", fecha);
 
 $('.AgregarCampoDeObservacionPedidos').click(function() {
 
-  $(".cajaObervacionesPedidos").show();
+  var obsText = $('#pedNewObsText').val();
+  if (!obsText || !obsText.trim()) {
+    $('#pedNewObsText').focus();
+    return;
+  }
 
-  $(".agregarcampoobervacionesPedidos").append(
-    '<div class="ped-obs-item" style="position:relative; margin-bottom:12px; background:#f8fafc; border:1px solid #f1f5f9; border-radius:10px; padding:12px 16px;">'+
-      '<div class="ped-obs-meta" style="margin-bottom:8px;">'+
-        '<button type="button" class="ped-btn-danger quitarObservacion"><i class="fa-solid fa-times"></i></button>'+
-        '<strong>'+valor_sesion+'</strong>'+
-        '<span>&middot;</span>'+
-        '<span>'+fecha+'</span>'+
+  // Build initials from session name
+  var parts = valor_sesion.trim().split(/\s+/);
+  var initials = parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : valor_sesion.substring(0,2).toUpperCase();
+
+  // Get gradient based on name
+  var obsGrads = [
+    'linear-gradient(135deg,#6366f1,#818cf8)',
+    'linear-gradient(135deg,#3b82f6,#60a5fa)',
+    'linear-gradient(135deg,#06b6d4,#22d3ee)',
+    'linear-gradient(135deg,#22c55e,#4ade80)',
+    'linear-gradient(135deg,#f59e0b,#fbbf24)',
+    'linear-gradient(135deg,#ef4444,#f87171)',
+    'linear-gradient(135deg,#8b5cf6,#a78bfa)',
+    'linear-gradient(135deg,#ec4899,#f472b6)'
+  ];
+  var hash = 0;
+  for (var c = 0; c < valor_sesion.length; c++) hash = ((hash << 5) - hash) + valor_sesion.charCodeAt(c);
+  var grad = obsGrads[Math.abs(hash) % obsGrads.length];
+
+  // Insert visual item at top of the list
+  var newItem =
+    '<div class="ped-obs-item" style="animation:pedSlideIn .25s var(--crm-ease);">'+
+      '<div class="ped-obs-avatar" style="background:'+grad+';">'+initials+'</div>'+
+      '<div class="ped-obs-body">'+
+        '<div class="ped-obs-header">'+
+          '<span class="ped-obs-name">'+$('<span>').text(valor_sesion).html()+'</span>'+
+          '<span class="ped-obs-date">'+fecha+' <span style="color:#22c55e;font-weight:600;">• Nueva</span></span>'+
+        '</div>'+
+        '<div class="ped-obs-content">'+$('<span>').text(obsText).html()+'</div>'+
       '</div>'+
-      '<textarea class="form-control nuevaObservacion" fecha="'+fecha+'" placeholder="Escribe una observación..." style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;min-height:60px;font-family:inherit;resize:vertical;"></textarea>'+
+      '<button type="button" class="ped-btn-danger quitarObservacion" style="align-self:flex-start;margin-top:2px;"><i class="fa-solid fa-times"></i></button>'+
+    '</div>';
+
+  // Ensure the list exists
+  if ($('.ped-obs-list').length === 0) {
+    // Remove empty state and create list
+    $('#pedObsCompose').after('<div class="ped-obs-list"></div>');
+    // Remove "no hay observaciones" placeholder
+    $('.ped-card-body').find('[style*="text-align:center"]').filter(function() { return $(this).find('.fa-message').length; }).remove();
+  }
+  $('.ped-obs-list').prepend(newItem);
+
+  // Add hidden fields for serialization
+  $(".cajaObervacionesPedidos").show();
+  $(".agregarcampoobervacionesPedidos").append(
+    '<div class="pedHiddenObs">'+
+      '<textarea class="nuevaObservacion" fecha="'+fecha+'" style="display:none;">'+$('<span>').text(obsText).html()+'</textarea>'+
       '<input type="hidden" class="usuarioQueCaptura" value="'+valor_sesion+'" name="usuarioQueCaptura">'+
     '</div>'
   );
+
+  // Clear compose area
+  $('#pedNewObsText').val('');
+
+  // Update count
+  var totalObs = $('.ped-obs-item').length;
+  $('.ped-card-head span').filter(function(){ return $(this).text().match(/comentario/); }).text(totalObs + ' comentario' + (totalObs !== 1 ? 's' : ''));
 
   listarObservacionesPedidos();
   listarNuevosPreciosDePedido();
 });
 
-
+/* Remove a newly-added observation */
+$(document).on("click", ".quitarObservacion", function() {
+  var $item = $(this).closest('.ped-obs-item');
+  var idx = $('.ped-obs-list .ped-obs-item').index($item);
+  // Remove matching hidden serialization entry
+  $('.agregarcampoobervacionesPedidos .pedHiddenObs').eq(idx).remove();
+  $item.remove();
+  // Update count
+  var totalObs = $('.ped-obs-item').length;
+  $('.ped-card-head span').filter(function(){ return $(this).text().match(/comentario/); })
+    .text(totalObs + ' comentario' + (totalObs !== 1 ? 's' : ''));
+  listarObservacionesPedidos();
+  listarNuevosPreciosDePedido();
+});
 
 $(document).on("change", ".nuevaObservacion", function() {
 
