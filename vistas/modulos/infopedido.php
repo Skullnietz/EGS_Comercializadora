@@ -66,18 +66,36 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 .ped-section h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--crm-text); }
 .ped-section p  { margin: 2px 0 0; font-size: 12px; color: var(--crm-muted); }
 
-/* ─── Header bar ─── */
-.ped-header-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+/* ─── Page header ─── */
+.ped-page-header {
+  background: var(--crm-surface);
+  border: 1px solid var(--crm-border);
+  border-radius: var(--crm-radius);
+  box-shadow: var(--crm-shadow);
+  padding: 20px 24px;
+  margin-bottom: 20px;
 }
-.ped-header-bar h1 {
+.ped-breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  list-style: none; margin: 0 0 10px; padding: 0;
+  font-size: 12px; font-weight: 500;
+}
+.ped-breadcrumb li { display: flex; align-items: center; gap: 6px; }
+.ped-breadcrumb li a {
+  color: var(--crm-muted); text-decoration: none;
+  transition: color .15s;
+}
+.ped-breadcrumb li a:hover { color: var(--crm-accent); }
+.ped-breadcrumb li a i { font-size: 11px; }
+.ped-breadcrumb-sep { color: var(--crm-border); font-size: 10px; }
+.ped-breadcrumb li.active { color: var(--crm-text2); }
+.ped-header-row {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.ped-header-row h1 {
   font-size: 22px; font-weight: 800; color: var(--crm-text);
   margin: 0; display: flex; align-items: center; gap: 10px;
-}
-.ped-header-bar h1 span {
-  color: var(--crm-accent); font-size: 13px; font-weight: 600;
-  background: rgba(99,102,241,.08); padding: 4px 12px; border-radius: 20px;
 }
 
 /* ─── Status badge ─── */
@@ -411,7 +429,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 /* ─── Responsive ─── */
 @media(max-width: 991px) {
   .ped-summary-box { flex-direction: column; }
-  .ped-header-bar { flex-direction: column; align-items: flex-start; }
+  .ped-header-row { flex-direction: column; align-items: flex-start; }
   .ped-new-payment-row { flex-direction: column; }
 }
 </style>
@@ -484,32 +502,29 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 
 <div class="content-wrapper">
 
-  <!-- Breadcrumb -->
-  <section class="content-header">
-    <h1>Detalle del Pedido <small>#<?php echo htmlspecialchars($_GET["idPedido"]); ?></small></h1>
-    <ol class="breadcrumb">
-      <li><a href="index.php?ruta=inicio"><i class="fa-solid fa-gauge"></i> Inicio</a></li>
-      <li><a href="index.php?ruta=pedidos">Pedidos</a></li>
-      <li class="active">Pedido #<?php echo htmlspecialchars($_GET["idPedido"]); ?></li>
-    </ol>
-  </section>
+  <section class="content ped-page" style="padding-top:20px;">
 
-  <section class="content ped-page">
-
-    <!-- ─── Header Bar ─── -->
-    <div class="ped-header-bar">
-      <div>
-        <a href="index.php?ruta=pedidos" class="ped-back">
-          <i class="fa-solid fa-arrow-left"></i> Volver a pedidos
-        </a>
-        <h1>
-          Pedido #<?php echo htmlspecialchars($_GET["idPedido"]); ?>
+    <!-- ─── Page Header ─── -->
+    <div class="ped-page-header">
+      <ul class="ped-breadcrumb">
+        <li><a href="index.php?ruta=inicio"><i class="fa-solid fa-gauge"></i> Inicio</a></li>
+        <li><span class="ped-breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span></li>
+        <li><a href="index.php?ruta=pedidos">Pedidos</a></li>
+        <li><span class="ped-breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span></li>
+        <li class="active">Pedido #<?php echo htmlspecialchars($_GET["idPedido"]); ?></li>
+      </ul>
+      <div class="ped-header-row">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <a href="index.php?ruta=pedidos" class="ped-back" title="Volver">
+            <i class="fa-solid fa-arrow-left"></i>
+          </a>
+          <h1>Pedido #<?php echo htmlspecialchars($_GET["idPedido"]); ?></h1>
           <span class="ped-status <?php echo $statusClass; ?>"><?php echo htmlspecialchars($estadoRaw); ?></span>
-        </h1>
+        </div>
+        <button class="ped-btn ped-btn-outline" data-toggle="modal" data-target="#modalAsignarPedido">
+          <i class="fa-solid fa-link"></i> Asignar a Orden
+        </button>
       </div>
-      <button class="ped-btn ped-btn-outline" data-toggle="modal" data-target="#modalAsignarPedido">
-        <i class="fa-solid fa-link"></i> Asignar a Orden
-      </button>
     </div>
 
     <div class="row">
