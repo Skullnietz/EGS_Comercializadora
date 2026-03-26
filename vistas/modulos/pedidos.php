@@ -376,13 +376,18 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
     background: linear-gradient(135deg, #6366f1, #818cf8) !important;
     color: #fff !important;
     border: none !important;
-    padding: 20px !important;
+    padding: 22px 24px !important;
+    position: relative;
   }
 
   .modal-header .close {
     color: #fff !important;
     opacity: 0.8;
     text-shadow: none;
+    font-size: 22px;
+    position: absolute;
+    right: 20px;
+    top: 18px;
   }
 
   .modal-header .close:hover,
@@ -397,6 +402,13 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
     font-weight: 700;
   }
 
+  .modal-content {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(15,23,42,.18);
+  }
+
   .modal-body {
     padding: 24px;
     background: #f8fafc;
@@ -405,7 +417,7 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
   .modal-footer {
     background: #fff;
     border-top: 1px solid #e2e8f0;
-    padding: 16px;
+    padding: 16px 24px;
   }
 
   .modal-body .form-group {
@@ -433,6 +445,42 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
     background: #f0f4f8;
     border: 1px solid #dbe3ef;
     color: #6366f1;
+  }
+
+  /* ── Modal section cards ── */
+  .pm-section {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .pm-section-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; color: var(--crm-muted); margin: 0 0 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .pm-section-title i { font-size: 12px; color: var(--crm-accent); }
+  .pm-field-label {
+    font-size: 12px; font-weight: 600; color: var(--crm-text2);
+    margin-bottom: 5px; display: block;
+  }
+  .pm-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .pm-row > .pm-col { flex: 1; min-width: 140px; }
+  .pm-divider { border: none; border-top: 1px dashed #e2e8f0; margin: 4px 0 14px; }
+
+  /* ── Modal header subtitle ── */
+  .pm-header-sub {
+    font-size: 13px; font-weight: 400; opacity: .8; margin-top: 4px;
+  }
+  .pm-header-id {
+    font-size: 26px; font-weight: 800; letter-spacing: -.02em;
+  }
+  .pm-header-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(255,255,255,.15); margin-right: 14px;
+    font-size: 20px; vertical-align: middle;
   }
 
   /* ── Tabs de secciones ── */
@@ -713,469 +761,246 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
 MODAL EDITAR PEDIDO
 ======================================-->
 <div id="modalEditarPedido" class="modal fade" role="dialog">
-  
     <div class="modal-dialog modal-lg">
-      
       <div class="modal-content">
-        
-        <!--=====================================
-        CABEZA DEL MODAL
-        ======================================-->
-        <div class="modal-header" style="background:#138a1e; color:white">
-          
-          <button type="button" class="close" data-dismiss>&times;</button>
 
-          <center><h2><b>PEDIDO:</b></h2><h2 class="modal-title NumeroDePedido"></h2></center>
-
-        </div>
-        <!--=====================================
-        CUERPO DEL MODAL
-        ======================================--> 
-        <input type="hidden" class="idPedido">
-
-
-
-        <!--=====================================
-        ENTRADA PARA EL ASESOR
-        ======================================-->
-        <div class="form-group">
-          
-          <div class="input-group">
-            
-            <span class="input-group-addon"><i class="fas fa-user"></i></span>
-
-            <input type="tex" class="form-control input-lg asesorDePedido" readonly>
-
-          </div>
-
-        </div>
-         <!--=====================================
-        INFORMACIÓN DEL CLIENTE
-        ======================================-->
-        <div class="form-group">
-          
-          <div class="input-group">
-            
-            <span class="input-group-addon"><i class="fas fa-user"></i></span>
-
-            <input type="tex" class="form-control input-lg clienteNombre" readonly>
-            <input type="tex" class="form-control input-lg clienteNumero" readonly>
-            <input type="tex" class="form-control input-lg clienteOrden" readonly>
-
-          </div>
-
+        <!-- Header -->
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <span class="pm-header-icon"><i class="fa-solid fa-pen-to-square"></i></span>
+          <span class="pm-header-id">Pedido #<span class="NumeroDePedido"></span></span>
+          <p class="pm-header-sub">Revisa y edita la información del pedido</p>
         </div>
 
-        <!--=====================================
-        ENTRADA PARA INFORMACION DEL PEDIDO UNO
-        ======================================-->
-        <div class="form-group row productoUnoEdicionMostrar" style="display: none;">
-          
-          <div class="col-xs-6">
-            <span><h5><center>Producto</center></h5></span>
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-product-hunt"></i></span>
-              <input type="text" class="form-control input-lg edicionProductoUnoPedido">
-
-            </div>
-
-          </div>
-          <div class="col-xs-6">
-            <span><h5><center>Precio</center></h5></span>
-            <div class="input-group">
-
-              <input type="number" class="form-control input-lg precioProductoPedidoEdicion" readonly>
-
-
-              <span class="input-group-addon"><i class="fas fa-dollar"></i></span>
-              
-            </div>
-
-          </div>
-
-        </div>  
-
-
-        <!--=====================================
-        ENTRADA PARA CANTIDAD DE CANTIDA DE PRODUCTOS PEDIDOS UNO
-        ======================================-->
-        <div class="form-group cantidadProductosUnoPedidoEditados" style="display: none;">
-          <span><h5><center>Cantidad</center></h5></span>
-          <div class="input-group">
-            
-            <span class="input-group-addon"><i class="fas fa-arrow-circle-up"></i></span>
-            <input type="number" class="form-control input-lg cantidadDeProductoPedidoEditado" readonly>  
-
-          </div>
-
-        </div>
-        <!--=====================================
-        ENTRADA PARA INFORMACION DEL PEDIDO DOS 
-        ======================================-->
-        <div class="form-group row productoDosEdicionMostrar" style="display: none;">
-          
-          <div class="col-xs-6">
-            <span><h5><center>Producto</center></h5></span>
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-product-hunt"></i></span>
-              <input type="text" class="form-control input-lg edicionProductoUnoPedidoDos">
-
-            </div>
-
-          </div>
-          <div class="col-xs-6">
-            <span><h5><center>Precio</center></h5></span>
-            <div class="input-group">
-
-              <input type="number" class="form-control input-lg precioProductoPedidoEdicionDos" readonly>
-
-
-              <span class="input-group-addon"><i class="fas fa-dollar"></i></span>
-              
-            </div>
-
-          </div>
-
-        </div>  
-
-        <!--=====================================
-        ENTRADA PARA CANTIDAD DE CANTIDA DE PRODUCTOS PEDIDOS DOS
-        ======================================-->
-        <div class="form-group cantidadProductosDosPedidoEditados" style="display: none;">
-          <span><h5><center>Cantidad</center></h5></span>
-          <div class="input-group">
-            
-            <span class="input-group-addon"><i class="fas fa-arrow-circle-up"></i></span>
-            <input type="number" class="form-control input-lg cantidadDeProductoPedidoEditadoDos" readonly>  
-
-          </div>
-
-        </div>
-        <!--=====================================
-        ENTRADA PARA INFORMACION DEL PEDIDO TRES
-        ======================================-->
-        <div class="form-group row productoTresEdicionMostrar" style="display: none;">
-          
-          <div class="col-xs-6">
-            <span><h5><center>Producto</center></h5></span>
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-product-hunt"></i></span>
-              <input type="text" class="form-control input-lg edicionProductoUnoPedidoTres">
-
-            </div>
-
-          </div>
-          <div class="col-xs-6">
-            <span><h5><center>Precio</center></h5></span>
-            <div class="input-group">
-
-              <input type="number" class="form-control input-lg precioProductoPedidoEdicionTres" readonly>
-
-
-              <span class="input-group-addon"><i class="fas fa-dollar"></i></span>
-              
-            </div>
-
-          </div>
-
-        </div>  
-
-        <!--=====================================
-        ENTRADA PARA CANTIDAD DE CANTIDA DE PRODUCTOS PEDIDOS TRES
-        ======================================-->
-        <div class="form-group cantidadProductosTresPedidoEditados" style="display: none;">
-          <span><h5><center>Cantidad</center></h5></span>
-          <div class="input-group">
-            
-            <span class="input-group-addon"><i class="fas fa-arrow-circle-up"></i></span>
-            <input type="number" class="form-control input-lg cantidadDeProductoPedidoEditadoTres" readonly>  
-
-          </div>
-
-        </div>
-        <!--=====================================
-        ENTRADA PARA INFORMACION DEL PEDIDO CUATRO
-        ======================================-->
-        <div class="form-group row productoCuatroEdicionMostrar" style="display: none;">
-          
-          <div class="col-xs-6">
-            <span><h5><center>Producto</center></h5></span>
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-product-hunt"></i></span>
-              <input type="text" class="form-control input-lg edicionProductoUnoPedidoCuatro">
-
-            </div>
-
-          </div>
-          <div class="col-xs-6">
-            <span><h5><center>Precio</center></h5></span>
-            <div class="input-group">
-
-              <input type="number" class="form-control input-lg precioProductoPedidoEdicionCuatro" readonly>
-
-
-              <span class="input-group-addon"><i class="fas fa-dollar"></i></span>
-              
-            </div>
-
-          </div>
-
-        </div>  
-
-        <!--=====================================
-        ENTRADA PARA CANTIDAD DE CANTIDA DE PRODUCTOS PEDIDOS CUATRO
-        ======================================-->
-        <div class="form-group cantidadProductosCuatroPedidoEditados" style="display: none;">
-          <span><h5><center>Cantidad</center></h5></span>
-          <div class="input-group">
-            
-            <span class="input-group-addon"><i class="fas fa-arrow-circle-up"></i></span>
-            <input type="number" class="form-control input-lg cantidadDeProductoPedidoEditadoCuatro" readonly>  
-
-          </div>
-
-        </div>
-        <!--=====================================
-        ENTRADA PARA INFORMACION DEL PEDIDO CINCO
-        ======================================-->
-        <div class="form-group row productoCincoEdicionMostrar" style="display: none;">
-          
-          <div class="col-xs-6">
-            <span><h5><center>Producto</center></h5></span>
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-product-hunt"></i></span>
-              <input type="text" class="form-control input-lg edicionProductoUnoPedidoCinco">
-
-            </div>
-
-          </div>
-          <div class="col-xs-6">
-            <span><h5><center>Precio</center></h5></span>
-            <div class="input-group">
-
-              <input type="number" class="form-control input-lg precioProductoPedidoEdicionCinco" readonly>
-
-
-              <span class="input-group-addon"><i class="fas fa-dollar"></i></span>
-              
-            </div>
-
-          </div>
-
-        </div>  
-
-        <!--=====================================
-        ENTRADA PARA CANTIDAD DE CANTIDAD DE PRODUCTOS PEDIDOS CINCO
-        ======================================-->
-        <div class="form-group cantidadProductosCincoPedidoEditados" style="display: none;">
-          <span><h5><center>Cantidad</center></h5></span>
-          <div class="input-group">
-            
-            <span class="input-group-addon"><i class="fas fa-arrow-circle-up"></i></span>
-            <input type="number" class="form-control input-lg cantidadDeProductoPedidoEditadoCinco" readonly>  
-
-          </div>
-
-        </div>
-        <!--=====================================
-        ENTRADA PARA PAGOS
-        ======================================-->
-        <div class="form-group row">
-          
-          <div class="col-xs-6">
-            
-            <span><h5><center>Pago del cliente</center></h5></span>
-
-            <div class="input-group"> 
-              
-              <span class="input-group-addon"><i class="fas fa-hand-holding-usd"></i></span>
-              <input type="number" class="form-control input-lg pagoClientePedido" value="0" min="0" step="any" readonly>
-
-            </div>
-
-          </div>
-          <div class="col-xs-6">
-            
-            <span><h5><center>TOTAL</center></h5></span>
-
-            <div class="input-group">
-              
-                <span class="input-group-addon"><i class="fas fa-money"></i></span>
-                <input type="number" class="form-control input-lg pagoPedidoEdidato" readonly>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-
-        <!--=====================================
-        Adeudo
-        ======================================-->
-        <div class="form-group row">
-          
-          <div class="col-xs-6">
-            
-            <span><h5><center>Adeudo</center></h5></span>
-
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-exchange"></i></span>
-              
-              <input type="number" class="form-control input-lg adeudoPedidoEditado" min="0" value="0" step="any" readonly>  
-
-            </div>  
-
-          </div>
-
-
-        </div>
-            <!--=====================================
-            ENTRADA PARA LOS ESTATUS
-            ======================================-->  
-
-              <div class="form-group">
-                
+        <!-- Body -->
+        <div class="modal-body">
+          <input type="hidden" class="idPedido">
+
+          <!-- Asesor & Cliente -->
+          <div class="pm-section">
+            <div class="pm-section-title"><i class="fa-solid fa-user"></i> Información del Contacto</div>
+            <div class="pm-row" style="margin-bottom:10px;">
+              <div class="pm-col">
+                <label class="pm-field-label">Asesor</label>
                 <div class="input-group">
-
-                  <span class="input-group-addon"><i class="fas fa-toggle-on"></i></i></span>
-                  
-                  <select class="form-control input-lg EstadoDelPedido">
-
-                    <option class="optionEstadoPedido">
-                      
-
-                    </option>
-                    
-                    <option value="Pedido Pendiente">
-
-                      Pedido Pendiente
-
-                    </option>
-
-                      <option value="Pedido Adquirido">
-
-                        Pedido Adquirido        
-
-                      </option> 
-
-                      <option value="Producto en Almacen">
-
-                        Producto en Almacén        
-
-                      </option> 
-  
-                      <option value="Entregado al asesor">
-
-                        Entregado al Asesor
-
-                      </option>
-
-                      <option value="Entregado/Pagado">
-
-                        Entregado/Pagado
-
-                      </option>
-
-                      <option value="Entregado/Credito">
-
-                        Entregado/Crédito
-
-                      </option>
-
-
-                  </select>
-
+                  <span class="input-group-addon"><i class="fa-solid fa-headset"></i></span>
+                  <input type="text" class="form-control asesorDePedido" readonly>
                 </div>
-
               </div>
-
-            <!--=====================================
-            BOTON PARA PODER AGREGAR ABONOS DE MANERA AUTOMATICA
-            ======================================-->  
-            
-             <div class="panel">AGREGAR NUEVO ABONO</div>
-
-                 <a href="#" onclick="AgregarCampoDeaAbonoEditado();">
-                  
-                  <div id="camposAbono">
-                
-                    <input type="button" class="btn btn-primary " value="Agregar Abono"/></br></br>
-
-                </a>
-
+            </div>
+            <div class="pm-row">
+              <div class="pm-col">
+                <label class="pm-field-label">Cliente</label>
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa-solid fa-user"></i></span>
+                  <input type="text" class="form-control clienteNombre" readonly>
+                </div>
+              </div>
+              <div class="pm-col">
+                <label class="pm-field-label">Teléfono</label>
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa-solid fa-phone"></i></span>
+                  <input type="text" class="form-control clienteNumero" readonly>
+                </div>
+              </div>
+              <div class="pm-col">
+                <label class="pm-field-label">Orden</label>
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span>
+                  <input type="text" class="form-control clienteOrden" readonly>
+                </div>
+              </div>
+            </div>
           </div>
-        <!--=====================================
-        CAMPOS DE ABONOS
-        ======================================-->
-        <div class="form-group row">
-          
-          <div class="col-xs-6">
-            
-            <span><h5><center>Abono</center></h5></span>
 
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-money"></i></span>
-              <input class="form-control input-lg abono1Lectura" type="text" readonly>
+          <!-- Productos -->
+          <div class="pm-section">
+            <div class="pm-section-title"><i class="fa-solid fa-box-open"></i> Productos del Pedido</div>
 
+            <!-- Producto 1 -->
+            <div class="productoUnoEdicionMostrar" style="display:none;">
+              <div class="pm-row" style="margin-bottom:8px;">
+                <div class="pm-col" style="flex:2;">
+                  <label class="pm-field-label">Producto</label>
+                  <input type="text" class="form-control edicionProductoUnoPedido">
+                </div>
+                <div class="pm-col">
+                  <label class="pm-field-label">Precio</label>
+                  <input type="number" class="form-control precioProductoPedidoEdicion" readonly>
+                </div>
+              </div>
+              <div class="cantidadProductosUnoPedidoEditados" style="display:none; margin-bottom:10px;">
+                <label class="pm-field-label">Cantidad</label>
+                <input type="number" class="form-control cantidadDeProductoPedidoEditado" readonly style="max-width:140px;">
+              </div>
+              <hr class="pm-divider">
             </div>
 
-          </div>
-          <div class="col-xs-6">
-            
-            <span><h5><center>Fecha</center></h5></span>
-
-            <div class="input-group">
-
-              <span class="input-group-addon"><i class="fas fa-clock"></i></span>
-              <input type="date" class="form-control input-lg fechaAbono1Lectura" min="0" value="0" step="any" readonly>
-
+            <!-- Producto 2 -->
+            <div class="productoDosEdicionMostrar" style="display:none;">
+              <div class="pm-row" style="margin-bottom:8px;">
+                <div class="pm-col" style="flex:2;">
+                  <label class="pm-field-label">Producto</label>
+                  <input type="text" class="form-control edicionProductoUnoPedidoDos">
+                </div>
+                <div class="pm-col">
+                  <label class="pm-field-label">Precio</label>
+                  <input type="number" class="form-control precioProductoPedidoEdicionDos" readonly>
+                </div>
+              </div>
+              <div class="cantidadProductosDosPedidoEditados" style="display:none; margin-bottom:10px;">
+                <label class="pm-field-label">Cantidad</label>
+                <input type="number" class="form-control cantidadDeProductoPedidoEditadoDos" readonly style="max-width:140px;">
+              </div>
+              <hr class="pm-divider">
             </div>
 
+            <!-- Producto 3 -->
+            <div class="productoTresEdicionMostrar" style="display:none;">
+              <div class="pm-row" style="margin-bottom:8px;">
+                <div class="pm-col" style="flex:2;">
+                  <label class="pm-field-label">Producto</label>
+                  <input type="text" class="form-control edicionProductoUnoPedidoTres">
+                </div>
+                <div class="pm-col">
+                  <label class="pm-field-label">Precio</label>
+                  <input type="number" class="form-control precioProductoPedidoEdicionTres" readonly>
+                </div>
+              </div>
+              <div class="cantidadProductosTresPedidoEditados" style="display:none; margin-bottom:10px;">
+                <label class="pm-field-label">Cantidad</label>
+                <input type="number" class="form-control cantidadDeProductoPedidoEditadoTres" readonly style="max-width:140px;">
+              </div>
+              <hr class="pm-divider">
+            </div>
+
+            <!-- Producto 4 -->
+            <div class="productoCuatroEdicionMostrar" style="display:none;">
+              <div class="pm-row" style="margin-bottom:8px;">
+                <div class="pm-col" style="flex:2;">
+                  <label class="pm-field-label">Producto</label>
+                  <input type="text" class="form-control edicionProductoUnoPedidoCuatro">
+                </div>
+                <div class="pm-col">
+                  <label class="pm-field-label">Precio</label>
+                  <input type="number" class="form-control precioProductoPedidoEdicionCuatro" readonly>
+                </div>
+              </div>
+              <div class="cantidadProductosCuatroPedidoEditados" style="display:none; margin-bottom:10px;">
+                <label class="pm-field-label">Cantidad</label>
+                <input type="number" class="form-control cantidadDeProductoPedidoEditadoCuatro" readonly style="max-width:140px;">
+              </div>
+              <hr class="pm-divider">
+            </div>
+
+            <!-- Producto 5 -->
+            <div class="productoCincoEdicionMostrar" style="display:none;">
+              <div class="pm-row" style="margin-bottom:8px;">
+                <div class="pm-col" style="flex:2;">
+                  <label class="pm-field-label">Producto</label>
+                  <input type="text" class="form-control edicionProductoUnoPedidoCinco">
+                </div>
+                <div class="pm-col">
+                  <label class="pm-field-label">Precio</label>
+                  <input type="number" class="form-control precioProductoPedidoEdicionCinco" readonly>
+                </div>
+              </div>
+              <div class="cantidadProductosCincoPedidoEditados" style="display:none; margin-bottom:10px;">
+                <label class="pm-field-label">Cantidad</label>
+                <input type="number" class="form-control cantidadDeProductoPedidoEditadoCinco" readonly style="max-width:140px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagos & Totales -->
+          <div class="pm-section">
+            <div class="pm-section-title"><i class="fa-solid fa-money-bill-wave"></i> Pagos y Totales</div>
+            <div class="pm-row" style="margin-bottom:10px;">
+              <div class="pm-col">
+                <label class="pm-field-label">Pago del Cliente</label>
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                  <input type="number" class="form-control pagoClientePedido" value="0" min="0" step="any" readonly>
+                </div>
+              </div>
+              <div class="pm-col">
+                <label class="pm-field-label">Total</label>
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa-solid fa-coins"></i></span>
+                  <input type="number" class="form-control pagoPedidoEdidato" readonly>
+                </div>
+              </div>
+              <div class="pm-col">
+                <label class="pm-field-label">Adeudo</label>
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa-solid fa-scale-unbalanced"></i></span>
+                  <input type="number" class="form-control adeudoPedidoEditado" min="0" value="0" step="any" readonly>
+                </div>
+              </div>
+            </div>
+
+            <hr class="pm-divider">
+
+            <!-- Abonos -->
+            <div class="pm-row" style="margin-bottom:10px;">
+              <div class="pm-col">
+                <label class="pm-field-label">Abono Registrado</label>
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa-solid fa-receipt"></i></span>
+                  <input class="form-control abono1Lectura" type="text" readonly>
+                </div>
+              </div>
+              <div class="pm-col">
+                <label class="pm-field-label">Fecha del Abono</label>
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa-solid fa-calendar"></i></span>
+                  <input type="date" class="form-control fechaAbono1Lectura" readonly>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="ped-btn ped-btn-primary" onclick="AgregarCampoDeaAbonoEditado();" style="font-size:12px; padding:7px 14px;">
+              <i class="fa-solid fa-plus"></i> Agregar Abono
+            </button>
+            <div id="camposAbono"></div>
+          </div>
+
+          <!-- Estado & Fecha Entrega -->
+          <div class="pm-section">
+            <div class="pm-section-title"><i class="fa-solid fa-sliders"></i> Estado y Entrega</div>
+            <div class="pm-row">
+              <div class="pm-col">
+                <label class="pm-field-label">Estado del Pedido</label>
+                <select class="form-control EstadoDelPedido">
+                  <option class="optionEstadoPedido"></option>
+                  <option value="Pedido Pendiente">Pedido Pendiente</option>
+                  <option value="Pedido Adquirido">Pedido Adquirido</option>
+                  <option value="Producto en Almacen">Producto en Almacén</option>
+                  <option value="Entregado al asesor">Entregado al Asesor</option>
+                  <option value="Entregado/Pagado">Entregado/Pagado</option>
+                  <option value="Entregado/Credito">Entregado/Crédito</option>
+                </select>
+              </div>
+              <div class="pm-col">
+                <label class="pm-field-label">Fecha de Entrega</label>
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa-solid fa-truck"></i></span>
+                  <input type="date" class="form-control fechaEntregaPedidoEditado" readonly>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
 
-        <!--=====================================
-        Fecha de entrega
-        ======================================-->
-        <div class="form-group">
-
-          <span><h5><center>Fecha de Entrega</center></h5></span>
-          
-          <div class="input-group">
-            
-            <span class="input-group-addon"><i class="fas fa-dollar"></i></span>
-
-            <input type="date" class="form-control input-lg fechaEntregaPedidoEditado" readonly>
-
-          </div>
-
-        </div>
-
-        <!--=====================================
-        PIE DEL MODAL
-        ======================================-->
+        <!-- Footer -->
         <div class="modal-footer">
-          
-          <button type="button" class="btn btn-light" data-dismiss="modal" style="border: 1px solid #dbe3ef; color: #334155; font-weight: 600;">Cancelar</button>
-          <button type="submit" class="btn btn-primary botonGuardarPedido" style="background: #6366f1; border: none; color: white; font-weight: 600; padding: 8px 20px; border-radius: 8px;">Guardar Pedido</button>
-
+          <button type="button" class="btn btn-light" data-dismiss="modal" style="border:1px solid #dbe3ef; color:#334155; font-weight:600; border-radius:8px;">Cancelar</button>
+          <button type="submit" class="ped-btn ped-btn-primary botonGuardarPedido"><i class="fa-solid fa-floppy-disk"></i> Guardar Pedido</button>
         </div>
-
 
       </div>
-
     </div>
-
 </div>
 
 <?php
@@ -1195,283 +1020,152 @@ MODAL AGREGAR PEDIDO
     <div class="modal-dialog modal-lg">
       
       <div class="modal-content">
-        
-        <!--=====================================
-        CABEZA DEL MODAL
-        ======================================-->
-        <div class="modal-header" style="background:#138a1e; color:white">
-          
+
+        <!-- Header -->
+        <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
-
-          <h4>Agregar Pedido</h4>
-
+          <span class="pm-header-icon"><i class="fa-solid fa-cart-plus"></i></span>
+          <span class="pm-header-id">Nuevo Pedido</span>
+          <p class="pm-header-sub">Completa los datos para registrar un pedido</p>
         </div>
 
-        <!--=====================================
-        CUERPO DEL MODAL
-        ======================================-->
+        <!-- Body -->
         <div class="modal-body">
-          
           <div class="box-body">
 
-          <!--=====================================
-           ENTRADA PARA LA EMPRESA
-          ======================================-->
-          <div class="form-group">
-            
-            <div class="input-group">
-              
-                             
-                  <?php
-                
-                    echo'<input  type="hidden" value="'.$_SESSION["empresa"].'" name="empresaPedioDinamico">';
+            <?php echo '<input type="hidden" value="'.$_SESSION["empresa"].'" name="empresaPedioDinamico">'; ?>
 
-                  ?>
-
-                
-            </div>
-
-          </div>
-          <!--=====================================
-           ENTRADA EL ASESOR
-          ======================================-->
-          <div class="form-group">
-            
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-user"></i></span>
-
-              <select class="form-control input-lg asesorPedidoDinamico" name="asesorPedidoDinamico">
-
-                <option>
-                  Seleccionar Asesor
-                </option>
-
-                <?php
-
+            <!-- Asesor & Cliente -->
+            <div class="pm-section">
+              <div class="pm-section-title"><i class="fa-solid fa-user"></i> Asignación</div>
+              <div class="pm-row" style="margin-bottom:12px;">
+                <div class="pm-col">
+                  <label class="pm-field-label">Asesor</label>
+                  <select class="form-control asesorPedidoDinamico" name="asesorPedidoDinamico">
+                    <option>Seleccionar Asesor</option>
+                    <?php
                       $item = "id_empresa";
                       $valor = $_SESSION["empresa"];
-
-
-                          $asesor = Controladorasesores::ctrMostrarAsesoresEmpresas($item,$valor);
-                              foreach ($asesor as $key => $value) {
-                                
-                                echo '<option value="'.$value["id"].'">'.$value["nombre"].'</option>';
-
-                              }                         
-
-                        ?>
-                 </select>
-                      
-            </div>
-
-          </div>
-          <!--=====================================
-           ENTRADA PARA EL CLIENTE
-          ======================================-->
-          <div class="fomr-group">
-            
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-user"></i></span>
-
-              <select class="form-control input-lg clientePedidoDinamico" name="clientePedidoDinamico">
-                
-                <option>
-                  Seleccionar Cliente
-                </option>
-                <?php
-
-                  $item = "id_empresa";
-                  $valor = $_SESSION["empresa"];
-
-                  $usuario = ControladorClientes::ctrMostrarClientesTabla($item,$valor);
-
-
-                            foreach ($usuario as $key => $value) {
-                              
-                                echo '<option value="'.$value["id"].'">'.$value["nombre"].'</option>';
-
-                              }
-
-                          ?>
-                
-
-              </select>
-
-            </div>
-
-          </div>
-          </br>
-          <!--=====================================
-           ENTRADA PARA LOS PRODUCTOS
-          ======================================-->
-          <div class="AgregarProductos">
-            
-             <input type="button" class="btn btn-primary " value="Agregar producto"></br></br>
-
-          </div>
-
-             <div class="NuevoProductoPedido">
-             
-             </div>
-
-             <div class="form-group row">
-               
-              <div class="col-md-3 col-xs-12">
-
-                
-
-                <div class="input-group">
-                  
-                  <span class="input-group-addon"><i class="fas fa-hand-holding-usd"></i> | Pago</span>
-                  <input type="number" class="form-control input-lg PagoClientePedidoDinamico">
-
-                </div>
-                 
-               </div>
-
-               <div class="col-md-3 col-xs-12">
-
-                  
-
-                <div class="input-group">
-                  
-                  <span class="input-group-addon"><i class="fas fa-hand-holding-usd"></i> | Restar</span>
-                  <input type="number" class="form-control input-lg cambioClientePedidoDinamico" readonly>
-
-                </div>
-                 
-               </div>
-
-               <div class="col-md-6 col-xs-12">
-
-                
-
-                <div class="input-group">
-                  
-                  <span class="input-group-addon"><i class="fas fa-table"></i> | Fecha de pago</span>
-                  <input type="date" class="form-control input-lg fechaPagoVentaModal" style="width:60%;">
-
-                  <input type="hidden" class="PrimerPagolistado" name="PrimerPagolistado">
-                  <input type="hidden" class="PrimerAdeudo" name="PrimerAdeudo">
-
-                </div>
-                 
-               </div>               
-
-             </div>
-              
-
-
-              <div class="form-group">
-                
-                <div class="input-group">
-                  
-                  <span class="input-group-addon"><i class="fas fa-hand-holding-usd"></i></span>
-                  <input type="number" class="form-control input-lg TotalPedidoEnOrden monto totales" name="TotalPedidoEnOrden" readonly>
-
-                </div>
-
-              </div>
-              <!--=====================================
-              ENTRADA PAR EL ESTADO
-              ======================================-->
-              <div class=form-group>
-                
-                <div class="input-group">
-                  
-                  <span class="input-group-addon"><i class="fas fa-toggle-on"></i></span>
-
-                  <select class="form-control input-lg estadoPedidoDinamico" name="EstadoPedidoDinamico">
-                    
-                    <option class="Pedido Pendiente">
-                    Pedido Pendiente  
-                    </option>
-
-                    <option value="Pedido Adquirido">
-                      Pedido Adquirido 
-                    </option>
-                    
-                    <option class="Entregado al asesor">
-                      Entregado al Asesor
-                    </option>
-
-                    <option value="Entregado/Pagado">
-                      Entregado/Pagado
-                    </option>
-
-                    <option value="Entregado/Credito">
-                      Entregado/Crédito
-                    </option>
-
-                  </select>
-
-                </div>
-
-              </div>
-
-              <!--ASIGNAR ORDEN -->
-              <div class="form-group">
-
-                <div class="input-group">
-                  
-                  <select class="form-control input-lg seleccionarOrdenPedidoDinamico" name="seleccionarOrdenPedidoDinamico">
-                  
-                    <option>ASIGNAR ORDEN</option>
-
-                    <?php
-
-                       $item = "id_empresa";
-                        $valor = $_SESSION["empresa"];
-
-                        $pedido = controladorOrdenes::ctrMostrarOrdenes($item,$valor);
-
-                        foreach ($pedido as $key => $valueOrdenes) {
-                          
-                          echo '
-
-                          <option value="'.$valueOrdenes["id"].'">'.$valueOrdenes["id"].'</option>';
-
-                        }
-
+                      $asesor = Controladorasesores::ctrMostrarAsesoresEmpresas($item,$valor);
+                      foreach ($asesor as $key => $value) {
+                        echo '<option value="'.$value["id"].'">'.htmlspecialchars($value["nombre"]).'</option>';
+                      }
                     ?>
-
                   </select>
-
-                </div> 
-                
-                <input type="hidden" id="ProductosPedidoListados" name="ProductosPedidoListados">
-
+                </div>
+                <div class="pm-col">
+                  <label class="pm-field-label">Cliente</label>
+                  <select class="form-control clientePedidoDinamico" name="clientePedidoDinamico">
+                    <option>Seleccionar Cliente</option>
+                    <?php
+                      $item = "id_empresa";
+                      $valor = $_SESSION["empresa"];
+                      $usuario = ControladorClientes::ctrMostrarClientesTabla($item,$valor);
+                      foreach ($usuario as $key => $value) {
+                        echo '<option value="'.$value["id"].'">'.htmlspecialchars($value["nombre"]).'</option>';
+                      }
+                    ?>
+                  </select>
+                </div>
               </div>
+            </div>
 
+            <!-- Productos -->
+            <div class="pm-section">
+              <div class="pm-section-title"><i class="fa-solid fa-box-open"></i> Productos</div>
+              <button type="button" class="ped-btn ped-btn-primary AgregarProductos" style="font-size:12px; padding:7px 14px; margin-bottom:12px;">
+                <i class="fa-solid fa-plus"></i> Agregar Producto
+              </button>
+              <div class="NuevoProductoPedido"></div>
+            </div>
+
+            <!-- Pago & Total -->
+            <div class="pm-section">
+              <div class="pm-section-title"><i class="fa-solid fa-money-bill-wave"></i> Pago</div>
+              <div class="pm-row" style="margin-bottom:12px;">
+                <div class="pm-col">
+                  <label class="pm-field-label">Pago del Cliente</label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                    <input type="number" class="form-control PagoClientePedidoDinamico">
+                  </div>
+                </div>
+                <div class="pm-col">
+                  <label class="pm-field-label">Restante</label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa-solid fa-scale-unbalanced"></i></span>
+                    <input type="number" class="form-control cambioClientePedidoDinamico" readonly>
+                  </div>
+                </div>
+              </div>
+              <div class="pm-row" style="margin-bottom:12px;">
+                <div class="pm-col">
+                  <label class="pm-field-label">Fecha de Pago</label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa-solid fa-calendar"></i></span>
+                    <input type="date" class="form-control fechaPagoVentaModal">
+                    <input type="hidden" class="PrimerPagolistado" name="PrimerPagolistado">
+                    <input type="hidden" class="PrimerAdeudo" name="PrimerAdeudo">
+                  </div>
+                </div>
+                <div class="pm-col">
+                  <label class="pm-field-label">Total del Pedido</label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa-solid fa-coins"></i></span>
+                    <input type="number" class="form-control TotalPedidoEnOrden monto totales" name="TotalPedidoEnOrden" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Estado & Orden -->
+            <div class="pm-section">
+              <div class="pm-section-title"><i class="fa-solid fa-sliders"></i> Estado y Orden</div>
+              <div class="pm-row">
+                <div class="pm-col">
+                  <label class="pm-field-label">Estado del Pedido</label>
+                  <select class="form-control estadoPedidoDinamico" name="EstadoPedidoDinamico">
+                    <option class="Pedido Pendiente">Pedido Pendiente</option>
+                    <option value="Pedido Adquirido">Pedido Adquirido</option>
+                    <option class="Entregado al asesor">Entregado al Asesor</option>
+                    <option value="Entregado/Pagado">Entregado/Pagado</option>
+                    <option value="Entregado/Credito">Entregado/Crédito</option>
+                  </select>
+                </div>
+                <div class="pm-col">
+                  <label class="pm-field-label">Asignar Orden</label>
+                  <select class="form-control seleccionarOrdenPedidoDinamico" name="seleccionarOrdenPedidoDinamico">
+                    <option>Sin orden</option>
+                    <?php
+                      $item = "id_empresa";
+                      $valor = $_SESSION["empresa"];
+                      $pedido = controladorOrdenes::ctrMostrarOrdenes($item,$valor);
+                      foreach ($pedido as $key => $valueOrdenes) {
+                        echo '<option value="'.$valueOrdenes["id"].'">#'.$valueOrdenes["id"].'</option>';
+                      }
+                    ?>
+                  </select>
+                </div>
+              </div>
+              <input type="hidden" id="ProductosPedidoListados" name="ProductosPedidoListados">
+            </div>
 
           </div>
-          <!--=====================================
-           PIE DEL MODAL
-          ======================================-->
-
-        <div class="modal-footer">
-
-          <button type="button" class="btn btn-light" data-dismiss="modal" style="border: 1px solid #dbe3ef; color: #334155; font-weight: 600;">Cancelar</button>
-
-          <button type="submit" class="btn btn-primary guardarPedidoDinamico" style="background: #6366f1; border: none; color: white; font-weight: 600; padding: 8px 20px; border-radius: 8px;">Guardar Cambios</button>
-
         </div>
 
-
+        <!-- Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-dismiss="modal" style="border:1px solid #dbe3ef; color:#334155; font-weight:600; border-radius:8px;">Cancelar</button>
+          <button type="submit" class="ped-btn ped-btn-primary guardarPedidoDinamico"><i class="fa-solid fa-floppy-disk"></i> Guardar Pedido</button>
         </div>
 
       </div>
-
     </div>
 
     <?php
-
-         $crearPedido = new controladorOrdenes();
-         $crearPedido -> ctrAgregarPedidoEnOrden();
-
-        ?>
+      $crearPedido = new controladorOrdenes();
+      $crearPedido -> ctrAgregarPedidoEnOrden();
+    ?>
 
   </form>
 
