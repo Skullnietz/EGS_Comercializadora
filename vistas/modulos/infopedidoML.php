@@ -236,6 +236,34 @@ if (!$orderId) {
     text-decoration: none;
   }
 
+  .ml-alt-links {
+    display: none;
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #f8fafc;
+  }
+
+  .ml-alt-links h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--crm-text);
+  }
+
+  .ml-alt-links p {
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: var(--crm-text2);
+  }
+
+  .ml-alt-links-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
   @media (max-width: 767px) {
     .ml-header-bar { flex-direction: column; align-items: flex-start; }
     .ml-card-body  { padding: 14px; }
@@ -532,6 +560,19 @@ if (!$orderId) {
         </a>
       </div>
 
+      <div class="ml-alt-links" id="ml-alt-links">
+        <h4>Enlaces alternativos</h4>
+        <p>
+          Si el boton principal no abre la compra, prueba estas variantes. En tu caso suele funcionar mejor
+          la ruta armada con <code>order.id</code> que con <code>shipping.id</code>.
+        </p>
+        <div class="ml-alt-links-list">
+          <a href="#" target="_blank" rel="noopener noreferrer" id="ml-alt-link-order" class="ml-btn ml-btn-back">Ruta por order.id</a>
+          <a href="#" target="_blank" rel="noopener noreferrer" id="ml-alt-link-shipping" class="ml-btn ml-btn-back">Ruta por shipping.id</a>
+          <a href="#" target="_blank" rel="noopener noreferrer" id="ml-alt-link-simple" class="ml-btn ml-btn-back">Ruta simple</a>
+        </div>
+      </div>
+
     </div><!-- /ml-detail-content -->
 
   </div><!-- /content -->
@@ -670,6 +711,31 @@ if (!$orderId) {
         });
       }
     });
+  }
+
+  function construirUrlsCompraML(orderId, shippingId, packId) {
+    var base = 'https://myaccount.mercadolibre.com.mx/my_purchases/';
+    var urls = {
+      byOrder: base + orderId + '/status?orderId=' + orderId,
+      byOrderWithPack: base + orderId + '/status?packId=' + packId + '&orderId=' + orderId,
+      byShipping: shippingId ? (base + shippingId + '/status?orderId=' + orderId) : '',
+      byShippingWithPack: (shippingId && packId) ? (base + shippingId + '/status?packId=' + packId + '&orderId=' + orderId) : '',
+      simple: base + orderId + '/status'
+    };
+
+    urls.primary = packId ? urls.byOrderWithPack : urls.byOrder;
+    return urls;
+  }
+
+  function configurarLinksCompraML(orderId, shippingId, packId) {
+    var urls = construirUrlsCompraML(orderId, shippingId, packId);
+
+    $('#ml-link-ver-ml').attr('href', urls.primary);
+    $('#ml-header-link-ml').attr('href', urls.primary);
+    $('#ml-alt-link-order').attr('href', urls.byOrderWithPack || urls.byOrder);
+    $('#ml-alt-link-shipping').attr('href', urls.byShippingWithPack || urls.byShipping || urls.byOrder);
+    $('#ml-alt-link-simple').attr('href', urls.simple);
+    $('#ml-alt-links').show();
   }
 
   function formatFecha(iso) {
@@ -824,20 +890,7 @@ if (!$orderId) {
       // orderId= = p.id          (2000015689832592)
       var shippingId = (p.shipping && p.shipping.id) ? p.shipping.id : null;
       var packId     = p.pack_id || null;
-      var urlML;
-      if (shippingId && packId) {
-        urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + shippingId
-              + '/status?packId=' + packId + '&orderId=' + ORDER_ID;
-      } else if (shippingId) {
-        urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + shippingId
-              + '/status?orderId=' + ORDER_ID;
-      } else {
-        urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + ORDER_ID
-              + '/status?orderId=' + ORDER_ID;
-      }
-      // Guardar la URL real en data-url para copiar al portapapeles
-      $('#ml-link-ver-ml').attr('href', urlML);
-      $('#ml-header-link-ml').attr('href', urlML);
+      configurarLinksCompraML(ORDER_ID, shippingId, packId);
 
       /* ── Mostrar contenido ── */
       $('#ml-detail-content').show();

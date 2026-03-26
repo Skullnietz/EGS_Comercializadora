@@ -3005,6 +3005,15 @@ function renderizarTablaML(pedidos) {
   }
 
   var html = '';
+
+  function construirUrlCompraML(orderId, shippingId, packId) {
+    var base = 'https://myaccount.mercadolibre.com.mx/my_purchases/';
+    if (packId) {
+      return base + orderId + '/status?packId=' + packId + '&orderId=' + orderId;
+    }
+    return base + orderId + '/status?orderId=' + orderId;
+  }
+
   $.each(pedidos, function (i, p) {
     var num    = mlOffset + i + 1;
     var estado = statusMap[p.status] || { text: p.status || '—', css: 'ml-badge-other' };
@@ -3033,21 +3042,7 @@ function renderizarTablaML(pedidos) {
 
     var shippingId = (p.shipping && p.shipping.id) ? p.shipping.id : null;
     var packId = p.pack_id || null;
-    var urlML;
-
-    if (shippingId && packId) {
-      urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + shippingId
-            + '/status?packId=' + packId + '&orderId=' + p.id;
-    } else if (shippingId) {
-      urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + shippingId
-            + '/status?orderId=' + p.id;
-    } else if (packId) {
-      urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + p.id
-            + '/status?packId=' + packId + '&orderId=' + p.id;
-    } else {
-      urlML = 'https://myaccount.mercadolibre.com.mx/my_purchases/' + p.id
-            + '/status?orderId=' + p.id;
-    }
+    var urlML = construirUrlCompraML(p.id, shippingId, packId);
 
     html += '<tr>';
     html += '<td>' + num + '</td>';
