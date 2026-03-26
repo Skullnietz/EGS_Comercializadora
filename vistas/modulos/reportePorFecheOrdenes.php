@@ -51,6 +51,19 @@ if($cargarDatos){
 
     if(!is_array($respuesta)) $respuesta = [];
 
+    /* ── Vendedor: solo estados relevantes para seguimiento ── */
+    if($_SESSION["perfil"] == "vendedor"){
+        $estadosVendedor = [
+            'Pendiente de autorización (AUT',
+            'Terminada (ter)',
+            'Aceptado (ok)',
+            'En revisión (REV)'
+        ];
+        $respuesta = array_values(array_filter($respuesta, function($o) use ($estadosVendedor){
+            return in_array($o["estado"], $estadosVendedor, true);
+        }));
+    }
+
     usort($respuesta, function($a, $b){
       return intval($a["id"]) <=> intval($b["id"]);
     });
@@ -63,6 +76,10 @@ $sumaInversion  = 0;
 $conteoEstados  = [];
 $estadosUnicos  = [];
 
+/* Conteos vendedor CRM */
+$cntContactar   = 0;  // Pendiente AUT + Terminada
+$cntSeguimiento = 0;  // Aceptado + Revisión
+
 foreach($respuesta as $v){
     $sumaTotal     += floatval($v["total"]);
     $sumaInversion += floatval($v["totalInversion"] ?? 0);
@@ -70,6 +87,9 @@ foreach($respuesta as $v){
     if(!isset($conteoEstados[$est])) $conteoEstados[$est] = 0;
     $conteoEstados[$est]++;
     $estadosUnicos[$est] = true;
+
+    if(in_array($est, ['Pendiente de autorización (AUT','Terminada (ter)'], true)) $cntContactar++;
+    if(in_array($est, ['Aceptado (ok)','En revisión (REV)'], true)) $cntSeguimiento++;
 }
 
 $utilidad = $sumaTotal - $sumaInversion;
@@ -380,6 +400,32 @@ $totalCols    = $isAdmin ? 12 : 10;
           <small>Total Órdenes</small>
         </div>
       </div>
+
+      <?php if($perfil == 'vendedor'): ?>
+      <!-- KPIs vendedor: enfocados en seguimiento -->
+      <div class="rpt-kpi">
+        <div class="rpt-kpi-icon green"><i class="fa-solid fa-phone-volume"></i></div>
+        <div class="rpt-kpi-body">
+          <h4 id="kpi-contactar"><?= number_format($cntContactar) ?></h4>
+          <small>Por contactar (AUT + TER)</small>
+        </div>
+      </div>
+      <div class="rpt-kpi">
+        <div class="rpt-kpi-icon amber"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+        <div class="rpt-kpi-body">
+          <h4 id="kpi-seguimiento"><?= number_format($cntSeguimiento) ?></h4>
+          <small>En taller (OK + REV)</small>
+        </div>
+      </div>
+      <div class="rpt-kpi">
+        <div class="rpt-kpi-icon purple"><i class="fa-solid fa-dollar-sign"></i></div>
+        <div class="rpt-kpi-body">
+          <h4 id="kpi-total-vendedor">$<?= number_format($sumaTotal, 2) ?></h4>
+          <small>Total en órdenes</small>
+        </div>
+      </div>
+      <?php else: ?>
+      <!-- KPIs admin: financieros -->
       <div class="rpt-kpi">
         <div class="rpt-kpi-icon green"><i class="fa-solid fa-dollar-sign"></i></div>
         <div class="rpt-kpi-body">
@@ -401,6 +447,7 @@ $totalCols    = $isAdmin ? 12 : 10;
           <small>Utilidad</small>
         </div>
       </div>
+      <?php endif; ?>
     </div>
 
     <!-- ═══ Distribución de estados ═══ -->
@@ -795,13 +842,24 @@ $totalCols    = $isAdmin ? 12 : 10;
     var utilidad = sumaTotal - sumaInv;
 
     $('#kpi-ordenes').text(totalOrdenes.toLocaleString('es-MX'));
-    $('#kpi-ingresos').text('$' + sumaTotal.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}));
-    $('#kpi-inversion').text('$' + sumaInv.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}));
 
-    var $util = $('#kpi-utilidad');
-    $util.text('$' + utilidad.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}));
-    $util.removeClass('rpt-money negative positive');
-    if(utilidad < 0) $util.addClass('rpt-money negative');
+    if (!IS_ADMIN) {
+      // Vendedor KPIs
+      var cContactar = (estados['Pendiente de autorización (AUT'] || 0) + (estados['Terminada (ter)'] || 0);
+      var cSeguimiento = (estados['Aceptado (ok)'] || 0) + (estados['En revisión (REV)'] || 0);
+      $('#kpi-contactar').text(cContactar.toLocaleString('es-MX'));
+      $('#kpi-seguimiento').text(cSeguimiento.toLocaleString('es-MX'));
+      $('#kpi-total-vendedor').text('$' + sumaTotal.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}));
+    } else {
+      // Admin KPIs
+      $('#kpi-ingresos').text('$' + sumaTotal.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}));
+      $('#kpi-inversion').text('$' + sumaInv.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}));
+
+      var $util = $('#kpi-utilidad');
+      $util.text('$' + utilidad.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}));
+      $util.removeClass('rpt-money negative positive');
+      if(utilidad < 0) $util.addClass('rpt-money negative');
+    }
 
     // Actualizar conteos en chips de estado
     $('[data-estado-count]').each(function(){
