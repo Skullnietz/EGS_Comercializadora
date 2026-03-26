@@ -109,6 +109,8 @@
 
   <!-- Daterange picker -->
   <link rel="stylesheet" href="vistas/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+  <!-- Flatpickr (rangos personalizados) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 
 
@@ -170,6 +172,7 @@
   <!-- daterangepicker http://www.daterangepicker.com/-->
   <!-- moment.js ya cargado desde CDN en <head> — no se repite -->
   <script src="vistas/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <script src="vistas/plugins/bardcode/codigo.js"></script>
   <script src="vistas/plugins/printArea/jquery.PrintArea.js"></script>
