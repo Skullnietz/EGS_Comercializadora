@@ -236,6 +236,76 @@ if (!$orderId) {
     text-decoration: none;
   }
 
+  .ml-subsection-title {
+    margin: 20px 0 10px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: var(--crm-text2);
+  }
+
+  .ml-address-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  .ml-address-card {
+    border: 1px solid var(--crm-border);
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 14px;
+  }
+
+  .ml-address-card h4 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--crm-text);
+  }
+
+  .ml-address-card p {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--crm-text);
+    line-height: 1.5;
+  }
+
+  .ml-address-card p:last-child { margin-bottom: 0; }
+
+  .ml-address-card strong {
+    display: inline-block;
+    min-width: 76px;
+    color: var(--crm-text2);
+  }
+
+  .ml-timeline {
+    display: grid;
+    gap: 10px;
+  }
+
+  .ml-timeline-item {
+    border-left: 3px solid #cbd5e1;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 0 10px 10px 0;
+  }
+
+  .ml-timeline-item strong {
+    display: block;
+    color: var(--crm-text);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .ml-timeline-item span {
+    display: block;
+    color: var(--crm-text2);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
   .ml-alt-links {
     display: none;
     margin-top: 14px;
@@ -476,11 +546,11 @@ if (!$orderId) {
           <div id="ml-envio-loading" style="text-align:center; padding:20px; color:#94a3b8;">
             <i class="fa-solid fa-spinner fa-spin"></i> Cargando datos de envío...
           </div>
-          <div id="ml-envio-info" style="display:none;">
-            <div class="ml-info-grid">
-              <div class="ml-info-item">
-                <label>ID de Envío</label>
-                <div class="valor" id="ml-d-shipping-id">—</div>
+            <div id="ml-envio-info" style="display:none;">
+              <div class="ml-info-grid">
+                <div class="ml-info-item">
+                  <label>ID de Envío</label>
+                  <div class="valor" id="ml-d-shipping-id">—</div>
               </div>
               <div class="ml-info-item">
                 <label>Estado</label>
@@ -498,19 +568,117 @@ if (!$orderId) {
                 <label>Número de seguimiento</label>
                 <div class="valor" id="ml-d-shipping-tracking">—</div>
               </div>
-              <div class="ml-info-item">
-                <label>Servicio de envío</label>
-                <div class="valor" id="ml-d-shipping-service">—</div>
+                <div class="ml-info-item">
+                  <label>Servicio de envío</label>
+                  <div class="valor" id="ml-d-shipping-service">—</div>
+                </div>
               </div>
-            </div>
-            <div id="ml-tracking-link-wrap" style="margin-top:14px; display:none;">
-              <a id="ml-tracking-link" href="#" target="_blank" class="ml-btn ml-btn-primary" style="font-size:12px;">
-                <i class="fa-solid fa-route"></i> Rastrear envío
-              </a>
+
+              <div class="ml-subsection-title">Fechas y costos</div>
+              <div class="ml-info-grid">
+                <div class="ml-info-item">
+                  <label>Fecha de creacion</label>
+                  <div class="valor" id="ml-d-shipping-created">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Ultima actualizacion</label>
+                  <div class="valor" id="ml-d-shipping-updated">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Fecha de impresion</label>
+                  <div class="valor" id="ml-d-shipping-printed">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Fecha enviado</label>
+                  <div class="valor" id="ml-d-shipping-date-shipped">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Fecha entregado</label>
+                  <div class="valor" id="ml-d-shipping-date-delivered">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Tipo logistico</label>
+                  <div class="valor" id="ml-d-shipping-logistic">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Modo</label>
+                  <div class="valor" id="ml-d-shipping-mode">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Tipo</label>
+                  <div class="valor" id="ml-d-shipping-type">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Creado por</label>
+                  <div class="valor" id="ml-d-shipping-created-by">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Service ID</label>
+                  <div class="valor" id="ml-d-shipping-service-id">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Costo base</label>
+                  <div class="valor" id="ml-d-shipping-base-cost">—</div>
+                </div>
+                <div class="ml-info-item">
+                  <label>Costo de orden</label>
+                  <div class="valor" id="ml-d-shipping-order-cost">—</div>
+                </div>
+              </div>
+
+              <div id="ml-tracking-link-wrap" style="margin-top:14px; display:none;">
+                <a id="ml-tracking-link" href="#" target="_blank" class="ml-btn ml-btn-primary" style="font-size:12px;">
+                  <i class="fa-solid fa-route"></i> Rastrear envío
+                </a>
+              </div>
+
+              <div class="ml-subsection-title">Direcciones</div>
+              <div class="ml-address-grid">
+                <div class="ml-address-card">
+                  <h4>Destino</h4>
+                  <p><strong>Recibe:</strong> <span id="ml-d-receiver-name">—</span></p>
+                  <p><strong>Direccion:</strong> <span id="ml-d-receiver-line">—</span></p>
+                  <p><strong>Zona:</strong> <span id="ml-d-receiver-zone">—</span></p>
+                  <p><strong>Telefono:</strong> <span id="ml-d-receiver-phone">—</span></p>
+                  <p><strong>Notas:</strong> <span id="ml-d-receiver-comment">—</span></p>
+                </div>
+                <div class="ml-address-card">
+                  <h4>Origen</h4>
+                  <p><strong>Envia:</strong> <span id="ml-d-sender-name">—</span></p>
+                  <p><strong>Direccion:</strong> <span id="ml-d-sender-line">—</span></p>
+                  <p><strong>Zona:</strong> <span id="ml-d-sender-zone">—</span></p>
+                  <p><strong>Nodo:</strong> <span id="ml-d-sender-node">—</span></p>
+                  <p><strong>Tipos:</strong> <span id="ml-d-sender-types">—</span></p>
+                </div>
+              </div>
+
+              <div class="ml-subsection-title">Items del envio</div>
+              <div style="overflow-x:auto;">
+                <table class="ml-items-table" style="width:100%; border-collapse:collapse;">
+                  <thead>
+                    <tr>
+                      <th>ID Item</th>
+                      <th>Descripcion</th>
+                      <th>Cantidad</th>
+                      <th>Dimensiones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ml-d-shipping-items-body">
+                    <tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:20px;">Sin items de envio</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="ml-subsection-title">Historial del envio</div>
+              <div class="ml-timeline" id="ml-d-shipping-history">
+                <div class="ml-timeline-item">
+                  <strong>Sin historial</strong>
+                  <span>El shipment no devolvio eventos todavia.</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
       <div class="ml-card">
         <div class="ml-card-head">
@@ -738,6 +906,167 @@ if (!$orderId) {
     $('#ml-alt-links').show();
   }
 
+  function textoLista(values) {
+    if (!values || !values.length) return '—';
+    return values.join(', ');
+  }
+
+  function direccionLinea(address) {
+    if (!address) return '—';
+    return textoPlano(
+      address.address_line,
+      [address.street_name || '', address.street_number || ''].join(' ').trim()
+    );
+  }
+
+  function direccionZona(address) {
+    if (!address) return '—';
+    return textoLista([
+      address.neighborhood && address.neighborhood.name ? address.neighborhood.name : '',
+      address.city && address.city.name ? address.city.name : '',
+      address.state && address.state.name ? address.state.name : '',
+      address.zip_code || ''
+    ].filter(Boolean));
+  }
+
+  function traducirEstadoEnvio(value) {
+    var map = {
+      'ready_to_ship': 'Listo para enviar',
+      'shipped': 'En camino',
+      'delivered': 'Entregado',
+      'not_delivered': 'No entregado',
+      'cancelled': 'Cancelado',
+      'handling': 'Preparando',
+      'in_transit': 'En transito',
+      'pending': 'Pendiente'
+    };
+    return map[value] || value || '—';
+  }
+
+  function traducirSubestadoEnvio(value) {
+    var map = {
+      'shipment_paid': 'Envio pagado',
+      'in_warehouse': 'En bodega',
+      'ready_to_pack': 'Listo para empaquetar',
+      'packed': 'Empacado',
+      'in_packing_list': 'En lista de empaque',
+      'picked_up': 'Recolectado',
+      'out_for_delivery': 'En ruta de entrega',
+      'delivered': 'Entregado'
+    };
+    return map[value] || value || '—';
+  }
+
+  function renderShippingItems(items) {
+    if (!items || !items.length) {
+      $('#ml-d-shipping-items-body').html('<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:20px;">Sin items de envio</td></tr>');
+      return;
+    }
+
+    var html = '';
+    $.each(items, function (i, item) {
+      html += '<tr>';
+      html += '<td><code style="font-size:11px;">' + textoPlano(item.id) + '</code></td>';
+      html += '<td>' + escapeHtml(textoPlano(item.description)) + '</td>';
+      html += '<td style="text-align:center;">' + textoPlano(item.quantity) + '</td>';
+      html += '<td>' + escapeHtml(textoPlano(item.dimensions)) + '</td>';
+      html += '</tr>';
+    });
+
+    $('#ml-d-shipping-items-body').html(html);
+  }
+
+  function renderShippingHistory(shipment) {
+    var timeline = [];
+    var statusHistory = shipment.status_history || {};
+    var substatusHistory = shipment.substatus_history || [];
+
+    if (statusHistory.date_ready_to_ship) {
+      timeline.push({
+        date: statusHistory.date_ready_to_ship,
+        title: 'Listo para enviar',
+        detail: 'Inicio de preparacion del envio'
+      });
+    }
+
+    if (statusHistory.date_handling) {
+      timeline.push({
+        date: statusHistory.date_handling,
+        title: 'Handling',
+        detail: 'El envio entro a proceso logistico'
+      });
+    }
+
+    if (statusHistory.date_shipped) {
+      timeline.push({
+        date: statusHistory.date_shipped,
+        title: 'Enviado',
+        detail: 'El paquete salio a ruta'
+      });
+    }
+
+    if (statusHistory.date_first_visit) {
+      timeline.push({
+        date: statusHistory.date_first_visit,
+        title: 'Primer intento de visita',
+        detail: 'Primer registro de visita o entrega'
+      });
+    }
+
+    if (statusHistory.date_delivered) {
+      timeline.push({
+        date: statusHistory.date_delivered,
+        title: 'Entregado',
+        detail: 'Entrega confirmada'
+      });
+    }
+
+    if (statusHistory.date_not_delivered) {
+      timeline.push({
+        date: statusHistory.date_not_delivered,
+        title: 'No entregado',
+        detail: 'Hubo un intento sin entrega'
+      });
+    }
+
+    if (statusHistory.date_cancelled) {
+      timeline.push({
+        date: statusHistory.date_cancelled,
+        title: 'Cancelado',
+        detail: 'El envio fue cancelado'
+      });
+    }
+
+    $.each(substatusHistory, function (i, event) {
+      timeline.push({
+        date: event.date,
+        title: traducirSubestadoEnvio(event.substatus),
+        detail: 'Estado: ' + traducirEstadoEnvio(event.status)
+      });
+    });
+
+    timeline.sort(function (a, b) {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+
+    if (!timeline.length) {
+      $('#ml-d-shipping-history').html(
+        '<div class="ml-timeline-item"><strong>Sin historial</strong><span>El shipment no devolvio eventos todavia.</span></div>'
+      );
+      return;
+    }
+
+    var html = '';
+    $.each(timeline, function (i, event) {
+      html += '<div class="ml-timeline-item">';
+      html += '<strong>' + escapeHtml(textoPlano(event.title)) + '</strong>';
+      html += '<span>' + escapeHtml(formatFecha(event.date)) + '</span>';
+      html += '<span>' + escapeHtml(textoPlano(event.detail)) + '</span>';
+      html += '</div>';
+    });
+    $('#ml-d-shipping-history').html(html);
+  }
+
   function formatFecha(iso) {
     if (!iso) return '—';
     var d = new Date(iso);
@@ -908,17 +1237,6 @@ if (!$orderId) {
     d.append('accion',      'obtenerEnvio');
     d.append('shipping_id', shippingId);
 
-    var shipStatusMap = {
-      'ready_to_ship'  : 'Listo para enviar',
-      'shipped'        : 'En camino',
-      'delivered'      : 'Entregado',
-      'not_delivered'  : 'No entregado',
-      'cancelled'      : 'Cancelado',
-      'handling'       : 'Preparando',
-      'in_transit'     : 'En tránsito',
-      'pending'        : 'Pendiente',
-    };
-
     $.ajax({
       url: 'ajax/mercadolibre.ajax.php', method: 'POST', data: d,
       cache: false, contentType: false, processData: false, dataType: 'json',
@@ -932,8 +1250,8 @@ if (!$orderId) {
         }
 
         // Estado legible
-        var statusText = shipStatusMap[s.status] || s.status || '—';
-        var subText    = s.substatus || '—';
+        var statusText = traducirEstadoEnvio(s.status);
+        var subText    = traducirSubestadoEnvio(s.substatus);
         $('#ml-d-shipping-status').text(statusText);
         $('#ml-d-shipping-substatus').text(subText);
         $('#ml-d-envio-badge').html('<span class="ml-shipping-badge">' + statusText + '</span>');
@@ -977,6 +1295,35 @@ if (!$orderId) {
                      ? (s.shipping_option.name || s.service_id || '—')
                      : (s.service_id || '—');
         $('#ml-d-shipping-service').text(servicio);
+        $('#ml-d-shipping-created').text(formatFecha(s.date_created));
+        $('#ml-d-shipping-updated').text(formatFecha(s.last_updated));
+        $('#ml-d-shipping-printed').text(formatFecha(s.date_first_printed));
+        $('#ml-d-shipping-date-shipped').text(formatFecha(s.status_history && s.status_history.date_shipped));
+        $('#ml-d-shipping-date-delivered').text(formatFecha(s.status_history && s.status_history.date_delivered));
+        $('#ml-d-shipping-logistic').text(textoPlano(s.logistic_type));
+        $('#ml-d-shipping-mode').text(textoPlano(s.mode));
+        $('#ml-d-shipping-type').text(textoPlano(s.type));
+        $('#ml-d-shipping-created-by').text(textoPlano(s.created_by));
+        $('#ml-d-shipping-service-id').text(textoPlano(s.service_id));
+        $('#ml-d-shipping-base-cost').text(s.base_cost != null ? formatMoney(s.base_cost, s.shipping_option && s.shipping_option.currency_id) : '—');
+        $('#ml-d-shipping-order-cost').text(s.order_cost != null ? formatMoney(s.order_cost, s.shipping_option && s.shipping_option.currency_id) : '—');
+
+        $('#ml-d-receiver-name').text(textoPlano(s.receiver_address && s.receiver_address.receiver_name));
+        $('#ml-d-receiver-line').text(direccionLinea(s.receiver_address));
+        $('#ml-d-receiver-zone').text(direccionZona(s.receiver_address));
+        $('#ml-d-receiver-phone').text(textoPlano(s.receiver_address && s.receiver_address.receiver_phone));
+        $('#ml-d-receiver-comment').text(textoPlano(s.receiver_address && s.receiver_address.comment));
+
+        $('#ml-d-sender-name').text(textoPlano(s.sender_id));
+        $('#ml-d-sender-line').text(direccionLinea(s.sender_address));
+        $('#ml-d-sender-zone').text(direccionZona(s.sender_address));
+        $('#ml-d-sender-node').text(textoPlano(
+          s.sender_address && s.sender_address.node && (s.sender_address.node.node_id || s.sender_address.node.logistic_center_id)
+        ));
+        $('#ml-d-sender-types').text(textoLista((s.sender_address && s.sender_address.types) || []));
+
+        renderShippingItems(s.shipping_items || []);
+        renderShippingHistory(s);
 
         // Link de rastreo
         if (s.tracking_url) {
