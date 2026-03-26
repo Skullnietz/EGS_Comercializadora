@@ -478,7 +478,10 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
     white-space: nowrap;
     appearance: auto;
     -webkit-appearance: menulist;
-    padding-right: 28px;
+    padding: 8px 28px 8px 10px;
+    font-size: 13px;
+    height: 38px;
+    line-height: 1.4;
   }
   /* Keep Bootstrap 3 table layout for input-group (addon + input) */
   .pm-section .input-group {
