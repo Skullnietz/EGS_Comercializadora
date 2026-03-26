@@ -1427,23 +1427,20 @@ RANGO DE FECHAS
 $('#daterange-btnOrdenes').daterangepicker(
   {
     ranges   : {
-			'Todos'    : [moment('2000-01-01', 'YYYY-MM-DD'), moment()],
-      'Hoy'       : [moment(), moment()],
-      'Ayer'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-      'Últimos 7 días' : [moment().subtract(6, 'days'), moment()],
-      'Este mes'  : [moment().startOf('month'), moment().endOf('month')],
-      'Último mes'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+			'Mes actual'       : [moment().startOf('month'), moment().endOf('month')],
+			'Mes anterior'     : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+			'Últimos 3 meses'  : [moment().subtract(2, 'months').startOf('month'), moment().endOf('month')],
+			'Últimos 6 meses'  : [moment().subtract(5, 'months').startOf('month'), moment().endOf('month')],
+			'Últimos 12 meses' : [moment().subtract(11, 'months').startOf('month'), moment().endOf('month')]
     },
-    startDate: moment(),
-    endDate  : moment()
+		startDate: moment().startOf('month'),
+		endDate  : moment().endOf('month'),
+		alwaysShowCalendars: true,
+		locale: {
+			customRangeLabel: 'Rango personalizado'
+		}
   },
 	function (start, end, label) {
-
-		if(label === 'Todos'){
-			localStorage.setItem("btnOrdenes", "Todos");
-			window.location = "index.php?ruta=reportePorFecheOrdenes&mostrarTodas=1";
-			return;
-		}
 
     $('#daterange-btnOrdenes span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
 
@@ -1479,47 +1476,8 @@ CAPTURAR HOY
 $(".daterangepicker.opensright .ranges li").on("click", function(){
 
 	var textoHoy = $(this).attr("data-range-key");
-
-	if(textoHoy == "Todos"){
-		localStorage.setItem("btnOrdenes", "Todos");
-		window.location = "index.php?ruta=reportePorFecheOrdenes&mostrarTodas=1";
-		return;
-	}
-
-	if(textoHoy == "Hoy"){
-
-    var d = new Date();
-    
-    var dia = d.getDate();
-    var mes = d.getMonth()+1;
-    var año = d.getFullYear();
-
-    if(mes < 10){
-
-      var fechaInicial = año+"-0"+mes+"-"+dia;
-      var fechaFinal = año+"-0"+mes+"-"+dia;
-
-    }else if(dia < 10){
-
-      var fechaInicial = año+"-"+mes+"-0"+dia;
-      var fechaFinal = año+"-"+mes+"-0"+dia;
-
-    }else if(mes < 10 && dia < 10){
-
-      var fechaInicial = año+"-0"+mes+"-0"+dia;
-      var fechaFinal = año+"-0"+mes+"-0"+dia;
-
-    }else{
-
-      var fechaInicial = año+"-"+mes+"-"+dia;
-        var fechaFinal = año+"-"+mes+"-"+dia;
-
-    } 
-
-    	localStorage.setItem("btnOrdenes", "Hoy");
-
-    	window.location = "index.php?ruta=reportePorFecheOrdenes&fechaInicial="+fechaInicial+"&fechaFinal="+fechaFinal;
-
+	if(textoHoy){
+		localStorage.setItem("btnOrdenes", textoHoy);
 	}
 
 })

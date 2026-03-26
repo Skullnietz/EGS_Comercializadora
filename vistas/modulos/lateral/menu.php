@@ -316,7 +316,7 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
     }
 
     $estadoServicioItem = '';
-    if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador") {
+    if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador" || $_SESSION["perfil"] == "vendedor") {
       $estadoServicioItem = '<li><a href="index.php?ruta=reportePorFecheOrdenes"><i class="far fa-circle"></i> Estado del servicio</a></li>';
     }
 
