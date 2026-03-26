@@ -12,7 +12,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 
 }
 
-$mostrarMercadoLibre = $_SESSION["perfil"] !== "vendedor";
+$mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador");
 
 ?>
 
