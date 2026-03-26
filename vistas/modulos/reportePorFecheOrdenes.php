@@ -119,13 +119,13 @@ if($fechaInicial && $fechaFinal){
 }
 
 /* ── Índices de columna para JS (dependen del perfil) ── */
-$colEstado    = 6;
-$colTotal     = 7;
-$colInversion = $isAdmin ? 8  : -1;
-$colUtilidad  = $isAdmin ? 9  : -1;
-$colIngreso   = $isAdmin ? 10 : 8;
-$colFecha     = $isAdmin ? 11 : 9;
-$totalCols    = $isAdmin ? 12 : 10;
+$colEstado    = 7;
+$colTotal     = 8;
+$colInversion = $isAdmin ? 9  : -1;
+$colUtilidad  = $isAdmin ? 10 : -1;
+$colIngreso   = $isAdmin ? 11 : 9;
+$colFecha     = $isAdmin ? 12 : 10;
+$totalCols    = $isAdmin ? 13 : 11;
 ?>
 
 <style>
@@ -596,6 +596,7 @@ $totalCols    = $isAdmin ? 12 : 10;
             <th>Equipo</th>
             <th>Empresa</th>
             <th>Asesor</th>
+            <th>Técnico</th>
             <th>Cliente</th>
             <th>Estado</th>
             <th>Total</th>
@@ -613,19 +614,20 @@ $totalCols    = $isAdmin ? 12 : 10;
             <th><input type="text" class="rpt-filter-input" placeholder="Marca, modelo..." data-col="2"></th>
             <th><input type="text" class="rpt-filter-input" placeholder="Empresa..." data-col="3"></th>
             <th><input type="text" class="rpt-filter-input" placeholder="Asesor..." data-col="4"></th>
-            <th><input type="text" class="rpt-filter-input" placeholder="Cliente..." data-col="5"></th>
+            <th><input type="text" class="rpt-filter-input" placeholder="Técnico..." data-col="5"></th>
+            <th><input type="text" class="rpt-filter-input" placeholder="Cliente..." data-col="6"></th>
             <th>
-              <select class="rpt-filter-select" data-col="6">
+              <select class="rpt-filter-select" data-col="7">
                 <option value="">Todos</option>
                 <?php foreach(array_keys($estadosUnicos) as $est): ?>
                   <option value="<?= htmlspecialchars($est) ?>"><?= htmlspecialchars($est) ?></option>
                 <?php endforeach; ?>
               </select>
             </th>
-            <th><input type="text" class="rpt-filter-input" placeholder="$..." data-col="7"></th>
+            <th><input type="text" class="rpt-filter-input" placeholder="$..." data-col="8"></th>
             <?php if($isAdmin): ?>
-              <th><input type="text" class="rpt-filter-input" placeholder="$..." data-col="8"></th>
               <th><input type="text" class="rpt-filter-input" placeholder="$..." data-col="9"></th>
+              <th><input type="text" class="rpt-filter-input" placeholder="$..." data-col="10"></th>
             <?php endif; ?>
             <th></th>
             <th></th>
@@ -641,6 +643,9 @@ $totalCols    = $isAdmin ? 12 : 10;
 
             $usuario        = ControladorClientes::ctrMostrarClientes("id", $value["id_usuario"]);
             $NombreUsuario  = $usuario["nombre"] ?? "—";
+
+            $tecnico        = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+            $NombreTecnico  = $tecnico["nombre"] ?? "—";
 
             $total     = floatval($value["total"]);
             $inversion = floatval($value["totalInversion"] ?? 0);
@@ -671,6 +676,7 @@ $totalCols    = $isAdmin ? 12 : 10;
             </td>
             <td><?= htmlspecialchars($NombreEmpresa) ?></td>
             <td><?= htmlspecialchars($NombreAsesor) ?></td>
+            <td><?= htmlspecialchars($NombreTecnico) ?></td>
             <td><?= htmlspecialchars($NombreUsuario) ?></td>
             <td>
               <span class="badge <?= _reportGetBadgeClass($value["estado"]) ?>">
