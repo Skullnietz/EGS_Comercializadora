@@ -279,6 +279,42 @@
   <script src="vistas/js/gestor.crm.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/almacenes.js?v=<?= $jsVer ?>"></script>
 
+  <?php if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "tecnico") { ?>
+  <script>
+    (function () {
+      var ticketSelectors = [
+        '.btnImprimirTicketPedido',
+        '.btnImprimirorden',
+        '.imprimirTicketVentaDinamica',
+        '.btnImprimirTiket',
+        '.btnImprimirComprovanteDeVentaR',
+        '.btnImprimirpdfComprovanteDeVenta',
+        '.botonImprimir',
+        'a[href*="ticketOrden.php"]',
+        'a[href*="ticketpedido.php"]',
+        'a[href*="ticketVentasD.php"]',
+        'a[href*="ticketR.php"]',
+        'a[href*="ticket.php"]',
+        'a[href*="comprbanteDeVentaTicket.php"]',
+        'a[href*="comprbanteDeVenta.php"]'
+      ];
+
+      function hideTicketPrintActions() {
+        $(ticketSelectors.join(',')).hide();
+
+        // Oculta encabezados de columnas de impresión para evitar espacios visuales.
+        $('th').filter(function () {
+          var text = ($(this).text() || '').toLowerCase();
+          return text.indexOf('imprimir ticket') !== -1 || text.indexOf('imprimir') !== -1;
+        }).hide();
+      }
+
+      $(document).ready(hideTicketPrintActions);
+      $(document).ajaxComplete(hideTicketPrintActions);
+    })();
+  </script>
+  <?php } ?>
+
 
 </body>
 

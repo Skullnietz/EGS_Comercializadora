@@ -1,4 +1,11 @@
 <?php
+session_start();
+
+if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] == "tecnico") {
+	echo '{"data":[]}';
+	exit;
+}
+
 require_once "../controladores/pedidos.controlador.php";
 require_once "../modelos/pedidos.modelo.php";
 require_once "../controladores/clientes.controlador.php";
@@ -19,6 +26,11 @@ class TablaOrdenes{
   MOSTRAR LA TABLA DE VENTAS
   =============================================*/
   public function mostrarTabla(){	
+
+	if (!isset($_GET["perfil"]) || $_GET["perfil"] == "tecnico") {
+		echo '{"data":[]}';
+		return;
+	}
 
 	
 

@@ -1,4 +1,11 @@
 <?php
+session_start();
+
+if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] == "tecnico") {
+	http_response_code(403);
+	exit;
+}
+
 require_once "../controladores/pedidos.controlador.php";
 require_once "../modelos/pedidos.modelo.php";
 

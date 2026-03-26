@@ -310,6 +310,11 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
 
   // ── Pedidos + Órdenes de servicio ──
   if ($_SESSION["perfil"] == "tecnico" || $_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "secretaria" || $_SESSION["perfil"] == "Super-Administrador") {
+    $estadoServicioItem = '';
+    if ($_SESSION["perfil"] != "tecnico") {
+      $estadoServicioItem = '<li><a href="index.php?ruta=reportePorFecheOrdenes"><i class="far fa-circle"></i> Estado del servicio</a></li>';
+    }
+
     echo '<li><a href="index.php?ruta=pedidos"><i class="fas fa-box-open"></i><span> Gestor pedidos</span></a></li>
 
       <li class="treeview">
@@ -322,7 +327,7 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
           </a>
           <ul class="treeview-menu">
             <li><a href="index.php?ruta=ordenes"><i class="far fa-circle"></i> Órdenes</a></li>
-            <li><a href="index.php?ruta=reportePorFecheOrdenes"><i class="far fa-circle"></i> Estado del servicio</a></li>
+            ' . $estadoServicioItem . '
             <li><a href="index.php?ruta=comisiones"><i class="far fa-circle"></i> Comisiones</a></li>
             <li><a href="index.php?ruta=busquedamaterial"><i class="fas fa-search"></i> Busqueda de Material</a></li>';
 
@@ -387,7 +392,6 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
   // ── Técnico ──
   if ($_SESSION["perfil"] == "tecnico") {
     echo '<li><a href="index.php?ruta=metas"><i class="fas fa-handshake"></i> <span>Mis Metas</span></a></li>
-      <li><a href="index.php?ruta=pantallacitas"><i class="fas fa-tv"></i> <span>Pantalla</span></a></li>
       <li><a href="index.php?ruta=peticionorden"><i class="fas fa-sync"></i> <span>Petición Orden</span></a></li>
       <li><a href="index.php?ruta=peticionmaterial"><i class="fas fa-tools"></i> <span>Peticion de material</span></a></li>';
   }
