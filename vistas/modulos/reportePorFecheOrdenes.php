@@ -486,7 +486,7 @@ $totalCols    = $isAdmin ? 12 : 10;
         </a>
       <?php endif; ?>
 
-      <?php if(in_array($perfil, ['administrador','vendedor'])): ?>
+      <?php if($perfil == 'administrador'): ?>
         <a class="rpt-dl-btn purple" href="<?= _dlLink('descargar-reporte-OrdenesSup.php','ordenesSup','reporte',$fechaParams,$empParam) ?>">
           <i class="fa-solid fa-file-excel"></i> SUP
         </a>
@@ -507,7 +507,7 @@ $totalCols    = $isAdmin ? 12 : 10;
         </a>
       <?php endif; ?>
 
-      <?php if(in_array($perfil, ['administrador','secretaria','vendedor'])): ?>
+      <?php if(in_array($perfil, ['administrador','secretaria'])): ?>
         <a class="rpt-dl-btn green" href="<?= _dlLink('descargar-reporte-OrdenesEntregadas.php','ordenesENT','reporte',$fechaParams,$empParam) ?>">
           <i class="fa-solid fa-file-excel"></i> ENT
         </a>
