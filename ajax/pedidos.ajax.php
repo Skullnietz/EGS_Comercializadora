@@ -38,7 +38,6 @@ class AjaxPedidos{
 		public $pagoClientePedido;
 		public $pagoPedido;
 		public $adeudo;
-		public $fechaEntrega;
 		public $IngresarEstadoDelPedido;
 
 	function ajaxCrearPedido(){
@@ -74,7 +73,6 @@ class AjaxPedidos{
 					   "metodo"=>$this->metodo,
 					   "pagoPedido"=>$this->pagoPedido,
 					   "adeudo"=>$this->adeudo,
-					   "fechaEntrega"=>$this->fechaEntrega,
 					   "IngresarEstadoDelPedido"=>$this->IngresarEstadoDelPedido
 	 	);
 
@@ -182,8 +180,6 @@ if(isset($_POST["empresaPedido"])){
 	$pedido -> pagoClientePedido = $_POST["pagoClientePedido"];
 	$pedido -> pagoPedido = $_POST["pagoPedido"];
 	$pedido -> adeudo = $_POST["adeudo"];
-	$pedido -> fechaEntrega = $_POST["fechaEntrega"];
-	
 
 	$pedido -> ajaxCrearPedido();
 

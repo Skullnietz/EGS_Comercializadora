@@ -116,7 +116,7 @@ class ModeloPedidos{
 
 	static public function mdlIngresarPedido($tabla, $datos){
 
-		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(id_empresa, id_cliente, id_Asesor, productoUno, precioProductoUno, cantidaProductoUno, totalPedidoUno, ProductoDos, precioProductoDos, cantidadProductoDos, totalPedidoDos, ProductoTres, precioProductoTres, cantidadProductoTres, totalPedidoTres, ProductoCuatro, precioProductoCuatro, cantidadProductoCuatro, totalPedidoCuatro, ProductoCinco, precioProductoCinco, cantidadProductoCinco, totalPedidoCinco, metodo, pagoPedido, total, adeudo, fechaEntrega, estado) VALUES (:id_empresa, :id_cliente, :id_Asesor, :productoUno, :precioProductoUno, :cantidaProductoUno, :totalPedidoUno, :ProductoDos, :precioProductoDos, :cantidadProductoDos, :totalPedidoDos, :ProductoTres, :precioProductoTres, :cantidadProductoTres, :totalPedidoTres, :ProductoCuatro, :precioProductoCuatro, :cantidadProductoCuatro, :totalPedidoCuatro, :ProductoCinco, :precioProductoCinco, :cantidadProductoCinco, :totalPedidoCinco, :metodo, :pagoPedido, :total, :adeudo, :fechaEntrega, :estado)");
+		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(id_empresa, id_cliente, id_Asesor, productoUno, precioProductoUno, cantidaProductoUno, totalPedidoUno, ProductoDos, precioProductoDos, cantidadProductoDos, totalPedidoDos, ProductoTres, precioProductoTres, cantidadProductoTres, totalPedidoTres, ProductoCuatro, precioProductoCuatro, cantidadProductoCuatro, totalPedidoCuatro, ProductoCinco, precioProductoCinco, cantidadProductoCinco, totalPedidoCinco, metodo, pagoPedido, total, adeudo, fechaDePedido, estado) VALUES (:id_empresa, :id_cliente, :id_Asesor, :productoUno, :precioProductoUno, :cantidaProductoUno, :totalPedidoUno, :ProductoDos, :precioProductoDos, :cantidadProductoDos, :totalPedidoDos, :ProductoTres, :precioProductoTres, :cantidadProductoTres, :totalPedidoTres, :ProductoCuatro, :precioProductoCuatro, :cantidadProductoCuatro, :totalPedidoCuatro, :ProductoCinco, :precioProductoCinco, :cantidadProductoCinco, :totalPedidoCinco, :metodo, :pagoPedido, :total, :adeudo, NOW(), :estado)");
 
 		$stmt->bindParam(":id_empresa", $datos["empresaPedido"], PDO::PARAM_INT);
 		$stmt->bindParam(":id_Asesor", $datos["AsesorPedido"], PDO::PARAM_INT);
@@ -155,8 +155,6 @@ class ModeloPedidos{
 		$stmt->bindParam(":pagoPedido", $datos["pagoClientePedido"], PDO::PARAM_INT);
 		$stmt->bindParam(":total", $datos["pagoPedido"], PDO::PARAM_INT);
 		$stmt->bindParam(":adeudo", $datos["adeudo"], PDO::PARAM_INT);
-		$stmt->bindParam(":adeudo", $datos["adeudo"], PDO::PARAM_INT);
-		$stmt->bindParam(":fechaEntrega", $datos["fechaEntrega"], PDO::PARAM_STR);
 
 		if($stmt->execute()){
 
@@ -277,7 +275,11 @@ class ModeloPedidos{
 
 	static public function mdlEditarPedido($tabla, $datos){
 
-		$stmt = Conexion::conectar()->prepare("UPDATE $tabla SET productoUno = :productoUno, abonoUno = :abonoUno, fechaAbonoUno = :fechaAbonoUno, ProductoDos = :ProductoDos, abonoDos = :abonoDos, fechaAbonoDos = :fechaAbonoDos, abonoTres = :abonoTres, fechaAbonoTres = :fechaAbonoTres, abonoCuatro = :abonoCuatro, fechaAbonoCuatro = :fechaAbonoCuatro, abonoCinco = :abonoCinco, fechaAbonoCinco = :fechaAbonoCinco, adeudo = :adeudo, estado = :estado WHERE id = :id");
+		// Si el estado contiene 'Entregado', registrar fecha de entrega automáticamente
+		$esEntregado = (stripos($datos["EstadoDelPedido"], 'Entregado') !== false);
+		$sqlExtra = $esEntregado ? ', fechaEntrega = NOW()' : '';
+
+		$stmt = Conexion::conectar()->prepare("UPDATE $tabla SET productoUno = :productoUno, abonoUno = :abonoUno, fechaAbonoUno = :fechaAbonoUno, ProductoDos = :ProductoDos, abonoDos = :abonoDos, fechaAbonoDos = :fechaAbonoDos, abonoTres = :abonoTres, fechaAbonoTres = :fechaAbonoTres, abonoCuatro = :abonoCuatro, fechaAbonoCuatro = :fechaAbonoCuatro, abonoCinco = :abonoCinco, fechaAbonoCinco = :fechaAbonoCinco, adeudo = :adeudo, estado = :estado" . $sqlExtra . " WHERE id = :id");
 
 		$stmt->bindParam(":productoUno", $datos["edicionProductoUnoPedido"], PDO::PARAM_STR);
 		$stmt->bindParam(":estado", $datos["EstadoDelPedido"], PDO::PARAM_STR);

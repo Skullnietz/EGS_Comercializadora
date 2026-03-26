@@ -1539,8 +1539,6 @@ function agregarMiPedido(){
        var pagoClientePedido = $(".pagoClientePedido").val();
        var pagoPedido = $(".pagoPedido").val();
        var adeudo = $(".adeudo").val();
-       var fechaEntrega = $(".fechaPagoVentaModal").val();
-         
         var datospedido = new FormData();
         datospedido.append("empresaPedido", empresaPedido);
         datospedido.append("AsesorPedido", AsesorPedido);
@@ -1569,7 +1567,6 @@ function agregarMiPedido(){
         datospedido.append("pagoClientePedido", pagoClientePedido);
         datospedido.append("pagoPedido", pagoPedido);
         datospedido.append("adeudo", adeudo);
-        datospedido.append("fechaEntrega", fechaEntrega);
         datospedido.append("IngresarEstadoDelPedido", IngresarEstadoDelPedido);
 
         $.ajax({
