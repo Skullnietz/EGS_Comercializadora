@@ -236,6 +236,17 @@ if (!$orderId) {
     text-decoration: none;
   }
 
+  .ml-btn-toggle {
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+  }
+
+  .ml-btn-toggle:hover {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+
   .ml-subsection-title {
     margin: 20px 0 10px;
     font-size: 12px;
@@ -680,15 +691,18 @@ if (!$orderId) {
           </div>
         </div>
 
-      <div class="ml-card">
-        <div class="ml-card-head">
-          <h3 class="ml-card-title"><i class="fa-solid fa-code"></i> Payload API</h3>
-        </div>
-        <div class="ml-card-body">
-          <p class="ml-section-note">
-            Aqui puedes ver exactamente lo que responde Mercado Libre para esta compra.
-            Esto te sirve para validar que campos puedes usar del lado buyer.
-          </p>
+        <div class="ml-card">
+          <div class="ml-card-head">
+            <h3 class="ml-card-title"><i class="fa-solid fa-code"></i> Payload API</h3>
+            <button type="button" id="ml-toggle-payload" class="ml-btn ml-btn-toggle">
+              <i class="fa-solid fa-code"></i> Mostrar payload
+            </button>
+          </div>
+          <div class="ml-card-body" id="ml-payload-body" style="display:none;">
+            <p class="ml-section-note">
+              Aqui puedes ver exactamente lo que responde Mercado Libre para esta compra.
+              Esto te sirve para validar que campos puedes usar del lado buyer.
+            </p>
           <div class="ml-json-grid">
             <div class="ml-json-box">
               <h4>Orden completa /orders/{id}</h4>
@@ -749,6 +763,7 @@ if (!$orderId) {
 <script>
 (function () {
   var ORDER_ID = <?php echo $orderId; ?>;
+  var payloadVisible = false;
 
   var statusMap = {
     'paid':           { text: 'Pagado',        css: 'ml-badge-paid'      },
@@ -1113,6 +1128,22 @@ if (!$orderId) {
       .html(msg)
       .show();
   }
+
+  function actualizarBotonPayload() {
+    var html = payloadVisible
+      ? '<i class="fa-solid fa-eye-slash"></i> Ocultar payload'
+      : '<i class="fa-solid fa-code"></i> Mostrar payload';
+
+    $('#ml-toggle-payload').html(html);
+    $('#ml-payload-body').toggle(payloadVisible);
+  }
+
+  $('#ml-toggle-payload').on('click', function () {
+    payloadVisible = !payloadVisible;
+    actualizarBotonPayload();
+  });
+
+  actualizarBotonPayload();
 
   /* ── Cargar detalle de la orden ── */
   var datos = new FormData();
