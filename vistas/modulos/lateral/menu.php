@@ -310,12 +310,17 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
 
   // ── Pedidos + Órdenes de servicio ──
   if ($_SESSION["perfil"] == "tecnico" || $_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "secretaria" || $_SESSION["perfil"] == "Super-Administrador") {
+    $gestorPedidosItem = '';
+    if ($_SESSION["perfil"] != "tecnico") {
+      $gestorPedidosItem = '<li><a href="index.php?ruta=pedidos"><i class="fas fa-box-open"></i><span> Gestor pedidos</span></a></li>';
+    }
+
     $estadoServicioItem = '';
     if ($_SESSION["perfil"] != "tecnico") {
       $estadoServicioItem = '<li><a href="index.php?ruta=reportePorFecheOrdenes"><i class="far fa-circle"></i> Estado del servicio</a></li>';
     }
 
-    echo '<li><a href="index.php?ruta=pedidos"><i class="fas fa-box-open"></i><span> Gestor pedidos</span></a></li>
+    echo $gestorPedidosItem . '
 
       <li class="treeview">
           <a href="#">
