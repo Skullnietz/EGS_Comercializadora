@@ -547,6 +547,10 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 <div class="ped-info-value"><?php echo htmlspecialchars($usuario["nombre"]); ?></div>
               </div>
             </div>
+            <?php
+              $correoValid = !empty($usuario["correo"]) && filter_var($usuario["correo"], FILTER_VALIDATE_EMAIL);
+            ?>
+            <?php if ($correoValid): ?>
             <div class="ped-info-row">
               <div class="ped-info-icon purple"><i class="fa-solid fa-envelope"></i></div>
               <div>
@@ -554,26 +558,33 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 <div class="ped-info-value"><?php echo htmlspecialchars($usuario["correo"]); ?></div>
               </div>
             </div>
+            <?php endif; ?>
+            <?php
+              $tel1Raw = isset($usuario["telefono"]) ? preg_replace('/[^0-9]/', '', $usuario["telefono"]) : '';
+              $tel2Raw = isset($usuario["telefonoDos"]) ? preg_replace('/[^0-9]/', '', $usuario["telefonoDos"]) : '';
+              $tel1Valid = strlen($tel1Raw) >= 10;
+              $tel2Valid = strlen($tel2Raw) >= 10;
+            ?>
+            <?php if ($tel1Valid): ?>
             <div class="ped-info-row">
               <div class="ped-info-icon green"><i class="fa-solid fa-phone"></i></div>
               <div style="flex:1;">
                 <div class="ped-info-label">Teléfono</div>
                 <div class="ped-info-value"><?php echo htmlspecialchars($usuario["telefono"]); ?></div>
               </div>
-              <?php if (!empty($usuario["telefono"])): ?>
-                <a href="https://wa.me/52<?php echo preg_replace('/[^0-9]/', '', $usuario["telefono"]); ?>" target="_blank" class="ped-wa-btn" title="Enviar WhatsApp">
-                  <i class="fa-brands fa-whatsapp"></i>
-                </a>
-              <?php endif; ?>
+              <a href="https://wa.me/52<?php echo $tel1Raw; ?>" target="_blank" class="ped-wa-btn" title="Enviar WhatsApp">
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
             </div>
-            <?php if (!empty($usuario["telefonoDos"])): ?>
+            <?php endif; ?>
+            <?php if ($tel2Valid): ?>
             <div class="ped-info-row">
               <div class="ped-info-icon green"><i class="fa-solid fa-phone"></i></div>
               <div style="flex:1;">
                 <div class="ped-info-label">Teléfono 2</div>
                 <div class="ped-info-value"><?php echo htmlspecialchars($usuario["telefonoDos"]); ?></div>
               </div>
-              <a href="https://wa.me/52<?php echo preg_replace('/[^0-9]/', '', $usuario["telefonoDos"]); ?>" target="_blank" class="ped-wa-btn" title="Enviar WhatsApp">
+              <a href="https://wa.me/52<?php echo $tel2Raw; ?>" target="_blank" class="ped-wa-btn" title="Enviar WhatsApp">
                 <i class="fa-brands fa-whatsapp"></i>
               </a>
             </div>
