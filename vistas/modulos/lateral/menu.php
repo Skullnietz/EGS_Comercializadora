@@ -344,6 +344,11 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
     echo '<li><a href="index.php?ruta=empresas"><i class="fas fa-building"></i><span> Empresas</span></a></li>';
   }
 
+  // ── Configuración WhatsApp ──
+  if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador") {
+    echo '<li><a href="index.php?ruta=config-whatsapp"><i class="fab fa-whatsapp"></i><span> Config WhatsApp</span></a></li>';
+  }
+
   // ── Corte de caja ──
   if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "secretaria" || $_SESSION["perfil"] == "Super-Administrador") {
     echo '<li><a href="index.php?ruta=CorteTotal"><i class="fas fa-cash-register"></i><span> Corte de caja</span></a></li>';

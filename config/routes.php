@@ -101,6 +101,7 @@ return [
     'perfil',
     'usuarios',
     'empresas',
+    'config-whatsapp',
     'visitas',
     'reportes',
     'reportePorFecheOrdenes',

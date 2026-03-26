@@ -3,6 +3,94 @@
 class controladorOrdenes
 {
 
+	/*=============================================
+	NOTIFICAR CAMBIO DE ESTADO A SERVICIO NODE (OPCIONAL)
+	=============================================*/
+	static private function ctrDatosClientePorId($idCliente)
+	{
+		$idCliente = intval($idCliente);
+		if ($idCliente <= 0) {
+			return array('nombre' => '', 'whatsapp' => '');
+		}
+
+		$cli = null;
+		try {
+			$cli = ControladorClientes::ctrMostrarClientes('id', $idCliente);
+		} catch (Exception $e) {
+		}
+
+		if (!is_array($cli)) {
+			return array('nombre' => '', 'whatsapp' => '');
+		}
+
+		$nombre = isset($cli['nombre']) ? $cli['nombre'] : '';
+		$waRaw = '';
+		if (isset($cli['telefonoDos'])) {
+			$waRaw = $cli['telefonoDos'];
+		} elseif (isset($cli['telefonoDosCliente'])) {
+			$waRaw = $cli['telefonoDosCliente'];
+		} elseif (isset($cli['telefono'])) {
+			$waRaw = $cli['telefono'];
+		}
+
+		$wa = preg_replace('/[^0-9]/', '', (string) $waRaw);
+		return array('nombre' => $nombre, 'whatsapp' => $wa);
+	}
+
+	static private function ctrNotificarEstadoNode($contexto)
+	{
+		$endpoint = '';
+		$token = '';
+		$timeout = 5;
+		$payload = $contexto;
+
+		if (class_exists('ControladorWhatsapp')) {
+			try {
+				$dispatch = ControladorWhatsapp::ctrPrepararNotificacionEstado($contexto);
+				if (is_array($dispatch)) {
+					$endpoint = trim((string) ($dispatch['endpoint'] ?? ''));
+					$token = trim((string) ($dispatch['token'] ?? ''));
+					$timeout = intval($dispatch['timeout'] ?? 5);
+					$payload = isset($dispatch['payload']) ? $dispatch['payload'] : $contexto;
+				}
+			} catch (Exception $e) {
+			}
+		}
+
+		if ($endpoint === '') {
+			$endpoint = trim((string) getenv('NODE_WHATSAPP_ENDPOINT'));
+			$token = trim((string) getenv('NODE_WHATSAPP_TOKEN'));
+			$timeout = intval(getenv('NODE_WHATSAPP_TIMEOUT') ?: 5);
+		}
+
+		if ($endpoint === '') {
+			return false;
+		}
+
+		$headers = array(
+			'Content-Type: application/json'
+		);
+		if ($token !== '') {
+			$headers[] = 'Authorization: Bearer ' . $token;
+		}
+
+		$ch = curl_init($endpoint);
+		curl_setopt_array($ch, array(
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_POST => true,
+			CURLOPT_HTTPHEADER => $headers,
+			CURLOPT_POSTFIELDS => json_encode($payload),
+			CURLOPT_CONNECTTIMEOUT => $timeout,
+			CURLOPT_TIMEOUT => $timeout,
+		));
+
+		curl_exec($ch);
+		$httpCode = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+		curl_close($ch);
+
+		return ($httpCode >= 200 && $httpCode < 300);
+	}
+
 
 
 	static public function ctrMostrarOrdenes($campo, $empresa)
@@ -1397,6 +1485,21 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 							"id_asesor" => intval($datos["asesor"]),
 							"id_tecnico" => intval($datos["tecnico"]),
 							"id_tecnicoDos" => $_egs_ordTecDos,
+						));
+
+						$_waCli = self::ctrDatosClientePorId(intval($datos["cliente"]));
+						self::ctrNotificarEstadoNode(array(
+							"id_orden" => intval($datos["idOrden"]),
+							"estado_anterior" => $_egs_estadoAnterior,
+							"estado_nuevo" => $datos["estado"],
+							"id_empresa" => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+							"empresa_nombre" => '',
+							"id_cliente" => intval($datos["cliente"]),
+							"cliente_nombre" => $_waCli['nombre'],
+							"cliente_whatsapp" => $_waCli['whatsapp'],
+							"id_asesor" => intval($datos["asesor"]),
+							"id_tecnico" => intval($datos["tecnico"]),
+							"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0
 						));
 					} catch (Exception $e) { /* silenciar para no romper el flujo */
 					}
@@ -3931,6 +4034,7 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 			$_egs_dyn_estadoAnt = '';
 			$_egs_dyn_tecnicoAnt = 0;
 			$_egs_dyn_tituloOrden = '';
+			$_egs_dyn_idCliente = 0;
 			try {
 				$_egs_dyn_ordenAnt = ModeloOrdenes::mdlMostrarordenesParaValidar("ordenes", "id", $_POST["idOrden"]);
 				if (is_array($_egs_dyn_ordenAnt) && !empty($_egs_dyn_ordenAnt)) {
@@ -3939,6 +4043,7 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 						$_egs_dyn_estadoAnt = isset($_egs_dyn_first["estado"]) ? $_egs_dyn_first["estado"] : '';
 						$_egs_dyn_tecnicoAnt = isset($_egs_dyn_first["id_tecnico"]) ? intval($_egs_dyn_first["id_tecnico"]) : 0;
 						$_egs_dyn_tituloOrden = isset($_egs_dyn_first["titulo"]) ? $_egs_dyn_first["titulo"] : '';
+						$_egs_dyn_idCliente = isset($_egs_dyn_first["id_usuario"]) ? intval($_egs_dyn_first["id_usuario"]) : 0;
 					}
 				}
 			} catch (Exception $e) {
@@ -4186,6 +4291,21 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 						"id_asesor" => intval($_POST["asesorEditadoEnOrdenDianmica"]),
 						"id_tecnico" => intval($_POST["tecnicoEditadoEnOrdenDianmica"]),
 						"id_tecnicoDos" => isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? intval($_POST["tecnicodosEditadoEnOrdenDianmica"]) : 0,
+					));
+
+					$_waCliDyn = self::ctrDatosClientePorId($_egs_dyn_idCliente);
+					self::ctrNotificarEstadoNode(array(
+						"id_orden" => intval($_POST["idOrden"]),
+						"estado_anterior" => $_egs_dyn_estadoAnt,
+						"estado_nuevo" => $_POST["estado"],
+						"id_empresa" => isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0,
+						"empresa_nombre" => '',
+						"id_cliente" => $_egs_dyn_idCliente,
+						"cliente_nombre" => $_waCliDyn['nombre'],
+						"cliente_whatsapp" => $_waCliDyn['whatsapp'],
+						"id_asesor" => intval($_POST["asesorEditadoEnOrdenDianmica"]),
+						"id_tecnico" => intval($_POST["tecnicoEditadoEnOrdenDianmica"]),
+						"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0
 					));
 				} catch (Exception $e) {
 				}
