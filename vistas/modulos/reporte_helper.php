@@ -46,7 +46,13 @@ if (!class_exists('ReporteHelper')) {
                     : $_GET['fechaInicial'] . ' a ' . $_GET['fechaFinal'])
                 : 'Todas las ordenes';
 
-            $headers = array('#', 'Folio', 'Empresa', 'Cliente', 'Telefono', 'WhatsApp', 'Titulo', 'Estado', 'Total', 'Fecha');
+            $isReporteAceptados = ($statusFilter === 'Aceptado (ok)');
+
+            if ($isReporteAceptados) {
+                $headers = array('Empresa', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'Fecha', 'Estado', 'Cantidad/Monto', 'Fecha ingreso');
+            } else {
+                $headers = array('#', 'Folio', 'Empresa', 'Cliente', 'Telefono', 'WhatsApp', 'Titulo', 'Estado', 'Total', 'Fecha');
+            }
             $rows = array();
             $sumaTotal = 0.0;
 
@@ -79,31 +85,56 @@ if (!class_exists('ReporteHelper')) {
                     $whatsapp = ($finalPhone != "") ? "52".$finalPhone : "";
                 }
 
-                $rows[] = array(
-                    $key + 1,
-                    $value["id"],
-                    $value["id_empresa"],
-                    $nombreCliente,
-                    $telefono,
-                    $whatsapp,
-                    $value["titulo"],
-                    $value["estado"],
-                    floatval($value["total"]),
-                    $value["fecha"]
-                );
+                $empresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
+                $asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
+                $tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
+
+                if ($isReporteAceptados) {
+                    $rows[] = array(
+                        $empresa["empresa"] ?? $value["id_empresa"],
+                        $asesor["nombre"] ?? "",
+                        $tecnico["nombre"] ?? "",
+                        $nombreCliente,
+                        $telefono,
+                        $value["titulo"] ?? "",
+                        $value["fecha"] ?? "",
+                        $value["estado"] ?? "",
+                        floatval($value["total"]),
+                        $value["fecha_ingreso"] ?? ""
+                    );
+                } else {
+                    $rows[] = array(
+                        $key + 1,
+                        $value["id"],
+                        $value["id_empresa"],
+                        $nombreCliente,
+                        $telefono,
+                        $whatsapp,
+                        $value["titulo"],
+                        $value["estado"],
+                        floatval($value["total"]),
+                        $value["fecha"]
+                    );
+                }
 
                 $sumaTotal += floatval($value["total"]);
             }
+
+            $currencyColumns = array(8);
+            $dateColumns = $isReporteAceptados ? array(6, 9) : array(9);
+            $footerTotalLabelColumn = 7;
+            $footerTotalValueColumn = 8;
+            $hyperlinkColumns = $isReporteAceptados ? array() : array(5 => 'whatsapp_api');
 
             ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
                 'sheetName' => 'Ordenes',
                 'title' => 'Reporte de Ordenes por Estado',
                 'subtitle' => 'Estado: ' . $statusFilter . ' | Rango: ' . $rangoTexto . ' | Generado: ' . date('Y-m-d H:i'),
-                'currencyColumns' => array(8),
-                'dateColumns' => array(9),
-                'hyperlinkColumns' => array(5 => 'whatsapp_api'),
+                'currencyColumns' => $currencyColumns,
+                'dateColumns' => $dateColumns,
+                'hyperlinkColumns' => $hyperlinkColumns,
                 'footerRows' => array(
-                    array('values' => array(0 => 'Registros', 1 => count($rows), 7 => 'Total', 8 => $sumaTotal))
+                    array('values' => array(0 => 'Registros', 1 => count($rows), $footerTotalLabelColumn => 'Total', $footerTotalValueColumn => $sumaTotal))
                 )
             ));
         }
