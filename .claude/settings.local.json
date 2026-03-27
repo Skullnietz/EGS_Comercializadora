@@ -176,7 +176,8 @@
       "Bash(grep -rn \"\\\\.xls\" vistas/modulos/descargar-reporte-*.php vistas/modulos/reporte_helper.php)",
       "mcp__Claude_Preview__preview_start",
       "WebSearch",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(grep -n \"asesor\\\\|tecnico\\\\|Asesor\\\\|Tecnico\\\\|$value\\\\[.id.\\\\]\\\\|$orden\\\\b\" \"C:\\\\Users\\\\CarlosGuizar\\\\Desktop\\\\Proyectos\\\\EGS\\\\EGS_Comercializadora\\\\vistas\\\\modulos\\\\infoOrden.php\")"
     ]
   }
 }
