@@ -46,9 +46,15 @@ if (!class_exists('ReporteHelper')) {
                     : $_GET['fechaInicial'] . ' a ' . $_GET['fechaFinal'])
                 : 'Todas las ordenes';
 
-            $isReporteAceptados = ($statusFilter === 'Aceptado (ok)');
+            $isReporteAceptados  = ($statusFilter === 'Aceptado (ok)');
+            $isReporteTerminados = ($statusFilter === 'Terminada (ter)');
+            $isReporteEntregados = ($statusFilter === 'Entregado (Ent)');
+            $isReporteIngresos   = ($statusFilter === 'En revisión (REV)');
+            $isEstiloAceptados   = ($isReporteAceptados || $isReporteTerminados || $isReporteEntregados || $isReporteIngresos);
 
-            if ($isReporteAceptados) {
+            if ($isReporteTerminados) {
+                $headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje 1', 'Mensaje 2', 'fecha', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
+            } elseif ($isEstiloAceptados) {
                 $headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'fecha', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
             } else {
                 $headers = array('#', 'Folio', 'Empresa', 'Cliente', 'Telefono', 'WhatsApp', 'Titulo', 'Estado', 'Total', 'Fecha');
@@ -72,8 +78,7 @@ if (!class_exists('ReporteHelper')) {
                     $validT1 = (strlen($t1) == 10 && is_numeric($t1));
                     $validT2 = (strlen($t2) == 10 && is_numeric($t2));
 
-                    if ($isReporteAceptados) {
-                        // Requisito: para Aceptados solo se usa telefonoUno (telefono).
+                    if ($isEstiloAceptados) {
                         $telefono = $validT1 ? $t1 : "";
                         $whatsapp = ($telefono !== "") ? "52" . $telefono : "";
                     } else {
@@ -94,22 +99,40 @@ if (!class_exists('ReporteHelper')) {
                 $asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
                 $tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
 
-                if ($isReporteAceptados) {
+                if ($isEstiloAceptados) {
                     $equipo = trim((string)($value["marcaDelEquipo"] ?? '') . ' ' . (string)($value["modeloDelEquipo"] ?? ''));
                     $mensaje = ($telefono !== "") ? "Enviar Msj" : "";
-                    $rows[] = array(
-                        $value["id"] ?? "",
-                        $equipo,
-                        $asesor["nombre"] ?? "",
-                        $tecnico["nombre"] ?? "",
-                        $nombreCliente,
-                        $telefono,
-                        $mensaje,
-                        $value["fecha"] ?? "",
-                        $value["estado"] ?? "",
-                        floatval($value["total"]),
-                        $value["fecha_ingreso"] ?? ""
-                    );
+
+                    if ($isReporteTerminados) {
+                        $rows[] = array(
+                            $value["id"] ?? "",
+                            $equipo,
+                            $asesor["nombre"] ?? "",
+                            $tecnico["nombre"] ?? "",
+                            $nombreCliente,
+                            $telefono,
+                            $mensaje,
+                            $mensaje,
+                            $value["fecha"] ?? "",
+                            $value["estado"] ?? "",
+                            floatval($value["total"]),
+                            $value["fecha_ingreso"] ?? ""
+                        );
+                    } else {
+                        $rows[] = array(
+                            $value["id"] ?? "",
+                            $equipo,
+                            $asesor["nombre"] ?? "",
+                            $tecnico["nombre"] ?? "",
+                            $nombreCliente,
+                            $telefono,
+                            $mensaje,
+                            $value["fecha"] ?? "",
+                            $value["estado"] ?? "",
+                            floatval($value["total"]),
+                            $value["fecha_ingreso"] ?? ""
+                        );
+                    }
                 } else {
                     $rows[] = array(
                         $key + 1,
@@ -128,31 +151,90 @@ if (!class_exists('ReporteHelper')) {
                 $sumaTotal += floatval($value["total"]);
             }
 
-            $currencyColumns = $isReporteAceptados ? array(9) : array(8);
-            $dateColumns = $isReporteAceptados ? array(7, 10) : array(9);
-            $footerTotalLabelColumn = $isReporteAceptados ? 8 : 7;
-            $footerTotalValueColumn = $isReporteAceptados ? 9 : 8;
-            $columnWidths = $isReporteAceptados ? array(0 => 8) : array();
-            $hyperlinkColumns = $isReporteAceptados
-                ? array(
+            // Configuración de columnas y mensajes según tipo de reporte
+            if ($isReporteTerminados) {
+                $currencyColumns     = array(10);
+                $dateColumns         = array(8, 11);
+                $footerTotalLabelColumn = 9;
+                $footerTotalValueColumn = 10;
+                $columnWidths        = array(0 => 8);
+                $msg1 = 'BUEN DIA LE INFORMAMOS QUE SU EQUIPO YA ESTA TERMINADO OJALÁ PODAMOS CONTAR CON SU RECOLECCIÓN PARA MAYOR INFORMACIÓN 7222831159/7221671684/7222144416 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN *[ORDEN]* ASESOR *[ASESOR]* TÉCNICO *[TECNICO]* https://comercializadoraegs.com';
+                $msg2 = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA CONFIRMAR SU CITA HOY O MAÑANA * PARA LA RECOLECCIÓN DE SU EQUIPO GRACIAS* https://comercializadoraegs.com SI USTED YA PASO POR EL EQUIPO O TIENE CITA PROGRAMADA POR FAVOR INFORMENOS POR ESTE MEDIO GRACIAS';
+                $hyperlinkColumns = array(
+                    6 => function ($value, $row) use ($msg1) {
+                        $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
+                        if (strlen($digits) !== 10) return '';
+                        $mensaje = str_replace(
+                            array('[ORDEN]', '[ASESOR]', '[TECNICO]'),
+                            array((string)($row[0] ?? ''), (string)($row[2] ?? ''), (string)($row[3] ?? '')),
+                            $msg1
+                        );
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($mensaje);
+                    },
+                    7 => function ($value, $row) use ($msg2) {
+                        $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
+                        if (strlen($digits) !== 10) return '';
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msg2);
+                    }
+                );
+            } elseif ($isReporteEntregados) {
+                $currencyColumns     = array(9);
+                $dateColumns         = array(7, 10);
+                $footerTotalLabelColumn = 8;
+                $footerTotalValueColumn = 9;
+                $columnWidths        = array(0 => 8);
+                $msgEnt = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA *COMENTAR COMO ESTA TRABAJANDO EL EQUIPO QUE NOS TRAJO A REPARACION, PARA NOSOTROS ES MUY IMPORTANTE SU SATISFACCION GRACIAS https://comercializadoraegs.com';
+                $hyperlinkColumns = array(
+                    6 => function ($value, $row) use ($msgEnt) {
+                        $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
+                        if (strlen($digits) !== 10) return '';
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msgEnt);
+                    }
+                );
+            } elseif ($isReporteIngresos) {
+                $currencyColumns     = array(9);
+                $dateColumns         = array(7, 10);
+                $footerTotalLabelColumn = 8;
+                $footerTotalValueColumn = 9;
+                $columnWidths        = array(0 => 8);
+                $msgRev = 'Somos COMERCIALIZADORA EGS * *https://comercializadoraegs.com gracias por venir y permitirnos apoyarte en tu proyecto de REPARACION DE EQUIPOS DE COMPUTO recuerda que es importante seguir en comunicación por este medio en un horario de LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 o a los teléfonos 7222831159/7221671684/7222144416.';
+                $hyperlinkColumns = array(
+                    6 => function ($value, $row) use ($msgRev) {
+                        $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
+                        if (strlen($digits) !== 10) return '';
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msgRev);
+                    }
+                );
+            } elseif ($isReporteAceptados) {
+                $currencyColumns     = array(9);
+                $dateColumns         = array(7, 10);
+                $footerTotalLabelColumn = 8;
+                $footerTotalValueColumn = 9;
+                $columnWidths        = array(0 => 8);
+                $hyperlinkColumns = array(
                     6 => function ($value, $row) {
                         $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
-                        if (strlen($digits) !== 10) {
-                            return '';
-                        }
+                        if (strlen($digits) !== 10) return '';
                         $orden = (string)($row[0] ?? '');
                         $mensajeBase = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416/720-3321271 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN **. ESTE NUMERO ES SOLO PARA MENSAJES';
                         $mensaje = str_replace('**', $orden, $mensajeBase);
                         return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($mensaje);
                     }
-                )
-                : array(5 => 'whatsapp_api');
+                );
+            } else {
+                $currencyColumns     = array(8);
+                $dateColumns         = array(9);
+                $footerTotalLabelColumn = 7;
+                $footerTotalValueColumn = 8;
+                $columnWidths        = array();
+                $hyperlinkColumns    = array(5 => 'whatsapp_api');
+            }
 
             ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
                 'sheetName' => 'Ordenes',
                 'title' => 'Reporte de Ordenes por Estado',
                 'subtitle' => 'Estado: ' . $statusFilter . ' | Rango: ' . $rangoTexto . ' | Generado: ' . date('Y-m-d H:i'),
-                'baseFontSize' => $isReporteAceptados ? 9 : 11,
+                'baseFontSize' => $isEstiloAceptados ? 9 : 11,
                 'currencyColumns' => $currencyColumns,
                 'dateColumns' => $dateColumns,
                 'columnWidths' => $columnWidths,
