@@ -295,12 +295,20 @@ foreach ($ordenes as $key => $value) {
 	$tecnicoDos = $value["id_tecnicoDos"];
 }
 
-// ── WhatsApp contextual por estado ──────────────────────────────
-$_wa_tel1 = (string)($usuario["telefonoDos"] ?? "");
-$_wa_tel2 = (string)($usuario["telefono"]   ?? "");
-$_wa_phone = "";
-if (strlen($_wa_tel1) == 10 && is_numeric($_wa_tel1))      $_wa_phone = "52" . $_wa_tel1;
-elseif (strlen($_wa_tel2) == 10 && is_numeric($_wa_tel2))  $_wa_phone = "52" . $_wa_tel2;
+// ── Validación centralizada de contacto ─────────────────────────
+$_wa_tel1      = preg_replace('/\D/', '', (string)($usuario["telefonoDos"] ?? ""));
+$_wa_tel2      = preg_replace('/\D/', '', (string)($usuario["telefono"]   ?? ""));
+$_tel1_valido  = (strlen($_wa_tel1) === 10);
+$_tel2_valido  = (strlen($_wa_tel2) === 10);
+
+// Número que se usará para WhatsApp (prioridad: telefonoDos)
+$_wa_phone        = "";
+$_wa_display      = ""; // número que se muestra en el campo WhatsApp
+if ($_tel1_valido)       { $_wa_phone = "52" . $_wa_tel1; $_wa_display = $_wa_tel1; }
+elseif ($_tel2_valido)   { $_wa_phone = "52" . $_wa_tel2; $_wa_display = $_wa_tel2; }
+
+// Teléfono secundario: solo mostrar si es válido Y diferente al de WhatsApp
+$_tel_display = ($_tel2_valido && $_wa_tel2 !== $_wa_tel1) ? $_wa_tel2 : "";
 
 $_wa_orden = (string)($value["id"] ?? "");
 
@@ -337,7 +345,7 @@ if ($_wa_phone !== "") {
 }
 // ── Email contextual por estado ──────────────────────────────────
 $_em_correo      = trim($usuario["correo"] ?? "");
-$_em_tieneCorreo = (!empty($_em_correo) && strpos($_em_correo, '@') !== false);
+$_em_tieneCorreo = (filter_var($_em_correo, FILTER_VALIDATE_EMAIL) !== false);
 $_em_subject     = "";
 $_em_body        = "";
 $_em_nombreCliente = $usuario["nombre"] ?? "";
@@ -451,16 +459,16 @@ function _egsEstadoClass($estado) {
 							<label class="egs-lbl">WhatsApp</label>
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fab fa-whatsapp"></i></span>
-								<input type="text" class="form-control" value="<?php echo htmlspecialchars($_wa_tel1 !== '' ? $_wa_tel1 : $_wa_tel2); ?>" id="botonwhats" readonly>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($_wa_display); ?>" id="botonwhats" readonly>
 							</div>
 						</div>
 						<?php endif; ?>
-						<?php $_tel_raw = trim($usuario["telefono"] ?? ""); if ($_tel_raw !== ""): ?>
+						<?php if ($_tel_display !== ""): ?>
 						<div class="egs-field-row">
 							<label class="egs-lbl">Teléfono</label>
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fas fa-phone-alt"></i></span>
-								<input type="text" class="form-control" value="<?php echo htmlspecialchars($_tel_raw); ?>" readonly>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($_tel_display); ?>" readonly>
 							</div>
 						</div>
 						<?php endif; ?>
