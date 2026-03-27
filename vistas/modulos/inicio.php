@@ -439,6 +439,21 @@ PÁGINA DE INICIO
       </div>
       <?php include "inicio/admin-ultimos-movimientos.php"; ?>
 
+      <!-- ══ SECCIÓN 6: Actividad Reciente (Cambios de Estado) ══ -->
+      <?php
+        // Cargar todas las órdenes del asesor para el widget de actividad
+        $_adm_allOrders = array();
+        try {
+            $r = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
+                "id_empresa", $_SESSION["empresa"], "id_Asesor", $_crm_idAsesor
+            );
+            if (is_array($r)) $_adm_allOrders = $r;
+        } catch (Exception $e) {}
+        $_act_filtro_asesor = $_crm_idAsesor;
+        include "inicio/admin-actividad-estado.php";
+        unset($_act_filtro_asesor, $_adm_allOrders, $_act_filtroTec, $_act_filtroAse, $_act_usaFiltro);
+      ?>
+
     <?php elseif ($_SESSION["perfil"] == "tecnico"): ?>
 
       <!-- ══ WELCOME BANNER TÉCNICO ══ -->

@@ -702,3 +702,11 @@ $_tec_stages_def = array(
     </div>
   </div>
 </div>
+
+<?php
+/* ══ Actividad Reciente — solo órdenes del técnico ══ */
+$_adm_allOrders      = $_tec_allOrders;
+$_act_filtro_tecnico = $_tec_id;
+include __DIR__ . "/admin-actividad-estado.php";
+unset($_act_filtro_tecnico, $_act_filtroTec, $_act_filtroAse, $_act_usaFiltro);
+?>

@@ -65,6 +65,12 @@ $_act_hoy = date('Y-m-d');
 $_act_actividad = array();
 $_act_ordenesVistos = array(); // evitar duplicados
 
+// Filtro opcional: si se definen estas variables antes de incluir este archivo,
+// solo se muestran órdenes que pertenezcan al técnico o asesor indicado.
+$_act_filtroTec = isset($_act_filtro_tecnico) ? intval($_act_filtro_tecnico) : 0;
+$_act_filtroAse = isset($_act_filtro_asesor)  ? intval($_act_filtro_asesor)  : 0;
+$_act_usaFiltro = ($_act_filtroTec > 0 || $_act_filtroAse > 0);
+
 // Indexar órdenes por ID para lookup rápido
 $_act_ordIndex = array();
 if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
@@ -72,6 +78,9 @@ if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
         $_act_ordIndex[intval($ord['id'])] = $ord;
     }
 }
+
+// Rastrear IDs cubiertos por notificaciones para evitar duplicados en la fuente 2
+$_act_ordenesEnNotifs = array();
 
 // 1) Obtener TODOS los cambios de estado de HOY desde notificaciones_estado
 try {
@@ -97,6 +106,9 @@ try {
             // Datos de la orden (si disponible)
             $ordData = isset($_act_ordIndex[$nfIdOrden]) ? $_act_ordIndex[$nfIdOrden] : array();
 
+            // Si hay filtro activo y la orden no está en el índice filtrado, omitir
+            if ($_act_usaFiltro && empty($ordData)) continue;
+
             $tipoEvento = 'cambio_estado';
             if ($nfTipo === 'traspaso') $tipoEvento = 'traspaso';
 
@@ -113,7 +125,8 @@ try {
                 'orden'     => !empty($ordData) ? $ordData : array('id' => $nfIdOrden, 'id_empresa' => isset($nf['id_empresa']) ? $nf['id_empresa'] : '', 'id_Asesor' => isset($nf['id_asesor']) ? $nf['id_asesor'] : '', 'id_tecnico' => isset($nf['id_tecnico']) ? $nf['id_tecnico'] : '', 'id_usuario' => '', 'id_pedido' => '', 'id_tecnicoDos' => ''),
                 'usuario_accion' => isset($nf['nombre_usuario']) ? $nf['nombre_usuario'] : '',
             );
-            $_act_ordenesVistos[$nfIdOrden . '_' . $nf['fecha']] = true;
+            // Marcar orden como cubierta por notificación (evita duplicado en fuente 2)
+            $_act_ordenesEnNotifs[$nfIdOrden] = true;
         }
     }
 } catch (Exception $e) {}
@@ -121,6 +134,9 @@ try {
 // 2) También incluir ingresos/salidas de hoy que no estén en notificaciones
 if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
     foreach ($_adm_allOrders as $ord) {
+        // Saltar si la orden ya aparece vía notificaciones (evita duplicados)
+        if (isset($_act_ordenesEnNotifs[intval($ord['id'])])) continue;
+
         $estado = isset($ord['estado']) ? $ord['estado'] : '';
         if (empty($estado)) continue;
 
@@ -164,12 +180,18 @@ usort($_act_actividad, function($a, $b) {
 
 $_act_actividad = array_slice($_act_actividad, 0, 20);
 
-// Resumen por estado
+// Resumen por estado (variantes de Entregado se unifican en una sola etiqueta)
 $_act_resumen = array();
 foreach ($_act_actividad as $act) {
-    $lbl = $act['info']['label'];
+    $grpInfo = $act['info'];
+    $lbl     = $grpInfo['label'];
+    // Unificar todas las variantes de Entregado
+    if (strpos($lbl, 'Entregado') === 0) {
+        $lbl     = 'Entregado';
+        $grpInfo = array('label' => 'Entregado', 'color' => '#22c55e', 'bg' => '#f0fdf4', 'icon' => 'fa-handshake');
+    }
     if (!isset($_act_resumen[$lbl])) {
-        $_act_resumen[$lbl] = array('count' => 0, 'info' => $act['info']);
+        $_act_resumen[$lbl] = array('count' => 0, 'info' => $grpInfo);
     }
     $_act_resumen[$lbl]['count']++;
 }
