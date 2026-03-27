@@ -49,7 +49,7 @@ if (!class_exists('ReporteHelper')) {
             $isReporteAceptados = ($statusFilter === 'Aceptado (ok)');
 
             if ($isReporteAceptados) {
-                $headers = array('Empresa', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'Fecha', 'Estado', 'Cantidad/Monto', 'Fecha ingreso');
+                $headers = array('Empresa', 'Asesor', 'Orden', 'Equipo', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'Fecha', 'Estado', 'Cantidad/Monto', 'Fecha ingreso');
             } else {
                 $headers = array('#', 'Folio', 'Empresa', 'Cliente', 'Telefono', 'WhatsApp', 'Titulo', 'Estado', 'Total', 'Fecha');
             }
@@ -90,9 +90,12 @@ if (!class_exists('ReporteHelper')) {
                 $tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
 
                 if ($isReporteAceptados) {
+                    $equipo = trim((string)($value["marcaDelEquipo"] ?? '') . ' ' . (string)($value["modeloDelEquipo"] ?? ''));
                     $rows[] = array(
                         $empresa["empresa"] ?? $value["id_empresa"],
                         $asesor["nombre"] ?? "",
+                        $value["id"] ?? "",
+                        $equipo,
                         $tecnico["nombre"] ?? "",
                         $nombreCliente,
                         $telefono,
@@ -120,10 +123,10 @@ if (!class_exists('ReporteHelper')) {
                 $sumaTotal += floatval($value["total"]);
             }
 
-            $currencyColumns = array(8);
-            $dateColumns = $isReporteAceptados ? array(6, 9) : array(9);
-            $footerTotalLabelColumn = 7;
-            $footerTotalValueColumn = 8;
+            $currencyColumns = $isReporteAceptados ? array(10) : array(8);
+            $dateColumns = $isReporteAceptados ? array(8, 11) : array(9);
+            $footerTotalLabelColumn = $isReporteAceptados ? 9 : 7;
+            $footerTotalValueColumn = $isReporteAceptados ? 10 : 8;
             $hyperlinkColumns = $isReporteAceptados ? array() : array(5 => 'whatsapp_api');
 
             ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
