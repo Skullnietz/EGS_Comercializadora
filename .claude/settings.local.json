@@ -175,7 +175,8 @@
       "Bash(git checkout:*)",
       "Bash(grep -rn \"\\\\.xls\" vistas/modulos/descargar-reporte-*.php vistas/modulos/reporte_helper.php)",
       "mcp__Claude_Preview__preview_start",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git pull:*)"
     ]
   }
 }
