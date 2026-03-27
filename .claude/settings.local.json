@@ -178,7 +178,8 @@
       "WebSearch",
       "Bash(git pull:*)",
       "Bash(grep -n \"asesor\\\\|tecnico\\\\|Asesor\\\\|Tecnico\\\\|$value\\\\[.id.\\\\]\\\\|$orden\\\\b\" \"C:\\\\Users\\\\CarlosGuizar\\\\Desktop\\\\Proyectos\\\\EGS\\\\EGS_Comercializadora\\\\vistas\\\\modulos\\\\infoOrden.php\")",
-      "Bash(grep -n \"Pendiente\\\\|AUT\\\\|total\\\\|Total\\\\|$total\" \"C:\\\\Users\\\\CarlosGuizar\\\\Desktop\\\\Proyectos\\\\EGS\\\\EGS_Comercializadora\\\\vistas\\\\modulos\\\\infoOrden.php\")"
+      "Bash(grep -n \"Pendiente\\\\|AUT\\\\|total\\\\|Total\\\\|$total\" \"C:\\\\Users\\\\CarlosGuizar\\\\Desktop\\\\Proyectos\\\\EGS\\\\EGS_Comercializadora\\\\vistas\\\\modulos\\\\infoOrden.php\")",
+      "Bash(php -l \"C:\\\\Users\\\\CarlosGuizar\\\\Desktop\\\\Proyectos\\\\EGS\\\\EGS_Comercializadora\\\\vistas\\\\modulos\\\\infoOrden.php\")"
     ]
   }
 }
