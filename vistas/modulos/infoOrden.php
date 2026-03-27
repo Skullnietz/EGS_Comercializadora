@@ -485,7 +485,7 @@ function _egsEstadoClass($estado) {
 						<hr style="margin:12px 0">
 						<div style="display:flex;gap:8px;flex-wrap:wrap">
 							<?php if ($_em_tieneCorreo): ?>
-							<a class="btn egs-btn-accent btn-sm" href="mailto:<?php echo rawurlencode($_em_correo); ?>?subject=<?php echo rawurlencode($_em_subject); ?>&body=<?php echo rawurlencode($_em_body); ?>">
+							<a class="btn egs-btn-accent btn-sm" href="mailto:<?php echo htmlspecialchars($_em_correo); ?>?subject=<?php echo rawurlencode($_em_subject); ?>&body=<?php echo rawurlencode($_em_body); ?>">
 								<i class="fas fa-envelope"></i> Enviar correo
 							</a>
 							<?php endif; ?>
