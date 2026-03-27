@@ -66,23 +66,29 @@ if (!class_exists('ReporteHelper')) {
                 $whatsapp = "";
 
                 if ($clienteData) {
-                    $t1 = $clienteData["telefono"];
-                    $t2 = $clienteData["telefonoDos"];
+                    $t1 = (string)($clienteData["telefono"] ?? "");
+                    $t2 = (string)($clienteData["telefonoDos"] ?? "");
 
                     $validT1 = (strlen($t1) == 10 && is_numeric($t1));
                     $validT2 = (strlen($t2) == 10 && is_numeric($t2));
 
-                    $finalPhone = "";
-                    if ($validT1 && $validT2 && $t1 !== $t2) {
-                        $finalPhone = $t1;
-                    } elseif ($validT1) {
-                        $finalPhone = $t1;
-                    } elseif ($validT2) {
-                        $finalPhone = $t2;
-                    }
+                    if ($isReporteAceptados) {
+                        // Requisito: para Aceptados solo se usa telefonoUno (telefono).
+                        $telefono = $validT1 ? $t1 : "";
+                        $whatsapp = ($telefono !== "") ? "52" . $telefono : "";
+                    } else {
+                        $finalPhone = "";
+                        if ($validT1 && $validT2 && $t1 !== $t2) {
+                            $finalPhone = $t1;
+                        } elseif ($validT1) {
+                            $finalPhone = $t1;
+                        } elseif ($validT2) {
+                            $finalPhone = $t2;
+                        }
 
-                    $telefono = $finalPhone;
-                    $whatsapp = ($finalPhone != "") ? "52".$finalPhone : "";
+                        $telefono = $finalPhone;
+                        $whatsapp = ($finalPhone != "") ? "52".$finalPhone : "";
+                    }
                 }
 
                 $asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
@@ -90,6 +96,7 @@ if (!class_exists('ReporteHelper')) {
 
                 if ($isReporteAceptados) {
                     $equipo = trim((string)($value["marcaDelEquipo"] ?? '') . ' ' . (string)($value["modeloDelEquipo"] ?? ''));
+                    $mensaje = ($telefono !== "") ? "Enviar Msj" : "";
                     $rows[] = array(
                         $value["id"] ?? "",
                         $equipo,
@@ -97,7 +104,7 @@ if (!class_exists('ReporteHelper')) {
                         $tecnico["nombre"] ?? "",
                         $nombreCliente,
                         $telefono,
-                        $value["titulo"] ?? "",
+                        $mensaje,
                         $value["fecha"] ?? "",
                         $value["estado"] ?? "",
                         floatval($value["total"]),
@@ -125,7 +132,17 @@ if (!class_exists('ReporteHelper')) {
             $dateColumns = $isReporteAceptados ? array(7, 10) : array(9);
             $footerTotalLabelColumn = $isReporteAceptados ? 8 : 7;
             $footerTotalValueColumn = $isReporteAceptados ? 9 : 8;
-            $hyperlinkColumns = $isReporteAceptados ? array() : array(5 => 'whatsapp_api');
+            $hyperlinkColumns = $isReporteAceptados
+                ? array(
+                    6 => function ($value, $row) {
+                        $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
+                        if (strlen($digits) !== 10) {
+                            return '';
+                        }
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits;
+                    }
+                )
+                : array(5 => 'whatsapp_api');
 
             ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
                 'sheetName' => 'Ordenes',
