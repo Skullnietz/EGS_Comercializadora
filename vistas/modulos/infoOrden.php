@@ -310,22 +310,26 @@ $_wa_tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnico"]);
 $_wa_asesorNombre  = isset($_wa_asesor["nombre"])  ? $_wa_asesor["nombre"]  : "";
 $_wa_tecnicoNombre = isset($_wa_tecnico["nombre"]) ? $_wa_tecnico["nombre"] : "";
 
+$_wa_total = number_format(floatval($value["total"] ?? 0), 2);
 $_wa_btns = array(); // cada elemento: ['label'=>'...','url'=>'...']
 
 if ($_wa_phone !== "") {
-    if ($estado === 'Aceptado (ok)') {
-        $msg = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416/720-3321271 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN ' . $_wa_orden . '. ESTE NUMERO ES SOLO PARA MENSAJES';
+    if ($estado === 'Pendiente de autorización (AUT') {
+        $msg = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416/720-3321271 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN ' . $_wa_orden . ' ASESOR *' . $_wa_asesorNombre . '* ESTE NUMERO ES SOLO PARA MENSAJES';
         $_wa_btns[] = array('label' => 'WhatsApp — Presupuesto', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
+    } elseif ($estado === 'Aceptado (ok)') {
+        $msg = "Buenos días soy su asesor " . $_wa_asesorNombre . " le comparto el  monto apagar  que acepto para la reparación de su equipo \xE2\x80\x8E\n\nOrden: " . $_wa_orden . "\n\nAceptada.\n\n$ " . $_wa_total . "\n\nGracias.";
+        $_wa_btns[] = array('label' => 'WhatsApp — Aceptado', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
     } elseif ($estado === 'Terminada (ter)') {
         $msg1 = 'BUEN DIA LE INFORMAMOS QUE SU EQUIPO YA ESTA TERMINADO OJALÁ PODAMOS CONTAR CON SU RECOLECCIÓN PARA MAYOR INFORMACIÓN 7222831159/7221671684/7222144416 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN *' . $_wa_orden . '* ASESOR *' . $_wa_asesorNombre . '* TÉCNICO *' . $_wa_tecnicoNombre . '* https://comercializadoraegs.com';
         $msg2 = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA CONFIRMAR SU CITA HOY O MAÑANA * PARA LA RECOLECCIÓN DE SU EQUIPO GRACIAS* https://comercializadoraegs.com SI USTED YA PASO POR EL EQUIPO O TIENE CITA PROGRAMADA POR FAVOR INFORMENOS POR ESTE MEDIO GRACIAS';
         $_wa_btns[] = array('label' => 'WhatsApp — Equipo listo',   'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg1));
         $_wa_btns[] = array('label' => 'WhatsApp — Confirmar cita', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg2));
     } elseif ($estado === 'Entregado (Ent)') {
-        $msg = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA *COMENTAR COMO ESTA TRABAJANDO EL EQUIPO QUE NOS TRAJO A REPARACION, PARA NOSOTROS ES MUY IMPORTANTE SU SATISFACCION GRACIAS https://comercializadoraegs.com';
+        $msg = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA *COMENTAR COMO ESTA TRABAJANDO EL EQUIPO QUE NOS TRAJO A REPARACION, PARA NOSOTROS ES MUY IMPORTANTE SU SATISFACCION GRACIAS https://comercializadoraegs.com ORDEN *' . $_wa_orden . '* ASESOR *' . $_wa_asesorNombre . '*';
         $_wa_btns[] = array('label' => 'WhatsApp — Seguimiento', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
     } elseif ($estado === 'En revisión (REV)') {
-        $msg = 'Somos COMERCIALIZADORA EGS * *https://comercializadoraegs.com gracias por venir y permitirnos apoyarte en tu proyecto de REPARACION DE EQUIPOS DE COMPUTO recuerda que es importante seguir en comunicación por este medio en un horario de LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 o a los teléfonos 7222831159/7221671684/7222144416.';
+        $msg = 'Somos COMERCIALIZADORA EGS * *https://comercializadoraegs.com gracias por venir y permitirnos apoyarte en tu proyecto de REPARACION DE EQUIPOS DE COMPUTO recuerda que es importante seguir en comunicación por este medio en un horario de LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 o a los teléfonos 7222831159/7221671684/7222144416. ORDEN *' . $_wa_orden . '* ASESOR *' . $_wa_asesorNombre . '*';
         $_wa_btns[] = array('label' => 'WhatsApp — Bienvenida', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
     } else {
         $_wa_btns[] = array('label' => 'WhatsApp', 'url' => '//api.whatsapp.com/send?phone=521' . $_wa_tel1);

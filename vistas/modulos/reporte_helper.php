@@ -50,10 +50,13 @@ if (!class_exists('ReporteHelper')) {
             $isReporteTerminados = ($statusFilter === 'Terminada (ter)');
             $isReporteEntregados = ($statusFilter === 'Entregado (Ent)');
             $isReporteIngresos   = ($statusFilter === 'En revisión (REV)');
-            $isEstiloAceptados   = ($isReporteAceptados || $isReporteTerminados || $isReporteEntregados || $isReporteIngresos);
+            $isReportePendiente  = ($statusFilter === 'Pendiente de autorización (AUT');
+            $isEstiloAceptados   = ($isReporteAceptados || $isReporteTerminados || $isReporteEntregados || $isReporteIngresos || $isReportePendiente);
 
             if ($isReporteTerminados) {
                 $headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje 1', 'Mensaje 2', 'fecha', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
+            } elseif ($isReportePendiente) {
+                $headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'fecha', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
             } elseif ($isEstiloAceptados) {
                 $headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'fecha', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
             } else {
@@ -183,12 +186,14 @@ if (!class_exists('ReporteHelper')) {
                 $footerTotalLabelColumn = 8;
                 $footerTotalValueColumn = 9;
                 $columnWidths        = array(0 => 8);
-                $msgEnt = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA *COMENTAR COMO ESTA TRABAJANDO EL EQUIPO QUE NOS TRAJO A REPARACION, PARA NOSOTROS ES MUY IMPORTANTE SU SATISFACCION GRACIAS https://comercializadoraegs.com';
                 $hyperlinkColumns = array(
-                    6 => function ($value, $row) use ($msgEnt) {
+                    6 => function ($value, $row) {
                         $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
                         if (strlen($digits) !== 10) return '';
-                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msgEnt);
+                        $orden  = (string)($row[0] ?? '');
+                        $asesor = (string)($row[2] ?? '');
+                        $msg = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA *COMENTAR COMO ESTA TRABAJANDO EL EQUIPO QUE NOS TRAJO A REPARACION, PARA NOSOTROS ES MUY IMPORTANTE SU SATISFACCION GRACIAS https://comercializadoraegs.com ORDEN *' . $orden . '* ASESOR *' . $asesor . '*';
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msg);
                     }
                 );
             } elseif ($isReporteIngresos) {
@@ -197,12 +202,14 @@ if (!class_exists('ReporteHelper')) {
                 $footerTotalLabelColumn = 8;
                 $footerTotalValueColumn = 9;
                 $columnWidths        = array(0 => 8);
-                $msgRev = 'Somos COMERCIALIZADORA EGS * *https://comercializadoraegs.com gracias por venir y permitirnos apoyarte en tu proyecto de REPARACION DE EQUIPOS DE COMPUTO recuerda que es importante seguir en comunicación por este medio en un horario de LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 o a los teléfonos 7222831159/7221671684/7222144416.';
                 $hyperlinkColumns = array(
-                    6 => function ($value, $row) use ($msgRev) {
+                    6 => function ($value, $row) {
                         $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
                         if (strlen($digits) !== 10) return '';
-                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msgRev);
+                        $orden  = (string)($row[0] ?? '');
+                        $asesor = (string)($row[2] ?? '');
+                        $msg = 'Somos COMERCIALIZADORA EGS * *https://comercializadoraegs.com gracias por venir y permitirnos apoyarte en tu proyecto de REPARACION DE EQUIPOS DE COMPUTO recuerda que es importante seguir en comunicación por este medio en un horario de LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 o a los teléfonos 7222831159/7221671684/7222144416. ORDEN *' . $orden . '* ASESOR *' . $asesor . '*';
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msg);
                     }
                 );
             } elseif ($isReporteAceptados) {
@@ -215,10 +222,27 @@ if (!class_exists('ReporteHelper')) {
                     6 => function ($value, $row) {
                         $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
                         if (strlen($digits) !== 10) return '';
-                        $orden = (string)($row[0] ?? '');
-                        $mensajeBase = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416/720-3321271 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN **. ESTE NUMERO ES SOLO PARA MENSAJES';
-                        $mensaje = str_replace('**', $orden, $mensajeBase);
-                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($mensaje);
+                        $orden  = (string)($row[0] ?? '');
+                        $asesor = (string)($row[2] ?? '');
+                        $total  = number_format(floatval($row[9] ?? 0), 2);
+                        $msg = "Buenos días soy su asesor " . $asesor . " le comparto el  monto apagar  que acepto para la reparación de su equipo \xE2\x80\x8E\n\nOrden: " . $orden . "\n\nAceptada.\n\n$ " . $total . "\n\nGracias.";
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msg);
+                    }
+                );
+            } elseif ($isReportePendiente) {
+                $currencyColumns     = array(9);
+                $dateColumns         = array(7, 10);
+                $footerTotalLabelColumn = 8;
+                $footerTotalValueColumn = 9;
+                $columnWidths        = array(0 => 8);
+                $hyperlinkColumns = array(
+                    6 => function ($value, $row) {
+                        $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
+                        if (strlen($digits) !== 10) return '';
+                        $orden  = (string)($row[0] ?? '');
+                        $asesor = (string)($row[2] ?? '');
+                        $msg = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416/720-3321271 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN ' . $orden . ' ASESOR *' . $asesor . '* ESTE NUMERO ES SOLO PARA MENSAJES';
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msg);
                     }
                 );
             } else {
