@@ -295,6 +295,44 @@ foreach ($ordenes as $key => $value) {
 	$tecnicoDos = $value["id_tecnicoDos"];
 }
 
+// ── WhatsApp contextual por estado ──────────────────────────────
+$_wa_tel1 = (string)($usuario["telefonoDos"] ?? "");
+$_wa_tel2 = (string)($usuario["telefono"]   ?? "");
+$_wa_phone = "";
+if (strlen($_wa_tel1) == 10 && is_numeric($_wa_tel1))      $_wa_phone = "52" . $_wa_tel1;
+elseif (strlen($_wa_tel2) == 10 && is_numeric($_wa_tel2))  $_wa_phone = "52" . $_wa_tel2;
+
+$_wa_orden = (string)($value["id"] ?? "");
+
+// Asesor y tecnico para el mensaje de Terminados
+$_wa_asesor  = Controladorasesores::ctrMostrarAsesoresEleg("id", $_GET["asesor"]);
+$_wa_tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnico"]);
+$_wa_asesorNombre  = isset($_wa_asesor["nombre"])  ? $_wa_asesor["nombre"]  : "";
+$_wa_tecnicoNombre = isset($_wa_tecnico["nombre"]) ? $_wa_tecnico["nombre"] : "";
+
+$_wa_btns = array(); // cada elemento: ['label'=>'...','url'=>'...']
+
+if ($_wa_phone !== "") {
+    if ($estado === 'Aceptado (ok)') {
+        $msg = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416/720-3321271 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN ' . $_wa_orden . '. ESTE NUMERO ES SOLO PARA MENSAJES';
+        $_wa_btns[] = array('label' => 'WhatsApp — Presupuesto', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
+    } elseif ($estado === 'Terminada (ter)') {
+        $msg1 = 'BUEN DIA LE INFORMAMOS QUE SU EQUIPO YA ESTA TERMINADO OJALÁ PODAMOS CONTAR CON SU RECOLECCIÓN PARA MAYOR INFORMACIÓN 7222831159/7221671684/7222144416 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN *' . $_wa_orden . '* ASESOR *' . $_wa_asesorNombre . '* TÉCNICO *' . $_wa_tecnicoNombre . '* https://comercializadoraegs.com';
+        $msg2 = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA CONFIRMAR SU CITA HOY O MAÑANA * PARA LA RECOLECCIÓN DE SU EQUIPO GRACIAS* https://comercializadoraegs.com SI USTED YA PASO POR EL EQUIPO O TIENE CITA PROGRAMADA POR FAVOR INFORMENOS POR ESTE MEDIO GRACIAS';
+        $_wa_btns[] = array('label' => 'WhatsApp — Equipo listo',   'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg1));
+        $_wa_btns[] = array('label' => 'WhatsApp — Confirmar cita', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg2));
+    } elseif ($estado === 'Entregado (Ent)') {
+        $msg = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA *COMENTAR COMO ESTA TRABAJANDO EL EQUIPO QUE NOS TRAJO A REPARACION, PARA NOSOTROS ES MUY IMPORTANTE SU SATISFACCION GRACIAS https://comercializadoraegs.com';
+        $_wa_btns[] = array('label' => 'WhatsApp — Seguimiento', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
+    } elseif ($estado === 'En revisión (REV)') {
+        $msg = 'Somos COMERCIALIZADORA EGS * *https://comercializadoraegs.com gracias por venir y permitirnos apoyarte en tu proyecto de REPARACION DE EQUIPOS DE COMPUTO recuerda que es importante seguir en comunicación por este medio en un horario de LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 o a los teléfonos 7222831159/7221671684/7222144416.';
+        $_wa_btns[] = array('label' => 'WhatsApp — Bienvenida', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
+    } else {
+        $_wa_btns[] = array('label' => 'WhatsApp', 'url' => '//api.whatsapp.com/send?phone=521' . $_wa_tel1);
+    }
+}
+// ────────────────────────────────────────────────────────────────
+
 // Nombres de partidas para el loop
 $partidaNames = array('Uno','Dos','Tres','Cuatro','Cinco','Seis','Siete','Ocho','Nueve','Diez');
 $partidaLabels = array(
@@ -411,9 +449,11 @@ function _egsEstadoClass($estado) {
 							<a class="btn egs-btn-accent btn-sm" href="mailto:<?php echo htmlspecialchars($usuario["correo"]); ?>?subject=INFORME%20DEL%20ESTADO%20DE%20SU%20ORDEN%20<?php echo $_GET["idOrden"]; ?>&body=SALUDOS%20<?php echo htmlspecialchars($usuario["nombre"]); ?>">
 								<i class="fas fa-envelope"></i> Enviar correo
 							</a>
-							<a class="btn btn-success btn-sm" href="//api.whatsapp.com/send?phone=521<?php echo htmlspecialchars($usuario["telefonoDos"]); ?>" target="_blank" id="linkwhats">
-								<i class="fab fa-whatsapp"></i> WhatsApp
+							<?php foreach ($_wa_btns as $_wb): ?>
+							<a class="btn btn-success btn-sm" href="<?php echo htmlspecialchars($_wb['url']); ?>" target="_blank">
+								<i class="fab fa-whatsapp"></i> <?php echo htmlspecialchars($_wb['label']); ?>
 							</a>
+							<?php endforeach; ?>
 						</div>
 						<?php endif; ?>
 					</div>
