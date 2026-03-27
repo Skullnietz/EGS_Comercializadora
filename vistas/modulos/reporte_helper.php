@@ -219,7 +219,7 @@ if (!class_exists('ReporteHelper')) {
                         $orden  = (string)($row[0] ?? '');
                         $asesor = (string)($row[2] ?? '');
                         $total  = number_format(floatval($row[9] ?? 0), 2);
-                        $msg = "Buenos días soy su asesor " . $asesor . " le comparto el  monto apagar  que acepto para la reparación de su equipo \xE2\x80\x8E\n\nOrden: " . $orden . "\n\nAceptada.\n\n$ " . $total . "\n\nGracias.";
+                        $msg = "Buen da soy su asesor " . $asesor . " le comparto el  monto apagar  que acepto para la reparación de su equipo \xE2\x80\x8E\n\nOrden: " . $orden . "\n\nAceptada.\n\n$ " . $total . "\n\nGracias.";
                         return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msg);
                     }
                 );
