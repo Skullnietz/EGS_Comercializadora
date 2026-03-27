@@ -49,7 +49,7 @@ if (!class_exists('ReporteHelper')) {
             $isReporteAceptados = ($statusFilter === 'Aceptado (ok)');
 
             if ($isReporteAceptados) {
-                $headers = array('Empresa', 'Asesor', 'Orden', 'Equipo', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'Fecha', 'Estado', 'Cantidad/Monto', 'Fecha ingreso');
+                $headers = array('Orden', 'Empresa', 'Asesor', 'Equipo', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'Fecha', 'Estado', 'Cantidad/Monto', 'Fecha ingreso');
             } else {
                 $headers = array('#', 'Folio', 'Empresa', 'Cliente', 'Telefono', 'WhatsApp', 'Titulo', 'Estado', 'Total', 'Fecha');
             }
@@ -92,9 +92,9 @@ if (!class_exists('ReporteHelper')) {
                 if ($isReporteAceptados) {
                     $equipo = trim((string)($value["marcaDelEquipo"] ?? '') . ' ' . (string)($value["modeloDelEquipo"] ?? ''));
                     $rows[] = array(
+                        $value["id"] ?? "",
                         $empresa["empresa"] ?? $value["id_empresa"],
                         $asesor["nombre"] ?? "",
-                        $value["id"] ?? "",
                         $equipo,
                         $tecnico["nombre"] ?? "",
                         $nombreCliente,
