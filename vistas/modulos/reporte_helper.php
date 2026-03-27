@@ -81,21 +81,15 @@ if (!class_exists('ReporteHelper')) {
                     $validT1 = (strlen($t1) == 10 && is_numeric($t1));
                     $validT2 = (strlen($t2) == 10 && is_numeric($t2));
 
-                    if ($isEstiloAceptados) {
-                        $telefono = $validT1 ? $t1 : "";
-                        $whatsapp = ($telefono !== "") ? "52" . $telefono : "";
-                    } else {
-                        $finalPhone = "";
-                        if ($validT1 && $validT2 && $t1 !== $t2) {
-                            $finalPhone = $t1;
-                        } elseif ($validT1) {
-                            $finalPhone = $t1;
-                        } elseif ($validT2) {
-                            $finalPhone = $t2;
-                        }
+                    // Prioridad: t1 → t2 → "Sin dato"
+                    $phoneParaWA = $validT1 ? $t1 : ($validT2 ? $t2 : "");
 
-                        $telefono = $finalPhone;
-                        $whatsapp = ($finalPhone != "") ? "52".$finalPhone : "";
+                    if ($isEstiloAceptados) {
+                        $telefono = $phoneParaWA !== "" ? $phoneParaWA : "Sin dato";
+                        $whatsapp = $phoneParaWA !== "" ? "52" . $phoneParaWA : "";
+                    } else {
+                        $telefono = $phoneParaWA !== "" ? $phoneParaWA : "Sin dato";
+                        $whatsapp = $phoneParaWA !== "" ? "52" . $phoneParaWA : "";
                     }
                 }
 
@@ -104,7 +98,7 @@ if (!class_exists('ReporteHelper')) {
 
                 if ($isEstiloAceptados) {
                     $equipo = trim((string)($value["marcaDelEquipo"] ?? '') . ' ' . (string)($value["modeloDelEquipo"] ?? ''));
-                    $mensaje = ($telefono !== "") ? "Enviar Msj" : "";
+                    $mensaje = ($phoneParaWA !== "") ? "Enviar Msj" : "";
 
                     if ($isReporteTerminados) {
                         $rows[] = array(
@@ -300,10 +294,12 @@ if (!class_exists('ReporteHelper')) {
                     $t1 = (string)($clienteData["telefono"] ?? "");
                     $t2 = (string)($clienteData["telefonoDos"] ?? "");
 
-                    $telefono = (strlen($t1) == 10 && is_numeric($t1)) ? $t1 : "";
-                    $telefonoDos = (strlen($t2) == 10 && is_numeric($t2)) ? $t2 : "";
+                    $validT1crm = (strlen($t1) == 10 && is_numeric($t1));
+                    $validT2crm = (strlen($t2) == 10 && is_numeric($t2));
+                    $telefono    = $validT1crm ? $t1 : "Sin dato";
+                    $telefonoDos = $validT2crm ? $t2 : "Sin dato";
 
-                    $finalPhone = $telefono != "" ? $telefono : $telefonoDos;
+                    $finalPhone = $validT1crm ? $t1 : ($validT2crm ? $t2 : "");
                     $whatsapp = ($finalPhone != "") ? "52" . $finalPhone : "";
                 }
 
