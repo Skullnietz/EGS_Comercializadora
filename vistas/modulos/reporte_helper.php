@@ -140,7 +140,10 @@ if (!class_exists('ReporteHelper')) {
                         if (strlen($digits) !== 10) {
                             return '';
                         }
-                        return 'https://api.whatsapp.com/send?phone=52' . $digits;
+                        $orden = (string)($row[0] ?? '');
+                        $mensajeBase = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN **. ESTE NUMERO ES SOLO PARA MENSAJES';
+                        $mensaje = str_replace('**', $orden, $mensajeBase);
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($mensaje);
                     }
                 )
                 : array(5 => 'whatsapp_api');
