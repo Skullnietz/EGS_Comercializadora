@@ -49,7 +49,7 @@ if (!class_exists('ReporteHelper')) {
             $isReporteAceptados = ($statusFilter === 'Aceptado (ok)');
 
             if ($isReporteAceptados) {
-                $headers = array('Orden', 'Empresa', 'Asesor', 'Equipo', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'Fecha', 'Estado', 'Cantidad/Monto', 'Fecha ingreso');
+                $headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'fecha', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
             } else {
                 $headers = array('#', 'Folio', 'Empresa', 'Cliente', 'Telefono', 'WhatsApp', 'Titulo', 'Estado', 'Total', 'Fecha');
             }
@@ -85,7 +85,6 @@ if (!class_exists('ReporteHelper')) {
                     $whatsapp = ($finalPhone != "") ? "52".$finalPhone : "";
                 }
 
-                $empresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $value["id_empresa"]);
                 $asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
                 $tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
 
@@ -93,9 +92,8 @@ if (!class_exists('ReporteHelper')) {
                     $equipo = trim((string)($value["marcaDelEquipo"] ?? '') . ' ' . (string)($value["modeloDelEquipo"] ?? ''));
                     $rows[] = array(
                         $value["id"] ?? "",
-                        $empresa["empresa"] ?? $value["id_empresa"],
-                        $asesor["nombre"] ?? "",
                         $equipo,
+                        $asesor["nombre"] ?? "",
                         $tecnico["nombre"] ?? "",
                         $nombreCliente,
                         $telefono,
@@ -123,10 +121,10 @@ if (!class_exists('ReporteHelper')) {
                 $sumaTotal += floatval($value["total"]);
             }
 
-            $currencyColumns = $isReporteAceptados ? array(10) : array(8);
-            $dateColumns = $isReporteAceptados ? array(8, 11) : array(9);
-            $footerTotalLabelColumn = $isReporteAceptados ? 9 : 7;
-            $footerTotalValueColumn = $isReporteAceptados ? 10 : 8;
+            $currencyColumns = $isReporteAceptados ? array(9) : array(8);
+            $dateColumns = $isReporteAceptados ? array(7, 10) : array(9);
+            $footerTotalLabelColumn = $isReporteAceptados ? 8 : 7;
+            $footerTotalValueColumn = $isReporteAceptados ? 9 : 8;
             $hyperlinkColumns = $isReporteAceptados ? array() : array(5 => 'whatsapp_api');
 
             ExcelExportHelper::downloadXlsx($filename, $headers, $rows, array(
