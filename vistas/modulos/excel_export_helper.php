@@ -13,6 +13,7 @@ if (!class_exists('ExcelExportHelper')) {
             $baseFontSize = max(8, min(14, $baseFontSize));
             $titleFontSize = $baseFontSize + 5;
             $subtitleFontSize = max(8, $baseFontSize - 1);
+            $columnWidths = isset($options['columnWidths']) ? (array) $options['columnWidths'] : array();
 
             $dateColumns = isset($options['dateColumns']) ? (array) $options['dateColumns'] : array();
             $currencyColumns = isset($options['currencyColumns']) ? (array) $options['currencyColumns'] : array();
@@ -151,7 +152,11 @@ if (!class_exists('ExcelExportHelper')) {
 
             $colsXml = array();
             foreach ($maxLen as $i => $len) {
-                $width = min(80, max(10, $len + 2));
+                if (isset($columnWidths[$i]) && is_numeric($columnWidths[$i])) {
+                    $width = max(5, min(80, (float) $columnWidths[$i]));
+                } else {
+                    $width = min(80, max(10, $len + 2));
+                }
                 $index = $i + 1;
                 $colsXml[] = '<col min="' . $index . '" max="' . $index . '" width="' . $width . '" customWidth="1"/>';
             }

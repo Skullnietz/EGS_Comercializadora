@@ -132,6 +132,7 @@ if (!class_exists('ReporteHelper')) {
             $dateColumns = $isReporteAceptados ? array(7, 10) : array(9);
             $footerTotalLabelColumn = $isReporteAceptados ? 8 : 7;
             $footerTotalValueColumn = $isReporteAceptados ? 9 : 8;
+            $columnWidths = $isReporteAceptados ? array(0 => 8) : array();
             $hyperlinkColumns = $isReporteAceptados
                 ? array(
                     6 => function ($value, $row) {
@@ -151,6 +152,7 @@ if (!class_exists('ReporteHelper')) {
                 'baseFontSize' => $isReporteAceptados ? 9 : 11,
                 'currencyColumns' => $currencyColumns,
                 'dateColumns' => $dateColumns,
+                'columnWidths' => $columnWidths,
                 'hyperlinkColumns' => $hyperlinkColumns,
                 'footerRows' => array(
                     array('values' => array(0 => 'Registros', 1 => count($rows), $footerTotalLabelColumn => 'Total', $footerTotalValueColumn => $sumaTotal))
