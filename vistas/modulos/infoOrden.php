@@ -335,7 +335,35 @@ if ($_wa_phone !== "") {
         $_wa_btns[] = array('label' => 'WhatsApp', 'url' => '//api.whatsapp.com/send?phone=521' . $_wa_tel1);
     }
 }
-// ────────────────────────────────────────────────────────────────
+// ── Email contextual por estado ──────────────────────────────────
+$_em_correo      = trim($usuario["correo"] ?? "");
+$_em_tieneCorreo = (!empty($_em_correo) && strpos($_em_correo, '@') !== false);
+$_em_subject     = "";
+$_em_body        = "";
+$_em_nombreCliente = $usuario["nombre"] ?? "";
+
+if ($_em_tieneCorreo) {
+    if ($estado === 'Pendiente de autorización (AUT') {
+        $_em_subject = "Presupuesto de tu equipo - Orden #" . $_wa_orden;
+        $_em_body    = "Buenos días " . $_em_nombreCliente . ",\n\nNos da gusto informarte que ya tenemos tu presupuesto listo. Por favor comunícate con nosotros para explicarte mejor a los teléfonos 7222831159 / 7221671684 / 7222144416, en un horario de Lunes a Viernes de 10 a 2 y de 4 a 6:30, Sábados de 9 a 2.\n\nOrden: " . $_wa_orden . "\nAsesor: " . $_wa_asesorNombre . "\n\nEste número es solo para mensajes.\n\nGracias.\nComercializadora EGS\nhttps://comercializadoraegs.com";
+    } elseif ($estado === 'Aceptado (ok)') {
+        $_em_subject = "Orden aceptada - #" . $_wa_orden;
+        $_em_body    = "Buenos días " . $_em_nombreCliente . ",\n\nSoy su asesor " . $_wa_asesorNombre . ", le comparto el monto a pagar que aceptó para la reparación de su equipo.\n\nOrden: " . $_wa_orden . "\n\nAceptada.\n\n$ " . $_wa_total . "\n\nGracias.\nComercializadora EGS\nhttps://comercializadoraegs.com";
+    } elseif ($estado === 'Terminada (ter)') {
+        $_em_subject = "¡Tu equipo está listo! - Orden #" . $_wa_orden;
+        $_em_body    = "Buenos días " . $_em_nombreCliente . ",\n\nLe informamos que su equipo ya está terminado. ¡Esperamos poder contar con su recolección!\n\nPara mayor información comuníquese a los teléfonos 7222831159 / 7221671684 / 7222144416, en un horario de Lunes a Viernes de 10 a 2 y de 4 a 6:30, Sábados de 9 a 2.\n\nOrden: " . $_wa_orden . "\nAsesor: " . $_wa_asesorNombre . "\nTécnico: " . $_wa_tecnicoNombre . "\n\nGracias.\nComercializadora EGS\nhttps://comercializadoraegs.com";
+    } elseif ($estado === 'Entregado (Ent)') {
+        $_em_subject = "¿Cómo está trabajando tu equipo? - Orden #" . $_wa_orden;
+        $_em_body    = "Buenos días " . $_em_nombreCliente . ",\n\nPara brindarle un mejor servicio, le agradeceríamos nos pudiera comentar cómo está trabajando el equipo que nos trajo a reparación. Para nosotros es muy importante su satisfacción.\n\nOrden: " . $_wa_orden . "\nAsesor: " . $_wa_asesorNombre . "\n\nGracias.\nComercializadora EGS\nhttps://comercializadoraegs.com";
+    } elseif ($estado === 'En revisión (REV)') {
+        $_em_subject = "Gracias por tu visita - Orden #" . $_wa_orden;
+        $_em_body    = "Buenos días " . $_em_nombreCliente . ",\n\nSomos Comercializadora EGS. Gracias por venir y permitirnos apoyarte en tu proyecto de reparación de equipos de cómputo. Recuerda que es importante seguir en comunicación en un horario de Lunes a Viernes de 10 a 2 y de 4 a 6:30, Sábados de 9 a 2, o a los teléfonos 7222831159 / 7221671684 / 7222144416.\n\nOrden: " . $_wa_orden . "\nAsesor: " . $_wa_asesorNombre . "\n\nGracias.\nhttps://comercializadoraegs.com";
+    } else {
+        $_em_subject = "Estado de tu orden #" . $_wa_orden;
+        $_em_body    = "Buenos días " . $_em_nombreCliente . ",\n\nSaludos de Comercializadora EGS.\n\nhttps://comercializadoraegs.com";
+    }
+}
+// ─────────────────────────────────────────────────────────────────
 
 // Nombres de partidas para el loop
 $partidaNames = array('Uno','Dos','Tres','Cuatro','Cinco','Seis','Siete','Ocho','Nueve','Diez');
@@ -409,27 +437,33 @@ function _egsEstadoClass($estado) {
 						</div>
 
 						<?php if (!$isTecnico): ?>
+						<?php if ($_em_tieneCorreo): ?>
 						<div class="egs-field-row">
 							<label class="egs-lbl">Correo</label>
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fas fa-envelope"></i></span>
-								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["correo"]); ?>" readonly>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($_em_correo); ?>" readonly>
 							</div>
 						</div>
+						<?php endif; ?>
+						<?php if ($_wa_phone !== ""): ?>
 						<div class="egs-field-row">
 							<label class="egs-lbl">WhatsApp</label>
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fab fa-whatsapp"></i></span>
-								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["telefonoDos"]); ?>" id="botonwhats" readonly>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($_wa_tel1 !== '' ? $_wa_tel1 : $_wa_tel2); ?>" id="botonwhats" readonly>
 							</div>
 						</div>
+						<?php endif; ?>
+						<?php $_tel_raw = trim($usuario["telefono"] ?? ""); if ($_tel_raw !== ""): ?>
 						<div class="egs-field-row">
 							<label class="egs-lbl">Teléfono</label>
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fas fa-phone-alt"></i></span>
-								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["telefono"]); ?>" readonly>
+								<input type="text" class="form-control" value="<?php echo htmlspecialchars($_tel_raw); ?>" readonly>
 							</div>
 						</div>
+						<?php endif; ?>
 						<?php endif; ?>
 
 						<div class="egs-field-row">
@@ -447,12 +481,14 @@ function _egsEstadoClass($estado) {
 							</div>
 						</div>
 
-						<?php if ($isAdmin || $isVendedor): ?>
+						<?php if (($isAdmin || $isVendedor) && ($_em_tieneCorreo || !empty($_wa_btns))): ?>
 						<hr style="margin:12px 0">
 						<div style="display:flex;gap:8px;flex-wrap:wrap">
-							<a class="btn egs-btn-accent btn-sm" href="mailto:<?php echo htmlspecialchars($usuario["correo"]); ?>?subject=INFORME%20DEL%20ESTADO%20DE%20SU%20ORDEN%20<?php echo $_GET["idOrden"]; ?>&body=SALUDOS%20<?php echo htmlspecialchars($usuario["nombre"]); ?>">
+							<?php if ($_em_tieneCorreo): ?>
+							<a class="btn egs-btn-accent btn-sm" href="mailto:<?php echo rawurlencode($_em_correo); ?>?subject=<?php echo rawurlencode($_em_subject); ?>&body=<?php echo rawurlencode($_em_body); ?>">
 								<i class="fas fa-envelope"></i> Enviar correo
 							</a>
+							<?php endif; ?>
 							<?php foreach ($_wa_btns as $_wb): ?>
 							<a class="btn btn-success btn-sm" href="<?php echo htmlspecialchars($_wb['url']); ?>" target="_blank">
 								<i class="fab fa-whatsapp"></i> <?php echo htmlspecialchars($_wb['label']); ?>
