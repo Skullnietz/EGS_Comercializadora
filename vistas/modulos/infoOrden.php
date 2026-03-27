@@ -460,6 +460,12 @@ function _egsEstadoClass($estado) {
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fab fa-whatsapp"></i></span>
 								<input type="text" class="form-control" value="<?php echo htmlspecialchars($_wa_display); ?>" id="botonwhats" readonly>
+								<span class="input-group-btn">
+									<button class="btn btn-default" type="button" title="Copiar número"
+									        onclick="_egsCopiarTel(this, '<?php echo htmlspecialchars($_wa_display); ?>')">
+									<i class="fas fa-copy"></i>
+									</button>
+								</span>
 							</div>
 						</div>
 						<?php endif; ?>
@@ -469,6 +475,12 @@ function _egsEstadoClass($estado) {
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fas fa-phone-alt"></i></span>
 								<input type="text" class="form-control" value="<?php echo htmlspecialchars($_tel_display); ?>" readonly>
+								<span class="input-group-btn">
+									<button class="btn btn-default" type="button" title="Copiar número"
+									        onclick="_egsCopiarTel(this, '<?php echo htmlspecialchars($_tel_display); ?>')">
+									<i class="fas fa-copy"></i>
+									</button>
+								</span>
 							</div>
 						</div>
 						<?php endif; ?>
@@ -1607,6 +1619,42 @@ $(document).ready(function(){
 	setInterval(pollInfoOrden, 45000);
 	pollInfoOrden();
 });
+</script>
+
+<script>
+function _egsCopiarTel(btn, numero) {
+	var icon = btn.querySelector('i');
+	var texto = numero.trim();
+	if (!texto) return;
+
+	function _feedback() {
+		icon.className = 'fas fa-check';
+		btn.style.color = '#22c55e';
+		setTimeout(function() {
+			icon.className = 'fas fa-copy';
+			btn.style.color = '';
+		}, 1800);
+	}
+
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(texto).then(_feedback).catch(function() {
+			_egsCopiarFallback(texto, _feedback);
+		});
+	} else {
+		_egsCopiarFallback(texto, _feedback);
+	}
+}
+
+function _egsCopiarFallback(texto, cb) {
+	var ta = document.createElement('textarea');
+	ta.value = texto;
+	ta.style.cssText = 'position:fixed;top:-999px;left:-999px;opacity:0';
+	document.body.appendChild(ta);
+	ta.focus();
+	ta.select();
+	try { document.execCommand('copy'); cb(); } catch(e) {}
+	document.body.removeChild(ta);
+}
 </script>
 
 <?php
