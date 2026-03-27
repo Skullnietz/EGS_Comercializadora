@@ -133,6 +133,7 @@ if (!class_exists('ReporteHelper')) {
                 'sheetName' => 'Ordenes',
                 'title' => 'Reporte de Ordenes por Estado',
                 'subtitle' => 'Estado: ' . $statusFilter . ' | Rango: ' . $rangoTexto . ' | Generado: ' . date('Y-m-d H:i'),
+                'baseFontSize' => $isReporteAceptados ? 9 : 11,
                 'currencyColumns' => $currencyColumns,
                 'dateColumns' => $dateColumns,
                 'hyperlinkColumns' => $hyperlinkColumns,

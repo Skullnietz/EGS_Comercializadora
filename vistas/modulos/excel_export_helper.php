@@ -9,6 +9,10 @@ if (!class_exists('ExcelExportHelper')) {
             $title = isset($options['title']) ? trim((string) $options['title']) : '';
             $subtitle = isset($options['subtitle']) ? trim((string) $options['subtitle']) : '';
             $footerRows = isset($options['footerRows']) ? (array) $options['footerRows'] : array();
+            $baseFontSize = isset($options['baseFontSize']) ? intval($options['baseFontSize']) : 11;
+            $baseFontSize = max(8, min(14, $baseFontSize));
+            $titleFontSize = $baseFontSize + 5;
+            $subtitleFontSize = max(8, $baseFontSize - 1);
 
             $dateColumns = isset($options['dateColumns']) ? (array) $options['dateColumns'] : array();
             $currencyColumns = isset($options['currencyColumns']) ? (array) $options['currencyColumns'] : array();
@@ -189,12 +193,12 @@ if (!class_exists('ExcelExportHelper')) {
                 . '<numFmt numFmtId="165" formatCode="$#,##0.00"/>'
                 . '</numFmts>'
                 . '<fonts count="6">'
-                . '<font><sz val="11"/><name val="Calibri"/></font>'
-                . '<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>'
-                . '<font><u/><color rgb="FF0563C1"/><sz val="11"/><name val="Calibri"/></font>'
-                . '<font><b/><sz val="16"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>'
-                . '<font><sz val="10"/><color rgb="FF475569"/><name val="Calibri"/></font>'
-                . '<font><b/><sz val="11"/><color rgb="FF0F172A"/><name val="Calibri"/></font>'
+                . '<font><sz val="' . $baseFontSize . '"/><name val="Calibri"/></font>'
+                . '<font><b/><sz val="' . $baseFontSize . '"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>'
+                . '<font><u/><color rgb="FF0563C1"/><sz val="' . $baseFontSize . '"/><name val="Calibri"/></font>'
+                . '<font><b/><sz val="' . $titleFontSize . '"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>'
+                . '<font><sz val="' . $subtitleFontSize . '"/><color rgb="FF475569"/><name val="Calibri"/></font>'
+                . '<font><b/><sz val="' . $baseFontSize . '"/><color rgb="FF0F172A"/><name val="Calibri"/></font>'
                 . '</fonts>'
                 . '<fills count="5">'
                 . '<fill><patternFill patternType="none"/></fill>'
