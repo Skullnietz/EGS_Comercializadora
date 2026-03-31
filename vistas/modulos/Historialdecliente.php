@@ -47,18 +47,46 @@ $_hc_entregadas = 0;
 $_hc_canceladas = 0;
 $_hc_pendientes = 0;
 $_hc_primeraFecha = null;
+$_hc_diasRecogida = [];
 foreach ($_hc_ordenes as $o) {
     $est = isset($o["estado"]) ? $o["estado"] : "";
     if (strpos($est, "Ent") !== false) {
         $_hc_entregadas++;
         $_hc_totalGastado += floatval(isset($o["total"]) ? $o["total"] : 0);
+        // Calcular días de recogida para entregadas con ambas fechas
+        $fi = isset($o["fecha_ingreso"]) ? trim($o["fecha_ingreso"]) : "";
+        $fs = isset($o["fecha_Salida"]) ? trim($o["fecha_Salida"]) : "";
+        if (!empty($fi) && !empty($fs)) {
+            try {
+                $dIng = new DateTime($fi);
+                $dSal = new DateTime($fs);
+                $diffDias = $dIng->diff($dSal)->days;
+                $_hc_diasRecogida[] = $diffDias;
+            } catch (Exception $e) {}
+        }
     } elseif (strpos($est, "can") !== false) {
         $_hc_canceladas++;
     } else {
         $_hc_pendientes++;
     }
-    $fi = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
-    if (!empty($fi) && ($_hc_primeraFecha === null || $fi < $_hc_primeraFecha)) $_hc_primeraFecha = $fi;
+    $fi2 = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
+    if (!empty($fi2) && ($_hc_primeraFecha === null || $fi2 < $_hc_primeraFecha)) $_hc_primeraFecha = $fi2;
+}
+
+// ── Promedio de recogida ──
+$_hc_promedioRecogida = null;
+$_hc_recLabel = "Sin datos";
+$_hc_recColor = "#64748b";
+$_hc_recBg    = "#f1f5f9";
+$_hc_recIcon  = "fa-clock";
+if (count($_hc_diasRecogida) >= 3) {
+    $_hc_promedioRecogida = round(array_sum($_hc_diasRecogida) / count($_hc_diasRecogida), 1);
+    $diasTxt = ($_hc_promedioRecogida == 1) ? "día" : "días";
+    $_hc_recLabel = "~" . $_hc_promedioRecogida . " " . $diasTxt;
+    if ($_hc_promedioRecogida <= 3)      { $_hc_recColor = "#16a34a"; $_hc_recBg = "#f0fdf4"; $_hc_recIcon = "fa-bolt"; }
+    elseif ($_hc_promedioRecogida <= 7)  { $_hc_recColor = "#2563eb"; $_hc_recBg = "#eff6ff"; $_hc_recIcon = "fa-clock"; }
+    elseif ($_hc_promedioRecogida <= 14) { $_hc_recColor = "#d97706"; $_hc_recBg = "#fffbeb"; $_hc_recIcon = "fa-hourglass-half"; }
+    else                                 { $_hc_recColor = "#dc2626"; $_hc_recBg = "#fef2f2"; $_hc_recIcon = "fa-hourglass-end"; }
 }
 
 // ── Calificación del cliente ──
@@ -197,6 +225,13 @@ if ($_hc_primeraFecha) {
             <?php endif; ?>
           </div>
           <div class="hc-stat-lbl">Calificación</div>
+        </div>
+        <div class="hc-stat" style="flex:1">
+          <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;background:<?php echo $_hc_recBg; ?>;margin-bottom:4px">
+            <i class="fa-solid <?php echo $_hc_recIcon; ?>" style="color:<?php echo $_hc_recColor; ?>;font-size:14px"></i>
+            <span style="font-size:14px;font-weight:800;color:<?php echo $_hc_recColor; ?>"><?php echo $_hc_recLabel; ?></span>
+          </div>
+          <div class="hc-stat-lbl">Tiempo de recogida</div>
         </div>
         <div class="hc-stat" style="flex:1">
           <div class="hc-stat-val" style="color:#6366f1">$<?php echo number_format($_hc_totalGastado, 0); ?></div>

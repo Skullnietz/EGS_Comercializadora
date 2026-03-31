@@ -36,6 +36,13 @@ class TablaClientes{
 			$estadoMap = [];
 		}
 
+		// Una sola query para promedio de días de recogida
+		try {
+			$recogidaMap = ControladorClientes::ctrPromedioRecogidaBulk();
+		} catch(Exception $e) {
+			$recogidaMap = [];
+		}
+
 		// Cache de asesores para evitar queries repetidas
 		$asesoresCache = [];
 
@@ -188,6 +195,21 @@ class TablaClientes{
 			                . "<i class='fas {$califIcon}'></i>&nbsp;{$califLabel}";
 			if($califPct) $clasificacion .= "&nbsp;<span style='opacity:.7;font-size:10px;'>({$califPct})</span>";
 			$clasificacion .= "</span>";
+
+			// ── Tiempo promedio de recogida (solo clientes con 3+ entregadas) ──
+			$recogidaBadge = "";
+			if(isset($recogidaMap[$idCliente])){
+				$promDias = $recogidaMap[$idCliente];
+				if($promDias <= 3)       { $recBg = "#f0fdf4"; $recColor = "#16a34a"; $recIcon = "fa-bolt"; }
+				elseif($promDias <= 7)   { $recBg = "#eff6ff"; $recColor = "#2563eb"; $recIcon = "fa-clock"; }
+				elseif($promDias <= 14)  { $recBg = "#fffbeb"; $recColor = "#d97706"; $recIcon = "fa-hourglass-half"; }
+				else                     { $recBg = "#fef2f2"; $recColor = "#dc2626"; $recIcon = "fa-hourglass-end"; }
+				$diasTxt = ($promDias == 1) ? "día" : "días";
+				$recogidaBadge = "<span style='display:inline-flex;align-items:center;gap:4px;padding:2px 9px;"
+				               . "border-radius:20px;font-size:11px;background:{$recBg};color:{$recColor};font-weight:600;'>"
+				               . "<i class='fas {$recIcon}'></i>&nbsp;Recoge:&nbsp;~{$promDias}&nbsp;{$diasTxt}</span>";
+			}
+			if($recogidaBadge) $clasificacion .= $recogidaBadge;
 
 			if($regBadge) $clasificacion .= $regBadge;
 			$clasificacion .= "</div>";

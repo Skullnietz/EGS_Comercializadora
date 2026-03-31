@@ -63,6 +63,16 @@ class ControladorClientes{
 	}
 
 	/*=============================================
+	PROMEDIO DÍAS DE RECOGIDA BULK
+	=============================================*/
+
+	static public function ctrPromedioRecogidaBulk(){
+
+		return ModeloClientes::mdlPromedioRecogidaBulk();
+
+	}
+
+	/*=============================================
 	MOSTRAR CLIENTES ORDENES
 	=============================================*/
 

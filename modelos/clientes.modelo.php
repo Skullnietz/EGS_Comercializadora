@@ -240,6 +240,38 @@ class ModeloClientes{
 	}
 
 	/*=============================================
+	PROMEDIO DÍAS DE RECOGIDA BULK
+	=============================================*/
+
+	static public function mdlPromedioRecogidaBulk(){
+
+		$stmt = ConexionWP::conectarWP()->prepare(
+			"SELECT id_usuario,
+				COUNT(*) as total_entregadas,
+				AVG(DATEDIFF(fecha_Salida, fecha_ingreso)) as promedio_dias
+			FROM ordenes
+			WHERE estado LIKE '%Ent%'
+			  AND fecha_ingreso IS NOT NULL AND fecha_ingreso != ''
+			  AND fecha_Salida IS NOT NULL AND fecha_Salida != ''
+			GROUP BY id_usuario
+			HAVING total_entregadas >= 3"
+		);
+
+		$stmt->execute();
+
+		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		$map = [];
+
+		foreach($results as $row){
+			$map[intval($row["id_usuario"])] = round(floatval($row["promedio_dias"]), 1);
+		}
+
+		return $map;
+
+	}
+
+	/*=============================================
 	MOSTRAR USUARIOS ORDENES
 	=============================================*/
 
