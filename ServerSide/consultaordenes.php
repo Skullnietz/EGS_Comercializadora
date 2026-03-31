@@ -1,5 +1,6 @@
 <?php
 include_once '../ServerSide/serversideConexion.php';
+require_once __DIR__ . '/../config/global.php';
 
 $objeto = new ConexionO();
 $conexiono = $objeto->Conectar();
@@ -9,22 +10,20 @@ $resultado = $conexiono->prepare($consulta);
 $resultado->execute();
 $data=$resultado->fetchAll(PDO::FETCH_ASSOC);
 
-// Traer nombres de clientes desde la otra BD
+// Traer nombres de clientes desde la BD del sistema (mismo método que Conexion.php)
 $clienteNames = [];
-try {
-    $host   = getenv('DB_SISTEMA_HOST') ?: 'localhost';
-    $dbname = getenv('DB_SISTEMA_NAME') ?: 'egsequip_dbsistema';
-    $user   = getenv('DB_SISTEMA_USER') ?: 'egsequip_sistema';
-    $pass   = getenv('DB_SISTEMA_PASS') ?: '{#k%ER.PJD0?';
-    $pdoSis = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']);
-    $stmtCli = $pdoSis->prepare("SELECT id, nombre FROM clientesTienda");
-    $stmtCli->execute();
-    foreach ($stmtCli->fetchAll(PDO::FETCH_ASSOC) as $cli) {
-        $clienteNames[intval($cli["id"])] = $cli["nombre"];
+$mysqli = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
+if (!$mysqli->connect_error) {
+    $mysqli->set_charset("utf8");
+    $res = $mysqli->query("SELECT id, nombre FROM clientesTienda");
+    if ($res) {
+        while ($row = $res->fetch_assoc()) {
+            $clienteNames[intval($row["id"])] = $row["nombre"];
+        }
+        $res->free();
     }
-    $pdoSis = null;
-} catch (Exception $e) {}
+    $mysqli->close();
+}
 
 foreach ($data as &$row) {
     $uid = intval($row["id_usuario"]);
