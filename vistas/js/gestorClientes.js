@@ -47,17 +47,21 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 });
 
 /*=============================================
-TOGGLE: Ordenar por Más órdenes / Nuevos
+TOGGLE: Más órdenes / Clientes nuevos
 =============================================*/
 $("#btnOrdenarOrdenes").on("click", function(){
 	$(".btn-toggle-view").removeClass("active");
 	$(this).addClass("active");
+	// Quitar filtro y ordenar por más órdenes
+	tablaClientes.column(4).search("").draw();
 	tablaClientes.order([7, "desc"]).draw();
 });
 
 $("#btnOrdenarNuevos").on("click", function(){
 	$(".btn-toggle-view").removeClass("active");
 	$(this).addClass("active");
+	// Filtrar solo clientes con etiqueta "Nuevo" y ordenar por fecha reciente
+	tablaClientes.column(4).search("^Nuevo$", true, false).draw();
 	tablaClientes.order([8, "desc"]).draw();
 });
 
