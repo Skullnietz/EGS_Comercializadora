@@ -59,7 +59,7 @@ if (!is_array($ventas)) {
 }
 
 usort($ventas, function ($a, $b) {
-    return strtotime((string)($a["fecha"] ?? "")) <=> strtotime((string)($b["fecha"] ?? ""));
+    return strtotime((string)($b["fecha"] ?? "")) <=> strtotime((string)($a["fecha"] ?? ""));
 });
 
 $rangoTexto = ($fechaInicial !== "" && $fechaFinal !== "")

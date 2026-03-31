@@ -33,11 +33,7 @@ if (!class_exists('ReporteHelper')) {
             }
 
             usort($filteredOrdenes, function ($a, $b) {
-                return intval($a['id']) <=> intval($b['id']);
-            });
-
-            usort($filteredOrdenes, function ($a, $b) {
-                return strtotime((string)($a['fecha'] ?? '')) <=> strtotime((string)($b['fecha'] ?? ''));
+                return strtotime((string)($b['fecha'] ?? '')) <=> strtotime((string)($a['fecha'] ?? ''));
             });
 
             $rangoTexto = (isset($_GET['fechaInicial']) && isset($_GET['fechaFinal']))
@@ -451,7 +447,7 @@ if (!class_exists('ReporteHelper')) {
             }
 
             usort($filteredOrdenes, function ($a, $b) {
-                return strtotime((string)($a['fecha_ingreso'] ?? '')) <=> strtotime((string)($b['fecha_ingreso'] ?? ''));
+                return strtotime((string)($b['fecha_ingreso'] ?? '')) <=> strtotime((string)($a['fecha_ingreso'] ?? ''));
             });
 
             return $filteredOrdenes;

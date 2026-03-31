@@ -67,7 +67,7 @@ if($cargarDatos){
     }
 
     usort($respuesta, function($a, $b){
-      return intval($a["id"]) <=> intval($b["id"]);
+      return intval($b["id"]) <=> intval($a["id"]);
     });
 }
 
