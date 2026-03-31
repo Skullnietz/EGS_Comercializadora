@@ -41,6 +41,16 @@ class ControladorClientes{
 	
 	}
 	/*=============================================
+	CONTAR ORDENES DE UN CLIENTE
+	=============================================*/
+
+	static public function ctrContarOrdenesCliente($id_cliente){
+
+		return ModeloClientes::mdlContarOrdenesCliente($id_cliente);
+
+	}
+
+	/*=============================================
 	MOSTRAR CLIENTES ORDENES
 	=============================================*/
 

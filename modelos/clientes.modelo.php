@@ -169,6 +169,24 @@ class ModeloClientes{
 
 	}	
 	/*=============================================
+	CONTAR ORDENES DE UN CLIENTE
+	=============================================*/
+
+	static public function mdlContarOrdenesCliente($id_cliente){
+
+		$stmt = Conexion::conectar()->prepare("SELECT COUNT(*) as total FROM ordenes WHERE id_usuario = :id_cliente");
+
+		$stmt->bindParam(":id_cliente", $id_cliente, PDO::PARAM_INT);
+
+		$stmt->execute();
+
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+		return $result ? intval($result["total"]) : 0;
+
+	}
+
+	/*=============================================
 	MOSTRAR USUARIOS ORDENES
 	=============================================*/
 
