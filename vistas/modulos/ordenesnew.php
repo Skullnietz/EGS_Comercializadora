@@ -507,6 +507,14 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
             }},
         {data: null,
             "render": function (data, type, row, meta ) {
+                return data.asesor_nombre || '<span style="color:#94a3b8">Sin asesor</span>';
+            }},
+        {data: null,
+            "render": function (data, type, row, meta ) {
+                return data.tecnico_nombre || '<span style="color:#94a3b8">Sin técnico</span>';
+            }},
+        {data: null,
+            "render": function (data, type, row, meta ) {
             var t = parseFloat(data.total || 0);
             return '<span style="font-weight:700">$'+t.toLocaleString('es-MX', {minimumFractionDigits:0})+'</span>';}},
         {data: null, "render": function(data) {
@@ -677,6 +685,10 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 	              <th>No. Orden</th>
 
 	              <th>Cliente</th>
+
+	              <th>Asesor</th>
+
+	              <th>Técnico</th>
 
 	              <th>TOTAL</th>
 
