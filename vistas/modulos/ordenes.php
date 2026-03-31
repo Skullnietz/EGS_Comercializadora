@@ -752,7 +752,11 @@ function _ordGetBadgeClass($estadoText) {
 
                 }
 
-
+                // ── Cargar badges de calificación de clientes (bulk) ──
+                $_cli_ordenesMap_tbl = []; $_cli_estadoMap_tbl = []; $_cli_recogidaMap_tbl = [];
+                try { $_cli_ordenesMap_tbl = ControladorClientes::ctrContarOrdenesClientesBulk(); } catch(Exception $e) {}
+                try { $_cli_estadoMap_tbl = ControladorClientes::ctrContarOrdenesEstadoBulk(); } catch(Exception $e) {}
+                try { $_cli_recogidaMap_tbl = ControladorClientes::ctrPromedioRecogidaBulk(); } catch(Exception $e) {}
 
                 foreach ($ordenes as $key => $valueOrdenes) {
 
@@ -823,6 +827,30 @@ function _ordGetBadgeClass($estadoText) {
 
 
                   $NombreUsuario = $usuario["nombre"];
+
+                  // ── Badges de calificación del cliente ──
+                  $__cId = intval($valueOrdenes["id_usuario"]);
+                  $__badgeHtml = '';
+                  $__cOrd = isset($_cli_ordenesMap_tbl[$__cId]) ? $_cli_ordenesMap_tbl[$__cId] : 0;
+                  $__cEnt = isset($_cli_estadoMap_tbl[$__cId]) ? $_cli_estadoMap_tbl[$__cId]["entregadas"] : 0;
+                  $__cCan = isset($_cli_estadoMap_tbl[$__cId]) ? $_cli_estadoMap_tbl[$__cId]["canceladas"] : 0;
+                  if ($__cOrd >= 3 && ($__cEnt + $__cCan) > 0) {
+                    $__r = $__cEnt / ($__cEnt + $__cCan) * 100;
+                    if ($__r >= 90)      { $__ico='fa-star';      $__fg='#fff'; $__bg='#16a34a'; }
+                    elseif ($__r >= 70)  { $__ico='fa-thumbs-up'; $__fg='#fff'; $__bg='#2563eb'; }
+                    elseif ($__r >= 50)  { $__ico='fa-minus-circle';$__fg='#fff';$__bg='#d97706'; }
+                    else                 { $__ico='fa-thumbs-down';$__fg='#fff';$__bg='#dc2626'; }
+                    $__badgeHtml .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:{$__bg};margin-left:4px' title='Calif: ".round($__r)."%'><i class='fas {$__ico}' style='font-size:10px;color:{$__fg}'></i></span>";
+                  }
+                  if (isset($_cli_recogidaMap_tbl[$__cId])) {
+                    $__d = $_cli_recogidaMap_tbl[$__cId];
+                    if ($__d <= 7)       { $__ico='fa-bolt';       $__fg='#fff'; $__bg='#16a34a'; }
+                    elseif ($__d <= 14)  { $__ico='fa-clock';      $__fg='#fff'; $__bg='#2563eb'; }
+                    elseif ($__d <= 30)  { $__ico='fa-hourglass-half';$__fg='#fff';$__bg='#d97706'; }
+                    else                 { $__ico='fa-hourglass-end';$__fg='#fff';$__bg='#dc2626'; }
+                    $__badgeHtml .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:{$__bg};margin-left:3px' title='Recoge: ~{$__d} días'><i class='fas {$__ico}' style='font-size:10px;color:{$__fg}'></i></span>";
+                  }
+                  $NombreUsuario = htmlspecialchars($usuario["nombre"]) . $__badgeHtml;
 
 
                   /*LINK DE IMPRESION DE EDITAR ORDEN https://backend.comercializadoraegs.com/index.php?ruta=infoOrden&idOrden=5240&empresa=1&asesor=9&cliente=2726&tecnico=4&pedido=0*/
