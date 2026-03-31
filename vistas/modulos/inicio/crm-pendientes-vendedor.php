@@ -6,13 +6,15 @@ require_once __DIR__ . "/../../../config/clienteBadges.helper.php";
 
 $_pend_raw = isset($_crm_ordAUT) && is_array($_crm_ordAUT) ? $_crm_ordAUT : array();
 
-function _crmDiasDesde($fecha) {
-    if (empty($fecha)) return 0;
-    try {
-        $hoy = new DateTime();
-        $ing = new DateTime($fecha);
-        return max(0, $ing->diff($hoy)->days);
-    } catch (Exception $e) { return 0; }
+if (!function_exists('_crmDiasDesde')) {
+    function _crmDiasDesde($fecha) {
+        if (empty($fecha)) return 0;
+        try {
+            $hoy = new DateTime();
+            $ing = new DateTime($fecha);
+            return max(0, $ing->diff($hoy)->days);
+        } catch (Exception $e) { return 0; }
+    }
 }
 
 // ── Filtrar: solo órdenes de los últimos 6 meses ──
@@ -29,6 +31,20 @@ usort($_pend_ordenes, function($a, $b) {
 });
 
 $_pend_numAUT = count($_pend_ordenes);
+
+// ── Pre-cargar TODOS los clientes de las órdenes visibles en UNA sola query ──
+$_pend_clienteIds = array();
+foreach (array_slice($_pend_ordenes, 0, 12) as $ord) {
+    if (!empty($ord["id_usuario"])) {
+        $_pend_clienteIds[] = intval($ord["id_usuario"]);
+    }
+}
+$_pend_clientesMap = array();
+if (!empty($_pend_clienteIds)) {
+    try {
+        $_pend_clientesMap = ControladorClientes::ctrMostrarClientesPorIds($_pend_clienteIds);
+    } catch (Exception $e) { $_pend_clientesMap = array(); }
+}
 ?>
 
 <div class="crm-card" style="margin-bottom:20px">
@@ -76,15 +92,12 @@ $_pend_numAUT = count($_pend_ordenes);
               $cliNom = "—";
               $cliTel1 = "";
               $cliTel2 = "";
-              if (!empty($ord["id_usuario"])) {
-                  try {
-                      $cd = ControladorClientes::ctrMostrarClientes("id", $ord["id_usuario"]);
-                      if (is_array($cd)) {
-                          if (isset($cd["nombre"])) $cliNom = $cd["nombre"];
-                          if (isset($cd["telefono"])) $cliTel1 = trim($cd["telefono"]);
-                          if (isset($cd["telefonoDos"])) $cliTel2 = trim($cd["telefonoDos"]);
-                      }
-                  } catch (Exception $e) {}
+              $_pendCliIdKey = intval(isset($ord["id_usuario"]) ? $ord["id_usuario"] : 0);
+              if ($_pendCliIdKey > 0 && isset($_pend_clientesMap[$_pendCliIdKey])) {
+                  $cd = $_pend_clientesMap[$_pendCliIdKey];
+                  if (isset($cd["nombre"])) $cliNom = $cd["nombre"];
+                  if (isset($cd["telefono"])) $cliTel1 = trim($cd["telefono"]);
+                  if (isset($cd["telefonoDos"])) $cliTel2 = trim($cd["telefonoDos"]);
               }
 
               // Validar 10 dígitos puros

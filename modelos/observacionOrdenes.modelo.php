@@ -224,4 +224,32 @@ class ModeloObservaciones
 
 
 	}
+
+	/*=============================================
+	ÚLTIMAS OBSERVACIONES FILTRADAS POR ÓRDENES
+	=============================================*/
+
+	static public function mdlUltimasObservacionesPorOrdenes($tabla, $idsOrdenes, $limite)
+	{
+		if (empty($idsOrdenes)) return array();
+
+		$placeholders = implode(',', array_fill(0, count($idsOrdenes), '?'));
+
+		$sql = "SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
+				       a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
+				FROM $tabla o
+				LEFT JOIN administradores a ON a.id = o.id_creador
+				WHERE o.id_orden IN ($placeholders)
+				ORDER BY o.fecha DESC
+				LIMIT " . intval($limite);
+
+		$stmt = Conexion::conectar()->prepare($sql);
+
+		foreach ($idsOrdenes as $i => $id) {
+			$stmt->bindValue($i + 1, intval($id), PDO::PARAM_INT);
+		}
+
+		$stmt->execute();
+		return $stmt->fetchAll();
+	}
 }

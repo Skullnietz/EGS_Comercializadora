@@ -325,4 +325,51 @@ class ModeloClientes{
 
 
 	}
+
+	/*=============================================
+	MOSTRAR CLIENTES POR LISTA DE IDs
+	=============================================*/
+
+	static public function mdlMostrarClientesPorIds($tabla, $ids){
+
+		if (empty($ids)) return array();
+
+		$ids = array_map('intval', array_unique($ids));
+		$placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+		$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE id IN ($placeholders)");
+
+		foreach ($ids as $i => $id) {
+			$stmt->bindValue($i + 1, $id, PDO::PARAM_INT);
+		}
+
+		$stmt->execute();
+		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		$map = array();
+		foreach ($rows as $row) {
+			$map[$row['id']] = $row;
+		}
+		return $map;
+	}
+
+	/*=============================================
+	CONTAR CLIENTES MES POR ASESOR
+	=============================================*/
+
+	static public function mdlContarClientesMesAsesor($tabla, $idAsesor){
+
+		$stmt = Conexion::conectar()->prepare(
+			"SELECT COUNT(*) AS total FROM $tabla
+			WHERE MONTH(`fecha`) = MONTH(NOW())
+			AND YEAR(`fecha`) = YEAR(NOW())
+			AND `id_Asesor` = :idAsesor"
+		);
+
+		$stmt->bindParam(":idAsesor", $idAsesor, PDO::PARAM_INT);
+		$stmt->execute();
+
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		return intval($row['total']);
+	}
 }

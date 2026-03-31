@@ -519,5 +519,29 @@ static public function ctrEditarCliente(){
 		}
 
 	}
+
+	/*=============================================
+	MOSTRAR CLIENTES POR LISTA DE IDs (BATCH)
+	=============================================*/
+
+	static public function ctrMostrarClientesPorIds($ids){
+
+		$tabla = "clientesTienda";
+
+		return ModeloClientes::mdlMostrarClientesPorIds($tabla, $ids);
+
+	}
+
+	/*=============================================
+	CONTAR CLIENTES MES POR ASESOR
+	=============================================*/
+
+	static public function ctrContarClientesMesAsesor($idAsesor){
+
+		$tabla = "clientesTienda";
+
+		return ModeloClientes::mdlContarClientesMesAsesor($tabla, $idAsesor);
+
+	}
 }
 

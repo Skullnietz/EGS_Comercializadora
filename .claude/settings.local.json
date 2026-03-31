@@ -185,7 +185,8 @@
       "Bash(php -l \"C:\\\\Users\\\\CarlosGuizar\\\\Desktop\\\\Proyectos\\\\EGS\\\\EGS_Comercializadora\\\\vistas\\\\modulos\\\\inicio.php\")",
       "Bash(grep -r \"estado\" /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/modulos/inicio/*.php)",
       "Bash(ls /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/modulos/inicio/*.php)",
-      "Bash(grep -l \"estado\" /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/modulos/inicio/*.php)"
+      "Bash(grep -l \"estado\" /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/modulos/inicio/*.php)",
+      "Bash(find /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/modelos -type f -name *.php)"
     ]
   }
 }

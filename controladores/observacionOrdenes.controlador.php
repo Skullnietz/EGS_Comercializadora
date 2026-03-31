@@ -197,4 +197,16 @@ class controladorObservaciones{
 
 
 	}
+
+	/*=============================================
+	ÚLTIMAS OBSERVACIONES FILTRADAS POR ÓRDENES
+	=============================================*/
+
+	static public function ctrUltimasObservacionesPorOrdenes($idsOrdenes, $limite = 20){
+
+		$tabla = "observacionesOrdenes";
+
+		return ModeloObservaciones::mdlUltimasObservacionesPorOrdenes($tabla, $idsOrdenes, $limite);
+
+	}
 }

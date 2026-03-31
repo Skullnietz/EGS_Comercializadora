@@ -355,6 +355,66 @@ PÁGINA DE INICIO
 
     <?php elseif ($_SESSION["perfil"] == "vendedor"): ?>
 
+      <?php
+      /* ═══════════════════════════════════════════════════════════
+         PRE-CARGA COMPARTIDA — Se ejecuta UNA sola vez y se
+         reutiliza en todos los sub-includes del vendedor.
+         ═══════════════════════════════════════════════════════ */
+
+      // 1) Identificar asesor
+      $_crm_idAsesor = 0;
+      try {
+          $_crm_asesor = Controladorasesores::ctrMostrarAsesoresEleg("correo", $_SESSION["email"]);
+          if (is_array($_crm_asesor) && isset($_crm_asesor["id"])) {
+              $_crm_idAsesor = intval($_crm_asesor["id"]);
+          }
+      } catch (Exception $e) { $_crm_idAsesor = 0; }
+
+      // 2) KPIs agregados en UNA sola query (SUM + COUNT en SQL)
+      $_crm_kpis = array('total_entregado' => 0, 'num_entregadas' => 0, 'num_entradas' => 0);
+      try {
+          $r = controladorOrdenes::ctrDashboardKpisAsesor($_crm_idAsesor);
+          if (is_array($r)) $_crm_kpis = $r;
+      } catch (Exception $e) {}
+
+      // 3) Todas las órdenes del asesor — UNA sola vez (pipeline + actividad)
+      $_crm_allOrders = array();
+      try {
+          $r = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
+              "id_empresa", $_SESSION["empresa"], "id_Asesor", $_crm_idAsesor
+          );
+          if (is_array($r)) $_crm_allOrders = $r;
+      } catch (Exception $e) {}
+
+      // 4) Órdenes pendientes de autorización (filtradas del cache)
+      $_crm_ordAUT = array();
+      foreach ($_crm_allOrders as $o) {
+          if (isset($o["estado"]) && strpos($o["estado"], "AUT") !== false) {
+              $_crm_ordAUT[] = $o;
+          }
+      }
+      $_crm_numAUT = count($_crm_ordAUT);
+
+      // 5) Clientes nuevos del mes (COUNT en SQL)
+      $_crm_numClientes = 0;
+      try {
+          $_crm_numClientes = ControladorClientes::ctrContarClientesMesAsesor($_crm_idAsesor);
+      } catch (Exception $e) {}
+
+      // 6) Cotizaciones del vendedor
+      $_crm_cotizaciones = array();
+      try {
+          $_crm_cotizaciones = CotizacionesControlador::ctrMostrarCotizaciones("id_vendedor", $_crm_idAsesor);
+          if (!is_array($_crm_cotizaciones)) $_crm_cotizaciones = array();
+      } catch (Exception $e) { $_crm_cotizaciones = array(); }
+
+      // 7) IDs de órdenes para filtrar observaciones
+      $_crm_orderIds = array();
+      foreach ($_crm_allOrders as $o) {
+          if (isset($o['id'])) $_crm_orderIds[] = intval($o['id']);
+      }
+      ?>
+
       <!-- ══ WELCOME BANNER ══ -->
       <div style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a78bfa 100%);border-radius:var(--crm-radius);padding:28px 30px;margin-bottom:24px;position:relative;overflow:hidden">
         <div style="position:absolute;right:-20px;top:-20px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
@@ -441,14 +501,8 @@ PÁGINA DE INICIO
 
       <!-- ══ SECCIÓN 6: Actividad Reciente (Cambios de Estado) ══ -->
       <?php
-        // Cargar todas las órdenes del asesor para el widget de actividad
-        $_adm_allOrders = array();
-        try {
-            $r = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
-                "id_empresa", $_SESSION["empresa"], "id_Asesor", $_crm_idAsesor
-            );
-            if (is_array($r)) $_adm_allOrders = $r;
-        } catch (Exception $e) {}
+        // Reusar las órdenes ya cargadas (sin segunda consulta)
+        $_adm_allOrders = $_crm_allOrders;
         $_act_filtro_asesor = $_crm_idAsesor;
         include "inicio/admin-actividad-estado.php";
         unset($_act_filtro_asesor, $_adm_allOrders, $_act_filtroTec, $_act_filtroAse, $_act_usaFiltro);

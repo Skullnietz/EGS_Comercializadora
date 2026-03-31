@@ -3,15 +3,8 @@
     CRM — Pipeline de Ventas con filtro de periodo
     ═══════════════════════════════════════════════════ */
 
-$_pipe_idAsesor = isset($_crm_idAsesor) ? $_crm_idAsesor : 0;
-
-try {
-    $_pipe_raw = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
-        "id_empresa", $_SESSION["empresa"],
-        "id_Asesor", $_pipe_idAsesor
-    );
-    if (!is_array($_pipe_raw)) $_pipe_raw = array();
-} catch (Exception $e) { $_pipe_raw = array(); }
+// Reusar órdenes pre-cargadas desde inicio.php ($_crm_allOrders)
+$_pipe_raw = isset($_crm_allOrders) && is_array($_crm_allOrders) ? $_crm_allOrders : array();
 
 // ── Pre-calcular cortes de fecha ──
 $_pipe_cortes = array(

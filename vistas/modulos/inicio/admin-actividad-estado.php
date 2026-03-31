@@ -88,7 +88,9 @@ try {
     $pdo_act = ConexionWP::conectarWP();
     $stmt_act = $pdo_act->prepare(
         "SELECT * FROM notificaciones_estado
-         WHERE id_empresa = :empresa AND DATE(fecha) = CURDATE()
+         WHERE id_empresa = :empresa
+         AND fecha >= CURDATE()
+         AND fecha < CURDATE() + INTERVAL 1 DAY
          ORDER BY fecha DESC
          LIMIT 50"
     );

@@ -3188,6 +3188,58 @@ class ModeloOrdenes{
 
 	}
 
+	/*=============================================
+	DASHBOARD ASESOR — RESUMEN KPIs EN UNA SOLA CONSULTA
+	=============================================*/
+
+	static public function mdlDashboardKpisAsesor($idAsesor){
+
+		$pdo = ConexionWP::conectarWP();
+		$idAsesor = intval($idAsesor);
+
+		$stmt = $pdo->prepare(
+			"SELECT
+				COALESCE(SUM(CASE WHEN `estado` = 'Entregado (Ent)'
+					AND MONTH(`fecha_Salida`) = MONTH(NOW())
+					AND YEAR(`fecha_Salida`) = YEAR(NOW()) THEN `total` END), 0) AS total_entregado,
+				COALESCE(SUM(CASE WHEN `estado` = 'Entregado (Ent)'
+					AND MONTH(`fecha_Salida`) = MONTH(NOW())
+					AND YEAR(`fecha_Salida`) = YEAR(NOW()) THEN 1 END), 0) AS num_entregadas,
+				COALESCE(SUM(CASE WHEN MONTH(`fecha_ingreso`) = MONTH(NOW())
+					AND YEAR(`fecha_ingreso`) = YEAR(NOW()) THEN 1 END), 0) AS num_entradas
+			FROM ordenes
+			WHERE `id_Asesor` = :idAsesor"
+		);
+
+		$stmt->bindParam(":idAsesor", $idAsesor, PDO::PARAM_INT);
+		$stmt->execute();
+
+		return $stmt->fetch(PDO::FETCH_ASSOC);
+	}
+
+	/*=============================================
+	DASHBOARD ASESOR — ORDENES POR ESTADO Y ASESOR
+	=============================================*/
+
+	static public function mdlOrdenesAsesorPorEstado($idEmpresa, $idAsesor, $estado){
+
+		$pdo = ConexionWP::conectarWP();
+
+		$stmt = $pdo->prepare(
+			"SELECT * FROM ordenes
+			WHERE `estado` LIKE :estado
+			AND `id_empresa` = :idEmpresa
+			AND `id_Asesor` = :idAsesor
+			ORDER BY id DESC"
+		);
+
+		$stmt->bindParam(":estado", $estado, PDO::PARAM_STR);
+		$stmt->bindParam(":idEmpresa", $idEmpresa, PDO::PARAM_INT);
+		$stmt->bindParam(":idAsesor", $idAsesor, PDO::PARAM_INT);
+		$stmt->execute();
+
+		return $stmt->fetchAll();
+	}
 
 
 }

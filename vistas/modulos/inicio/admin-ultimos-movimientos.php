@@ -7,17 +7,24 @@
 
 $_mov_obs = array();
 try {
-    $_mov_obs = controladorObservaciones::ctrUltimasObservaciones(20);
+    // Si hay IDs de órdenes del asesor, filtrar solo sus observaciones
+    if (isset($_crm_orderIds) && !empty($_crm_orderIds)) {
+        $_mov_obs = controladorObservaciones::ctrUltimasObservacionesPorOrdenes($_crm_orderIds, 20);
+    } else {
+        $_mov_obs = controladorObservaciones::ctrUltimasObservaciones(20);
+    }
     if (!is_array($_mov_obs)) $_mov_obs = array();
 } catch (Exception $e) { $_mov_obs = array(); }
 
 // Mapa de órdenes para construir links directos
 $_mov_ordMap = array();
-if (isset($_adm_allOrders) && is_array($_adm_allOrders)) {
-    foreach ($_adm_allOrders as $o) {
+$_mov_ordSource = isset($_crm_allOrders) ? $_crm_allOrders : (isset($_adm_allOrders) ? $_adm_allOrders : array());
+if (is_array($_mov_ordSource)) {
+    foreach ($_mov_ordSource as $o) {
         if (isset($o['id'])) $_mov_ordMap[$o['id']] = $o;
     }
 }
+unset($_mov_ordSource);
 
 // Helper: truncar texto sin cortar palabras
 if (!function_exists('_movTruncar')) {

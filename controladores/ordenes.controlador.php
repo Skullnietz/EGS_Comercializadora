@@ -4885,5 +4885,25 @@ AGREGAR ORDENES CON PARTIDAS LISTADAS
 
 	}
 
+	/*=============================================
+	DASHBOARD ASESOR — KPIs EN UNA CONSULTA
+	=============================================*/
+
+	static public function ctrDashboardKpisAsesor($idAsesor){
+
+		return ModeloOrdenes::mdlDashboardKpisAsesor($idAsesor);
+
+	}
+
+	/*=============================================
+	DASHBOARD ASESOR — ORDENES POR ESTADO
+	=============================================*/
+
+	static public function ctrOrdenesAsesorPorEstado($idEmpresa, $idAsesor, $estado){
+
+		return ModeloOrdenes::mdlOrdenesAsesorPorEstado($idEmpresa, $idAsesor, $estado);
+
+	}
+
 
 }
