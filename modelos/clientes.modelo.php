@@ -188,6 +188,28 @@ class ModeloClientes{
 	}
 
 	/*=============================================
+	CONTAR ORDENES DE TODOS LOS CLIENTES (BULK)
+	=============================================*/
+
+	static public function mdlContarOrdenesClientesBulk(){
+
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT id_usuario, COUNT(*) as total FROM ordenes GROUP BY id_usuario");
+
+		$stmt->execute();
+
+		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		$counts = [];
+
+		foreach($results as $row){
+			$counts[intval($row["id_usuario"])] = intval($row["total"]);
+		}
+
+		return $counts;
+
+	}
+
+	/*=============================================
 	MOSTRAR USUARIOS ORDENES
 	=============================================*/
 

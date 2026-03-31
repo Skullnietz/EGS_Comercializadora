@@ -22,21 +22,29 @@ class TablaClientes{
 
 		if(!is_array($clientes)) $clientes = [];
 
+		// Una sola query para contar órdenes de TODOS los clientes
+		try {
+			$ordenesMap = ControladorClientes::ctrContarOrdenesClientesBulk();
+		} catch(Exception $e) {
+			$ordenesMap = [];
+		}
+
+		// Cache de asesores para evitar queries repetidas
+		$asesoresCache = [];
+
 		$data = [];
 
 		for($i = 0; $i < count($clientes); $i++){
 
-			$item1  = "id";
-			$valor1 = $clientes[$i]["id_Asesor"];
-			$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item1, $valor1);
-			$nombre_asesor = isset($asesor["nombre"]) ? $asesor["nombre"] : "Sin asignar";
-
-			// Conteo de órdenes del cliente
-			try {
-				$totalOrdenes = ControladorClientes::ctrContarOrdenesCliente($clientes[$i]["id"]);
-			} catch(Exception $e) {
-				$totalOrdenes = 0;
+			$idAsesor = $clientes[$i]["id_Asesor"];
+			if(!isset($asesoresCache[$idAsesor])){
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $idAsesor);
+				$asesoresCache[$idAsesor] = isset($asesor["nombre"]) ? $asesor["nombre"] : "Sin asignar";
 			}
+			$nombre_asesor = $asesoresCache[$idAsesor];
+
+			$idCliente = intval($clientes[$i]["id"]);
+			$totalOrdenes = isset($ordenesMap[$idCliente]) ? $ordenesMap[$idCliente] : 0;
 
 			$tel    = trim($clientes[$i]["telefono"]);
 			$wa     = trim($clientes[$i]["telefonoDos"]);
