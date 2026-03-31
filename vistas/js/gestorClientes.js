@@ -6,7 +6,7 @@ var Empresa_del_perfil = $("#Empresa_del_perfil").val();
 var tablaClientes = $(".tablaClientesOrden").DataTable({
 	 "ajax": "ajax/tablaClientes.ajax.php?empresa=" + Empresa_del_perfil,
 	 "deferRender": true,
-	 "retrieve": true,
+	 "destroy": true,
 	 "processing": true,
 
 	 /* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw) */
