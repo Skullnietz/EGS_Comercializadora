@@ -2,6 +2,7 @@
 /*  ═══════════════════════════════════════════════════
     DASHBOARD TÉCNICO — Panel de trabajo completo
     ═══════════════════════════════════════════════════ */
+require_once __DIR__ . "/../../../config/clienteBadges.helper.php";
 
 // ── Identificar técnico ──
 $_tec_id = 0;
@@ -380,6 +381,7 @@ $_tec_stages_def = array(
               <thead><tr>
                 <th></th>
                 <th>Orden</th>
+                <th>Cliente</th>
                 <th>Equipo</th>
                 <th style="text-align:center">Días</th>
                 <th style="text-align:center">Prioridad</th>
@@ -414,6 +416,16 @@ $_tec_stages_def = array(
                   </td>
                   <td><span style="font-weight:700;color:#6366f1">#<?php echo $o["id"]; ?></span>
                     <div style="font-size:11px;color:#94a3b8"><?php echo !empty($o["fecha_ingreso"]) ? date("d/m/Y", strtotime($o["fecha_ingreso"])) : ""; ?></div>
+                  </td>
+                  <td>
+                    <?php
+                      $_tecCliId = isset($o["id_usuario"]) ? intval($o["id_usuario"]) : 0;
+                      $_tecCliNom = isset($o["nombre"]) ? $o["nombre"] : "";
+                      if (empty($_tecCliNom) && $_tecCliId > 0) {
+                          try { $cd = ControladorClientes::ctrMostrarClientes("id", $_tecCliId); if (is_array($cd) && isset($cd["nombre"])) $_tecCliNom = $cd["nombre"]; } catch(Exception $e) {}
+                      }
+                      echo ClienteBadgesHelper::getInstance()->renderWithName($_tecCliNom ?: "—", $_tecCliId);
+                    ?>
                   </td>
                   <td>
                     <div style="font-weight:600;font-size:13px"><?php echo htmlspecialchars($equipo); ?></div>
@@ -580,6 +592,16 @@ $_tec_stages_def = array(
                 <span style="font-size:11px;font-weight:700;color:<?php echo $borderColor; ?>"><?php echo $dias; ?>d</span>
               </div>
               <div style="font-size:12px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($equipo); ?></div>
+              <?php
+                $_okCliId = isset($o["id_usuario"]) ? intval($o["id_usuario"]) : 0;
+                $_okCliNom = isset($o["nombre"]) ? $o["nombre"] : "";
+                if (empty($_okCliNom) && $_okCliId > 0) {
+                    try { $cd = ControladorClientes::ctrMostrarClientes("id", $_okCliId); if (is_array($cd) && isset($cd["nombre"])) $_okCliNom = $cd["nombre"]; } catch(Exception $e) {}
+                }
+                if ($_okCliId > 0):
+              ?>
+                <div style="font-size:11px;margin-top:2px"><?php echo ClienteBadgesHelper::getInstance()->renderWithName($_okCliNom ?: "—", $_okCliId); ?></div>
+              <?php endif; ?>
               <?php if (!empty($titulo)): ?>
                 <div style="font-size:11px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars(mb_substr($titulo, 0, 40)); ?></div>
               <?php endif; ?>

@@ -3,6 +3,7 @@
     DASHBOARD ADMIN — Ultimas ordenes (estilo CRM)
     ═══════════════════════════════════════════════════ */
 $_admOrd = controladorOrdenes::ctrlTraerOrdenesConTope(0, 10);
+require_once __DIR__ . "/../../../config/clienteBadges.helper.php";
 
 function _admEstadoBadge($estado) {
     $e = strtolower(trim($estado));
@@ -71,6 +72,7 @@ function _admGetImgOrd($ord) {
           <thead><tr>
             <th></th>
             <th>Orden</th>
+            <th>Cliente</th>
             <th>Equipo / Titulo</th>
             <th>Estado</th>
             <th style="text-align:right">Total</th>
@@ -93,6 +95,16 @@ function _admGetImgOrd($ord) {
                        style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0" loading="lazy">
                 </td>
                 <td><span style="font-weight:700;color:#6366f1">#<?php echo htmlspecialchars($o['id']); ?></span></td>
+                <td>
+                  <?php
+                    $_admCliId = isset($o['id_usuario']) ? intval($o['id_usuario']) : 0;
+                    $_admCliNom = isset($o['nombre']) ? $o['nombre'] : '';
+                    if (empty($_admCliNom) && $_admCliId > 0) {
+                        try { $cd = ControladorClientes::ctrMostrarClientes('id', $_admCliId); if (is_array($cd) && isset($cd['nombre'])) $_admCliNom = $cd['nombre']; } catch(Exception $e) {}
+                    }
+                    echo ClienteBadgesHelper::getInstance()->renderWithName($_admCliNom ?: '—', $_admCliId);
+                  ?>
+                </td>
                 <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
                   <?php echo htmlspecialchars($display); ?>
                 </td>

@@ -2,6 +2,7 @@
 /*  ═══════════════════════════════════════════════════
     DASHBOARD ADMINISTRADOR — Panel completo
     ═══════════════════════════════════════════════════ */
+require_once __DIR__ . "/../../../config/clienteBadges.helper.php";
 
 // ══════════════════════════════════════
 // DATOS: KPIs principales
@@ -529,6 +530,7 @@ $_adm_prodColors = array('#ef4444','#22c55e','#f59e0b','#06b6d4','#8b5cf6');
 <!-- Datos para drill-down -->
 <script>
 var _ord=<?php echo json_encode($_adm_ordJS); ?>;
+var _cliBadges=<?php echo json_encode(ClienteBadgesHelper::getInstance()->toArray()); ?>;
 var _tecMap=<?php echo json_encode($_adm_mapaTec); ?>;
 var _pipeCortes=<?php echo json_encode($_adm_pipe_cortes); ?>;
 var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
@@ -1558,6 +1560,16 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
 
   function esc(s) { return $('<span>').text(s || '—').html(); }
 
+  function renderCliBadges(id) {
+    var b = _cliBadges[id];
+    if (!b) return '';
+    var h = '';
+    if (b.n) h += "<span style='display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:"+b.n[2]+";margin-left:4px' title='Cliente nuevo ("+b.n[3]+" órdenes)'><i class='fas "+b.n[0]+"' style='font-size:9px;color:"+b.n[1]+"'></i></span>";
+    if (b.c) h += "<span style='display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:"+b.c[2]+";margin-left:4px' title='Calif: "+b.c[3]+"%'><i class='fas "+b.c[0]+"' style='font-size:9px;color:"+b.c[1]+"'></i></span>";
+    if (b.r) h += "<span style='display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:"+b.r[2]+";margin-left:3px' title='Recoge: ~"+b.r[3]+" días'><i class='fas "+b.r[0]+"' style='font-size:9px;color:"+b.r[1]+"'></i></span>";
+    return h;
+  }
+
   function orderLink(o) {
     return 'index.php?ruta=infoOrden&idOrden=' + o.id
       + '&empresa=' + (o.emp||'') + '&asesor=' + (o.ase||'')
@@ -1593,7 +1605,7 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
       sum += o.total;
       html += '<tr style="border-bottom:1px solid #f1f5f9">'
         + '<td style="padding:10px 14px"><a href="' + orderLink(o) + '" target="_blank" style="color:#6366f1;font-weight:700;text-decoration:none">#' + o.id + '</a></td>'
-        + '<td style="padding:10px 8px">' + esc(o.nom) + '</td>'
+        + '<td style="padding:10px 8px">' + esc(o.nom) + renderCliBadges(o.usr) + '</td>'
         + '<td style="padding:10px 8px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(o.eq || o.marca) + '</td>'
         + '<td style="padding:10px 8px"><span style="font-size:10px;font-weight:600;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:6px;white-space:nowrap">' + esc(o.est) + '</span></td>'
         + '<td style="padding:10px 8px;white-space:nowrap">' + (o.fi||'—') + '</td>'

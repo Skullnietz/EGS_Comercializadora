@@ -2,6 +2,7 @@
 /*  ═══════════════════════════════════════════════════
     CRM — Pendientes de Autorización (seguimiento)
     ═══════════════════════════════════════════════════ */
+require_once __DIR__ . "/../../../config/clienteBadges.helper.php";
 
 $_pend_raw = isset($_crm_ordAUT) && is_array($_crm_ordAUT) ? $_crm_ordAUT : array();
 
@@ -109,7 +110,12 @@ $_pend_numAUT = count($_pend_ordenes);
                 <span style="font-weight:700;color:var(--crm-accent)">#<?php echo $ord["id"]; ?></span>
               </td>
               <td>
-                <div style="font-weight:600;color:var(--crm-text)"><?php echo htmlspecialchars($cliNom); ?></div>
+                <div style="font-weight:600;color:var(--crm-text)">
+                  <?php
+                    $_pendCliId = isset($ord["id_usuario"]) ? intval($ord["id_usuario"]) : 0;
+                    echo ClienteBadgesHelper::getInstance()->renderWithName($cliNom, $_pendCliId);
+                  ?>
+                </div>
                 <div style="font-size:11px;color:var(--crm-muted)">
                   <?php echo isset($ord["fecha_ingreso"]) ? date("d M Y", strtotime($ord["fecha_ingreso"])) : "—"; ?>
                 </div>
