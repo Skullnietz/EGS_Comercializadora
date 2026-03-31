@@ -4905,5 +4905,19 @@ AGREGAR ORDENES CON PARTIDAS LISTADAS
 
 	}
 
+	/*=============================================
+	DASHBOARD ASESOR — ORDENES RECIENTES (últimos N meses)
+	=============================================*/
+
+	static public function ctrlMostrarordenesEmpresayPerfilRecientes($itemOrdenes, $valorOrdenes, $iteDosOrdenes, $valorDosOrdenes, $meses = 13){
+
+		$tabla = "ordenes";
+
+		$respuesta = ModeloOrdenes::mdlMostrarordenesEmpresayPerfilRecientes($tabla, $itemOrdenes, $valorOrdenes, $iteDosOrdenes, $valorDosOrdenes, $meses);
+
+		return $respuesta;
+
+	}
+
 
 }

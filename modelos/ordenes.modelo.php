@@ -3241,5 +3241,30 @@ class ModeloOrdenes{
 		return $stmt->fetchAll();
 	}
 
+	/*=============================================
+	DASHBOARD ASESOR — ORDENES RECIENTES (últimos N meses)
+	Limita la carga para evitar traer todo el histórico.
+	=============================================*/
+
+	static public function mdlMostrarordenesEmpresayPerfilRecientes($tabla, $itemOrdenes, $valorOrdenes, $iteDosOrdenes, $valorDosOrdenes, $meses = 13){
+
+		$pdo = ConexionWP::conectarWP();
+
+		$stmt = $pdo->prepare(
+			"SELECT * FROM $tabla
+			WHERE $itemOrdenes = :item1
+			AND $iteDosOrdenes = :item2
+			AND `fecha_ingreso` >= DATE_SUB(NOW(), INTERVAL :meses MONTH)
+			ORDER BY id DESC"
+		);
+
+		$stmt->bindParam(":item1", $valorOrdenes, PDO::PARAM_STR);
+		$stmt->bindParam(":item2", $valorDosOrdenes, PDO::PARAM_STR);
+		$stmt->bindParam(":meses", $meses, PDO::PARAM_INT);
+		$stmt->execute();
+
+		return $stmt->fetchAll();
+	}
+
 
 }

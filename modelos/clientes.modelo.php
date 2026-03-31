@@ -334,13 +334,13 @@ class ModeloClientes{
 
 		if (empty($ids)) return array();
 
-		$ids = array_map('intval', array_unique($ids));
+		$ids = array_values(array_unique(array_map('intval', $ids)));
 		$placeholders = implode(',', array_fill(0, count($ids), '?'));
 
 		$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE id IN ($placeholders)");
 
-		foreach ($ids as $i => $id) {
-			$stmt->bindValue($i + 1, $id, PDO::PARAM_INT);
+		for ($i = 0; $i < count($ids); $i++) {
+			$stmt->bindValue($i + 1, $ids[$i], PDO::PARAM_INT);
 		}
 
 		$stmt->execute();

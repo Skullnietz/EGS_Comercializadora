@@ -233,6 +233,7 @@ class ModeloObservaciones
 	{
 		if (empty($idsOrdenes)) return array();
 
+		$idsOrdenes = array_values(array_unique(array_map('intval', $idsOrdenes)));
 		$placeholders = implode(',', array_fill(0, count($idsOrdenes), '?'));
 
 		$sql = "SELECT o.id, o.id_creador, o.id_orden, o.observacion, o.fecha,
@@ -245,8 +246,8 @@ class ModeloObservaciones
 
 		$stmt = Conexion::conectar()->prepare($sql);
 
-		foreach ($idsOrdenes as $i => $id) {
-			$stmt->bindValue($i + 1, intval($id), PDO::PARAM_INT);
+		for ($i = 0; $i < count($idsOrdenes); $i++) {
+			$stmt->bindValue($i + 1, $idsOrdenes[$i], PDO::PARAM_INT);
 		}
 
 		$stmt->execute();

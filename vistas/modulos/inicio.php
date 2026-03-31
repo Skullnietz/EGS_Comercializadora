@@ -377,11 +377,12 @@ PÁGINA DE INICIO
           if (is_array($r)) $_crm_kpis = $r;
       } catch (Exception $e) {}
 
-      // 3) Todas las órdenes del asesor — UNA sola vez (pipeline + actividad)
+      // 3) Órdenes del asesor de los últimos 13 meses — UNA sola vez (pipeline + actividad)
+      //    Pipeline usa max 12 meses, pendientes 6 meses, actividad solo hoy.
       $_crm_allOrders = array();
       try {
-          $r = controladorOrdenes::ctrlMostrarordenesEmpresayPerfil(
-              "id_empresa", $_SESSION["empresa"], "id_Asesor", $_crm_idAsesor
+          $r = controladorOrdenes::ctrlMostrarordenesEmpresayPerfilRecientes(
+              "id_empresa", $_SESSION["empresa"], "id_Asesor", $_crm_idAsesor, 13
           );
           if (is_array($r)) $_crm_allOrders = $r;
       } catch (Exception $e) {}
