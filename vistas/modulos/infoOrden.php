@@ -446,7 +446,7 @@ function _egsEstadoClass($estado) {
 
 	<section class="content">
 
-		<!-- ==================== FILA 1: CLIENTE + FICHA TÉCNICA (izq) + IMÁGENES + ANÁLISIS (der) ==================== -->
+		<!-- ==================== FILA 1: CLIENTE + ANÁLISIS (izq) + IMÁGENES + FICHA TÉCNICA (der) ==================== -->
 		<div class="row">
 
 			<div class="col-lg-5 col-xs-12">
@@ -649,116 +649,6 @@ function _egsEstadoClass($estado) {
 				}
 				?>
 
-				<!-- FICHA TÉCNICA -->
-				<div class="egs-section">
-					<div class="egs-title-bar"><i class="fa-solid fa-microchip"></i> Ficha técnica</div>
-					<div class="egs-body">
-						<form role="form" method="post" class="formularioFichaTecnica">
-							<?php if ($value["marcaDelEquipo"] == ""): ?>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Marca del equipo</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
-										<input type="text" id="marca" class="form-control" name="marcaDelEquipo" placeholder="Ej: HP, EPSON, BROTHER">
-									</div>
-									<span id="spanmarca" style="color:red;font-size:12px"></span>
-								</div>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Modelo del equipo</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
-										<input type="text" id="modelo" class="form-control" name="modeloDelEquipo" placeholder="Ej: LaserJet Pro M404">
-									</div>
-									<span id="spanmodelo" style="color:red;font-size:12px"></span>
-								</div>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Número de serie</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
-										<input type="text" id="numeroserial" class="form-control" name="numeroDeSerieDelEquipo" placeholder="Últimos 6 dígitos">
-									</div>
-									<span id="spannumeroserie" style="color:red;font-size:12px"></span>
-								</div>
-							<?php else: ?>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Marca</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
-										<input type="text" id="marca2" class="form-control" value="<?php echo htmlspecialchars($value["marcaDelEquipo"]); ?>" readonly>
-									</div>
-								</div>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Modelo</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
-										<input type="text" id="modelo2" class="form-control" value="<?php echo htmlspecialchars($value["modeloDelEquipo"]); ?>" readonly>
-									</div>
-								</div>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Número de serie</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
-										<input type="text" id="numeroserial2" class="form-control" value="<?php echo htmlspecialchars($value["numeroDeSerieDelEquipo"]); ?>" readonly>
-									</div>
-								</div>
-							<?php endif; ?>
-							<input type="hidden" value="<?php echo $_GET["idOrden"]; ?>" name="idOrden">
-						</form>
-					</div>
-				</div>
-
-			</div>
-
-			<div class="col-lg-7 col-xs-12">
-				<!-- IMÁGENES DE LA ORDEN -->
-				<div class="egs-section">
-					<div class="egs-title-bar"><i class="fa-solid fa-images"></i> Imágenes de la orden</div>
-					<div class="egs-body" style="padding:0">
-						<?php
-						// Construir array de todas las imágenes
-						$_gal_imgs = array();
-						if (!empty($portada)) $_gal_imgs[] = $portada;
-						if (!empty($AlbumDeImagenes)) {
-							foreach ($AlbumDeImagenes as $_gi) {
-								if (isset($_gi["foto"]) && !empty($_gi["foto"])) $_gal_imgs[] = $_gi["foto"];
-							}
-						}
-						$_gal_total = count($_gal_imgs);
-
-						if ($_gal_total > 0):
-						?>
-						<div class="egs-gallery">
-							<!-- Counter badge -->
-							<span class="egs-gallery-counter">1 / <?php echo $_gal_total; ?></span>
-
-							<!-- Main image -->
-							<div class="egs-gallery-main">
-								<img src="<?php echo htmlspecialchars($_gal_imgs[0]); ?>" alt="Imagen de la orden" loading="lazy">
-							</div>
-
-							<?php if ($_gal_total > 1): ?>
-							<!-- Navigation arrows -->
-							<button class="egs-gallery-nav prev" title="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
-							<button class="egs-gallery-nav next" title="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
-
-							<!-- Thumbnails strip -->
-							<div class="egs-gallery-thumbs">
-								<?php foreach ($_gal_imgs as $_gi_idx => $_gi_src): ?>
-								<div class="egs-gallery-thumb <?php echo $_gi_idx === 0 ? 'active' : ''; ?>" data-src="<?php echo htmlspecialchars($_gi_src); ?>">
-									<img src="<?php echo htmlspecialchars($_gi_src); ?>" alt="Miniatura" loading="lazy">
-								</div>
-								<?php endforeach; ?>
-							</div>
-							<?php endif; ?>
-						</div>
-						<?php else: ?>
-						<div style="width:100%;border-radius:12px;overflow:hidden;background:#f1f5f9">
-							<img src="vistas/img/default/default.png" alt="Sin imagen" style="width:100%;height:300px;object-fit:contain;display:block" loading="lazy">
-						</div>
-						<?php endif; ?>
-					</div>
-				</div>
-
 				<!-- ANÁLISIS DEL CLIENTE -->
 				<div class="egs-section">
 					<div class="egs-title-bar"><i class="fa-solid fa-chart-line"></i> Análisis del cliente <?php echo $_csBadges; ?></div>
@@ -834,6 +724,116 @@ function _egsEstadoClass($estado) {
 							<i class="fas fa-angle-right"></i> <strong>Tiempo de recolección:</strong> promedio de días entre "Terminada" y "Entregado" en órdenes anteriores<br>
 							<i class="fas fa-angle-right"></i> <strong>Calificación:</strong> entregadas ÷ (entregadas + canceladas) × 100
 						</div>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="col-lg-7 col-xs-12">
+				<!-- IMÁGENES DE LA ORDEN -->
+				<div class="egs-section">
+					<div class="egs-title-bar"><i class="fa-solid fa-images"></i> Imágenes de la orden</div>
+					<div class="egs-body" style="padding:0">
+						<?php
+						// Construir array de todas las imágenes
+						$_gal_imgs = array();
+						if (!empty($portada)) $_gal_imgs[] = $portada;
+						if (!empty($AlbumDeImagenes)) {
+							foreach ($AlbumDeImagenes as $_gi) {
+								if (isset($_gi["foto"]) && !empty($_gi["foto"])) $_gal_imgs[] = $_gi["foto"];
+							}
+						}
+						$_gal_total = count($_gal_imgs);
+
+						if ($_gal_total > 0):
+						?>
+						<div class="egs-gallery">
+							<!-- Counter badge -->
+							<span class="egs-gallery-counter">1 / <?php echo $_gal_total; ?></span>
+
+							<!-- Main image -->
+							<div class="egs-gallery-main">
+								<img src="<?php echo htmlspecialchars($_gal_imgs[0]); ?>" alt="Imagen de la orden" loading="lazy">
+							</div>
+
+							<?php if ($_gal_total > 1): ?>
+							<!-- Navigation arrows -->
+							<button class="egs-gallery-nav prev" title="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+							<button class="egs-gallery-nav next" title="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+
+							<!-- Thumbnails strip -->
+							<div class="egs-gallery-thumbs">
+								<?php foreach ($_gal_imgs as $_gi_idx => $_gi_src): ?>
+								<div class="egs-gallery-thumb <?php echo $_gi_idx === 0 ? 'active' : ''; ?>" data-src="<?php echo htmlspecialchars($_gi_src); ?>">
+									<img src="<?php echo htmlspecialchars($_gi_src); ?>" alt="Miniatura" loading="lazy">
+								</div>
+								<?php endforeach; ?>
+							</div>
+							<?php endif; ?>
+						</div>
+						<?php else: ?>
+						<div style="width:100%;border-radius:12px;overflow:hidden;background:#f1f5f9">
+							<img src="vistas/img/default/default.png" alt="Sin imagen" style="width:100%;height:300px;object-fit:contain;display:block" loading="lazy">
+						</div>
+						<?php endif; ?>
+					</div>
+				</div>
+
+				<!-- FICHA TÉCNICA -->
+				<div class="egs-section">
+					<div class="egs-title-bar"><i class="fa-solid fa-microchip"></i> Ficha técnica</div>
+					<div class="egs-body">
+						<form role="form" method="post" class="formularioFichaTecnica">
+							<?php if ($value["marcaDelEquipo"] == ""): ?>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Marca del equipo</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
+										<input type="text" id="marca" class="form-control" name="marcaDelEquipo" placeholder="Ej: HP, EPSON, BROTHER">
+									</div>
+									<span id="spanmarca" style="color:red;font-size:12px"></span>
+								</div>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Modelo del equipo</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
+										<input type="text" id="modelo" class="form-control" name="modeloDelEquipo" placeholder="Ej: LaserJet Pro M404">
+									</div>
+									<span id="spanmodelo" style="color:red;font-size:12px"></span>
+								</div>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Número de serie</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
+										<input type="text" id="numeroserial" class="form-control" name="numeroDeSerieDelEquipo" placeholder="Últimos 6 dígitos">
+									</div>
+									<span id="spannumeroserie" style="color:red;font-size:12px"></span>
+								</div>
+							<?php else: ?>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Marca</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
+										<input type="text" id="marca2" class="form-control" value="<?php echo htmlspecialchars($value["marcaDelEquipo"]); ?>" readonly>
+									</div>
+								</div>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Modelo</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
+										<input type="text" id="modelo2" class="form-control" value="<?php echo htmlspecialchars($value["modeloDelEquipo"]); ?>" readonly>
+									</div>
+								</div>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Número de serie</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
+										<input type="text" id="numeroserial2" class="form-control" value="<?php echo htmlspecialchars($value["numeroDeSerieDelEquipo"]); ?>" readonly>
+									</div>
+								</div>
+							<?php endif; ?>
+							<input type="hidden" value="<?php echo $_GET["idOrden"]; ?>" name="idOrden">
+						</form>
 					</div>
 				</div>
 			</div>
