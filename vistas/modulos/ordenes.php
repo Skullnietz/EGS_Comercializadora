@@ -834,7 +834,9 @@ function _ordGetBadgeClass($estadoText) {
                   $__cOrd = isset($_cli_ordenesMap_tbl[$__cId]) ? $_cli_ordenesMap_tbl[$__cId] : 0;
                   $__cEnt = isset($_cli_estadoMap_tbl[$__cId]) ? $_cli_estadoMap_tbl[$__cId]["entregadas"] : 0;
                   $__cCan = isset($_cli_estadoMap_tbl[$__cId]) ? $_cli_estadoMap_tbl[$__cId]["canceladas"] : 0;
-                  if ($__cOrd >= 3 && ($__cEnt + $__cCan) > 0) {
+                  if ($__cOrd < 3) {
+                    $__badgeHtml .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#8b5cf6;margin-left:4px' title='Cliente nuevo ({$__cOrd} órdenes)'><i class='fas fa-seedling' style='font-size:10px;color:#fff'></i></span>";
+                  } elseif (($__cEnt + $__cCan) > 0) {
                     $__r = $__cEnt / ($__cEnt + $__cCan) * 100;
                     if ($__r >= 90)      { $__ico='fa-star';      $__fg='#fff'; $__bg='#16a34a'; }
                     elseif ($__r >= 70)  { $__ico='fa-thumbs-up'; $__fg='#fff'; $__bg='#2563eb'; }

@@ -434,6 +434,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
       var b = _clienteBadges[id];
       if (!b) return '';
       var h = '';
+      if (b.n) h += "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:"+b.n[2]+";margin-left:4px' title='Cliente nuevo ("+b.n[3]+" órdenes)'><i class='fas "+b.n[0]+"' style='font-size:10px;color:"+b.n[1]+"'></i></span>";
       if (b.c) h += "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:"+b.c[2]+";margin-left:4px' title='Calif: "+b.c[3]+"%'><i class='fas "+b.c[0]+"' style='font-size:10px;color:"+b.c[1]+"'></i></span>";
       if (b.r) h += "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:"+b.r[2]+";margin-left:3px' title='Recoge: ~"+b.r[3]+" días'><i class='fas "+b.r[0]+"' style='font-size:10px;color:"+b.r[1]+"'></i></span>";
       return h;

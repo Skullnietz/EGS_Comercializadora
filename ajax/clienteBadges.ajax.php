@@ -12,12 +12,16 @@ try { $estadoMap = ControladorClientes::ctrContarOrdenesEstadoBulk(); } catch(Ex
 try { $recogidaMap = ControladorClientes::ctrPromedioRecogidaBulk(); } catch(Exception $e) {}
 
 $badges = [];
-foreach ($estadoMap as $cliId => $est) {
+// Recopilar todos los IDs de clientes (incluidos los que tienen 0 ordenes en estadoMap)
+$allClientIds = array_unique(array_merge(array_keys($ordenesMap), array_keys($estadoMap)));
+foreach ($allClientIds as $cliId) {
     $totalOrd = isset($ordenesMap[$cliId]) ? $ordenesMap[$cliId] : 0;
-    $ent = $est["entregadas"];
-    $can = $est["canceladas"];
+    $ent = isset($estadoMap[$cliId]) ? $estadoMap[$cliId]["entregadas"] : 0;
+    $can = isset($estadoMap[$cliId]) ? $estadoMap[$cliId]["canceladas"] : 0;
     $b = [];
-    if ($totalOrd >= 3 && ($ent + $can) > 0) {
+    if ($totalOrd < 3) {
+        $b["n"] = ["fa-seedling","#fff","#8b5cf6",$totalOrd];
+    } elseif (($ent + $can) > 0) {
         $r = $ent / ($ent + $can) * 100;
         if ($r >= 90)      $b["c"] = ["fa-star","#16a34a","#f0fdf4",round($r)];
         elseif ($r >= 70)  $b["c"] = ["fa-thumbs-up","#2563eb","#eff6ff",round($r)];
