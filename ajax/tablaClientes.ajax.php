@@ -13,10 +13,14 @@ class TablaClientes{
 
 	public function mostrarTablaClientes(){
 
+		ob_start(); // capturar cualquier error/warning para que no rompa el JSON
+
 		$empresaDelPerfil = $_GET["empresa"];
 		$item  = "id_empresa";
 		$valor = $empresaDelPerfil;
 		$clientes = ControladorClientes::ctrMostrarClientesTabla($item, $valor);
+
+		if(!is_array($clientes)) $clientes = [];
 
 		$data = [];
 
@@ -28,7 +32,11 @@ class TablaClientes{
 			$nombre_asesor = isset($asesor["nombre"]) ? $asesor["nombre"] : "Sin asignar";
 
 			// Conteo de órdenes del cliente
-			$totalOrdenes = ControladorClientes::ctrContarOrdenesCliente($clientes[$i]["id"]);
+			try {
+				$totalOrdenes = ControladorClientes::ctrContarOrdenesCliente($clientes[$i]["id"]);
+			} catch(Exception $e) {
+				$totalOrdenes = 0;
+			}
 
 			$tel    = trim($clientes[$i]["telefono"]);
 			$wa     = trim($clientes[$i]["telefonoDos"]);
@@ -85,13 +93,16 @@ class TablaClientes{
 			if($etiqueta === "Frecuente")    { $etiqColor = "#1e8449"; $etiqBg = "#d5f5e3"; }
 			if($etiqueta === "Problematico") { $etiqColor = "#c0392b"; $etiqBg = "#fadbd8"; }
 
+			// Asegurar que sea entero
+			$totalOrdenes = intval($totalOrdenes);
+
 			// Colores según cantidad de órdenes
-			if($totalOrdenes === 0)      { $ordBg = "#e8e8e8"; $ordColor = "#777"; }
+			if($totalOrdenes == 0)       { $ordBg = "#e8e8e8"; $ordColor = "#777"; }
 			elseif($totalOrdenes <= 2)   { $ordBg = "#d6eaf8"; $ordColor = "#1a5276"; }
 			elseif($totalOrdenes <= 5)   { $ordBg = "#d5f5e3"; $ordColor = "#1e8449"; }
 			else                         { $ordBg = "#fdebd0"; $ordColor = "#784212"; }
 
-			$ordLabel = $totalOrdenes === 1 ? "orden" : "órdenes";
+			$ordLabel = $totalOrdenes == 1 ? "orden" : "órdenes";
 
 			// Badge de antigüedad por fecha de registro
 			$regBadge = "";
@@ -160,8 +171,19 @@ class TablaClientes{
 			];
 		}
 
+		ob_end_clean(); // descartar cualquier output previo (warnings, notices)
 		header('Content-Type: application/json; charset=utf-8');
-		echo json_encode(["data" => $data], JSON_UNESCAPED_UNICODE);
+		$json = json_encode(["data" => $data], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+
+		if($json === false){
+			// Fallback: limpiar strings no-UTF8 e intentar de nuevo
+			array_walk_recursive($data, function(&$val){
+				if(is_string($val)) $val = mb_convert_encoding($val, 'UTF-8', 'UTF-8');
+			});
+			$json = json_encode(["data" => $data], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+		}
+
+		echo $json ? $json : '{"data":[]}';
 	}
 
 }
