@@ -108,6 +108,19 @@ if (empty($_adm_allOrders)) {
     } catch (Exception $e) {}
 }
 
+// ── Deduplicar por ID de orden (el JOIN puede devolver filas repetidas) ──
+$_adm_dedup_seen = array();
+$_adm_dedup_tmp  = array();
+foreach ($_adm_allOrders as $_dord) {
+    $did = isset($_dord['id']) ? intval($_dord['id']) : 0;
+    if ($did > 0 && !isset($_adm_dedup_seen[$did])) {
+        $_adm_dedup_seen[$did] = true;
+        $_adm_dedup_tmp[]      = $_dord;
+    }
+}
+$_adm_allOrders = $_adm_dedup_tmp;
+unset($_adm_dedup_seen, $_adm_dedup_tmp);
+
 // ══════════════════════════════════════
 // JSON trimmed para drill-down en JavaScript
 // ══════════════════════════════════════
@@ -139,15 +152,21 @@ $_adm_pipe_cortes = array(
 );
 
 function _admPipeClasificar($est) {
-    if (stripos($est, "sin reparación") !== false || strpos($est, "SR") !== false) return 'SR';
-    if (stripos($est, "producto para venta") !== false || strpos($est, "PV") !== false) return 'PV';
-    if (strpos($est, "AUT") !== false) return 'AUT';
-    if (strpos($est, "REV") !== false || strpos($est, "revisión") !== false) return 'REV';
-    if (strpos($est, "Aceptado") !== false || strpos($est, "ok") !== false) return 'OK';
-    if (strpos($est, "Terminada") !== false || strpos($est, "ter") !== false) return 'TER';
-    if (strpos($est, "Entregado") !== false || strpos($est, "Ent") !== false) return 'ENT';
-    if (strpos($est, "Supervisión") !== false || strpos($est, "SUP") !== false) return 'SUP';
-    if (strpos($est, "cancel") !== false || strpos($est, "can") !== false) return 'CAN';
+    $el = strtolower($est);
+    // Excluidos del pipeline (sin reparación, producto para venta, cancelada)
+    if (stripos($est, "sin reparación") !== false || stripos($est, "sin reparacion") !== false) return 'SR';
+    if (stripos($est, "producto para venta") !== false) return 'PV';
+    if (strpos($el, "cancel") !== false) return 'CAN';
+    if (strpos($el, "garantía") !== false || strpos($el, "garantia") !== false) return 'OTR';
+    // Entregado — TODAS las variantes (Entregado/Pagado, Entregado al Asesor, etc.)
+    // Se verifica primero para evitar falsos positivos en otras reglas
+    if (strpos($el, "entregad") !== false) return 'ENT';
+    // Estados estándar
+    if (strpos($est, "AUT") !== false || strpos($el, "pendiente de autorizaci") !== false) return 'AUT';
+    if (strpos($est, "REV") !== false || strpos($el, "revisión") !== false || strpos($el, "revision") !== false) return 'REV';
+    if (strpos($el, "supervisión") !== false || strpos($el, "supervision") !== false || strpos($est, "SUP") !== false) return 'SUP';
+    if (strpos($el, "aceptado") !== false || strpos($el, "(ok)") !== false) return 'OK';
+    if (strpos($el, "terminada") !== false) return 'TER';
     return 'OTR';
 }
 
