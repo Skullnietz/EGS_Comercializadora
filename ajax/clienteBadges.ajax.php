@@ -7,9 +7,12 @@ header('Content-Type: application/json; charset=utf-8');
 $ordenesMap = [];
 $estadoMap = [];
 $recogidaMap = [];
+$fechaRegMap = [];
 try { $ordenesMap = ControladorClientes::ctrContarOrdenesClientesBulk(); } catch(Exception $e) {}
 try { $estadoMap = ControladorClientes::ctrContarOrdenesEstadoBulk(); } catch(Exception $e) {}
 try { $recogidaMap = ControladorClientes::ctrPromedioRecogidaBulk(); } catch(Exception $e) {}
+try { $fechaRegMap = ControladorClientes::ctrFechaRegistroClientesBulk(); } catch(Exception $e) {}
+$seisAntes = date('Y-m-d H:i:s', strtotime('-6 months'));
 
 $badges = [];
 // Recopilar todos los IDs de clientes (incluidos los que tienen 0 ordenes en estadoMap)
@@ -19,7 +22,8 @@ foreach ($allClientIds as $cliId) {
     $ent = isset($estadoMap[$cliId]) ? $estadoMap[$cliId]["entregadas"] : 0;
     $can = isset($estadoMap[$cliId]) ? $estadoMap[$cliId]["canceladas"] : 0;
     $b = [];
-    if ($totalOrd < 3) {
+    $esNuevo = ($totalOrd < 3 && isset($fechaRegMap[$cliId]) && $fechaRegMap[$cliId] >= $seisAntes);
+    if ($esNuevo) {
         $b["n"] = ["fa-seedling","#fff","#8b5cf6",$totalOrd];
     } elseif (($ent + $can) > 0) {
         $r = $ent / ($ent + $can) * 100;

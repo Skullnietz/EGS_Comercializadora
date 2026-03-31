@@ -72,6 +72,12 @@ class ControladorClientes{
 
 	}
 
+	static public function ctrFechaRegistroClientesBulk(){
+
+		return ModeloClientes::mdlFechaRegistroClientesBulk();
+
+	}
+
 	/*=============================================
 	MOSTRAR CLIENTES ORDENES
 	=============================================*/

@@ -753,10 +753,12 @@ function _ordGetBadgeClass($estadoText) {
                 }
 
                 // ── Cargar badges de calificación de clientes (bulk) ──
-                $_cli_ordenesMap_tbl = []; $_cli_estadoMap_tbl = []; $_cli_recogidaMap_tbl = [];
+                $_cli_ordenesMap_tbl = []; $_cli_estadoMap_tbl = []; $_cli_recogidaMap_tbl = []; $_cli_fechaRegMap_tbl = [];
                 try { $_cli_ordenesMap_tbl = ControladorClientes::ctrContarOrdenesClientesBulk(); } catch(Exception $e) {}
                 try { $_cli_estadoMap_tbl = ControladorClientes::ctrContarOrdenesEstadoBulk(); } catch(Exception $e) {}
                 try { $_cli_recogidaMap_tbl = ControladorClientes::ctrPromedioRecogidaBulk(); } catch(Exception $e) {}
+                try { $_cli_fechaRegMap_tbl = ControladorClientes::ctrFechaRegistroClientesBulk(); } catch(Exception $e) {}
+                $_seisAntes = date('Y-m-d H:i:s', strtotime('-6 months'));
 
                 foreach ($ordenes as $key => $valueOrdenes) {
 
@@ -834,7 +836,8 @@ function _ordGetBadgeClass($estadoText) {
                   $__cOrd = isset($_cli_ordenesMap_tbl[$__cId]) ? $_cli_ordenesMap_tbl[$__cId] : 0;
                   $__cEnt = isset($_cli_estadoMap_tbl[$__cId]) ? $_cli_estadoMap_tbl[$__cId]["entregadas"] : 0;
                   $__cCan = isset($_cli_estadoMap_tbl[$__cId]) ? $_cli_estadoMap_tbl[$__cId]["canceladas"] : 0;
-                  if ($__cOrd < 3) {
+                  $__esNuevo = ($__cOrd < 3 && isset($_cli_fechaRegMap_tbl[$__cId]) && $_cli_fechaRegMap_tbl[$__cId] >= $_seisAntes);
+                  if ($__esNuevo) {
                     $__badgeHtml .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#8b5cf6;margin-left:4px' title='Cliente nuevo ({$__cOrd} órdenes)'><i class='fas fa-seedling' style='font-size:10px;color:#fff'></i></span>";
                   } elseif (($__cEnt + $__cCan) > 0) {
                     $__r = $__cEnt / ($__cEnt + $__cCan) * 100;

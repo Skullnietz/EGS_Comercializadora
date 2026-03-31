@@ -272,6 +272,28 @@ class ModeloClientes{
 	}
 
 	/*=============================================
+	FECHA DE REGISTRO DE CLIENTES (BULK)
+	=============================================*/
+
+	static public function mdlFechaRegistroClientesBulk(){
+
+		$stmt = Conexion::conectar()->prepare("SELECT id, fecha FROM clientesTienda WHERE fecha IS NOT NULL AND fecha != ''");
+
+		$stmt->execute();
+
+		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		$map = [];
+
+		foreach($results as $row){
+			$map[intval($row["id"])] = $row["fecha"];
+		}
+
+		return $map;
+
+	}
+
+	/*=============================================
 	MOSTRAR USUARIOS ORDENES
 	=============================================*/
 
