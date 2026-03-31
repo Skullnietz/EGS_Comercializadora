@@ -1,6 +1,7 @@
 <?php
 
 require_once "conexion.php";
+require_once "conexionWordpress.php";
 
 class ModeloClientes{
     /*=============================================
@@ -174,7 +175,7 @@ class ModeloClientes{
 
 	static public function mdlContarOrdenesCliente($id_cliente){
 
-		$stmt = Conexion::conectar()->prepare("SELECT COUNT(*) as total FROM ordenes WHERE id_usuario = :id_cliente");
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT COUNT(*) as total FROM ordenes WHERE id_usuario = :id_cliente");
 
 		$stmt->bindParam(":id_cliente", $id_cliente, PDO::PARAM_INT);
 
