@@ -139,6 +139,44 @@ class ClienteBadgesHelper
         return $badges;
     }
 
+    /**
+     * Devuelve estadísticas detalladas de un cliente para el panel de análisis.
+     * @param int $id  ID del cliente
+     * @return array   Datos crudos + métricas calculadas
+     */
+    public function getDetailedStats($id)
+    {
+        $id = intval($id);
+        $totalOrd   = isset($this->ordenesMap[$id])  ? $this->ordenesMap[$id]  : 0;
+        $entregadas = isset($this->estadoMap[$id])    ? $this->estadoMap[$id]["entregadas"] : 0;
+        $canceladas = isset($this->estadoMap[$id])    ? $this->estadoMap[$id]["canceladas"] : 0;
+        $resueltas  = $entregadas + $canceladas;
+        $avgDias    = isset($this->recogidaMap[$id])  ? $this->recogidaMap[$id] : null;
+        $fechaReg   = isset($this->fechaRegMap[$id])  ? $this->fechaRegMap[$id] : null;
+
+        $esNuevo = ($totalOrd < 3 && $fechaReg !== null && $fechaReg >= $this->seisAntes);
+
+        // Probabilidad de cancelación
+        $probCancel = null;
+        $califEntrega = null;
+        if ($resueltas > 0) {
+            $probCancel   = round($canceladas / $resueltas * 100);
+            $califEntrega = round($entregadas / $resueltas * 100);
+        }
+
+        return [
+            'total_ordenes'   => $totalOrd,
+            'entregadas'      => $entregadas,
+            'canceladas'      => $canceladas,
+            'resueltas'       => $resueltas,
+            'prob_cancelacion' => $probCancel,
+            'calif_entrega'   => $califEntrega,
+            'avg_recogida'    => $avgDias,
+            'es_nuevo'        => $esNuevo,
+            'fecha_registro'  => $fechaReg,
+        ];
+    }
+
     /* ── Interno ── */
     private function circle($icon, $fg, $bg, $title, $ml = 4)
     {

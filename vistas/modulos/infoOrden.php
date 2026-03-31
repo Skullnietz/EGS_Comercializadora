@@ -58,6 +58,23 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 	.egs-estado-default        { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
 
 	/* ═══════════════════════════════════════
+	   ANALYTICS PANEL — Cliente stats
+	   ═══════════════════════════════════════ */
+	.egs-analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+	@media(max-width:576px){ .egs-analytics-grid { grid-template-columns: 1fr; } }
+	.egs-stat-card { background: #f8fafc; border-radius: 10px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; }
+	.egs-stat-card .egs-stat-value { font-size: 28px; font-weight: 800; line-height: 1.1; }
+	.egs-stat-card .egs-stat-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
+	.egs-stat-card .egs-stat-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+	.egs-progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+	.egs-progress-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+	.egs-rec-box { background: #f8fafc; border-radius: 10px; padding: 14px 16px; border-left: 4px solid #6366f1; }
+	.egs-rec-box .egs-rec-title { font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+	.egs-rec-box .egs-rec-text { font-size: 13px; color: #475569; line-height: 1.5; margin: 0; }
+	.egs-calc-summary { font-size: 12px; color: #94a3b8; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; line-height: 1.6; }
+	.egs-calc-summary i { margin-right: 4px; color: #cbd5e1; }
+
+	/* ═══════════════════════════════════════
 	   GALLERY — Modern Carousel + Lightbox
 	   ═══════════════════════════════════════ */
 
@@ -518,6 +535,130 @@ function _egsEstadoClass($estado) {
 						<?php endif; ?>
 					</div>
 				</div>
+
+				<!-- ANÁLISIS DEL CLIENTE -->
+				<?php
+				require_once "config/clienteBadges.helper.php";
+				$_bh = ClienteBadgesHelper::getInstance();
+				$_cs = $_bh->getDetailedStats(intval($_GET["cliente"]));
+				$_csBadges = $_bh->render(intval($_GET["cliente"]));
+				?>
+				<div class="egs-section">
+					<div class="egs-title-bar"><i class="fa-solid fa-chart-line"></i> Análisis del cliente <?php echo $_csBadges; ?></div>
+					<div class="egs-body">
+						<?php if ($_cs['es_nuevo']): ?>
+						<div class="egs-rec-box" style="border-left-color:#8b5cf6;margin-bottom:14px">
+							<div class="egs-rec-title"><i class="fas fa-seedling" style="color:#8b5cf6"></i> Cliente nuevo</div>
+							<p class="egs-rec-text">Este cliente tiene pocas órdenes registradas (<?php echo $_cs['total_ordenes']; ?>). Aún no hay suficientes datos para calcular probabilidades confiables.</p>
+						</div>
+						<?php endif; ?>
+
+						<div class="egs-analytics-grid">
+							<!-- Probabilidad de cancelación -->
+							<div class="egs-stat-card">
+								<?php if ($_cs['prob_cancelacion'] !== null): ?>
+									<?php
+									$_pcVal = $_cs['prob_cancelacion'];
+									if ($_pcVal <= 15)      { $_pcColor = '#16a34a'; }
+									elseif ($_pcVal <= 35)   { $_pcColor = '#2563eb'; }
+									elseif ($_pcVal <= 55)   { $_pcColor = '#d97706'; }
+									else                     { $_pcColor = '#dc2626'; }
+									?>
+									<div class="egs-stat-value" style="color:<?php echo $_pcColor; ?>"><?php echo $_pcVal; ?>%</div>
+									<div class="egs-stat-label">Probabilidad de cancelación</div>
+									<div class="egs-progress-bar"><div class="egs-progress-fill" style="width:<?php echo $_pcVal; ?>%;background:<?php echo $_pcColor; ?>"></div></div>
+									<div class="egs-stat-sub"><?php echo $_cs['canceladas']; ?> canceladas de <?php echo $_cs['resueltas']; ?> resueltas</div>
+								<?php else: ?>
+									<div class="egs-stat-value" style="color:#94a3b8">—</div>
+									<div class="egs-stat-label">Probabilidad de cancelación</div>
+									<div class="egs-stat-sub">Sin datos suficientes</div>
+								<?php endif; ?>
+							</div>
+
+							<!-- Tiempo estimado de recolección -->
+							<div class="egs-stat-card">
+								<?php if ($_cs['avg_recogida'] !== null): ?>
+									<?php
+									$_rdVal = $_cs['avg_recogida'];
+									if ($_rdVal <= 7)        { $_rdColor = '#16a34a'; $_rdIcon = 'fa-bolt'; }
+									elseif ($_rdVal <= 14)   { $_rdColor = '#2563eb'; $_rdIcon = 'fa-clock'; }
+									elseif ($_rdVal <= 30)   { $_rdColor = '#d97706'; $_rdIcon = 'fa-hourglass-half'; }
+									else                     { $_rdColor = '#dc2626'; $_rdIcon = 'fa-hourglass-end'; }
+									?>
+									<div class="egs-stat-value" style="color:<?php echo $_rdColor; ?>"><i class="fas <?php echo $_rdIcon; ?>" style="font-size:18px;vertical-align:middle;margin-right:4px"></i>~<?php echo $_rdVal; ?> días</div>
+									<div class="egs-stat-label">Tiempo estimado de recolección</div>
+									<div class="egs-progress-bar"><div class="egs-progress-fill" style="width:<?php echo min($_rdVal / 45 * 100, 100); ?>%;background:<?php echo $_rdColor; ?>"></div></div>
+									<div class="egs-stat-sub"><?php echo $_rdVal <= 7 ? 'Recolecta rápido' : ($_rdVal <= 14 ? 'Tiempo normal' : ($_rdVal <= 30 ? 'Tarda en recoger' : 'Muy lento para recoger')); ?></div>
+								<?php else: ?>
+									<div class="egs-stat-value" style="color:#94a3b8">—</div>
+									<div class="egs-stat-label">Tiempo estimado de recolección</div>
+									<div class="egs-stat-sub">Sin datos suficientes</div>
+								<?php endif; ?>
+							</div>
+						</div>
+
+						<!-- Calificación de entregas -->
+						<?php if ($_cs['calif_entrega'] !== null): ?>
+						<div class="egs-analytics-grid" style="grid-template-columns:1fr">
+							<div class="egs-stat-card" style="text-align:left;display:flex;align-items:center;gap:16px">
+								<?php
+								$_ceVal = $_cs['calif_entrega'];
+								if ($_ceVal >= 90)      { $_ceColor = '#16a34a'; $_ceIcon = 'fa-star'; $_ceLabel = 'Excelente'; }
+								elseif ($_ceVal >= 70)   { $_ceColor = '#2563eb'; $_ceIcon = 'fa-thumbs-up'; $_ceLabel = 'Buena'; }
+								elseif ($_ceVal >= 50)   { $_ceColor = '#d97706'; $_ceIcon = 'fa-minus-circle'; $_ceLabel = 'Regular'; }
+								else                     { $_ceColor = '#dc2626'; $_ceIcon = 'fa-thumbs-down'; $_ceLabel = 'Baja'; }
+								?>
+								<div style="min-width:50px;text-align:center">
+									<i class="fas <?php echo $_ceIcon; ?>" style="font-size:28px;color:<?php echo $_ceColor; ?>"></i>
+								</div>
+								<div style="flex:1">
+									<div style="font-size:18px;font-weight:800;color:<?php echo $_ceColor; ?>"><?php echo $_ceVal; ?>% — <?php echo $_ceLabel; ?></div>
+									<div class="egs-stat-label" style="margin-top:2px">Calificación de entregas</div>
+									<div class="egs-progress-bar" style="margin-top:6px"><div class="egs-progress-fill" style="width:<?php echo $_ceVal; ?>%;background:<?php echo $_ceColor; ?>"></div></div>
+									<div class="egs-stat-sub"><?php echo $_cs['entregadas']; ?> entregadas de <?php echo $_cs['resueltas']; ?> resueltas (<?php echo $_cs['total_ordenes']; ?> totales)</div>
+								</div>
+							</div>
+						</div>
+						<?php endif; ?>
+
+						<!-- Recomendaciones -->
+						<?php
+						$_recs = [];
+						if ($_cs['prob_cancelacion'] !== null && $_cs['prob_cancelacion'] > 40) {
+							$_recs[] = '<i class="fas fa-exclamation-triangle" style="color:#d97706"></i> <strong>Alta probabilidad de cancelación</strong> — Se recomienda dar seguimiento proactivo y mantener comunicación constante con el cliente.';
+						}
+						if ($_cs['avg_recogida'] !== null && $_cs['avg_recogida'] > 21) {
+							$_recs[] = '<i class="fas fa-clock" style="color:#d97706"></i> <strong>Recolección lenta</strong> — Este cliente suele tardar en recoger sus equipos. Considere enviar recordatorios adicionales cuando el equipo esté terminado.';
+						}
+						if ($_cs['calif_entrega'] !== null && $_cs['calif_entrega'] >= 90 && $_cs['avg_recogida'] !== null && $_cs['avg_recogida'] <= 7) {
+							$_recs[] = '<i class="fas fa-trophy" style="color:#16a34a"></i> <strong>Cliente estrella</strong> — Excelente historial de entregas y rápida recolección. Cliente confiable.';
+						}
+						if ($_cs['es_nuevo']) {
+							$_recs[] = '<i class="fas fa-seedling" style="color:#8b5cf6"></i> <strong>Cliente nuevo</strong> — Aún con pocos datos. Una buena experiencia inicial puede fidelizarlo.';
+						}
+						if ($_cs['resueltas'] == 0 && !$_cs['es_nuevo']) {
+							$_recs[] = '<i class="fas fa-info-circle" style="color:#64748b"></i> Sin órdenes resueltas (entregadas o canceladas) para este cliente aún.';
+						}
+						?>
+						<?php if (!empty($_recs)): ?>
+						<div class="egs-rec-box">
+							<div class="egs-rec-title"><i class="fas fa-lightbulb" style="color:#6366f1"></i> Recomendaciones</div>
+							<?php foreach ($_recs as $_r): ?>
+							<p class="egs-rec-text" style="margin-bottom:6px"><?php echo $_r; ?></p>
+							<?php endforeach; ?>
+						</div>
+						<?php endif; ?>
+
+						<!-- Cómo se calcula -->
+						<div class="egs-calc-summary">
+							<i class="fas fa-calculator"></i> <strong>¿Cómo se calcula?</strong><br>
+							<i class="fas fa-angle-right"></i> <strong>Prob. de cancelación:</strong> canceladas ÷ (entregadas + canceladas) × 100<br>
+							<i class="fas fa-angle-right"></i> <strong>Tiempo de recolección:</strong> promedio de días entre "Terminada" y "Entregado" en órdenes anteriores<br>
+							<i class="fas fa-angle-right"></i> <strong>Calificación:</strong> entregadas ÷ (entregadas + canceladas) × 100
+						</div>
+					</div>
+				</div>
+
 			</div>
 
 			<div class="col-lg-7 col-xs-12">
