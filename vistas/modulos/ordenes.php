@@ -850,7 +850,8 @@ function _ordGetBadgeClass($estadoText) {
                     else                 { $__ico='fa-hourglass-end';$__fg='#fff';$__bg='#dc2626'; }
                     $__badgeHtml .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:{$__bg};margin-left:3px' title='Recoge: ~{$__d} días'><i class='fas {$__ico}' style='font-size:10px;color:{$__fg}'></i></span>";
                   }
-                  $NombreUsuario = htmlspecialchars($usuario["nombre"]) . $__badgeHtml;
+                  $__nombre = htmlspecialchars($usuario["nombre"]);
+                  $NombreUsuario = "<span style='display:inline-flex;align-items:center;max-width:100%;white-space:nowrap'><span style='overflow:hidden;text-overflow:ellipsis;max-width:120px;display:inline-block;vertical-align:middle' title='" . $__nombre . "'>" . $__nombre . "</span>" . $__badgeHtml . "</span>";
 
 
                   /*LINK DE IMPRESION DE EDITAR ORDEN https://backend.comercializadoraegs.com/index.php?ruta=infoOrden&idOrden=5240&empresa=1&asesor=9&cliente=2726&tecnico=4&pedido=0*/
