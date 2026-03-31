@@ -297,14 +297,11 @@ $(document).ready(function(){
           </button>
 
           <div class="toggle-view-group" style="display:inline-flex;gap:4px;margin-left:12px;">
-            <button id="btnOrdenarOrdenes" class="btn-toggle-view active" title="Clientes con más órdenes primero">
-              <i class="fas fa-sort-amount-down"></i>&nbsp; Más órdenes
+            <button id="btnMejoresClientes" class="btn-toggle-view active" title="Mejores clientes: más órdenes y mejor calificación">
+              <i class="fas fa-trophy"></i>&nbsp; Mejores Clientes
             </button>
-            <button id="btnOrdenarNuevos" class="btn-toggle-view" title="Clientes más recientes primero">
-              <i class="fas fa-user-clock"></i>&nbsp; Nuevos
-            </button>
-            <button id="btnOrdenarCalif" class="btn-toggle-view" title="Mejor calificación primero">
-              <i class="fas fa-star"></i>&nbsp; Calificación
+            <button id="btnMalosClientes" class="btn-toggle-view" title="Clientes con baja calificación y más órdenes">
+              <i class="fas fa-exclamation-triangle"></i>&nbsp; Malos Clientes
             </button>
           </div>
         </div>

@@ -1,25 +1,29 @@
 /*=============================================
 CARGAR LA TABLA DINÁMICA DE CLIENTES
 =============================================*/
+$(document).ready(function(){
+
 var Empresa_del_perfil = $("#Empresa_del_perfil").val();
 
+/* Solo inicializar si estamos en la página de clientes */
+if(!Empresa_del_perfil || !$(".tablaClientesOrden").length) return;
+
 var tablaClientes = $(".tablaClientesOrden").DataTable({
-	 "ajax": "ajax/tablaClientes.ajax.php?empresa=" + Empresa_del_perfil,
-	 "deferRender": true,
-	 "destroy": true,
-	 "processing": true,
+	"ajax": "ajax/tablaClientes.ajax.php?empresa=" + Empresa_del_perfil,
+	"deferRender": true,
+	"destroy": true,
+	"processing": true,
 
-	 /* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw, 9 = calificación) */
-	 "columnDefs": [
-	 	{ "targets": [7, 8, 9], "visible": false, "searchable": false }
-	 ],
+	/* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw, 9 = calificación) */
+	"columnDefs": [
+		{ "targets": [7, 8, 9], "visible": false, "searchable": false }
+	],
 
-	 /* Default: ordenar por más órdenes (columna 7 desc) */
-	 "order": [[7, "desc"]],
+	/* Default: mejores clientes (calificación desc + órdenes desc) */
+	"order": [[9, "desc"], [7, "desc"]],
 
-	 "language": {
-
-	 	"sProcessing":     "Procesando...",
+	"language": {
+		"sProcessing":     "Procesando...",
 		"sLengthMenu":     "Mostrar _MENU_ registros",
 		"sZeroRecords":    "No se encontraron resultados",
 		"sEmptyTable":     "Ningún dato disponible en esta tabla",
@@ -38,37 +42,26 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 			"sPrevious": "Anterior"
 		},
 		"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
+			"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+			"sSortDescending": ": Activar para ordenar la columna de manera descendente"
 		}
-
-	 }
-
+	}
 });
 
 /*=============================================
-TOGGLE: Más órdenes / Clientes nuevos
+TOGGLE: Mejores Clientes / Malos Clientes
 =============================================*/
-$("#btnOrdenarOrdenes").on("click", function(){
+$("#btnMejoresClientes").on("click", function(){
 	$(".btn-toggle-view").removeClass("active");
 	$(this).addClass("active");
-	// Quitar filtro y ordenar por más órdenes
-	tablaClientes.column(4).search("").draw();
-	tablaClientes.order([7, "desc"]).draw();
-});
-
-$("#btnOrdenarNuevos").on("click", function(){
-	$(".btn-toggle-view").removeClass("active");
-	$(this).addClass("active");
-	tablaClientes.column(4).search("").draw();
-	tablaClientes.order([8, "desc"]).draw();
-});
-
-$("#btnOrdenarCalif").on("click", function(){
-	$(".btn-toggle-view").removeClass("active");
-	$(this).addClass("active");
-	tablaClientes.column(4).search("").draw();
 	tablaClientes.order([[9, "desc"], [7, "desc"]]).draw();
+});
+
+$("#btnMalosClientes").on("click", function(){
+	$(".btn-toggle-view").removeClass("active");
+	$(this).addClass("active");
+	/* Calificación ascendente (peores primero, -1 sin calificar al inicio), luego más órdenes */
+	tablaClientes.order([[9, "asc"], [7, "desc"]]).draw();
 });
 
 /*=============================================
@@ -82,7 +75,6 @@ $(".tablaClientesOrden").on("click", ".btnEditarCliente", function(){
 	datos.append("idCliente", idCliente);
 
 	$.ajax({
-
 		url:"ajax/clientes.ajax.php",
 		method: "POST",
 		data: datos,
@@ -91,20 +83,14 @@ $(".tablaClientesOrden").on("click", ".btnEditarCliente", function(){
 		processData: false,
 		dataType: "json",
 		success: function(respuesta){
-
 			$("#idCliente").val(respuesta["id"]);
 			$("#editarNombreDelCliente").val(respuesta["nombre"]);
-      		$("#EditarCorreoCliente").val(respuesta["correo"]);
-      		$("#EditarNumeroDelCliente").val(respuesta["telefono"]);
-      		$("#EditarSegundoNumeroDeTel").val(respuesta["telefonoDos"]);
-      		$("#EditarAsesorDelCliente").val(respuesta["id_Asesor"]);
-			$(".EditarEtiquetaDelCLiente").val(respuesta["etiqueta"]);
-			$(".MostrarEtiquetaDelCliente").html(respuesta["etiqueta"]);
-
+			$("#EditarCorreoCliente").val(respuesta["correo"]);
+			$("#EditarNumeroDelCliente").val(respuesta["telefono"]);
+			$("#EditarSegundoNumeroDeTel").val(respuesta["telefonoDos"]);
+			$("#EditarAsesorDelCliente").val(respuesta["id_Asesor"]);
 		}
-
 	})
-
 })
 
 /*=============================================
@@ -142,3 +128,5 @@ $(".nombreCliente").change(function(){
    	})
 
 })
+
+}); /* end document.ready */

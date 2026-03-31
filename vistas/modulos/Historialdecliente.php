@@ -67,7 +67,7 @@ $_hc_califColor = "#64748b";
 $_hc_califBg    = "#f1f5f9";
 $_hc_califIcon  = "fa-circle-question";
 $_hc_califPct   = "";
-if (($_hc_entregadas + $_hc_canceladas) > 0) {
+if (count($_hc_ordenes) >= 3 && ($_hc_entregadas + $_hc_canceladas) > 0) {
     $ratio = $_hc_entregadas / ($_hc_entregadas + $_hc_canceladas) * 100;
     $_hc_califPct = round($ratio) . "%";
     if ($ratio >= 90)     { $_hc_califLabel = "Excelente"; $_hc_califColor = "#16a34a"; $_hc_califBg = "#f0fdf4"; $_hc_califIcon = "fa-star"; }

@@ -168,13 +168,13 @@ class TablaClientes{
 			                . "border-radius:20px;font-size:11px;background:{$ordBg};color:{$ordColor};'>"
 			                . "<i class='fas fa-clipboard-list'></i>&nbsp;{$totalOrdenes}&nbsp;{$ordLabel}</span>";
 
-			// ── Calificación del cliente (entregadas vs canceladas) ──
+			// ── Calificación del cliente (entregadas vs canceladas, mínimo 3 órdenes) ──
 			$cliEntregadas = isset($estadoMap[$idCliente]) ? $estadoMap[$idCliente]["entregadas"] : 0;
 			$cliCanceladas = isset($estadoMap[$idCliente]) ? $estadoMap[$idCliente]["canceladas"] : 0;
 			$califLabel = "Sin calificar"; $califColor = "#64748b"; $califBg = "#f1f5f9"; $califIcon = "fa-circle-question";
 			$califPct = "";
-			$califRatio = -1; // para sorting: -1 = sin datos
-			if(($cliEntregadas + $cliCanceladas) > 0){
+			$califRatio = -1; // para sorting: -1 = sin datos suficientes
+			if($totalOrdenes >= 3 && ($cliEntregadas + $cliCanceladas) > 0){
 				$ratio = $cliEntregadas / ($cliEntregadas + $cliCanceladas) * 100;
 				$califRatio = round($ratio, 2);
 				$califPct = round($ratio) . "%";
