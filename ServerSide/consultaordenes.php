@@ -3,7 +3,12 @@ include_once '../ServerSide/serversideConexion.php';
 $objeto = new ConexionO();
 $conexiono = $objeto->Conectar();
 
-$consulta = "SELECT * FROM ordenes ORDER BY id DESC";
+$dbSistema = getenv('DB_SISTEMA_NAME') ?: 'egsequip_dbsistema';
+
+$consulta = "SELECT o.*, c.nombre AS cliente_nombre
+             FROM ordenes o
+             LEFT JOIN {$dbSistema}.clientesTienda c ON c.id = o.id_usuario
+             ORDER BY o.id DESC";
 $resultado = $conexiono->prepare($consulta);
 $resultado->execute();
 $data=$resultado->fetchAll(PDO::FETCH_ASSOC);

@@ -425,6 +425,20 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
         else $('#spanboton').html('Complete el N° de serie (6 dígitos)');
       }
     }
+    // Cargar mapa de badges de clientes
+    var _clienteBadges = {};
+    $.ajax({ url: 'ajax/clienteBadges.ajax.php', async: false, dataType: 'json',
+      success: function(d) { _clienteBadges = d || {}; }
+    });
+    function _renderCliBadges(id) {
+      var b = _clienteBadges[id];
+      if (!b) return '';
+      var h = '';
+      if (b.c) h += "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:"+b.c[2]+";margin-left:4px' title='Calif: "+b.c[3]+"%'><i class='fas "+b.c[0]+"' style='font-size:10px;color:"+b.c[1]+"'></i></span>";
+      if (b.r) h += "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:"+b.r[2]+";margin-left:3px' title='Recoge: ~"+b.r[3]+" días'><i class='fas "+b.r[0]+"' style='font-size:10px;color:"+b.r[1]+"'></i></span>";
+      return h;
+    }
+
     $('#datatableordenes').DataTable( {
     "order": [[ 0, "desc" ]],
     "scrollX": true,
@@ -485,6 +499,11 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
             "render": function (data, type, row, meta ) {
                 if (type === 'sort' || type === 'type') return parseInt(data.id) || 0;
                 return '<span style="font-weight:800;color:#6366f1">#'+data.id+'</span>';
+            }},
+        {data: null,
+            "render": function (data, type, row, meta ) {
+                var nombre = data.cliente_nombre || 'Sin cliente';
+                return nombre + _renderCliBadges(data.id_usuario);
             }},
         {data: null,
             "render": function (data, type, row, meta ) {
@@ -656,6 +675,8 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 	              
 
 	              <th>No. Orden</th>
+
+	              <th>Cliente</th>
 
 	              <th>TOTAL</th>
 
