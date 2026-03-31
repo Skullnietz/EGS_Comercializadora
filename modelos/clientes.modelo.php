@@ -210,6 +210,36 @@ class ModeloClientes{
 	}
 
 	/*=============================================
+	CONTAR ORDENES ENTREGADAS/CANCELADAS BULK
+	=============================================*/
+
+	static public function mdlContarOrdenesEstadoBulk(){
+
+		$stmt = ConexionWP::conectarWP()->prepare(
+			"SELECT id_usuario,
+				SUM(CASE WHEN estado LIKE '%Ent%' THEN 1 ELSE 0 END) as entregadas,
+				SUM(CASE WHEN estado LIKE '%can%' THEN 1 ELSE 0 END) as canceladas
+			FROM ordenes GROUP BY id_usuario"
+		);
+
+		$stmt->execute();
+
+		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+		$map = [];
+
+		foreach($results as $row){
+			$map[intval($row["id_usuario"])] = [
+				"entregadas" => intval($row["entregadas"]),
+				"canceladas" => intval($row["canceladas"])
+			];
+		}
+
+		return $map;
+
+	}
+
+	/*=============================================
 	MOSTRAR USUARIOS ORDENES
 	=============================================*/
 

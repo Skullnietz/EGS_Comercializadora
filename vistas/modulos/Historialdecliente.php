@@ -39,15 +39,36 @@ try {
 // ── Estadísticas rápidas ──
 $_hc_totalGastado = 0;
 $_hc_entregadas = 0;
+$_hc_canceladas = 0;
 $_hc_pendientes = 0;
 $_hc_primeraFecha = null;
 foreach ($_hc_ordenes as $o) {
-    $_hc_totalGastado += floatval(isset($o["total"]) ? $o["total"] : 0);
     $est = isset($o["estado"]) ? $o["estado"] : "";
-    if (strpos($est, "Ent") !== false) $_hc_entregadas++;
-    elseif (strpos($est, "can") === false) $_hc_pendientes++;
+    if (strpos($est, "Ent") !== false) {
+        $_hc_entregadas++;
+        $_hc_totalGastado += floatval(isset($o["total"]) ? $o["total"] : 0);
+    } elseif (strpos($est, "can") !== false) {
+        $_hc_canceladas++;
+    } else {
+        $_hc_pendientes++;
+    }
     $fi = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
     if (!empty($fi) && ($_hc_primeraFecha === null || $fi < $_hc_primeraFecha)) $_hc_primeraFecha = $fi;
+}
+
+// ── Calificación del cliente ──
+$_hc_califLabel = "Sin calificar";
+$_hc_califColor = "#64748b";
+$_hc_califBg    = "#f1f5f9";
+$_hc_califIcon  = "fa-circle-question";
+$_hc_califPct   = "";
+if (($_hc_entregadas + $_hc_canceladas) > 0) {
+    $ratio = $_hc_entregadas / ($_hc_entregadas + $_hc_canceladas) * 100;
+    $_hc_califPct = round($ratio) . "%";
+    if ($ratio >= 90)     { $_hc_califLabel = "Excelente"; $_hc_califColor = "#16a34a"; $_hc_califBg = "#f0fdf4"; $_hc_califIcon = "fa-star"; }
+    elseif ($ratio >= 70) { $_hc_califLabel = "Bueno";     $_hc_califColor = "#2563eb"; $_hc_califBg = "#eff6ff"; $_hc_califIcon = "fa-thumbs-up"; }
+    elseif ($ratio >= 50) { $_hc_califLabel = "Regular";   $_hc_califColor = "#d97706"; $_hc_califBg = "#fffbeb"; $_hc_califIcon = "fa-minus-circle"; }
+    else                  { $_hc_califLabel = "Malo";      $_hc_califColor = "#dc2626"; $_hc_califBg = "#fef2f2"; $_hc_califIcon = "fa-thumbs-down"; }
 }
 $_hc_antiguedad = "";
 if ($_hc_primeraFecha) {
@@ -149,8 +170,18 @@ if ($_hc_primeraFecha) {
       <!-- Stats strip -->
       <div style="display:flex;border-top:1px solid #f1f5f9">
         <div class="hc-stat" style="flex:1">
+          <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;background:<?php echo $_hc_califBg; ?>;margin-bottom:4px">
+            <i class="fa-solid <?php echo $_hc_califIcon; ?>" style="color:<?php echo $_hc_califColor; ?>;font-size:14px"></i>
+            <span style="font-size:14px;font-weight:800;color:<?php echo $_hc_califColor; ?>"><?php echo $_hc_califLabel; ?></span>
+            <?php if ($_hc_califPct): ?>
+              <span style="font-size:11px;font-weight:600;color:<?php echo $_hc_califColor; ?>;opacity:.7">(<?php echo $_hc_califPct; ?>)</span>
+            <?php endif; ?>
+          </div>
+          <div class="hc-stat-lbl">Calificación</div>
+        </div>
+        <div class="hc-stat" style="flex:1">
           <div class="hc-stat-val" style="color:#6366f1">$<?php echo number_format($_hc_totalGastado, 0); ?></div>
-          <div class="hc-stat-lbl">Total acumulado</div>
+          <div class="hc-stat-lbl">Total acumulado <span style="font-size:9px;color:#a5b4fc">(entregadas)</span></div>
         </div>
         <div class="hc-stat" style="flex:1">
           <div class="hc-stat-val"><?php echo count($_hc_ordenes); ?></div>
@@ -159,6 +190,10 @@ if ($_hc_primeraFecha) {
         <div class="hc-stat" style="flex:1">
           <div class="hc-stat-val" style="color:#22c55e"><?php echo $_hc_entregadas; ?></div>
           <div class="hc-stat-lbl">Entregadas</div>
+        </div>
+        <div class="hc-stat" style="flex:1">
+          <div class="hc-stat-val" style="color:#dc2626"><?php echo $_hc_canceladas; ?></div>
+          <div class="hc-stat-lbl">Canceladas</div>
         </div>
         <div class="hc-stat" style="flex:1">
           <div class="hc-stat-val" style="color:#f59e0b"><?php echo $_hc_pendientes; ?></div>

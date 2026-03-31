@@ -56,6 +56,12 @@ class ControladorClientes{
 
 	}
 
+	static public function ctrContarOrdenesEstadoBulk(){
+
+		return ModeloClientes::mdlContarOrdenesEstadoBulk();
+
+	}
+
 	/*=============================================
 	MOSTRAR CLIENTES ORDENES
 	=============================================*/

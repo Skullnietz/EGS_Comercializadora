@@ -29,6 +29,13 @@ class TablaClientes{
 			$ordenesMap = [];
 		}
 
+		// Una sola query para contar entregadas/canceladas de TODOS los clientes
+		try {
+			$estadoMap = ControladorClientes::ctrContarOrdenesEstadoBulk();
+		} catch(Exception $e) {
+			$estadoMap = [];
+		}
+
 		// Cache de asesores para evitar queries repetidas
 		$asesoresCache = [];
 
@@ -135,6 +142,26 @@ class TablaClientes{
 			$clasificacion .= "<span style='display:inline-flex;align-items:center;gap:4px;padding:2px 9px;"
 			                . "border-radius:20px;font-size:11px;background:{$ordBg};color:{$ordColor};'>"
 			                . "<i class='fas fa-clipboard-list'></i>&nbsp;{$totalOrdenes}&nbsp;{$ordLabel}</span>";
+
+			// ── Calificación del cliente (entregadas vs canceladas) ──
+			$cliEntregadas = isset($estadoMap[$idCliente]) ? $estadoMap[$idCliente]["entregadas"] : 0;
+			$cliCanceladas = isset($estadoMap[$idCliente]) ? $estadoMap[$idCliente]["canceladas"] : 0;
+			$califLabel = "Sin calificar"; $califColor = "#64748b"; $califBg = "#f1f5f9"; $califIcon = "fa-circle-question";
+			$califPct = "";
+			if(($cliEntregadas + $cliCanceladas) > 0){
+				$ratio = $cliEntregadas / ($cliEntregadas + $cliCanceladas) * 100;
+				$califPct = round($ratio) . "%";
+				if($ratio >= 90)      { $califLabel = "Excelente"; $califColor = "#16a34a"; $califBg = "#f0fdf4"; $califIcon = "fa-star"; }
+				elseif($ratio >= 70)  { $califLabel = "Bueno";     $califColor = "#2563eb"; $califBg = "#eff6ff"; $califIcon = "fa-thumbs-up"; }
+				elseif($ratio >= 50)  { $califLabel = "Regular";   $califColor = "#d97706"; $califBg = "#fffbeb"; $califIcon = "fa-minus-circle"; }
+				else                  { $califLabel = "Malo";      $califColor = "#dc2626"; $califBg = "#fef2f2"; $califIcon = "fa-thumbs-down"; }
+			}
+			$clasificacion .= "<span style='display:inline-flex;align-items:center;gap:4px;padding:2px 9px;"
+			                . "border-radius:20px;font-size:11px;background:{$califBg};color:{$califColor};font-weight:600;'>"
+			                . "<i class='fas {$califIcon}'></i>&nbsp;{$califLabel}";
+			if($califPct) $clasificacion .= "&nbsp;<span style='opacity:.7;font-size:10px;'>({$califPct})</span>";
+			$clasificacion .= "</span>";
+
 			if($regBadge) $clasificacion .= $regBadge;
 			$clasificacion .= "</div>";
 
