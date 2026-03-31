@@ -58,29 +58,22 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 	.egs-estado-default        { color: #475569; background: #f1f5f9; border-color: #e2e8f0; }
 
 	/* ═══════════════════════════════════════
-	   ANALYTICS PANEL — Compact collapsible
+	   ANALYTICS PANEL — Cliente stats
 	   ═══════════════════════════════════════ */
-	.egs-an-bar { display:flex; align-items:center; gap:14px; flex-wrap:wrap; cursor:pointer; }
-	.egs-an-pill { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700; background:#f1f5f9; border:1px solid #e2e8f0; white-space:nowrap; }
-	.egs-an-pill i { font-size:11px; }
-	.egs-an-toggle { margin-left:auto; font-size:12px; color:#94a3b8; display:flex; align-items:center; gap:4px; }
-	.egs-an-toggle i { transition:transform .25s; }
-	.egs-an-detail { max-height:0; overflow:hidden; transition:max-height .35s ease; }
-	.egs-an-detail.open { max-height:800px; }
-	.egs-an-metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:14px; }
-	@media(max-width:768px){ .egs-an-metrics { grid-template-columns:1fr; } }
-	.egs-an-metric { background:#f8fafc; border-radius:8px; padding:10px 12px; border:1px solid #e2e8f0; }
-	.egs-an-metric-val { font-size:20px; font-weight:800; line-height:1.1; }
-	.egs-an-metric-lbl { font-size:10px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.3px; margin-top:2px; }
-	.egs-an-metric-sub { font-size:11px; color:#94a3b8; margin-top:1px; }
-	.egs-an-pbar { width:100%; height:5px; background:#e2e8f0; border-radius:3px; overflow:hidden; margin-top:6px; }
-	.egs-an-pbar-fill { height:100%; border-radius:3px; transition:width .6s ease; }
-	.egs-an-rec { margin-top:12px; padding:10px 14px; background:#f8fafc; border-radius:8px; border-left:3px solid #6366f1; }
-	.egs-an-rec-title { font-size:11px; font-weight:700; color:#334155; margin-bottom:4px; display:flex; align-items:center; gap:5px; }
-	.egs-an-rec p { font-size:12px; color:#475569; line-height:1.5; margin:0 0 4px; }
-	.egs-an-rec p:last-child { margin-bottom:0; }
-	.egs-an-calc { font-size:11px; color:#94a3b8; margin-top:10px; padding-top:10px; border-top:1px solid #e2e8f0; line-height:1.5; }
-	.egs-an-calc i { margin-right:3px; color:#cbd5e1; }
+	.egs-analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+	@media(max-width:576px){ .egs-analytics-grid { grid-template-columns: 1fr; } }
+	.egs-stat-card { background: #f8fafc; border-radius: 10px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; }
+	.egs-stat-card .egs-stat-value { font-size: 28px; font-weight: 800; line-height: 1.1; }
+	.egs-stat-card .egs-stat-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
+	.egs-stat-card .egs-stat-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+	.egs-progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+	.egs-progress-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+	.egs-rec-box { background: #f8fafc; border-radius: 10px; padding: 14px 16px; border-left: 4px solid #6366f1; }
+	.egs-rec-box .egs-rec-title { font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+	.egs-rec-box .egs-rec-text { font-size: 13px; color: #475569; line-height: 1.5; margin: 0 0 6px; }
+	.egs-rec-box .egs-rec-text:last-child { margin-bottom: 0; }
+	.egs-calc-summary { font-size: 12px; color: #94a3b8; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; line-height: 1.6; }
+	.egs-calc-summary i { margin-right: 4px; color: #cbd5e1; }
 
 	/* ═══════════════════════════════════════
 	   GALLERY — Modern Carousel + Lightbox
@@ -544,14 +537,13 @@ function _egsEstadoClass($estado) {
 					</div>
 				</div>
 
-				<!-- ANÁLISIS DEL CLIENTE — Compact collapsible -->
+				<!-- ANÁLISIS DEL CLIENTE -->
 				<?php
 				require_once "config/clienteBadges.helper.php";
 				$_bh = ClienteBadgesHelper::getInstance();
 				$_cs = $_bh->getDetailedStats(intval($_GET["cliente"]));
 				$_csBadges = $_bh->render(intval($_GET["cliente"]));
 
-				// ── Colors / icons pre-calc ──
 				$_pcVal = $_cs['prob_cancelacion'];
 				$_ceVal = $_cs['calif_entrega'];
 				$_rdVal = $_cs['avg_recogida'];
@@ -569,180 +561,166 @@ function _egsEstadoClass($estado) {
 					else                    { $_ceColor='#dc2626'; $_ceIcon='fa-thumbs-down'; $_ceLabel='Baja'; }
 				}
 				if ($_rdVal !== null) {
-					if ($_rdVal <= 7)       { $_rdColor='#16a34a'; $_rdIcon='fa-bolt'; $_rdTag='Rápido'; }
-					elseif ($_rdVal <= 14)  { $_rdColor='#2563eb'; $_rdIcon='fa-clock'; $_rdTag='Normal'; }
-					elseif ($_rdVal <= 30)  { $_rdColor='#d97706'; $_rdIcon='fa-hourglass-half'; $_rdTag='Lento'; }
-					else                    { $_rdColor='#dc2626'; $_rdIcon='fa-hourglass-end'; $_rdTag='Muy lento'; }
+					if ($_rdVal <= 7)       { $_rdColor='#16a34a'; $_rdIcon='fa-bolt'; $_rdTag='Recolecta rápido'; }
+					elseif ($_rdVal <= 14)  { $_rdColor='#2563eb'; $_rdIcon='fa-clock'; $_rdTag='Tiempo normal'; }
+					elseif ($_rdVal <= 30)  { $_rdColor='#d97706'; $_rdIcon='fa-hourglass-half'; $_rdTag='Tarda en recoger'; }
+					else                    { $_rdColor='#dc2626'; $_rdIcon='fa-hourglass-end'; $_rdTag='Muy lento para recoger'; }
 				}
 
-				// ── Profile-specific recommendations ──
+				// ── Recomendaciones por perfil con contexto de negocio ──
 				$_perfil = $_SESSION["perfil"];
 				$_recs = [];
 
-				// --- Recomendaciones para ADMINISTRADOR ---
+				// ─── ADMINISTRADOR ───
 				if ($isAdmin) {
 					if ($_pcVal !== null && $_pcVal > 50) {
-						$_recs[] = '<i class="fas fa-exclamation-triangle" style="color:#dc2626"></i> <strong>Alerta:</strong> Cliente con más del 50% de cancelación. Revisar si hay un patrón de problema recurrente (precio, tiempo, comunicación).';
+						$_recs[] = '<i class="fas fa-exclamation-triangle" style="color:#dc2626"></i> <strong>Alerta — Alta cancelación (' . $_pcVal . '%):</strong> De ' . $_cs['resueltas'] . ' órdenes resueltas, ' . $_cs['canceladas'] . ' fueron canceladas. Revise si el presupuesto de reparación está siendo competitivo frente a equipos nuevos, o si los tiempos de diagnóstico están causando que el cliente busque otra opción. Considere reunirse con el asesor asignado para identificar el patrón.';
 					} elseif ($_pcVal !== null && $_pcVal > 30) {
-						$_recs[] = '<i class="fas fa-eye" style="color:#d97706"></i> <strong>Monitorear:</strong> Tasa de cancelación moderada. Validar que los presupuestos estén siendo claros y competitivos.';
+						$_recs[] = '<i class="fas fa-eye" style="color:#d97706"></i> <strong>Monitorear — Cancelación moderada (' . $_pcVal . '%):</strong> ' . $_cs['canceladas'] . ' de ' . $_cs['resueltas'] . ' órdenes canceladas. Valide que los presupuestos estén siendo claros desde el primer contacto y que el asesor explique bien las partidas de mano de obra y refacciones.';
 					}
 					if ($_rdVal !== null && $_rdVal > 30) {
-						$_recs[] = '<i class="fas fa-warehouse" style="color:#dc2626"></i> <strong>Almacén:</strong> Este cliente tarda +30 días en recoger. Considere políticas de cobro por almacenaje o contacto urgente.';
+						$_recs[] = '<i class="fas fa-warehouse" style="color:#dc2626"></i> <strong>Almacén — Equipo estancado (~' . $_rdVal . ' días):</strong> Este cliente históricamente tarda más de un mes en recoger equipos terminados. Esto ocupa espacio en el taller y genera riesgo de daño o pérdida. Considere aplicar cargo por almacenaje después de 15 días o establecer contacto directo desde gerencia.';
 					} elseif ($_rdVal !== null && $_rdVal > 14) {
-						$_recs[] = '<i class="fas fa-clock" style="color:#d97706"></i> <strong>Seguimiento:</strong> Recolección lenta. Asigne recordatorios automáticos al asesor para esta orden.';
+						$_recs[] = '<i class="fas fa-clock" style="color:#d97706"></i> <strong>Seguimiento — Recolección lenta (~' . $_rdVal . ' días):</strong> El cliente no recoge de inmediato. Indique al asesor que programe un WhatsApp de recordatorio desde el día que el equipo pasa a "Terminada" y un segundo aviso a los 7 días.';
 					}
 					if ($_ceVal !== null && $_ceVal >= 90 && $_rdVal !== null && $_rdVal <= 7) {
-						$_recs[] = '<i class="fas fa-trophy" style="color:#16a34a"></i> <strong>Cliente VIP:</strong> Excelente historial. Considere descuentos preferenciales o prioridad en atención.';
+						$_recs[] = '<i class="fas fa-trophy" style="color:#16a34a"></i> <strong>Cliente VIP — Excelente historial:</strong> ' . $_cs['entregadas'] . ' de ' . $_cs['resueltas'] . ' entregas exitosas y recoge en menos de una semana. Este tipo de cliente genera flujo constante. Considere ofrecerle un descuento preferencial del 5-10% en su próximo servicio o prioridad de atención para fidelizarlo.';
 					}
 					if ($_cs['es_nuevo']) {
-						$_recs[] = '<i class="fas fa-seedling" style="color:#8b5cf6"></i> <strong>Nuevo:</strong> Primera impresión clave — asegure que la experiencia sea impecable para fidelizar.';
+						$_recs[] = '<i class="fas fa-seedling" style="color:#8b5cf6"></i> <strong>Cliente nuevo (' . $_cs['total_ordenes'] . ' órdenes):</strong> La primera experiencia define si regresa o no. Asegúrese de que el diagnóstico se entregue rápido, la comunicación sea clara y el presupuesto no tenga sorpresas. Un cliente nuevo bien atendido puede representar 5-10 órdenes futuras.';
 					}
 				}
 
-				// --- Recomendaciones para VENDEDOR/ASESOR ---
+				// ─── VENDEDOR / ASESOR ───
 				if ($isVendedor) {
 					if ($_pcVal !== null && $_pcVal > 50) {
-						$_recs[] = '<i class="fas fa-phone-alt" style="color:#dc2626"></i> <strong>Llamar al cliente:</strong> Alto riesgo de cancelación. Contacte para resolver dudas sobre el presupuesto antes de que cancele.';
+						$_recs[] = '<i class="fas fa-phone-alt" style="color:#dc2626"></i> <strong>Acción urgente — Alta cancelación (' . $_pcVal . '%):</strong> Este cliente cancela más de la mitad de sus órdenes. Antes de enviar el presupuesto por WhatsApp, llámele directamente para explicar cada partida. Enfatice el valor de la reparación vs. comprar equipo nuevo y ofrezca opciones si el costo es alto (reparación parcial, priorizar lo esencial).';
 					} elseif ($_pcVal !== null && $_pcVal > 30) {
-						$_recs[] = '<i class="fab fa-whatsapp" style="color:#d97706"></i> <strong>Dar seguimiento:</strong> Envíe un mensaje amable para confirmar que el cliente está de acuerdo con el proceso.';
+						$_recs[] = '<i class="fab fa-whatsapp" style="color:#d97706"></i> <strong>Seguimiento activo — Cancelación moderada (' . $_pcVal . '%):</strong> Envíe un WhatsApp de seguimiento al día siguiente de entregar el presupuesto. Pregunte si tiene dudas y recuérdele los beneficios de reparar (garantía de servicio, tiempo de entrega). No espere a que el cliente se comunique.';
+					} elseif ($_pcVal !== null && $_pcVal <= 15 && $_ceVal !== null && $_ceVal >= 85) {
+						$_recs[] = '<i class="fas fa-handshake" style="color:#16a34a"></i> <strong>Cliente leal — Baja cancelación:</strong> Este cliente casi siempre acepta los presupuestos. Aproveche la confianza para ofrecerle servicios adicionales: mantenimiento preventivo, limpieza profunda, respaldo de información o actualización de componentes (RAM, SSD).';
 					}
 					if ($_rdVal !== null && $_rdVal > 21) {
-						$_recs[] = '<i class="fas fa-bell" style="color:#d97706"></i> <strong>Recordatorio:</strong> Este cliente tarda en recoger. Envíe un recordatorio de recolección cuando el equipo esté listo.';
-					}
-					if ($_ceVal !== null && $_ceVal >= 90) {
-						$_recs[] = '<i class="fas fa-star" style="color:#16a34a"></i> <strong>Buen cliente:</strong> Excelente historial. Puede ofrecer servicios adicionales o mantenimientos preventivos.';
+						$_recs[] = '<i class="fas fa-bell" style="color:#d97706"></i> <strong>Recordatorio de recolección (~' . $_rdVal . ' días promedio):</strong> Cuando esta orden pase a "Terminada", envíe el WhatsApp de equipo listo ese mismo día. Si a los 5 días no confirma, envíe un segundo mensaje. Este cliente necesita reminders constantes para que recoja.';
+					} elseif ($_rdVal !== null && $_rdVal <= 7) {
+						$_recs[] = '<i class="fas fa-bolt" style="color:#16a34a"></i> <strong>Recolección rápida (~' . $_rdVal . ' días):</strong> Este cliente recoge pronto. Cuando el equipo esté listo, basta con un solo aviso por WhatsApp. No necesita seguimiento adicional.';
 					}
 					if ($_cs['es_nuevo']) {
-						$_recs[] = '<i class="fas fa-handshake" style="color:#8b5cf6"></i> <strong>Cliente nuevo:</strong> Sea detallado en la explicación del presupuesto y tiempos para generar confianza.';
+						$_recs[] = '<i class="fas fa-user-plus" style="color:#8b5cf6"></i> <strong>Cliente nuevo — Primera impresión:</strong> Sea especialmente detallado en la explicación del presupuesto. Describa cada partida (diagnóstico, refacción, mano de obra) y dé un rango de tiempo realista. Si el cliente siente transparencia, es muy probable que regrese para futuras reparaciones.';
 					}
 					if ($_cs['resueltas'] == 0 && !$_cs['es_nuevo']) {
-						$_recs[] = '<i class="fas fa-info-circle" style="color:#64748b"></i> Sin entregas ni cancelaciones registradas para este cliente.';
+						$_recs[] = '<i class="fas fa-info-circle" style="color:#64748b"></i> Este cliente tiene órdenes registradas pero ninguna ha llegado a entrega o cancelación. Verifique si hay órdenes pendientes de autorización que requieran seguimiento.';
 					}
 				}
 
-				// --- Recomendaciones para TÉCNICO ---
+				// ─── TÉCNICO ───
 				if ($isTecnico) {
 					if ($_pcVal !== null && $_pcVal > 50) {
-						$_recs[] = '<i class="fas fa-exclamation-circle" style="color:#dc2626"></i> <strong>Prioridad baja:</strong> Cliente con alta cancelación. No invierta tiempo extra hasta que se confirme la autorización.';
+						$_recs[] = '<i class="fas fa-exclamation-circle" style="color:#dc2626"></i> <strong>No priorizar — Alta cancelación (' . $_pcVal . '%):</strong> Este cliente cancela frecuentemente. Realice el diagnóstico estándar pero no invierta tiempo en reparaciones complejas hasta que el asesor confirme que el cliente autorizó el presupuesto. Si hay otros equipos en espera, atienda primero los de clientes con mejor historial.';
 					} elseif ($_pcVal !== null && $_pcVal <= 20 && $_ceVal !== null && $_ceVal >= 80) {
-						$_recs[] = '<i class="fas fa-check-circle" style="color:#16a34a"></i> <strong>Cliente confiable:</strong> Baja cancelación y buena entrega. Puede proceder con confianza en la reparación.';
+						$_recs[] = '<i class="fas fa-check-circle" style="color:#16a34a"></i> <strong>Cliente confiable — Proceda con confianza:</strong> Historial sólido de ' . $_cs['entregadas'] . ' entregas exitosas. Este cliente casi siempre autoriza y recoge. Si durante la reparación identifica algo adicional que mejoraría el equipo (ej: cambio de pasta térmica, limpieza interna), repórtelo al asesor como oportunidad — probablemente lo acepte.';
 					}
 					if ($_rdVal !== null && $_rdVal > 30) {
-						$_recs[] = '<i class="fas fa-hourglass-end" style="color:#d97706"></i> <strong>Recolección lenta:</strong> Priorice otros equipos con clientes que recogen más rápido para liberar espacio de trabajo.';
+						$_recs[] = '<i class="fas fa-hourglass-end" style="color:#d97706"></i> <strong>Equipo ocupará espacio — Recolección lenta (~' . $_rdVal . ' días):</strong> Una vez terminado, este equipo probablemente estará en el taller al menos un mes. Colóquelo en zona de almacenaje, no en mesa de trabajo activa. Priorice espacio para equipos de clientes que recogen más rápido.';
+					} elseif ($_rdVal !== null && $_rdVal <= 7) {
+						$_recs[] = '<i class="fas fa-bolt" style="color:#16a34a"></i> <strong>Recolección rápida (~' . $_rdVal . ' días):</strong> Este cliente recoge en cuanto se le avisa. Si puede adelantar la terminación de este equipo, libera espacio de trabajo rápidamente.';
 					}
 					if ($_cs['es_nuevo']) {
-						$_recs[] = '<i class="fas fa-seedling" style="color:#8b5cf6"></i> <strong>Nuevo:</strong> Documente bien el diagnóstico para que el asesor pueda explicar claramente al cliente.';
+						$_recs[] = '<i class="fas fa-seedling" style="color:#8b5cf6"></i> <strong>Cliente nuevo — Diagnóstico detallado:</strong> Documente bien cada hallazgo en las observaciones (fotos del estado del equipo, componentes revisados, fallas encontradas). El asesor necesitará esta información para explicar el presupuesto de forma clara y convincente al cliente.';
 					}
 				}
 
-				// --- Recomendaciones para SECRETARIA ---
+				// ─── SECRETARIA ───
 				if ($isSecretaria) {
 					if ($_rdVal !== null && $_rdVal > 21) {
-						$_recs[] = '<i class="fas fa-calendar-alt" style="color:#d97706"></i> <strong>Programar contacto:</strong> Cliente lento en recoger. Programe llamadas o mensajes de recordatorio con anticipación.';
+						$_recs[] = '<i class="fas fa-calendar-alt" style="color:#d97706"></i> <strong>Programar recordatorios — Recolección lenta (~' . $_rdVal . ' días):</strong> Al pasar esta orden a "Terminada", agende un recordatorio a los 3, 7 y 14 días para llamar al cliente. Este perfil de cliente necesita contacto repetido. Tenga a la mano el teléfono y WhatsApp para no perder el seguimiento.';
+					} elseif ($_rdVal !== null && $_rdVal <= 7) {
+						$_recs[] = '<i class="fas fa-bolt" style="color:#16a34a"></i> <strong>Recolección rápida (~' . $_rdVal . ' días):</strong> Normalmente este cliente pasa por el equipo en menos de una semana. Basta con un aviso. Tenga lista la documentación de entrega.';
 					}
 					if ($_pcVal !== null && $_pcVal > 40) {
-						$_recs[] = '<i class="fas fa-clipboard-list" style="color:#dc2626"></i> <strong>Atención:</strong> Alta probabilidad de cancelación. Tenga lista la documentación por si el cliente solicita devolución.';
+						$_recs[] = '<i class="fas fa-clipboard-list" style="color:#dc2626"></i> <strong>Preparar documentación — Alta cancelación (' . $_pcVal . '%):</strong> Si el cliente decide cancelar, tenga lista la orden de devolución y verifique que todas las observaciones del técnico estén registradas. Asegúrese de que el equipo se devuelva en las mismas condiciones que ingresó.';
 					}
 					if ($_ceVal !== null && $_ceVal >= 90) {
-						$_recs[] = '<i class="fas fa-star" style="color:#16a34a"></i> <strong>Buen cliente:</strong> Entrega confiable. Agilice su proceso de entrega.';
+						$_recs[] = '<i class="fas fa-star" style="color:#16a34a"></i> <strong>Buen cliente — Entrega ágil:</strong> ' . $_cs['entregadas'] . ' entregas exitosas. Cuando venga a recoger, agilice la documentación y el cobro. Un buen servicio en la entrega refuerza la fidelización.';
 					}
 					if ($_cs['es_nuevo']) {
-						$_recs[] = '<i class="fas fa-id-card" style="color:#8b5cf6"></i> <strong>Nuevo:</strong> Verifique que los datos de contacto estén completos para futuras comunicaciones.';
+						$_recs[] = '<i class="fas fa-id-card" style="color:#8b5cf6"></i> <strong>Cliente nuevo — Datos completos:</strong> Verifique que el teléfono, WhatsApp y correo estén registrados correctamente. Para clientes nuevos es especialmente importante tener múltiples canales de contacto por si no responde al primero.';
 					}
 				}
 				?>
 				<div class="egs-section">
-					<div class="egs-title-bar" onclick="var d=document.getElementById('egsAnDetail'),c=this.querySelector('.egs-an-toggle i');d.classList.toggle('open');c.style.transform=d.classList.contains('open')?'rotate(180deg)':''">
-						<i class="fa-solid fa-chart-line"></i> Análisis del cliente <?php echo $_csBadges; ?>
-						<!-- ── Inline pills ── -->
-						<div class="egs-an-bar">
-							<?php if ($_pcVal !== null): ?>
-							<span class="egs-an-pill" style="color:<?php echo $_pcColor; ?>;border-color:<?php echo $_pcColor; ?>30;background:<?php echo $_pcColor; ?>12">
-								<i class="fas fa-ban"></i> <?php echo $_pcVal; ?>% cancel.
-							</span>
-							<?php endif; ?>
-							<?php if ($_rdVal !== null): ?>
-							<span class="egs-an-pill" style="color:<?php echo $_rdColor; ?>;border-color:<?php echo $_rdColor; ?>30;background:<?php echo $_rdColor; ?>12">
-								<i class="fas <?php echo $_rdIcon; ?>"></i> ~<?php echo $_rdVal; ?> días
-							</span>
-							<?php endif; ?>
-							<?php if ($_ceVal !== null): ?>
-							<span class="egs-an-pill" style="color:<?php echo $_ceColor; ?>;border-color:<?php echo $_ceColor; ?>30;background:<?php echo $_ceColor; ?>12">
-								<i class="fas <?php echo $_ceIcon; ?>"></i> <?php echo $_ceVal; ?>% <?php echo $_ceLabel; ?>
-							</span>
-							<?php endif; ?>
-							<?php if ($_cs['es_nuevo']): ?>
-							<span class="egs-an-pill" style="color:#8b5cf6;border-color:#8b5cf630;background:#8b5cf612">
-								<i class="fas fa-seedling"></i> Nuevo
-							</span>
-							<?php endif; ?>
-							<span class="egs-an-toggle"><i class="fas fa-chevron-down"></i></span>
+					<div class="egs-title-bar"><i class="fa-solid fa-chart-line"></i> Análisis del cliente <?php echo $_csBadges; ?></div>
+					<div class="egs-body">
+						<?php if ($_cs['es_nuevo']): ?>
+						<div class="egs-rec-box" style="border-left-color:#8b5cf6;margin-bottom:14px">
+							<div class="egs-rec-title"><i class="fas fa-seedling" style="color:#8b5cf6"></i> Cliente nuevo</div>
+							<p class="egs-rec-text">Este cliente tiene pocas órdenes registradas (<?php echo $_cs['total_ordenes']; ?>). Aún no hay suficientes datos para calcular probabilidades confiables.</p>
 						</div>
-					</div>
+						<?php endif; ?>
 
-					<!-- ── Expandable detail ── -->
-					<div id="egsAnDetail" class="egs-an-detail">
-						<div class="egs-body" style="padding:14px 20px 16px">
-
-							<!-- Metrics row -->
-							<div class="egs-an-metrics">
-								<div class="egs-an-metric" style="text-align:center">
-									<?php if ($_pcVal !== null): ?>
-									<div class="egs-an-metric-val" style="color:<?php echo $_pcColor; ?>"><?php echo $_pcVal; ?>%</div>
-									<div class="egs-an-metric-lbl">Prob. cancelación</div>
-									<div class="egs-an-pbar"><div class="egs-an-pbar-fill" style="width:<?php echo $_pcVal; ?>%;background:<?php echo $_pcColor; ?>"></div></div>
-									<div class="egs-an-metric-sub"><?php echo $_cs['canceladas']; ?> de <?php echo $_cs['resueltas']; ?> resueltas</div>
-									<?php else: ?>
-									<div class="egs-an-metric-val" style="color:#94a3b8">—</div>
-									<div class="egs-an-metric-lbl">Prob. cancelación</div>
-									<div class="egs-an-metric-sub">Sin datos</div>
-									<?php endif; ?>
-								</div>
-
-								<div class="egs-an-metric" style="text-align:center">
-									<?php if ($_rdVal !== null): ?>
-									<div class="egs-an-metric-val" style="color:<?php echo $_rdColor; ?>"><i class="fas <?php echo $_rdIcon; ?>" style="font-size:14px"></i> ~<?php echo $_rdVal; ?>d</div>
-									<div class="egs-an-metric-lbl">Recolección</div>
-									<div class="egs-an-pbar"><div class="egs-an-pbar-fill" style="width:<?php echo min($_rdVal / 45 * 100, 100); ?>%;background:<?php echo $_rdColor; ?>"></div></div>
-									<div class="egs-an-metric-sub"><?php echo $_rdTag; ?></div>
-									<?php else: ?>
-									<div class="egs-an-metric-val" style="color:#94a3b8">—</div>
-									<div class="egs-an-metric-lbl">Recolección</div>
-									<div class="egs-an-metric-sub">Sin datos</div>
-									<?php endif; ?>
-								</div>
-
-								<div class="egs-an-metric" style="text-align:center">
-									<?php if ($_ceVal !== null): ?>
-									<div class="egs-an-metric-val" style="color:<?php echo $_ceColor; ?>"><i class="fas <?php echo $_ceIcon; ?>" style="font-size:14px"></i> <?php echo $_ceVal; ?>%</div>
-									<div class="egs-an-metric-lbl">Calif. entregas</div>
-									<div class="egs-an-pbar"><div class="egs-an-pbar-fill" style="width:<?php echo $_ceVal; ?>%;background:<?php echo $_ceColor; ?>"></div></div>
-									<div class="egs-an-metric-sub"><?php echo $_cs['entregadas']; ?> de <?php echo $_cs['resueltas']; ?> — <?php echo $_ceLabel; ?></div>
-									<?php else: ?>
-									<div class="egs-an-metric-val" style="color:#94a3b8">—</div>
-									<div class="egs-an-metric-lbl">Calif. entregas</div>
-									<div class="egs-an-metric-sub">Sin datos</div>
-									<?php endif; ?>
-								</div>
+						<div class="egs-analytics-grid">
+							<!-- Probabilidad de cancelación -->
+							<div class="egs-stat-card">
+								<?php if ($_pcVal !== null): ?>
+									<div class="egs-stat-value" style="color:<?php echo $_pcColor; ?>"><?php echo $_pcVal; ?>%</div>
+									<div class="egs-stat-label">Probabilidad de cancelación</div>
+									<div class="egs-progress-bar"><div class="egs-progress-fill" style="width:<?php echo $_pcVal; ?>%;background:<?php echo $_pcColor; ?>"></div></div>
+									<div class="egs-stat-sub"><?php echo $_cs['canceladas']; ?> canceladas de <?php echo $_cs['resueltas']; ?> resueltas</div>
+								<?php else: ?>
+									<div class="egs-stat-value" style="color:#94a3b8">—</div>
+									<div class="egs-stat-label">Probabilidad de cancelación</div>
+									<div class="egs-stat-sub">Sin datos suficientes</div>
+								<?php endif; ?>
 							</div>
 
-							<!-- Profile-specific recommendations -->
-							<?php if (!empty($_recs)): ?>
-							<div class="egs-an-rec">
-								<div class="egs-an-rec-title"><i class="fas fa-lightbulb" style="color:#6366f1"></i> Recomendaciones — <?php echo htmlspecialchars(ucfirst($_perfil)); ?></div>
-								<?php foreach ($_recs as $_r): ?>
-								<p><?php echo $_r; ?></p>
-								<?php endforeach; ?>
+							<!-- Tiempo estimado de recolección -->
+							<div class="egs-stat-card">
+								<?php if ($_rdVal !== null): ?>
+									<div class="egs-stat-value" style="color:<?php echo $_rdColor; ?>"><i class="fas <?php echo $_rdIcon; ?>" style="font-size:18px;vertical-align:middle;margin-right:4px"></i>~<?php echo $_rdVal; ?> días</div>
+									<div class="egs-stat-label">Tiempo estimado de recolección</div>
+									<div class="egs-progress-bar"><div class="egs-progress-fill" style="width:<?php echo min($_rdVal / 45 * 100, 100); ?>%;background:<?php echo $_rdColor; ?>"></div></div>
+									<div class="egs-stat-sub"><?php echo $_rdTag; ?></div>
+								<?php else: ?>
+									<div class="egs-stat-value" style="color:#94a3b8">—</div>
+									<div class="egs-stat-label">Tiempo estimado de recolección</div>
+									<div class="egs-stat-sub">Sin datos suficientes</div>
+								<?php endif; ?>
 							</div>
-							<?php endif; ?>
+						</div>
 
-							<!-- How it's calculated -->
-							<div class="egs-an-calc">
-								<i class="fas fa-calculator"></i> <strong>¿Cómo se calcula?</strong>
-								&nbsp; Cancel.: canceladas÷resueltas
-								&nbsp;|&nbsp; Recolección: prom. días Terminada→Entregado
-								&nbsp;|&nbsp; Calif.: entregadas÷resueltas
+						<!-- Calificación de entregas -->
+						<?php if ($_ceVal !== null): ?>
+						<div class="egs-analytics-grid" style="grid-template-columns:1fr">
+							<div class="egs-stat-card" style="text-align:left;display:flex;align-items:center;gap:16px">
+								<div style="min-width:50px;text-align:center">
+									<i class="fas <?php echo $_ceIcon; ?>" style="font-size:28px;color:<?php echo $_ceColor; ?>"></i>
+								</div>
+								<div style="flex:1">
+									<div style="font-size:18px;font-weight:800;color:<?php echo $_ceColor; ?>"><?php echo $_ceVal; ?>% — <?php echo $_ceLabel; ?></div>
+									<div class="egs-stat-label" style="margin-top:2px">Calificación de entregas</div>
+									<div class="egs-progress-bar" style="margin-top:6px"><div class="egs-progress-fill" style="width:<?php echo $_ceVal; ?>%;background:<?php echo $_ceColor; ?>"></div></div>
+									<div class="egs-stat-sub"><?php echo $_cs['entregadas']; ?> entregadas de <?php echo $_cs['resueltas']; ?> resueltas (<?php echo $_cs['total_ordenes']; ?> totales)</div>
+								</div>
 							</div>
+						</div>
+						<?php endif; ?>
+
+						<!-- Recomendaciones por perfil -->
+						<?php if (!empty($_recs)): ?>
+						<div class="egs-rec-box">
+							<div class="egs-rec-title"><i class="fas fa-lightbulb" style="color:#6366f1"></i> Recomendaciones para <?php echo htmlspecialchars(ucfirst($_perfil)); ?></div>
+							<?php foreach ($_recs as $_r): ?>
+							<p class="egs-rec-text"><?php echo $_r; ?></p>
+							<?php endforeach; ?>
+						</div>
+						<?php endif; ?>
+
+						<!-- Cómo se calcula -->
+						<div class="egs-calc-summary">
+							<i class="fas fa-calculator"></i> <strong>¿Cómo se calcula?</strong><br>
+							<i class="fas fa-angle-right"></i> <strong>Prob. de cancelación:</strong> canceladas ÷ (entregadas + canceladas) × 100<br>
+							<i class="fas fa-angle-right"></i> <strong>Tiempo de recolección:</strong> promedio de días entre "Terminada" y "Entregado" en órdenes anteriores<br>
+							<i class="fas fa-angle-right"></i> <strong>Calificación:</strong> entregadas ÷ (entregadas + canceladas) × 100
 						</div>
 					</div>
 				</div>
