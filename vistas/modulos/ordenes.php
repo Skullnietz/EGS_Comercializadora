@@ -1069,7 +1069,7 @@ function _ordGetBadgeClass($estadoText) {
 
 
 
-                    $NombreUsuario = $usuario["nombre"];
+                    $NombreUsuario = ClienteBadgesHelper::getInstance()->renderWithName($usuario["nombre"], intval($valueOrdenes["id_usuario"]));
 
 
 
@@ -1318,7 +1318,7 @@ function _ordGetBadgeClass($estadoText) {
 
 
 
-                    $NombreUsuario = $usuario["nombre"];
+                    $NombreUsuario = ClienteBadgesHelper::getInstance()->renderWithName($usuario["nombre"], intval($valueOrdeneDelTecnico["id_usuario"]));
 
 
 
