@@ -200,9 +200,9 @@ class TablaClientes{
 			$recogidaBadge = "";
 			if(isset($recogidaMap[$idCliente])){
 				$promDias = $recogidaMap[$idCliente];
-				if($promDias <= 3)       { $recBg = "#f0fdf4"; $recColor = "#16a34a"; $recIcon = "fa-bolt"; }
-				elseif($promDias <= 7)   { $recBg = "#eff6ff"; $recColor = "#2563eb"; $recIcon = "fa-clock"; }
-				elseif($promDias <= 14)  { $recBg = "#fffbeb"; $recColor = "#d97706"; $recIcon = "fa-hourglass-half"; }
+				if($promDias <= 7)       { $recBg = "#f0fdf4"; $recColor = "#16a34a"; $recIcon = "fa-bolt"; }
+				elseif($promDias <= 14)   { $recBg = "#eff6ff"; $recColor = "#2563eb"; $recIcon = "fa-clock"; }
+				elseif($promDias <= 30)  { $recBg = "#fffbeb"; $recColor = "#d97706"; $recIcon = "fa-hourglass-half"; }
 				else                     { $recBg = "#fef2f2"; $recColor = "#dc2626"; $recIcon = "fa-hourglass-end"; }
 				$diasTxt = ($promDias == 1) ? "día" : "días";
 				$recogidaBadge = "<span style='display:inline-flex;align-items:center;gap:4px;padding:2px 9px;"

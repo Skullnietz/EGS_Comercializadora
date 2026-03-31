@@ -83,9 +83,9 @@ if (count($_hc_diasRecogida) >= 3) {
     $_hc_promedioRecogida = round(array_sum($_hc_diasRecogida) / count($_hc_diasRecogida), 1);
     $diasTxt = ($_hc_promedioRecogida == 1) ? "día" : "días";
     $_hc_recLabel = "~" . $_hc_promedioRecogida . " " . $diasTxt;
-    if ($_hc_promedioRecogida <= 3)      { $_hc_recColor = "#16a34a"; $_hc_recBg = "#f0fdf4"; $_hc_recIcon = "fa-bolt"; }
-    elseif ($_hc_promedioRecogida <= 7)  { $_hc_recColor = "#2563eb"; $_hc_recBg = "#eff6ff"; $_hc_recIcon = "fa-clock"; }
-    elseif ($_hc_promedioRecogida <= 14) { $_hc_recColor = "#d97706"; $_hc_recBg = "#fffbeb"; $_hc_recIcon = "fa-hourglass-half"; }
+    if ($_hc_promedioRecogida <= 7)      { $_hc_recColor = "#16a34a"; $_hc_recBg = "#f0fdf4"; $_hc_recIcon = "fa-bolt"; }
+    elseif ($_hc_promedioRecogida <= 14)  { $_hc_recColor = "#2563eb"; $_hc_recBg = "#eff6ff"; $_hc_recIcon = "fa-clock"; }
+    elseif ($_hc_promedioRecogida <= 30) { $_hc_recColor = "#d97706"; $_hc_recBg = "#fffbeb"; $_hc_recIcon = "fa-hourglass-half"; }
     else                                 { $_hc_recColor = "#dc2626"; $_hc_recBg = "#fef2f2"; $_hc_recIcon = "fa-hourglass-end"; }
 }
 
