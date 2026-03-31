@@ -446,7 +446,7 @@ function _egsEstadoClass($estado) {
 
 	<section class="content">
 
-		<!-- ==================== FILA 1: CLIENTE (izq) + IMÁGENES (der) ==================== -->
+		<!-- ==================== FILA 1: CLIENTE + FICHA TÉCNICA (izq) + IMÁGENES + ANÁLISIS (der) ==================== -->
 		<div class="row">
 
 			<div class="col-lg-5 col-xs-12">
@@ -648,82 +648,6 @@ function _egsEstadoClass($estado) {
 					}
 				}
 				?>
-				<div class="egs-section">
-					<div class="egs-title-bar"><i class="fa-solid fa-chart-line"></i> Análisis del cliente <?php echo $_csBadges; ?></div>
-					<div class="egs-body">
-						<?php if ($_cs['es_nuevo']): ?>
-						<div class="egs-rec-box" style="border-left-color:#8b5cf6;margin-bottom:14px">
-							<div class="egs-rec-title"><i class="fas fa-seedling" style="color:#8b5cf6"></i> Cliente nuevo</div>
-							<p class="egs-rec-text">Este cliente tiene pocas órdenes registradas (<?php echo $_cs['total_ordenes']; ?>). Aún no hay suficientes datos para calcular probabilidades confiables.</p>
-						</div>
-						<?php endif; ?>
-
-						<div class="egs-analytics-grid">
-							<!-- Probabilidad de cancelación -->
-							<div class="egs-stat-card">
-								<?php if ($_pcVal !== null): ?>
-									<div class="egs-stat-value" style="color:<?php echo $_pcColor; ?>"><?php echo $_pcVal; ?>%</div>
-									<div class="egs-stat-label">Probabilidad de cancelación</div>
-									<div class="egs-progress-bar"><div class="egs-progress-fill" style="width:<?php echo $_pcVal; ?>%;background:<?php echo $_pcColor; ?>"></div></div>
-									<div class="egs-stat-sub"><?php echo $_cs['canceladas']; ?> canceladas de <?php echo $_cs['resueltas']; ?> resueltas</div>
-								<?php else: ?>
-									<div class="egs-stat-value" style="color:#94a3b8">—</div>
-									<div class="egs-stat-label">Probabilidad de cancelación</div>
-									<div class="egs-stat-sub">Sin datos suficientes</div>
-								<?php endif; ?>
-							</div>
-
-							<!-- Tiempo estimado de recolección -->
-							<div class="egs-stat-card">
-								<?php if ($_rdVal !== null): ?>
-									<div class="egs-stat-value" style="color:<?php echo $_rdColor; ?>"><i class="fas <?php echo $_rdIcon; ?>" style="font-size:18px;vertical-align:middle;margin-right:4px"></i>~<?php echo $_rdVal; ?> días</div>
-									<div class="egs-stat-label">Tiempo estimado de recolección</div>
-									<div class="egs-progress-bar"><div class="egs-progress-fill" style="width:<?php echo min($_rdVal / 45 * 100, 100); ?>%;background:<?php echo $_rdColor; ?>"></div></div>
-									<div class="egs-stat-sub"><?php echo $_rdTag; ?></div>
-								<?php else: ?>
-									<div class="egs-stat-value" style="color:#94a3b8">—</div>
-									<div class="egs-stat-label">Tiempo estimado de recolección</div>
-									<div class="egs-stat-sub">Sin datos suficientes</div>
-								<?php endif; ?>
-							</div>
-						</div>
-
-						<!-- Calificación de entregas -->
-						<?php if ($_ceVal !== null): ?>
-						<div class="egs-analytics-grid" style="grid-template-columns:1fr">
-							<div class="egs-stat-card" style="text-align:left;display:flex;align-items:center;gap:16px">
-								<div style="min-width:50px;text-align:center">
-									<i class="fas <?php echo $_ceIcon; ?>" style="font-size:28px;color:<?php echo $_ceColor; ?>"></i>
-								</div>
-								<div style="flex:1">
-									<div style="font-size:18px;font-weight:800;color:<?php echo $_ceColor; ?>"><?php echo $_ceVal; ?>% — <?php echo $_ceLabel; ?></div>
-									<div class="egs-stat-label" style="margin-top:2px">Calificación de entregas</div>
-									<div class="egs-progress-bar" style="margin-top:6px"><div class="egs-progress-fill" style="width:<?php echo $_ceVal; ?>%;background:<?php echo $_ceColor; ?>"></div></div>
-									<div class="egs-stat-sub"><?php echo $_cs['entregadas']; ?> entregadas de <?php echo $_cs['resueltas']; ?> resueltas (<?php echo $_cs['total_ordenes']; ?> totales)</div>
-								</div>
-							</div>
-						</div>
-						<?php endif; ?>
-
-						<!-- Recomendaciones por perfil -->
-						<?php if (!empty($_recs)): ?>
-						<div class="egs-rec-box">
-							<div class="egs-rec-title"><i class="fas fa-lightbulb" style="color:#6366f1"></i> Recomendaciones para <?php echo htmlspecialchars(ucfirst($_perfil)); ?></div>
-							<?php foreach ($_recs as $_r): ?>
-							<p class="egs-rec-text"><?php echo $_r; ?></p>
-							<?php endforeach; ?>
-						</div>
-						<?php endif; ?>
-
-						<!-- Cómo se calcula -->
-						<div class="egs-calc-summary">
-							<i class="fas fa-calculator"></i> <strong>¿Cómo se calcula?</strong><br>
-							<i class="fas fa-angle-right"></i> <strong>Prob. de cancelación:</strong> canceladas ÷ (entregadas + canceladas) × 100<br>
-							<i class="fas fa-angle-right"></i> <strong>Tiempo de recolección:</strong> promedio de días entre "Terminada" y "Entregado" en órdenes anteriores<br>
-							<i class="fas fa-angle-right"></i> <strong>Calificación:</strong> entregadas ÷ (entregadas + canceladas) × 100
-						</div>
-					</div>
-				</div>
 
 				<!-- FICHA TÉCNICA -->
 				<div class="egs-section">
@@ -832,6 +756,84 @@ function _egsEstadoClass($estado) {
 							<img src="vistas/img/default/default.png" alt="Sin imagen" style="width:100%;height:300px;object-fit:contain;display:block" loading="lazy">
 						</div>
 						<?php endif; ?>
+					</div>
+				</div>
+
+				<!-- ANÁLISIS DEL CLIENTE -->
+				<div class="egs-section">
+					<div class="egs-title-bar"><i class="fa-solid fa-chart-line"></i> Análisis del cliente <?php echo $_csBadges; ?></div>
+					<div class="egs-body">
+						<?php if ($_cs['es_nuevo']): ?>
+						<div class="egs-rec-box" style="border-left-color:#8b5cf6;margin-bottom:14px">
+							<div class="egs-rec-title"><i class="fas fa-seedling" style="color:#8b5cf6"></i> Cliente nuevo</div>
+							<p class="egs-rec-text">Este cliente tiene pocas órdenes registradas (<?php echo $_cs['total_ordenes']; ?>). Aún no hay suficientes datos para calcular probabilidades confiables.</p>
+						</div>
+						<?php endif; ?>
+
+						<div class="egs-analytics-grid">
+							<!-- Probabilidad de cancelación -->
+							<div class="egs-stat-card">
+								<?php if ($_pcVal !== null): ?>
+									<div class="egs-stat-value" style="color:<?php echo $_pcColor; ?>"><?php echo $_pcVal; ?>%</div>
+									<div class="egs-stat-label">Probabilidad de cancelación</div>
+									<div class="egs-progress-bar"><div class="egs-progress-fill" style="width:<?php echo $_pcVal; ?>%;background:<?php echo $_pcColor; ?>"></div></div>
+									<div class="egs-stat-sub"><?php echo $_cs['canceladas']; ?> canceladas de <?php echo $_cs['resueltas']; ?> resueltas</div>
+								<?php else: ?>
+									<div class="egs-stat-value" style="color:#94a3b8">—</div>
+									<div class="egs-stat-label">Probabilidad de cancelación</div>
+									<div class="egs-stat-sub">Sin datos suficientes</div>
+								<?php endif; ?>
+							</div>
+
+							<!-- Tiempo estimado de recolección -->
+							<div class="egs-stat-card">
+								<?php if ($_rdVal !== null): ?>
+									<div class="egs-stat-value" style="color:<?php echo $_rdColor; ?>"><i class="fas <?php echo $_rdIcon; ?>" style="font-size:18px;vertical-align:middle;margin-right:4px"></i>~<?php echo $_rdVal; ?> días</div>
+									<div class="egs-stat-label">Tiempo estimado de recolección</div>
+									<div class="egs-progress-bar"><div class="egs-progress-fill" style="width:<?php echo min($_rdVal / 45 * 100, 100); ?>%;background:<?php echo $_rdColor; ?>"></div></div>
+									<div class="egs-stat-sub"><?php echo $_rdTag; ?></div>
+								<?php else: ?>
+									<div class="egs-stat-value" style="color:#94a3b8">—</div>
+									<div class="egs-stat-label">Tiempo estimado de recolección</div>
+									<div class="egs-stat-sub">Sin datos suficientes</div>
+								<?php endif; ?>
+							</div>
+						</div>
+
+						<!-- Calificación de entregas -->
+						<?php if ($_ceVal !== null): ?>
+						<div class="egs-analytics-grid" style="grid-template-columns:1fr">
+							<div class="egs-stat-card" style="text-align:left;display:flex;align-items:center;gap:16px">
+								<div style="min-width:50px;text-align:center">
+									<i class="fas <?php echo $_ceIcon; ?>" style="font-size:28px;color:<?php echo $_ceColor; ?>"></i>
+								</div>
+								<div style="flex:1">
+									<div style="font-size:18px;font-weight:800;color:<?php echo $_ceColor; ?>"><?php echo $_ceVal; ?>% — <?php echo $_ceLabel; ?></div>
+									<div class="egs-stat-label" style="margin-top:2px">Calificación de entregas</div>
+									<div class="egs-progress-bar" style="margin-top:6px"><div class="egs-progress-fill" style="width:<?php echo $_ceVal; ?>%;background:<?php echo $_ceColor; ?>"></div></div>
+									<div class="egs-stat-sub"><?php echo $_cs['entregadas']; ?> entregadas de <?php echo $_cs['resueltas']; ?> resueltas (<?php echo $_cs['total_ordenes']; ?> totales)</div>
+								</div>
+							</div>
+						</div>
+						<?php endif; ?>
+
+						<!-- Recomendaciones por perfil -->
+						<?php if (!empty($_recs)): ?>
+						<div class="egs-rec-box">
+							<div class="egs-rec-title"><i class="fas fa-lightbulb" style="color:#6366f1"></i> Recomendaciones para <?php echo htmlspecialchars(ucfirst($_perfil)); ?></div>
+							<?php foreach ($_recs as $_r): ?>
+							<p class="egs-rec-text"><?php echo $_r; ?></p>
+							<?php endforeach; ?>
+						</div>
+						<?php endif; ?>
+
+						<!-- Cómo se calcula -->
+						<div class="egs-calc-summary">
+							<i class="fas fa-calculator"></i> <strong>¿Cómo se calcula?</strong><br>
+							<i class="fas fa-angle-right"></i> <strong>Prob. de cancelación:</strong> canceladas ÷ (entregadas + canceladas) × 100<br>
+							<i class="fas fa-angle-right"></i> <strong>Tiempo de recolección:</strong> promedio de días entre "Terminada" y "Entregado" en órdenes anteriores<br>
+							<i class="fas fa-angle-right"></i> <strong>Calificación:</strong> entregadas ÷ (entregadas + canceladas) × 100
+						</div>
 					</div>
 				</div>
 			</div>
