@@ -131,28 +131,9 @@ class TablaClientes{
 
 			/* ══════════════════════════════════════════
 			   COLUMNA CLASIFICACIÓN
-			   Etiqueta + Órdenes + Antigüedad
+			   Órdenes + Calificación + Antigüedad
 			══════════════════════════════════════════ */
-			$etiqueta = isset($clientes[$i]["etiqueta"]) ? $clientes[$i]["etiqueta"] : "";
 			$fecha    = $clientes[$i]["fecha"];
-
-			// Auto-asignar "Nuevo" solo si fue registrado en los últimos 6 meses
-			if($etiqueta === "Nuevo" || $etiqueta === ""){
-				if($fecha){
-					try {
-						$diasReg = (new DateTime())->diff(new DateTime($fecha))->days;
-						$etiqueta = ($diasReg <= 180) ? "Nuevo" : "Frecuente";
-					} catch(Exception $e){ $etiqueta = "Frecuente"; }
-				} else {
-					$etiqueta = "Frecuente";
-				}
-			}
-			// Si tenía "Problematico", reclasificar como "Frecuente" (ahora se evalúa con calificación)
-			if($etiqueta === "Problematico") { $etiqueta = "Frecuente"; }
-
-			// Colores de etiqueta
-			$etiqColor = "#1a5276"; $etiqBg = "#d6eaf8"; // Nuevo
-			if($etiqueta === "Frecuente") { $etiqColor = "#1e8449"; $etiqBg = "#d5f5e3"; }
 
 			// Asegurar que sea entero
 			$totalOrdenes = intval($totalOrdenes);
@@ -183,8 +164,6 @@ class TablaClientes{
 			}
 
 			$clasificacion  = "<div style='display:flex;flex-direction:column;gap:5px;align-items:flex-start;'>";
-			$clasificacion .= "<span style='display:inline-block;padding:3px 10px;border-radius:20px;"
-			                . "font-size:12px;background:{$etiqBg};color:{$etiqColor};font-weight:700;'>{$etiqueta}</span>";
 			$clasificacion .= "<span style='display:inline-flex;align-items:center;gap:4px;padding:2px 9px;"
 			                . "border-radius:20px;font-size:11px;background:{$ordBg};color:{$ordColor};'>"
 			                . "<i class='fas fa-clipboard-list'></i>&nbsp;{$totalOrdenes}&nbsp;{$ordLabel}</span>";

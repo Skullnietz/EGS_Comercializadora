@@ -349,103 +349,109 @@ $(document).ready(function(){
 ══════════════════════════════════════════════════-->
 
 <div id="modalAgregarUsuario" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius:10px;">
+  <div class="modal-dialog" style="max-width:520px">
+    <div class="modal-content" style="border-radius:14px;border:none;box-shadow:0 8px 40px rgba(15,23,42,.18);overflow:hidden">
       <form role="form" method="POST" enctype="multipart/form-data">
 
-        <div class="modal-header" style="border-radius:10px 10px 0 0;background:#138a1e;color:white;">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title"><i class="fas fa-user-plus"></i>&nbsp; Agregar Cliente</h4>
+        <div class="modal-header" style="background:linear-gradient(135deg,#0f1c2e,#1e3d72);border-bottom:none;padding:20px 24px">
+          <button type="button" class="close" data-dismiss="modal" style="color:rgba(255,255,255,.8);opacity:1;text-shadow:none;font-size:20px;font-weight:700">&times;</button>
+          <h4 class="modal-title" style="font-weight:800;font-size:16px;color:#fff;margin:0;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-user-plus" style="font-size:15px;opacity:.85"></i> Agregar Cliente
+          </h4>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">Registrar nuevo cliente en el sistema</div>
         </div>
 
-        <div class="modal-body">
-          <div class="box-body">
+        <div class="modal-body" style="padding:24px">
 
-            <!-- Nombre -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon" style="border-radius:3px;"><i class="fas fa-user"></i></span>
-                <input type="text" class="form-control input-lg nombreCliente namecliente"
-                       name="AgregarNombreCliente" placeholder="Nombre del cliente"
-                       id="nombrecliente" style="border-radius:3px;">
-                <?php echo '<input type="hidden" value="'.$_SESSION["empresa"].'" name="id_empresa">'; ?>
-              </div>
+          <!-- Nombre -->
+          <div class="form-group" style="margin-bottom:16px">
+            <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+              <i class="fas fa-user" style="margin-right:4px;color:#94a3b8"></i> Nombre
+            </label>
+            <input type="text" class="form-control nombreCliente namecliente"
+                   name="AgregarNombreCliente" placeholder="Nombre del cliente"
+                   id="nombrecliente"
+                   style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;transition:border-color .15s,box-shadow .15s">
+            <?php echo '<input type="hidden" value="'.$_SESSION["empresa"].'" name="id_empresa">'; ?>
+            <input type="hidden" name="EtiquetaCliente" value="Nuevo">
+          </div>
+
+          <!-- Correo -->
+          <div class="form-group" style="margin-bottom:16px">
+            <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+              <i class="fas fa-at" style="margin-right:4px;color:#94a3b8"></i> Correo electrónico
+            </label>
+            <div style="position:relative">
+              <input type="text" class="form-control emailverif mailv"
+                     name="AgregarCorreoCliente" placeholder="correo@ejemplo.com"
+                     style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;transition:border-color .15s,box-shadow .15s">
+              <span id="spanmail" style="position:absolute;right:12px;top:50%;transform:translateY(-50%)"></span>
             </div>
+          </div>
 
-            <!-- Correo -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon" style="border-radius:3px;"><i class="fas fa-at"></i></span>
-                <input type="text" style="border-radius:3px;"
-                       class="form-control input-lg emailverif mailv"
-                       name="AgregarCorreoCliente" placeholder="Correo del cliente">
-                <span id="spanmail"></span>
-              </div>
-            </div>
-
+          <div style="display:flex;gap:12px">
             <!-- WhatsApp -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon" style="border-radius:3px;"><i class="fab fa-whatsapp"></i></span>
-                <input type="tel" style="border-radius:3px;"
-                       class="form-control input-lg telwhatsapp numerocliente1"
-                       id="whatsapp" name="telefonoDosCliente" placeholder="Número de WhatsApp" required>
-                <span id="spaninputnum1"></span>
+            <div class="form-group" style="margin-bottom:16px;flex:1">
+              <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+                <i class="fab fa-whatsapp" style="margin-right:4px;color:#25d366"></i> WhatsApp
+              </label>
+              <div style="position:relative">
+                <input type="tel" class="form-control telwhatsapp numerocliente1"
+                       id="whatsapp" name="telefonoDosCliente" placeholder="10 dígitos" required
+                       style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;transition:border-color .15s,box-shadow .15s">
+                <span id="spaninputnum1" style="position:absolute;right:12px;top:50%;transform:translateY(-50%)"></span>
               </div>
             </div>
 
             <!-- Teléfono -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon" style="border-radius:3px;"><i class="fas fa-phone-alt"></i></span>
-                <input type="tel" style="border-radius:3px;"
-                       class="form-control input-lg"
-                       id="telefono" name="telefonoUnoCliente" placeholder="Número telefónico" required>
-              </div>
+            <div class="form-group" style="margin-bottom:16px;flex:1">
+              <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+                <i class="fas fa-phone-alt" style="margin-right:4px;color:#94a3b8"></i> Teléfono
+              </label>
+              <input type="tel" class="form-control"
+                     id="telefono" name="telefonoUnoCliente" placeholder="10 dígitos" required
+                     style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;transition:border-color .15s,box-shadow .15s">
             </div>
+          </div>
 
-            <!-- Etiqueta -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-tag"></i></span>
-                <select style="border-radius:3px;" class="form-control input-lg" name="EtiquetaCliente">
-                  <option value="Nuevo">Nuevo</option>
-                  <option value="Frecuente">Frecuente</option>
-                </select>
-              </div>
-            </div>
+          <!-- Asesor -->
+          <div class="form-group" style="margin-bottom:16px">
+            <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+              <i class="fas fa-headphones" style="margin-right:4px;color:#94a3b8"></i> Asesor
+            </label>
+            <select class="form-control" name="AgreagrAsesorAlCliente"
+                    style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;height:auto">
+              <option value="">Seleccionar Asesor</option>
+              <?php
+                $item  = null;
+                $valor = null;
+                $Asesores = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
+                foreach($Asesores as $key => $value){
+                  echo '<option value="'.$value["id"].'">'.$value["nombre"].'</option>';
+                }
+              ?>
+            </select>
+          </div>
 
-            <!-- Asesor -->
-            <div class="input-group">
-              <span class="input-group-addon"><i class="fas fa-headphones"></i></span>
-              <select style="border-radius:3px;" class="form-control input-lg" name="AgreagrAsesorAlCliente">
-                <option value="">Seleccionar Asesor</option>
-                <?php
-                  $item  = null;
-                  $valor = null;
-                  $Asesores = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-                  foreach($Asesores as $key => $value){
-                    echo '<option value="'.$value["id"].'">'.$value["nombre"].'</option>';
-                  }
-                ?>
-              </select>
-            </div>
-
-            <hr>
-            <div style="text-align:center;padding:10px 0;">
-              <p style="font-weight:600;font-size:15px;color:#555;margin-bottom:12px;">Verificar contacto</p>
+          <!-- Verificar contacto -->
+          <div style="text-align:center;padding:14px 0 4px;border-top:1px solid #f1f5f9;margin-top:8px">
+            <p style="font-weight:700;font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Verificar contacto</p>
+            <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
               <span id="spanbuttonw"></span>
-              <br><br>
               <span id="spanbuttone"></span>
             </div>
-
           </div>
+
         </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Salir</button>
-          <button type="submit" class="btn btn-success" id="guardar">
-            <i class="fas fa-save"></i> Agregar Cliente
+        <div class="modal-footer" style="border-top:1px solid #f1f5f9;padding:14px 24px;display:flex;justify-content:space-between;align-items:center">
+          <button type="button" class="btn" data-dismiss="modal"
+                  style="background:#f1f5f9;color:#64748b;border:none;border-radius:8px;padding:8px 18px;font-weight:600;font-size:13px">
+            Cancelar
+          </button>
+          <button type="submit" class="btn" id="guardar"
+                  style="background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;border:none;border-radius:8px;padding:8px 22px;font-weight:700;font-size:13px;box-shadow:0 2px 8px rgba(99,102,241,.3);transition:box-shadow .15s">
+            <i class="fas fa-save" style="margin-right:4px"></i> Agregar Cliente
           </button>
         </div>
 
@@ -465,97 +471,98 @@ $(document).ready(function(){
 ══════════════════════════════════════════════════-->
 
 <div id="btnEditarCliente" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius:10px;">
+  <div class="modal-dialog" style="max-width:520px">
+    <div class="modal-content" style="border-radius:14px;border:none;box-shadow:0 8px 40px rgba(15,23,42,.18);overflow:hidden">
       <form role="form" method="post" enctype="multipart/form-data">
 
-        <div class="modal-header" style="border-radius:10px 10px 0 0;background:#138a1e;color:white;">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title"><i class="fas fa-user-edit"></i>&nbsp; Editar Cliente</h4>
+        <div class="modal-header" style="background:linear-gradient(135deg,#0f1c2e,#1e3d72);border-bottom:none;padding:20px 24px">
+          <button type="button" class="close" data-dismiss="modal" style="color:rgba(255,255,255,.8);opacity:1;text-shadow:none;font-size:20px;font-weight:700">&times;</button>
+          <h4 class="modal-title" style="font-weight:800;font-size:16px;color:#fff;margin:0;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-user-edit" style="font-size:15px;opacity:.85"></i> Editar Cliente
+          </h4>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">Modificar datos del cliente</div>
         </div>
 
-        <div class="modal-body">
-          <div class="box-body">
+        <div class="modal-body" style="padding:24px">
 
-            <!-- Nombre -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon" style="border-radius:3px;"><i class="fas fa-user"></i></span>
-                <input type="text" class="form-control input-lg"
-                       name="editarNombreDelCliente" id="editarNombreDelCliente"
-                       placeholder="Nombre del cliente" style="border-radius:3px;">
-                <input type="hidden" id="idCliente" name="idCliente">
-              </div>
-            </div>
+          <!-- Nombre -->
+          <div class="form-group" style="margin-bottom:16px">
+            <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+              <i class="fas fa-user" style="margin-right:4px;color:#94a3b8"></i> Nombre
+            </label>
+            <input type="text" class="form-control"
+                   name="editarNombreDelCliente" id="editarNombreDelCliente"
+                   placeholder="Nombre del cliente"
+                   style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;transition:border-color .15s,box-shadow .15s">
+            <input type="hidden" id="idCliente" name="idCliente">
+          </div>
 
-            <!-- Email -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon" style="border-radius:3px;"><i class="fas fa-envelope"></i></span>
-                <input type="email" style="border-radius:3px;" class="form-control input-lg"
-                       name="EditarCorreoCliente" id="EditarCorreoCliente"
-                       placeholder="Correo del cliente" required>
-              </div>
-            </div>
+          <!-- Email -->
+          <div class="form-group" style="margin-bottom:16px">
+            <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+              <i class="fas fa-envelope" style="margin-right:4px;color:#94a3b8"></i> Correo electrónico
+            </label>
+            <input type="email" class="form-control"
+                   name="EditarCorreoCliente" id="EditarCorreoCliente"
+                   placeholder="correo@ejemplo.com" required
+                   style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;transition:border-color .15s,box-shadow .15s">
+          </div>
 
+          <div style="display:flex;gap:12px">
             <!-- Teléfono -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon" style="border-radius:3px;"><i class="fas fa-phone-alt"></i></span>
-                <input type="tel" style="border-radius:3px;" class="form-control input-lg"
-                       name="EditarNumeroDelCliente" id="EditarNumeroDelCliente"
-                       placeholder="Número telefónico" required>
-              </div>
+            <div class="form-group" style="margin-bottom:16px;flex:1">
+              <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+                <i class="fas fa-phone-alt" style="margin-right:4px;color:#94a3b8"></i> Teléfono
+              </label>
+              <input type="tel" class="form-control"
+                     name="EditarNumeroDelCliente" id="EditarNumeroDelCliente"
+                     placeholder="10 dígitos" required
+                     style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;transition:border-color .15s,box-shadow .15s">
             </div>
 
             <!-- WhatsApp -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon" style="border-radius:3px;"><i class="fab fa-whatsapp"></i></span>
-                <input type="tel" style="border-radius:3px;" class="form-control input-lg"
-                       name="EditarSegundoNumeroDeTel" id="EditarSegundoNumeroDeTel"
-                       placeholder="Número de WhatsApp" required>
-              </div>
+            <div class="form-group" style="margin-bottom:16px;flex:1">
+              <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+                <i class="fab fa-whatsapp" style="margin-right:4px;color:#25d366"></i> WhatsApp
+              </label>
+              <input type="tel" class="form-control"
+                     name="EditarSegundoNumeroDeTel" id="EditarSegundoNumeroDeTel"
+                     placeholder="10 dígitos" required
+                     style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;transition:border-color .15s,box-shadow .15s">
             </div>
-
-            <!-- Etiqueta -->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-tag"></i></span>
-                <select style="border-radius:3px;" class="form-control input-lg EditarEtiquetaDelCLiente"
-                        name="EditarEtiquetaDelCLiente">
-                  <option class="MostrarEtiquetaDelCliente"></option>
-                  <option value="Nuevo">Nuevo</option>
-                  <option value="Frecuente">Frecuente</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Asesor -->
-            <div class="input-group">
-              <span class="input-group-addon"><i class="fas fa-headphones"></i></span>
-              <select style="border-radius:3px;" class="form-control input-lg"
-                      name="EditarAsesorDelCliente"
-                      <?php if($_SESSION["perfil"] == "vendedor"){ echo 'disabled'; } ?>>
-                <option value="" id="EditarAsesorDelCliente">Seleccionar Asesor</option>
-                <?php
-                  $item  = null;
-                  $valor = null;
-                  $Asesores = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-                  foreach($Asesores as $key => $value){
-                    echo '<option value="'.$value["id"].'">'.$value["nombre"].'</option>';
-                  }
-                ?>
-              </select>
-            </div>
-
           </div>
+
+          <!-- Asesor -->
+          <div class="form-group" style="margin-bottom:0">
+            <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block">
+              <i class="fas fa-headphones" style="margin-right:4px;color:#94a3b8"></i> Asesor
+            </label>
+            <select class="form-control"
+                    name="EditarAsesorDelCliente"
+                    style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 14px;font-size:14px;height:auto"
+                    <?php if($_SESSION["perfil"] == "vendedor"){ echo 'disabled'; } ?>>
+              <option value="" id="EditarAsesorDelCliente">Seleccionar Asesor</option>
+              <?php
+                $item  = null;
+                $valor = null;
+                $Asesores = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
+                foreach($Asesores as $key => $value){
+                  echo '<option value="'.$value["id"].'">'.$value["nombre"].'</option>';
+                }
+              ?>
+            </select>
+          </div>
+
         </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Salir</button>
-          <button type="submit" class="btn btn-success">
-            <i class="fas fa-save"></i> Guardar Cambios
+        <div class="modal-footer" style="border-top:1px solid #f1f5f9;padding:14px 24px;display:flex;justify-content:space-between;align-items:center">
+          <button type="button" class="btn" data-dismiss="modal"
+                  style="background:#f1f5f9;color:#64748b;border:none;border-radius:8px;padding:8px 18px;font-weight:600;font-size:13px">
+            Cancelar
+          </button>
+          <button type="submit" class="btn"
+                  style="background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;border:none;border-radius:8px;padding:8px 22px;font-weight:700;font-size:13px;box-shadow:0 2px 8px rgba(99,102,241,.3);transition:box-shadow .15s">
+            <i class="fas fa-save" style="margin-right:4px"></i> Guardar Cambios
           </button>
         </div>
 
