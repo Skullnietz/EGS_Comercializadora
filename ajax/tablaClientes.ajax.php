@@ -4,6 +4,7 @@ require_once "../controladores/clientes.controlador.php";
 require_once "../modelos/clientes.modelo.php";
 require_once "../controladores/controlador.asesore.php";
 require_once "../modelos/modelo.asesores.php";
+require_once "../config/clienteBadges.helper.php";
 
 class TablaClientes{
 
@@ -244,9 +245,11 @@ class TablaClientes{
 			══════════════════════════════════════════ */
 			$fechaDisplay = ($fecha) ? date("d/m/Y", strtotime($fecha)) : "—";
 
+			$bh = ClienteBadgesHelper::getInstance();
+
 			$data[] = [
 				($i + 1),
-				$clientes[$i]["nombre"],
+				$bh->renderWithName($clientes[$i]["nombre"], $idCliente),
 				$nombre_asesor,
 				$contacto,
 				$clasificacion,

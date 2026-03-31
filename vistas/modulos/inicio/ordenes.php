@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/../../../config/clienteBadges.helper.php";
 
 //if($_SESSION["perfil"] != "administrador"){
 
@@ -207,7 +208,7 @@ if ($_SESSION["perfil"] == "administrador") {
 
                   $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
 
-                  $NombreUsuario = $usuario["nombre"];
+                  $NombreUsuario = ClienteBadgesHelper::getInstance()->renderWithName($usuario["nombre"], intval($valueOrdenes["id_usuario"]));
 
 
                   $InfoOrdenes = "<button class='btn btn-warning btnVerInfoOrden' idOrden='".$valueOrdenes["id"]."' cliente='".$valueOrdenes["id_usuario"]."'  tecnico='".$valueOrdenes["id_tecnico"]."' asesor='".$valueOrdenes["id_Asesor"]."' empresa='".$valueOrdenes["id_empresa"]."' pedido='".$valueOrdenes["id_pedido"]."' data-toggle='modal'><i class='fa fa-edit'></button>";
@@ -330,7 +331,7 @@ if ($_SESSION["perfil"] == "vendedor") {
 
                   $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
 
-                  $NombreUsuario = $usuario["nombre"];
+                  $NombreUsuario = ClienteBadgesHelper::getInstance()->renderWithName($usuario["nombre"], intval($valueOrdenes["id_usuario"]));
 
 
                   $InfoOrdenes = "<button class='btn btn-warning btnVerInfoOrden' idOrden='".$valueOrdenes["id"]."' cliente='".$valueOrdenes["id_usuario"]."'  tecnico='".$valueOrdenes["id_tecnico"]."' asesor='".$valueOrdenes["id_Asesor"]."' empresa='".$valueOrdenes["id_empresa"]."' pedido='".$valueOrdenes["id_pedido"]."' data-toggle='modal'><i class='fa fa-edit'></button>";
@@ -453,7 +454,7 @@ if ($_SESSION["perfil"] == "tecnico") {
 
                   $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
 
-                  $NombreUsuario = $usuario["nombre"];
+                  $NombreUsuario = ClienteBadgesHelper::getInstance()->renderWithName($usuario["nombre"], intval($valueOrdeneDelTecnico["id_usuario"]));
 
 
                   $InfoOrdenes = "<button class='btn btn-warning btnVerInfoOrden' idOrden='".$valueOrdeneDelTecnico["id"]."' cliente='".$valueOrdeneDelTecnico["id_usuario"]."'  tecnico='".$valueOrdeneDelTecnico["id_tecnico"]."' asesor='".$valueOrdeneDelTecnico["id_Asesor"]."' empresa='".$valueOrdeneDelTecnico["id_empresa"]."' pedido='".$valueOrdeneDelTecnico["id_pedido"]."' data-toggle='modal'><i class='fa fa-edit'></button>";

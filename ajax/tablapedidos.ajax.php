@@ -10,6 +10,7 @@ require_once "../controladores/pedidos.controlador.php";
 require_once "../modelos/pedidos.modelo.php";
 require_once "../controladores/clientes.controlador.php";
 require_once "../modelos/clientes.modelo.php";
+require_once "../config/clienteBadges.helper.php";
 require_once "../controladores/productos.controlador.php";
 require_once "../modelos/productos.modelo.php";
 require_once "../controladores/productos.controlador.php";
@@ -90,6 +91,8 @@ class TablaOrdenes{
       $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
 
       $NombreUsuario = $usuario["nombre"];
+      $__bh = ClienteBadgesHelper::getInstance();
+      $NombreUsuarioConBadge = $__bh->renderWithName($NombreUsuario, intval($pedidos[$i]["id_cliente"]));
 
 	  // Usar campos solicitados por negocio: fechaDePedido y fechaEntrega
 	  $fechaDePedidoRaw = isset($pedidos[$i]["fechaDePedido"]) ? trim((string)$pedidos[$i]["fechaDePedido"]) : '';
@@ -107,6 +110,8 @@ class TablaOrdenes{
 		DEVOLVER DATOS JSON MEJORADO
 		=============================================*/
 
+		$__NomUsuBadgeEscaped = str_replace(["'", "\n", "\r"], ["\\'", "", ""], $NombreUsuarioConBadge);
+
 		$datosJson	 .= '[
 
 			      		"'.($i+1).'",
@@ -115,7 +120,7 @@ class TablaOrdenes{
 
 			      		"<b>'.$pedidos[$i]["id"].'</b>",
 
-			      		"'.$NombreUsuario.'",
+			      		"'.$__NomUsuBadgeEscaped.'",
 
 			      		"'.$estadoHtml.'",
 			      		

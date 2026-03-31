@@ -752,13 +752,7 @@ function _ordGetBadgeClass($estadoText) {
 
                 }
 
-                // ── Cargar badges de calificación de clientes (bulk) ──
-                $_cli_ordenesMap_tbl = []; $_cli_estadoMap_tbl = []; $_cli_recogidaMap_tbl = []; $_cli_fechaRegMap_tbl = [];
-                try { $_cli_ordenesMap_tbl = ControladorClientes::ctrContarOrdenesClientesBulk(); } catch(Exception $e) {}
-                try { $_cli_estadoMap_tbl = ControladorClientes::ctrContarOrdenesEstadoBulk(); } catch(Exception $e) {}
-                try { $_cli_recogidaMap_tbl = ControladorClientes::ctrPromedioRecogidaBulk(); } catch(Exception $e) {}
-                try { $_cli_fechaRegMap_tbl = ControladorClientes::ctrFechaRegistroClientesBulk(); } catch(Exception $e) {}
-                $_seisAntes = date('Y-m-d H:i:s', strtotime('-6 months'));
+                require_once __DIR__ . "/../../config/clienteBadges.helper.php";
 
                 foreach ($ordenes as $key => $valueOrdenes) {
 
@@ -828,35 +822,7 @@ function _ordGetBadgeClass($estadoText) {
 
 
 
-                  $NombreUsuario = $usuario["nombre"];
-
-                  // ── Badges de calificación del cliente ──
-                  $__cId = intval($valueOrdenes["id_usuario"]);
-                  $__badgeHtml = '';
-                  $__cOrd = isset($_cli_ordenesMap_tbl[$__cId]) ? $_cli_ordenesMap_tbl[$__cId] : 0;
-                  $__cEnt = isset($_cli_estadoMap_tbl[$__cId]) ? $_cli_estadoMap_tbl[$__cId]["entregadas"] : 0;
-                  $__cCan = isset($_cli_estadoMap_tbl[$__cId]) ? $_cli_estadoMap_tbl[$__cId]["canceladas"] : 0;
-                  $__esNuevo = ($__cOrd < 3 && isset($_cli_fechaRegMap_tbl[$__cId]) && $_cli_fechaRegMap_tbl[$__cId] >= $_seisAntes);
-                  if ($__esNuevo) {
-                    $__badgeHtml .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#8b5cf6;margin-left:4px' title='Cliente nuevo ({$__cOrd} órdenes)'><i class='fas fa-seedling' style='font-size:10px;color:#fff'></i></span>";
-                  } elseif (($__cEnt + $__cCan) > 0) {
-                    $__r = $__cEnt / ($__cEnt + $__cCan) * 100;
-                    if ($__r >= 90)      { $__ico='fa-star';      $__fg='#fff'; $__bg='#16a34a'; }
-                    elseif ($__r >= 70)  { $__ico='fa-thumbs-up'; $__fg='#fff'; $__bg='#2563eb'; }
-                    elseif ($__r >= 50)  { $__ico='fa-minus-circle';$__fg='#fff';$__bg='#d97706'; }
-                    else                 { $__ico='fa-thumbs-down';$__fg='#fff';$__bg='#dc2626'; }
-                    $__badgeHtml .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:{$__bg};margin-left:4px' title='Calif: ".round($__r)."%'><i class='fas {$__ico}' style='font-size:10px;color:{$__fg}'></i></span>";
-                  }
-                  if (isset($_cli_recogidaMap_tbl[$__cId])) {
-                    $__d = $_cli_recogidaMap_tbl[$__cId];
-                    if ($__d <= 7)       { $__ico='fa-bolt';       $__fg='#fff'; $__bg='#16a34a'; }
-                    elseif ($__d <= 14)  { $__ico='fa-clock';      $__fg='#fff'; $__bg='#2563eb'; }
-                    elseif ($__d <= 30)  { $__ico='fa-hourglass-half';$__fg='#fff';$__bg='#d97706'; }
-                    else                 { $__ico='fa-hourglass-end';$__fg='#fff';$__bg='#dc2626'; }
-                    $__badgeHtml .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:{$__bg};margin-left:3px' title='Recoge: ~{$__d} días'><i class='fas {$__ico}' style='font-size:10px;color:{$__fg}'></i></span>";
-                  }
-                  $__nombre = htmlspecialchars($usuario["nombre"]);
-                  $NombreUsuario = "<span style='display:inline-flex;align-items:center;max-width:100%;white-space:nowrap'><span style='overflow:hidden;text-overflow:ellipsis;max-width:120px;display:inline-block;vertical-align:middle' title='" . $__nombre . "'>" . $__nombre . "</span>" . $__badgeHtml . "</span>";
+                  $NombreUsuario = ClienteBadgesHelper::getInstance()->renderWithName($usuario["nombre"], intval($valueOrdenes["id_usuario"]));
 
 
                   /*LINK DE IMPRESION DE EDITAR ORDEN https://backend.comercializadoraegs.com/index.php?ruta=infoOrden&idOrden=5240&empresa=1&asesor=9&cliente=2726&tecnico=4&pedido=0*/

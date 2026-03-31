@@ -28,6 +28,8 @@ function _reportGetBadgeClass($estadoText) {
     return 'badge-otro';
 }
 
+require_once __DIR__ . "/../../config/clienteBadges.helper.php";
+
 /* ── Obtener datos (solo si hay rango de fecha o se pidió mostrar todas) ── */
 $tieneRango    = isset($_GET["fechaInicial"]);
 $mostrarTodas  = isset($_GET["mostrarTodas"]);
@@ -677,7 +679,7 @@ $totalCols    = $isAdmin ? 13 : 11;
             <td><?= htmlspecialchars($NombreEmpresa) ?></td>
             <td><?= htmlspecialchars($NombreAsesor) ?></td>
             <td><?= htmlspecialchars($NombreTecnico) ?></td>
-            <td><?= htmlspecialchars($NombreUsuario) ?></td>
+            <td><?= ClienteBadgesHelper::getInstance()->renderWithName($NombreUsuario, intval($value["id_usuario"])) ?></td>
             <td>
               <span class="badge <?= _reportGetBadgeClass($value["estado"]) ?>">
                 <?= htmlspecialchars($value["estado"]) ?>
