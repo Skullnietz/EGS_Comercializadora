@@ -21,6 +21,11 @@ $_hc_t1clean = preg_replace('/\D/', '', $_hc_tel1);
 $_hc_t2clean = preg_replace('/\D/', '', $_hc_tel2);
 $_hc_t1ok = (strlen($_hc_t1clean) === 10);
 $_hc_t2ok = (strlen($_hc_t2clean) === 10) && ($_hc_t2clean !== $_hc_t1clean);
+$_hc_emailOk = (!empty($_hc_email) && filter_var($_hc_email, FILTER_VALIDATE_EMAIL) !== false);
+
+// Flags para mostrar datos (sin validar formato, solo existencia)
+$_hc_tel1Exists = (!empty($_hc_tel1) && $_hc_tel1 !== "sin Telefono");
+$_hc_tel2Exists = (!empty($_hc_tel2) && $_hc_tel2 !== "sin whatsapp");
 
 // ── Órdenes del cliente ──
 $_hc_ordenes = array();
@@ -132,13 +137,27 @@ if ($_hc_primeraFecha) {
           <div style="font-size:18px;font-weight:800;color:#0f172a;margin-bottom:4px"><?php echo $_hc_nombreCli; ?></div>
           <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#64748b">
             <?php if (!empty($_hc_email)): ?>
-              <span><i class="fa-solid fa-envelope" style="margin-right:4px;color:#94a3b8"></i><?php echo htmlspecialchars($_hc_email); ?></span>
+              <?php if ($_hc_emailOk): ?>
+                <a href="mailto:<?php echo htmlspecialchars($_hc_email); ?>" style="text-decoration:none">
+                  <span style="color:#64748b"><i class="fa-solid fa-envelope" style="margin-right:4px;color:#94a3b8"></i><?php echo htmlspecialchars($_hc_email); ?></span>
+                </a>
+              <?php else: ?>
+                <span style="color:#dc2626"><i class="fa-solid fa-envelope" style="margin-right:4px;color:#dc2626"></i><?php echo htmlspecialchars($_hc_email); ?> <i class="fa-solid fa-triangle-exclamation" style="font-size:10px" title="Correo inválido"></i></span>
+              <?php endif; ?>
             <?php endif; ?>
-            <?php if ($_hc_t1ok): ?>
-              <span><i class="fa-solid fa-phone" style="margin-right:4px;color:#94a3b8"></i><?php echo htmlspecialchars($_hc_tel1); ?></span>
+            <?php if ($_hc_tel1Exists): ?>
+              <?php if ($_hc_t1ok): ?>
+                <span><i class="fa-solid fa-phone" style="margin-right:4px;color:#94a3b8"></i><?php echo htmlspecialchars($_hc_tel1); ?></span>
+              <?php else: ?>
+                <span style="color:#dc2626"><i class="fa-solid fa-phone" style="margin-right:4px;color:#dc2626"></i><?php echo htmlspecialchars($_hc_tel1); ?> <i class="fa-solid fa-triangle-exclamation" style="font-size:10px" title="Teléfono inválido"></i></span>
+              <?php endif; ?>
             <?php endif; ?>
-            <?php if ($_hc_t2ok): ?>
-              <span><i class="fa-solid fa-phone" style="margin-right:4px;color:#94a3b8"></i><?php echo htmlspecialchars($_hc_tel2); ?></span>
+            <?php if ($_hc_tel2Exists): ?>
+              <?php if ($_hc_t2ok): ?>
+                <span><i class="fa-solid fa-phone" style="margin-right:4px;color:#94a3b8"></i><?php echo htmlspecialchars($_hc_tel2); ?></span>
+              <?php else: ?>
+                <span style="color:#dc2626"><i class="fa-solid fa-phone" style="margin-right:4px;color:#dc2626"></i><?php echo htmlspecialchars($_hc_tel2); ?> <i class="fa-solid fa-triangle-exclamation" style="font-size:10px" title="WhatsApp inválido"></i></span>
+              <?php endif; ?>
             <?php endif; ?>
             <?php if (!empty($_hc_antiguedad)): ?>
               <span><i class="fa-solid fa-calendar" style="margin-right:4px;color:#94a3b8"></i>Cliente desde hace <?php echo $_hc_antiguedad; ?></span>

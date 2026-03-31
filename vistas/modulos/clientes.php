@@ -411,7 +411,6 @@ $(document).ready(function(){
                 <select style="border-radius:3px;" class="form-control input-lg" name="EtiquetaCliente">
                   <option value="Nuevo">Nuevo</option>
                   <option value="Frecuente">Frecuente</option>
-                  <option value="Problematico">Problemático</option>
                 </select>
               </div>
             </div>
@@ -528,7 +527,6 @@ $(document).ready(function(){
                   <option class="MostrarEtiquetaDelCliente"></option>
                   <option value="Nuevo">Nuevo</option>
                   <option value="Frecuente">Frecuente</option>
-                  <option value="Problematico">Problemático</option>
                 </select>
               </div>
             </div>

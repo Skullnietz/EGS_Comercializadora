@@ -57,9 +57,18 @@ class TablaClientes{
 			$wa     = trim($clientes[$i]["telefonoDos"]);
 			$correo = trim($clientes[$i]["correo"]);
 
-			$hayTel   = ($tel    && $tel    !== "sin Telefono");
-			$hayWa    = ($wa     && $wa     !== "sin whatsapp");
+			// Validar formato de teléfono (exactamente 10 dígitos numéricos)
+			$telClean = preg_replace('/\D/', '', $tel);
+			$waClean  = preg_replace('/\D/', '', $wa);
+			$telValido  = (strlen($telClean) === 10);
+			$waValido   = (strlen($waClean) === 10);
+
+			$hayTel   = ($tel && $tel !== "sin Telefono");
+			$hayWa    = ($wa  && $wa  !== "sin whatsapp");
 			$hayEmail = ($correo && $correo !== "");
+
+			// Validar formato de correo
+			$emailValido = ($hayEmail && filter_var($correo, FILTER_VALIDATE_EMAIL) !== false);
 
 			/* ══════════════════════════════════════════
 			   COLUMNA CONTACTO
@@ -68,26 +77,50 @@ class TablaClientes{
 			$contacto = "<div style='display:flex;flex-direction:column;gap:5px;min-width:170px;'>";
 
 			if($hayTel){
-				$contacto .= "<span style='display:inline-flex;align-items:center;gap:6px;padding:3px 10px;"
-				           . "background:#eaf4fb;border-radius:20px;font-size:12px;color:#1a5276;white-space:nowrap;'>"
-				           . "<i class='fas fa-phone-alt' style='color:#2980b9;'></i>"
-				           . "<strong>Tel:</strong>&nbsp;" . $tel . "</span>";
+				if($telValido){
+					$contacto .= "<span style='display:inline-flex;align-items:center;gap:6px;padding:3px 10px;"
+					           . "background:#eaf4fb;border-radius:20px;font-size:12px;color:#1a5276;white-space:nowrap;'>"
+					           . "<i class='fas fa-phone-alt' style='color:#2980b9;'></i>"
+					           . "<strong>Tel:</strong>&nbsp;" . htmlspecialchars($tel) . "</span>";
+				} else {
+					$contacto .= "<span style='display:inline-flex;align-items:center;gap:6px;padding:3px 10px;"
+					           . "background:#fef2f2;border-radius:20px;font-size:12px;color:#991b1b;white-space:nowrap;'>"
+					           . "<i class='fas fa-phone-alt' style='color:#dc2626;'></i>"
+					           . "<strong>Tel:</strong>&nbsp;" . htmlspecialchars($tel)
+					           . "&nbsp;<i class='fas fa-exclamation-triangle' style='color:#dc2626;font-size:10px;' title='Formato inválido'></i></span>";
+				}
 			}
 
 			if($hayWa){
-				$contacto .= "<a href='https://api.whatsapp.com/send/?phone=521" . $wa . "' target='_blank' style='text-decoration:none;'>"
-				           . "<span style='display:inline-flex;align-items:center;gap:6px;padding:3px 10px;"
-				           . "background:#e9f7ef;border-radius:20px;font-size:12px;color:#196f3d;white-space:nowrap;'>"
-				           . "<i class='fab fa-whatsapp' style='color:#25d366;'></i>"
-				           . "<strong>WA:</strong>&nbsp;" . $wa . "</span></a>";
+				if($waValido){
+					$contacto .= "<a href='https://api.whatsapp.com/send/?phone=521" . $waClean . "' target='_blank' style='text-decoration:none;'>"
+					           . "<span style='display:inline-flex;align-items:center;gap:6px;padding:3px 10px;"
+					           . "background:#e9f7ef;border-radius:20px;font-size:12px;color:#196f3d;white-space:nowrap;'>"
+					           . "<i class='fab fa-whatsapp' style='color:#25d366;'></i>"
+					           . "<strong>WA:</strong>&nbsp;" . htmlspecialchars($wa) . "</span></a>";
+				} else {
+					$contacto .= "<span style='display:inline-flex;align-items:center;gap:6px;padding:3px 10px;"
+					           . "background:#fef2f2;border-radius:20px;font-size:12px;color:#991b1b;white-space:nowrap;'>"
+					           . "<i class='fab fa-whatsapp' style='color:#dc2626;'></i>"
+					           . "<strong>WA:</strong>&nbsp;" . htmlspecialchars($wa)
+					           . "&nbsp;<i class='fas fa-exclamation-triangle' style='color:#dc2626;font-size:10px;' title='Formato inválido'></i></span>";
+				}
 			}
 
 			if($hayEmail){
-				$contacto .= "<a href='mailto:" . $correo . "' style='text-decoration:none;'>"
-				           . "<span style='display:inline-flex;align-items:center;gap:6px;padding:3px 10px;"
-				           . "background:#fef9e7;border-radius:20px;font-size:12px;color:#784212;"
-				           . "max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>"
-				           . "<i class='fas fa-envelope' style='color:#e67e22;'></i>&nbsp;" . $correo . "</span></a>";
+				if($emailValido){
+					$contacto .= "<a href='mailto:" . htmlspecialchars($correo) . "' style='text-decoration:none;'>"
+					           . "<span style='display:inline-flex;align-items:center;gap:6px;padding:3px 10px;"
+					           . "background:#fef9e7;border-radius:20px;font-size:12px;color:#784212;"
+					           . "max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>"
+					           . "<i class='fas fa-envelope' style='color:#e67e22;'></i>&nbsp;" . htmlspecialchars($correo) . "</span></a>";
+				} else {
+					$contacto .= "<span style='display:inline-flex;align-items:center;gap:6px;padding:3px 10px;"
+					           . "background:#fef2f2;border-radius:20px;font-size:12px;color:#991b1b;"
+					           . "max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>"
+					           . "<i class='fas fa-envelope' style='color:#dc2626;'></i>&nbsp;" . htmlspecialchars($correo)
+					           . "&nbsp;<i class='fas fa-exclamation-triangle' style='color:#dc2626;font-size:10px;' title='Correo inválido'></i></span>";
+				}
 			}
 
 			if(!$hayTel && !$hayWa && !$hayEmail){
@@ -100,13 +133,26 @@ class TablaClientes{
 			   COLUMNA CLASIFICACIÓN
 			   Etiqueta + Órdenes + Antigüedad
 			══════════════════════════════════════════ */
-			$etiqueta = isset($clientes[$i]["etiqueta"]) ? $clientes[$i]["etiqueta"] : "Nuevo";
+			$etiqueta = isset($clientes[$i]["etiqueta"]) ? $clientes[$i]["etiqueta"] : "";
 			$fecha    = $clientes[$i]["fecha"];
+
+			// Auto-asignar "Nuevo" solo si fue registrado en los últimos 6 meses
+			if($etiqueta === "Nuevo" || $etiqueta === ""){
+				if($fecha){
+					try {
+						$diasReg = (new DateTime())->diff(new DateTime($fecha))->days;
+						$etiqueta = ($diasReg <= 180) ? "Nuevo" : "Frecuente";
+					} catch(Exception $e){ $etiqueta = "Frecuente"; }
+				} else {
+					$etiqueta = "Frecuente";
+				}
+			}
+			// Si tenía "Problematico", reclasificar como "Frecuente" (ahora se evalúa con calificación)
+			if($etiqueta === "Problematico") { $etiqueta = "Frecuente"; }
 
 			// Colores de etiqueta
 			$etiqColor = "#1a5276"; $etiqBg = "#d6eaf8"; // Nuevo
-			if($etiqueta === "Frecuente")    { $etiqColor = "#1e8449"; $etiqBg = "#d5f5e3"; }
-			if($etiqueta === "Problematico") { $etiqColor = "#c0392b"; $etiqBg = "#fadbd8"; }
+			if($etiqueta === "Frecuente") { $etiqColor = "#1e8449"; $etiqBg = "#d5f5e3"; }
 
 			// Asegurar que sea entero
 			$totalOrdenes = intval($totalOrdenes);
@@ -182,8 +228,8 @@ class TablaClientes{
 			           . "<button class='btn btn-primary btn-sm' style='{$btnW}'>"
 			           . "<i class='fas fa-clipboard-list'></i>&nbsp;Historial</button></a>";
 
-			if($hayWa){
-				$acciones .= "<a href='https://api.whatsapp.com/send/?phone=521" . $wa . "' target='_blank'>"
+			if($hayWa && $waValido){
+				$acciones .= "<a href='https://api.whatsapp.com/send/?phone=521" . $waClean . "' target='_blank'>"
 				           . "<button class='btn btn-success btn-sm' style='{$btnW}'>"
 				           . "<i class='fab fa-whatsapp'></i>&nbsp;WhatsApp</button></a>";
 			}
