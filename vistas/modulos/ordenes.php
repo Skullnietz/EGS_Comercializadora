@@ -1591,8 +1591,33 @@ MODAL AGREGAR ORDENES
                     <?php
                     $item = "id_empresa"; $valor = $_SESSION["empresa"];
                     $usuario = ControladorClientes::ctrMostrarClientesTabla($item, $valor);
+                    $_cli_ordenesMap = []; $_cli_estadoMap = []; $_cli_recogidaMap = [];
+                    try { $_cli_ordenesMap = ControladorClientes::ctrContarOrdenesClientesBulk(); } catch(Exception $e) {}
+                    try { $_cli_estadoMap = ControladorClientes::ctrContarOrdenesEstadoBulk(); } catch(Exception $e) {}
+                    try { $_cli_recogidaMap = ControladorClientes::ctrPromedioRecogidaBulk(); } catch(Exception $e) {}
                     foreach ($usuario as $key => $value) {
-                      echo '<option value="' . $value["id"] . '">' . $value["nombre"] . '</option>';
+                      $cId = intval($value["id"]);
+                      $cOrd = isset($_cli_ordenesMap[$cId]) ? $_cli_ordenesMap[$cId] : 0;
+                      $cEnt = isset($_cli_estadoMap[$cId]) ? $_cli_estadoMap[$cId]["entregadas"] : 0;
+                      $cCan = isset($_cli_estadoMap[$cId]) ? $_cli_estadoMap[$cId]["canceladas"] : 0;
+                      $cp = [];
+                      if ($cOrd >= 3 && ($cEnt + $cCan) > 0) {
+                        $r = $cEnt / ($cEnt + $cCan) * 100;
+                        if ($r >= 90) $cp["c"] = ["Excelente","#16a34a","#f0fdf4"];
+                        elseif ($r >= 70) $cp["c"] = ["Bueno","#2563eb","#eff6ff"];
+                        elseif ($r >= 50) $cp["c"] = ["Regular","#d97706","#fffbeb"];
+                        else $cp["c"] = ["Malo","#dc2626","#fef2f2"];
+                      }
+                      if (isset($_cli_recogidaMap[$cId])) {
+                        $d = $_cli_recogidaMap[$cId];
+                        $dt = "~".$d." días";
+                        if ($d <= 7) $cp["r"] = [$dt,"#16a34a","#f0fdf4"];
+                        elseif ($d <= 14) $cp["r"] = [$dt,"#2563eb","#eff6ff"];
+                        elseif ($d <= 30) $cp["r"] = [$dt,"#d97706","#fffbeb"];
+                        else $cp["r"] = [$dt,"#dc2626","#fef2f2"];
+                      }
+                      $cpAttr = !empty($cp) ? " data-custom-properties='" . htmlspecialchars(json_encode($cp, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . "'" : "";
+                      echo '<option value="' . $cId . '"' . $cpAttr . '>' . htmlspecialchars($value["nombre"]) . '</option>';
                     }
                     ?>
                   </select>
