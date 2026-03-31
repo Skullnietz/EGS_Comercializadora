@@ -81,6 +81,9 @@
   <!-- En el <head> CHOICES.js -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 
+  <!-- Select2 -->
+  <link rel="stylesheet" href="vistas/plugins/select2/css/select2.min.css">
+
   <!-- bootstrap slider -->
   <link rel="stylesheet" href="vistas/plugins/bootstrap-slider/slider.css">
 
@@ -159,6 +162,9 @@
   <script src="vistas/bower_components/datatables.net-bs/js/responsive.bootstrap.min.js"></script>
 
 
+
+  <!-- Select2 -->
+  <script src="vistas/plugins/select2/js/select2.full.min.js"></script>
 
   <!-- bootstrap tags input https://bootstrap-tagsinput.github.io/bootstrap-tagsinput/examples/-->
   <script src="vistas/plugins/tags/bootstrap-tagsinput.min.js"></script>

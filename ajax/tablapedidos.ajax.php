@@ -56,7 +56,7 @@ class TablaOrdenes{
 
 	for($i = 0; $i < count($pedidos); $i++){
 
-		if ($_GET["perfil"] == "administrador" || $_GET["perfil"] == "editor" || $_GET["perfil"] == "vendedor") {
+		if ($_GET["perfil"] == "administrador" || $_GET["perfil"] == "editor" || $_GET["perfil"] == "vendedor" || $_GET["perfil"] == "Super-Administrador") {
 		
 			$detallesPedido = "<button class='btn btn-warning btnAgregarDetallePedido' idPedido='".$pedidos[$i]["id"]."' data-toggle='modal' data-target='#modalEditarPedido'><i class='fas fa-edit'></i></button>";
 
