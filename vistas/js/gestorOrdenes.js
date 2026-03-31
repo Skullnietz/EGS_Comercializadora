@@ -1588,87 +1588,37 @@ $(document).on("click", ".btnVerInfoOrden", function(){
 /*=============================================
 SELECTOR DE CLIENTE
 =============================================*/
-
-/* ── Helper: render badges from customProperties ── */
-function _renderClienteBadges(data) {
-  var cp = data.customProperties;
-  if (typeof cp === 'string' && cp) {
-    try { cp = JSON.parse(cp); } catch(e) { return ''; }
-  }
-  if (!cp || (!cp.c && !cp.r)) return '';
-  var html = '<div style="display:flex;gap:4px;margin-top:2px;flex-wrap:wrap">';
-  if (cp.c) {
-    html += '<span style="display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;background:' + cp.c[2] + ';color:' + cp.c[1] + '">' + cp.c[0] + '</span>';
-  }
-  if (cp.r) {
-    html += '<span style="display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;background:' + cp.r[2] + ';color:' + cp.r[1] + '">⏱ ' + cp.r[0] + '</span>';
-  }
-  html += '</div>';
-  return html;
-}
-
-function _renderClienteBadgesInline(data) {
-  var cp = data.customProperties;
-  if (typeof cp === 'string' && cp) {
-    try { cp = JSON.parse(cp); } catch(e) { return ''; }
-  }
-  if (!cp || (!cp.c && !cp.r)) return '';
-  var html = '';
-  if (cp.c) {
-    html += '<span style="display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;background:' + cp.c[2] + ';color:' + cp.c[1] + ';margin-left:6px">' + cp.c[0] + '</span>';
-  }
-  if (cp.r) {
-    html += '<span style="display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;background:' + cp.r[2] + ';color:' + cp.r[1] + ';margin-left:4px">⏱ ' + cp.r[0] + '</span>';
-  }
-  return html;
-}
-
 document.addEventListener('DOMContentLoaded', function() {
   // Inicializar Choices para todos los select con la clase 'cliente'
   document.querySelectorAll('.cliente').forEach(function(element) {
-    new Choices(element, {
+    var choicesInstance = new Choices(element, {
       removeItemButton: false,
       searchEnabled: true,
-      shouldSort: false,
-      allowHTML: true,
-      callbackOnCreateTemplates: function(strToEl, escapeForTemplate, getClassNames) {
-        var self = this;
-        return {
-          choice: function(_ref, data) {
-            var classNames = _ref.classNames;
-            var badges = _renderClienteBadges(data);
-            return strToEl(
-              '<div class="' + getClassNames(classNames.item).join(' ') + ' ' + getClassNames(classNames.itemChoice).join(' ') + ' ' + getClassNames(data.disabled ? classNames.itemDisabled : classNames.itemSelectable).join(' ') + '"'
-              + ' data-select-text="' + self.config.itemSelectText + '"'
-              + ' data-choice'
-              + (data.disabled ? ' data-choice-disabled aria-disabled="true"' : ' data-choice-selectable')
-              + ' data-id="' + data.id + '"'
-              + ' data-value="' + data.value + '"'
-              + (data.groupId > 0 ? ' role="treeitem"' : ' role="option"')
-              + '>'
-              + '<div style="line-height:1.4">' + escapeForTemplate(true, data.label) + '</div>'
-              + badges
-              + '</div>'
-            );
-          },
-          item: function(_ref, data) {
-            var classNames = _ref.classNames;
-            var badges = _renderClienteBadgesInline(data);
-            return strToEl(
-              '<div class="' + getClassNames(classNames.item).join(' ') + ' ' + getClassNames(data.highlighted ? classNames.highlightedState : classNames.itemSelectable).join(' ') + (data.placeholder ? ' ' + getClassNames(classNames.placeholder).join(' ') : '') + '"'
-              + ' data-item'
-              + ' data-id="' + data.id + '"'
-              + ' data-value="' + data.value + '"'
-              + (data.active ? ' aria-selected="true"' : '')
-              + (data.disabled ? ' aria-disabled="true"' : '')
-              + '>'
-              + '<span>' + escapeForTemplate(true, data.label) + '</span>'
-              + badges
-              + '</div>'
-            );
-          }
-        };
+      shouldSort: false
+    });
+
+    // Mostrar badges al seleccionar un cliente
+    element.addEventListener('choice', function(e) {
+      var container = element.closest('.form-group').querySelector('.cliente-badges');
+      if (!container) return;
+      var cp = e.detail.choice.customProperties;
+      if (typeof cp === 'string' && cp) {
+        try { cp = JSON.parse(cp); } catch(err) { cp = null; }
       }
+      if (!cp || (!cp.c && !cp.r)) {
+        container.innerHTML = '';
+        container.style.display = 'none';
+        return;
+      }
+      var html = '';
+      if (cp.c) {
+        html += '<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:' + cp.c[2] + ';color:' + cp.c[1] + '"><i class="fas fa-star" style="font-size:10px"></i> ' + cp.c[0] + '</span>';
+      }
+      if (cp.r) {
+        html += '<span style="display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:' + cp.r[2] + ';color:' + cp.r[1] + '"><i class="fas fa-clock" style="font-size:10px"></i> Recoge: ' + cp.r[0] + '</span>';
+      }
+      container.innerHTML = html;
+      container.style.display = 'flex';
     });
   });
 

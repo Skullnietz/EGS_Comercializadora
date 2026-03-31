@@ -1621,6 +1621,7 @@ MODAL AGREGAR ORDENES
                     }
                     ?>
                   </select>
+                  <div class="cliente-badges" style="display:none;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
                 </div>
               </div>
               <div class="col-md-6">
