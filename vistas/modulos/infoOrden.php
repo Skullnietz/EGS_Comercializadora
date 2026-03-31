@@ -725,6 +725,64 @@ function _egsEstadoClass($estado) {
 					</div>
 				</div>
 
+				<!-- FICHA TÉCNICA -->
+				<div class="egs-section">
+					<div class="egs-title-bar"><i class="fa-solid fa-microchip"></i> Ficha técnica</div>
+					<div class="egs-body">
+						<form role="form" method="post" class="formularioFichaTecnica">
+							<?php if ($value["marcaDelEquipo"] == ""): ?>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Marca del equipo</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
+										<input type="text" id="marca" class="form-control" name="marcaDelEquipo" placeholder="Ej: HP, EPSON, BROTHER">
+									</div>
+									<span id="spanmarca" style="color:red;font-size:12px"></span>
+								</div>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Modelo del equipo</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
+										<input type="text" id="modelo" class="form-control" name="modeloDelEquipo" placeholder="Ej: LaserJet Pro M404">
+									</div>
+									<span id="spanmodelo" style="color:red;font-size:12px"></span>
+								</div>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Número de serie</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
+										<input type="text" id="numeroserial" class="form-control" name="numeroDeSerieDelEquipo" placeholder="Últimos 6 dígitos">
+									</div>
+									<span id="spannumeroserie" style="color:red;font-size:12px"></span>
+								</div>
+							<?php else: ?>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Marca</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
+										<input type="text" id="marca2" class="form-control" value="<?php echo htmlspecialchars($value["marcaDelEquipo"]); ?>" readonly>
+									</div>
+								</div>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Modelo</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
+										<input type="text" id="modelo2" class="form-control" value="<?php echo htmlspecialchars($value["modeloDelEquipo"]); ?>" readonly>
+									</div>
+								</div>
+								<div class="egs-field-row">
+									<label class="egs-lbl">Número de serie</label>
+									<div class="input-group">
+										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
+										<input type="text" id="numeroserial2" class="form-control" value="<?php echo htmlspecialchars($value["numeroDeSerieDelEquipo"]); ?>" readonly>
+									</div>
+								</div>
+							<?php endif; ?>
+							<input type="hidden" value="<?php echo $_GET["idOrden"]; ?>" name="idOrden">
+						</form>
+					</div>
+				</div>
+
 			</div>
 
 			<div class="col-lg-7 col-xs-12">
@@ -952,7 +1010,7 @@ function _egsEstadoClass($estado) {
 		})();
 		</script>
 
-		<!-- ==================== FILA 2: PARTIDAS (izq) + FICHA TÉCNICA + ASIGNACIÓN (der) ==================== -->
+		<!-- ==================== FILA 2: PARTIDAS (izq) + ASIGNACIÓN (der) ==================== -->
 		<div class="row">
 
 			<!-- COLUMNA IZQUIERDA: PARTIDAS Y COSTOS -->
@@ -1196,66 +1254,8 @@ function _egsEstadoClass($estado) {
 				</div>
 			</div><!-- /col-lg-8 partidas -->
 
-			<!-- COLUMNA DERECHA: FICHA TÉCNICA + ASIGNACIÓN -->
+			<!-- COLUMNA DERECHA: ASIGNACIÓN -->
 			<div class="col-lg-4 col-xs-12">
-
-				<!-- FICHA TÉCNICA -->
-				<div class="egs-section">
-					<div class="egs-title-bar"><i class="fa-solid fa-microchip"></i> Ficha técnica</div>
-					<div class="egs-body">
-						<form role="form" method="post" class="formularioFichaTecnica">
-							<?php if ($value["marcaDelEquipo"] == ""): ?>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Marca del equipo</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
-										<input type="text" id="marca" class="form-control" name="marcaDelEquipo" placeholder="Ej: HP, EPSON, BROTHER">
-									</div>
-									<span id="spanmarca" style="color:red;font-size:12px"></span>
-								</div>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Modelo del equipo</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
-										<input type="text" id="modelo" class="form-control" name="modeloDelEquipo" placeholder="Ej: LaserJet Pro M404">
-									</div>
-									<span id="spanmodelo" style="color:red;font-size:12px"></span>
-								</div>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Número de serie</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
-										<input type="text" id="numeroserial" class="form-control" name="numeroDeSerieDelEquipo" placeholder="Últimos 6 dígitos">
-									</div>
-									<span id="spannumeroserie" style="color:red;font-size:12px"></span>
-								</div>
-							<?php else: ?>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Marca</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="far fa-copyright"></i></span>
-										<input type="text" id="marca2" class="form-control" value="<?php echo htmlspecialchars($value["marcaDelEquipo"]); ?>" readonly>
-									</div>
-								</div>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Modelo</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="fas fa-kaaba"></i></span>
-										<input type="text" id="modelo2" class="form-control" value="<?php echo htmlspecialchars($value["modeloDelEquipo"]); ?>" readonly>
-									</div>
-								</div>
-								<div class="egs-field-row">
-									<label class="egs-lbl">Número de serie</label>
-									<div class="input-group">
-										<span class="input-group-addon"><i class="fas fa-barcode"></i></span>
-										<input type="text" id="numeroserial2" class="form-control" value="<?php echo htmlspecialchars($value["numeroDeSerieDelEquipo"]); ?>" readonly>
-									</div>
-								</div>
-							<?php endif; ?>
-							<input type="hidden" value="<?php echo $_GET["idOrden"]; ?>" name="idOrden">
-						</form>
-					</div>
-				</div>
 
 				<!-- ASIGNACIÓN -->
 				<div class="egs-section">
@@ -1408,7 +1408,7 @@ function _egsEstadoClass($estado) {
 					</div>
 				</div>
 
-			</div><!-- /col-lg-4 ficha+asignacion -->
+			</div><!-- /col-lg-4 asignacion -->
 
 		</div><!-- /row 2 -->
 
