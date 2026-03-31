@@ -84,19 +84,25 @@ class tablaOrdenes
 
 			$NombreUsuario = $usuario["nombre"];
 
-			// ── Badges de calificación y recogida (solo iconos) ──
+			// ── Etiquetas de calificación y recogida ──
 			$_cliId = intval($ordenes[$i]["id_usuario"]);
 			$_cliOrd = isset($_bo_ordenesMap[$_cliId]) ? $_bo_ordenesMap[$_cliId] : 0;
 			$_cliEnt = isset($_bo_estadoMap[$_cliId]) ? $_bo_estadoMap[$_cliId]["entregadas"] : 0;
 			$_cliCan = isset($_bo_estadoMap[$_cliId]) ? $_bo_estadoMap[$_cliId]["canceladas"] : 0;
 			$_cliBadges = "";
+			$_califBadge = "";
+			$_recogidaBadge = "";
 			if ($_cliOrd >= 3 && ($_cliEnt + $_cliCan) > 0) {
 				$_r = $_cliEnt / ($_cliEnt + $_cliCan) * 100;
-				if ($_r >= 90)      { $_cIco = "fa-star";         $_cCol = "#16a34a"; $_cBg = "#f0fdf4"; }
-				elseif ($_r >= 70)  { $_cIco = "fa-thumbs-up";    $_cCol = "#2563eb"; $_cBg = "#eff6ff"; }
-				elseif ($_r >= 50)  { $_cIco = "fa-minus-circle"; $_cCol = "#d97706"; $_cBg = "#fffbeb"; }
-				else                { $_cIco = "fa-thumbs-down";  $_cCol = "#dc2626"; $_cBg = "#fef2f2"; }
-				$_cliBadges .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:{$_cBg};margin-left:4px;' title='Calif: " . round($_r) . "%'><i class='fas {$_cIco}' style='font-size:10px;color:{$_cCol}'></i></span>";
+				$_califPct = round($_r) . "%";
+				if ($_r >= 90)      { $_cIco = "fa-star";         $_cCol = "#16a34a"; $_cBg = "#f0fdf4"; $_cLabel = "Excelente"; }
+				elseif ($_r >= 70)  { $_cIco = "fa-thumbs-up";    $_cCol = "#2563eb"; $_cBg = "#eff6ff"; $_cLabel = "Bueno"; }
+				elseif ($_r >= 50)  { $_cIco = "fa-minus-circle"; $_cCol = "#d97706"; $_cBg = "#fffbeb"; $_cLabel = "Regular"; }
+				else                { $_cIco = "fa-thumbs-down";  $_cCol = "#dc2626"; $_cBg = "#fef2f2"; $_cLabel = "Malo"; }
+				$_califBadge = "<span style='display:inline-flex;align-items:center;gap:4px;padding:2px 9px;"
+				             . "border-radius:20px;font-size:11px;background:{$_cBg};color:{$_cCol};font-weight:600;'>"
+				             . "<i class='fas {$_cIco}'></i>&nbsp;{$_cLabel}"
+				             . "&nbsp;<span style='opacity:.7;font-size:10px;'>({$_califPct})</span></span>";
 			}
 			if (isset($_bo_recogidaMap[$_cliId])) {
 				$_d = $_bo_recogidaMap[$_cliId];
@@ -104,9 +110,14 @@ class tablaOrdenes
 				elseif ($_d <= 14)  { $_rIco = "fa-clock";          $_rCol = "#2563eb"; $_rBg = "#eff6ff"; }
 				elseif ($_d <= 30)  { $_rIco = "fa-hourglass-half"; $_rCol = "#d97706"; $_rBg = "#fffbeb"; }
 				else                { $_rIco = "fa-hourglass-end";  $_rCol = "#dc2626"; $_rBg = "#fef2f2"; }
-				$_cliBadges .= "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:{$_rBg};margin-left:3px;' title='Recoge: ~{$_d} días'><i class='fas {$_rIco}' style='font-size:10px;color:{$_rCol}'></i></span>";
+				$_diasTxt = ($_d == 1) ? "día" : "días";
+				$_recogidaBadge = "<span style='display:inline-flex;align-items:center;gap:4px;padding:2px 9px;"
+				                . "border-radius:20px;font-size:11px;background:{$_rBg};color:{$_rCol};font-weight:600;'>"
+				                . "<i class='fas {$_rIco}'></i>&nbsp;Recoge:&nbsp;~{$_d}&nbsp;{$_diasTxt}</span>";
 			}
-			if ($_cliBadges) {
+			if ($_califBadge || $_recogidaBadge) {
+				$_cliBadges = "<div style='display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;'>"
+				            . $_califBadge . $_recogidaBadge . "</div>";
 				$NombreUsuario .= $_cliBadges;
 			}
 
