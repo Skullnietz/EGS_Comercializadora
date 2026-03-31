@@ -125,6 +125,32 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     font-size: 12.5px;
     color: #566573;
 }
+
+/* ── Toggle buttons ──────────────────────────────────────── */
+.btn-toggle-view {
+    background: #fff;
+    color: #555;
+    border: 1.5px solid #ddd;
+    border-radius: 7px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.btn-toggle-view:hover {
+    border-color: #138a1e;
+    color: #138a1e;
+}
+.btn-toggle-view.active {
+    background: #138a1e;
+    color: #fff;
+    border-color: #138a1e;
+    box-shadow: 0 2px 8px rgba(19,138,30,0.2);
+}
 </style>
 
 <script>
@@ -269,6 +295,15 @@ $(document).ready(function(){
           <button class="btn-add-client" data-toggle="modal" data-target="#modalAgregarUsuario">
             <i class="fas fa-user-plus"></i>&nbsp; Agregar Cliente
           </button>
+
+          <div class="toggle-view-group" style="display:inline-flex;gap:4px;margin-left:12px;">
+            <button id="btnOrdenarOrdenes" class="btn-toggle-view active" title="Clientes con más órdenes primero">
+              <i class="fas fa-sort-amount-down"></i>&nbsp; Más órdenes
+            </button>
+            <button id="btnOrdenarNuevos" class="btn-toggle-view" title="Clientes más recientes primero">
+              <i class="fas fa-user-clock"></i>&nbsp; Nuevos
+            </button>
+          </div>
         </div>
         <div style="font-size:13px;color:#888;">
           <i class="fas fa-info-circle"></i>&nbsp;
@@ -288,6 +323,8 @@ $(document).ready(function(){
               <th>Clasificación</th>
               <th>Acciones</th>
               <th>Registro</th>
+              <th>_ordenes</th>
+              <th>_fecha</th>
             </tr>
           </thead>
 

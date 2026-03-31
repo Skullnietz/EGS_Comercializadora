@@ -167,7 +167,9 @@ class TablaClientes{
 				$contacto,
 				$clasificacion,
 				$acciones,
-				$fechaDisplay
+				$fechaDisplay,
+				$totalOrdenes,
+				$fecha ? $fecha : "2000-01-01"
 			];
 		}
 

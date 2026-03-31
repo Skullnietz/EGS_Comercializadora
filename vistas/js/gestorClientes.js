@@ -1,24 +1,22 @@
 /*=============================================
-CARGAR LA TABLA DINÁMICA DE USUARIOS
+CARGAR LA TABLA DINÁMICA DE CLIENTES
 =============================================*/
 var Empresa_del_perfil = $("#Empresa_del_perfil").val();
 
- $.ajax({
-
- 	url:"ajax/tablaClientes.ajax.php?empresa="+$("#Empresa_del_perfil").val(),
- 	success:function(respuesta){
-		
- 		//console.log("respuesta", respuesta);
-
- 	}
-
- })
-
-$(".tablaClientesOrden").DataTable({
-	 "ajax": "ajax/tablaClientes.ajax.php?empresa="+$("#Empresa_del_perfil").val(),
+var tablaClientes = $(".tablaClientesOrden").DataTable({
+	 "ajax": "ajax/tablaClientes.ajax.php?empresa=" + Empresa_del_perfil,
 	 "deferRender": true,
 	 "retrieve": true,
 	 "processing": true,
+
+	 /* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw) */
+	 "columnDefs": [
+	 	{ "targets": [7, 8], "visible": false, "searchable": false }
+	 ],
+
+	 /* Default: ordenar por más órdenes (columna 7 desc) */
+	 "order": [[7, "desc"]],
+
 	 "language": {
 
 	 	"sProcessing":     "Procesando...",
@@ -48,17 +46,32 @@ $(".tablaClientesOrden").DataTable({
 
 });
 
+/*=============================================
+TOGGLE: Ordenar por Más órdenes / Nuevos
+=============================================*/
+$("#btnOrdenarOrdenes").on("click", function(){
+	$(".btn-toggle-view").removeClass("active");
+	$(this).addClass("active");
+	tablaClientes.order([7, "desc"]).draw();
+});
+
+$("#btnOrdenarNuevos").on("click", function(){
+	$(".btn-toggle-view").removeClass("active");
+	$(this).addClass("active");
+	tablaClientes.order([8, "desc"]).draw();
+});
+
+/*=============================================
+EDITAR CLIENTE
+=============================================*/
 $(".tablaClientesOrden").on("click", ".btnEditarCliente", function(){
 
-	//console.log("Editar");
 	var idCliente = $(this).attr("idCliente");
-	
+
 	var datos = new FormData();
 	datos.append("idCliente", idCliente);
-	//console.log(idUsuario);
-	
-	$.ajax({
 
+	$.ajax({
 
 		url:"ajax/clientes.ajax.php",
 		method: "POST",
@@ -67,7 +80,7 @@ $(".tablaClientesOrden").on("click", ".btnEditarCliente", function(){
 		contentType: false,
 		processData: false,
 		dataType: "json",
-		success: function(respuesta){ 
+		success: function(respuesta){
 
 			$("#idCliente").val(respuesta["id"]);
 			$("#editarNombreDelCliente").val(respuesta["nombre"]);
@@ -75,20 +88,18 @@ $(".tablaClientesOrden").on("click", ".btnEditarCliente", function(){
       		$("#EditarNumeroDelCliente").val(respuesta["telefono"]);
       		$("#EditarSegundoNumeroDeTel").val(respuesta["telefonoDos"]);
       		$("#EditarAsesorDelCliente").val(respuesta["id_Asesor"]);
-			$("#modalAgregarUsuario .EditarEtiquetaDelCLiente").val(respuesta["etiqueta"]);
-			$("#modalAgregarUsuario .MostrarEtiquetaDelCliente").html(respuesta["etiqueta"]);
-		
-			console.log("cliente:", respuesta);
+			$(".EditarEtiquetaDelCLiente").val(respuesta["etiqueta"]);
+			$(".MostrarEtiquetaDelCliente").html(respuesta["etiqueta"]);
 
 		}
 
 	})
 
-
 })
 
-/*VALIDAR NO REPETIR CLIENTES*/
-
+/*=============================================
+VALIDAR NO REPETIR CLIENTES
+=============================================*/
 $(".nombreCliente").change(function(){
 
 	$(".alert").remove();
@@ -110,7 +121,7 @@ $(".nombreCliente").change(function(){
 
     		if(respuesta.length != 0){
 
-    			$(".nombreCliente").parent().after('<div class="alert alert-warning">El clienten ya existe en la base de datos</div>');
+    			$(".nombreCliente").parent().after('<div class="alert alert-warning">El cliente ya existe en la base de datos</div>');
 
 	    		$(".nombreCliente").val("");
 
