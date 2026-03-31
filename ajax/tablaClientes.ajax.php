@@ -173,8 +173,10 @@ class TablaClientes{
 			$cliCanceladas = isset($estadoMap[$idCliente]) ? $estadoMap[$idCliente]["canceladas"] : 0;
 			$califLabel = "Sin calificar"; $califColor = "#64748b"; $califBg = "#f1f5f9"; $califIcon = "fa-circle-question";
 			$califPct = "";
+			$califRatio = -1; // para sorting: -1 = sin datos
 			if(($cliEntregadas + $cliCanceladas) > 0){
 				$ratio = $cliEntregadas / ($cliEntregadas + $cliCanceladas) * 100;
+				$califRatio = round($ratio, 2);
 				$califPct = round($ratio) . "%";
 				if($ratio >= 90)      { $califLabel = "Excelente"; $califColor = "#16a34a"; $califBg = "#f0fdf4"; $califIcon = "fa-star"; }
 				elseif($ratio >= 70)  { $califLabel = "Bueno";     $califColor = "#2563eb"; $califBg = "#eff6ff"; $califIcon = "fa-thumbs-up"; }
@@ -229,7 +231,8 @@ class TablaClientes{
 				$acciones,
 				$fechaDisplay,
 				$totalOrdenes,
-				$fecha ? $fecha : "2000-01-01"
+				$fecha ? $fecha : "2000-01-01",
+				$califRatio
 			];
 		}
 

@@ -303,6 +303,9 @@ $(document).ready(function(){
             <button id="btnOrdenarNuevos" class="btn-toggle-view" title="Clientes más recientes primero">
               <i class="fas fa-user-clock"></i>&nbsp; Nuevos
             </button>
+            <button id="btnOrdenarCalif" class="btn-toggle-view" title="Mejor calificación primero">
+              <i class="fas fa-star"></i>&nbsp; Calificación
+            </button>
           </div>
         </div>
         <div style="font-size:13px;color:#888;">
@@ -325,6 +328,7 @@ $(document).ready(function(){
               <th>Registro</th>
               <th>_ordenes</th>
               <th>_fecha</th>
+              <th>_calificacion</th>
             </tr>
           </thead>
 

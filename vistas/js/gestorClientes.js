@@ -9,9 +9,9 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 	 "destroy": true,
 	 "processing": true,
 
-	 /* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw) */
+	 /* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw, 9 = calificación) */
 	 "columnDefs": [
-	 	{ "targets": [7, 8], "visible": false, "searchable": false }
+	 	{ "targets": [7, 8, 9], "visible": false, "searchable": false }
 	 ],
 
 	 /* Default: ordenar por más órdenes (columna 7 desc) */
@@ -60,9 +60,15 @@ $("#btnOrdenarOrdenes").on("click", function(){
 $("#btnOrdenarNuevos").on("click", function(){
 	$(".btn-toggle-view").removeClass("active");
 	$(this).addClass("active");
-	// Filtrar solo clientes con etiqueta "Nuevo" y ordenar por fecha reciente
-	tablaClientes.column(4).search("^Nuevo$", true, false).draw();
+	tablaClientes.column(4).search("").draw();
 	tablaClientes.order([8, "desc"]).draw();
+});
+
+$("#btnOrdenarCalif").on("click", function(){
+	$(".btn-toggle-view").removeClass("active");
+	$(this).addClass("active");
+	tablaClientes.column(4).search("").draw();
+	tablaClientes.order([[9, "desc"], [7, "desc"]]).draw();
 });
 
 /*=============================================
