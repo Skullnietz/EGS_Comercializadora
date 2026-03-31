@@ -123,17 +123,36 @@ $_adm_allOrders = $_adm_dedup_tmp;
 unset($_adm_dedup_seen, $_adm_dedup_tmp);
 
 // ══════════════════════════════════════
+// Batch: resolver nombres de clientes en UNA sola query
+// ══════════════════════════════════════
+$_adm_clienteIds = array();
+foreach ($_adm_allOrders as $_o) {
+    if (!empty($_o['id_usuario'])) $_adm_clienteIds[] = intval($_o['id_usuario']);
+}
+$_adm_clientesMap = array();
+if (!empty($_adm_clienteIds)) {
+    try {
+        $_adm_clientesMap = ControladorClientes::ctrMostrarClientesPorIds($_adm_clienteIds);
+    } catch (Exception $e) { $_adm_clientesMap = array(); }
+}
+
+// ══════════════════════════════════════
 // JSON trimmed para drill-down en JavaScript
 // ══════════════════════════════════════
 $_adm_ordJS = array();
 foreach ($_adm_allOrders as $_o) {
+    $_adm_cliId = isset($_o['id_usuario']) ? intval($_o['id_usuario']) : 0;
+    $_adm_cliNom = '';
+    if ($_adm_cliId > 0 && isset($_adm_clientesMap[$_adm_cliId])) {
+        $_adm_cliNom = $_adm_clientesMap[$_adm_cliId]['nombre'];
+    }
     $_adm_ordJS[] = array(
         'id'    => $_o['id'],
         'est'   => isset($_o['estado']) ? $_o['estado'] : '',
         'fi'    => isset($_o['fecha_ingreso']) ? substr($_o['fecha_ingreso'], 0, 10) : '',
         'fs'    => !empty($_o['fecha_Salida']) ? substr($_o['fecha_Salida'], 0, 10) : '',
         'tec'   => isset($_o['id_tecnico']) ? $_o['id_tecnico'] : '',
-        'nom'   => isset($_o['nombre']) ? $_o['nombre'] : '',
+        'nom'   => $_adm_cliNom,
         'eq'    => isset($_o['equipo']) ? $_o['equipo'] : '',
         'marca' => isset($_o['marca']) ? $_o['marca'] : '',
         'total' => isset($_o['total']) ? floatval($_o['total']) : 0,
@@ -144,6 +163,7 @@ foreach ($_adm_allOrders as $_o) {
         'td'    => isset($_o['id_tecnicoDos']) ? $_o['id_tecnicoDos'] : '',
     );
 }
+unset($_adm_clienteIds, $_adm_clientesMap, $_adm_cliId, $_adm_cliNom);
 
 $_adm_pipe_cortes = array(
     '1m'  => date("Y-m-d", strtotime("-1 month")),
