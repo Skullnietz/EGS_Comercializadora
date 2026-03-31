@@ -10,19 +10,17 @@ $resultado = $conexiono->prepare($consulta);
 $resultado->execute();
 $data=$resultado->fetchAll(PDO::FETCH_ASSOC);
 
-// Traer nombres de clientes desde la BD del sistema (mismo método que Conexion.php)
+// Traer nombres de clientes desde la BD de e-commerce (clientesTienda vive en egsequip_ecomerce)
+require_once __DIR__ . '/../config/Database.php';
 $clienteNames = [];
-$mysqli = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
-if (!$mysqli->connect_error) {
-    $mysqli->set_charset("utf8");
-    $res = $mysqli->query("SELECT id, nombre FROM clientesTienda");
-    if ($res) {
-        while ($row = $res->fetch_assoc()) {
-            $clienteNames[intval($row["id"])] = $row["nombre"];
-        }
-        $res->free();
+try {
+    $pdoEcom = Database::conectar(Database::ECOMMERCE);
+    $stmtCli = $pdoEcom->query("SELECT id, nombre FROM clientesTienda");
+    while ($row = $stmtCli->fetch(PDO::FETCH_ASSOC)) {
+        $clienteNames[intval($row["id"])] = $row["nombre"];
     }
-    $mysqli->close();
+} catch (Exception $e) {
+    error_log("consultaordenes.php - Error al traer clientes: " . $e->getMessage());
 }
 
 foreach ($data as &$row) {
