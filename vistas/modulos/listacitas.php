@@ -170,7 +170,21 @@ $nombre= $nombre1;
     
     echo '<td> '.$value["fechacreacion"].'</td>
     <td><button class="btn btn-sm btn-info"><i class="fas fa-calendar-day"></i> Reagendar cita</button></td>
-    <td><button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#modalEditarCita"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i></button></td>
+    <td>
+    <a href="index.php?ruta=infoOrden&idOrden='.$value["cita_orden"].'" class="btn btn-sm btn-primary" title="Ver Orden"><i class="fas fa-eye"></i></a> ';
+
+    // Google Calendar link
+    $gcalTitle = urlencode('Cita - Orden #'.$value["cita_orden"]);
+    $fechaRaw = $value["fecha"].' '.$value["hora"];
+    $gcalStart = date('Ymd\THis', strtotime($fechaRaw));
+    $gcalEnd = date('Ymd\THis', strtotime($fechaRaw.' +1 hour'));
+    $gcalDetails = urlencode('Orden #'.$value["cita_orden"]);
+    $gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='.$gcalTitle.'&dates='.$gcalStart.'/'.$gcalEnd.'&details='.$gcalDetails;
+
+    echo '<a href="'.$gcalUrl.'" target="_blank" class="btn btn-sm" style="background:#4285f4;color:#fff" title="Agendar en Google Calendar"><i class="fab fa-google"></i></a> ';
+
+    echo '<button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#modalEditarCita"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i></button>
+    </td>
     </tr>';
     
 }

@@ -42,42 +42,74 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Al hacer click en un evento
         eventClick: function (info) {
+            var idOrden = info.event.extendedProps.id_orden;
             swal({
                 title: info.event.title,
-                text: 'Fecha: ' + info.event.start.toLocaleString(),
+                text: 'Fecha: ' + info.event.start.toLocaleString() + (idOrden ? '\nOrden #' + idOrden : ''),
                 icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ok',
-                cancelButtonText: 'Eliminar'
-            }).then((result) => {
-                if (result.dismiss === 'cancel') {
+                buttons: {
+                    cancel: { text: 'Cerrar', visible: true },
+                    verOrden: { text: 'Ver Orden', value: 'verOrden', className: 'swal-btn-info' },
+                    googleCal: { text: 'Google Calendar', value: 'googleCal', className: 'swal-btn-gcal' },
+                    eliminar: { text: 'Eliminar', value: 'eliminar', className: 'swal-btn-danger' }
+                }
+            }).then(function (value) {
+                if (value === 'verOrden') {
+                    if (idOrden) {
+                        window.location = 'index.php?ruta=infoOrden&idOrden=' + idOrden;
+                    } else {
+                        swal('Sin orden', 'Esta cita no tiene una orden vinculada.', 'warning');
+                    }
+                } else if (value === 'googleCal') {
+                    // Generar URL de Google Calendar
+                    var startDate = info.event.start;
+                    var endDate = info.event.end || new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hora si no hay fin
 
-                    var datos = new FormData();
-                    datos.append("idCita", info.event.id);
+                    function formatGCalDate(d) {
+                        return d.getFullYear().toString() +
+                            ('0' + (d.getMonth() + 1)).slice(-2) +
+                            ('0' + d.getDate()).slice(-2) + 'T' +
+                            ('0' + d.getHours()).slice(-2) +
+                            ('0' + d.getMinutes()).slice(-2) +
+                            ('0' + d.getSeconds()).slice(-2);
+                    }
 
-                    $.ajax({
-                        url: "ajax/citas.ajax.php",
-                        method: "POST",
-                        data: datos,
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        success: function (respuesta) {
-                            if (respuesta == "ok") {
-                                info.event.remove();
-                                swal(
-                                    'Eliminado!',
-                                    'La cita ha sido eliminada.',
-                                    'success'
-                                )
-                            } else {
-                                swal('Error', 'No se pudo eliminar la cita', 'error');
-                            }
+                    var gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+                        '&text=' + encodeURIComponent(info.event.title) +
+                        '&dates=' + formatGCalDate(startDate) + '/' + formatGCalDate(endDate) +
+                        (idOrden ? '&details=' + encodeURIComponent('Orden #' + idOrden) : '');
+
+                    window.open(gcalUrl, '_blank');
+                } else if (value === 'eliminar') {
+                    swal({
+                        title: '¿Estás seguro?',
+                        text: 'Se eliminará la cita "' + info.event.title + '"',
+                        icon: 'warning',
+                        buttons: ['Cancelar', 'Sí, eliminar'],
+                        dangerMode: true
+                    }).then(function (confirmar) {
+                        if (confirmar) {
+                            var datos = new FormData();
+                            datos.append("idCita", info.event.id);
+
+                            $.ajax({
+                                url: "ajax/citas.ajax.php",
+                                method: "POST",
+                                data: datos,
+                                cache: false,
+                                contentType: false,
+                                processData: false,
+                                success: function (respuesta) {
+                                    if (respuesta == "ok") {
+                                        info.event.remove();
+                                        swal('Eliminado!', 'La cita ha sido eliminada.', 'success');
+                                    } else {
+                                        swal('Error', 'No se pudo eliminar la cita', 'error');
+                                    }
+                                }
+                            });
                         }
                     });
-
                 }
             });
         }

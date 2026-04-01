@@ -102,6 +102,16 @@
 
 <!-- Estilos FullCalendar -->
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+
+<!-- Estilos botones swal para citas -->
+<style>
+    .swal-btn-info { background-color: #3c8dbc !important; color: #fff !important; }
+    .swal-btn-info:hover { background-color: #367fa9 !important; }
+    .swal-btn-gcal { background-color: #4285f4 !important; color: #fff !important; }
+    .swal-btn-gcal:hover { background-color: #3367d6 !important; }
+    .swal-btn-danger { background-color: #dd4b39 !important; color: #fff !important; }
+    .swal-btn-danger:hover { background-color: #d73925 !important; }
+</style>
 <!-- Scripts FullCalendar -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.js'></script>
