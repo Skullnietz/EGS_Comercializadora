@@ -98,12 +98,25 @@ if (isset($_POST["accion"]) && $_POST["accion"] == "mostrar") {
 
 // Guardar Cita
 if (isset($_POST["tituloCita"])) {
-    $guardar = new AjaxCitas();
-    $guardar->titulo = $_POST["tituloCita"];
-    $guardar->start = $_POST["fechaCita"];
-    $guardar->color = $_POST["colorCita"];
-    $guardar->idOrden = isset($_POST["idOrden"]) ? $_POST["idOrden"] : null;
-    $guardar->ajaxGuardarCita();
+    $fecha = $_POST["fechaCita"];
+    $idOrden = isset($_POST["idOrden"]) ? $_POST["idOrden"] : null;
+
+    // Verificar duplicados antes de guardar
+    $dup = ModeloCitas::mdlVerificarDuplicado("citas", $fecha, $idOrden);
+    if ($dup["duplicado"]) {
+        if ($dup["tipo"] === "orden_hora") {
+            echo "duplicado_hora|" . $dup["cita"]["title"] . "|" . $dup["cita"]["start"];
+        } else {
+            echo "duplicado_orden|" . $dup["cita"]["title"] . "|" . $dup["cita"]["start"];
+        }
+    } else {
+        $guardar = new AjaxCitas();
+        $guardar->titulo = $_POST["tituloCita"];
+        $guardar->start = $fecha;
+        $guardar->color = $_POST["colorCita"];
+        $guardar->idOrden = $idOrden;
+        $guardar->ajaxGuardarCita();
+    }
 }
 
 // Eliminar Cita

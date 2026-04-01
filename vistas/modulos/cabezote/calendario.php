@@ -962,6 +962,17 @@
       contentType: false,
       processData: false,
       success: function(resp) {
+        // Verificar duplicados
+        if (resp.indexOf('duplicado_hora') === 0) {
+          var parts = resp.split('|');
+          swal({ icon:'warning', title:'Horario ocupado', text:'Ya existe una cita a esa hora: "' + parts[1] + '" (' + parts[2] + '). Elige otra hora.' });
+          return;
+        }
+        if (resp.indexOf('duplicado_orden') === 0) {
+          var parts = resp.split('|');
+          swal({ icon:'warning', title:'Cita duplicada', text:'Ya existe una cita para esta orden en ese día: "' + parts[1] + '" (' + parts[2] + ').' });
+          return;
+        }
         if (resp == 'ok') {
           $('#modalCitaRapida').modal('hide');
           $('#formCitaRapida')[0].reset();

@@ -1900,10 +1900,17 @@ function _egsCopiarFallback(texto, cb) {
 
 <!-- JS: Agendar cita desde observaciones de orden -->
 <script>
+// Bloquear campos cuando se abre desde una orden
+function lockCitaFields(idOrden) {
+  $('#crTitulo').val('Cita Orden #' + idOrden).prop('readonly', true)
+    .css({'background':'#f1f5f9','color':'#475569','cursor':'not-allowed'});
+  $('#crOrdenId').val(idOrden).prop('readonly', true)
+    .css({'background':'#f1f5f9','color':'#475569','cursor':'not-allowed'})
+    .trigger('input');
+}
+
 $(document).on('click', '.btnAgendarCitaOrden', function(){
-  var idOrden = $(this).data('orden');
-  $('#crTitulo').val('Cita Orden #' + idOrden);
-  $('#crOrdenId').val(idOrden).trigger('input');
+  lockCitaFields($(this).data('orden'));
   $('#modalCitaRapida').modal('show');
 });
 
@@ -1912,10 +1919,15 @@ $(document).on('click', '.btnAgendarCitaDesdeObs', function(){
   var idOrden = $(this).data('orden');
   $('#exampleModal').modal('hide');
   setTimeout(function(){
-    $('#crTitulo').val('Cita Orden #' + idOrden);
-    $('#crOrdenId').val(idOrden).trigger('input');
+    lockCitaFields(idOrden);
     $('#modalCitaRapida').modal('show');
   }, 300);
+});
+
+// Desbloquear al cerrar el modal
+$(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
+  $('#crTitulo').prop('readonly', false).css({'background':'','color':'','cursor':''});
+  $('#crOrdenId').prop('readonly', false).css({'background':'','color':'','cursor':''});
 });
 </script>
 

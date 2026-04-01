@@ -69,6 +69,47 @@ class ModeloCitas
 	}
 
 	/*=============================================
+	VERIFICAR DUPLICADO DE CITA (misma orden + misma hora)
+	=============================================*/
+	static public function mdlVerificarDuplicado($tabla, $fecha, $idOrden)
+	{
+		if (!$idOrden) {
+			return array("duplicado" => false);
+		}
+
+		// Verificar si ya existe una cita para la misma orden a la misma hora exacta
+		$stmt = Conexion::conectar()->prepare(
+			"SELECT id, title, start FROM $tabla WHERE id_orden = :idOrden AND start = :fecha LIMIT 1"
+		);
+		$stmt->bindParam(":idOrden", $idOrden, PDO::PARAM_INT);
+		$stmt->bindParam(":fecha", $fecha, PDO::PARAM_STR);
+		$stmt->execute();
+		$porHora = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt = null;
+
+		if ($porHora) {
+			return array("duplicado" => true, "tipo" => "orden_hora", "cita" => $porHora);
+		}
+
+		// Verificar si ya existe una cita para la misma orden en el mismo día
+		$soloFecha = substr($fecha, 0, 10);
+		$stmt2 = Conexion::conectar()->prepare(
+			"SELECT id, title, start FROM $tabla WHERE id_orden = :idOrden AND DATE(start) = :fecha LIMIT 1"
+		);
+		$stmt2->bindParam(":idOrden", $idOrden, PDO::PARAM_INT);
+		$stmt2->bindParam(":fecha", $soloFecha, PDO::PARAM_STR);
+		$stmt2->execute();
+		$porOrdenDia = $stmt2->fetch(PDO::FETCH_ASSOC);
+		$stmt2 = null;
+
+		if ($porOrdenDia) {
+			return array("duplicado" => true, "tipo" => "orden_dia", "cita" => $porOrdenDia);
+		}
+
+		return array("duplicado" => false);
+	}
+
+	/*=============================================
 	ELIMINAR CITA
 	=============================================*/
 	static public function mdlEliminarCita($tabla, $datos)
