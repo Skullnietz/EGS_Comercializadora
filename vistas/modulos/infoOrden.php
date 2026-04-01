@@ -467,7 +467,7 @@ function _egsEstadoClass($estado) {
 								<?php if ($isAdmin || $isVendedor): ?>
 								<span class="input-group-btn">
 									<a class="btn btn-default" href="<?php echo htmlspecialchars($_historialClienteUrl); ?>" target="_blank" title="Ver historial del cliente">
-										<i class="fas fa-history"></i>
+										<i class="fas fa-history"></i> Historial
 									</a>
 								</span>
 								<?php endif; ?>
@@ -493,7 +493,7 @@ function _egsEstadoClass($estado) {
 								<span class="input-group-btn">
 									<button class="btn btn-default" type="button" title="Copiar número"
 									        onclick="_egsCopiarTel(this, '<?php echo htmlspecialchars($_wa_display); ?>')">
-									<i class="fas fa-copy"></i>
+									<i class="fas fa-copy"></i> Copiar
 									</button>
 								</span>
 							</div>
@@ -508,7 +508,7 @@ function _egsEstadoClass($estado) {
 								<span class="input-group-btn">
 									<button class="btn btn-default" type="button" title="Copiar número"
 									        onclick="_egsCopiarTel(this, '<?php echo htmlspecialchars($_tel_display); ?>')">
-									<i class="fas fa-copy"></i>
+									<i class="fas fa-copy"></i> Copiar
 									</button>
 								</span>
 							</div>
