@@ -134,7 +134,7 @@ if (isset($_POST["accion"]) && $_POST["accion"] == "mostrar") {
 // Guardar Cita
 if (isset($_POST["tituloCita"])) {
     $fecha = $_POST["fechaCita"];
-    $idOrden = isset($_POST["idOrden"]) ? $_POST["idOrden"] : null;
+    $idOrden = isset($_POST["idOrden"]) && $_POST["idOrden"] !== '' ? intval($_POST["idOrden"]) : null;
 
     // Verificar duplicados antes de guardar
     $dup = ModeloCitas::mdlVerificarDuplicado("citas", $fecha, $idOrden);

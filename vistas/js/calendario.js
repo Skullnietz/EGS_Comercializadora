@@ -242,7 +242,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Orden info
             var idOrden = props.id_orden;
-            if (idOrden) {
+            var hasOrden = idOrden && parseInt(idOrden) > 0;
+            if (hasOrden) {
                 $('#dcOrdenNum').text('Orden #' + idOrden);
                 $('#dcBtnOrden').attr('href', 'index.php?ruta=infoOrden&idOrden=' + idOrden).show();
             } else {
@@ -251,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Foto del equipo
-            var portada = props.orden_portada;
+            var portada = hasOrden ? (props.orden_portada || '') : '';
             if (portada) {
                 $('#dcFoto').attr('src', portada).show();
                 $('#dcFotoPlaceholder').hide();
@@ -261,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Estado
-            var estado = props.orden_estado || '';
+            var estado = hasOrden ? (props.orden_estado || '') : '';
             var $badge = $('#dcEstadoBadge');
             if (estado) {
                 var estadoColors = {
@@ -281,12 +282,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Equipo
-            var equipo = props.equipo || '';
-            $('#dcEquipo').text(equipo || 'Sin descripción');
+            var equipo = hasOrden ? (props.equipo || '') : '';
+            $('#dcEquipo').text(equipo || (hasOrden ? 'Sin descripción' : 'Cita sin orden vinculada'));
 
             // Marca/Modelo
-            var marca = props.orden_marca || '';
-            var modelo = props.orden_modelo || '';
+            var marca = hasOrden ? (props.orden_marca || '') : '';
+            var modelo = hasOrden ? (props.orden_modelo || '') : '';
             var mm = [marca, modelo].filter(Boolean).join(' · ');
             $('#dcMarcaModelo').text(mm).toggle(!!mm);
 
@@ -401,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Total
-            var total = props.orden_total;
+            var total = hasOrden ? props.orden_total : null;
             if (total && parseFloat(total) > 0) {
                 $('#dcTotal').text('$' + parseFloat(total).toLocaleString('es-MX', {minimumFractionDigits:2}));
                 $('#dcTotalBlock').show();
@@ -410,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Fecha Ingreso
-            var fechaIng = props.orden_fecha_ingreso;
+            var fechaIng = hasOrden ? props.orden_fecha_ingreso : null;
             if (fechaIng) {
                 var fi = new Date(fechaIng.replace(/-/g,'/'));
                 if (!isNaN(fi)) {
@@ -428,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var startDate = ev.start;
                 var endDate = ev.end || new Date(startDate.getTime() + 60 * 60 * 1000);
                 var detalles = [];
-                if (idOrden) detalles.push('Orden #' + idOrden);
+                if (hasOrden) detalles.push('Orden #' + idOrden);
                 if (clienteNombre) detalles.push('Cliente: ' + clienteNombre);
                 if (equipo) detalles.push('Equipo: ' + equipo);
                 if (desc) detalles.push('\nNotas: ' + desc);
@@ -519,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!idOrden || idOrden < 1) {
             $('#colorCita').val('#3a87ad');
             $('#pcAutoColorDot').css('background', '#3a87ad');
-            $('#pcAutoColorText').text('Ingresa un No. de Orden para asignar color').css('color', '#64748b');
+            $('#pcAutoColorText').text('Sin orden — se usará color por defecto').css('color', '#64748b');
             return;
         }
 
@@ -574,12 +575,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var color = $('#colorCita').val();
         var idOrden = $('#idOrden').val();
 
-        if (!idOrden || idOrden < 1) {
-            swal({ icon: 'warning', title: 'Orden requerida', text: 'Debes vincular un No. de Orden o Pedido.' });
-            $('#idOrden').focus();
-            return;
-        }
-
         if (!pcSelectedHora) {
             swal({ icon: 'warning', title: 'Hora requerida', text: 'Selecciona una hora disponible.' });
             return;
@@ -604,7 +599,7 @@ document.addEventListener('DOMContentLoaded', function () {
         datos.append("tituloCita", titulo);
         datos.append("fechaCita", fechaFinal);
         datos.append("colorCita", color);
-        datos.append("idOrden", idOrden);
+        datos.append("idOrden", idOrden && idOrden > 0 ? idOrden : '');
         datos.append("descripcionCita", descripcion);
 
         $.ajax({
@@ -632,7 +627,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     $('#pcCustomDateWrap').hide();
                     $('#colorCita').val('#3a87ad');
                     $('#pcAutoColorDot').css('background', '#3a87ad');
-                    $('#pcAutoColorText').text('Ingresa un No. de Orden para asignar color automático').css('color', '#64748b');
+                    $('#pcAutoColorText').text('Sin orden — se usará color por defecto').css('color', '#64748b');
                     pcRenderTimeGrid();
                     pcUpdateDatePreview();
 

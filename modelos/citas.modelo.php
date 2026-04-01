@@ -21,8 +21,29 @@ class ModeloCitas
 				$ordenIds[] = intval($c["id_orden"]);
 			}
 		}
-		if (empty($ordenIds)) return $citas;
 		$ordenIds = array_unique($ordenIds);
+
+		// Si no hay órdenes, solo setear defaults y retornar
+		if (empty($ordenIds)) {
+			foreach ($citas as &$c) {
+				$c["equipo"] = "";
+				$c["cliente_nombre"] = "";
+				$c["cliente_telefono"] = "";
+				$c["tecnico_nombre"] = "";
+				$c["tecnico_foto"] = "";
+				$c["asesor_nombre"] = "";
+				$c["asesor_foto"] = "";
+				$c["orden_estado"] = "";
+				$c["orden_portada"] = "";
+				$c["orden_marca"] = "";
+				$c["orden_modelo"] = "";
+				$c["orden_total"] = "";
+				$c["orden_fecha_ingreso"] = "";
+				$c["cliente_badges"] = null;
+			}
+			unset($c);
+			return $citas;
+		}
 
 		// Consultar ordenes (BD WordPress/respaldo) — traer campos completos
 		$in = implode(',', $ordenIds);
@@ -184,7 +205,7 @@ class ModeloCitas
 
 			$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla");
 			$stmt->execute();
-			$citas = $stmt->fetchAll();
+			$citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return self::enriquecerCitas($citas);
 
 		}
@@ -206,7 +227,13 @@ class ModeloCitas
 		$stmt->bindParam(":start", $datos["start"], PDO::PARAM_STR);
 		$stmt->bindParam(":end", $datos["end"], PDO::PARAM_STR);
 		$stmt->bindParam(":color", $datos["color"], PDO::PARAM_STR);
-		$stmt->bindParam(":id_orden", $datos["id_orden"], PDO::PARAM_INT);
+
+		$idOrden = !empty($datos["id_orden"]) ? intval($datos["id_orden"]) : null;
+		if ($idOrden === null) {
+			$stmt->bindValue(":id_orden", null, PDO::PARAM_NULL);
+		} else {
+			$stmt->bindValue(":id_orden", $idOrden, PDO::PARAM_INT);
+		}
 
 		if ($stmt->execute()) {
 			$stmt = null;
@@ -284,7 +311,7 @@ class ModeloCitas
 		$in = implode(',', array_map('intval', $ordenIds));
 		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE id_orden IN ($in)");
 		$stmt->execute();
-		$citas = $stmt->fetchAll();
+		$citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		return self::enriquecerCitas($citas);
 	}
 

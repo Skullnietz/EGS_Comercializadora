@@ -68,10 +68,10 @@
                     <!-- No. de Orden -->
                     <div class="form-group" style="margin-bottom:16px;">
                         <label class="egs-pc-lbl">
-                            <i class="fa-solid fa-file-lines" style="margin-right:4px;color:#6366f1;"></i>No. de Orden o Pedido <span style="color:#ef4444;">*</span>
+                            <i class="fa-solid fa-file-lines" style="margin-right:4px;color:#6366f1;"></i>No. de Orden o Pedido <span style="color:#94a3b8;font-weight:400;">(opcional)</span>
                         </label>
                         <input type="number" class="form-control egs-pc-input" id="idOrden" name="idOrden"
-                            placeholder="Ingresa el ID de la orden o pedido" required min="1">
+                            placeholder="Ingresa el ID de la orden o pedido" min="1">
                     </div>
 
                     <!-- Comentarios -->
@@ -133,7 +133,7 @@
                         <input type="hidden" id="colorCita" name="colorCita" value="#3a87ad">
                         <div id="pcAutoColorPreview" style="padding:10px 14px;border-radius:8px;background:#f1f5f9;border:1.5px solid #e2e8f0;font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;">
                             <span id="pcAutoColorDot" style="width:14px;height:14px;border-radius:50%;background:#3a87ad;flex-shrink:0;"></span>
-                            <span id="pcAutoColorText">Ingresa un No. de Orden para asignar color automático</span>
+                            <span id="pcAutoColorText">Sin orden — se usará color por defecto</span>
                         </div>
                     </div>
 
