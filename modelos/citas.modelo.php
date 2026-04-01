@@ -110,6 +110,36 @@ class ModeloCitas
 	}
 
 	/*=============================================
+	MOSTRAR CITAS FILTRADAS POR ORDENES (para técnicos)
+	=============================================*/
+	static public function mdlMostrarCitasPorOrdenes($tabla, $ordenIds)
+	{
+		if (empty($ordenIds)) {
+			return array();
+		}
+		$in = implode(',', array_map('intval', $ordenIds));
+		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE id_orden IN ($in)");
+		$stmt->execute();
+		return $stmt->fetchAll();
+	}
+
+	/*=============================================
+	CITAS POR RANGO FILTRADAS POR ORDENES (para técnicos)
+	=============================================*/
+	static public function mdlCitasPorRangoYOrdenes($tabla, $inicio, $fin, $ordenIds)
+	{
+		if (empty($ordenIds)) {
+			return array();
+		}
+		$in = implode(',', array_map('intval', $ordenIds));
+		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE start BETWEEN :inicio AND :fin AND id_orden IN ($in) ORDER BY start ASC");
+		$stmt->bindParam(":inicio", $inicio, PDO::PARAM_STR);
+		$stmt->bindParam(":fin", $fin, PDO::PARAM_STR);
+		$stmt->execute();
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	/*=============================================
 	ELIMINAR CITA
 	=============================================*/
 	static public function mdlEliminarCita($tabla, $datos)

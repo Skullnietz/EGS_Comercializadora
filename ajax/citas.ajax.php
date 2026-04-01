@@ -1,7 +1,33 @@
 <?php
 
+session_start();
+
 require_once "../controladores/citas.controlador.php";
 require_once "../modelos/citas.modelo.php";
+
+/*=============================================
+HELPER: Obtener IDs de órdenes de un técnico
+=============================================*/
+function obtenerOrdenesDelTecnico($idTecnico) {
+    require_once "../modelos/ordenes.modelo.php";
+    $todas = ModeloOrdenes::mdlMostrarordenesParaValidar("ordenes", null, null);
+    $ids = array();
+    if (!empty($todas)) {
+        foreach ($todas as $orden) {
+            if (
+                (isset($orden["id_tecnico"]) && $orden["id_tecnico"] == $idTecnico) ||
+                (isset($orden["id_tecnicoDos"]) && $orden["id_tecnicoDos"] == $idTecnico)
+            ) {
+                $ids[] = intval($orden["id"]);
+            }
+        }
+    }
+    return $ids;
+}
+
+function esTecnico() {
+    return isset($_SESSION["perfil"]) && $_SESSION["perfil"] == "tecnico";
+}
 
 class AjaxCitas
 {
@@ -92,8 +118,16 @@ ACCIONES
 
 // Mostrar Citas
 if (isset($_POST["accion"]) && $_POST["accion"] == "mostrar") {
-    $citas = new AjaxCitas();
-    $citas->ajaxMostrarCitas();
+
+    if (esTecnico()) {
+        $ordenIds = obtenerOrdenesDelTecnico($_SESSION["id"]);
+        $respuesta = ModeloCitas::mdlMostrarCitasPorOrdenes("citas", $ordenIds);
+        echo json_encode($respuesta);
+    } else {
+        $citas = new AjaxCitas();
+        $citas->ajaxMostrarCitas();
+    }
+
 }
 
 // Guardar Cita
@@ -202,6 +236,11 @@ if (isset($_POST["accion"]) && $_POST["accion"] == "citasPorRango") {
             $fin = $hoy . ' 23:59:59';
     }
 
-    $respuesta = ModeloCitas::mdlCitasPorRango("citas", $inicio, $fin);
+    if (esTecnico()) {
+        $ordenIds = obtenerOrdenesDelTecnico($_SESSION["id"]);
+        $respuesta = ModeloCitas::mdlCitasPorRangoYOrdenes("citas", $inicio, $fin, $ordenIds);
+    } else {
+        $respuesta = ModeloCitas::mdlCitasPorRango("citas", $inicio, $fin);
+    }
     echo json_encode($respuesta);
 }
