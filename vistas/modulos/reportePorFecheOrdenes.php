@@ -768,7 +768,7 @@ $totalCols    = $isAdmin ? 13 : 11;
     searching: true,
     info: true,
     ordering: true,
-    order: [[1, 'asc']], // Orden ascendente por id de orden
+    order: [[1, 'desc']], // Orden descendente por id de orden
     orderCellsTop: true,  // Click en la fila de títulos para ordenar
     language: {
       info: "Mostrando _START_ a _END_ de _TOTAL_ órdenes",

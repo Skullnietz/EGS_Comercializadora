@@ -52,7 +52,7 @@ if (!is_array($ordenes)) {
 $rangoTexto = isset($_GET["estado"]) ? $_GET["estado"] : "Estado";
 
 usort($ordenes, function ($a, $b) {
-	return strtotime((string)($b["fecha"] ?? "")) <=> strtotime((string)($a["fecha"] ?? ""));
+	return intval($b["id"] ?? 0) <=> intval($a["id"] ?? 0);
 });
 
 $headers = array("Orden", "Empresa", "Asesor", "Tecnico", "Cliente", "Estado", "Monto", "Fecha");

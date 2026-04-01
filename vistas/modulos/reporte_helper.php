@@ -33,7 +33,7 @@ if (!class_exists('ReporteHelper')) {
             }
 
             usort($filteredOrdenes, function ($a, $b) {
-                return strtotime((string)($b['fecha'] ?? '')) <=> strtotime((string)($a['fecha'] ?? ''));
+                return intval($b['id']) <=> intval($a['id']);
             });
 
             $rangoTexto = (isset($_GET['fechaInicial']) && isset($_GET['fechaFinal']))
@@ -179,11 +179,13 @@ if (!class_exists('ReporteHelper')) {
                 $hyperlinkColumns = array(
                     6 => function ($value, $row) {
                         $digits = preg_replace('/\D+/', '', (string)($row[5] ?? ''));
-                        if (strlen($digits) !== 10) return '';
-                        $orden  = (string)($row[0] ?? '');
-                        $asesor = (string)($row[2] ?? '');
-                        $msg = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA *COMENTAR COMO ESTA TRABAJANDO EL EQUIPO QUE NOS TRAJO A REPARACION, PARA NOSOTROS ES MUY IMPORTANTE SU SATISFACCION GRACIAS https://comercializadoraegs.com ORDEN *' . $orden . '* ASESOR *' . $asesor . '*';
-                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($msg);
+                        if (strlen($digits) !== 10) {
+                            return '';
+                        }
+                        $orden = (string)($row[0] ?? '');
+                        $mensajeBase = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416/7203321271 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN **. ESTE NUMERO ES SOLO PARA MENSAJES';
+                        $mensaje = str_replace('**', $orden, $mensajeBase);
+                        return 'https://api.whatsapp.com/send?phone=52' . $digits . '&text=' . rawurlencode($mensaje);
                     }
                 );
             } elseif ($isReporteIngresos) {
@@ -447,7 +449,7 @@ if (!class_exists('ReporteHelper')) {
             }
 
             usort($filteredOrdenes, function ($a, $b) {
-                return strtotime((string)($b['fecha_ingreso'] ?? '')) <=> strtotime((string)($a['fecha_ingreso'] ?? ''));
+                return intval($b['id']) <=> intval($a['id']);
             });
 
             return $filteredOrdenes;

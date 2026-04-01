@@ -34,7 +34,7 @@ $rangoTexto = (isset($_GET["fechaInicial"]) && isset($_GET["fechaFinal"]))
 	: "Todas las ordenes";
 
 usort($ordenes, function ($a, $b) {
-	return strtotime((string)($b["fecha"] ?? "")) <=> strtotime((string)($a["fecha"] ?? ""));
+	return intval($b["id"] ?? 0) <=> intval($a["id"] ?? 0);
 });
 
 $headers = array("Orden", "Tecnico", "Estado", "Cliente", "Partidas Recepcion", "Partidas", "Costo", "Observaciones");
