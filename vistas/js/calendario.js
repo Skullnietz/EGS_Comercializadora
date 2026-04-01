@@ -43,9 +43,19 @@ document.addEventListener('DOMContentLoaded', function () {
         // Al hacer click en un evento
         eventClick: function (info) {
             var idOrden = info.event.extendedProps.id_orden;
+            var descripcion = info.event.extendedProps.description || '';
+            var clienteNombre = info.event.extendedProps.cliente_nombre || '';
+            var equipo = info.event.extendedProps.equipo || '';
+
+            var textoInfo = 'Fecha: ' + info.event.start.toLocaleString();
+            if (idOrden) textoInfo += '\nOrden #' + idOrden;
+            if (clienteNombre) textoInfo += '\nCliente: ' + clienteNombre;
+            if (equipo) textoInfo += '\nEquipo: ' + equipo;
+            if (descripcion) textoInfo += '\n\n📝 ' + descripcion;
+
             swal({
                 title: info.event.title,
-                text: 'Fecha: ' + info.event.start.toLocaleString() + (idOrden ? '\nOrden #' + idOrden : ''),
+                text: textoInfo,
                 icon: 'info',
                 buttons: {
                     cancel: { text: 'Cerrar', visible: true },
@@ -74,10 +84,18 @@ document.addEventListener('DOMContentLoaded', function () {
                             ('0' + d.getSeconds()).slice(-2);
                     }
 
+                    var detalles = [];
+                    if (idOrden) detalles.push('Orden #' + idOrden);
+                    var clienteNombre = info.event.extendedProps.cliente_nombre;
+                    if (clienteNombre) detalles.push('Cliente: ' + clienteNombre);
+                    var equipo = info.event.extendedProps.equipo;
+                    if (equipo) detalles.push('Equipo: ' + equipo);
+                    if (descripcion) detalles.push('\nNotas: ' + descripcion);
+
                     var gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
                         '&text=' + encodeURIComponent(info.event.title) +
                         '&dates=' + formatGCalDate(startDate) + '/' + formatGCalDate(endDate) +
-                        (idOrden ? '&details=' + encodeURIComponent('Orden #' + idOrden) : '');
+                        (detalles.length ? '&details=' + encodeURIComponent(detalles.join('\n')) : '');
 
                     window.open(gcalUrl, '_blank');
                 } else if (value === 'eliminar') {
@@ -197,11 +215,14 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        var descripcion = $('#descripcionCita').val() || '';
+
         var datos = new FormData();
         datos.append("tituloCita", titulo);
         datos.append("fechaCita", fecha);
         datos.append("colorCita", color);
         datos.append("idOrden", idOrden);
+        datos.append("descripcionCita", descripcion);
 
         $.ajax({
             url: "ajax/citas.ajax.php",

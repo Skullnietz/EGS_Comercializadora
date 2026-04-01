@@ -78,6 +78,17 @@
             <div id="crOrdenPreview" style="display:none;margin-top:6px;padding:6px 10px;border-radius:8px;font-size:11px;"></div>
           </div>
 
+          <!-- Comentarios / Observaciones -->
+          <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;">
+              <i class="fa-solid fa-comment-dots" style="margin-right:4px;color:#6366f1;"></i>Comentarios / Observaciones
+            </label>
+            <textarea class="form-control" id="crDescripcion" rows="2"
+              placeholder="¿De qué trata la cita? Ej: Revisión de pantalla, entrega de equipo..."
+              style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 12px;font-size:13px;resize:vertical;min-height:50px;transition:border-color .2s;"></textarea>
+            <small style="font-size:10px;color:#94a3b8;margin-top:4px;display:block;">Opcional — Aparecerá al consultar la cita</small>
+          </div>
+
           <!-- Accesos rápidos de fecha -->
           <div class="form-group" style="margin-bottom:16px;">
             <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:8px;display:block;">
@@ -339,6 +350,24 @@
 
 .egs-cal-event-time i {
   font-size: 10px;
+}
+
+.egs-cal-event-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 3px;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+}
+.egs-cal-event-desc i {
+  font-size: 10px;
+  margin-top: 2px;
+  color: #6366f1;
+  flex-shrink: 0;
 }
 
 .egs-cal-event-actions {
@@ -639,10 +668,15 @@
           var dtStart = new Date(ev.start.replace(/-/g,'/').replace('T',' '));
           var dtEnd = new Date(dtStart.getTime() + 60*60*1000);
           function fmtGCal(d){ return d.getFullYear().toString()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'T'+('0'+d.getHours()).slice(-2)+('0'+d.getMinutes()).slice(-2)+('0'+d.getSeconds()).slice(-2); }
+          var detalles = [];
+          if (ev.id_orden) detalles.push('Orden #' + ev.id_orden);
+          if (ev.cliente_nombre) detalles.push('Cliente: ' + ev.cliente_nombre);
+          if (ev.equipo) detalles.push('Equipo: ' + ev.equipo);
+          if (ev.description) detalles.push('\nNotas: ' + ev.description);
           gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
             '&text=' + encodeURIComponent(ev.title || 'Cita') +
             '&dates=' + fmtGCal(dtStart) + '/' + fmtGCal(dtEnd) +
-            (ev.id_orden ? '&details=' + encodeURIComponent('Orden #' + ev.id_orden) : '');
+            (detalles.length ? '&details=' + encodeURIComponent(detalles.join('\n')) : '');
         }
 
         // Botones de acción
@@ -660,6 +694,7 @@
           '<div class="egs-cal-event-info">' +
             '<div class="egs-cal-event-title">' + $('<span>').text(ev.title || 'Sin título').html() + '</div>' +
             '<div class="egs-cal-event-time"><i class="fa-regular fa-clock"></i> ' + hora + '</div>' +
+            (ev.description ? '<div class="egs-cal-event-desc"><i class="fa-regular fa-comment-dots"></i> ' + $('<span>').text(ev.description).html() + '</div>' : '') +
           '</div>' +
           actionsHtml +
         '</div>';
@@ -1003,11 +1038,14 @@
     var dd = d.getDate().toString().padStart(2,'0');
     var fechaFinal = yyyy + '-' + mm + '-' + dd + 'T' + selectedHora;
 
+    var descripcion = $('#crDescripcion').val() || '';
+
     var datos = new FormData();
     datos.append("tituloCita", titulo);
     datos.append("fechaCita", fechaFinal);
     datos.append("colorCita", selectedColor);
     datos.append("idOrden", ordenId);
+    datos.append("descripcionCita", descripcion);
 
     var $btn = $('#btnGuardarCitaRapida');
     $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Guardando...');

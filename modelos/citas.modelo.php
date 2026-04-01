@@ -20,7 +20,7 @@ class ModeloCitas
 
 		} else {
 
-			$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla");
+			$stmt = Conexion::conectar()->prepare("SELECT c.id, c.title, c.description, c.start, c.end, c.color, c.id_orden, o.descripcion AS equipo, cl.nombre AS cliente_nombre FROM $tabla c LEFT JOIN ordenes o ON c.id_orden = o.id LEFT JOIN clientes cl ON o.id_usuario = cl.id");
 			$stmt->execute();
 			return $stmt->fetchAll();
 
@@ -61,7 +61,7 @@ class ModeloCitas
 	=============================================*/
 	static public function mdlCitasPorRango($tabla, $inicio, $fin)
 	{
-		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE start BETWEEN :inicio AND :fin ORDER BY start ASC");
+		$stmt = Conexion::conectar()->prepare("SELECT c.id, c.title, c.description, c.start, c.end, c.color, c.id_orden, o.descripcion AS equipo, cl.nombre AS cliente_nombre FROM $tabla c LEFT JOIN ordenes o ON c.id_orden = o.id LEFT JOIN clientes cl ON o.id_usuario = cl.id WHERE c.start BETWEEN :inicio AND :fin ORDER BY c.start ASC");
 		$stmt->bindParam(":inicio", $inicio, PDO::PARAM_STR);
 		$stmt->bindParam(":fin", $fin, PDO::PARAM_STR);
 		$stmt->execute();
@@ -118,7 +118,7 @@ class ModeloCitas
 			return array();
 		}
 		$in = implode(',', array_map('intval', $ordenIds));
-		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE id_orden IN ($in)");
+		$stmt = Conexion::conectar()->prepare("SELECT c.id, c.title, c.description, c.start, c.end, c.color, c.id_orden, o.descripcion AS equipo, cl.nombre AS cliente_nombre FROM $tabla c LEFT JOIN ordenes o ON c.id_orden = o.id LEFT JOIN clientes cl ON o.id_usuario = cl.id WHERE c.id_orden IN ($in)");
 		$stmt->execute();
 		return $stmt->fetchAll();
 	}
@@ -132,7 +132,7 @@ class ModeloCitas
 			return array();
 		}
 		$in = implode(',', array_map('intval', $ordenIds));
-		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE start BETWEEN :inicio AND :fin AND id_orden IN ($in) ORDER BY start ASC");
+		$stmt = Conexion::conectar()->prepare("SELECT c.id, c.title, c.description, c.start, c.end, c.color, c.id_orden, o.descripcion AS equipo, cl.nombre AS cliente_nombre FROM $tabla c LEFT JOIN ordenes o ON c.id_orden = o.id LEFT JOIN clientes cl ON o.id_usuario = cl.id WHERE c.start BETWEEN :inicio AND :fin AND c.id_orden IN ($in) ORDER BY c.start ASC");
 		$stmt->bindParam(":inicio", $inicio, PDO::PARAM_STR);
 		$stmt->bindParam(":fin", $fin, PDO::PARAM_STR);
 		$stmt->execute();

@@ -173,12 +173,29 @@ $nombre= $nombre1;
     <td>
     <a href="index.php?ruta=infoOrden&idOrden='.$value["cita_orden"].'" class="btn btn-sm btn-primary" title="Ver Orden"><i class="fas fa-eye"></i></a> ';
 
-    // Google Calendar link
+    // Google Calendar link - obtener datos de orden y cliente
     $gcalTitle = urlencode('Cita - Orden #'.$value["cita_orden"]);
     $fechaRaw = $value["fecha"].' '.$value["hora"];
     $gcalStart = date('Ymd\THis', strtotime($fechaRaw));
     $gcalEnd = date('Ymd\THis', strtotime($fechaRaw.' +1 hour'));
-    $gcalDetails = urlencode('Orden #'.$value["cita_orden"]);
+    $gcalDetalles = array('Orden #'.$value["cita_orden"]);
+    // Obtener nombre del cliente y descripción del equipo
+    $_gcOrd = ModeloCitas::mdlMostrarCitas("citas", "id_orden", $value["cita_orden"]);
+    if (!empty($_gcOrd)) {
+        // Query directo para datos de orden y cliente
+        try {
+            $_gcStmt = Conexion::conectar()->prepare("SELECT o.descripcion, cl.nombre FROM ordenes o LEFT JOIN clientes cl ON o.id_usuario = cl.id WHERE o.id = :id LIMIT 1");
+            $_gcStmt->bindParam(":id", $value["cita_orden"], PDO::PARAM_INT);
+            $_gcStmt->execute();
+            $_gcData = $_gcStmt->fetch(PDO::FETCH_ASSOC);
+            if ($_gcData) {
+                if (!empty($_gcData["nombre"])) $gcalDetalles[] = 'Cliente: '.$_gcData["nombre"];
+                if (!empty($_gcData["descripcion"])) $gcalDetalles[] = 'Equipo: '.$_gcData["descripcion"];
+            }
+            $_gcStmt = null;
+        } catch(Exception $e) {}
+    }
+    $gcalDetails = urlencode(implode("\n", $gcalDetalles));
     $gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='.$gcalTitle.'&dates='.$gcalStart.'/'.$gcalEnd.'&details='.$gcalDetails;
 
     echo '<a href="'.$gcalUrl.'" target="_blank" class="btn btn-sm" style="background:#4285f4;color:#fff" title="Agendar en Google Calendar"><i class="fab fa-google"></i></a> ';

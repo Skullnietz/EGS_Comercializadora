@@ -76,6 +76,15 @@
                             </div>
                         </div>
 
+                        <!-- Comentarios / Observaciones -->
+                        <div class="form-group">
+                            <label for="descripcionCita"><i class="fa fa-comment-dots" style="margin-right:4px;color:#6366f1"></i> Comentarios / Observaciones</label>
+                            <textarea class="form-control" id="descripcionCita" name="descripcionCita" rows="3"
+                                placeholder="¿De qué trata la cita? Ej: Revisión de pantalla, entrega de equipo, seguimiento de presupuesto..."
+                                style="resize:vertical;min-height:60px;border-radius:6px;"></textarea>
+                            <small class="text-muted" style="font-size:11px;">Opcional — Esta información aparecerá al consultar la cita</small>
+                        </div>
+
                         <!-- Color automático basado en calificación del cliente -->
                         <div class="form-group">
                             <label>Color de Etiqueta (automático)</label>

@@ -54,6 +54,7 @@ class AjaxCitas
     public $start;
     public $color;
     public $idOrden;
+    public $descripcion;
 
     public function ajaxGuardarCita()
     {
@@ -64,7 +65,7 @@ class AjaxCitas
             "title" => $this->titulo,
             "start" => $this->start,
             "end" => $this->start,
-            "description" => "",
+            "description" => $this->descripcion,
             "color" => $this->color,
             "id_orden" => $this->idOrden
         );
@@ -149,6 +150,7 @@ if (isset($_POST["tituloCita"])) {
         $guardar->start = $fecha;
         $guardar->color = $_POST["colorCita"];
         $guardar->idOrden = $idOrden;
+        $guardar->descripcion = isset($_POST["descripcionCita"]) ? $_POST["descripcionCita"] : "";
         $guardar->ajaxGuardarCita();
     }
 }
