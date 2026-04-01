@@ -544,6 +544,11 @@ function _egsEstadoClass($estado) {
 								<i class="fab fa-whatsapp"></i> <?php echo htmlspecialchars($_wb['label']); ?>
 							</a>
 							<?php endforeach; ?>
+							<a class="btn btn-sm" href="index.php?ruta=pantallacitas" target="_blank"
+							   style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;"
+							   onclick="event.preventDefault();_egsAgendarCitaDesdeOrden();">
+								<i class="fa-regular fa-calendar-plus"></i> Agendar Cita
+							</a>
 						</div>
 						<?php endif; ?>
 					</div>
@@ -1900,6 +1905,12 @@ function _egsCopiarFallback(texto, cb) {
 
 <!-- JS: Agendar cita desde observaciones de orden -->
 <script>
+// Agendar cita desde la sección de datos del cliente
+function _egsAgendarCitaDesdeOrden() {
+  lockCitaFields(<?php echo intval($value["id"]); ?>);
+  $('#modalCitaRapida').modal('show');
+}
+
 // Bloquear campos cuando se abre desde una orden
 function lockCitaFields(idOrden) {
   $('#crTitulo').val('Cita Orden #' + idOrden).prop('readonly', true)
