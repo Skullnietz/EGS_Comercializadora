@@ -243,17 +243,21 @@ document.addEventListener('DOMContentLoaded', function () {
             var idOrden = props.id_orden;
             var hasOrden = idOrden && parseInt(idOrden) > 0;
             var portada = hasOrden ? (props.orden_portada || '') : '';
-            // Si hay multimedia con más de 1 imagen, usar la segunda (la primera es portada)
-            var heroImg = portada;
+            // Construir array de imágenes para galería hero
+            var heroImages = [];
             if (hasOrden && props.orden_multimedia) {
                 try {
                     var mmArr = typeof props.orden_multimedia === 'string' ? JSON.parse(props.orden_multimedia) : props.orden_multimedia;
-                    if (Array.isArray(mmArr) && mmArr.length > 1 && mmArr[1].foto) {
-                        heroImg = mmArr[1].foto;
+                    if (Array.isArray(mmArr)) {
+                        for (var mi = 0; mi < mmArr.length; mi++) {
+                            if (mmArr[mi].foto) heroImages.push(mmArr[mi].foto);
+                        }
                     }
                 } catch(e) {}
             }
-            var hasHero = hasOrden && portada;
+            // Si no hay multimedia, usar portada como única imagen
+            if (heroImages.length === 0 && portada) heroImages.push(portada);
+            var hasHero = hasOrden && heroImages.length > 0;
 
             // Fecha string
             var fechaStr = '';
@@ -280,10 +284,49 @@ document.addEventListener('DOMContentLoaded', function () {
                 $el.text(estado).css({ background: ec.bg, color: ec.color, border: '1px solid ' + ec.border }).show();
             }
 
-            // ═══ HERO MODE (order + portada) ═══
+            // ═══ HERO MODE (galería de imágenes) ═══
             if (hasHero) {
+                // Construir slides
+                var trackHtml = '';
+                for (var hi = 0; hi < heroImages.length; hi++) {
+                    trackHtml += '<img src="' + heroImages[hi] + '" style="width:100%;height:220px;object-fit:cover;flex-shrink:0;display:block;">';
+                }
+                $('#dcHeroTrack').html(trackHtml);
+
+                // Reset galería
+                var heroIdx = 0;
+                var heroTotal = heroImages.length;
+                function heroGoTo(idx) {
+                    if (idx < 0) idx = heroTotal - 1;
+                    if (idx >= heroTotal) idx = 0;
+                    heroIdx = idx;
+                    $('#dcHeroTrack').css('transform', 'translateX(-' + (heroIdx * 100) + '%)');
+                    $('#dcHeroCounter').text((heroIdx + 1) + ' / ' + heroTotal);
+                    $('#dcHeroDots .egs-hero-dot').removeClass('active').eq(heroIdx).addClass('active');
+                }
+
+                if (heroTotal > 1) {
+                    // Mostrar navegación
+                    $('#dcHeroPrev').show(); $('#dcHeroNext').show();
+                    var dotsHtml = '';
+                    for (var di = 0; di < heroTotal; di++) {
+                        dotsHtml += '<span class="egs-hero-dot' + (di === 0 ? ' active' : '') + '"></span>';
+                    }
+                    $('#dcHeroDots').html(dotsHtml).css('display', 'flex');
+                    $('#dcHeroCounter').text('1 / ' + heroTotal).show();
+
+                    $('#dcHeroPrev').off('click').on('click', function(e) { e.stopPropagation(); heroGoTo(heroIdx - 1); });
+                    $('#dcHeroNext').off('click').on('click', function(e) { e.stopPropagation(); heroGoTo(heroIdx + 1); });
+                    $('#dcHeroDots').off('click', '.egs-hero-dot').on('click', '.egs-hero-dot', function(e) {
+                        e.stopPropagation(); heroGoTo($(this).index());
+                    });
+                } else {
+                    $('#dcHeroPrev').hide(); $('#dcHeroNext').hide();
+                    $('#dcHeroDots').hide(); $('#dcHeroCounter').hide();
+                }
+                heroGoTo(0);
+
                 $('#dcHero').show();
-                $('#dcHeroImg').attr('src', heroImg);
                 $('#dcHeroOrdenNum').text('Orden #' + idOrden);
                 $('#dcHeroTitle').text(ev.title || 'Sin título');
                 $('#dcHeroFechaHora span').text(fechaStr);

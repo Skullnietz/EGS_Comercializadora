@@ -162,12 +162,24 @@
     <div class="modal-dialog" role="document" style="max-width:560px;margin:50px auto;">
         <div class="modal-content" style="border-radius:14px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(15,23,42,.22);">
 
-            <!-- ═══ HERO: imagen del equipo + overlay (solo si tiene orden con portada) ═══ -->
+            <!-- ═══ HERO: galería de imágenes + overlay ═══ -->
             <div id="dcHero" style="position:relative;display:none;">
-                <img id="dcHeroImg" src="" style="width:100%;height:200px;object-fit:cover;display:block;">
-                <div id="dcHeroOverlay" style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,23,42,.85) 0%,rgba(15,23,42,.3) 100%);"></div>
-                <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:.9;text-shadow:none;font-size:22px;position:absolute;right:16px;top:12px;z-index:2;">&times;</button>
-                <div style="position:absolute;bottom:0;left:0;right:0;padding:18px 24px;z-index:1;">
+                <!-- Galería -->
+                <div id="dcHeroGallery" style="position:relative;width:100%;height:220px;overflow:hidden;">
+                    <div id="dcHeroTrack" style="display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);">
+                        <!-- Imágenes se insertan vía JS -->
+                    </div>
+                    <!-- Flechas de navegación -->
+                    <button type="button" id="dcHeroPrev" class="egs-hero-nav egs-hero-nav-prev" style="display:none;"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button type="button" id="dcHeroNext" class="egs-hero-nav egs-hero-nav-next" style="display:none;"><i class="fa-solid fa-chevron-right"></i></button>
+                    <!-- Indicadores (dots) -->
+                    <div id="dcHeroDots" style="position:absolute;bottom:68px;left:50%;transform:translateX(-50%);display:none;z-index:3;gap:5px;"></div>
+                    <!-- Contador -->
+                    <span id="dcHeroCounter" style="display:none;position:absolute;top:12px;left:16px;z-index:3;font-size:11px;font-weight:600;color:#fff;background:rgba(0,0,0,.45);padding:3px 10px;border-radius:20px;backdrop-filter:blur(4px);"></span>
+                </div>
+                <div id="dcHeroOverlay" style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,23,42,.85) 0%,rgba(15,23,42,.3) 100%);pointer-events:none;"></div>
+                <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:.9;text-shadow:none;font-size:22px;position:absolute;right:16px;top:12px;z-index:4;">&times;</button>
+                <div style="position:absolute;bottom:0;left:0;right:0;padding:18px 24px;z-index:2;">
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
                         <span id="dcHeroOrdenNum" style="font-size:13px;font-weight:700;color:#fff;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:6px;backdrop-filter:blur(4px);"></span>
                         <span id="dcHeroEstadoBadge" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;"></span>
@@ -424,6 +436,24 @@
     .egs-dc-indicador-body { flex:1;min-width:0; }
     .egs-dc-indicador-val { font-size:14px;font-weight:800; }
     .egs-dc-indicador-lbl { font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.03em;margin-top:1px; }
+
+    /* ═══ Hero Gallery ═══ */
+    .egs-hero-nav {
+        position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+        width:32px;height:32px;border-radius:50%;border:none;
+        background:rgba(0,0,0,.45);color:#fff;font-size:13px;
+        display:flex;align-items:center;justify-content:center;
+        cursor:pointer;backdrop-filter:blur(4px);transition:background .15s;
+    }
+    .egs-hero-nav:hover { background:rgba(0,0,0,.7); }
+    .egs-hero-nav-prev { left:10px; }
+    .egs-hero-nav-next { right:10px; }
+    .egs-hero-dot {
+        width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4);
+        cursor:pointer;transition:all .2s;
+    }
+    .egs-hero-dot.active { background:#fff;transform:scale(1.3); }
+    .egs-hero-dot:hover { background:rgba(255,255,255,.8); }
 
     /* ═══ FullCalendar Overrides ═══ */
     .fc .fc-event, .fc .fc-event-dot { background-color: inherit !important; border-color: inherit !important; }
