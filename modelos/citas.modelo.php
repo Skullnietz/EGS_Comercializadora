@@ -24,10 +24,13 @@ class ModeloCitas
 		if (empty($ordenIds)) return $citas;
 		$ordenIds = array_unique($ordenIds);
 
-		// Consultar ordenes (BD WordPress/respaldo)
+		// Consultar ordenes (BD WordPress/respaldo) — traer campos completos
 		$in = implode(',', $ordenIds);
 		try {
-			$stmt = ConexionWP::conectarWP()->prepare("SELECT id, descripcion, id_usuario FROM ordenes WHERE id IN ($in)");
+			$stmt = ConexionWP::conectarWP()->prepare(
+				"SELECT id, descripcion, id_usuario, id_tecnico, id_tecnicoDos, id_Asesor, estado, portada, marcaDelEquipo, modeloDelEquipo, fecha_ingreso, total
+				 FROM ordenes WHERE id IN ($in)"
+			);
 			$stmt->execute();
 			$ordenes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			$stmt = null;
@@ -35,14 +38,17 @@ class ModeloCitas
 			return $citas;
 		}
 
-		// Mapear ordenes por ID
+		// Mapear ordenes por ID y recolectar IDs de usuarios relacionados
 		$ordenMap = array();
 		$clienteIds = array();
+		$tecnicoIds = array();
+		$asesorIds = array();
 		foreach ($ordenes as $o) {
 			$ordenMap[intval($o["id"])] = $o;
-			if (!empty($o["id_usuario"])) {
-				$clienteIds[] = intval($o["id_usuario"]);
-			}
+			if (!empty($o["id_usuario"])) $clienteIds[] = intval($o["id_usuario"]);
+			if (!empty($o["id_tecnico"])) $tecnicoIds[] = intval($o["id_tecnico"]);
+			if (!empty($o["id_tecnicoDos"])) $tecnicoIds[] = intval($o["id_tecnicoDos"]);
+			if (!empty($o["id_Asesor"])) $asesorIds[] = intval($o["id_Asesor"]);
 		}
 
 		// Consultar clientes (BD ecommerce)
@@ -51,12 +57,57 @@ class ModeloCitas
 			$clienteIds = array_unique($clienteIds);
 			$inCl = implode(',', $clienteIds);
 			try {
-				$stmt2 = Conexion::conectar()->prepare("SELECT id, nombre FROM clientes WHERE id IN ($inCl)");
+				$stmt2 = Conexion::conectar()->prepare("SELECT id, nombre, telefono, telefonoDos FROM clientes WHERE id IN ($inCl)");
 				$stmt2->execute();
 				$clientes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 				$stmt2 = null;
 				foreach ($clientes as $cl) {
-					$clienteMap[intval($cl["id"])] = $cl["nombre"];
+					$clienteMap[intval($cl["id"])] = $cl;
+				}
+			} catch (Exception $e) {}
+		}
+
+		// Consultar técnicos (BD ecommerce — tabla usuarios)
+		$tecnicoMap = array();
+		if (!empty($tecnicoIds)) {
+			$tecnicoIds = array_unique($tecnicoIds);
+			$inTec = implode(',', $tecnicoIds);
+			try {
+				$stmtTec = Conexion::conectar()->prepare("SELECT id, nombre, foto FROM usuarios WHERE id IN ($inTec)");
+				$stmtTec->execute();
+				$tecnicos = $stmtTec->fetchAll(PDO::FETCH_ASSOC);
+				$stmtTec = null;
+				foreach ($tecnicos as $t) {
+					$tecnicoMap[intval($t["id"])] = $t;
+				}
+			} catch (Exception $e) {}
+		}
+
+		// Consultar asesores (BD ecommerce — tabla usuarios)
+		$asesorMap = array();
+		if (!empty($asesorIds)) {
+			$asesorIds = array_unique($asesorIds);
+			$inAs = implode(',', $asesorIds);
+			try {
+				$stmtAs = Conexion::conectar()->prepare("SELECT id, nombre, foto FROM usuarios WHERE id IN ($inAs)");
+				$stmtAs->execute();
+				$asesores = $stmtAs->fetchAll(PDO::FETCH_ASSOC);
+				$stmtAs = null;
+				foreach ($asesores as $a) {
+					$asesorMap[intval($a["id"])] = $a;
+				}
+			} catch (Exception $e) {}
+		}
+
+		// Obtener badges de clientes
+		$badgeMap = array();
+		if (!empty($clienteIds)) {
+			try {
+				if (!defined('EGS_ROOT')) define('EGS_ROOT', realpath(__DIR__ . '/..'));
+				require_once __DIR__ . "/../config/clienteBadges.helper.php";
+				$bh = ClienteBadgesHelper::getInstance();
+				foreach ($clienteIds as $cid) {
+					$badgeMap[$cid] = $bh->getDetailedStats($cid);
 				}
 			} catch (Exception $e) {}
 		}
@@ -65,11 +116,49 @@ class ModeloCitas
 		foreach ($citas as &$c) {
 			$c["equipo"] = "";
 			$c["cliente_nombre"] = "";
+			$c["cliente_telefono"] = "";
+			$c["tecnico_nombre"] = "";
+			$c["tecnico_foto"] = "";
+			$c["asesor_nombre"] = "";
+			$c["asesor_foto"] = "";
+			$c["orden_estado"] = "";
+			$c["orden_portada"] = "";
+			$c["orden_marca"] = "";
+			$c["orden_modelo"] = "";
+			$c["orden_total"] = "";
+			$c["orden_fecha_ingreso"] = "";
+			$c["cliente_badges"] = null;
+
 			if (!empty($c["id_orden"]) && isset($ordenMap[intval($c["id_orden"])])) {
 				$o = $ordenMap[intval($c["id_orden"])];
 				$c["equipo"] = isset($o["descripcion"]) ? $o["descripcion"] : "";
+				$c["orden_estado"] = isset($o["estado"]) ? $o["estado"] : "";
+				$c["orden_portada"] = isset($o["portada"]) ? $o["portada"] : "";
+				$c["orden_marca"] = isset($o["marcaDelEquipo"]) ? $o["marcaDelEquipo"] : "";
+				$c["orden_modelo"] = isset($o["modeloDelEquipo"]) ? $o["modeloDelEquipo"] : "";
+				$c["orden_total"] = isset($o["total"]) ? $o["total"] : "";
+				$c["orden_fecha_ingreso"] = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
+
+				// Cliente
 				if (!empty($o["id_usuario"]) && isset($clienteMap[intval($o["id_usuario"])])) {
-					$c["cliente_nombre"] = $clienteMap[intval($o["id_usuario"])];
+					$cl = $clienteMap[intval($o["id_usuario"])];
+					$c["cliente_nombre"] = $cl["nombre"];
+					$c["cliente_telefono"] = !empty($cl["telefonoDos"]) ? $cl["telefonoDos"] : (isset($cl["telefono"]) ? $cl["telefono"] : "");
+					if (isset($badgeMap[intval($o["id_usuario"])])) {
+						$c["cliente_badges"] = $badgeMap[intval($o["id_usuario"])];
+					}
+				}
+				// Técnico
+				if (!empty($o["id_tecnico"]) && isset($tecnicoMap[intval($o["id_tecnico"])])) {
+					$t = $tecnicoMap[intval($o["id_tecnico"])];
+					$c["tecnico_nombre"] = $t["nombre"];
+					$c["tecnico_foto"] = isset($t["foto"]) ? $t["foto"] : "";
+				}
+				// Asesor
+				if (!empty($o["id_Asesor"]) && isset($asesorMap[intval($o["id_Asesor"])])) {
+					$a = $asesorMap[intval($o["id_Asesor"])];
+					$c["asesor_nombre"] = $a["nombre"];
+					$c["asesor_foto"] = isset($a["foto"]) ? $a["foto"] : "";
 				}
 			}
 		}

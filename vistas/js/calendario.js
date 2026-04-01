@@ -1,9 +1,174 @@
 document.addEventListener('DOMContentLoaded', function () {
     var calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
 
-    // Initialize Select2
-    $('.select2').select2();
+    // Initialize Select2 if present
+    if ($.fn.select2) $('.select2').select2();
 
+    /* ═══════════════════════════════════════════
+       Date / Time helpers
+       ═══════════════════════════════════════════ */
+    var diasEs = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    var mesesEs = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+    // Horarios laborales
+    var horasLV  = ['10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','16:00','16:30','17:00','17:30','18:00','18:30'];
+    var horasSab = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30'];
+
+    var pcSelectedFecha = 'hoy';
+    var pcSelectedHora  = '10:00';
+
+    function getNextDayOfWeek(dayIndex) {
+        var d = new Date();
+        var diff = dayIndex - d.getDay();
+        if (diff <= 0) diff += 7;
+        d.setDate(d.getDate() + diff);
+        return d;
+    }
+
+    function calcFecha(tipo) {
+        var d = new Date();
+        switch (tipo) {
+            case 'hoy':       return d;
+            case 'manana':    d.setDate(d.getDate() + 1); return d;
+            case 'lunes':     return getNextDayOfWeek(1);
+            case 'martes':    return getNextDayOfWeek(2);
+            case 'miercoles': return getNextDayOfWeek(3);
+            case 'jueves':    return getNextDayOfWeek(4);
+            case 'viernes':   return getNextDayOfWeek(5);
+            case 'sabado':    return getNextDayOfWeek(6);
+            default:          return d;
+        }
+    }
+
+    function esSabado(dow)  { return dow === 6; }
+    function esDomingo(dow) { return dow === 0; }
+    function getHorasParaDia(dow) {
+        if (esSabado(dow))  return horasSab;
+        if (esDomingo(dow)) return [];
+        return horasLV;
+    }
+
+    function pcRenderTimeGrid() {
+        var d = pcSelectedFecha === 'personalizado'
+            ? (function(){ var v = $('#pcFechaCustom').val(); return v ? new Date(v.replace(/-/g,'/')) : new Date(); })()
+            : calcFecha(pcSelectedFecha);
+
+        var dow = d.getDay();
+        var horas = getHorasParaDia(dow);
+        var $grid = $('#pcTimeGrid');
+        var $info = $('#pcHorarioTexto');
+
+        if (esDomingo(dow)) {
+            $grid.html('<div style="text-align:center;padding:12px;color:#ef4444;font-size:12px;"><i class="fa-solid fa-ban" style="margin-right:5px;"></i>Domingo no disponible — elige otro día</div>');
+            $info.text('Domingos no se atiende');
+            $('#pcHorarioInfo').css({'background':'#fef2f2','border-color':'#fecaca','color':'#991b1b'});
+            pcSelectedHora = '';
+            return;
+        }
+
+        $info.text(esSabado(dow) ? 'Sábado: 9:00 – 14:30' : 'L-V: 10:00–14:00 y 16:00–18:30');
+        $('#pcHorarioInfo').css({'background':'#fffbeb','border-color':'#fde68a','color':'#92400e'});
+
+        // Filtrar horas pasadas si es hoy
+        var esHoy = false;
+        var ahora = new Date();
+        var hoyDate = new Date(); hoyDate.setHours(0,0,0,0);
+        var fechaSel = new Date(d); fechaSel.setHours(0,0,0,0);
+        if (fechaSel.getTime() === hoyDate.getTime()) esHoy = true;
+
+        var horaActual = ahora.getHours().toString().padStart(2,'0') + ':' + ahora.getMinutes().toString().padStart(2,'0');
+        var horasFiltradas = esHoy ? horas.filter(function(h){ return h > horaActual; }) : horas;
+
+        if (esHoy && horasFiltradas.length === 0) {
+            $grid.html('<div style="text-align:center;padding:12px;color:#d97706;font-size:12px;"><i class="fa-solid fa-clock" style="margin-right:5px;"></i>Ya no hay horarios disponibles hoy — elige otro día</div>');
+            pcSelectedHora = '';
+            return;
+        }
+
+        var html = '';
+        var found = false;
+        horasFiltradas.forEach(function(h) {
+            var isActive = (h === pcSelectedHora);
+            if (isActive) found = true;
+            html += '<button type="button" class="egs-pc-time-chip' + (isActive ? ' active' : '') + '" data-hora="' + h + '">' + h + '</button>';
+        });
+        $grid.html(html);
+
+        if (!found && horasFiltradas.length) {
+            pcSelectedHora = horasFiltradas[0];
+            $grid.find('.egs-pc-time-chip').first().addClass('active');
+        }
+    }
+
+    function pcUpdateDatePreview() {
+        var d;
+        if (pcSelectedFecha === 'personalizado') {
+            var val = $('#pcFechaCustom').val();
+            d = val ? new Date(val.replace(/-/g,'/')) : new Date();
+        } else {
+            d = calcFecha(pcSelectedFecha);
+        }
+        var txt = diasEs[d.getDay()] + ' ' + d.getDate() + ' de ' + mesesEs[d.getMonth()];
+        if (pcSelectedHora) txt += ' — ' + pcSelectedHora;
+        $('#pcDatePreviewText').text(txt);
+    }
+
+    function pcBuildFechaFinal() {
+        var d;
+        if (pcSelectedFecha === 'personalizado') {
+            var val = $('#pcFechaCustom').val();
+            if (!val) return null;
+            d = new Date(val.replace(/-/g,'/'));
+        } else {
+            d = calcFecha(pcSelectedFecha);
+        }
+        if (esDomingo(d.getDay()) || !pcSelectedHora) return null;
+
+        var yyyy = d.getFullYear();
+        var mm = (d.getMonth() + 1).toString().padStart(2,'0');
+        var dd = d.getDate().toString().padStart(2,'0');
+        return yyyy + '-' + mm + '-' + dd + 'T' + pcSelectedHora;
+    }
+
+    // Initialize time grid
+    pcRenderTimeGrid();
+    pcUpdateDatePreview();
+
+    // Date chip click
+    $(document).on('click', '.egs-pc-qd-chip', function() {
+        var fecha = $(this).data('fecha');
+        if (!fecha) return;
+        $('.egs-pc-qd-chip').removeClass('active');
+        $(this).addClass('active');
+        pcSelectedFecha = fecha;
+        if (fecha === 'personalizado') {
+            $('#pcCustomDateWrap').slideDown(150);
+        } else {
+            $('#pcCustomDateWrap').slideUp(150);
+        }
+        pcRenderTimeGrid();
+        pcUpdateDatePreview();
+    });
+
+    $('#pcFechaCustom').on('change', function() {
+        pcRenderTimeGrid();
+        pcUpdateDatePreview();
+    });
+
+    // Time chip click
+    $(document).on('click', '.egs-pc-time-chip', function() {
+        var hora = $(this).data('hora');
+        if (!hora) return;
+        $('.egs-pc-time-chip').removeClass('active');
+        $(this).addClass('active');
+        pcSelectedHora = hora;
+        pcUpdateDatePreview();
+    });
+
+    /* ═══════════════════════════════════════════
+       FullCalendar Init
+       ═══════════════════════════════════════════ */
     var calendar = new FullCalendar.Calendar(calendarEl, {
         headerToolbar: {
             left: 'prev,next today',
@@ -17,134 +182,344 @@ document.addEventListener('DOMContentLoaded', function () {
         editable: true,
         selectable: true,
 
-        // Cargar eventos desde BD via AJAX
         events: {
             url: 'ajax/citas.ajax.php',
             method: 'POST',
-            extraParams: {
-                accion: 'mostrar'
-            },
-            failure: function () {
-                console.log('Error al cargar eventos');
-            }
+            extraParams: { accion: 'mostrar' },
+            failure: function () { console.log('Error al cargar eventos'); }
         },
 
-        // Al hacer click en una fecha
         dateClick: function (info) {
             document.getElementById('formularioCita').reset();
-            var dateStr = info.dateStr;
-            if (dateStr.length === 10) {
-                dateStr += 'T09:00';
+            // Set date from clicked cell — find matching chip or use custom
+            var clickedDate = new Date(info.dateStr.replace(/-/g,'/'));
+            var hoy = new Date(); hoy.setHours(0,0,0,0);
+            var diff = Math.round((clickedDate - hoy) / 86400000);
+
+            var chipMap = { 0: 'hoy', 1: 'manana' };
+            var dowMap = { 1: 'lunes', 2: 'martes', 3: 'miercoles', 4: 'jueves', 5: 'viernes', 6: 'sabado' };
+
+            if (chipMap[diff] !== undefined) {
+                pcSelectedFecha = chipMap[diff];
+            } else if (diff > 1 && diff <= 7 && dowMap[clickedDate.getDay()]) {
+                pcSelectedFecha = dowMap[clickedDate.getDay()];
+            } else {
+                pcSelectedFecha = 'personalizado';
+                var yy = clickedDate.getFullYear();
+                var mmm = (clickedDate.getMonth()+1).toString().padStart(2,'0');
+                var ddd = clickedDate.getDate().toString().padStart(2,'0');
+                $('#pcFechaCustom').val(yy + '-' + mmm + '-' + ddd);
+                $('#pcCustomDateWrap').show();
             }
-            document.getElementById('fechaCita').value = dateStr;
+
+            // Update chips visual
+            $('.egs-pc-qd-chip').removeClass('active');
+            $('.egs-pc-qd-chip[data-fecha="' + pcSelectedFecha + '"]').addClass('active');
+            if (pcSelectedFecha !== 'personalizado') $('#pcCustomDateWrap').hide();
+
+            pcRenderTimeGrid();
+            pcUpdateDatePreview();
+
             $('#modalAgregarCita').modal('show');
         },
 
-        // Al hacer click en un evento
+        // ═══ Event Click → Rich Detail Modal ═══
         eventClick: function (info) {
-            var idOrden = info.event.extendedProps.id_orden;
-            var descripcion = info.event.extendedProps.description || '';
-            var clienteNombre = info.event.extendedProps.cliente_nombre || '';
-            var equipo = info.event.extendedProps.equipo || '';
+            var ev = info.event;
+            var props = ev.extendedProps;
 
-            var textoInfo = 'Fecha: ' + info.event.start.toLocaleString();
-            if (idOrden) textoInfo += '\nOrden #' + idOrden;
-            if (clienteNombre) textoInfo += '\nCliente: ' + clienteNombre;
-            if (equipo) textoInfo += '\nEquipo: ' + equipo;
-            if (descripcion) textoInfo += '\n\n📝 ' + descripcion;
+            // Header — color based on the event
+            var evColor = ev.backgroundColor || '#6366f1';
+            $('#dcHeader').css('background', 'linear-gradient(135deg, ' + evColor + ', ' + adjustColor(evColor, -20) + ')');
+            $('#dcTitle').text(ev.title || 'Sin título');
 
-            swal({
-                title: info.event.title,
-                text: textoInfo,
-                icon: 'info',
-                buttons: {
-                    cancel: { text: 'Cerrar', visible: true },
-                    verOrden: { text: 'Ver Orden', value: 'verOrden', className: 'swal-btn-info' },
-                    googleCal: { text: 'Google Calendar', value: 'googleCal', className: 'swal-btn-gcal' },
-                    eliminar: { text: 'Eliminar', value: 'eliminar', className: 'swal-btn-danger' }
+            // Fecha y hora
+            if (ev.start) {
+                var fechaStr = diasEs[ev.start.getDay()] + ' ' + ev.start.getDate() + ' de ' + mesesEs[ev.start.getMonth()] + ', ' +
+                    ev.start.getHours().toString().padStart(2,'0') + ':' + ev.start.getMinutes().toString().padStart(2,'0');
+                $('#dcFechaHora span').text(fechaStr);
+            }
+
+            // Orden info
+            var idOrden = props.id_orden;
+            if (idOrden) {
+                $('#dcOrdenNum').text('Orden #' + idOrden);
+                $('#dcBtnOrden').attr('href', 'index.php?ruta=infoOrden&idOrden=' + idOrden).show();
+            } else {
+                $('#dcOrdenNum').text('Sin orden vinculada');
+                $('#dcBtnOrden').hide();
+            }
+
+            // Foto del equipo
+            var portada = props.orden_portada;
+            if (portada) {
+                $('#dcFoto').attr('src', portada).show();
+                $('#dcFotoPlaceholder').hide();
+            } else {
+                $('#dcFoto').hide();
+                $('#dcFotoPlaceholder').show();
+            }
+
+            // Estado
+            var estado = props.orden_estado || '';
+            var $badge = $('#dcEstadoBadge');
+            if (estado) {
+                var estadoColors = {
+                    'Ent': { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
+                    'ok':  { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
+                    'ter': { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
+                    'REV': { bg: '#fffbeb', color: '#d97706', border: '#fde68a' },
+                    'AUT': { bg: '#fef2f2', color: '#dc2626', border: '#fecaca' },
+                    'SUP': { bg: '#faf5ff', color: '#8b5cf6', border: '#e9d5ff' }
+                };
+                var ec = null;
+                Object.keys(estadoColors).forEach(function(k) { if (estado.indexOf(k) !== -1) ec = estadoColors[k]; });
+                if (!ec) ec = { bg: '#f1f5f9', color: '#64748b', border: '#e2e8f0' };
+                $badge.text(estado).css({ background: ec.bg, color: ec.color, border: '1px solid ' + ec.border }).show();
+            } else {
+                $badge.hide();
+            }
+
+            // Equipo
+            var equipo = props.equipo || '';
+            $('#dcEquipo').text(equipo || 'Sin descripción');
+
+            // Marca/Modelo
+            var marca = props.orden_marca || '';
+            var modelo = props.orden_modelo || '';
+            var mm = [marca, modelo].filter(Boolean).join(' · ');
+            $('#dcMarcaModelo').text(mm).toggle(!!mm);
+
+            // Descripción/Notas
+            var desc = props.description || '';
+            if (desc) {
+                $('#dcDescripcion').text(desc);
+                $('#dcDescSection').show();
+            } else {
+                $('#dcDescSection').hide();
+            }
+
+            // Cliente
+            var clienteNombre = props.cliente_nombre || '';
+            if (clienteNombre) {
+                var initials = clienteNombre.split(' ').map(function(w){ return w.charAt(0).toUpperCase(); }).slice(0,2).join('');
+                $('#dcClienteAvatar').text(initials);
+                $('#dcClienteNombre').text(clienteNombre);
+                $('#dcClienteSection').show();
+
+                // Teléfono
+                var tel = props.cliente_telefono || '';
+                if (tel) {
+                    $('#dcClienteTel span').text(tel);
+                    $('#dcClienteTel').show();
+                    // WhatsApp link
+                    var waNum = tel.replace(/\D/g,'');
+                    if (waNum.length === 10) waNum = '52' + waNum;
+                    $('#dcBtnWhatsApp').attr('href', 'https://wa.me/' + waNum).show();
+                } else {
+                    $('#dcClienteTel').hide();
+                    $('#dcBtnWhatsApp').hide();
                 }
-            }).then(function (value) {
-                if (value === 'verOrden') {
-                    if (idOrden) {
-                        window.location = 'index.php?ruta=infoOrden&idOrden=' + idOrden;
-                    } else {
-                        swal('Sin orden', 'Esta cita no tiene una orden vinculada.', 'warning');
+
+                // Badges
+                var badges = props.cliente_badges;
+                var badgesHtml = '';
+                if (badges) {
+                    // Calificación de entrega badge
+                    if (badges.es_nuevo) {
+                        badgesHtml += buildBadge('fa-seedling', '#f5f3ff', '#8b5cf6', 'Cliente nuevo');
+                    } else if (badges.calif_entrega !== null) {
+                        if (badges.calif_entrega >= 90)      badgesHtml += buildBadge('fa-star', '#f0fdf4', '#16a34a', 'Excelente (' + badges.calif_entrega + '%)');
+                        else if (badges.calif_entrega >= 70)  badgesHtml += buildBadge('fa-thumbs-up', '#eff6ff', '#2563eb', 'Bueno (' + badges.calif_entrega + '%)');
+                        else if (badges.calif_entrega >= 50)  badgesHtml += buildBadge('fa-minus-circle', '#fffbeb', '#d97706', 'Regular (' + badges.calif_entrega + '%)');
+                        else                                  badgesHtml += buildBadge('fa-thumbs-down', '#fef2f2', '#dc2626', 'Bajo (' + badges.calif_entrega + '%)');
                     }
-                } else if (value === 'googleCal') {
-                    // Generar URL de Google Calendar
-                    var startDate = info.event.start;
-                    var endDate = info.event.end || new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hora si no hay fin
-
-                    function formatGCalDate(d) {
-                        return d.getFullYear().toString() +
-                            ('0' + (d.getMonth() + 1)).slice(-2) +
-                            ('0' + d.getDate()).slice(-2) + 'T' +
-                            ('0' + d.getHours()).slice(-2) +
-                            ('0' + d.getMinutes()).slice(-2) +
-                            ('0' + d.getSeconds()).slice(-2);
+                    // Pickup speed badge
+                    if (badges.avg_recogida !== null) {
+                        var ar = badges.avg_recogida;
+                        if (ar <= 7)       badgesHtml += buildBadge('fa-bolt', '#f0fdf4', '#16a34a', '~' + Math.round(ar) + ' días');
+                        else if (ar <= 14) badgesHtml += buildBadge('fa-clock', '#eff6ff', '#2563eb', '~' + Math.round(ar) + ' días');
+                        else if (ar <= 30) badgesHtml += buildBadge('fa-hourglass-half', '#fffbeb', '#d97706', '~' + Math.round(ar) + ' días');
+                        else               badgesHtml += buildBadge('fa-hourglass-end', '#fef2f2', '#dc2626', '~' + Math.round(ar) + ' días');
                     }
 
-                    var detalles = [];
-                    if (idOrden) detalles.push('Orden #' + idOrden);
-                    var clienteNombre = info.event.extendedProps.cliente_nombre;
-                    if (clienteNombre) detalles.push('Cliente: ' + clienteNombre);
-                    var equipo = info.event.extendedProps.equipo;
-                    if (equipo) detalles.push('Equipo: ' + equipo);
-                    if (descripcion) detalles.push('\nNotas: ' + descripcion);
+                    // Mini stats
+                    var statsHtml = '<div class="egs-dc-mini-stats">';
+                    statsHtml += '<div class="egs-dc-mini-stat"><div class="egs-dc-mini-stat-val" style="color:#1e293b;">' + (badges.total_ordenes || 0) + '</div><div class="egs-dc-mini-stat-lbl">Órdenes</div></div>';
+                    statsHtml += '<div class="egs-dc-mini-stat"><div class="egs-dc-mini-stat-val" style="color:#16a34a;">' + (badges.entregadas || 0) + '</div><div class="egs-dc-mini-stat-lbl">Entregadas</div></div>';
+                    statsHtml += '<div class="egs-dc-mini-stat"><div class="egs-dc-mini-stat-val" style="color:#ef4444;">' + (badges.canceladas || 0) + '</div><div class="egs-dc-mini-stat-lbl">Canceladas</div></div>';
+                    statsHtml += '</div>';
+                    $('#dcClienteStats').html(statsHtml).show();
+                } else {
+                    $('#dcClienteStats').hide();
+                }
+                $('#dcClienteBadges').html(badgesHtml);
+            } else {
+                $('#dcClienteSection').hide();
+                $('#dcBtnWhatsApp').hide();
+            }
 
-                    var gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
-                        '&text=' + encodeURIComponent(info.event.title) +
-                        '&dates=' + formatGCalDate(startDate) + '/' + formatGCalDate(endDate) +
-                        (detalles.length ? '&details=' + encodeURIComponent(detalles.join('\n')) : '');
+            // Técnico
+            var tecNombre = props.tecnico_nombre || '';
+            if (tecNombre) {
+                $('#dcTecnicoNombre').text(tecNombre);
+                var tecFoto = props.tecnico_foto;
+                if (tecFoto) {
+                    $('#dcTecnicoFoto').attr('src', tecFoto).show();
+                    $('#dcTecnicoIcon').hide();
+                } else {
+                    $('#dcTecnicoFoto').hide();
+                    $('#dcTecnicoIcon').show();
+                }
+                $('#dcTecnicoBlock').show();
+            } else {
+                $('#dcTecnicoBlock').hide();
+            }
 
-                    window.open(gcalUrl, '_blank');
-                } else if (value === 'eliminar') {
-                    swal({
-                        title: '¿Estás seguro?',
-                        text: 'Se eliminará la cita "' + info.event.title + '"',
-                        icon: 'warning',
-                        buttons: ['Cancelar', 'Sí, eliminar'],
-                        dangerMode: true
-                    }).then(function (confirmar) {
-                        if (confirmar) {
-                            var datos = new FormData();
-                            datos.append("idCita", info.event.id);
+            // Asesor
+            var aseNombre = props.asesor_nombre || '';
+            if (aseNombre) {
+                $('#dcAsesorNombre').text(aseNombre);
+                var aseFoto = props.asesor_foto;
+                if (aseFoto) {
+                    $('#dcAsesorFoto').attr('src', aseFoto).show();
+                    $('#dcAsesorIcon').hide();
+                } else {
+                    $('#dcAsesorFoto').hide();
+                    $('#dcAsesorIcon').show();
+                }
+                $('#dcAsesorBlock').show();
+            } else {
+                $('#dcAsesorBlock').hide();
+            }
 
-                            $.ajax({
-                                url: "ajax/citas.ajax.php",
-                                method: "POST",
-                                data: datos,
-                                cache: false,
-                                contentType: false,
-                                processData: false,
-                                success: function (respuesta) {
-                                    if (respuesta == "ok") {
-                                        info.event.remove();
-                                        swal('Eliminado!', 'La cita ha sido eliminada.', 'success');
-                                    } else {
-                                        swal('Error', 'No se pudo eliminar la cita', 'error');
-                                    }
+            // Hide equipo section row if both empty
+            if (!tecNombre && !aseNombre) {
+                $('#dcEquipoSection').hide();
+            } else {
+                $('#dcEquipoSection').show();
+            }
+
+            // Total
+            var total = props.orden_total;
+            if (total && parseFloat(total) > 0) {
+                $('#dcTotal').text('$' + parseFloat(total).toLocaleString('es-MX', {minimumFractionDigits:2}));
+                $('#dcTotalBlock').show();
+            } else {
+                $('#dcTotalBlock').hide();
+            }
+
+            // Fecha Ingreso
+            var fechaIng = props.orden_fecha_ingreso;
+            if (fechaIng) {
+                var fi = new Date(fechaIng.replace(/-/g,'/'));
+                if (!isNaN(fi)) {
+                    $('#dcFechaIngreso').text(fi.getDate() + ' ' + mesesEs[fi.getMonth()].substring(0,3) + ' ' + fi.getFullYear());
+                } else {
+                    $('#dcFechaIngreso').text(fechaIng);
+                }
+                $('#dcFechaIngresoBlock').show();
+            } else {
+                $('#dcFechaIngresoBlock').hide();
+            }
+
+            // Google Calendar URL
+            if (ev.start) {
+                var startDate = ev.start;
+                var endDate = ev.end || new Date(startDate.getTime() + 60 * 60 * 1000);
+                var detalles = [];
+                if (idOrden) detalles.push('Orden #' + idOrden);
+                if (clienteNombre) detalles.push('Cliente: ' + clienteNombre);
+                if (equipo) detalles.push('Equipo: ' + equipo);
+                if (desc) detalles.push('\nNotas: ' + desc);
+
+                var gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+                    '&text=' + encodeURIComponent(ev.title) +
+                    '&dates=' + formatGCalDate(startDate) + '/' + formatGCalDate(endDate) +
+                    (detalles.length ? '&details=' + encodeURIComponent(detalles.join('\n')) : '');
+                $('#dcBtnGCal').attr('href', gcalUrl).show();
+            } else {
+                $('#dcBtnGCal').hide();
+            }
+
+            // Eliminar handler
+            $('#dcBtnEliminar').off('click').on('click', function() {
+                swal({
+                    title: '¿Estás seguro?',
+                    text: 'Se eliminará la cita "' + ev.title + '"',
+                    icon: 'warning',
+                    buttons: ['Cancelar', 'Sí, eliminar'],
+                    dangerMode: true
+                }).then(function(confirmar) {
+                    if (confirmar) {
+                        var datos = new FormData();
+                        datos.append("idCita", ev.id);
+                        $.ajax({
+                            url: "ajax/citas.ajax.php",
+                            method: "POST",
+                            data: datos,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            success: function(resp) {
+                                if (resp == "ok") {
+                                    ev.remove();
+                                    $('#modalDetalleCita').modal('hide');
+                                    swal('Eliminado', 'La cita ha sido eliminada.', 'success');
+                                } else {
+                                    swal('Error', 'No se pudo eliminar la cita', 'error');
                                 }
-                            });
-                        }
-                    });
-                }
+                            }
+                        });
+                    }
+                });
             });
+
+            // Open modal
+            $('#modalDetalleCita').modal('show');
         }
     });
 
     calendar.render();
 
-    // Auto-color: buscar calificación del cliente al cambiar ID de orden
+    /* ═══════════════════════════════════════════
+       Helper Functions
+       ═══════════════════════════════════════════ */
+    function formatGCalDate(d) {
+        return d.getFullYear().toString() +
+            ('0' + (d.getMonth() + 1)).slice(-2) +
+            ('0' + d.getDate()).slice(-2) + 'T' +
+            ('0' + d.getHours()).slice(-2) +
+            ('0' + d.getMinutes()).slice(-2) +
+            ('0' + d.getSeconds()).slice(-2);
+    }
+
+    function adjustColor(hex, amount) {
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        var r = Math.max(0, Math.min(255, parseInt(hex.substring(0,2), 16) + amount));
+        var g = Math.max(0, Math.min(255, parseInt(hex.substring(2,4), 16) + amount));
+        var b = Math.max(0, Math.min(255, parseInt(hex.substring(4,6), 16) + amount));
+        return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
+    }
+
+    function buildBadge(icon, bg, color, title) {
+        return '<span class="egs-dc-badge-icon" style="background:' + bg + ';" title="' + title + '">' +
+            '<i class="fas ' + icon + '" style="color:' + color + ';"></i></span>';
+    }
+
+    /* ═══════════════════════════════════════════
+       Auto-color por orden
+       ═══════════════════════════════════════════ */
     var pcColorReq = null;
-    $(document).on('input change', '#idOrden', function(){
+    $(document).on('input change', '#idOrden', function() {
         var idOrden = $(this).val();
         if (pcColorReq && pcColorReq.readyState !== 4) pcColorReq.abort();
 
         if (!idOrden || idOrden < 1) {
             $('#colorCita').val('#3a87ad');
             $('#pcAutoColorDot').css('background', '#3a87ad');
-            $('#pcAutoColorText').text('Ingresa un No. de Orden para asignar color').css('color','#64748b');
+            $('#pcAutoColorText').text('Ingresa un No. de Orden para asignar color').css('color', '#64748b');
             return;
         }
 
@@ -160,66 +535,74 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (resp && resp.ok) {
                     $('#colorCita').val(resp.color);
                     $('#pcAutoColorDot').css('background', resp.color);
-                    var labels = {'#16a34a':'Excelente','#2563eb':'Bueno','#d97706':'Regular','#dc2626':'Bajo','#8b5cf6':'Cliente nuevo'};
+                    var labels = { '#16a34a':'Excelente', '#2563eb':'Bueno', '#d97706':'Regular', '#dc2626':'Bajo', '#8b5cf6':'Cliente nuevo' };
                     var label = labels[resp.color] || 'General';
                     var detail = '';
                     if (resp.es_nuevo) { detail = 'Cliente nuevo (' + resp.total_ordenes + ' órdenes)'; }
-                    else if (resp.calif !== null) { detail = label + ' — Calif: ' + resp.calif + '%'; }
-                    else { detail = 'Sin historial suficiente'; }
-                    $('#pcAutoColorText').text(detail).css('color','#334155');
+                    else if (resp.calif !== null) {
+                        detail = label + ' — Calif: ' + resp.calif + '%';
+                        if (resp.avg_recogida) detail += ' · Recoge: ~' + resp.avg_recogida + ' días';
+                    } else { detail = 'Sin historial suficiente'; }
+                    $('#pcAutoColorText').text(detail).css('color', '#334155');
                 } else {
                     $('#colorCita').val('#3a87ad');
                     $('#pcAutoColorDot').css('background', '#3a87ad');
-                    $('#pcAutoColorText').text(resp.error || 'Orden no encontrada').css('color','#ef4444');
+                    $('#pcAutoColorText').text(resp.error || 'Orden no encontrada').css('color', '#ef4444');
                 }
             },
             error: function(xhr) {
                 if (xhr.statusText === 'abort') return;
                 $('#colorCita').val('#3a87ad');
                 $('#pcAutoColorDot').css('background', '#3a87ad');
-                $('#pcAutoColorText').text('Error al consultar').css('color','#ef4444');
+                $('#pcAutoColorText').text('Error al consultar').css('color', '#ef4444');
             }
         });
     });
 
-    // Flag to prevent double submission
+    /* ═══════════════════════════════════════════
+       Form Submit
+       ═══════════════════════════════════════════ */
     var isSaving = false;
 
-    // Manejar el envío del formulario
     $(document).off('submit', '#formularioCita').on('submit', '#formularioCita', function (e) {
         e.preventDefault();
         e.stopPropagation();
 
-        if (isSaving) {
-            return; // Exit if already saving
-        }
-
-        isSaving = true;
-        var submitBtn = $(this).find('button[type="submit"]');
-        submitBtn.prop('disabled', true);
+        if (isSaving) return;
 
         var titulo = $('#tituloCita').val();
-        var fecha = $('#fechaCita').val();
         var color = $('#colorCita').val();
         var idOrden = $('#idOrden').val();
 
         if (!idOrden || idOrden < 1) {
-            swal({
-                icon: 'warning',
-                title: 'Orden requerida',
-                text: 'Debes vincular un No. de Orden o Pedido para crear la cita.'
-            });
-            isSaving = false;
-            submitBtn.prop('disabled', false);
+            swal({ icon: 'warning', title: 'Orden requerida', text: 'Debes vincular un No. de Orden o Pedido.' });
             $('#idOrden').focus();
             return;
         }
+
+        if (!pcSelectedHora) {
+            swal({ icon: 'warning', title: 'Hora requerida', text: 'Selecciona una hora disponible.' });
+            return;
+        }
+
+        var fechaFinal = pcBuildFechaFinal();
+        if (!fechaFinal) {
+            swal({ icon: 'warning', title: 'Fecha inválida', text: 'Selecciona una fecha y hora válidas.' });
+            return;
+        }
+
+        // Set the hidden field
+        $('#fechaCita').val(fechaFinal);
+
+        isSaving = true;
+        var $btn = $('#btnGuardarCitaPC');
+        $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Guardando...');
 
         var descripcion = $('#descripcionCita').val() || '';
 
         var datos = new FormData();
         datos.append("tituloCita", titulo);
-        datos.append("fechaCita", fecha);
+        datos.append("fechaCita", fechaFinal);
         datos.append("colorCita", color);
         datos.append("idOrden", idOrden);
         datos.append("descripcionCita", descripcion);
@@ -241,32 +624,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else if (respuesta == "ok") {
                     $('#modalAgregarCita').modal('hide');
                     document.getElementById('formularioCita').reset();
+
+                    // Reset chips + grid
+                    pcSelectedFecha = 'hoy';
+                    pcSelectedHora = '10:00';
+                    $('.egs-pc-qd-chip').removeClass('active').first().addClass('active');
+                    $('#pcCustomDateWrap').hide();
+                    $('#colorCita').val('#3a87ad');
+                    $('#pcAutoColorDot').css('background', '#3a87ad');
+                    $('#pcAutoColorText').text('Ingresa un No. de Orden para asignar color automático').css('color', '#64748b');
+                    pcRenderTimeGrid();
+                    pcUpdateDatePreview();
+
                     calendar.refetchEvents();
-                    swal({
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Cita agendada correctamente',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
+                    swal({ icon: 'success', title: 'Cita agendada', text: titulo, showConfirmButton: false, timer: 1800 });
                 } else {
-                    swal({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Hubo un error al guardar: ' + respuesta
-                    });
+                    swal({ icon: 'error', title: 'Error', text: 'No se pudo guardar: ' + respuesta });
                 }
             },
-            error: function (request, status, error) {
-                swal({
-                    icon: 'error',
-                    title: 'Error de conexión',
-                    text: 'No se pudo guardar la cita.'
-                });
+            error: function () {
+                swal({ icon: 'error', title: 'Error de conexión', text: 'No se pudo guardar la cita.' });
             },
             complete: function () {
                 isSaving = false;
-                submitBtn.prop('disabled', false);
+                $btn.prop('disabled', false).html('<i class="fa-solid fa-check" style="margin-right:5px;"></i>Agendar');
             }
         });
     });
