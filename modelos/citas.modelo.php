@@ -57,6 +57,18 @@ class ModeloCitas
 	}
 
 	/*=============================================
+	CITAS POR RANGO DE FECHAS
+	=============================================*/
+	static public function mdlCitasPorRango($tabla, $inicio, $fin)
+	{
+		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE start BETWEEN :inicio AND :fin ORDER BY start ASC");
+		$stmt->bindParam(":inicio", $inicio, PDO::PARAM_STR);
+		$stmt->bindParam(":fin", $fin, PDO::PARAM_STR);
+		$stmt->execute();
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	/*=============================================
 	ELIMINAR CITA
 	=============================================*/
 	static public function mdlEliminarCita($tabla, $datos)

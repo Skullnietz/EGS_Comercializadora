@@ -802,6 +802,7 @@
     <div class="navbar-custom-menu">
       <ul class="nav navbar-nav">
         <?php
+        include "cabezote/calendario.php";
         include "cabezote/faq.php";
         include "cabezote/notificaciones.php";
         include "cabezote/usuario.php";

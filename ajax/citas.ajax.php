@@ -119,3 +119,33 @@ if (isset($_POST["obtenerOrden"])) {
     $infoOrden->obtenerOrden = $_POST["obtenerOrden"];
     $infoOrden->ajaxObtenerOrden();
 }
+
+// Obtener citas por rango de fechas (para navbar calendar)
+if (isset($_POST["accion"]) && $_POST["accion"] == "citasPorRango") {
+    $rango = isset($_POST["rango"]) ? $_POST["rango"] : "hoy";
+
+    $hoy = date('Y-m-d');
+
+    switch ($rango) {
+        case 'hoy':
+            $inicio = $hoy . ' 00:00:00';
+            $fin = $hoy . ' 23:59:59';
+            break;
+        case 'semana':
+            $inicioSemana = date('Y-m-d', strtotime('monday this week'));
+            $finSemana = date('Y-m-d', strtotime('sunday this week'));
+            $inicio = $inicioSemana . ' 00:00:00';
+            $fin = $finSemana . ' 23:59:59';
+            break;
+        case 'mes':
+            $inicio = date('Y-m-01') . ' 00:00:00';
+            $fin = date('Y-m-t') . ' 23:59:59';
+            break;
+        default:
+            $inicio = $hoy . ' 00:00:00';
+            $fin = $hoy . ' 23:59:59';
+    }
+
+    $respuesta = ModeloCitas::mdlCitasPorRango("citas", $inicio, $fin);
+    echo json_encode($respuesta);
+}

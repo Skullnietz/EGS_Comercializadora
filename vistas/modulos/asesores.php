@@ -38,11 +38,20 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "Super-Admi
       <div class="box-header with-border">
          
         <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarAsesor">
-
-          
-          Agregar Asesor
-
+          <i class="fas fa-user-plus"></i> Agregar Asesor
         </button>
+
+        <button class="btn btn-default btnAbrirAgendarCitaAsesor" style="margin-left:8px;border-radius:8px;border:1.5px solid #6366f1;color:#6366f1;font-weight:600;transition:all .15s;"
+          onmouseover="this.style.background='#6366f1';this.style.color='#fff';"
+          onmouseout="this.style.background='transparent';this.style.color='#6366f1';">
+          <i class="fa-regular fa-calendar-plus"></i> Agendar Cita
+        </button>
+
+        <a href="index.php?ruta=pantallacitas" class="btn btn-default" style="margin-left:8px;border-radius:8px;border:1.5px solid #94a3b8;color:#64748b;font-weight:500;transition:all .15s;"
+          onmouseover="this.style.background='#f1f5f9';"
+          onmouseout="this.style.background='transparent';">
+          <i class="fa-regular fa-calendar-days"></i> Ver Calendario
+        </a>
 
       </div>
 
@@ -99,12 +108,14 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "Super-Admi
                          echo '<td>
 
                           <div class="btn-group">
-                              
+
+                            <button class="btn btn-info btnAgendarCitaAsesor" data-nombre="'.htmlspecialchars($value["nombre"], ENT_QUOTES).'" title="Agendar cita con '.$value["nombre"].'"><i class="fa-regular fa-calendar-plus"></i></button>
+
                             <button class="btn btn-warning btnEditarDatosAsesor" idAsesor="'.$value["id"].'" data-toggle="modal" data-target="#modalAgregarAsesorEditado"><i class="fas fa-edit"></i></button>
 
                             <button class="btn btn-danger btnEliminarAsesor" idAsesor="'.$value["id"].'"><i class="fas fa-times"></i></button>
 
-                          </div>  
+                          </div>
 
                         </td>
 
@@ -400,3 +411,22 @@ MODAL EDITAR ASESOR
   $eliminarAsesor = new Controladorasesores();
   $eliminarAsesor -> ctrEliminarAsesor();
 
+?>
+
+<!-- JS: Agendar cita desde asesores -->
+<script>
+$(document).ready(function(){
+  // Botón general "Agendar Cita"
+  $(document).on('click', '.btnAbrirAgendarCitaAsesor', function(){
+    $('#crTitulo').val('');
+    $('#modalCitaRapida').modal('show');
+  });
+
+  // Botón por fila: agendar cita con nombre del asesor prellenado
+  $(document).on('click', '.btnAgendarCitaAsesor', function(){
+    var nombre = $(this).data('nombre');
+    $('#crTitulo').val('Cita con ' + nombre);
+    $('#modalCitaRapida').modal('show');
+  });
+});
+</script>
