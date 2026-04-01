@@ -155,6 +155,7 @@ class ModeloCitas
 				$c["equipo"] = isset($o["descripcion"]) ? $o["descripcion"] : "";
 				$c["orden_estado"] = isset($o["estado"]) ? $o["estado"] : "";
 				$c["orden_portada"] = isset($o["portada"]) ? $o["portada"] : "";
+				$c["orden_multimedia"] = isset($o["multimedia"]) ? $o["multimedia"] : "";
 				$c["orden_marca"] = isset($o["marcaDelEquipo"]) ? $o["marcaDelEquipo"] : "";
 				$c["orden_modelo"] = isset($o["modeloDelEquipo"]) ? $o["modeloDelEquipo"] : "";
 				$c["orden_total"] = isset($o["total"]) ? $o["total"] : "";

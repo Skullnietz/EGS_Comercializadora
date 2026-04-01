@@ -243,6 +243,16 @@ document.addEventListener('DOMContentLoaded', function () {
             var idOrden = props.id_orden;
             var hasOrden = idOrden && parseInt(idOrden) > 0;
             var portada = hasOrden ? (props.orden_portada || '') : '';
+            // Si hay multimedia con más de 1 imagen, usar la segunda (la primera es portada)
+            var heroImg = portada;
+            if (hasOrden && props.orden_multimedia) {
+                try {
+                    var mmArr = typeof props.orden_multimedia === 'string' ? JSON.parse(props.orden_multimedia) : props.orden_multimedia;
+                    if (Array.isArray(mmArr) && mmArr.length > 1 && mmArr[1].foto) {
+                        heroImg = mmArr[1].foto;
+                    }
+                } catch(e) {}
+            }
             var hasHero = hasOrden && portada;
 
             // Fecha string
@@ -273,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // ═══ HERO MODE (order + portada) ═══
             if (hasHero) {
                 $('#dcHero').show();
-                $('#dcHeroImg').attr('src', portada);
+                $('#dcHeroImg').attr('src', heroImg);
                 $('#dcHeroOrdenNum').text('Orden #' + idOrden);
                 $('#dcHeroTitle').text(ev.title || 'Sin título');
                 $('#dcHeroFechaHora span').text(fechaStr);
