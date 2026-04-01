@@ -341,6 +341,37 @@
   font-size: 10px;
 }
 
+.egs-cal-event-actions {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+.egs-cal-event-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: opacity .15s;
+  line-height: 1.4;
+}
+.egs-cal-event-actions a:hover {
+  opacity: .85;
+}
+.egs-cal-btn-orden {
+  background: #eef2ff;
+  color: #4f46e5 !important;
+  border: 1px solid #c7d2fe;
+}
+.egs-cal-btn-gcal {
+  background: #eff6ff;
+  color: #2563eb !important;
+  border: 1px solid #bfdbfe;
+}
+
 .egs-cal-empty {
   text-align: center;
   padding: 32px 16px;
@@ -598,13 +629,36 @@
           var dt = new Date(ev.start.replace(/-/g,'/').replace('T',' '));
           hora = dt.getHours().toString().padStart(2,'0') + ':' + dt.getMinutes().toString().padStart(2,'0');
         }
-        html += '<a class="egs-cal-event" href="index.php?ruta=pantallacitas">' +
+        // Generar URL de Google Calendar
+        var gcalUrl = '';
+        if (ev.start) {
+          var dtStart = new Date(ev.start.replace(/-/g,'/').replace('T',' '));
+          var dtEnd = new Date(dtStart.getTime() + 60*60*1000);
+          function fmtGCal(d){ return d.getFullYear().toString()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'T'+('0'+d.getHours()).slice(-2)+('0'+d.getMinutes()).slice(-2)+('0'+d.getSeconds()).slice(-2); }
+          gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+            '&text=' + encodeURIComponent(ev.title || 'Cita') +
+            '&dates=' + fmtGCal(dtStart) + '/' + fmtGCal(dtEnd) +
+            (ev.id_orden ? '&details=' + encodeURIComponent('Orden #' + ev.id_orden) : '');
+        }
+
+        // Botones de acción
+        var actionsHtml = '<div class="egs-cal-event-actions">';
+        if (ev.id_orden) {
+          actionsHtml += '<a href="index.php?ruta=infoOrden&idOrden=' + ev.id_orden + '" class="egs-cal-btn-orden"><i class="fa-solid fa-eye"></i> Orden</a>';
+        }
+        if (gcalUrl) {
+          actionsHtml += '<a href="' + gcalUrl + '" target="_blank" class="egs-cal-btn-gcal"><i class="fa-brands fa-google"></i> Calendar</a>';
+        }
+        actionsHtml += '</div>';
+
+        html += '<div class="egs-cal-event">' +
           '<span class="egs-cal-event-dot" style="background:' + (ev.color || '#3a87ad') + '"></span>' +
           '<div class="egs-cal-event-info">' +
             '<div class="egs-cal-event-title">' + $('<span>').text(ev.title || 'Sin título').html() + '</div>' +
             '<div class="egs-cal-event-time"><i class="fa-regular fa-clock"></i> ' + hora + '</div>' +
+            actionsHtml +
           '</div>' +
-        '</a>';
+        '</div>';
       });
     });
 
