@@ -240,63 +240,31 @@
                 <div id="dcClienteSection" style="padding:14px 0;border-bottom:1px solid #f1f5f9;display:none;">
                     <div class="egs-dc-section-label"><i class="fa-solid fa-user" style="margin-right:4px;"></i>Cliente</div>
 
-                    <!-- Fila: Avatar + nombre + tel -->
+                    <!-- Fila: Avatar + nombre + tel + badges inline -->
                     <div style="display:flex;align-items:center;gap:12px;">
-                        <div id="dcClienteAvatar" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:800;flex-shrink:0;"></div>
+                        <div id="dcClienteAvatar" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:800;flex-shrink:0;"></div>
                         <div style="flex:1;min-width:0;">
-                            <span id="dcClienteNombre" style="font-size:15px;font-weight:700;color:#1e293b;display:block;"></span>
-                            <div id="dcClienteTel" style="font-size:12px;color:#64748b;margin-top:3px;display:flex;align-items:center;gap:5px;">
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <span id="dcClienteNombre" style="font-size:14px;font-weight:700;color:#1e293b;"></span>
+                                <span id="dcClienteCalifBadge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;"></span>
+                                <span id="dcClienteRecBadge" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f1f5f9;color:#64748b;"></span>
+                            </div>
+                            <div id="dcClienteTel" style="font-size:12px;color:#64748b;margin-top:2px;display:flex;align-items:center;gap:5px;">
                                 <i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i><span></span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Calificación + Indicadores -->
-                    <div id="dcClienteCalifCard" style="display:none;margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;">
-                        <!-- Calificación principal -->
-                        <div id="dcCalifRow" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
-                            <div id="dcCalifCircle" style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:3px solid;">
-                                <span id="dcCalifNum" style="font-size:18px;font-weight:900;"></span>
-                            </div>
-                            <div style="flex:1;">
-                                <div id="dcCalifLabel" style="font-size:13px;font-weight:700;"></div>
-                                <div style="font-size:10px;color:#94a3b8;margin-top:1px;">Calificación de entrega</div>
-                                <div id="dcCalifStars" style="margin-top:3px;display:flex;gap:2px;"></div>
-                            </div>
-                        </div>
-
-                        <!-- Indicadores: Entregas + Recogida -->
-                        <div id="dcIndicadores" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px;border-top:1px solid #e2e8f0;">
-                            <div id="dcIndicadorEntrega" class="egs-dc-indicador" style="display:none;">
-                                <div class="egs-dc-indicador-icon" id="dcEntregaIcon"><i class="fa-solid fa-truck-fast"></i></div>
-                                <div class="egs-dc-indicador-body">
-                                    <div id="dcEntregaVal" class="egs-dc-indicador-val"></div>
-                                    <div class="egs-dc-indicador-lbl">Tasa de entrega</div>
-                                </div>
-                            </div>
-                            <div id="dcIndicadorRecogida" class="egs-dc-indicador" style="display:none;">
-                                <div class="egs-dc-indicador-icon" id="dcRecogidaIcon"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                                <div class="egs-dc-indicador-body">
-                                    <div id="dcRecogidaVal" class="egs-dc-indicador-val"></div>
-                                    <div class="egs-dc-indicador-lbl">Tiempo recolección</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Alerta probabilidad cancelación -->
-                        <div id="dcAlertaCancelacion" style="display:none;margin-top:10px;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                            <span id="dcAlertaCancelacionTxt"></span>
-                        </div>
+                    <!-- Alerta cancelación inline -->
+                    <div id="dcAlertaCancelacion" style="display:none;margin-top:8px;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;align-items:center;gap:5px;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span id="dcAlertaCancelacionTxt"></span>
                     </div>
 
-                    <!-- Badges inline (cliente nuevo, etc.) -->
-                    <div id="dcClienteBadgesWrap" style="display:none;margin-top:10px;">
+                    <!-- Badge cliente nuevo -->
+                    <div id="dcClienteBadgesWrap" style="display:none;margin-top:6px;">
                         <span id="dcClienteBadges"></span>
                     </div>
-
-                    <!-- Mini stats (órdenes, entregadas, canceladas, resueltas) -->
-                    <div id="dcClienteStats" style="display:none;"></div>
                 </div>
 
                 <!-- Técnico y Asesor -->

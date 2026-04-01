@@ -408,90 +408,63 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Badges & Calificación
                     var badges = props.cliente_badges;
                     if (badges) {
-                        // ── Cliente nuevo: solo mostrar badge, no calificación ──
+                        // ── Cliente nuevo ──
                         if (badges.es_nuevo) {
-                            $('#dcClienteCalifCard').hide();
+                            $('#dcClienteCalifBadge').hide();
+                            $('#dcClienteRecBadge').hide();
                             $('#dcClienteBadges').html(buildBadge('fa-seedling', '#f5f3ff', '#8b5cf6', 'Cliente nuevo') +
                                 '<span style="font-size:11px;font-weight:600;color:#8b5cf6;margin-left:4px;">Cliente nuevo</span>');
                             $('#dcClienteBadgesWrap').show();
-                            $('#dcClienteStats').hide();
                         } else {
                             $('#dcClienteBadgesWrap').hide();
 
-                            // ── Calificación de entrega ──
+                            // ── Calificación de entrega (pill badge) ──
                             var ce = badges.calif_entrega;
                             if (ce !== null && ce !== undefined) {
-                                var califColor, califLabel, califBg, califBorder, starsCount;
-                                if (ce >= 90)      { califColor = '#16a34a'; califBg = '#f0fdf4'; califBorder = '#bbf7d0'; califLabel = 'Excelente'; starsCount = 5; }
-                                else if (ce >= 70)  { califColor = '#2563eb'; califBg = '#eff6ff'; califBorder = '#bfdbfe'; califLabel = 'Bueno'; starsCount = 4; }
-                                else if (ce >= 50)  { califColor = '#d97706'; califBg = '#fffbeb'; califBorder = '#fde68a'; califLabel = 'Regular'; starsCount = 3; }
-                                else                { califColor = '#dc2626'; califBg = '#fef2f2'; califBorder = '#fecaca'; califLabel = 'Bajo'; starsCount = 2; }
-
-                                $('#dcCalifCircle').css({ background: califBg, 'border-color': califColor });
-                                $('#dcCalifNum').text(Math.round(ce) + '%').css('color', califColor);
-                                $('#dcCalifLabel').text(califLabel).css('color', califColor);
-
-                                // Estrellas
-                                var starsHtml = '';
-                                for (var si = 0; si < 5; si++) {
-                                    starsHtml += '<i class="fa-' + (si < starsCount ? 'solid' : 'regular') + ' fa-star" style="font-size:11px;color:' + (si < starsCount ? califColor : '#cbd5e1') + ';"></i>';
-                                }
-                                $('#dcCalifStars').html(starsHtml);
-
-                                // Indicador de entrega
-                                $('#dcEntregaIcon').css('color', califColor);
-                                $('#dcEntregaVal').text(Math.round(ce) + '%').css('color', califColor);
-                                $('#dcIndicadorEntrega').show();
-
-                                $('#dcCalifRow').show();
+                                var califColor, califBg, califIcon, califLabel;
+                                if (ce >= 90)      { califColor = '#16a34a'; califBg = '#f0fdf4'; califIcon = '★'; califLabel = Math.round(ce) + '% Entrega'; }
+                                else if (ce >= 70)  { califColor = '#2563eb'; califBg = '#eff6ff'; califIcon = '★'; califLabel = Math.round(ce) + '% Entrega'; }
+                                else if (ce >= 50)  { califColor = '#d97706'; califBg = '#fffbeb'; califIcon = '★'; califLabel = Math.round(ce) + '% Entrega'; }
+                                else                { califColor = '#dc2626'; califBg = '#fef2f2'; califIcon = '★'; califLabel = Math.round(ce) + '% Entrega'; }
+                                $('#dcClienteCalifBadge').text(califIcon + ' ' + califLabel)
+                                    .css({ background: califBg, color: califColor, border: '1px solid ' + califBg })
+                                    .show();
                             } else {
-                                $('#dcCalifRow').hide();
-                                $('#dcIndicadorEntrega').hide();
+                                $('#dcClienteCalifBadge').hide();
                             }
 
-                            // ── Tiempo de recogida ──
+                            // ── Tiempo de recogida (pill badge) ──
                             var ar = badges.avg_recogida;
                             if (ar !== null && ar !== undefined) {
-                                var recColor, recLabel;
-                                if (ar <= 7)       { recColor = '#16a34a'; recLabel = '~' + Math.round(ar) + ' días'; }
-                                else if (ar <= 14)  { recColor = '#2563eb'; recLabel = '~' + Math.round(ar) + ' días'; }
-                                else if (ar <= 30)  { recColor = '#d97706'; recLabel = '~' + Math.round(ar) + ' días'; }
-                                else                { recColor = '#dc2626'; recLabel = '~' + Math.round(ar) + ' días'; }
-
-                                $('#dcRecogidaIcon').css('color', recColor);
-                                $('#dcRecogidaVal').text(recLabel).css('color', recColor);
-                                $('#dcIndicadorRecogida').show();
+                                var recColor, recBg;
+                                if (ar <= 7)       { recColor = '#16a34a'; recBg = '#f0fdf4'; }
+                                else if (ar <= 14)  { recColor = '#2563eb'; recBg = '#eff6ff'; }
+                                else if (ar <= 30)  { recColor = '#d97706'; recBg = '#fffbeb'; }
+                                else                { recColor = '#dc2626'; recBg = '#fef2f2'; }
+                                $('#dcClienteRecBadge').html('<i class="fa-solid fa-clock" style="font-size:9px;margin-right:3px;"></i>~' + Math.round(ar) + 'd')
+                                    .css({ background: recBg, color: recColor })
+                                    .show();
                             } else {
-                                $('#dcIndicadorRecogida').hide();
+                                $('#dcClienteRecBadge').hide();
                             }
 
                             // ── Alerta de cancelación ──
                             var pc = badges.prob_cancelacion;
                             if (pc !== null && pc !== undefined && pc > 30) {
-                                var alertColor, alertBg, alertBorder;
-                                if (pc >= 60)      { alertColor = '#dc2626'; alertBg = '#fef2f2'; alertBorder = '#fecaca'; }
-                                else               { alertColor = '#d97706'; alertBg = '#fffbeb'; alertBorder = '#fde68a'; }
-                                $('#dcAlertaCancelacion').css({ background: alertBg, color: alertColor, border: '1px solid ' + alertBorder, display: 'flex' });
+                                var alertColor, alertBg;
+                                if (pc >= 60)      { alertColor = '#dc2626'; alertBg = '#fef2f2'; }
+                                else               { alertColor = '#d97706'; alertBg = '#fffbeb'; }
+                                $('#dcAlertaCancelacion').css({ background: alertBg, color: alertColor, display: 'flex' });
                                 $('#dcAlertaCancelacionTxt').text('Prob. cancelación: ' + Math.round(pc) + '%');
                             } else {
                                 $('#dcAlertaCancelacion').hide();
                             }
-
-                            $('#dcClienteCalifCard').show();
-
-                            // ── Stats grid (4 columnas) ──
-                            var statsHtml = '<div class="egs-dc-mini-stats" style="grid-template-columns:repeat(4,1fr);">';
-                            statsHtml += '<div class="egs-dc-mini-stat"><div class="egs-dc-mini-stat-val" style="color:#1e293b;">' + (badges.total_ordenes || 0) + '</div><div class="egs-dc-mini-stat-lbl">Órdenes</div></div>';
-                            statsHtml += '<div class="egs-dc-mini-stat"><div class="egs-dc-mini-stat-val" style="color:#16a34a;">' + (badges.entregadas || 0) + '</div><div class="egs-dc-mini-stat-lbl">Entregadas</div></div>';
-                            statsHtml += '<div class="egs-dc-mini-stat"><div class="egs-dc-mini-stat-val" style="color:#2563eb;">' + (badges.resueltas || 0) + '</div><div class="egs-dc-mini-stat-lbl">Resueltas</div></div>';
-                            statsHtml += '<div class="egs-dc-mini-stat"><div class="egs-dc-mini-stat-val" style="color:#ef4444;">' + (badges.canceladas || 0) + '</div><div class="egs-dc-mini-stat-lbl">Canceladas</div></div>';
-                            statsHtml += '</div>';
-                            $('#dcClienteStats').html(statsHtml).show();
                         }
                     } else {
-                        $('#dcClienteCalifCard').hide();
+                        $('#dcClienteCalifBadge').hide();
+                        $('#dcClienteRecBadge').hide();
                         $('#dcClienteBadgesWrap').hide();
-                        $('#dcClienteStats').hide();
+                        $('#dcAlertaCancelacion').hide();
                     }
                 } else {
                     // Orden sin cliente asignado
@@ -499,9 +472,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     $('#dcClienteNombre').text('Sin cliente asignado');
                     $('#dcClienteTel').hide();
                     $('#dcBtnWhatsApp').hide();
-                    $('#dcClienteCalifCard').hide();
+                    $('#dcClienteCalifBadge').hide();
+                    $('#dcClienteRecBadge').hide();
                     $('#dcClienteBadgesWrap').hide();
-                    $('#dcClienteStats').hide();
+                    $('#dcAlertaCancelacion').hide();
                 }
             } else {
                 $('#dcClienteSection').hide();
