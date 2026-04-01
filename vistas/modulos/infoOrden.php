@@ -1903,18 +1903,17 @@ function _egsCopiarFallback(texto, cb) {
 $(document).on('click', '.btnAgendarCitaOrden', function(){
   var idOrden = $(this).data('orden');
   $('#crTitulo').val('Cita Orden #' + idOrden);
-  $('#crOrdenId').val(idOrden);
+  $('#crOrdenId').val(idOrden).trigger('input');
   $('#modalCitaRapida').modal('show');
 });
 
 // Desde dentro del modal de observaciones
 $(document).on('click', '.btnAgendarCitaDesdeObs', function(){
   var idOrden = $(this).data('orden');
-  // Cerrar modal de observaciones primero
   $('#exampleModal').modal('hide');
   setTimeout(function(){
     $('#crTitulo').val('Cita Orden #' + idOrden);
-    $('#crOrdenId').val(idOrden);
+    $('#crOrdenId').val(idOrden).trigger('input');
     $('#modalCitaRapida').modal('show');
   }, 300);
 });
