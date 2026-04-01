@@ -1892,18 +1892,6 @@ function listarProductosPedidoDinamico(){
 } 
 
 /*=============================================
-SELECTOR DE CLIENTE
-=============================================*/
-$(document).ready(function(){
-      
-  $('.seleccionarOrdenPedidoDinamico').select2();
-  $('.clientePedidoDinamico').select2();
-
-  
-        
-});
-
-/*=============================================
 SUMAR TOTAL DE LOS PRECIOS
 =============================================*/
 $(document).ready(function(){
