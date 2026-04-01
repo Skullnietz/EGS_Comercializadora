@@ -49,7 +49,7 @@ class ModeloCitas
 		$in = implode(',', $ordenIds);
 		try {
 			$stmt = ConexionWP::conectarWP()->prepare(
-				"SELECT id, descripcion, id_usuario, id_tecnico, id_tecnicoDos, id_Asesor, estado, portada, marcaDelEquipo, modeloDelEquipo, fecha_ingreso, total
+				"SELECT id, descripcion, id_usuario, id_tecnico, id_tecnicoDos, id_Asesor, estado, portada, multimedia, marcaDelEquipo, modeloDelEquipo, fecha_ingreso, total
 				 FROM ordenes WHERE id IN ($in)"
 			);
 			$stmt->execute();
