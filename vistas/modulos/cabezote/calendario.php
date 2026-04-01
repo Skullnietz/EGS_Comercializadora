@@ -1,7 +1,8 @@
 <!-- ═══ Calendario Navbar Dropdown ═══ -->
 <li class="dropdown egs-calendar-menu">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="egsCalendarToggle" aria-expanded="false">
+  <a href="#" class="dropdown-toggle egs-cal-trigger" data-toggle="dropdown" id="egsCalendarToggle" aria-expanded="false">
     <i class="fa-regular fa-calendar-days"></i>
+    <span class="egs-cal-trigger-label">Agenda</span>
     <span class="egs-cal-badge" id="egsCalBadge" style="display:none;"></span>
   </a>
 
@@ -42,9 +43,9 @@
   </ul>
 </li>
 
-<!-- ═══ Modal: Cita Rápida desde Navbar ═══ -->
-<div class="modal fade" id="modalCitaRapida" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:480px;">
+<!-- ═══ Modal: Cita Rápida — se mueve a body via JS para evitar conflictos con dropdown ═══ -->
+<div class="modal fade egs-modal-cita-rapida" id="modalCitaRapida" tabindex="-1" role="dialog" style="display:none;">
+  <div class="modal-dialog" role="document" style="max-width:480px;margin:80px auto;">
     <div class="modal-content" style="border-radius:14px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(15,23,42,.22);">
 
       <form id="formCitaRapida">
@@ -168,6 +169,45 @@
 </div>
 
 <style>
+/* ═══ Calendar Trigger — Pill destacado en navbar ═══ */
+.egs-calendar-menu > a.egs-cal-trigger {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 7px 14px !important;
+  margin: 7px 6px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, rgba(99,102,241,.15), rgba(139,92,246,.12)) !important;
+  border: 1.5px solid rgba(99,102,241,.3) !important;
+  color: #a5b4fc !important;
+  font-size: 15px !important;
+  transition: all .2s !important;
+  position: relative !important;
+  line-height: 1.3 !important;
+}
+
+.egs-calendar-menu > a.egs-cal-trigger:hover,
+.egs-calendar-menu.open > a.egs-cal-trigger {
+  background: linear-gradient(135deg, rgba(99,102,241,.28), rgba(139,92,246,.22)) !important;
+  border-color: rgba(99,102,241,.5) !important;
+  color: #c7d2fe !important;
+  box-shadow: 0 0 16px rgba(99,102,241,.2) !important;
+}
+
+.egs-calendar-menu > a.egs-cal-trigger > i {
+  font-size: 17px !important;
+}
+
+.egs-cal-trigger-label {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: .3px;
+}
+
+@media (max-width: 767px) {
+  .egs-cal-trigger-label { display: none; }
+}
+
 /* ═══ Calendar Dropdown Styles ═══ */
 .egs-calendar-menu > a {
   position: relative;
@@ -368,14 +408,14 @@
 /* Fecha counter badge en el icono del calendar */
 .egs-cal-badge {
   position: absolute;
-  top: 8px;
-  right: 6px;
-  background: #6366f1;
+  top: -2px;
+  right: -4px;
+  background: #ef4444;
   color: #fff;
   font-size: 9px;
   font-weight: 700;
-  min-width: 16px;
-  height: 16px;
+  min-width: 17px;
+  height: 17px;
   border-radius: 9999px;
   display: flex;
   align-items: center;
@@ -383,6 +423,12 @@
   padding: 0 4px;
   box-shadow: 0 0 0 2px #1e293b;
   line-height: 1;
+  animation: egs-badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes egs-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
 }
 
 /* ═══ Quick Date Chips ═══ */
@@ -642,16 +688,23 @@
     }
   });
 
-  // Quick add button
+  // Quick add button — cerrar dropdown primero, luego abrir modal
   $(document).on('click', '#egsCalQuickAdd', function(e){
     e.preventDefault();
     e.stopPropagation();
-    $('.egs-cal-dropdown').parent().removeClass('open');
-    $('#modalCitaRapida').modal('show');
+    // Cerrar el dropdown de Bootstrap correctamente
+    $('#egsCalendarToggle').dropdown('toggle');
+    // Abrir modal después de que el dropdown se cierre
+    setTimeout(function(){
+      $('#modalCitaRapida').modal('show');
+    }, 200);
   });
 
-  // Load badge on page load
+  // Load badge on page load + mover modal al body
   $(document).ready(function(){
+    // Mover el modal fuera del navbar al body para evitar conflictos de z-index
+    $('#modalCitaRapida').appendTo('body');
+
     $.ajax({
       url: 'ajax/citas.ajax.php',
       type: 'POST',

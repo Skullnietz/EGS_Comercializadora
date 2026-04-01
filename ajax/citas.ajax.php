@@ -1,6 +1,6 @@
 <?php
 
-require_once "../config/controladores/citas.controlador.php";
+require_once "../controladores/citas.controlador.php";
 require_once "../modelos/citas.modelo.php";
 
 class AjaxCitas
