@@ -95,6 +95,9 @@
               <button type="button" class="egs-qd-chip" data-fecha="viernes">
                 <i class="fa-regular fa-calendar"></i> Viernes
               </button>
+              <button type="button" class="egs-qd-chip" data-fecha="sabado">
+                <i class="fa-regular fa-calendar"></i> Sábado
+              </button>
               <button type="button" class="egs-qd-chip egs-qd-custom" data-fecha="personalizado">
                 <i class="fa-solid fa-pen"></i> Elegir fecha
               </button>
@@ -113,30 +116,17 @@
             </div>
           </div>
 
-          <!-- Hora -->
+          <!-- Hora (se genera dinámicamente según el día) -->
           <div class="form-group" style="margin-bottom:16px;">
             <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:8px;display:block;">
               <i class="fa-regular fa-clock" style="margin-right:4px;color:#6366f1;"></i>Hora
             </label>
-            <div class="egs-time-grid" id="egsTimeGrid">
-              <button type="button" class="egs-time-chip" data-hora="08:00">8:00</button>
-              <button type="button" class="egs-time-chip active" data-hora="09:00">9:00</button>
-              <button type="button" class="egs-time-chip" data-hora="10:00">10:00</button>
-              <button type="button" class="egs-time-chip" data-hora="11:00">11:00</button>
-              <button type="button" class="egs-time-chip" data-hora="12:00">12:00</button>
-              <button type="button" class="egs-time-chip" data-hora="13:00">13:00</button>
-              <button type="button" class="egs-time-chip" data-hora="14:00">14:00</button>
-              <button type="button" class="egs-time-chip" data-hora="15:00">15:00</button>
-              <button type="button" class="egs-time-chip" data-hora="16:00">16:00</button>
-              <button type="button" class="egs-time-chip" data-hora="17:00">17:00</button>
-              <button type="button" class="egs-time-chip" data-hora="18:00">18:00</button>
-              <button type="button" class="egs-time-chip egs-qd-custom" data-hora="custom">
-                <i class="fa-solid fa-pen"></i>
-              </button>
+            <div id="egsHorarioInfo" style="margin-bottom:8px;padding:6px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:6px;">
+              <i class="fa-solid fa-info-circle"></i>
+              <span id="egsHorarioTexto">L-V: 10:00–14:00 y 16:00–18:30</span>
             </div>
-            <div id="egsCustomTimeWrap" style="display:none;margin-top:10px;">
-              <input type="time" class="form-control" id="crHoraCustom"
-                style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 12px;font-size:13px;">
+            <div class="egs-time-grid" id="egsTimeGrid">
+              <!-- Se genera por JS -->
             </div>
           </div>
 
@@ -391,7 +381,7 @@
   color: #4f46e5 !important;
 }
 
-.egs-cal-add-btn {
+.egs-cal-footer a.egs-cal-add-btn {
   background: #6366f1 !important;
   color: #fff !important;
   padding: 5px 12px !important;
@@ -400,7 +390,7 @@
   transition: background .12s !important;
 }
 
-.egs-cal-add-btn:hover {
+.egs-cal-footer a.egs-cal-add-btn:hover {
   background: #4f46e5 !important;
   color: #fff !important;
 }
@@ -721,8 +711,14 @@
 
   // ═══ Quick Date Logic ═══
   var selectedFecha = 'hoy';
-  var selectedHora = '09:00';
+  var selectedHora = '10:00';
   var selectedColor = '#3a87ad';
+
+  // Horarios por tipo de día
+  // L-V: 10:00-14:00 y 16:00-18:30
+  var horasLV = ['10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','16:00','16:30','17:00','17:30','18:00','18:30'];
+  // Sábado: 9:00-14:30
+  var horasSab = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30'];
 
   function getNextDayOfWeek(dayIndex) {
     var d = new Date();
@@ -742,7 +738,61 @@
       case 'miercoles': return getNextDayOfWeek(3);
       case 'jueves': return getNextDayOfWeek(4);
       case 'viernes': return getNextDayOfWeek(5);
+      case 'sabado': return getNextDayOfWeek(6);
       default: return d;
+    }
+  }
+
+  // Determina si un día (0=Dom..6=Sáb) es sábado
+  function esSabado(dayOfWeek) { return dayOfWeek === 6; }
+  function esDomingo(dayOfWeek) { return dayOfWeek === 0; }
+
+  function getHorasParaDia(dayOfWeek) {
+    if (esSabado(dayOfWeek)) return horasSab;
+    if (esDomingo(dayOfWeek)) return []; // Domingo cerrado
+    return horasLV;
+  }
+
+  function renderTimeGrid() {
+    var d = selectedFecha === 'personalizado'
+      ? (function(){ var v=$('#crFechaCustom').val(); return v ? new Date(v.replace(/-/g,'/')) : new Date(); })()
+      : calcFecha(selectedFecha);
+
+    var dow = d.getDay();
+    var horas = getHorasParaDia(dow);
+    var $grid = $('#egsTimeGrid');
+    var $info = $('#egsHorarioTexto');
+
+    if (esDomingo(dow)) {
+      $grid.html('<div style="text-align:center;padding:12px;color:#ef4444;font-size:12px;"><i class="fa-solid fa-ban" style="margin-right:5px;"></i>Domingo no disponible — elige otro día</div>');
+      $info.text('Domingos no se atiende');
+      $('#egsHorarioInfo').css({'background':'#fef2f2','border-color':'#fecaca','color':'#991b1b'});
+      selectedHora = '';
+      return;
+    }
+
+    if (esSabado(dow)) {
+      $info.text('Sábado: 9:00 – 14:30');
+    } else {
+      $info.text('L-V: 10:00–14:00 y 16:00–18:30');
+    }
+    $('#egsHorarioInfo').css({'background':'#fffbeb','border-color':'#fde68a','color':'#92400e'});
+
+    var html = '';
+    var found = false;
+    horas.forEach(function(h){
+      var isActive = (h === selectedHora);
+      if (isActive) found = true;
+      // Mostrar separador visual entre turnos L-V
+      html += '<button type="button" class="egs-time-chip' + (isActive ? ' active' : '') + '" data-hora="' + h + '">' + h + '</button>';
+    });
+
+    $grid.html(html);
+
+    // Si la hora seleccionada no está en las opciones, seleccionar la primera
+    if (!found && horas.length) {
+      selectedHora = horas[0];
+      $grid.find('.egs-time-chip').first().addClass('active');
     }
   }
 
@@ -754,9 +804,14 @@
     } else {
       d = calcFecha(selectedFecha);
     }
-    var txt = diasEs[d.getDay()] + ' ' + d.getDate() + ' de ' + mesesEs[d.getMonth()] + ' — ' + selectedHora;
+    var txt = diasEs[d.getDay()] + ' ' + d.getDate() + ' de ' + mesesEs[d.getMonth()];
+    if (selectedHora) txt += ' — ' + selectedHora;
     $('#egsDatePreviewText').text(txt);
   }
+
+  // Render time grid al inicio
+  renderTimeGrid();
+  updateDatePreview();
 
   // Date chip selection
   $(document).on('click', '.egs-qd-chip', function(){
@@ -771,10 +826,14 @@
     } else {
       $('#egsCustomDateWrap').slideUp(150);
     }
+    renderTimeGrid();
     updateDatePreview();
   });
 
-  $('#crFechaCustom').on('change', function(){ updateDatePreview(); });
+  $('#crFechaCustom').on('change', function(){
+    renderTimeGrid();
+    updateDatePreview();
+  });
 
   // Time chip selection
   $(document).on('click', '.egs-time-chip', function(){
@@ -782,19 +841,7 @@
     if (!hora) return;
     $('.egs-time-chip').removeClass('active');
     $(this).addClass('active');
-
-    if (hora === 'custom') {
-      $('#egsCustomTimeWrap').slideDown(150);
-      selectedHora = $('#crHoraCustom').val() || '09:00';
-    } else {
-      $('#egsCustomTimeWrap').slideUp(150);
-      selectedHora = hora;
-    }
-    updateDatePreview();
-  });
-
-  $('#crHoraCustom').on('change', function(){
-    selectedHora = $(this).val();
+    selectedHora = hora;
     updateDatePreview();
   });
 
@@ -811,12 +858,24 @@
     var titulo = $('#crTitulo').val().trim();
     if (!titulo) return;
 
+    // Validar que no sea domingo y que haya hora seleccionada
+    if (!selectedHora) {
+      swal({ icon:'warning', title:'Hora requerida', text:'Selecciona una hora disponible.' });
+      return;
+    }
+
     var d;
     if (selectedFecha === 'personalizado') {
       var val = $('#crFechaCustom').val();
-      d = val ? new Date(val.replace(/-/g,'/')) : new Date();
+      if (!val) { swal({ icon:'warning', title:'Fecha requerida', text:'Selecciona una fecha.' }); return; }
+      d = new Date(val.replace(/-/g,'/'));
     } else {
       d = calcFecha(selectedFecha);
+    }
+
+    if (esDomingo(d.getDay())) {
+      swal({ icon:'warning', title:'Día no disponible', text:'No se pueden agendar citas en domingo.' });
+      return;
     }
 
     var yyyy = d.getFullYear();
@@ -845,10 +904,11 @@
           $('#formCitaRapida')[0].reset();
           // Reset chips
           $('.egs-qd-chip').removeClass('active').first().addClass('active');
-          $('.egs-time-chip').removeClass('active').eq(1).addClass('active');
           $('.egs-color-pill').removeClass('active').first().addClass('active');
-          selectedFecha = 'hoy'; selectedHora = '09:00'; selectedColor = '#3a87ad';
-          $('#egsCustomDateWrap, #egsCustomTimeWrap').hide();
+          selectedFecha = 'hoy'; selectedHora = '10:00'; selectedColor = '#3a87ad';
+          $('#egsCustomDateWrap').hide();
+          renderTimeGrid();
+          updateDatePreview();
 
           swal({ icon:'success', title:'Cita agendada', text: titulo, showConfirmButton:false, timer:1800 });
 

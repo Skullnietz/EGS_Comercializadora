@@ -1638,11 +1638,20 @@ function _egsEstadoClass($estado) {
 							<?php } ?>
 							</div>
 
-							<!-- Botón agregar observación -->
+							<!-- Botón agregar observación + agendar cita -->
 							<div style="margin-top:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
 								<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#exampleModal">
 									<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar observación
 								</button>
+								<?php if ($isAdmin || $isVendedor): ?>
+								<button type="button" class="btn btnAgendarCitaOrden"
+									style="border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;border:1.5px solid #6366f1;color:#6366f1;background:#fff;transition:all .15s;display:inline-flex;align-items:center;gap:5px;"
+									onmouseover="this.style.background='#6366f1';this.style.color='#fff';"
+									onmouseout="this.style.background='#fff';this.style.color='#6366f1';"
+									data-orden="<?php echo htmlspecialchars($_GET['idOrden']); ?>">
+									<i class="fa-regular fa-calendar-plus"></i>Agendar cita
+								</button>
+								<?php endif; ?>
 							</div>
 
 							<hr style="margin:20px 0 12px">
@@ -1864,6 +1873,15 @@ function _egsCopiarFallback(texto, cb) {
 	try { document.execCommand('copy'); cb(); } catch(e) {}
 	document.body.removeChild(ta);
 }
+</script>
+
+<!-- JS: Agendar cita desde observaciones de orden -->
+<script>
+$(document).on('click', '.btnAgendarCitaOrden', function(){
+  var idOrden = $(this).data('orden');
+  $('#crTitulo').val('Cita Orden #' + idOrden);
+  $('#modalCitaRapida').modal('show');
+});
 </script>
 
 <?php

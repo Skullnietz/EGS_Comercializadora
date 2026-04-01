@@ -188,7 +188,9 @@
       "Bash(grep -l \"estado\" /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/modulos/inicio/*.php)",
       "Bash(find /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/modelos -type f -name *.php)",
       "Bash(grep -l \"downloadXlsx\\\\|ExcelExportHelper\\\\|reporte\" C:/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/modulos/*.php)",
-      "Bash(grep -l \"DataTable\\\\|dataTable\" \"C:/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/js/\"*.js)"
+      "Bash(grep -l \"DataTable\\\\|dataTable\" \"C:/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/js/\"*.js)",
+      "Bash(grep -n \"isAdmin\\\\|$_ESSION\\\\|perfil\\\\|verificar\" /c/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php)",
+      "Bash(grep -r eliminarObservacion /c/Users/black/Desktop/EGS --include=*.js --include=*.php)"
     ]
   }
 }
