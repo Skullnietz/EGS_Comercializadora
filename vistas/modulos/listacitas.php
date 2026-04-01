@@ -179,22 +179,25 @@ $nombre= $nombre1;
     $gcalStart = date('Ymd\THis', strtotime($fechaRaw));
     $gcalEnd = date('Ymd\THis', strtotime($fechaRaw.' +1 hour'));
     $gcalDetalles = array('Orden #'.$value["cita_orden"]);
-    // Obtener nombre del cliente y descripción del equipo
-    $_gcOrd = ModeloCitas::mdlMostrarCitas("citas", "id_orden", $value["cita_orden"]);
-    if (!empty($_gcOrd)) {
-        // Query directo para datos de orden y cliente
-        try {
-            $_gcStmt = Conexion::conectar()->prepare("SELECT o.descripcion, cl.nombre FROM ordenes o LEFT JOIN clientes cl ON o.id_usuario = cl.id WHERE o.id = :id LIMIT 1");
-            $_gcStmt->bindParam(":id", $value["cita_orden"], PDO::PARAM_INT);
-            $_gcStmt->execute();
-            $_gcData = $_gcStmt->fetch(PDO::FETCH_ASSOC);
-            if ($_gcData) {
-                if (!empty($_gcData["nombre"])) $gcalDetalles[] = 'Cliente: '.$_gcData["nombre"];
-                if (!empty($_gcData["descripcion"])) $gcalDetalles[] = 'Equipo: '.$_gcData["descripcion"];
+    // Obtener nombre del cliente y descripción del equipo (ordenes en BD WP, clientes en ecommerce)
+    try {
+        $_gcStmt = ConexionWP::conectarWP()->prepare("SELECT descripcion, id_usuario FROM ordenes WHERE id = :id LIMIT 1");
+        $_gcStmt->bindParam(":id", $value["cita_orden"], PDO::PARAM_INT);
+        $_gcStmt->execute();
+        $_gcOrd = $_gcStmt->fetch(PDO::FETCH_ASSOC);
+        $_gcStmt = null;
+        if ($_gcOrd) {
+            if (!empty($_gcOrd["descripcion"])) $gcalDetalles[] = 'Equipo: '.$_gcOrd["descripcion"];
+            if (!empty($_gcOrd["id_usuario"])) {
+                $_gcStmt2 = Conexion::conectar()->prepare("SELECT nombre FROM clientes WHERE id = :id LIMIT 1");
+                $_gcStmt2->bindParam(":id", $_gcOrd["id_usuario"], PDO::PARAM_INT);
+                $_gcStmt2->execute();
+                $_gcCl = $_gcStmt2->fetch(PDO::FETCH_ASSOC);
+                $_gcStmt2 = null;
+                if ($_gcCl && !empty($_gcCl["nombre"])) $gcalDetalles[] = 'Cliente: '.$_gcCl["nombre"];
             }
-            $_gcStmt = null;
-        } catch(Exception $e) {}
-    }
+        }
+    } catch(Exception $e) {}
     $gcalDetails = urlencode(implode("\n", $gcalDetalles));
     $gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='.$gcalTitle.'&dates='.$gcalStart.'/'.$gcalEnd.'&details='.$gcalDetails;
 

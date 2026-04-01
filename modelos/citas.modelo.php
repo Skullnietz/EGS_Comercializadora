@@ -1,9 +1,82 @@
 <?php
 
 require_once "conexion.php";
+require_once "conexionWordpress.php";
 
 class ModeloCitas
 {
+
+	/*=============================================
+	HELPER: Enriquecer citas con datos de orden y cliente
+	(ordenes está en BD WordPress/respaldo, clientes en ecommerce)
+	=============================================*/
+	private static function enriquecerCitas($citas)
+	{
+		if (empty($citas)) return $citas;
+
+		// Recolectar IDs de orden únicos
+		$ordenIds = array();
+		foreach ($citas as $c) {
+			if (!empty($c["id_orden"])) {
+				$ordenIds[] = intval($c["id_orden"]);
+			}
+		}
+		if (empty($ordenIds)) return $citas;
+		$ordenIds = array_unique($ordenIds);
+
+		// Consultar ordenes (BD WordPress/respaldo)
+		$in = implode(',', $ordenIds);
+		try {
+			$stmt = ConexionWP::conectarWP()->prepare("SELECT id, descripcion, id_usuario FROM ordenes WHERE id IN ($in)");
+			$stmt->execute();
+			$ordenes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			$stmt = null;
+		} catch (Exception $e) {
+			return $citas;
+		}
+
+		// Mapear ordenes por ID
+		$ordenMap = array();
+		$clienteIds = array();
+		foreach ($ordenes as $o) {
+			$ordenMap[intval($o["id"])] = $o;
+			if (!empty($o["id_usuario"])) {
+				$clienteIds[] = intval($o["id_usuario"]);
+			}
+		}
+
+		// Consultar clientes (BD ecommerce)
+		$clienteMap = array();
+		if (!empty($clienteIds)) {
+			$clienteIds = array_unique($clienteIds);
+			$inCl = implode(',', $clienteIds);
+			try {
+				$stmt2 = Conexion::conectar()->prepare("SELECT id, nombre FROM clientes WHERE id IN ($inCl)");
+				$stmt2->execute();
+				$clientes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+				$stmt2 = null;
+				foreach ($clientes as $cl) {
+					$clienteMap[intval($cl["id"])] = $cl["nombre"];
+				}
+			} catch (Exception $e) {}
+		}
+
+		// Enriquecer cada cita
+		foreach ($citas as &$c) {
+			$c["equipo"] = "";
+			$c["cliente_nombre"] = "";
+			if (!empty($c["id_orden"]) && isset($ordenMap[intval($c["id_orden"])])) {
+				$o = $ordenMap[intval($c["id_orden"])];
+				$c["equipo"] = isset($o["descripcion"]) ? $o["descripcion"] : "";
+				if (!empty($o["id_usuario"]) && isset($clienteMap[intval($o["id_usuario"])])) {
+					$c["cliente_nombre"] = $clienteMap[intval($o["id_usuario"])];
+				}
+			}
+		}
+		unset($c);
+
+		return $citas;
+	}
 
 	/*=============================================
 	MOSTRAR CITAS
@@ -20,9 +93,10 @@ class ModeloCitas
 
 		} else {
 
-			$stmt = Conexion::conectar()->prepare("SELECT c.id, c.title, c.description, c.start, c.end, c.color, c.id_orden, o.descripcion AS equipo, cl.nombre AS cliente_nombre FROM $tabla c LEFT JOIN ordenes o ON c.id_orden = o.id LEFT JOIN clientes cl ON o.id_usuario = cl.id");
+			$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla");
 			$stmt->execute();
-			return $stmt->fetchAll();
+			$citas = $stmt->fetchAll();
+			return self::enriquecerCitas($citas);
 
 		}
 
@@ -61,11 +135,12 @@ class ModeloCitas
 	=============================================*/
 	static public function mdlCitasPorRango($tabla, $inicio, $fin)
 	{
-		$stmt = Conexion::conectar()->prepare("SELECT c.id, c.title, c.description, c.start, c.end, c.color, c.id_orden, o.descripcion AS equipo, cl.nombre AS cliente_nombre FROM $tabla c LEFT JOIN ordenes o ON c.id_orden = o.id LEFT JOIN clientes cl ON o.id_usuario = cl.id WHERE c.start BETWEEN :inicio AND :fin ORDER BY c.start ASC");
+		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE start BETWEEN :inicio AND :fin ORDER BY start ASC");
 		$stmt->bindParam(":inicio", $inicio, PDO::PARAM_STR);
 		$stmt->bindParam(":fin", $fin, PDO::PARAM_STR);
 		$stmt->execute();
-		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return self::enriquecerCitas($citas);
 	}
 
 	/*=============================================
@@ -118,9 +193,10 @@ class ModeloCitas
 			return array();
 		}
 		$in = implode(',', array_map('intval', $ordenIds));
-		$stmt = Conexion::conectar()->prepare("SELECT c.id, c.title, c.description, c.start, c.end, c.color, c.id_orden, o.descripcion AS equipo, cl.nombre AS cliente_nombre FROM $tabla c LEFT JOIN ordenes o ON c.id_orden = o.id LEFT JOIN clientes cl ON o.id_usuario = cl.id WHERE c.id_orden IN ($in)");
+		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE id_orden IN ($in)");
 		$stmt->execute();
-		return $stmt->fetchAll();
+		$citas = $stmt->fetchAll();
+		return self::enriquecerCitas($citas);
 	}
 
 	/*=============================================
@@ -132,11 +208,12 @@ class ModeloCitas
 			return array();
 		}
 		$in = implode(',', array_map('intval', $ordenIds));
-		$stmt = Conexion::conectar()->prepare("SELECT c.id, c.title, c.description, c.start, c.end, c.color, c.id_orden, o.descripcion AS equipo, cl.nombre AS cliente_nombre FROM $tabla c LEFT JOIN ordenes o ON c.id_orden = o.id LEFT JOIN clientes cl ON o.id_usuario = cl.id WHERE c.start BETWEEN :inicio AND :fin AND c.id_orden IN ($in) ORDER BY c.start ASC");
+		$stmt = Conexion::conectar()->prepare("SELECT id, title, description, start, end, color, id_orden FROM $tabla WHERE start BETWEEN :inicio AND :fin AND id_orden IN ($in) ORDER BY start ASC");
 		$stmt->bindParam(":inicio", $inicio, PDO::PARAM_STR);
 		$stmt->bindParam(":fin", $fin, PDO::PARAM_STR);
 		$stmt->execute();
-		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return self::enriquecerCitas($citas);
 	}
 
 	/*=============================================
