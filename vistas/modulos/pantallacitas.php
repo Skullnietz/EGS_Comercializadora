@@ -162,7 +162,24 @@
     <div class="modal-dialog" role="document" style="max-width:560px;margin:50px auto;">
         <div class="modal-content" style="border-radius:14px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(15,23,42,.22);">
 
-            <!-- Header dinámico (color del evento) -->
+            <!-- ═══ HERO: imagen del equipo + overlay (solo si tiene orden con portada) ═══ -->
+            <div id="dcHero" style="position:relative;display:none;">
+                <img id="dcHeroImg" src="" style="width:100%;height:200px;object-fit:cover;display:block;">
+                <div id="dcHeroOverlay" style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,23,42,.85) 0%,rgba(15,23,42,.3) 100%);"></div>
+                <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:.9;text-shadow:none;font-size:22px;position:absolute;right:16px;top:12px;z-index:2;">&times;</button>
+                <div style="position:absolute;bottom:0;left:0;right:0;padding:18px 24px;z-index:1;">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                        <span id="dcHeroOrdenNum" style="font-size:13px;font-weight:700;color:#fff;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:6px;backdrop-filter:blur(4px);"></span>
+                        <span id="dcHeroEstadoBadge" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;"></span>
+                    </div>
+                    <h4 id="dcHeroTitle" style="margin:4px 0 0;font-size:17px;font-weight:700;color:#fff;"></h4>
+                    <div id="dcHeroFechaHora" style="font-size:12px;color:rgba(255,255,255,.8);margin-top:4px;display:flex;align-items:center;gap:6px;">
+                        <i class="fa-regular fa-clock"></i><span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ HEADER: sin orden o sin portada (gradiente de color del evento) ═══ -->
             <div id="dcHeader" style="padding:20px 24px;color:#fff;position:relative;">
                 <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:.8;text-shadow:none;font-size:22px;position:absolute;right:16px;top:14px;">&times;</button>
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
@@ -177,30 +194,38 @@
             <!-- Body -->
             <div style="padding:0 24px 16px;max-height:62vh;overflow-y:auto;">
 
-                <!-- Equipo / Orden -->
-                <div id="dcOrdenSection" style="display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-bottom:1px solid #f1f5f9;">
-                    <div id="dcFotoWrap" style="width:80px;height:80px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
-                        <img id="dcFoto" src="" style="width:100%;height:100%;object-fit:cover;display:none;">
-                        <i class="fa-solid fa-image" id="dcFotoPlaceholder" style="font-size:24px;color:#cbd5e1;"></i>
-                    </div>
-                    <div style="flex:1;min-width:0;">
-                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                            <span id="dcOrdenNum" style="font-size:14px;font-weight:700;color:#1e293b;"></span>
-                            <span id="dcEstadoBadge" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;"></span>
+                <!-- Orden info compacta (solo si tiene orden pero no hero/portada) -->
+                <div id="dcOrdenCompact" style="display:none;padding:14px 0;border-bottom:1px solid #f1f5f9;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:42px;height:42px;border-radius:10px;background:#eef2ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fa-solid fa-file-lines" style="font-size:16px;color:#6366f1;"></i>
                         </div>
-                        <div id="dcEquipo" style="font-size:13px;color:#475569;margin-top:4px;line-height:1.4;"></div>
-                        <div id="dcMarcaModelo" style="font-size:11px;color:#94a3b8;margin-top:2px;"></div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <span id="dcOrdenNum" style="font-size:14px;font-weight:700;color:#1e293b;"></span>
+                                <span id="dcEstadoBadge" style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;"></span>
+                            </div>
+                            <div id="dcEquipo" style="font-size:12px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Notas -->
+                <!-- Equipo detalle (marca, modelo) solo si tiene orden -->
+                <div id="dcEquipoDetalle" style="display:none;padding:12px 0;border-bottom:1px solid #f1f5f9;">
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <div id="dcMarcaBlock" class="egs-dc-tag"><i class="fa-solid fa-tag" style="margin-right:4px;color:#6366f1;"></i><span id="dcMarca"></span></div>
+                        <div id="dcModeloBlock" class="egs-dc-tag"><i class="fa-solid fa-microchip" style="margin-right:4px;color:#8b5cf6;"></i><span id="dcModelo"></span></div>
+                    </div>
+                </div>
+
+                <!-- Notas / Descripción -->
                 <div id="dcDescSection" style="padding:12px 0;border-bottom:1px solid #f1f5f9;display:none;">
                     <div class="egs-dc-section-label"><i class="fa-regular fa-comment-dots" style="margin-right:4px;"></i>Notas</div>
                     <p id="dcDescripcion" style="margin:0;font-size:13px;color:#334155;line-height:1.5;"></p>
                 </div>
 
                 <!-- Cliente -->
-                <div id="dcClienteSection" style="padding:14px 0;border-bottom:1px solid #f1f5f9;">
+                <div id="dcClienteSection" style="padding:14px 0;border-bottom:1px solid #f1f5f9;display:none;">
                     <div class="egs-dc-section-label"><i class="fa-solid fa-user" style="margin-right:4px;"></i>Cliente</div>
                     <div style="display:flex;align-items:center;gap:12px;">
                         <div id="dcClienteAvatar" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:800;flex-shrink:0;"></div>
@@ -215,7 +240,7 @@
                         </div>
                     </div>
                     <!-- Mini stats -->
-                    <div id="dcClienteStats" style="display:none;margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+                    <div id="dcClienteStats" style="display:none;"></div>
                 </div>
 
                 <!-- Técnico y Asesor -->
@@ -242,8 +267,8 @@
                     </div>
                 </div>
 
-                <!-- Info extra -->
-                <div id="dcInfoExtra" style="padding:14px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <!-- Info extra (total, fecha ingreso) -->
+                <div id="dcInfoExtra" style="padding:14px 0;display:none;grid-template-columns:1fr 1fr;gap:8px;">
                     <div id="dcTotalBlock" class="egs-dc-stat-box" style="display:none;">
                         <div class="egs-dc-stat-label">Total</div>
                         <div id="dcTotal" class="egs-dc-stat-val"></div>
@@ -254,17 +279,31 @@
                     </div>
                 </div>
 
+                <!-- ═══ Observaciones editables ═══ -->
+                <div id="dcObservacionesSection" style="padding:14px 0;border-top:1px solid #f1f5f9;">
+                    <div class="egs-dc-section-label"><i class="fa-solid fa-clipboard-list" style="margin-right:4px;"></i>Observaciones</div>
+                    <textarea id="dcObservaciones" class="form-control egs-pc-input" rows="3"
+                        placeholder="Escribe observaciones sobre esta cita..."
+                        style="resize:vertical;min-height:60px;font-size:13px;"></textarea>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+                        <span id="dcObsStatus" style="font-size:11px;color:#94a3b8;"></span>
+                        <button type="button" id="dcBtnGuardarObs" class="btn" style="border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;background:#6366f1;color:#fff;border:none;">
+                            <i class="fa-solid fa-floppy-disk" style="margin-right:4px;"></i>Guardar
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Footer acciones -->
             <div style="padding:14px 24px 18px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #f1f5f9;background:#f8fafc;">
-                <a id="dcBtnOrden" href="#" class="egs-dc-action-btn" style="background:#eef2ff;color:#4f46e5;border-color:#c7d2fe;">
+                <a id="dcBtnOrden" href="#" class="egs-dc-action-btn" style="display:none;background:#eef2ff;color:#4f46e5;border-color:#c7d2fe;">
                     <i class="fa-solid fa-eye"></i> Ver Orden
                 </a>
                 <a id="dcBtnGCal" href="#" target="_blank" class="egs-dc-action-btn" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;">
                     <i class="fa-brands fa-google"></i> Calendar
                 </a>
-                <a id="dcBtnWhatsApp" href="#" target="_blank" class="egs-dc-action-btn" style="background:#f0fdf4;color:#16a34a;border-color:#bbf7d0;">
+                <a id="dcBtnWhatsApp" href="#" target="_blank" class="egs-dc-action-btn" style="display:none;background:#f0fdf4;color:#16a34a;border-color:#bbf7d0;">
                     <i class="fa-brands fa-whatsapp"></i> WhatsApp
                 </a>
                 <button type="button" id="dcBtnEliminar" class="egs-dc-action-btn" style="background:#fff;color:#ef4444;border-color:#fecaca;">
@@ -327,8 +366,13 @@
     .egs-dc-mini-stat { padding:8px;background:#f8fafc;border-radius:8px;text-align:center; }
     .egs-dc-mini-stat-val { font-size:14px;font-weight:800; }
     .egs-dc-mini-stat-lbl { font-size:10px;color:#94a3b8;margin-top:1px; }
+    .egs-dc-tag {
+        display:inline-flex;align-items:center;padding:5px 12px;border-radius:8px;background:#f8fafc;
+        border:1px solid #e2e8f0;font-size:12px;font-weight:500;color:#475569;
+    }
 
     /* ═══ FullCalendar Overrides ═══ */
+    .fc .fc-event, .fc .fc-event-dot { background-color: inherit !important; border-color: inherit !important; }
     .fc .fc-toolbar { margin-bottom:16px !important;flex-wrap:wrap;gap:10px; }
     .fc .fc-toolbar-title { font-size:18px !important;font-weight:700 !important;color:#1e293b !important;text-transform:capitalize; }
     .fc .fc-button {

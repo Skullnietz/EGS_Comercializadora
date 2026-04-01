@@ -182,11 +182,21 @@ document.addEventListener('DOMContentLoaded', function () {
         editable: true,
         selectable: true,
 
+        eventDisplay: 'block',
+
         events: {
             url: 'ajax/citas.ajax.php',
             method: 'POST',
             extraParams: { accion: 'mostrar' },
             failure: function () { console.log('Error al cargar eventos'); }
+        },
+
+        eventDidMount: function(info) {
+            var color = info.event.backgroundColor || info.event.borderColor || '';
+            if (color) {
+                info.el.style.setProperty('background-color', color, 'important');
+                info.el.style.setProperty('border-color', color, 'important');
+            }
         },
 
         dateClick: function (info) {
@@ -227,44 +237,25 @@ document.addEventListener('DOMContentLoaded', function () {
         eventClick: function (info) {
             var ev = info.event;
             var props = ev.extendedProps;
-
-            // Header — color based on the event
             var evColor = ev.backgroundColor || '#6366f1';
-            $('#dcHeader').css('background', 'linear-gradient(135deg, ' + evColor + ', ' + adjustColor(evColor, -20) + ')');
-            $('#dcTitle').text(ev.title || 'Sin título');
 
-            // Fecha y hora
-            if (ev.start) {
-                var fechaStr = diasEs[ev.start.getDay()] + ' ' + ev.start.getDate() + ' de ' + mesesEs[ev.start.getMonth()] + ', ' +
-                    ev.start.getHours().toString().padStart(2,'0') + ':' + ev.start.getMinutes().toString().padStart(2,'0');
-                $('#dcFechaHora span').text(fechaStr);
-            }
-
-            // Orden info
+            // Basic data
             var idOrden = props.id_orden;
             var hasOrden = idOrden && parseInt(idOrden) > 0;
-            if (hasOrden) {
-                $('#dcOrdenNum').text('Orden #' + idOrden);
-                $('#dcBtnOrden').attr('href', 'index.php?ruta=infoOrden&idOrden=' + idOrden).show();
-            } else {
-                $('#dcOrdenNum').text('Sin orden vinculada');
-                $('#dcBtnOrden').hide();
-            }
-
-            // Foto del equipo
             var portada = hasOrden ? (props.orden_portada || '') : '';
-            if (portada) {
-                $('#dcFoto').attr('src', portada).show();
-                $('#dcFotoPlaceholder').hide();
-            } else {
-                $('#dcFoto').hide();
-                $('#dcFotoPlaceholder').show();
+            var hasHero = hasOrden && portada;
+
+            // Fecha string
+            var fechaStr = '';
+            if (ev.start) {
+                fechaStr = diasEs[ev.start.getDay()] + ' ' + ev.start.getDate() + ' de ' + mesesEs[ev.start.getMonth()] + ', ' +
+                    ev.start.getHours().toString().padStart(2,'0') + ':' + ev.start.getMinutes().toString().padStart(2,'0');
             }
 
-            // Estado
+            // Estado badge helper
             var estado = hasOrden ? (props.orden_estado || '') : '';
-            var $badge = $('#dcEstadoBadge');
-            if (estado) {
+            function renderEstadoBadge($el) {
+                if (!estado) { $el.hide(); return; }
                 var estadoColors = {
                     'Ent': { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
                     'ok':  { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
@@ -276,22 +267,59 @@ document.addEventListener('DOMContentLoaded', function () {
                 var ec = null;
                 Object.keys(estadoColors).forEach(function(k) { if (estado.indexOf(k) !== -1) ec = estadoColors[k]; });
                 if (!ec) ec = { bg: '#f1f5f9', color: '#64748b', border: '#e2e8f0' };
-                $badge.text(estado).css({ background: ec.bg, color: ec.color, border: '1px solid ' + ec.border }).show();
-            } else {
-                $badge.hide();
+                $el.text(estado).css({ background: ec.bg, color: ec.color, border: '1px solid ' + ec.border }).show();
             }
 
-            // Equipo
-            var equipo = hasOrden ? (props.equipo || '') : '';
-            $('#dcEquipo').text(equipo || (hasOrden ? 'Sin descripción' : 'Cita sin orden vinculada'));
+            // ═══ HERO MODE (order + portada) ═══
+            if (hasHero) {
+                $('#dcHero').show();
+                $('#dcHeroImg').attr('src', portada);
+                $('#dcHeroOrdenNum').text('Orden #' + idOrden);
+                $('#dcHeroTitle').text(ev.title || 'Sin título');
+                $('#dcHeroFechaHora span').text(fechaStr);
+                renderEstadoBadge($('#dcHeroEstadoBadge'));
+                $('#dcHeader').hide();
+            } else {
+                $('#dcHero').hide();
+                $('#dcHeader').css('background', 'linear-gradient(135deg, ' + evColor + ', ' + adjustColor(evColor, -20) + ')').show();
+                $('#dcTitle').text(ev.title || 'Sin título');
+                $('#dcFechaHora span').text(fechaStr);
+            }
 
-            // Marca/Modelo
+            // ═══ ORDEN COMPACT (order pero sin portada) ═══
+            if (hasOrden && !hasHero) {
+                $('#dcOrdenNum').text('Orden #' + idOrden);
+                var equipo = props.equipo || '';
+                $('#dcEquipo').text(equipo || 'Sin descripción del equipo');
+                renderEstadoBadge($('#dcEstadoBadge'));
+                $('#dcOrdenCompact').show();
+            } else if (hasHero) {
+                // En hero, mostrar equipo en sección compacta también
+                var equipo = props.equipo || '';
+                if (equipo) {
+                    $('#dcOrdenNum').text('');
+                    $('#dcEquipo').text(equipo);
+                    $('#dcEstadoBadge').hide();
+                    $('#dcOrdenCompact').show();
+                } else {
+                    $('#dcOrdenCompact').hide();
+                }
+            } else {
+                $('#dcOrdenCompact').hide();
+            }
+
+            // ═══ EQUIPO DETALLE (marca, modelo) ═══
             var marca = hasOrden ? (props.orden_marca || '') : '';
             var modelo = hasOrden ? (props.orden_modelo || '') : '';
-            var mm = [marca, modelo].filter(Boolean).join(' · ');
-            $('#dcMarcaModelo').text(mm).toggle(!!mm);
+            if (marca || modelo) {
+                if (marca) { $('#dcMarca').text(marca); $('#dcMarcaBlock').show(); } else { $('#dcMarcaBlock').hide(); }
+                if (modelo) { $('#dcModelo').text(modelo); $('#dcModeloBlock').show(); } else { $('#dcModeloBlock').hide(); }
+                $('#dcEquipoDetalle').show();
+            } else {
+                $('#dcEquipoDetalle').hide();
+            }
 
-            // Descripción/Notas
+            // ═══ DESCRIPCIÓN ═══
             var desc = props.description || '';
             if (desc) {
                 $('#dcDescripcion').text(desc);
@@ -300,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#dcDescSection').hide();
             }
 
-            // Cliente
+            // ═══ CLIENTE ═══
             var clienteNombre = props.cliente_nombre || '';
             if (clienteNombre) {
                 var initials = clienteNombre.split(' ').map(function(w){ return w.charAt(0).toUpperCase(); }).slice(0,2).join('');
@@ -313,7 +341,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (tel) {
                     $('#dcClienteTel span').text(tel);
                     $('#dcClienteTel').show();
-                    // WhatsApp link
                     var waNum = tel.replace(/\D/g,'');
                     if (waNum.length === 10) waNum = '52' + waNum;
                     $('#dcBtnWhatsApp').attr('href', 'https://wa.me/' + waNum).show();
@@ -326,7 +353,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 var badges = props.cliente_badges;
                 var badgesHtml = '';
                 if (badges) {
-                    // Calificación de entrega badge
                     if (badges.es_nuevo) {
                         badgesHtml += buildBadge('fa-seedling', '#f5f3ff', '#8b5cf6', 'Cliente nuevo');
                     } else if (badges.calif_entrega !== null) {
@@ -335,7 +361,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         else if (badges.calif_entrega >= 50)  badgesHtml += buildBadge('fa-minus-circle', '#fffbeb', '#d97706', 'Regular (' + badges.calif_entrega + '%)');
                         else                                  badgesHtml += buildBadge('fa-thumbs-down', '#fef2f2', '#dc2626', 'Bajo (' + badges.calif_entrega + '%)');
                     }
-                    // Pickup speed badge
                     if (badges.avg_recogida !== null) {
                         var ar = badges.avg_recogida;
                         if (ar <= 7)       badgesHtml += buildBadge('fa-bolt', '#f0fdf4', '#16a34a', '~' + Math.round(ar) + ' días');
@@ -344,7 +369,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         else               badgesHtml += buildBadge('fa-hourglass-end', '#fef2f2', '#dc2626', '~' + Math.round(ar) + ' días');
                     }
 
-                    // Mini stats
                     var statsHtml = '<div class="egs-dc-mini-stats">';
                     statsHtml += '<div class="egs-dc-mini-stat"><div class="egs-dc-mini-stat-val" style="color:#1e293b;">' + (badges.total_ordenes || 0) + '</div><div class="egs-dc-mini-stat-lbl">Órdenes</div></div>';
                     statsHtml += '<div class="egs-dc-mini-stat"><div class="egs-dc-mini-stat-val" style="color:#16a34a;">' + (badges.entregadas || 0) + '</div><div class="egs-dc-mini-stat-lbl">Entregadas</div></div>';
@@ -360,78 +384,105 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#dcBtnWhatsApp').hide();
             }
 
-            // Técnico
+            // ═══ TÉCNICO / ASESOR ═══
             var tecNombre = props.tecnico_nombre || '';
             if (tecNombre) {
                 $('#dcTecnicoNombre').text(tecNombre);
                 var tecFoto = props.tecnico_foto;
-                if (tecFoto) {
-                    $('#dcTecnicoFoto').attr('src', tecFoto).show();
-                    $('#dcTecnicoIcon').hide();
-                } else {
-                    $('#dcTecnicoFoto').hide();
-                    $('#dcTecnicoIcon').show();
-                }
+                if (tecFoto) { $('#dcTecnicoFoto').attr('src', tecFoto).show(); $('#dcTecnicoIcon').hide(); }
+                else { $('#dcTecnicoFoto').hide(); $('#dcTecnicoIcon').show(); }
                 $('#dcTecnicoBlock').show();
             } else {
                 $('#dcTecnicoBlock').hide();
             }
 
-            // Asesor
             var aseNombre = props.asesor_nombre || '';
             if (aseNombre) {
                 $('#dcAsesorNombre').text(aseNombre);
                 var aseFoto = props.asesor_foto;
-                if (aseFoto) {
-                    $('#dcAsesorFoto').attr('src', aseFoto).show();
-                    $('#dcAsesorIcon').hide();
-                } else {
-                    $('#dcAsesorFoto').hide();
-                    $('#dcAsesorIcon').show();
-                }
+                if (aseFoto) { $('#dcAsesorFoto').attr('src', aseFoto).show(); $('#dcAsesorIcon').hide(); }
+                else { $('#dcAsesorFoto').hide(); $('#dcAsesorIcon').show(); }
                 $('#dcAsesorBlock').show();
             } else {
                 $('#dcAsesorBlock').hide();
             }
 
-            // Hide equipo section row if both empty
-            if (!tecNombre && !aseNombre) {
-                $('#dcEquipoSection').hide();
+            if (!tecNombre && !aseNombre) { $('#dcEquipoSection').hide(); } else { $('#dcEquipoSection').show(); }
+
+            // ═══ INFO EXTRA (solo si tiene orden) ═══
+            if (hasOrden) {
+                var total = props.orden_total;
+                if (total && parseFloat(total) > 0) {
+                    $('#dcTotal').text('$' + parseFloat(total).toLocaleString('es-MX', {minimumFractionDigits:2}));
+                    $('#dcTotalBlock').show();
+                } else { $('#dcTotalBlock').hide(); }
+
+                var fechaIng = props.orden_fecha_ingreso;
+                if (fechaIng) {
+                    var fi = new Date(fechaIng.replace(/-/g,'/'));
+                    if (!isNaN(fi)) {
+                        $('#dcFechaIngreso').text(fi.getDate() + ' ' + mesesEs[fi.getMonth()].substring(0,3) + ' ' + fi.getFullYear());
+                    } else {
+                        $('#dcFechaIngreso').text(fechaIng);
+                    }
+                    $('#dcFechaIngresoBlock').show();
+                } else { $('#dcFechaIngresoBlock').hide(); }
+
+                var showExtra = ($('#dcTotalBlock').is(':visible') || $('#dcFechaIngresoBlock').is(':visible'));
+                $('#dcInfoExtra').css('display', showExtra ? 'grid' : 'none');
             } else {
-                $('#dcEquipoSection').show();
+                $('#dcInfoExtra').hide();
             }
 
-            // Total
-            var total = hasOrden ? props.orden_total : null;
-            if (total && parseFloat(total) > 0) {
-                $('#dcTotal').text('$' + parseFloat(total).toLocaleString('es-MX', {minimumFractionDigits:2}));
-                $('#dcTotalBlock').show();
+            // ═══ OBSERVACIONES ═══
+            $('#dcObservaciones').val(desc);
+            $('#dcObsStatus').text('');
+            var currentCitaId = ev.id;
+
+            $('#dcBtnGuardarObs').off('click').on('click', function() {
+                var newDesc = $('#dcObservaciones').val().trim();
+                var $btn = $(this);
+                $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+
+                $.ajax({
+                    url: 'ajax/citas.ajax.php',
+                    type: 'POST',
+                    data: { accion: 'actualizarDescripcion', idCita: currentCitaId, descripcion: newDesc },
+                    success: function(resp) {
+                        if (resp === 'ok') {
+                            ev.setExtendedProp('description', newDesc);
+                            if (newDesc) { $('#dcDescripcion').text(newDesc); $('#dcDescSection').show(); }
+                            else { $('#dcDescSection').hide(); }
+                            $('#dcObsStatus').text('Guardado ✓').css('color', '#16a34a');
+                        } else {
+                            $('#dcObsStatus').text('Error al guardar').css('color', '#ef4444');
+                        }
+                    },
+                    error: function() {
+                        $('#dcObsStatus').text('Error de conexión').css('color', '#ef4444');
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false).html('<i class="fa-solid fa-floppy-disk" style="margin-right:4px;"></i>Guardar');
+                        setTimeout(function() { $('#dcObsStatus').text(''); }, 3000);
+                    }
+                });
+            });
+
+            // ═══ VER ORDEN BUTTON ═══
+            if (hasOrden) {
+                $('#dcBtnOrden').attr('href', 'index.php?ruta=infoOrden&idOrden=' + idOrden).show();
             } else {
-                $('#dcTotalBlock').hide();
+                $('#dcBtnOrden').hide();
             }
 
-            // Fecha Ingreso
-            var fechaIng = hasOrden ? props.orden_fecha_ingreso : null;
-            if (fechaIng) {
-                var fi = new Date(fechaIng.replace(/-/g,'/'));
-                if (!isNaN(fi)) {
-                    $('#dcFechaIngreso').text(fi.getDate() + ' ' + mesesEs[fi.getMonth()].substring(0,3) + ' ' + fi.getFullYear());
-                } else {
-                    $('#dcFechaIngreso').text(fechaIng);
-                }
-                $('#dcFechaIngresoBlock').show();
-            } else {
-                $('#dcFechaIngresoBlock').hide();
-            }
-
-            // Google Calendar URL
+            // ═══ GOOGLE CALENDAR ═══
             if (ev.start) {
                 var startDate = ev.start;
                 var endDate = ev.end || new Date(startDate.getTime() + 60 * 60 * 1000);
                 var detalles = [];
                 if (hasOrden) detalles.push('Orden #' + idOrden);
                 if (clienteNombre) detalles.push('Cliente: ' + clienteNombre);
-                if (equipo) detalles.push('Equipo: ' + equipo);
+                if (props.equipo) detalles.push('Equipo: ' + props.equipo);
                 if (desc) detalles.push('\nNotas: ' + desc);
 
                 var gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
@@ -443,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#dcBtnGCal').hide();
             }
 
-            // Eliminar handler
+            // ═══ ELIMINAR ═══
             $('#dcBtnEliminar').off('click').on('click', function() {
                 swal({
                     title: '¿Estás seguro?',

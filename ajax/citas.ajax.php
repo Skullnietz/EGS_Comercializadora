@@ -162,6 +162,18 @@ if (isset($_POST["idCita"])) {
     $eliminar->ajaxEliminarCita();
 }
 
+// Actualizar descripción/observaciones
+if (isset($_POST["accion"]) && $_POST["accion"] == "actualizarDescripcion") {
+    $idCita = isset($_POST["idCita"]) ? intval($_POST["idCita"]) : 0;
+    $descripcion = isset($_POST["descripcion"]) ? trim($_POST["descripcion"]) : "";
+
+    if ($idCita > 0) {
+        echo ModeloCitas::mdlActualizarDescripcion("citas", $idCita, $descripcion);
+    } else {
+        echo "error";
+    }
+}
+
 // Obtener Orden Info
 if (isset($_POST["obtenerOrden"])) {
     $infoOrden = new AjaxCitas();

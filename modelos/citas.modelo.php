@@ -351,4 +351,22 @@ class ModeloCitas
 
 	}
 
+	/*=============================================
+	ACTUALIZAR DESCRIPCIÓN / OBSERVACIONES
+	=============================================*/
+	static public function mdlActualizarDescripcion($tabla, $idCita, $descripcion)
+	{
+		$stmt = Conexion::conectar()->prepare("UPDATE $tabla SET description = :descripcion WHERE id = :id");
+		$stmt->bindParam(":descripcion", $descripcion, PDO::PARAM_STR);
+		$stmt->bindParam(":id", $idCita, PDO::PARAM_INT);
+
+		if ($stmt->execute()) {
+			$stmt = null;
+			return "ok";
+		} else {
+			$stmt = null;
+			return "error";
+		}
+	}
+
 }
