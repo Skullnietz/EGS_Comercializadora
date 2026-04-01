@@ -78,7 +78,7 @@ class ModeloCitas
 			$clienteIds = array_unique($clienteIds);
 			$inCl = implode(',', $clienteIds);
 			try {
-				$stmt2 = Conexion::conectar()->prepare("SELECT id, nombre, telefono, telefonoDos FROM clientes WHERE id IN ($inCl)");
+				$stmt2 = Conexion::conectar()->prepare("SELECT id, nombre, telefono, telefonoDos FROM clientesTienda WHERE id IN ($inCl)");
 				$stmt2->execute();
 				$clientes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 				$stmt2 = null;
