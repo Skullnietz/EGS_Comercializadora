@@ -120,6 +120,49 @@ if (isset($_POST["obtenerOrden"])) {
     $infoOrden->ajaxObtenerOrden();
 }
 
+// Obtener color automático basado en calificación del cliente de la orden
+if (isset($_POST["accion"]) && $_POST["accion"] == "colorPorOrden") {
+    $idOrden = isset($_POST["idOrden"]) ? intval($_POST["idOrden"]) : 0;
+
+    if ($idOrden > 0) {
+        require_once "../modelos/ordenes.modelo.php";
+        $orden = ModeloOrdenes::mdlMostrarordenesParaValidar("ordenes", "id", $idOrden);
+
+        if (!empty($orden) && isset($orden[0]["id_usuario"])) {
+            $idCliente = $orden[0]["id_usuario"];
+
+            require_once "../config/clienteBadges.helper.php";
+            if (!defined('EGS_ROOT')) define('EGS_ROOT', realpath(__DIR__ . '/..'));
+            $bh = ClienteBadgesHelper::getInstance();
+            $stats = $bh->getDetailedStats($idCliente);
+
+            // Asignar color basado en calificación de entrega
+            $color = '#3a87ad'; // Default azul
+            if ($stats['es_nuevo']) {
+                $color = '#8b5cf6'; // Morado - cliente nuevo
+            } elseif ($stats['calif_entrega'] !== null) {
+                if ($stats['calif_entrega'] >= 90)      $color = '#16a34a'; // Verde - excelente
+                elseif ($stats['calif_entrega'] >= 70)   $color = '#2563eb'; // Azul - bueno
+                elseif ($stats['calif_entrega'] >= 50)   $color = '#d97706'; // Ámbar - regular
+                else                                     $color = '#dc2626'; // Rojo - pobre
+            }
+
+            echo json_encode([
+                'ok' => true,
+                'color' => $color,
+                'calif' => $stats['calif_entrega'],
+                'es_nuevo' => $stats['es_nuevo'],
+                'total_ordenes' => $stats['total_ordenes'],
+                'avg_recogida' => $stats['avg_recogida']
+            ]);
+        } else {
+            echo json_encode(['ok' => false, 'error' => 'Orden no encontrada', 'color' => '#3a87ad']);
+        }
+    } else {
+        echo json_encode(['ok' => false, 'error' => 'ID inválido', 'color' => '#3a87ad']);
+    }
+}
+
 // Obtener citas por rango de fechas (para navbar calendar)
 if (isset($_POST["accion"]) && $_POST["accion"] == "citasPorRango") {
     $rango = isset($_POST["rango"]) ? $_POST["rango"] : "hoy";

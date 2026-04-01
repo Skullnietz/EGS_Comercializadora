@@ -46,7 +46,7 @@
                 <div class="modal-body">
                     <div class="box-body">
 
-                        <!-- Entrada para el T�tulo -->
+                        <!-- Entrada para el T�tulo -->
                         <div class="form-group">
                             <label for="tituloCita">T&iacute;tulo de la Cita</label>
                             <div class="input-group">
@@ -68,27 +68,21 @@
 
                         <!-- Entrada para la ID Orden -->
                         <div class="form-group">
-                            <label for="idOrden">No. de Orden (Opcional)</label>
+                            <label for="idOrden">No. de Orden o Pedido <span style="color:#ef4444;">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-file-text-o"></i></span>
                                 <input type="number" class="form-control input-lg" id="idOrden" name="idOrden"
-                                    placeholder="ID de la Orden">
+                                    placeholder="ID de la Orden o Pedido" required min="1">
                             </div>
                         </div>
 
-                        <!-- Entrada para el Color -->
+                        <!-- Color automático basado en calificación del cliente -->
                         <div class="form-group">
-                            <label for="colorCita">Color de la Etiqueta</label>
-                            <div class="input-group">
-                                <span class="input-group-addon"><i class="fa fa-paint-brush"></i></span>
-                                <select class="form-control input-lg" id="colorCita" name="colorCita"
-                                    style="color: #333 !important; background-color: #fff !important; -webkit-text-fill-color: #333 !important; opacity: 1 !important;">
-                                    <option value="#3a87ad">Azul (Por defecto)</option>
-                                    <option value="#28a745">Verde (Confirmado)</option>
-                                    <option value="#ffc107">Amarillo (Pendiente)</option>
-                                    <option value="#dc3545">Rojo (Urgente)</option>
-                                    <option value="#6c757d">Gris (Normal)</option>
-                                </select>
+                            <label>Color de Etiqueta (automático)</label>
+                            <input type="hidden" id="colorCita" name="colorCita" value="#3a87ad">
+                            <div id="pcAutoColorPreview" style="padding:10px 14px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;font-size:13px;color:#64748b;display:flex;align-items:center;gap:8px;">
+                                <span id="pcAutoColorDot" style="width:14px;height:14px;border-radius:50%;background:#3a87ad;flex-shrink:0;"></span>
+                                <span id="pcAutoColorText">Ingresa un No. de Orden para asignar color</span>
                             </div>
                         </div>
 

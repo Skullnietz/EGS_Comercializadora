@@ -85,6 +85,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
     calendar.render();
 
+    // Auto-color: buscar calificación del cliente al cambiar ID de orden
+    var pcColorReq = null;
+    $(document).on('input change', '#idOrden', function(){
+        var idOrden = $(this).val();
+        if (pcColorReq && pcColorReq.readyState !== 4) pcColorReq.abort();
+
+        if (!idOrden || idOrden < 1) {
+            $('#colorCita').val('#3a87ad');
+            $('#pcAutoColorDot').css('background', '#3a87ad');
+            $('#pcAutoColorText').text('Ingresa un No. de Orden para asignar color').css('color','#64748b');
+            return;
+        }
+
+        $('#pcAutoColorText').html('<i class="fa-solid fa-spinner fa-spin"></i> Consultando...');
+
+        pcColorReq = $.ajax({
+            url: 'ajax/citas.ajax.php',
+            type: 'POST',
+            data: { accion: 'colorPorOrden', idOrden: idOrden },
+            dataType: 'json',
+            global: false,
+            success: function(resp) {
+                if (resp && resp.ok) {
+                    $('#colorCita').val(resp.color);
+                    $('#pcAutoColorDot').css('background', resp.color);
+                    var labels = {'#16a34a':'Excelente','#2563eb':'Bueno','#d97706':'Regular','#dc2626':'Bajo','#8b5cf6':'Cliente nuevo'};
+                    var label = labels[resp.color] || 'General';
+                    var detail = '';
+                    if (resp.es_nuevo) { detail = 'Cliente nuevo (' + resp.total_ordenes + ' órdenes)'; }
+                    else if (resp.calif !== null) { detail = label + ' — Calif: ' + resp.calif + '%'; }
+                    else { detail = 'Sin historial suficiente'; }
+                    $('#pcAutoColorText').text(detail).css('color','#334155');
+                } else {
+                    $('#colorCita').val('#3a87ad');
+                    $('#pcAutoColorDot').css('background', '#3a87ad');
+                    $('#pcAutoColorText').text(resp.error || 'Orden no encontrada').css('color','#ef4444');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.statusText === 'abort') return;
+                $('#colorCita').val('#3a87ad');
+                $('#pcAutoColorDot').css('background', '#3a87ad');
+                $('#pcAutoColorText').text('Error al consultar').css('color','#ef4444');
+            }
+        });
+    });
+
     // Flag to prevent double submission
     var isSaving = false;
 
@@ -104,11 +151,25 @@ document.addEventListener('DOMContentLoaded', function () {
         var titulo = $('#tituloCita').val();
         var fecha = $('#fechaCita').val();
         var color = $('#colorCita').val();
+        var idOrden = $('#idOrden').val();
+
+        if (!idOrden || idOrden < 1) {
+            swal({
+                icon: 'warning',
+                title: 'Orden requerida',
+                text: 'Debes vincular un No. de Orden o Pedido para crear la cita.'
+            });
+            isSaving = false;
+            submitBtn.prop('disabled', false);
+            $('#idOrden').focus();
+            return;
+        }
 
         var datos = new FormData();
         datos.append("tituloCita", titulo);
         datos.append("fechaCita", fecha);
         datos.append("colorCita", color);
+        datos.append("idOrden", idOrden);
 
         $.ajax({
             url: "ajax/citas.ajax.php",

@@ -68,6 +68,16 @@
               style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 12px;font-size:13px;transition:border-color .2s;">
           </div>
 
+          <!-- No. de Orden o Pedido (obligatorio) -->
+          <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;">
+              <i class="fa-solid fa-file-lines" style="margin-right:4px;color:#6366f1;"></i>No. de Orden o Pedido <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="number" class="form-control" id="crOrdenId" placeholder="Ingresa el ID de la orden o pedido" required min="1"
+              style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 12px;font-size:13px;transition:border-color .2s;">
+            <div id="crOrdenPreview" style="display:none;margin-top:6px;padding:6px 10px;border-radius:8px;font-size:11px;"></div>
+          </div>
+
           <!-- Accesos rápidos de fecha -->
           <div class="form-group" style="margin-bottom:16px;">
             <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:8px;display:block;">
@@ -130,15 +140,14 @@
             </div>
           </div>
 
-          <!-- Color -->
+          <!-- Color automático basado en calificación del cliente -->
           <div class="form-group" style="margin-bottom:6px;">
-            <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:8px;display:block;">Etiqueta</label>
-            <div class="egs-color-pills">
-              <button type="button" class="egs-color-pill active" data-color="#3a87ad" style="background:#3a87ad;" title="General"></button>
-              <button type="button" class="egs-color-pill" data-color="#28a745" style="background:#28a745;" title="Confirmado"></button>
-              <button type="button" class="egs-color-pill" data-color="#ffc107" style="background:#ffc107;" title="Pendiente"></button>
-              <button type="button" class="egs-color-pill" data-color="#dc3545" style="background:#dc3545;" title="Urgente"></button>
-              <button type="button" class="egs-color-pill" data-color="#6c757d" style="background:#6c757d;" title="Normal"></button>
+            <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:8px;display:block;">
+              <i class="fa-solid fa-palette" style="margin-right:4px;color:#6366f1;"></i>Etiqueta de color
+            </label>
+            <div id="egsAutoColorPreview" style="padding:10px 14px;border-radius:8px;background:#f1f5f9;border:1.5px solid #e2e8f0;font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;">
+              <span id="egsAutoColorDot" style="width:14px;height:14px;border-radius:50%;background:#3a87ad;flex-shrink:0;"></span>
+              <span id="egsAutoColorText">Ingresa un No. de Orden para asignar color automático</span>
             </div>
           </div>
 
@@ -494,30 +503,7 @@
   border-color: #6366f1;
 }
 
-/* ═══ Color Pills ═══ */
-.egs-color-pills {
-  display: flex;
-  gap: 8px;
-}
-
-.egs-color-pill {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  cursor: pointer;
-  transition: all .15s;
-  padding: 0;
-}
-
-.egs-color-pill:hover {
-  transform: scale(1.15);
-}
-
-.egs-color-pill.active {
-  border-color: #1e293b;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px currentColor;
-}
+/* ═══ (Color pills removed — auto-color from client badge) ═══ */
 
 /* ═══ Day labels in calendar dropdown ═══ */
 .egs-cal-day-label {
@@ -778,20 +764,36 @@
     }
     $('#egsHorarioInfo').css({'background':'#fffbeb','border-color':'#fde68a','color':'#92400e'});
 
+    // Filtrar horas pasadas si es hoy
+    var esHoy = false;
+    var ahora = new Date();
+    var hoyDate = new Date(); hoyDate.setHours(0,0,0,0);
+    var fechaSel = new Date(d); fechaSel.setHours(0,0,0,0);
+    if (fechaSel.getTime() === hoyDate.getTime()) esHoy = true;
+
+    var horaActual = ahora.getHours().toString().padStart(2,'0') + ':' + ahora.getMinutes().toString().padStart(2,'0');
+
+    var horasFiltradas = esHoy ? horas.filter(function(h){ return h > horaActual; }) : horas;
+
+    if (esHoy && horasFiltradas.length === 0) {
+      $grid.html('<div style="text-align:center;padding:12px;color:#d97706;font-size:12px;"><i class="fa-solid fa-clock" style="margin-right:5px;"></i>Ya no hay horarios disponibles hoy — elige otro día</div>');
+      selectedHora = '';
+      return;
+    }
+
     var html = '';
     var found = false;
-    horas.forEach(function(h){
+    horasFiltradas.forEach(function(h){
       var isActive = (h === selectedHora);
       if (isActive) found = true;
-      // Mostrar separador visual entre turnos L-V
       html += '<button type="button" class="egs-time-chip' + (isActive ? ' active' : '') + '" data-hora="' + h + '">' + h + '</button>';
     });
 
     $grid.html(html);
 
     // Si la hora seleccionada no está en las opciones, seleccionar la primera
-    if (!found && horas.length) {
-      selectedHora = horas[0];
+    if (!found && horasFiltradas.length) {
+      selectedHora = horasFiltradas[0];
       $grid.find('.egs-time-chip').first().addClass('active');
     }
   }
@@ -845,11 +847,63 @@
     updateDatePreview();
   });
 
-  // Color pill selection
-  $(document).on('click', '.egs-color-pill', function(){
-    $('.egs-color-pill').removeClass('active');
-    $(this).addClass('active');
-    selectedColor = $(this).data('color');
+  // Auto-color: buscar calificación del cliente al ingresar ID de orden
+  var colorAjaxReq = null;
+  $(document).on('input change', '#crOrdenId', function(){
+    var idOrden = $(this).val();
+    if (colorAjaxReq && colorAjaxReq.readyState !== 4) colorAjaxReq.abort();
+
+    if (!idOrden || idOrden < 1) {
+      selectedColor = '#3a87ad';
+      $('#egsAutoColorDot').css('background', '#3a87ad');
+      $('#egsAutoColorText').text('Ingresa un No. de Orden para asignar color automático').css('color','#64748b');
+      return;
+    }
+
+    $('#egsAutoColorText').html('<i class="fa-solid fa-spinner fa-spin"></i> Consultando...');
+
+    colorAjaxReq = $.ajax({
+      url: 'ajax/citas.ajax.php',
+      type: 'POST',
+      data: { accion: 'colorPorOrden', idOrden: idOrden },
+      dataType: 'json',
+      global: false,
+      success: function(resp) {
+        if (resp && resp.ok) {
+          selectedColor = resp.color;
+          $('#egsAutoColorDot').css('background', resp.color);
+
+          var labels = {
+            '#16a34a': 'Excelente',
+            '#2563eb': 'Bueno',
+            '#d97706': 'Regular',
+            '#dc2626': 'Bajo',
+            '#8b5cf6': 'Cliente nuevo'
+          };
+          var label = labels[resp.color] || 'General';
+          var detail = '';
+          if (resp.es_nuevo) {
+            detail = 'Cliente nuevo (' + resp.total_ordenes + ' órdenes)';
+          } else if (resp.calif !== null) {
+            detail = label + ' — Calif. entrega: ' + resp.calif + '%';
+            if (resp.avg_recogida) detail += ' · Recoge: ~' + resp.avg_recogida + ' días';
+          } else {
+            detail = 'Sin historial suficiente';
+          }
+          $('#egsAutoColorText').text(detail).css('color','#334155');
+        } else {
+          selectedColor = '#3a87ad';
+          $('#egsAutoColorDot').css('background', '#3a87ad');
+          $('#egsAutoColorText').text(resp.error || 'Orden no encontrada').css('color','#ef4444');
+        }
+      },
+      error: function(xhr) {
+        if (xhr.statusText === 'abort') return;
+        selectedColor = '#3a87ad';
+        $('#egsAutoColorDot').css('background', '#3a87ad');
+        $('#egsAutoColorText').text('Error al consultar').css('color','#ef4444');
+      }
+    });
   });
 
   // Submit form
@@ -857,6 +911,14 @@
     e.preventDefault();
     var titulo = $('#crTitulo').val().trim();
     if (!titulo) return;
+
+    // Validar orden/pedido obligatorio
+    var ordenId = $('#crOrdenId').val();
+    if (!ordenId || ordenId < 1) {
+      swal({ icon:'warning', title:'Orden requerida', text:'Debes vincular un No. de Orden o Pedido.' });
+      $('#crOrdenId').focus();
+      return;
+    }
 
     // Validar que no sea domingo y que haya hora seleccionada
     if (!selectedHora) {
@@ -887,6 +949,7 @@
     datos.append("tituloCita", titulo);
     datos.append("fechaCita", fechaFinal);
     datos.append("colorCita", selectedColor);
+    datos.append("idOrden", ordenId);
 
     var $btn = $('#btnGuardarCitaRapida');
     $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Guardando...');
@@ -902,9 +965,13 @@
         if (resp == 'ok') {
           $('#modalCitaRapida').modal('hide');
           $('#formCitaRapida')[0].reset();
+          $('#crOrdenId').val('');
+          $('#crOrdenPreview').hide();
+          // Reset auto-color
+          $('#egsAutoColorDot').css('background', '#3a87ad');
+          $('#egsAutoColorText').text('Ingresa un No. de Orden para asignar color automático').css('color','#64748b');
           // Reset chips
           $('.egs-qd-chip').removeClass('active').first().addClass('active');
-          $('.egs-color-pill').removeClass('active').first().addClass('active');
           selectedFecha = 'hoy'; selectedHora = '10:00'; selectedColor = '#3a87ad';
           $('#egsCustomDateWrap').hide();
           renderTimeGrid();

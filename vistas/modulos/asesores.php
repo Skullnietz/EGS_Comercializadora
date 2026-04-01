@@ -419,6 +419,7 @@ $(document).ready(function(){
   // Botón general "Agendar Cita"
   $(document).on('click', '.btnAbrirAgendarCitaAsesor', function(){
     $('#crTitulo').val('');
+    $('#crOrdenId').val('');
     $('#modalCitaRapida').modal('show');
   });
 
@@ -426,6 +427,7 @@ $(document).ready(function(){
   $(document).on('click', '.btnAgendarCitaAsesor', function(){
     var nombre = $(this).data('nombre');
     $('#crTitulo').val('Cita con ' + nombre);
+    $('#crOrdenId').val('');
     $('#modalCitaRapida').modal('show');
   });
 });

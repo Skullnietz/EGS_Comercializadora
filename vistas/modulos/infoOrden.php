@@ -295,6 +295,11 @@ if (is_array($ordenes) && !empty($ordenes)) {
 // Cliente
 $usuario = ControladorClientes::ctrMostrarClientesOrdenes("id", $_GET["cliente"]);
 
+$_historialClienteUrl = "index.php?ruta=Historialdecliente&idCliente="
+	. intval($_GET["cliente"] ?? 0)
+	. "&nombreCliente="
+	. urlencode((string)($usuario["nombre"] ?? "Cliente"));
+
 // Datos de la orden
 foreach ($ordenes as $key => $value) {
 	$portada = $value["portada"];
@@ -459,6 +464,13 @@ function _egsEstadoClass($estado) {
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fas fa-user"></i></span>
 								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" readonly>
+								<?php if ($isAdmin || $isVendedor): ?>
+								<span class="input-group-btn">
+									<a class="btn btn-default" href="<?php echo htmlspecialchars($_historialClienteUrl); ?>" target="_blank" title="Ver historial del cliente">
+										<i class="fas fa-history"></i>
+									</a>
+								</span>
+								<?php endif; ?>
 							</div>
 						</div>
 
@@ -1715,7 +1727,18 @@ function _egsEstadoClass($estado) {
 							<input name="id_creador" type="hidden" value="<?php echo $_SESSION["id"]; ?>">
 							<input name="_obs_token" type="hidden" value="<?php echo bin2hex(random_bytes(16)); ?>">
 						</div>
-						<div class="modal-footer" style="border-top:1px solid #f1f5f9">
+						<div class="modal-footer" style="border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:8px;">
+							<?php if ($isAdmin || $isVendedor): ?>
+							<button type="button" class="btn btnAgendarCitaDesdeObs"
+								style="border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;border:1.5px solid #6366f1;color:#6366f1;background:#fff;transition:all .15s;display:inline-flex;align-items:center;gap:5px;margin-right:auto;"
+								onmouseover="this.style.background='#6366f1';this.style.color='#fff';"
+								onmouseout="this.style.background='#fff';this.style.color='#6366f1';"
+								data-orden="<?php echo htmlspecialchars($_GET['idOrden']); ?>">
+								<i class="fa-regular fa-calendar-plus"></i>Agendar cita
+							</button>
+							<?php else: ?>
+							<span style="margin-right:auto;"></span>
+							<?php endif; ?>
 							<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
 							<button type="submit" class="btn egs-btn-accent" id="btnGuardarObs">
 								<i class="fa-solid fa-paper-plane" style="margin-right:4px"></i>Guardar observación
@@ -1880,7 +1903,20 @@ function _egsCopiarFallback(texto, cb) {
 $(document).on('click', '.btnAgendarCitaOrden', function(){
   var idOrden = $(this).data('orden');
   $('#crTitulo').val('Cita Orden #' + idOrden);
+  $('#crOrdenId').val(idOrden);
   $('#modalCitaRapida').modal('show');
+});
+
+// Desde dentro del modal de observaciones
+$(document).on('click', '.btnAgendarCitaDesdeObs', function(){
+  var idOrden = $(this).data('orden');
+  // Cerrar modal de observaciones primero
+  $('#exampleModal').modal('hide');
+  setTimeout(function(){
+    $('#crTitulo').val('Cita Orden #' + idOrden);
+    $('#crOrdenId').val(idOrden);
+    $('#modalCitaRapida').modal('show');
+  }, 300);
 });
 </script>
 
