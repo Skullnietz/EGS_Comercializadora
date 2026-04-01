@@ -293,7 +293,7 @@
 
 .egs-cal-event {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   padding: 10px 16px;
   transition: background .12s;
@@ -343,20 +343,24 @@
 
 .egs-cal-event-actions {
   display: flex;
-  gap: 5px;
-  margin-top: 5px;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 .egs-cal-event-actions a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  padding: 3px 8px;
-  border-radius: 5px;
+  padding: 4px 9px;
+  border-radius: 6px;
   font-size: 10px;
   font-weight: 600;
   text-decoration: none !important;
-  transition: opacity .15s;
-  line-height: 1.4;
+  transition: all .15s;
+  line-height: 1.3;
+  white-space: nowrap;
 }
 .egs-cal-event-actions a:hover {
   opacity: .85;
@@ -656,8 +660,8 @@
           '<div class="egs-cal-event-info">' +
             '<div class="egs-cal-event-title">' + $('<span>').text(ev.title || 'Sin título').html() + '</div>' +
             '<div class="egs-cal-event-time"><i class="fa-regular fa-clock"></i> ' + hora + '</div>' +
-            actionsHtml +
           '</div>' +
+          actionsHtml +
         '</div>';
       });
     });
