@@ -19,7 +19,7 @@ class AjaxRecompensas
     }
 
     /*=============================================
-    CANJEAR DINERO ELECTRÓNICO
+    CANJEAR DINERO ELECTRÓNICO EN ORDEN
     =============================================*/
     public function ajaxCanjearRecompensa()
     {
@@ -28,6 +28,44 @@ class AjaxRecompensas
         $montoCanje = floatval($this->montoCanje);
 
         $resultado = ControladorRecompensas::ctrCanjearRecompensa($idCliente, $idOrden, $montoCanje);
+
+        header('Content-Type: application/json');
+        if ($resultado) {
+            echo json_encode(array("status" => "ok", "data" => $resultado));
+        } else {
+            echo json_encode(array("status" => "error", "mensaje" => "No se pudo realizar el canje. Verifica el saldo disponible."));
+        }
+    }
+
+    /*=============================================
+    CANJEAR DINERO ELECTRÓNICO EN PEDIDO
+    =============================================*/
+    public function ajaxCanjearRecompensaPedido()
+    {
+        $idCliente = intval($this->idClienteCanjePedido);
+        $idPedido = intval($this->idPedidoCanje);
+        $montoCanje = floatval($this->montoCanjePedido);
+
+        $resultado = ControladorRecompensas::ctrCanjearRecompensaPedido($idCliente, $idPedido, $montoCanje);
+
+        header('Content-Type: application/json');
+        if ($resultado) {
+            echo json_encode(array("status" => "ok", "data" => $resultado));
+        } else {
+            echo json_encode(array("status" => "error", "mensaje" => "No se pudo realizar el canje. Verifica el saldo disponible."));
+        }
+    }
+
+    /*=============================================
+    CANJEAR DINERO ELECTRÓNICO EN VENTA RÁPIDA
+    =============================================*/
+    public function ajaxCanjearRecompensaVenta()
+    {
+        $idCliente = intval($this->idClienteCanjeVenta);
+        $idVenta = intval($this->idVentaCanje);
+        $montoCanje = floatval($this->montoCanjeVenta);
+
+        $resultado = ControladorRecompensas::ctrCanjearRecompensaVenta($idCliente, $idVenta, $montoCanje);
 
         header('Content-Type: application/json');
         if ($resultado) {
@@ -48,7 +86,7 @@ if (isset($_POST["idClienteRecompensas"])) {
 }
 
 /*=============================================
-CANJEAR RECOMPENSA
+CANJEAR RECOMPENSA (ORDEN)
 =============================================*/
 if (isset($_POST["idClienteCanje"])) {
     $recompensas = new AjaxRecompensas();
@@ -56,4 +94,26 @@ if (isset($_POST["idClienteCanje"])) {
     $recompensas->idOrdenCanje = $_POST["idOrdenCanje"];
     $recompensas->montoCanje = $_POST["montoCanje"];
     $recompensas->ajaxCanjearRecompensa();
+}
+
+/*=============================================
+CANJEAR RECOMPENSA (PEDIDO)
+=============================================*/
+if (isset($_POST["idClienteCanjePedido"])) {
+    $recompensas = new AjaxRecompensas();
+    $recompensas->idClienteCanjePedido = $_POST["idClienteCanjePedido"];
+    $recompensas->idPedidoCanje = $_POST["idPedidoCanje"];
+    $recompensas->montoCanjePedido = $_POST["montoCanjePedido"];
+    $recompensas->ajaxCanjearRecompensaPedido();
+}
+
+/*=============================================
+CANJEAR RECOMPENSA (VENTA RÁPIDA)
+=============================================*/
+if (isset($_POST["idClienteCanjeVenta"])) {
+    $recompensas = new AjaxRecompensas();
+    $recompensas->idClienteCanjeVenta = $_POST["idClienteCanjeVenta"];
+    $recompensas->idVentaCanje = $_POST["idVentaCanje"];
+    $recompensas->montoCanjeVenta = $_POST["montoCanjeVenta"];
+    $recompensas->ajaxCanjearRecompensaVenta();
 }

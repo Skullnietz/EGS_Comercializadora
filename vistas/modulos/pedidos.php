@@ -997,6 +997,44 @@ MODAL EDITAR PEDIDO
             <div id="camposAbono"></div>
           </div>
 
+          <!-- Dinero Electrónico -->
+          <div class="pm-section" id="egs_dePedido_section" style="display:none;">
+            <div class="pm-section-title"><i class="fa-solid fa-wallet"></i> Dinero Electrónico</div>
+            <input type="hidden" class="egs_idClientePedidoDE" value="0">
+            <div id="egs_dePedido_loading" style="text-align:center; padding:12px;">
+              <i class="fa fa-spinner fa-spin"></i> Cargando información de recompensas...
+            </div>
+            <div id="egs_dePedido_content" style="display:none;">
+              <p style="margin-bottom:8px; color:#64748b; font-size:13px;" id="egs_dePedido_nivel"></p>
+              <div class="pm-row" style="margin-bottom:10px;">
+                <div class="pm-col">
+                  <label class="pm-field-label">Saldo Disponible</label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa-solid fa-coins"></i></span>
+                    <input type="text" class="form-control egs_dePedido_saldo" readonly>
+                  </div>
+                </div>
+                <div class="pm-col" id="egs_dePedido_canjeCol">
+                  <label class="pm-field-label">Monto a Canjear</label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                    <input type="number" class="form-control egs_dePedido_montoInput" min="0" step="any" value="0">
+                    <span class="input-group-btn">
+                      <button type="button" class="btn btn-info egs_dePedido_usarTodo" style="font-size:12px;">Usar todo</button>
+                    </span>
+                  </div>
+                  <small style="color:#94a3b8;" id="egs_dePedido_maxLabel"></small>
+                </div>
+              </div>
+              <div id="egs_dePedido_sinSaldo" style="display:none;">
+                <p style="color:#64748b; font-size:13px;">
+                  <i class="fa-solid fa-info-circle"></i> Sin saldo disponible. Esta transacción generará aproximadamente <strong id="egs_dePedido_montoGenerar">$0.00</strong> en dinero electrónico.
+                </p>
+              </div>
+            </div>
+            <input type="hidden" class="egs_montoCanjeElectronicoPedido" value="0">
+          </div>
+
           <!-- Estado & Fecha Entrega -->
           <div class="pm-section">
             <div class="pm-section-title"><i class="fa-solid fa-sliders"></i> Estado y Entrega</div>
@@ -1831,6 +1869,49 @@ $('.tablaPedidos tbody').on("click", ".btnEditarPedido", function(){
           }
         })
 
+        // Cargar dinero electrónico del cliente
+        $(".egs_idClientePedidoDE").val(respuesta[0]["id_cliente"]);
+        $("#egs_dePedido_section").show();
+        $("#egs_dePedido_loading").show();
+        $("#egs_dePedido_content").hide();
+
+        $.ajax({
+          url: "ajax/recompensas.ajax.php",
+          method: "POST",
+          data: {idClienteRecompensas: respuesta[0]["id_cliente"]},
+          dataType: "json",
+          success: function(dataDE){
+            $("#egs_dePedido_loading").hide();
+            $("#egs_dePedido_content").show();
+
+            var saldoDE = parseFloat(dataDE.saldo) || 0;
+            window._dePedido_saldo = saldoDE;
+            $(".egs_dePedido_saldo").val("$" + saldoDE.toFixed(2));
+            $("#egs_dePedido_nivel").text("Nivel: " + dataDE.porcentaje + "% | " + dataDE.entregadas + " transacciones");
+
+            var totalPedido = parseFloat($(".pagoPedidoEdidato").val()) || 0;
+
+            if (saldoDE > 0) {
+              $("#egs_dePedido_sinSaldo").hide();
+              $("#egs_dePedido_canjeCol").show();
+              var maxUsar = Math.min(saldoDE, totalPedido);
+              $("#egs_dePedido_maxLabel").text("Máximo: $" + maxUsar.toFixed(2));
+              $(".egs_dePedido_montoInput").attr("max", maxUsar).val(0);
+            } else {
+              $("#egs_dePedido_sinSaldo").show();
+              $("#egs_dePedido_canjeCol").hide();
+              var montoGenerar = (totalPedido * (dataDE.porcentaje / 100)).toFixed(2);
+              $("#egs_dePedido_montoGenerar").text("$" + montoGenerar);
+            }
+          },
+          error: function(){
+            $("#egs_dePedido_loading").hide();
+            $("#egs_dePedido_section").hide();
+          }
+        });
+
+      } else {
+        $("#egs_dePedido_section").hide();
       }
       
 
@@ -1897,7 +1978,9 @@ function btnEditarMiPedido(){
   datosPedido.append("abono5", abono5);
   datosPedido.append("fechaAbono5", fechaAbono5);
   datosPedido.append("adeudoPedidoEditado", adeudoPedidoEditado);        
-  datosPedido.append("EstadoDelPedido", EstadoDelPedido); 
+  datosPedido.append("EstadoDelPedido", EstadoDelPedido);
+  datosPedido.append("montoCanjeElectronicoPedido", $(".egs_montoCanjeElectronicoPedido").val() || 0);
+  datosPedido.append("idClientePedidoDE", $(".egs_idClientePedidoDE").val() || 0);
 
   $.ajax({
       url:"ajax/pedidos.ajax.php",
@@ -2796,5 +2879,25 @@ function mostrarStatusML(tipo, mensaje) {
     .show();
 }
   <?php } ?>
+
+// ═══════════════════════════════════════════════
+// DINERO ELECTRÓNICO EN PEDIDOS - Interacción
+// ═══════════════════════════════════════════════
+$(".egs_dePedido_usarTodo").on("click", function(){
+  var totalPedido = parseFloat($(".pagoPedidoEdidato").val()) || 0;
+  var maxUsar = Math.min(window._dePedido_saldo || 0, totalPedido);
+  $(".egs_dePedido_montoInput").val(maxUsar.toFixed(2));
+  $(".egs_montoCanjeElectronicoPedido").val(maxUsar.toFixed(2));
+});
+
+$(".egs_dePedido_montoInput").on("input change", function(){
+  var val = parseFloat($(this).val()) || 0;
+  var totalPedido = parseFloat($(".pagoPedidoEdidato").val()) || 0;
+  var maxUsar = Math.min(window._dePedido_saldo || 0, totalPedido);
+  if (val > maxUsar) val = maxUsar;
+  if (val < 0) val = 0;
+  $(this).val(val.toFixed(2));
+  $(".egs_montoCanjeElectronicoPedido").val(val.toFixed(2));
+});
 
 </script>

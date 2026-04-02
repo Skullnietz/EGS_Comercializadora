@@ -271,7 +271,7 @@ class ModeloVentas{
 
 	static public function mdlIngresarVenta($tabla, $datos){
 		
-		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(productoUno, precioUno, cantidadUno, productoDos, precioDos, cantidadDos, productoTres, precioTres, cantidadTres, productoCuatro, precioCuatro, cantidadCuatro, productoCinco, precioCinco, cantidadCinco, productoSeis, precioSeis, cantidadSeis, productoSiete, precioSiete, cantidadSiete, productoOcho, precioOcho, cantidadOcho, productoNueve, precioNueve, cantidadNueve, productoDiez, precioDiez, cantidadDiez, cantidadProductos, asesor, empresa, pago, metodo, nombreCliente, correo, id_empresa) VALUES (:productoUno, :precioUno, :cantidadUno, :productoDos, :precioDos, :cantidadDos, :productoTres, :precioTres, :cantidadTres,:productoCuatro, :precioCuatro, :cantidadCuatro,:productoCinco, :precioCinco, :cantidadCinco,:productoSeis, :precioSeis, :cantidadSeis,:productoSiete, :precioSiete, :cantidadSiete,:productoOcho, :precioOcho, :cantidadOcho,:productoNueve, :precioNueve, :cantidadNueve,:productoDiez, :precioDiez, :cantidadDiez,  :cantidadProductos, :asesor, :empresa, :pago, :metodo, :nombreCliente, :correo, :id_empresa)");
+		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(productoUno, precioUno, cantidadUno, productoDos, precioDos, cantidadDos, productoTres, precioTres, cantidadTres, productoCuatro, precioCuatro, cantidadCuatro, productoCinco, precioCinco, cantidadCinco, productoSeis, precioSeis, cantidadSeis, productoSiete, precioSiete, cantidadSiete, productoOcho, precioOcho, cantidadOcho, productoNueve, precioNueve, cantidadNueve, productoDiez, precioDiez, cantidadDiez, cantidadProductos, asesor, empresa, pago, metodo, nombreCliente, correo, id_empresa, id_cliente) VALUES (:productoUno, :precioUno, :cantidadUno, :productoDos, :precioDos, :cantidadDos, :productoTres, :precioTres, :cantidadTres,:productoCuatro, :precioCuatro, :cantidadCuatro,:productoCinco, :precioCinco, :cantidadCinco,:productoSeis, :precioSeis, :cantidadSeis,:productoSiete, :precioSiete, :cantidadSiete,:productoOcho, :precioOcho, :cantidadOcho,:productoNueve, :precioNueve, :cantidadNueve,:productoDiez, :precioDiez, :cantidadDiez,  :cantidadProductos, :asesor, :empresa, :pago, :metodo, :nombreCliente, :correo, :id_empresa, :id_cliente)");
 
 		$stmt->bindParam(":empresa", $datos["empresa"], PDO::PARAM_INT);
 		$stmt->bindParam(":productoUno", $datos["productoUno"], PDO::PARAM_STR);
@@ -313,6 +313,9 @@ class ModeloVentas{
 
 		$stmt->bindParam(":id_empresa", $datos["empresa"], PDO::PARAM_STR);
 
+		$idCliente = isset($datos["id_cliente"]) && $datos["id_cliente"] > 0 ? $datos["id_cliente"] : null;
+		$stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
+
 		if($stmt->execute()){
 
 			return "ok";	
@@ -326,6 +329,18 @@ class ModeloVentas{
 		$stmt->close();
 		
 		$stmt = null;
+	}
+
+	/*=============================================
+	OBTENER ÚLTIMA VENTA INSERTADA (para vincular canje)
+	=============================================*/
+	static public function mdlObtenerUltimaVenta($idEmpresa){
+		$pdo = Conexion::conectar();
+		$stmt = $pdo->prepare("SELECT id FROM compras WHERE id_empresa = :id_empresa ORDER BY id DESC LIMIT 1");
+		$stmt->bindParam(":id_empresa", $idEmpresa, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $result ? intval($result["id"]) : 0;
 	}
 
 

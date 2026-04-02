@@ -56,7 +56,7 @@ class ControladorRecompensas
     }
 
     /*=============================================
-    CANJEAR DINERO ELECTRÓNICO
+    CANJEAR DINERO ELECTRÓNICO EN ORDEN
     Valida contra el saldo dinámico antes de registrar.
     =============================================*/
     static public function ctrCanjearRecompensa($idCliente, $idOrden, $montoCanje)
@@ -72,6 +72,56 @@ class ControladorRecompensas
 
         $descripcion = "Canje en Orden #" . $idOrden;
         ModeloRecompensas::mdlCanjearRecompensa($idCliente, $idOrden, $montoCanje, $descripcion);
+
+        $nuevoSaldo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje);
+
+        return array(
+            "monto_canjeado" => $montoCanje,
+            "saldo_nuevo" => $nuevoSaldo
+        );
+    }
+
+    /*=============================================
+    CANJEAR DINERO ELECTRÓNICO EN PEDIDO
+    =============================================*/
+    static public function ctrCanjearRecompensaPedido($idCliente, $idPedido, $montoCanje)
+    {
+        self::ctrCrearTablas();
+
+        $porcentaje = self::ctrCalcularPorcentaje($idCliente);
+        $saldoDisponible = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje);
+
+        if ($montoCanje > $saldoDisponible || $montoCanje <= 0) {
+            return false;
+        }
+
+        $descripcion = "Canje en Pedido #" . $idPedido;
+        ModeloRecompensas::mdlCanjearRecompensa($idCliente, $idPedido, $montoCanje, $descripcion);
+
+        $nuevoSaldo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje);
+
+        return array(
+            "monto_canjeado" => $montoCanje,
+            "saldo_nuevo" => $nuevoSaldo
+        );
+    }
+
+    /*=============================================
+    CANJEAR DINERO ELECTRÓNICO EN VENTA RÁPIDA
+    =============================================*/
+    static public function ctrCanjearRecompensaVenta($idCliente, $idVenta, $montoCanje)
+    {
+        self::ctrCrearTablas();
+
+        $porcentaje = self::ctrCalcularPorcentaje($idCliente);
+        $saldoDisponible = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje);
+
+        if ($montoCanje > $saldoDisponible || $montoCanje <= 0) {
+            return false;
+        }
+
+        $descripcion = "Canje en Venta #" . $idVenta;
+        ModeloRecompensas::mdlCanjearRecompensa($idCliente, $idVenta, $montoCanje, $descripcion);
 
         $nuevoSaldo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje);
 
@@ -99,17 +149,21 @@ class ControladorRecompensas
         $saldo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje);
         $nombreCliente = ModeloRecompensas::mdlObtenerNombreCliente($idCliente);
 
-        // Construir historial combinando órdenes + canjes
+        // Construir historial combinando órdenes, pedidos, ventas + canjes
         $ordenesRecomp = ModeloRecompensas::mdlObtenerOrdenesConRecompensa($idCliente, $porcentaje);
         $canjes = ModeloRecompensas::mdlObtenerCanjes($idCliente);
 
         // Unir en un solo array de movimientos para la vista
         $movimientos = array();
         foreach ($ordenesRecomp as $ord) {
+            $fuenteLabel = "Orden";
+            if ($ord["fuente"] == "pedido") $fuenteLabel = "Pedido";
+            elseif ($ord["fuente"] == "venta") $fuenteLabel = "Venta";
+
             $movimientos[] = array(
                 "tipo" => "acumulacion",
                 "monto" => $ord["recompensa"],
-                "descripcion" => "Recompensa " . $porcentaje . "% por Orden #" . $ord["id_orden"],
+                "descripcion" => "Recompensa " . $porcentaje . "% por " . $fuenteLabel . " #" . $ord["id_orden"],
                 "fecha" => $ord["fecha_entrega"],
                 "fecha_expiracion" => date('Y-m-d', strtotime($ord["fecha_entrega"] . ' +6 months')),
                 "expirado" => 0
@@ -148,6 +202,24 @@ class ControladorRecompensas
     {
         self::ctrCrearTablas();
         return ModeloRecompensas::mdlObtenerCanjeOrden($idOrden);
+    }
+
+    /*=============================================
+    OBTENER CANJE DE UN PEDIDO
+    =============================================*/
+    static public function ctrObtenerCanjePedido($idPedido)
+    {
+        self::ctrCrearTablas();
+        return ModeloRecompensas::mdlObtenerCanjePedido($idPedido);
+    }
+
+    /*=============================================
+    OBTENER CANJE DE UNA VENTA RÁPIDA
+    =============================================*/
+    static public function ctrObtenerCanjeVenta($idVenta)
+    {
+        self::ctrCrearTablas();
+        return ModeloRecompensas::mdlObtenerCanjeVenta($idVenta);
     }
 
     /*=============================================

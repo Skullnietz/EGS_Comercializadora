@@ -23,6 +23,9 @@ require_once "../../../controladores/clientes.controlador.php";
 require_once "../../../modelos/clientes.modelo.php";
 require_once "../../../controladores/tecnicos.controlador.php";
 require_once "../../../modelos/tecnicos.modelo.php";
+require_once "../../../config/Database.php";
+require_once "../../../modelos/recompensas.modelo.php";
+require_once "../../../controladores/recompensas.controlador.php";
 /**MANDAR INFORMACION DE LA VENTA**/
 class ImprimirTicketsPedido{
   
@@ -63,6 +66,29 @@ class ImprimirTicketsPedido{
       $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
 
       $NombreUsuario = $usuario["nombre"];
+
+      // ═══════════════════════════════════════
+      // RECOMPENSAS - DINERO ELECTRÓNICO
+      // ═══════════════════════════════════════
+      $idClientePedido = intval($_GET["cliente"]);
+      $totalPedido = floatval($value["total"]);
+
+      try {
+          $infoRecompensas = ControladorRecompensas::ctrObtenerInfoRecompensas($idClientePedido);
+          $saldoElectronico = $infoRecompensas["saldo"];
+          $porcentajeCliente = $infoRecompensas["porcentaje"];
+          $entregadasCliente = $infoRecompensas["entregadas"];
+          $ordenesEnPrograma = intval($infoRecompensas["ordenes_en_programa"]);
+          $tokenMonedero = $infoRecompensas["token"];
+          $montoGenerado = round($totalPedido * ($porcentajeCliente / 100), 2);
+      } catch (Exception $e) {
+          $saldoElectronico = 0;
+          $porcentajeCliente = 1;
+          $entregadasCliente = 0;
+          $ordenesEnPrograma = 0;
+          $tokenMonedero = '';
+          $montoGenerado = 0;
+      }
 
        echo '<div class="zona_impresion">
          <br>
@@ -316,7 +342,75 @@ class ImprimirTicketsPedido{
                 
             <tr>
             
-          </table><br>
+          </table>';
+
+      // ═══════════════════════════════════════════════════════════════
+      // SECCIÓN DE RECOMPENSAS - MONEDERO ELECTRÓNICO EGS (PEDIDO)
+      // ═══════════════════════════════════════════════════════════════
+      $estadoPedido = $value["estado"];
+      $mostrarRecompensasPedido = (stripos($estadoPedido, 'cancel') === false);
+
+      if ($mostrarRecompensasPedido && $idClientePedido > 0) {
+      echo '<hr size="5" style="margin: 20px 0 10px;">
+            <table border="0" align="center" width="100%">
+              <tr>
+                <td align="center" colspan="3">
+                  <div style="border:3px solid #000;padding:15px;margin:10px 0;text-align:center">';
+
+      if ($ordenesEnPrograma == 0) {
+          echo '    <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:8px">
+                      *** MONEDERO EGS ***
+                    </div>
+                    <div style="font-size:13px;color:#000;font-weight:700;margin-bottom:6px">
+                      ¡Bienvenido al programa de recompensas!
+                    </div>
+                    <div style="font-size:12px;color:#000;line-height:1.5;margin-bottom:8px">
+                      Por cada pedido o servicio entregado acumulas <b>dinero electrónico</b> que puedes usar como descuento.
+                    </div>
+                    <div style="border:1px solid #000;padding:8px;margin:6px 0">
+                      <div style="font-size:11px;color:#000;font-weight:700">
+                        * Clientes nuevos: <b>1%</b> de recompensa<br>
+                        * +3 transacciones: <b>2%</b> de recompensa<br>
+                        * +5 transacciones: <b>3%</b> de recompensa
+                      </div>
+                    </div>
+                    <div style="font-size:13px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:8px">
+                      Este pedido te generará $'.number_format($montoGenerado, 2).' en dinero electrónico al ser entregado
+                    </div>';
+      } else {
+          $textoGeneradoPed = (stripos($estadoPedido, 'Entregado') !== false) ? 'generó' : 'generará al ser entregado';
+          echo '    <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:8px">
+                      *** MONEDERO EGS ***
+                    </div>
+                    <div style="border:1px solid #000;padding:12px;margin:6px 0;text-align:center">
+                      <div style="font-size:11px;color:#000;font-weight:700;text-transform:uppercase;letter-spacing:1px">Tu saldo disponible</div>
+                      <div style="font-size:28px;font-weight:900;color:#000;margin:4px 0">$'.number_format($saldoElectronico, 2).'</div>
+                      <div style="font-size:10px;color:#000">Nivel: '.$porcentajeCliente.'% | '.$entregadasCliente.' transacciones</div>
+                    </div>
+                    <div style="font-size:14px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:10px;text-align:center">
+                      Este pedido te '.$textoGeneradoPed.'<br>
+                      <span style="font-size:22px;display:block;margin:4px 0">$'.number_format($montoGenerado, 2).'</span>
+                      <span style="font-size:11px;color:#000">en dinero electrónico ('.$porcentajeCliente.'% de $'.number_format($totalPedido, 2).')</span>
+                    </div>
+                    <div style="font-size:10px;color:#000;margin-top:6px">Tu dinero electrónico vence cada 6 meses. ¡Úsalo antes!</div>';
+      }
+
+      if (!empty($tokenMonedero)) {
+          $urlMonedero = 'https://backend.comercializadoraegs.com/monedero.php?token=' . $tokenMonedero;
+          $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($urlMonedero);
+          echo '    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed #000">
+                      <div style="font-size:11px;color:#000;font-weight:700;margin-bottom:6px">Escanea para ver tu monedero:</div>
+                      <img src="'.$qrUrl.'" alt="QR Monedero" style="width:150px;height:150px">
+                    </div>';
+      }
+
+      echo '      </div>
+                </td>
+              </tr>
+            </table>';
+      } // fin if ($mostrarRecompensasPedido)
+
+      echo '<br>
 
 
                 

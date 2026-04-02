@@ -1285,6 +1285,52 @@ MODAL AGREGAR PRODUCTO
               	</div>
 
             </div>
+
+            <!--=====================================
+            BUSCAR CLIENTE REGISTRADO (para dinero electrónico)
+            ======================================-->
+            <div class="form-group">
+              <div class="input-group">
+                <span class="input-group-addon"><i class="fas fa-search"></i></span>
+                <select class="form-control input-lg" id="egs_clienteVentaR" name="id_cliente">
+                  <option value="0">Vincular cliente registrado (opcional - para dinero electrónico)</option>
+                  <?php
+                    $clientesVR = ControladorClientes::ctrMostrarClientes(null, null);
+                    if (is_array($clientesVR)) {
+                      foreach ($clientesVR as $clVR) {
+                        echo '<option value="'.intval($clVR["id"]).'">'.htmlspecialchars($clVR["nombre"]).'</option>';
+                      }
+                    }
+                  ?>
+                </select>
+              </div>
+            </div>
+
+            <!-- Sección dinero electrónico (oculta hasta seleccionar cliente) -->
+            <div id="egs_deVentaR_section" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:12px">
+              <div style="font-weight:700;color:#166534;margin-bottom:6px"><i class="fas fa-wallet"></i> Monedero EGS</div>
+              <div id="egs_deVentaR_loading" style="text-align:center;padding:8px"><i class="fa fa-spinner fa-spin"></i> Cargando...</div>
+              <div id="egs_deVentaR_content" style="display:none">
+                <div>Saldo disponible: <span id="egs_deVentaR_saldo" style="font-weight:900;color:#166534">$0.00</span>
+                  <span id="egs_deVentaR_nivel" style="font-size:11px;color:#64748b;margin-left:6px"></span>
+                </div>
+                <div id="egs_deVentaR_sinSaldo" style="display:none;margin-top:6px;font-size:12px;color:#64748b">
+                  Esta venta generará <span id="egs_deVentaR_montoGenerar" style="font-weight:700;color:#166534"></span> en dinero electrónico.
+                </div>
+                <div id="egs_deVentaR_conSaldo" style="display:none;margin-top:8px">
+                  <label style="cursor:pointer;font-weight:600;color:#166534"><input type="checkbox" id="egs_deVentaR_usarSaldo"> Usar dinero electrónico en esta venta</label>
+                  <div id="egs_deVentaR_montoSection" style="display:none;margin-top:6px">
+                    <div class="input-group" style="max-width:280px">
+                      <span class="input-group-addon">$</span>
+                      <input type="number" class="form-control" id="egs_deVentaR_montoInput" min="0" step="0.01" value="0" placeholder="Monto a usar">
+                      <span class="input-group-btn"><button type="button" class="btn btn-success" id="egs_deVentaR_usarTodo">Usar todo</button></span>
+                    </div>
+                    <div style="font-size:11px;color:#64748b;margin-top:3px">Máximo: <span id="egs_deVentaR_maxMonto">$0.00</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" id="egs_montoCanjeElectronicoVenta" name="montoCanjeElectronicoVenta" value="0">
             <!--=====================================
             CORREO CLIENTE
             ======================================-->
@@ -2049,3 +2095,87 @@ MODAL AGREGAR PRODUCTO
 
   $eliminarVenta = new ControladorVentas();
   $eliminarVenta -> ctrEliminarVenta();
+
+?>
+
+<script>
+// ═══════════════════════════════════════════════
+// DINERO ELECTRÓNICO EN VENTAS RÁPIDAS
+// ═══════════════════════════════════════════════
+(function(){
+  var _deVR_saldo = 0;
+
+  $('#egs_clienteVentaR').on('change', function(){
+    var idCliente = parseInt($(this).val()) || 0;
+    if (idCliente <= 0) {
+      $('#egs_deVentaR_section').hide();
+      $('#egs_montoCanjeElectronicoVenta').val(0);
+      return;
+    }
+    $('#egs_deVentaR_section').show();
+    $('#egs_deVentaR_loading').show();
+    $('#egs_deVentaR_content').hide();
+
+    $.ajax({
+      url: 'ajax/recompensas.ajax.php',
+      method: 'POST',
+      data: { idClienteRecompensas: idCliente },
+      dataType: 'json',
+      success: function(data) {
+        $('#egs_deVentaR_loading').hide();
+        $('#egs_deVentaR_content').show();
+
+        _deVR_saldo = parseFloat(data.saldo) || 0;
+        $('#egs_deVentaR_saldo').text('$' + _deVR_saldo.toFixed(2));
+        $('#egs_deVentaR_nivel').text('Nivel: ' + data.porcentaje + '% | ' + data.entregadas + ' transacciones');
+
+        var totalVenta = parseFloat($('#Resultado').val()) || 0;
+
+        if (_deVR_saldo > 0) {
+          $('#egs_deVentaR_sinSaldo').hide();
+          $('#egs_deVentaR_conSaldo').show();
+          var maxUsar = Math.min(_deVR_saldo, totalVenta);
+          $('#egs_deVentaR_maxMonto').text('$' + maxUsar.toFixed(2));
+          $('#egs_deVentaR_montoInput').attr('max', maxUsar).val('');
+        } else {
+          $('#egs_deVentaR_sinSaldo').show();
+          $('#egs_deVentaR_conSaldo').hide();
+          var montoGenerar = (totalVenta * (data.porcentaje / 100)).toFixed(2);
+          $('#egs_deVentaR_montoGenerar').text('$' + montoGenerar);
+        }
+      },
+      error: function() {
+        $('#egs_deVentaR_loading').hide();
+        $('#egs_deVentaR_content').show();
+        $('#egs_deVentaR_saldo').text('$0.00');
+        $('#egs_deVentaR_sinSaldo').show();
+        $('#egs_deVentaR_conSaldo').hide();
+      }
+    });
+  });
+
+  $('#egs_deVentaR_usarSaldo').on('change', function(){
+    $('#egs_deVentaR_montoSection').toggle(this.checked);
+    if (!this.checked) {
+      $('#egs_deVentaR_montoInput').val('0');
+      $('#egs_montoCanjeElectronicoVenta').val(0);
+    }
+  });
+
+  $('#egs_deVentaR_usarTodo').on('click', function(){
+    var totalVenta = parseFloat($('#Resultado').val()) || 0;
+    var maxUsar = Math.min(_deVR_saldo, totalVenta);
+    $('#egs_deVentaR_montoInput').val(maxUsar.toFixed(2));
+    $('#egs_montoCanjeElectronicoVenta').val(maxUsar.toFixed(2));
+  });
+
+  $('#egs_deVentaR_montoInput').on('input change', function(){
+    var val = parseFloat($(this).val()) || 0;
+    var totalVenta = parseFloat($('#Resultado').val()) || 0;
+    var maxUsar = Math.min(_deVR_saldo, totalVenta);
+    if (val > maxUsar) val = maxUsar;
+    if (val < 0) val = 0;
+    $('#egs_montoCanjeElectronicoVenta').val(val.toFixed(2));
+  });
+})();
+</script>
