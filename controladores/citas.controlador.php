@@ -85,9 +85,9 @@ class ControladorCitas
     }
 
     /*=============================================
-    ELIMINAR CITA
+    OCULTAR CITA
     =============================================*/
-    static public function ctrEliminarCita()
+    static public function ctrOcultarCita()
     {
 
         if (isset($_GET["idCita"])) {
@@ -95,7 +95,7 @@ class ControladorCitas
             $tabla = "citas";
             $datos = $_GET["idCita"];
 
-            $respuesta = ModeloCitas::mdlEliminarCita($tabla, $datos);
+            $respuesta = ModeloCitas::mdlOcultarCita($tabla, $datos);
 
             if ($respuesta == "ok") {
 

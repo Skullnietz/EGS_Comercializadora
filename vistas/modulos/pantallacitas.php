@@ -330,8 +330,8 @@
                 <a id="dcBtnWhatsApp" href="#" target="_blank" class="egs-dc-action-btn" style="display:none;background:#f0fdf4;color:#16a34a;border-color:#bbf7d0;">
                     <i class="fa-brands fa-whatsapp"></i> WhatsApp
                 </a>
-                <button type="button" id="dcBtnEliminar" class="egs-dc-action-btn" style="background:#fff;color:#ef4444;border-color:#fecaca;">
-                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                <button type="button" id="dcBtnOcultar" class="egs-dc-action-btn" style="background:#fff;color:#ef4444;border-color:#fecaca;">
+                    <i class="fa-solid fa-eye-slash"></i> Ocultar
                 </button>
             </div>
 

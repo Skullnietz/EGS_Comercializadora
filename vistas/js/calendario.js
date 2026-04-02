@@ -592,13 +592,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#dcBtnGCal').hide();
             }
 
-            // ═══ ELIMINAR ═══
-            $('#dcBtnEliminar').off('click').on('click', function() {
+            // ═══ OCULTAR ═══
+            $('#dcBtnOcultar').off('click').on('click', function() {
                 swal({
-                    title: '¿Estás seguro?',
-                    text: 'Se eliminará la cita "' + ev.title + '"',
+                    title: '¿Ocultar esta cita?',
+                    text: 'La cita "' + ev.title + '" dejará de aparecer en el calendario pero se conservará el registro.',
                     icon: 'warning',
-                    buttons: ['Cancelar', 'Sí, eliminar'],
+                    buttons: ['Cancelar', 'Sí, ocultar'],
                     dangerMode: true
                 }).then(function(confirmar) {
                     if (confirmar) {
@@ -615,9 +615,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 if (resp == "ok") {
                                     ev.remove();
                                     $('#modalDetalleCita').modal('hide');
-                                    swal('Eliminado', 'La cita ha sido eliminada.', 'success');
+                                    swal('Ocultada', 'La cita ha sido ocultada del calendario.', 'success');
                                 } else {
-                                    swal('Error', 'No se pudo eliminar la cita', 'error');
+                                    swal('Error', 'No se pudo ocultar la cita', 'error');
                                 }
                             }
                         });

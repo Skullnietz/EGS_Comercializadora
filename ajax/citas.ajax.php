@@ -77,15 +77,15 @@ class AjaxCitas
     }
 
     /*=============================================
-    ELIMINAR CITA (AJAX)
+    OCULTAR CITA (AJAX)
     =============================================*/
     public $idCita;
 
-    public function ajaxEliminarCita()
+    public function ajaxOcultarCita()
     {
         $tabla = "citas";
         $datos = $this->idCita;
-        $respuesta = ModeloCitas::mdlEliminarCita($tabla, $datos);
+        $respuesta = ModeloCitas::mdlOcultarCita($tabla, $datos);
         echo $respuesta;
     }
 
@@ -155,11 +155,11 @@ if (isset($_POST["tituloCita"])) {
     }
 }
 
-// Eliminar Cita
+// Ocultar Cita (soft-hide)
 if (isset($_POST["idCita"])) {
-    $eliminar = new AjaxCitas();
-    $eliminar->idCita = $_POST["idCita"];
-    $eliminar->ajaxEliminarCita();
+    $ocultar = new AjaxCitas();
+    $ocultar->idCita = $_POST["idCita"];
+    $ocultar->ajaxOcultarCita();
 }
 
 // Actualizar descripción/observaciones
