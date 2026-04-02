@@ -73,6 +73,7 @@ require_once "controladores/almacenes.controlador.php";
 require_once "controladores/peticionmaterial.controlador.php";
 require_once "controladores/cotizaciones.controlador.php";
 require_once "controladores/whatsapp.controlador.php";
+require_once "controladores/recompensas.controlador.php";
 /////////////////////////////////////////////////////////////// 
 
 require_once "modelos/administradores.modelo.php";
@@ -137,6 +138,7 @@ require_once "modelos/almacenes.modelo.php";
 require_once "modelos/peticionmaterial.modelo.php";
 require_once "modelos/cotizacion.modelo.php";
 require_once "modelos/whatsapp.modelo.php";
+require_once "modelos/recompensas.modelo.php";
 /////////////////////////modelos siste ventas//////////////////////////////////////
 
 

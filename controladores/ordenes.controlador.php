@@ -1446,6 +1446,19 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 					$respuesta = ModeloOrdenes::mdlEditarFechaSalida("ordenes", $datosOrdenSalida);
 
+					// ── Recompensas: acumular al entregar (AJAX path) ──
+					try {
+						$_egs_cliRecomp = intval($datos["cliente"]);
+						$_egs_totalRecomp = floatval($datos["totalOrdenEditar"]);
+						if ($_egs_cliRecomp > 0 && $_egs_totalRecomp > 0) {
+							ControladorRecompensas::ctrAcumularRecompensa(
+								$_egs_cliRecomp,
+								intval($datos["idOrden"]),
+								$_egs_totalRecomp
+							);
+						}
+					} catch (Exception $e) { /* no romper flujo */ }
+
 				}
 
 
@@ -4263,8 +4276,30 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 									</script>';
 
+				// ── Recompensas: acumular dinero electrónico al entregar ──
+				try {
+					$_egs_idClienteRecomp = isset($_egs_dyn_idCliente) ? $_egs_dyn_idCliente : 0;
+					$_egs_totalOrdenRecomp = floatval($_POST["costoTotalDeOrden"]);
+					$_egs_idOrdenRecomp = intval($_POST["idOrden"]);
 
+					if ($_egs_idClienteRecomp > 0 && $_egs_totalOrdenRecomp > 0) {
+						ControladorRecompensas::ctrAcumularRecompensa(
+							$_egs_idClienteRecomp,
+							$_egs_idOrdenRecomp,
+							$_egs_totalOrdenRecomp
+						);
+					}
 
+					// Canjear dinero electrónico si se solicitó
+					$_egs_montoCanje = isset($_POST["montoCanjeElectronico"]) ? floatval($_POST["montoCanjeElectronico"]) : 0;
+					if ($_egs_montoCanje > 0 && $_egs_idClienteRecomp > 0) {
+						ControladorRecompensas::ctrCanjearRecompensa(
+							$_egs_idClienteRecomp,
+							$_egs_idOrdenRecomp,
+							$_egs_montoCanje
+						);
+					}
+				} catch (Exception $e) { /* no romper flujo */ }
 
 
 			}
