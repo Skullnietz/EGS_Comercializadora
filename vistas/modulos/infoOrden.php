@@ -1998,7 +1998,7 @@ $(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
 								<label style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;display:block">Monto a usar (máx: <span id="egs_de_maxMonto">$0.00</span>)</label>
 								<div class="input-group">
 									<span class="input-group-addon" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:700">$</span>
-									<input type="number" id="egs_de_montoInput" class="form-control" min="0" step="0.01" value="0" style="font-weight:700;font-size:16px">
+									<input type="number" id="egs_de_montoInput" class="form-control" min="0" step="0.01" placeholder="Ingresa el monto a usar" style="font-weight:700;font-size:16px">
 								</div>
 								<div style="margin-top:8px;text-align:right">
 									<button type="button" id="egs_de_usarTodo" class="btn btn-xs" style="background:#eef2ff;color:#6366f1;font-weight:600;border:1px solid #c7d2fe;border-radius:6px">
@@ -2065,7 +2065,7 @@ $(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
 					$('#egs_de_conSaldo').show();
 					var maxUsar = Math.min(_de_saldoDisponible, totalOrden);
 					$('#egs_de_maxMonto').text('$' + maxUsar.toFixed(2));
-					$('#egs_de_montoInput').attr('max', maxUsar).val(maxUsar.toFixed(2));
+					$('#egs_de_montoInput').attr('max', maxUsar).val('');
 				} else {
 					$('#egs_de_sinSaldo').show();
 					$('#egs_de_conSaldo').hide();

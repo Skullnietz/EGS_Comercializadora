@@ -119,6 +119,7 @@ class ImprimirTicketsOrden{
           $porcentajeCliente = $infoRecompensas["porcentaje"];
           $entregadasCliente = $infoRecompensas["entregadas"];
           $esNuevo = $infoRecompensas["es_nuevo"];
+          $ordenesEnPrograma = intval($infoRecompensas["ordenes_en_programa"]);
           $tokenMonedero = $infoRecompensas["token"];
 
           $montoGenerado = round($totalOrden * ($porcentajeCliente / 100), 2);
@@ -130,6 +131,7 @@ class ImprimirTicketsOrden{
           $porcentajeCliente = 1;
           $entregadasCliente = 0;
           $esNuevo = true;
+          $ordenesEnPrograma = 0;
           $tokenMonedero = '';
           $montoGenerado = 0;
           $montoCanjeado = 0;
@@ -528,14 +530,11 @@ class ImprimirTicketsOrden{
       // Solo mostrar si la orden NO está cancelada ni sin reparación
       // ═══════════════════════════════════════════════════════════════
       $estadoOrden = $value["estado"];
-      $estadosSinRecompensa = array("Cancelada (can)", "Sin reparacion (SR)");
-      $mostrarRecompensas = true;
-      foreach ($estadosSinRecompensa as $estadoExcluido) {
-          if (stripos($estadoOrden, $estadoExcluido) !== false) {
-              $mostrarRecompensas = false;
-              break;
-          }
-      }
+      // No mostrar recompensas en órdenes canceladas o sin reparación
+      // ya que no se están entregando al cliente
+      $mostrarRecompensas = (stripos($estadoOrden, 'cancel') === false
+                          && stripos($estadoOrden, 'can)') === false
+                          && stripos($estadoOrden, 'SR)') === false);
 
       if ($mostrarRecompensas) {
       echo '<hr size="5" style="margin: 20px 0 10px;">
@@ -544,8 +543,8 @@ class ImprimirTicketsOrden{
                 <td align="center" colspan="3">
                   <div style="border:3px solid #6366f1;border-radius:12px;padding:15px;margin:10px 0;background:linear-gradient(135deg,#eef2ff,#e0e7ff)">';
 
-      if ($esNuevo) {
-          // CLIENTE NUEVO - Mensaje de bienvenida al programa
+      if ($ordenesEnPrograma == 0) {
+          // PRIMERA ORDEN EN EL PROGRAMA - Mensaje de bienvenida
           echo '    <div style="font-size:18px;font-weight:900;color:#6366f1;margin-bottom:8px">
                       &#127775; MONEDERO EGS &#127775;
                     </div>

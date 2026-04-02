@@ -40,6 +40,7 @@ class ControladorRecompensas
 
         $monedero = ModeloRecompensas::mdlObtenerMonedero($idCliente);
         $entregadas = ModeloRecompensas::mdlContarOrdenesEntregadas($idCliente);
+        $ordenesEnPrograma = ModeloRecompensas::mdlContarOrdenesEnPrograma($idCliente);
         $porcentaje = self::ctrCalcularPorcentaje($idCliente);
         $saldo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje);
 
@@ -47,6 +48,7 @@ class ControladorRecompensas
             "monedero" => $monedero,
             "saldo" => $saldo,
             "entregadas" => $entregadas,
+            "ordenes_en_programa" => $ordenesEnPrograma,
             "porcentaje" => $porcentaje,
             "token" => $monedero["token"],
             "es_nuevo" => ($entregadas == 0)

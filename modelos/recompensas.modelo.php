@@ -106,42 +106,53 @@ class ModeloRecompensas
     }
 
     /*=============================================
+    FECHA DE INICIO DEL PROGRAMA DE RECOMPENSAS
+    Solo se contabilizan órdenes entregadas desde esta fecha.
+    Cada recompensa vence 6 meses después de la entrega.
+    =============================================*/
+    const FECHA_INICIO_PROGRAMA = '2026-04-01';
+
+    /*=============================================
     CALCULAR SALDO DINÁMICO
     Suma el % correspondiente del total de cada orden
-    entregada en los últimos 6 meses y resta los canjes.
+    entregada desde el inicio del programa (abril 2026)
+    cuya recompensa no haya vencido (máx 6 meses) y
+    resta los canjes del mismo periodo.
     =============================================*/
     static public function mdlCalcularSaldoDinamico($idCliente, $porcentaje)
     {
         $pdo = ConexionWP::conectarWP();
         $hace6meses = date('Y-m-d', strtotime('-6 months'));
+        // La ventana inicia en la fecha más reciente entre hace 6 meses y el inicio del programa
+        $fechaDesde = max($hace6meses, self::FECHA_INICIO_PROGRAMA);
 
-        // 1) Sumar recompensas de órdenes entregadas en los últimos 6 meses
+        // 1) Sumar recompensas de órdenes entregadas en la ventana vigente
         $stmt = $pdo->prepare("
             SELECT COALESCE(SUM(total), 0) as suma_totales
             FROM ordenes
             WHERE id_usuario = :id_cliente
               AND estado LIKE '%Ent%'
               AND fecha_Salida IS NOT NULL
-              AND fecha_Salida >= :hace6meses
+              AND fecha_Salida >= :fechaDesde
         ");
         $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmt->bindParam(":hace6meses", $hace6meses, PDO::PARAM_STR);
+        $stmt->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         $sumaTotales = floatval($row["suma_totales"]);
 
         $acumulado = round($sumaTotales * ($porcentaje / 100), 2);
 
-        // 2) Restar canjes realizados (sin importar fecha, todos los canjes vigentes)
+        // 2) Restar canjes realizados desde el inicio del programa
         $stmtCanjes = $pdo->prepare("
             SELECT COALESCE(SUM(ABS(monto)), 0) as total_canjes
             FROM dinero_electronico_movimientos
             WHERE id_cliente = :id_cliente
               AND tipo = 'canje'
-              AND fecha >= :hace6meses
+              AND fecha >= :fechaDesde
         ");
         $stmtCanjes->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmtCanjes->bindParam(":hace6meses", $hace6meses, PDO::PARAM_STR);
+        $stmtCanjes->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
         $stmtCanjes->execute();
         $rowCanjes = $stmtCanjes->fetch(PDO::FETCH_ASSOC);
         $totalCanjes = floatval($rowCanjes["total_canjes"]);
@@ -160,6 +171,7 @@ class ModeloRecompensas
     {
         $pdo = ConexionWP::conectarWP();
         $hace6meses = date('Y-m-d', strtotime('-6 months'));
+        $fechaDesde = max($hace6meses, self::FECHA_INICIO_PROGRAMA);
 
         $stmt = $pdo->prepare("
             SELECT id, total, fecha_Salida
@@ -167,11 +179,11 @@ class ModeloRecompensas
             WHERE id_usuario = :id_cliente
               AND estado LIKE '%Ent%'
               AND fecha_Salida IS NOT NULL
-              AND fecha_Salida >= :hace6meses
+              AND fecha_Salida >= :fechaDesde
             ORDER BY fecha_Salida DESC
         ");
         $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmt->bindParam(":hace6meses", $hace6meses, PDO::PARAM_STR);
+        $stmt->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
         $stmt->execute();
         $ordenes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -186,6 +198,31 @@ class ModeloRecompensas
             );
         }
         return $resultado;
+    }
+
+    /*=============================================
+    CONTAR ORDENES ENTREGADAS DENTRO DEL PROGRAMA
+    (desde abril 2026 y dentro de la ventana de 6 meses)
+    =============================================*/
+    static public function mdlContarOrdenesEnPrograma($idCliente)
+    {
+        $pdo = ConexionWP::conectarWP();
+        $hace6meses = date('Y-m-d', strtotime('-6 months'));
+        $fechaDesde = max($hace6meses, self::FECHA_INICIO_PROGRAMA);
+
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as total
+            FROM ordenes
+            WHERE id_usuario = :id_cliente
+              AND estado LIKE '%Ent%'
+              AND fecha_Salida IS NOT NULL
+              AND fecha_Salida >= :fechaDesde
+        ");
+        $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
+        $stmt->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return intval($result["total"]);
     }
 
     /*=============================================
