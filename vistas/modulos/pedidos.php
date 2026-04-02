@@ -1875,6 +1875,9 @@ $('.tablaPedidos tbody').on("click", ".btnEditarPedido", function(){
         $("#egs_dePedido_loading").show();
         $("#egs_dePedido_content").hide();
 
+        // Guardar estado actual del pedido para validar canje
+        window._dePedido_estadoActual = respuesta[0]["estado"];
+
         $.ajax({
           url: "ajax/recompensas.ajax.php",
           method: "POST",
@@ -1886,17 +1889,25 @@ $('.tablaPedidos tbody').on("click", ".btnEditarPedido", function(){
 
             var saldoDE = parseFloat(dataDE.saldo) || 0;
             window._dePedido_saldo = saldoDE;
+            window._dePedido_porcentaje = parseFloat(dataDE.porcentaje) || 1;
             $(".egs_dePedido_saldo").val("$" + saldoDE.toFixed(2));
             $("#egs_dePedido_nivel").text("Nivel: " + dataDE.porcentaje + "% | " + dataDE.entregadas + " transacciones");
 
             var totalPedido = parseFloat($(".pagoPedidoEdidato").val()) || 0;
+            var estadoSeleccionado = $(".EstadoDelPedido").val() || "";
+            var esEntregado = estadoSeleccionado.indexOf("Entregado") !== -1;
 
-            if (saldoDE > 0) {
+            if (saldoDE > 0 && esEntregado) {
               $("#egs_dePedido_sinSaldo").hide();
               $("#egs_dePedido_canjeCol").show();
               var maxUsar = Math.min(saldoDE, totalPedido);
               $("#egs_dePedido_maxLabel").text("Máximo: $" + maxUsar.toFixed(2));
-              $(".egs_dePedido_montoInput").attr("max", maxUsar).val(0);
+              $(".egs_dePedido_montoInput").attr("max", maxUsar).val(0).prop("disabled", false);
+            } else if (saldoDE > 0 && !esEntregado) {
+              $("#egs_dePedido_sinSaldo").hide();
+              $("#egs_dePedido_canjeCol").show();
+              $(".egs_dePedido_montoInput").val(0).prop("disabled", true);
+              $("#egs_dePedido_maxLabel").html('<i class="fa fa-info-circle"></i> El canje se habilita al cambiar el estado a Entregado');
             } else {
               $("#egs_dePedido_sinSaldo").show();
               $("#egs_dePedido_canjeCol").hide();
@@ -2898,6 +2909,25 @@ $(".egs_dePedido_montoInput").on("input change", function(){
   if (val < 0) val = 0;
   $(this).val(val.toFixed(2));
   $(".egs_montoCanjeElectronicoPedido").val(val.toFixed(2));
+});
+
+// Habilitar/deshabilitar canje al cambiar estado del pedido
+$(".EstadoDelPedido").on("change", function(){
+  var nuevoEstado = $(this).val() || "";
+  var esEntregado = nuevoEstado.indexOf("Entregado") !== -1;
+  var saldoDE = window._dePedido_saldo || 0;
+
+  if (saldoDE > 0 && esEntregado) {
+    var totalPedido = parseFloat($(".pagoPedidoEdidato").val()) || 0;
+    var maxUsar = Math.min(saldoDE, totalPedido);
+    $(".egs_dePedido_montoInput").prop("disabled", false);
+    $("#egs_dePedido_maxLabel").text("Máximo: $" + maxUsar.toFixed(2));
+    $(".egs_dePedido_montoInput").attr("max", maxUsar);
+  } else if (saldoDE > 0) {
+    $(".egs_dePedido_montoInput").val(0).prop("disabled", true);
+    $(".egs_montoCanjeElectronicoPedido").val(0);
+    $("#egs_dePedido_maxLabel").html('<i class="fa fa-info-circle"></i> El canje se habilita al cambiar el estado a Entregado');
+  }
 });
 
 </script>

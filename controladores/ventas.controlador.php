@@ -336,7 +336,11 @@ class ControladorVentas{
 						require_once __DIR__ . "/../modelos/recompensas.modelo.php";
 						$ultimaVenta = ModeloVentas::mdlObtenerUltimaVenta(intval($_POST["empresa"]));
 						if ($ultimaVenta > 0) {
-							ControladorRecompensas::ctrCanjearRecompensaVenta($_egs_idClienteVenta, $ultimaVenta, $_egs_montoCanjeVenta);
+							// Verificar que no exista un canje previo para esta venta
+							$canjeExistente = ModeloRecompensas::mdlObtenerCanjeVenta($ultimaVenta);
+							if (!$canjeExistente) {
+								ControladorRecompensas::ctrCanjearRecompensaVenta($_egs_idClienteVenta, $ultimaVenta, $_egs_montoCanjeVenta);
+							}
 						}
 					} catch (Exception $e) {
 						// No bloquear la venta si falla el canje

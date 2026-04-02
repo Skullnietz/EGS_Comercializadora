@@ -168,14 +168,19 @@ class ControladorPedidos{
 				
 				$respuesta = ModeloPedidos::mdlEditarPedido("pedidos", $datosPedioEditado);
 
-				// Procesar canje de dinero electrónico si aplica
+				// Procesar canje de dinero electrónico SOLO si el estado es Entregado
 				$montoCanje = floatval($datos["montoCanjeElectronicoPedido"] ?? 0);
 				$idClienteDE = intval($datos["idClientePedidoDE"] ?? 0);
+				$esEntregado = (stripos($datos["EstadoDelPedido"], 'Entregado') !== false);
 
-				if ($respuesta == "ok" && $montoCanje > 0 && $idClienteDE > 0) {
+				if ($respuesta == "ok" && $montoCanje > 0 && $idClienteDE > 0 && $esEntregado) {
 					require_once __DIR__ . "/recompensas.controlador.php";
 					require_once __DIR__ . "/../modelos/recompensas.modelo.php";
-					ControladorRecompensas::ctrCanjearRecompensaPedido($idClienteDE, $datos["idPedido"], $montoCanje);
+					// Verificar que no exista un canje previo para este pedido
+					$canjeExistente = ModeloRecompensas::mdlObtenerCanjePedido($datos["idPedido"]);
+					if (!$canjeExistente) {
+						ControladorRecompensas::ctrCanjearRecompensaPedido($idClienteDE, $datos["idPedido"], $montoCanje);
+					}
 				}
 
 				return $respuesta;
