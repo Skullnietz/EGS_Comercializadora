@@ -460,7 +460,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				//imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
+				imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
 
 

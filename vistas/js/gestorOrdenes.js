@@ -827,8 +827,8 @@ $('.tablaOrdenes tbody').on("click", ".btnEditarOrden", function(){
 			CARGAMOS LA IMAGEN PRINCIPAL
 			=============================================*/
 
-			$("#modalEditarOrden .previsualizarPrincipal").attr("src", respuesta[0]["portada"]);
-			$("#modalEditarOrden .antiguaFotoPrincipal").val(respuesta[0]["portada"]);
+			$("#modalEditarOrden .previsualizarPrincipal").attr("src", respuesta[0]["fotoPrincipal"] || respuesta[0]["portada"]);
+			$("#modalEditarOrden .antiguaFotoPrincipal").val(respuesta[0]["fotoPrincipal"] || respuesta[0]["portada"]);
 			
 
 			/*=============================================
@@ -970,7 +970,7 @@ $(".guardarCambiosOrden").click(function(){
 			datosMultimedia.append("ruta", $("#modalEditarOrden .rutaOrden").val());
 
 			$.ajax({
-				url:"ajax/productos.ajax.php",
+				url:"ajax/ordenes.ajax.php",
 				method: "POST",
 				data: datosMultimedia,
 				cache: false,
