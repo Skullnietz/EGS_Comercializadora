@@ -525,7 +525,19 @@ class ImprimirTicketsOrden{
 
       // ═══════════════════════════════════════════════════════════════
       // SECCIÓN DE RECOMPENSAS - MONEDERO ELECTRÓNICO EGS
+      // Solo mostrar si la orden NO está cancelada ni sin reparación
       // ═══════════════════════════════════════════════════════════════
+      $estadoOrden = $value["estado"];
+      $estadosSinRecompensa = array("Cancelada (can)", "Sin reparacion (SR)");
+      $mostrarRecompensas = true;
+      foreach ($estadosSinRecompensa as $estadoExcluido) {
+          if (stripos($estadoOrden, $estadoExcluido) !== false) {
+              $mostrarRecompensas = false;
+              break;
+          }
+      }
+
+      if ($mostrarRecompensas) {
       echo '<hr size="5" style="margin: 20px 0 10px;">
             <table border="0" align="center" width="100%">
               <tr>
@@ -589,6 +601,7 @@ class ImprimirTicketsOrden{
                 </td>
               </tr>
             </table>';
+      } // fin if ($mostrarRecompensas)
 
       echo '<hr size="5" style="margin: 20px 0;">
             <table>
