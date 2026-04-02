@@ -230,49 +230,95 @@ class ImprimirTicketsPedido{
                   <td align="right"><b>TOTAL: $'.$value["total"].'</b></td>
                 </tr>
             <tr>
-
               <td colspan="4">==========================================</td>
+            </tr>';
 
-                 <tr>
-                     <td>Abonado</td>
-                     <td display:"none"></td>
-                     <td display:"none"></td>
-                     <td>Adeudo</td>
-                 </tr>';
+                // ═══════════════════════════════════════
+                // RESUMEN DE PAGOS Y ADEUDO
+                // ═══════════════════════════════════════
+                $totalAbonado = 0;
 
-                 if ($value["pagoPedido"] != "" and $value["pagoPedido"] != null) {
-                    echo'<tr>
-                    <td><b> pago: $'.$value["pagoPedido"].'</b></td>
-                     <td display:"none"></td>
-                     <td display:"none"></td>
-                 </tr>';
+                echo '<tr>
+                  <td colspan="4" style="padding-top:8px;">
+                    <div style="border:2px solid #000;padding:10px;margin:4px 0;">
+                      <div style="font-size:14px;font-weight:900;text-align:center;margin-bottom:8px;text-decoration:underline;">RESUMEN DE PAGOS</div>';
 
-                 }
-                
+                // Pago inicial
+                if (!empty($value["pagoPedido"]) && floatval($value["pagoPedido"]) > 0) {
+                    $montoPago = floatval($value["pagoPedido"]);
+                    $totalAbonado += $montoPago;
+                    echo '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+                            <span>Pago inicial</span>
+                            <span><b>$'.number_format($montoPago, 2).'</b></span>
+                          </div>';
+                }
 
-                 $pagos = json_decode($value["pagos"], true);
+                // Abonos registrados en JSON
+                $pagos = json_decode($value["pagos"], true);
+                if (is_array($pagos)) {
+                    $numAbono = 1;
+                    foreach ($pagos as $valuePagos) {
+                        $montoAbono = floatval($valuePagos["pago"]);
+                        if ($montoAbono > 0) {
+                            $totalAbonado += $montoAbono;
+                            $fechaAbono = !empty($valuePagos["fecha"]) ? $valuePagos["fecha"] : "";
+                            $labelFecha = $fechaAbono ? " (".$fechaAbono.")" : "";
+                            echo '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+                                    <span>Abono '.$numAbono.$labelFecha.'</span>
+                                    <span><b>$'.number_format($montoAbono, 2).'</b></span>
+                                  </div>';
+                            $numAbono++;
+                        }
+                    }
+                }
 
-                 foreach ($pagos as $key => $valuePagos) {
-                      
-                      echo'<tr>
-                            <td><b> pago: $'.$valuePagos["pago"].'</b></td>
-                             <td display:"none"></td>
-                             <td display:"none"></td>
-                         </tr>';
-                 }
+                // Abonos directos (abonoUno, etc.)
+                $camposAbono = array(
+                    array("monto" => "abonoUno", "fecha" => "fechaAbonoUno"),
+                    array("monto" => "abonoDos", "fecha" => "fechaAbonoDos"),
+                    array("monto" => "abonoTres", "fecha" => "fechaAbonoTres"),
+                    array("monto" => "abonoCuatro", "fecha" => "fechaAbonoCuatro"),
+                    array("monto" => "abonoCinco", "fecha" => "fechaAbonoCinco"),
+                );
+                $numAbonoDir = 1;
+                foreach ($camposAbono as $campo) {
+                    if (!empty($value[$campo["monto"]]) && floatval($value[$campo["monto"]]) > 0) {
+                        $montoAb = floatval($value[$campo["monto"]]);
+                        $totalAbonado += $montoAb;
+                        $fechaAb = !empty($value[$campo["fecha"]]) ? $value[$campo["fecha"]] : "";
+                        $labelFechaAb = $fechaAb ? " (".$fechaAb.")" : "";
+                        echo '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+                                <span>Abono'.$labelFechaAb.'</span>
+                                <span><b>$'.number_format($montoAb, 2).'</b></span>
+                              </div>';
+                        $numAbonoDir++;
+                    }
+                }
 
-                         echo'<tr>
-                             <td display:"none"></td>
-                             <td display:"none"></td>
-                             <td display:"none"></td>
-                             <td style="align : right;"><b> adeudo: $'.$value["adeudo"].'</b></td>
-                         </tr>';
-                
+                // Línea separadora
+                echo '  <div style="border-top:1px dashed #000;margin:6px 0;"></div>';
+
+                // Total abonado
+                echo '  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;font-weight:900;">
+                          <span>TOTAL ABONADO</span>
+                          <span>$'.number_format($totalAbonado, 2).'</span>
+                        </div>';
+
+                // Adeudo
+                $adeudo = floatval($value["adeudo"]);
+                $colorAdeudo = ($adeudo > 0) ? "#d00" : "#060";
+                $textoAdeudo = ($adeudo > 0) ? "ADEUDO PENDIENTE" : "PAGADO";
+                echo '  <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:15px;font-weight:900;color:'.$colorAdeudo.';">
+                          <span>'.$textoAdeudo.'</span>
+                          <span>$'.number_format($adeudo, 2).'</span>
+                        </div>';
+
+                echo '  </div>
+                  </td>
+                </tr>';
 
                 echo'<tr>
                     <td colspan="4">&nbsp;</td>
-
-
                 </tr> 
 
                 <ul>
