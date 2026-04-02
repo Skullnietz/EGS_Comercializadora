@@ -312,13 +312,7 @@ class ImprimirTicketsPedido{
             <table>
         
               <center>¡Gracias por su compra!</center>
-              <center>
-               <hr size="7" /style="position: line; margin: 20px;">
-              <h3>¡Descubre nuestra selección de productos de TI de primera calidad escaneando este código QR y compra ahora mismo! 🛒💻 #TecnologíaAlAlcanceDeTuMano</h3>
-              <div><img src="https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/images/qr-code-shop.png" alt="QRCODE" style="width:200px"></div>
-              
-              <hr size="7" /style="position: line; margin: 20px;">
-              </center>
+
                 
             <tr>
             

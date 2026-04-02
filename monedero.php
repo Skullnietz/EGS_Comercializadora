@@ -75,6 +75,7 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
 
         .card-saldo{position:relative;z-index:1;margin-bottom:20px}
         .card-saldo-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.5);margin-bottom:6px}
+        .card-saldo-periodo{font-size:10px;font-weight:500;color:rgba(255,255,255,.35);margin-top:8px;letter-spacing:.3px}
         .card-saldo-amount{font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1;
             background:linear-gradient(135deg,#fff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .card-saldo-amount.zero{background:linear-gradient(135deg,#64748b 0%,#475569 100%);-webkit-background-clip:text;background-clip:text}
@@ -104,6 +105,11 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
         .stat-item+.stat-item{border-left:1px solid rgba(255,255,255,.06)}
         .stat-value{font-size:26px;font-weight:900;color:#fff;line-height:1}
         .stat-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:#64748b;margin-top:4px}
+
+        .info-banner{display:flex;align-items:center;gap:8px;padding:14px 20px;background:rgba(99,102,241,.08);border-bottom:1px solid rgba(255,255,255,.06)}
+        .info-banner-icon{font-size:16px;flex-shrink:0}
+        .info-banner-text{font-size:11px;color:#94a3b8;line-height:1.5}
+        .info-banner-text strong{color:#c7d2fe;font-weight:700}
 
         /* ── Niveles ── */
         .levels-section{padding:20px}
@@ -182,6 +188,7 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
         <div class="card-saldo">
             <div class="card-saldo-label">Saldo disponible</div>
             <div class="card-saldo-amount <?php echo $saldo <= 0 ? 'zero' : ''; ?>">$<?php echo number_format($saldo, 2); ?></div>
+            <div class="card-saldo-periodo">&uacute;ltimos 6 meses</div>
         </div>
         <div class="card-bottom">
             <div>
@@ -209,6 +216,11 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
                 <div class="stat-value"><?php echo $porcentaje; ?>%</div>
                 <div class="stat-label">Tu recompensa</div>
             </div>
+        </div>
+
+        <div class="info-banner">
+            <span class="info-banner-icon">&#9432;</span>
+            <span class="info-banner-text">Tu saldo corresponde a las recompensas acumuladas en los <strong>&uacute;ltimos 6 meses</strong>. El dinero electr&oacute;nico vence 6 meses despu&eacute;s de ser generado.</span>
         </div>
 
         <div class="levels-section">

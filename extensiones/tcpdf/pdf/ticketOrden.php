@@ -595,11 +595,7 @@ class ImprimirTicketsOrden{
 
               <h3>¡Gracias por su visita!</h3>
 
-              <hr size="7" style="margin: 20px 0;">
-              <h3>¡Descubre nuestra selección de productos de TI de primera calidad escaneando este código QR y compra ahora mismo! &#128722;&#128187; #TecnologíaAlAlcanceDeTuMano</h3>
-              <img src="https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/images/qr-code-shop.png" alt="QRCODE" style="width:200px">
 
-              <hr size="7" style="margin: 20px 0;">
               </center>
 
 
