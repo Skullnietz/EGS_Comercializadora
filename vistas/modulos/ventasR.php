@@ -549,18 +549,6 @@ $('#CAMBIORE').hide();
      
  });
  // EVITAR USO DE CARACTERES ESPECIALES
- const $input1 = document.querySelector('#nombrecliente');
-    const patron1 = /[a-zA-ZñÑ ÉÁÍÓ()]+/;
-    $input1.addEventListener("keydown", event => {
-                console.log(event.key);
-                if(patron1.test(event.key)){
-                    $("#nombrecliente").css({ "border": "1px solid #0C0"});
-                }
-                else{
-                    if(event.keyCode==8){ console.log("backspace"); }
-                    else{ event.preventDefault();}
-                }
-            });
 const $input2 = document.querySelector('#productoUno');
     const patron2 = /[0-9a-zA-ZñÑ ÉÁÍÓ().-]+/;
     $input2.addEventListener("keydown", event => {
@@ -670,175 +658,164 @@ const $input11 = document.querySelector(' #productoDiez');
    });
  </script> 
 <style>
+    /* ─── Base helpers ─── */
     .productosp{ margin-left:-100px; }
     .circulo{ margin-top:8px; }
-    .negativo{ border-color: #dc143c; }
-    .positivo{ border-color: #7cfc00; }
+    .negativo{ border-color: #ef4444 !important; }
+    .positivo{ border-color: #22c55e !important; }
     #pagoCliente, #Resultado, #cambio{ font-size: 40px; }
     .plus{ margin-left:20px; }
     .btn-circle {
-      width: 30px;
-      height: 30px;
-      padding: 6px 0px;
-      border-radius: 15px;
-      text-align: center;
-      font-size: 12px;
-      line-height: 1.42857;
+      width: 30px; height: 30px; padding: 6px 0px;
+      border-radius: 15px; text-align: center;
+      font-size: 12px; line-height: 1.42857;
     }
 
-    .vr-dashboard-shell {
-      background: linear-gradient(125deg, #f5f8ff 0%, #f2f8f4 45%, #fff5ea 100%);
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 10px 25px rgba(16, 24, 40, 0.08);
+    /* ─── CRM Design Tokens (match inicio.php) ─── */
+    :root {
+      --crm-bg:       #f8fafc;
+      --crm-surface:  #ffffff;
+      --crm-border:   #e2e8f0;
+      --crm-text:     #0f172a;
+      --crm-text2:    #475569;
+      --crm-muted:    #94a3b8;
+      --crm-accent:   #6366f1;
+      --crm-accent2:  #818cf8;
+      --crm-radius:   14px;
+      --crm-radius-sm:10px;
+      --crm-shadow:   0 1px 3px rgba(15,23,42,.06), 0 4px 14px rgba(15,23,42,.04);
+      --crm-shadow-lg:0 4px 24px rgba(15,23,42,.10);
+      --crm-ease:     cubic-bezier(.4,0,.2,1);
     }
-    .vr-hero {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .vr-hero h3 {
-      margin: 0;
-      font-weight: 700;
-      color: #1a2f44;
-      letter-spacing: .2px;
-    }
-    .vr-hero p {
-      margin: 2px 0 0;
-      color: #506177;
-      font-size: 13px;
-    }
+
+    /* ─── KPI Cards ─── */
     .vr-kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      margin-bottom: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
     }
-    .vr-kpi-card {
-      background: #fff;
-      border: 1px solid #e6ebf2;
-      border-left: 4px solid #1f8d61;
-      border-radius: 10px;
-      padding: 10px 12px;
-      box-shadow: 0 6px 14px rgba(30, 41, 59, 0.07);
+    .vr-kpi {
+      border-radius: var(--crm-radius);
+      padding: 22px 20px 18px;
+      position: relative; overflow: hidden;
+      color: #fff;
+      transition: transform .2s var(--crm-ease), box-shadow .2s var(--crm-ease);
     }
-    .vr-kpi-card .vr-kpi-title {
-      display: block;
-      font-size: 11px;
-      text-transform: uppercase;
-      color: #5f7085;
-      letter-spacing: .8px;
-      margin-bottom: 2px;
-      font-weight: 700;
+    .vr-kpi:hover { transform: translateY(-3px); box-shadow: var(--crm-shadow-lg); }
+    .vr-kpi-icon {
+      position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+      font-size: 48px; opacity: .12;
     }
-    .vr-kpi-card .vr-kpi-value {
-      display: block;
-      font-size: 25px;
-      font-weight: 700;
-      color: #0f172a;
-      line-height: 1.1;
+    .vr-kpi-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .5px; opacity: .85; margin-bottom: 6px;
     }
+    .vr-kpi-value {
+      font-size: 28px; font-weight: 800; line-height: 1.1; margin-bottom: 0;
+      letter-spacing: -.02em;
+    }
+
+    /* ─── Toolbar actions ─── */
     .vr-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 12px;
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+      align-items: center; gap: 14px; margin-bottom: 20px;
     }
     .vr-primary-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
     }
-    .vr-primary-actions .btn,
-    .vr-filtro-fechas .btn {
-      border-radius: 999px;
-      font-weight: 600;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+    .vr-primary-actions .btn {
+      border-radius: var(--crm-radius-sm); font-weight: 600;
+      box-shadow: var(--crm-shadow);
+      transition: all .18s var(--crm-ease);
+    }
+    .vr-primary-actions .btn:hover {
+      transform: translateY(-1px); box-shadow: var(--crm-shadow-lg);
     }
     .vr-btn-main {
-      min-height: 40px;
-      padding: 8px 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      min-height: 42px; padding: 8px 18px;
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; letter-spacing: .2px;
     }
+
+    /* ─── Date filters ─── */
     .vr-filtro-fechas {
-      background: #fff;
-      border: 1px solid #dde7f2;
-      border-radius: 12px;
-      padding: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      justify-content: flex-end;
-      max-width: 700px;
-      width: 100%;
+      background: var(--crm-surface);
+      border: 1px solid var(--crm-border);
+      border-radius: var(--crm-radius);
+      padding: 12px 16px;
+      display: flex; flex-wrap: wrap; gap: 10px;
+      align-items: center; justify-content: flex-end;
+      max-width: 720px; width: 100%;
+      box-shadow: var(--crm-shadow);
     }
     .vr-filtro-fechas .form-control {
-      min-width: 145px;
-      border-radius: 999px;
-      border: 1px solid #d4dde8;
-      box-shadow: none;
+      min-width: 148px; border-radius: var(--crm-radius-sm);
+      border: 1px solid var(--crm-border); box-shadow: none;
+      font-size: 12px; height: 36px; font-weight: 500;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .vr-filtro-fechas .form-control:focus {
+      border-color: var(--crm-accent); box-shadow: 0 0 0 3px rgba(99,102,241,.12);
     }
     .vr-date-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: #5b6f84;
-      text-transform: uppercase;
-      letter-spacing: .6px;
-      margin-right: 2px;
+      font-size: 11px; font-weight: 700; color: var(--crm-text2);
+      text-transform: uppercase; letter-spacing: .6px;
     }
     .vr-filtro-presets {
-      display: inline-flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-left: 2px;
+      display: inline-flex; gap: 6px; flex-wrap: wrap;
     }
-    .vr-filtro-presets .btn {
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 12px;
-      box-shadow: none;
+    .vr-filtro-presets .btn,
+    .vr-filtro-fechas > .btn {
+      border-radius: var(--crm-radius-sm); padding: 6px 12px;
+      font-size: 12px; font-weight: 600; box-shadow: none;
+      border: 1px solid var(--crm-border);
+      transition: all .15s var(--crm-ease);
+    }
+    .vr-filtro-presets .btn:hover,
+    .vr-filtro-fechas > .btn:hover {
+      border-color: var(--crm-accent); background: #eef2ff; color: #3730a3;
     }
     @media (max-width: 991px) {
-      .vr-toolbar {
-        flex-direction: column;
-      }
-      .vr-filtro-fechas {
-        justify-content: flex-start;
-      }
+      .vr-toolbar { flex-direction: column; align-items: stretch; }
+      .vr-filtro-fechas { justify-content: flex-start; max-width: 100%; }
     }
-    .vr-table-wrap {
-      background: #fff;
-      border-radius: 12px;
-      padding: 12px;
-      border: 1px solid #e7edf4;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+
+    /* ─── Table card ─── */
+    .vr-table-card {
+      background: var(--crm-surface);
+      border: 1px solid var(--crm-border);
+      border-radius: var(--crm-radius);
+      box-shadow: var(--crm-shadow);
+      overflow: hidden;
+      transition: box-shadow .2s var(--crm-ease);
     }
-    .vr-table-wrap .dataTables_filter input {
-      border-radius: 20px;
-      border: 1px solid #d4dde8;
-      padding: 4px 10px;
+    .vr-table-card:hover { box-shadow: var(--crm-shadow-lg); }
+    .vr-table-card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #f1f5f9;
     }
+    .vr-table-card-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; font-weight: 700; color: var(--crm-text);
+      margin: 0; line-height: 1.3;
+    }
+    .vr-table-card-title i {
+      font-size: 15px; color: var(--crm-accent); opacity: .85;
+    }
+    .vr-table-card-body { padding: 16px 20px; }
+
+    /* ─── DataTable overrides ─── */
     #tablaVentasRapidasUI thead th {
-      position: sticky;
-      top: 0;
+      position: sticky; top: 0; z-index: 2;
       background: #f8fafc;
-      z-index: 2;
-      box-shadow: 0 1px 0 rgba(15, 23, 42, .08);
+      padding: 12px 16px; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .6px;
+      color: var(--crm-muted);
+      border-bottom: 1px solid var(--crm-border);
+      box-shadow: 0 1px 0 rgba(15,23,42,.04);
       white-space: nowrap;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .4px;
-      color: #475569;
-      border-bottom-color: #e8eef5;
     }
     #tablaVentasRapidasUI.dataTable thead .sorting,
     #tablaVentasRapidasUI.dataTable thead .sorting_asc,
@@ -846,8 +823,7 @@ const $input11 = document.querySelector(' #productoDiez');
     #tablaVentasRapidasUI.dataTable thead .sorting_asc_disabled,
     #tablaVentasRapidasUI.dataTable thead .sorting_desc_disabled,
     #tablaVentasRapidasUI.dataTable thead .sorting_disabled {
-      background-image: none !important;
-      padding-right: 8px !important;
+      background-image: none !important; padding-right: 8px !important;
     }
     #tablaVentasRapidasUI.dataTable thead .sorting::before,
     #tablaVentasRapidasUI.dataTable thead .sorting::after,
@@ -861,19 +837,20 @@ const $input11 = document.querySelector(' #productoDiez');
     #tablaVentasRapidasUI.dataTable thead .sorting_desc_disabled::after,
     #tablaVentasRapidasUI.dataTable thead .sorting_disabled::before,
     #tablaVentasRapidasUI.dataTable thead .sorting_disabled::after {
-      display: none !important;
-      content: none !important;
+      display: none !important; content: none !important;
     }
-    #tablaVentasRapidasUI tbody tr td {
-      vertical-align: middle;
+    #tablaVentasRapidasUI tbody tr {
+      transition: background .12s;
+    }
+    #tablaVentasRapidasUI tbody tr:hover { background: #f4f7ff !important; }
+    #tablaVentasRapidasUI tbody td {
+      padding: 12px 16px; font-size: 13px; color: var(--crm-text);
+      border-bottom: 1px solid #f1f5f9; vertical-align: middle;
     }
     #tablaVentasRapidasUI.dataTable.stripe tbody tr.odd,
     #tablaVentasRapidasUI.dataTable.display tbody tr.odd,
     #tablaVentasRapidasUI.table-striped > tbody > tr:nth-of-type(odd) {
       background-color: #fbfdff;
-    }
-    #tablaVentasRapidasUI tbody tr:hover {
-      background-color: #f4f7ff !important;
     }
     #tablaVentasRapidasUI_wrapper .dataTables_length,
     #tablaVentasRapidasUI_wrapper .dataTables_filter {
@@ -881,270 +858,219 @@ const $input11 = document.querySelector(' #productoDiez');
     }
     #tablaVentasRapidasUI_wrapper .dataTables_length label,
     #tablaVentasRapidasUI_wrapper .dataTables_filter label {
-      color: #475569;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .2px;
+      color: var(--crm-text2); font-size: 12px; font-weight: 700; letter-spacing: .2px;
     }
     #tablaVentasRapidasUI_wrapper .dataTables_length select {
-      border: 1px solid #dbe3ef !important;
-      border-radius: 8px;
-      background: #fff;
-      color: #334155;
-      height: 34px;
-      padding: 4px 26px 4px 10px;
-      margin: 0 6px;
-      font-size: 12px;
-      font-weight: 600;
+      border: 1px solid var(--crm-border) !important;
+      border-radius: 8px; background: #fff; color: #334155;
+      height: 34px; padding: 4px 26px 4px 10px; margin: 0 6px;
+      font-size: 12px; font-weight: 600;
     }
     #tablaVentasRapidasUI_wrapper .dataTables_filter input {
-      border: 1px solid #dbe3ef !important;
-      border-radius: 10px;
-      background: #fff;
-      color: #334155;
-      height: 36px;
-      min-width: 220px;
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      transition: all .15s ease;
+      border: 1px solid var(--crm-border) !important;
+      border-radius: var(--crm-radius-sm); background: #fff; color: #334155;
+      height: 36px; min-width: 220px; padding: 6px 12px;
+      font-size: 12px; font-weight: 600; transition: all .15s ease;
     }
     #tablaVentasRapidasUI_wrapper .dataTables_length select:focus,
     #tablaVentasRapidasUI_wrapper .dataTables_filter input:focus {
       outline: none;
-      border-color: #a5b4fc !important;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+      border-color: var(--crm-accent) !important;
+      box-shadow: 0 0 0 3px rgba(99,102,241,.12);
     }
-    #tablaVentasRapidasUI_wrapper .dataTables_paginate {
-      margin-top: 14px;
-    }
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate { margin-top: 14px; }
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
       border-radius: 8px !important;
-      border: 1px solid #dbe3ef !important;
-      background: #fff !important;
-      color: #334155 !important;
-      margin-left: 6px;
-      padding: 6px 12px !important;
-      font-weight: 600;
-      transition: all .15s ease;
+      border: 1px solid var(--crm-border) !important;
+      background: #fff !important; color: #334155 !important;
+      margin-left: 6px; padding: 6px 12px !important;
+      font-weight: 600; transition: all .15s ease;
     }
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover {
       background: #eef2ff !important;
-      border-color: #a5b4fc !important;
+      border-color: var(--crm-accent) !important;
       color: #3730a3 !important;
     }
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a,
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:hover,
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:focus {
-      background: #1a3152 !important;
-      border-color: #1a3152 !important;
+      background: var(--crm-accent) !important;
+      border-color: var(--crm-accent) !important;
       color: #fff !important;
     }
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a,
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:hover,
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:focus {
-      background: #f8fafc !important;
-      border-color: #e2e8f0 !important;
-      color: #94a3b8 !important;
-      cursor: not-allowed;
+      background: #f8fafc !important; border-color: #e2e8f0 !important;
+      color: #94a3b8 !important; cursor: not-allowed;
     }
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
-      background: transparent !important;
-      border: 0 !important;
-      box-shadow: none !important;
+      background: transparent !important; border: 0 !important; box-shadow: none !important;
     }
 
+    /* ─── Modal ─── */
     #modalAgregarVenta .modal-content {
-      border-radius: 14px;
-      border: 1px solid #dae5f1;
-      box-shadow: 0 18px 45px rgba(15, 23, 42, .24);
-      overflow: hidden;
+      border-radius: var(--crm-radius); border: 1px solid var(--crm-border);
+      box-shadow: 0 20px 60px rgba(15,23,42,.28); overflow: hidden;
     }
     #modalAgregarVenta .modal-header {
-      background: linear-gradient(90deg, #1f8d61 0%, #2eaf78 100%) !important;
-      border-bottom: 0;
-      padding: 14px 18px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #334155 100%) !important;
+      border-bottom: 0; padding: 18px 22px;
     }
     #modalAgregarVenta .modal-title {
-      font-weight: 700;
-      letter-spacing: .2px;
+      font-weight: 800; letter-spacing: -.01em; font-size: 16px;
     }
     #modalAgregarVenta .modal-body {
-      background: #f7fbff;
-      padding: 16px;
+      background: var(--crm-bg); padding: 20px;
     }
     #modalAgregarVenta .box-body {
-      background: #fff;
-      border: 1px solid #e2eaf3;
-      border-radius: 10px;
-      padding: 14px;
+      background: var(--crm-surface);
+      border: 1px solid var(--crm-border);
+      border-radius: var(--crm-radius); padding: 18px;
     }
     #modalAgregarVenta .input-group-addon {
-      background: #f3f7fc;
-      color: #35506d;
-      border-color: #d7e2ef;
-      font-weight: 600;
+      background: #f8fafc; color: var(--crm-text2);
+      border-color: var(--crm-border); font-weight: 600;
+      font-size: 12px;
     }
     #modalAgregarVenta .form-control {
-      border-color: #d7e2ef;
-      border-radius: 8px;
-      box-shadow: none;
+      border-color: var(--crm-border); border-radius: 8px; box-shadow: none;
+      transition: border-color .15s, box-shadow .15s;
     }
     #modalAgregarVenta .form-control:focus {
-      border-color: #41a776;
-      box-shadow: 0 0 0 2px rgba(31, 141, 97, .12);
+      border-color: var(--crm-accent);
+      box-shadow: 0 0 0 3px rgba(99,102,241,.12);
     }
     #modalAgregarVenta #Caltotal {
-      background: linear-gradient(90deg, #f3fbf6 0%, #f2f8ff 100%);
-      border: 1px dashed #c8ddcf;
-      border-radius: 12px;
-      padding: 10px 0;
+      background: linear-gradient(90deg, #eef2ff 0%, #f0fdf4 100%);
+      border: 1px dashed #c7d2fe; border-radius: var(--crm-radius);
+      padding: 14px 0;
     }
     #modalAgregarVenta #Resultado,
     #modalAgregarVenta #pagoCliente,
     #modalAgregarVenta #cambio {
-      font-size: 34px;
-      font-weight: 700;
-      color: #10243a;
-      text-align: center;
+      font-size: 34px; font-weight: 800; color: var(--crm-text);
+      text-align: center; letter-spacing: -.02em;
     }
     #modalAgregarVenta .modal-footer {
-      border-top: 1px solid #dde7f2;
-      background: #f8fbff;
+      border-top: 1px solid #f1f5f9; background: var(--crm-bg);
+      padding: 14px 22px;
     }
     #modalAgregarVenta .modal-footer .btn {
-      border-radius: 999px;
-      font-weight: 600;
-      min-width: 120px;
+      border-radius: var(--crm-radius-sm); font-weight: 600; min-width: 130px;
+      transition: all .18s var(--crm-ease);
+    }
+    #modalAgregarVenta .modal-footer .btn:hover {
+      transform: translateY(-1px); box-shadow: var(--crm-shadow-lg);
+    }
+    #modalAgregarVenta .modal-footer .btn-primary {
+      background: linear-gradient(135deg, var(--crm-accent), var(--crm-accent2));
+      border: none;
+    }
+    #modalAgregarVenta .modal-footer .btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
     }
 </style>
 
 <div class="content-wrapper">
   
-   <section class="content-header">
-      
-    <h1>
-      Gestor Ventas Rápidas
-    </h1>
-
+  <section class="content-header">
+    <h1>Ventas Rápidas <small>Gestión de ventas</small></h1>
     <ol class="breadcrumb">
-
-      <li><a href="inicio"><i class="fas fa-dashboard"></i> Inicio</a></li>
-
-      <li class="active">Gestor Ventas Rápidas</li>
-      
+      <li><a href="inicio"><i class="fa-solid fa-gauge"></i> Inicio</a></li>
+      <li class="active">Ventas Rápidas</li>
     </ol>
-
   </section>
-
 
   <section class="content">
 
-    <div class="box vr-dashboard-shell"> 
+    <!-- ══ WELCOME BANNER ══ -->
+    <?php
+      $diasEs  = array('Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado');
+      $mesesEs = array('','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre');
+      $_vrFechaHoy = $diasEs[date('w')].' '.date('j').' de '.$mesesEs[intval(date('n'))].', '.date('Y');
+    ?>
+    <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#334155 100%);border-radius:var(--crm-radius,14px);padding:28px 30px;margin-bottom:24px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-20px;top:-20px;width:180px;height:180px;border-radius:50%;background:rgba(99,102,241,.12)"></div>
+      <div style="position:absolute;right:60px;bottom:-40px;width:120px;height:120px;border-radius:50%;background:rgba(99,102,241,.08)"></div>
+      <div style="position:relative;z-index:1">
+        <h2 style="margin:0 0 4px;color:#fff;font-size:22px;font-weight:800;letter-spacing:-.02em">
+          <i class="fa-solid fa-bolt" style="margin-right:8px;opacity:.7"></i>
+          Centro de Ventas Rápidas
+        </h2>
+        <p style="margin:0;color:rgba(255,255,255,.55);font-size:13px;font-weight:400">
+          <?php echo $_vrFechaHoy; ?> &mdash; Panel operativo con indicadores en vivo y acceso rápido a captura y reportes
+        </p>
+      </div>
+    </div>
 
-      <div class="box-header with-border">
-        
-        <?php
+    <!-- ══ KPI CARDS ══ -->
+    <?php if(!$esVendedorVentasR): ?>
+    <div class="vr-kpi-grid">
+      <div class="vr-kpi" style="background:linear-gradient(135deg,#6366f1,#818cf8)">
+        <i class="fa-solid fa-receipt vr-kpi-icon"></i>
+        <div class="vr-kpi-label">Ventas visibles</div>
+        <div class="vr-kpi-value" id="kpiVentasTotal">0</div>
+      </div>
+      <div class="vr-kpi" style="background:linear-gradient(135deg,#22c55e,#4ade80)">
+        <i class="fa-solid fa-dollar-sign vr-kpi-icon"></i>
+        <div class="vr-kpi-label">Ingreso visible</div>
+        <div class="vr-kpi-value" id="kpiIngresoTotal">$0.00</div>
+      </div>
+      <div class="vr-kpi" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">
+        <i class="fa-solid fa-ticket vr-kpi-icon"></i>
+        <div class="vr-kpi-label">Ticket promedio</div>
+        <div class="vr-kpi-value" id="kpiTicketPromedio">$0.00</div>
+      </div>
+      <div class="vr-kpi" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)">
+        <i class="fa-solid fa-boxes-stacked vr-kpi-icon"></i>
+        <div class="vr-kpi-label">Productos vendidos</div>
+        <div class="vr-kpi-value" id="kpiProductosTotal">0</div>
+      </div>
+    </div>
+    <?php endif; ?>
 
-        //include "inicio/grafico-ventas.php";
-
-        ?>
-
+    <!-- ══ TOOLBAR ══ -->
+    <div class="vr-toolbar">
+      <div class="vr-primary-actions">
+        <?php if(!$esVendedorVentasR): ?>
+        <a id="btnDescargarExcelVentasR" href="vistas/modulos/descargar-reporte-ventasR.php?reporte=ventasR&empresa=<?php echo $_SESSION["empresa"]; ?>">
+          <button class="btn btn-success vr-btn-main"><i class="fas fa-file-excel"></i> Descargar Excel</button>
+        </a>
+        <?php endif; ?>
+        <button class="btn btn-primary vr-btn-main" data-toggle="modal" data-target="#modalAgregarVenta" style="background:linear-gradient(135deg,var(--crm-accent,#6366f1),var(--crm-accent2,#818cf8));border:none">
+          <i class="fas fa-plus-circle"></i> Agregar Venta
+        </button>
       </div>
 
-      <div class="box-body">
-
-        <div class="vr-hero">
-          <div>
-            <h3>Centro de Ventas R</h3>
-            <p>Panel operativo con indicadores en vivo y acceso rapido a captura y reportes.</p>
-          </div>
+      <?php if(!$esVendedorVentasR): ?>
+      <div class="vr-filtro-fechas">
+        <span class="vr-date-label">Desde</span>
+        <input type="date" id="filtroFechaInicialR" class="form-control">
+        <span class="vr-date-label">Hasta</span>
+        <input type="date" id="filtroFechaFinalR" class="form-control">
+        <div class="vr-filtro-presets">
+          <button class="btn btn-default" type="button" id="btnPresetHoyR">Hoy</button>
+          <button class="btn btn-default" type="button" id="btnPresetSemanaR">Semana</button>
+          <button class="btn btn-default" type="button" id="btnPresetMesR">Mes</button>
         </div>
+        <button class="btn btn-default" type="button" id="btnAplicarFiltroFechaR"><i class="fas fa-filter"></i> Filtrar</button>
+        <button class="btn btn-default" type="button" id="btnLimpiarFiltroFechaR"><i class="fas fa-eraser"></i> Limpiar</button>
+      </div>
+      <?php endif; ?>
+    </div>
 
-        <?php if(!$esVendedorVentasR): ?>
-        <div class="vr-kpi-grid">
-          <div class="vr-kpi-card">
-            <span class="vr-kpi-title">Ventas visibles</span>
-            <span class="vr-kpi-value" id="kpiVentasTotal">0</span>
-          </div>
-          <div class="vr-kpi-card">
-            <span class="vr-kpi-title">Ingreso visible</span>
-            <span class="vr-kpi-value" id="kpiIngresoTotal">$0.00</span>
-          </div>
-          <div class="vr-kpi-card">
-            <span class="vr-kpi-title">Ticket promedio</span>
-            <span class="vr-kpi-value" id="kpiTicketPromedio">$0.00</span>
-          </div>
-          <div class="vr-kpi-card">
-            <span class="vr-kpi-title">Productos vendidos</span>
-            <span class="vr-kpi-value" id="kpiProductosTotal">0</span>
-          </div>
-        </div>
-        <?php endif; ?>
-
-        <div class="vr-toolbar">
-
-          <div class="vr-primary-actions">
-
-            <?php if(!$esVendedorVentasR): ?>
-            <a id="btnDescargarExcelVentasR" href="vistas/modulos/descargar-reporte-ventasR.php?reporte=ventasR&empresa=<?echo $_SESSION["empresa"]?>">
-            
-              <button class="btn btn-success vr-btn-main"><i class="fas fa-file-excel"></i> Descargar Reporte En Excel</button>
-
-            </a>
-            <?php endif; ?>
-
-
-            <button class="btn btn-primary vr-btn-main" data-toggle="modal" data-target="#modalAgregarVenta">
-          
-              <i class="fas fa-plus-circle"></i> Agregar Venta
-
-            </button>
-          </div>
-
-          <?php if(!$esVendedorVentasR): ?>
-          <div class="vr-filtro-fechas">
-          <span class="vr-date-label">Desde</span>
-          <input type="date" id="filtroFechaInicialR" class="form-control" placeholder="Fecha inicial">
-          <span class="vr-date-label">Hasta</span>
-          <input type="date" id="filtroFechaFinalR" class="form-control" placeholder="Fecha final">
-          <div class="vr-filtro-presets">
-            <button class="btn btn-default" type="button" id="btnPresetHoyR">Hoy</button>
-            <button class="btn btn-default" type="button" id="btnPresetSemanaR">Semana</button>
-            <button class="btn btn-default" type="button" id="btnPresetMesR">Mes</button>
-          </div>
-          <button class="btn btn-default" type="button" id="btnAplicarFiltroFechaR"><i class="fas fa-filter"></i> Filtrar</button>
-          <button class="btn btn-default" type="button" id="btnLimpiarFiltroFechaR"><i class="fas fa-eraser"></i> Limpiar</button>
-          </div>
-          <?php endif; ?>
-        
-        <!--<div class="box-header with-border">
-        
-              <a href="creararventa">
-
-                <button class="btn btn-primary">
-                  
-                  Agregar venta Prueba
-
-                </button>
-
-              </a>
-
-            </div>
-    
-        </div>-->
-  
-
-        </div>
-        
-        <div class="vr-table-wrap">
-        
+    <!-- ══ TABLE CARD ══ -->
+    <div class="vr-table-card">
+      <div class="vr-table-card-head">
+        <h4 class="vr-table-card-title">
+          <i class="fa-solid fa-table-list"></i> Registro de Ventas
+        </h4>
+      </div>
+      <div class="vr-table-card-body">
         <table id="tablaVentasRapidasUI" class="table table-bordered table-striped dt-responsive tablaVentasRapidas" width="100%">
-        
           <thead>
-            
             <tr>
-              
               <th style="width:10px">#</th>
               <th>Numero de venta</th>
               <th>Cliente</th>
@@ -1153,31 +1079,16 @@ const $input11 = document.querySelector(' #productoDiez');
               <th>Precio</th>
               <th>Ticket</th>
               <th>Eliminar Venta</th>
-
             </tr>
-
-          </thead> 
-
-                  <?php
-            
-             // $administrador = ControladorAdministradores::ctrMostrarAdministradores($item, $valor);
-               //foreach ($administrador as $key => $valueA) {
-                 echo'
-
-                 <input  type="hidden" id="tipoDePerfil" value="'.$_SESSION["perfil"].'"  placeholder="'.$_SESSION["perfil"].'">
-              
-                <input  type="hidden" id="id_empresa" value="'.$_SESSION["empresa"].'">
-
-                ';
-                //}
-            ?>
-        
+          </thead>
+          <?php
+            echo '
+              <input type="hidden" id="tipoDePerfil" value="'.$_SESSION["perfil"].'" placeholder="'.$_SESSION["perfil"].'">
+              <input type="hidden" id="id_empresa" value="'.$_SESSION["empresa"].'">
+            ';
+          ?>
         </table>
-        </div>
-
-
       </div>
-
     </div>
 
   </section>
@@ -1199,11 +1110,11 @@ MODAL AGREGAR PRODUCTO
         CABEZA DEL MODAL
         ======================================-->
 
-        <div class="modal-header" style="background:#138a1e; color:white">
+        <div class="modal-header" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#334155 100%); color:white">
 
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:.7">&times;</button>
 
-          <h4 class="modal-title">Agregar Venta</h4>
+          <h4 class="modal-title"><i class="fa-solid fa-bolt" style="margin-right:8px;opacity:.7"></i> Agregar Venta</h4>
 
         </div>
         
