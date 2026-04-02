@@ -222,11 +222,13 @@
                     </div>
                 </div>
 
-                <!-- Equipo detalle (marca, modelo) solo si tiene orden -->
+                <!-- Equipo detalle (marca, modelo, técnico, asesor) solo si tiene orden -->
                 <div id="dcEquipoDetalle" style="display:none;padding:12px 0;border-bottom:1px solid #f1f5f9;">
                     <div style="display:flex;gap:10px;flex-wrap:wrap;">
                         <div id="dcMarcaBlock" class="egs-dc-tag"><i class="fa-solid fa-tag" style="margin-right:4px;color:#6366f1;"></i><span id="dcMarca"></span></div>
                         <div id="dcModeloBlock" class="egs-dc-tag"><i class="fa-solid fa-microchip" style="margin-right:4px;color:#8b5cf6;"></i><span id="dcModelo"></span></div>
+                        <div id="dcTecnicoTag" class="egs-dc-tag" style="display:none;"><i class="fa-solid fa-wrench" style="margin-right:4px;color:#f59e0b;"></i><span id="dcTecnicoTagNombre"></span></div>
+                        <div id="dcAsesorTag" class="egs-dc-tag" style="display:none;"><i class="fa-solid fa-headset" style="margin-right:4px;color:#10b981;"></i><span id="dcAsesorTagNombre"></span></div>
                     </div>
                 </div>
 
@@ -264,30 +266,6 @@
                     <!-- Badge cliente nuevo -->
                     <div id="dcClienteBadgesWrap" style="display:none;margin-top:6px;">
                         <span id="dcClienteBadges"></span>
-                    </div>
-                </div>
-
-                <!-- Técnico y Asesor -->
-                <div style="padding:14px 0;border-bottom:1px solid #f1f5f9;display:flex;gap:20px;" id="dcEquipoSection">
-                    <div id="dcTecnicoBlock" style="flex:1;display:none;">
-                        <div class="egs-dc-section-label"><i class="fa-solid fa-wrench" style="margin-right:4px;"></i>Técnico</div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <div class="egs-dc-avatar-sm" id="dcTecnicoAvatar">
-                                <img id="dcTecnicoFoto" src="" style="width:100%;height:100%;object-fit:cover;display:none;">
-                                <i class="fa-solid fa-wrench" id="dcTecnicoIcon" style="font-size:12px;color:#94a3b8;"></i>
-                            </div>
-                            <span id="dcTecnicoNombre" style="font-size:13px;font-weight:600;color:#334155;"></span>
-                        </div>
-                    </div>
-                    <div id="dcAsesorBlock" style="flex:1;display:none;">
-                        <div class="egs-dc-section-label"><i class="fa-solid fa-headset" style="margin-right:4px;"></i>Asesor</div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <div class="egs-dc-avatar-sm" id="dcAsesorAvatar">
-                                <img id="dcAsesorFoto" src="" style="width:100%;height:100%;object-fit:cover;display:none;">
-                                <i class="fa-solid fa-headset" id="dcAsesorIcon" style="font-size:12px;color:#94a3b8;"></i>
-                            </div>
-                            <span id="dcAsesorNombre" style="font-size:13px;font-weight:600;color:#334155;"></span>
-                        </div>
                     </div>
                 </div>
 

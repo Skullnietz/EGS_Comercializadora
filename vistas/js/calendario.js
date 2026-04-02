@@ -361,12 +361,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#dcOrdenCompact').hide();
             }
 
-            // ═══ EQUIPO DETALLE (marca, modelo) ═══
+            // ═══ EQUIPO DETALLE (marca, modelo, técnico, asesor) ═══
             var marca = hasOrden ? (props.orden_marca || '') : '';
             var modelo = hasOrden ? (props.orden_modelo || '') : '';
-            if (marca || modelo) {
-                if (marca) { $('#dcMarca').text(marca); $('#dcMarcaBlock').show(); } else { $('#dcMarcaBlock').hide(); }
-                if (modelo) { $('#dcModelo').text(modelo); $('#dcModeloBlock').show(); } else { $('#dcModeloBlock').hide(); }
+            var tecNombre = props.tecnico_nombre || '';
+            var aseNombre = props.asesor_nombre || '';
+
+            if (marca) { $('#dcMarca').text(marca); $('#dcMarcaBlock').show(); } else { $('#dcMarcaBlock').hide(); }
+            if (modelo) { $('#dcModelo').text(modelo); $('#dcModeloBlock').show(); } else { $('#dcModeloBlock').hide(); }
+            if (tecNombre) { $('#dcTecnicoTagNombre').text(tecNombre); $('#dcTecnicoTag').show(); } else { $('#dcTecnicoTag').hide(); }
+            if (aseNombre) { $('#dcAsesorTagNombre').text(aseNombre); $('#dcAsesorTag').show(); } else { $('#dcAsesorTag').hide(); }
+
+            if (marca || modelo || tecNombre || aseNombre) {
                 $('#dcEquipoDetalle').show();
             } else {
                 $('#dcEquipoDetalle').hide();
@@ -481,33 +487,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#dcClienteSection').hide();
                 $('#dcBtnWhatsApp').hide();
             }
-
-            // ═══ TÉCNICO / ASESOR ═══
-            var tecNombre = props.tecnico_nombre || '';
-            if (tecNombre) {
-                $('#dcTecnicoNombre').text(tecNombre).css('color', '#334155');
-                var tecFoto = props.tecnico_foto;
-                if (tecFoto) { $('#dcTecnicoFoto').attr('src', tecFoto).show(); $('#dcTecnicoIcon').hide(); }
-                else { $('#dcTecnicoFoto').hide(); $('#dcTecnicoIcon').show(); }
-            } else {
-                $('#dcTecnicoNombre').text('Sin asignar').css('color', '#94a3b8');
-                $('#dcTecnicoFoto').hide(); $('#dcTecnicoIcon').show();
-            }
-            $('#dcTecnicoBlock').show();
-
-            var aseNombre = props.asesor_nombre || '';
-            if (aseNombre) {
-                $('#dcAsesorNombre').text(aseNombre).css('color', '#334155');
-                var aseFoto = props.asesor_foto;
-                if (aseFoto) { $('#dcAsesorFoto').attr('src', aseFoto).show(); $('#dcAsesorIcon').hide(); }
-                else { $('#dcAsesorFoto').hide(); $('#dcAsesorIcon').show(); }
-            } else {
-                $('#dcAsesorNombre').text('Sin asignar').css('color', '#94a3b8');
-                $('#dcAsesorFoto').hide(); $('#dcAsesorIcon').show();
-            }
-            $('#dcAsesorBlock').show();
-
-            $('#dcEquipoSection').show();
 
             // ═══ INFO EXTRA (solo si tiene orden) ═══
             if (hasOrden) {
