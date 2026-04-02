@@ -564,11 +564,12 @@ class ImprimirTicketsOrden{
                       <div style="font-size:10px;color:#94a3b8">Nivel: '.$porcentajeCliente.'% | '.$entregadasCliente.' órdenes entregadas</div>
                     </div>';
 
-          if ($value["estado"] == "Terminada (ter)" || $value["estado"] == "Entregado (Ent)") {
-              echo '  <div style="font-size:13px;color:#16a34a;font-weight:800;margin-top:8px;background:#f0fdf4;border-radius:6px;padding:8px">
-                        &#128176; Esta orden te '.($value["estado"] == "Entregado (Ent)" ? 'generó' : 'generará').' <b>$'.number_format($montoGenerado, 2).'</b> en dinero electrónico ('.$porcentajeCliente.'%)
-                      </div>';
-          }
+          $textoGenerado = ($value["estado"] == "Entregado (Ent)") ? 'generó' : 'generará al ser entregada';
+          echo '  <div style="font-size:14px;color:#16a34a;font-weight:800;margin-top:8px;background:#f0fdf4;border:2px solid #16a34a;border-radius:6px;padding:10px;text-align:center">
+                    &#128176; Esta orden te '.$textoGenerado.'<br>
+                    <span style="font-size:22px;display:block;margin:4px 0">$'.number_format($montoGenerado, 2).'</span>
+                    <span style="font-size:11px;color:#15803d">en dinero electrónico ('.$porcentajeCliente.'% de $'.number_format($totalOrden, 2).')</span>
+                  </div>';
 
           echo '    <div style="font-size:10px;color:#6b7280;margin-top:6px">Tu dinero electrónico vence cada 6 meses. ¡Úsalo antes!</div>';
       }
