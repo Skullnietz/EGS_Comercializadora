@@ -53,6 +53,7 @@ class ModeloRecompensas
 
     /*=============================================
     OBTENER O CREAR MONEDERO DEL CLIENTE
+    (solo para el token y registro, el saldo se calcula dinámicamente)
     =============================================*/
     static public function mdlObtenerMonedero($idCliente)
     {
@@ -92,7 +93,7 @@ class ModeloRecompensas
     }
 
     /*=============================================
-    CONTAR ORDENES ENTREGADAS POR CLIENTE
+    CONTAR ORDENES ENTREGADAS POR CLIENTE (todas)
     =============================================*/
     static public function mdlContarOrdenesEntregadas($idCliente)
     {
@@ -105,12 +106,95 @@ class ModeloRecompensas
     }
 
     /*=============================================
-    VERIFICAR SI YA SE ACUMULÓ RECOMPENSA PARA UNA ORDEN
+    CALCULAR SALDO DINÁMICO
+    Suma el % correspondiente del total de cada orden
+    entregada en los últimos 6 meses y resta los canjes.
     =============================================*/
-    static public function mdlExisteAcumulacionOrden($idOrden)
+    static public function mdlCalcularSaldoDinamico($idCliente, $porcentaje)
     {
         $pdo = ConexionWP::conectarWP();
-        $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM dinero_electronico_movimientos WHERE id_orden = :id_orden AND tipo = 'acumulacion'");
+        $hace6meses = date('Y-m-d', strtotime('-6 months'));
+
+        // 1) Sumar recompensas de órdenes entregadas en los últimos 6 meses
+        $stmt = $pdo->prepare("
+            SELECT COALESCE(SUM(total), 0) as suma_totales
+            FROM ordenes
+            WHERE id_usuario = :id_cliente
+              AND estado LIKE '%Ent%'
+              AND fecha_Salida IS NOT NULL
+              AND fecha_Salida >= :hace6meses
+        ");
+        $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
+        $stmt->bindParam(":hace6meses", $hace6meses, PDO::PARAM_STR);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $sumaTotales = floatval($row["suma_totales"]);
+
+        $acumulado = round($sumaTotales * ($porcentaje / 100), 2);
+
+        // 2) Restar canjes realizados (sin importar fecha, todos los canjes vigentes)
+        $stmtCanjes = $pdo->prepare("
+            SELECT COALESCE(SUM(ABS(monto)), 0) as total_canjes
+            FROM dinero_electronico_movimientos
+            WHERE id_cliente = :id_cliente
+              AND tipo = 'canje'
+              AND fecha >= :hace6meses
+        ");
+        $stmtCanjes->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
+        $stmtCanjes->bindParam(":hace6meses", $hace6meses, PDO::PARAM_STR);
+        $stmtCanjes->execute();
+        $rowCanjes = $stmtCanjes->fetch(PDO::FETCH_ASSOC);
+        $totalCanjes = floatval($rowCanjes["total_canjes"]);
+
+        $saldo = $acumulado - $totalCanjes;
+        if ($saldo < 0) $saldo = 0;
+
+        return $saldo;
+    }
+
+    /*=============================================
+    OBTENER DESGLOSE DE ÓRDENES QUE GENERAN SALDO
+    (para la vista del monedero público)
+    =============================================*/
+    static public function mdlObtenerOrdenesConRecompensa($idCliente, $porcentaje)
+    {
+        $pdo = ConexionWP::conectarWP();
+        $hace6meses = date('Y-m-d', strtotime('-6 months'));
+
+        $stmt = $pdo->prepare("
+            SELECT id, total, fecha_Salida
+            FROM ordenes
+            WHERE id_usuario = :id_cliente
+              AND estado LIKE '%Ent%'
+              AND fecha_Salida IS NOT NULL
+              AND fecha_Salida >= :hace6meses
+            ORDER BY fecha_Salida DESC
+        ");
+        $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
+        $stmt->bindParam(":hace6meses", $hace6meses, PDO::PARAM_STR);
+        $stmt->execute();
+        $ordenes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $resultado = array();
+        foreach ($ordenes as $ord) {
+            $recompensa = round(floatval($ord["total"]) * ($porcentaje / 100), 2);
+            $resultado[] = array(
+                "id_orden" => $ord["id"],
+                "total_orden" => floatval($ord["total"]),
+                "recompensa" => $recompensa,
+                "fecha_entrega" => $ord["fecha_Salida"]
+            );
+        }
+        return $resultado;
+    }
+
+    /*=============================================
+    VERIFICAR SI YA SE REGISTRÓ CANJE PARA UNA ORDEN
+    =============================================*/
+    static public function mdlExisteCanjeOrden($idOrden)
+    {
+        $pdo = ConexionWP::conectarWP();
+        $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM dinero_electronico_movimientos WHERE id_orden = :id_orden AND tipo = 'canje'");
         $stmt->bindParam(":id_orden", $idOrden, PDO::PARAM_INT);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -118,143 +202,37 @@ class ModeloRecompensas
     }
 
     /*=============================================
-    ACUMULAR DINERO ELECTRÓNICO
-    =============================================*/
-    static public function mdlAcumularRecompensa($idCliente, $idOrden, $monto, $porcentaje, $descripcion)
-    {
-        $pdo = ConexionWP::conectarWP();
-
-        $monedero = self::mdlObtenerMonedero($idCliente);
-        $saldoAnterior = floatval($monedero["saldo"]);
-        $saldoNuevo = $saldoAnterior + $monto;
-        $fechaExpiracion = date('Y-m-d', strtotime('+6 months'));
-
-        $stmt = $pdo->prepare("INSERT INTO dinero_electronico_movimientos
-            (id_cliente, id_orden, tipo, monto, porcentaje_aplicado, saldo_anterior, saldo_nuevo, fecha_expiracion, descripcion)
-            VALUES (:id_cliente, :id_orden, 'acumulacion', :monto, :porcentaje, :saldo_anterior, :saldo_nuevo, :fecha_expiracion, :descripcion)");
-        $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmt->bindParam(":id_orden", $idOrden, PDO::PARAM_INT);
-        $stmt->bindParam(":monto", $monto);
-        $stmt->bindParam(":porcentaje", $porcentaje);
-        $stmt->bindParam(":saldo_anterior", $saldoAnterior);
-        $stmt->bindParam(":saldo_nuevo", $saldoNuevo);
-        $stmt->bindParam(":fecha_expiracion", $fechaExpiracion, PDO::PARAM_STR);
-        $stmt->bindParam(":descripcion", $descripcion, PDO::PARAM_STR);
-        $stmt->execute();
-
-        $stmtUp = $pdo->prepare("UPDATE dinero_electronico SET saldo = :saldo WHERE id_cliente = :id_cliente");
-        $stmtUp->bindParam(":saldo", $saldoNuevo);
-        $stmtUp->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmtUp->execute();
-
-        return $saldoNuevo;
-    }
-
-    /*=============================================
-    CANJEAR DINERO ELECTRÓNICO
+    REGISTRAR CANJE DE DINERO ELECTRÓNICO
+    (solo inserta el movimiento, el saldo se recalcula dinámicamente)
     =============================================*/
     static public function mdlCanjearRecompensa($idCliente, $idOrden, $montoCanje, $descripcion)
     {
         $pdo = ConexionWP::conectarWP();
 
-        $monedero = self::mdlObtenerMonedero($idCliente);
-        $saldoAnterior = floatval($monedero["saldo"]);
-
-        if ($montoCanje > $saldoAnterior) {
-            return false;
-        }
-
-        $saldoNuevo = $saldoAnterior - $montoCanje;
-
+        $montoNeg = -$montoCanje;
         $stmt = $pdo->prepare("INSERT INTO dinero_electronico_movimientos
             (id_cliente, id_orden, tipo, monto, saldo_anterior, saldo_nuevo, descripcion)
-            VALUES (:id_cliente, :id_orden, 'canje', :monto, :saldo_anterior, :saldo_nuevo, :descripcion)");
+            VALUES (:id_cliente, :id_orden, 'canje', :monto, 0, 0, :descripcion)");
         $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmt->bindParam(":id_orden", $idOrden, PDO::PARAM_INT);
-        $montoNeg = -$montoCanje;
         $stmt->bindParam(":monto", $montoNeg);
-        $stmt->bindParam(":saldo_anterior", $saldoAnterior);
-        $stmt->bindParam(":saldo_nuevo", $saldoNuevo);
         $stmt->bindParam(":descripcion", $descripcion, PDO::PARAM_STR);
         $stmt->execute();
 
-        $stmtUp = $pdo->prepare("UPDATE dinero_electronico SET saldo = :saldo WHERE id_cliente = :id_cliente");
-        $stmtUp->bindParam(":saldo", $saldoNuevo);
-        $stmtUp->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmtUp->execute();
-
-        return $saldoNuevo;
+        return true;
     }
 
     /*=============================================
-    EXPIRAR MOVIMIENTOS VENCIDOS
+    OBTENER CANJES DEL CLIENTE (para historial)
     =============================================*/
-    static public function mdlExpirarMovimientos()
+    static public function mdlObtenerCanjes($idCliente, $limite = 20)
     {
         $pdo = ConexionWP::conectarWP();
-        $hoy = date('Y-m-d');
-
-        $stmt = $pdo->prepare("SELECT id, id_cliente, monto FROM dinero_electronico_movimientos
-            WHERE tipo = 'acumulacion' AND expirado = 0 AND fecha_expiracion IS NOT NULL AND fecha_expiracion <= :hoy");
-        $stmt->bindParam(":hoy", $hoy, PDO::PARAM_STR);
-        $stmt->execute();
-        $vencidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($vencidos as $mov) {
-            $monedero = self::mdlObtenerMonedero($mov["id_cliente"]);
-            $saldoAnterior = floatval($monedero["saldo"]);
-            $montoExpirar = min(floatval($mov["monto"]), $saldoAnterior);
-
-            if ($montoExpirar > 0) {
-                $saldoNuevo = $saldoAnterior - $montoExpirar;
-
-                $stmtIns = $pdo->prepare("INSERT INTO dinero_electronico_movimientos
-                    (id_cliente, tipo, monto, saldo_anterior, saldo_nuevo, descripcion)
-                    VALUES (:id_cliente, 'expiracion', :monto, :saldo_anterior, :saldo_nuevo, :descripcion)");
-                $stmtIns->bindParam(":id_cliente", $mov["id_cliente"], PDO::PARAM_INT);
-                $montoNeg = -$montoExpirar;
-                $stmtIns->bindParam(":monto", $montoNeg);
-                $stmtIns->bindParam(":saldo_anterior", $saldoAnterior);
-                $stmtIns->bindParam(":saldo_nuevo", $saldoNuevo);
-                $desc = "Expiración automática del movimiento #" . $mov["id"];
-                $stmtIns->bindParam(":descripcion", $desc, PDO::PARAM_STR);
-                $stmtIns->execute();
-
-                $stmtUp = $pdo->prepare("UPDATE dinero_electronico SET saldo = :saldo WHERE id_cliente = :id_cliente");
-                $stmtUp->bindParam(":saldo", $saldoNuevo);
-                $stmtUp->bindParam(":id_cliente", $mov["id_cliente"], PDO::PARAM_INT);
-                $stmtUp->execute();
-            }
-
-            $stmtExp = $pdo->prepare("UPDATE dinero_electronico_movimientos SET expirado = 1 WHERE id = :id");
-            $stmtExp->bindParam(":id", $mov["id"], PDO::PARAM_INT);
-            $stmtExp->execute();
-        }
-
-        return count($vencidos);
-    }
-
-    /*=============================================
-    OBTENER MOVIMIENTOS DEL CLIENTE
-    =============================================*/
-    static public function mdlObtenerMovimientos($idCliente, $limite = 20)
-    {
-        $pdo = ConexionWP::conectarWP();
-        $stmt = $pdo->prepare("SELECT * FROM dinero_electronico_movimientos WHERE id_cliente = :id_cliente ORDER BY fecha DESC LIMIT :limite");
+        $stmt = $pdo->prepare("SELECT * FROM dinero_electronico_movimientos WHERE id_cliente = :id_cliente AND tipo = 'canje' ORDER BY fecha DESC LIMIT :limite");
         $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /*=============================================
-    OBTENER SALDO DISPONIBLE (sin expirados)
-    =============================================*/
-    static public function mdlObtenerSaldoDisponible($idCliente)
-    {
-        $pdo = ConexionWP::conectarWP();
-        $monedero = self::mdlObtenerMonedero($idCliente);
-        return floatval($monedero["saldo"]);
     }
 
     /*=============================================

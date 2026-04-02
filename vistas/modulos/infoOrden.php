@@ -2111,31 +2111,16 @@ $(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
 
 		function procederConEntrega() {
 			$('#egs_montoCanjeElectronico').val(montoCanje);
-
-			// Acumular recompensa por esta orden
-			$.ajax({
-				url: 'ajax/recompensas.ajax.php',
-				method: 'POST',
-				data: {
-					idClienteAcumular: idCliente,
-					idOrdenAcumular: idOrden,
-					totalOrdenAcumular: totalOrden
-				},
-				dataType: 'json',
-				complete: function(){
-					$('#modalDineroElectronico').modal('hide');
-					// Enviar formulario original
-					if (_de_formPendiente) {
-						var form = _de_formPendiente;
-						_de_formPendiente = 'submitted';
-						form.submit();
-					}
-				}
-			});
+			$('#modalDineroElectronico').modal('hide');
+			if (_de_formPendiente) {
+				var form = _de_formPendiente;
+				_de_formPendiente = 'submitted';
+				form.submit();
+			}
 		}
 
 		if (montoCanje > 0) {
-			// Primero canjear, luego acumular
+			// Canjear dinero electrónico antes de entregar
 			$.ajax({
 				url: 'ajax/recompensas.ajax.php',
 				method: 'POST',
