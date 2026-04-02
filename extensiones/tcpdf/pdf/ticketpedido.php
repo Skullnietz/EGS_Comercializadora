@@ -403,11 +403,32 @@ class ImprimirTicketsPedido{
                 <td align="center" colspan="3">
                   <div style="border:3px solid #000;padding:15px;margin:10px 0;text-align:center">';
 
-      if ($ordenesEnPrograma == 0) {
-          echo '    <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:8px">
+      echo '    <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:8px">
                       *** MONEDERO EGS ***
+                    </div>';
+
+      if ($totalPedido > 0) {
+          // Mostrar lo que genera el pedido
+          $textoGeneradoPed = (stripos($estadoPedido, 'Entregado') !== false) ? 'generó' : 'generará al ser entregado';
+
+          if ($ordenesEnPrograma > 0) {
+              // Cliente existente: mostrar saldo + generación
+              echo '    <div style="border:1px solid #000;padding:12px;margin:6px 0;text-align:center">
+                          <div style="font-size:11px;color:#000;font-weight:700;text-transform:uppercase;letter-spacing:1px">Tu saldo disponible</div>
+                          <div style="font-size:28px;font-weight:900;color:#000;margin:4px 0">$'.number_format($saldoElectronico, 2).'</div>
+                          <div style="font-size:10px;color:#000">Nivel: '.$porcentajeCliente.'% | '.$entregadasCliente.' transacciones</div>
+                        </div>';
+          }
+
+          echo '    <div style="font-size:14px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:10px;text-align:center">
+                      Este pedido te '.$textoGeneradoPed.'<br>
+                      <span style="font-size:22px;display:block;margin:4px 0">$'.number_format($montoGenerado, 2).'</span>
+                      <span style="font-size:11px;color:#000">en dinero electrónico ('.$porcentajeCliente.'% de $'.number_format($totalPedido, 2).')</span>
                     </div>
-                    <div style="font-size:13px;color:#000;font-weight:700;margin-bottom:6px">
+                    <div style="font-size:10px;color:#000;margin-top:6px">Tu dinero electrónico vence cada 6 meses. ¡Úsalo antes!</div>';
+      } else {
+          // Sin monto: bienvenida al programa
+          echo '    <div style="font-size:13px;color:#000;font-weight:700;margin-bottom:6px">
                       ¡Bienvenido al programa de recompensas!
                     </div>
                     <div style="font-size:12px;color:#000;line-height:1.5;margin-bottom:8px">
@@ -419,26 +440,7 @@ class ImprimirTicketsPedido{
                         * +3 transacciones: <b>2%</b> de recompensa<br>
                         * +5 transacciones: <b>3%</b> de recompensa
                       </div>
-                    </div>
-                    <div style="font-size:13px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:8px">
-                      Este pedido te generará $'.number_format($montoGenerado, 2).' en dinero electrónico al ser entregado
                     </div>';
-      } else {
-          $textoGeneradoPed = (stripos($estadoPedido, 'Entregado') !== false) ? 'generó' : 'generará al ser entregado';
-          echo '    <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:8px">
-                      *** MONEDERO EGS ***
-                    </div>
-                    <div style="border:1px solid #000;padding:12px;margin:6px 0;text-align:center">
-                      <div style="font-size:11px;color:#000;font-weight:700;text-transform:uppercase;letter-spacing:1px">Tu saldo disponible</div>
-                      <div style="font-size:28px;font-weight:900;color:#000;margin:4px 0">$'.number_format($saldoElectronico, 2).'</div>
-                      <div style="font-size:10px;color:#000">Nivel: '.$porcentajeCliente.'% | '.$entregadasCliente.' transacciones</div>
-                    </div>
-                    <div style="font-size:14px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:10px;text-align:center">
-                      Este pedido te '.$textoGeneradoPed.'<br>
-                      <span style="font-size:22px;display:block;margin:4px 0">$'.number_format($montoGenerado, 2).'</span>
-                      <span style="font-size:11px;color:#000">en dinero electrónico ('.$porcentajeCliente.'% de $'.number_format($totalPedido, 2).')</span>
-                    </div>
-                    <div style="font-size:10px;color:#000;margin-top:6px">Tu dinero electrónico vence cada 6 meses. ¡Úsalo antes!</div>';
       }
 
       if (!empty($tokenMonedero)) {
