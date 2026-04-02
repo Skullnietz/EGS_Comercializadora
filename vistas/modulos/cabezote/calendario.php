@@ -68,12 +68,12 @@
               style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 12px;font-size:13px;transition:border-color .2s;">
           </div>
 
-          <!-- No. de Orden o Pedido (obligatorio) -->
+          <!-- No. de Orden o Pedido (opcional) -->
           <div class="form-group" style="margin-bottom:16px;">
             <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;">
-              <i class="fa-solid fa-file-lines" style="margin-right:4px;color:#6366f1;"></i>No. de Orden o Pedido <span style="color:#ef4444;">*</span>
+              <i class="fa-solid fa-file-lines" style="margin-right:4px;color:#6366f1;"></i>No. de Orden o Pedido
             </label>
-            <input type="number" class="form-control" id="crOrdenId" placeholder="Ingresa el ID de la orden o pedido" required min="1"
+            <input type="number" class="form-control" id="crOrdenId" placeholder="Ingresa el ID de la orden o pedido (opcional)" min="1"
               style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 12px;font-size:13px;transition:border-color .2s;">
             <div id="crOrdenPreview" style="display:none;margin-top:6px;padding:6px 10px;border-radius:8px;font-size:11px;"></div>
           </div>
@@ -1005,13 +1005,8 @@
     var titulo = $('#crTitulo').val().trim();
     if (!titulo) return;
 
-    // Validar orden/pedido obligatorio
+    // Validar orden/pedido (opcional)
     var ordenId = $('#crOrdenId').val();
-    if (!ordenId || ordenId < 1) {
-      swal({ icon:'warning', title:'Orden requerida', text:'Debes vincular un No. de Orden o Pedido.' });
-      $('#crOrdenId').focus();
-      return;
-    }
 
     // Validar que no sea domingo y que haya hora seleccionada
     if (!selectedHora) {
