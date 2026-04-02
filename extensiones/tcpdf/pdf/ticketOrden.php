@@ -439,8 +439,8 @@ class ImprimirTicketsOrden{
                 if ($montoCanjeado > 0) {
                     echo '<tr>
                       <td colspan="3" style="padding-top:8px">
-                        <div style="border:2px dashed #16a34a;border-radius:8px;padding:10px;text-align:center;background:#f0fdf4">
-                          <span style="font-size:14px;font-weight:800;color:#16a34a">AHORRASTE $'.number_format($montoCanjeado, 2).' CON TU MONEDERO EGS</span>
+                        <div style="border:2px dashed #000;padding:10px;text-align:center">
+                          <span style="font-size:14px;font-weight:800;color:#000">AHORRASTE $'.number_format($montoCanjeado, 2).' CON TU MONEDERO EGS</span>
                         </div>
                       </td>
                     </tr>';
@@ -541,48 +541,48 @@ class ImprimirTicketsOrden{
             <table border="0" align="center" width="100%">
               <tr>
                 <td align="center" colspan="3">
-                  <div style="border:3px solid #6366f1;border-radius:12px;padding:15px;margin:10px 0;background:linear-gradient(135deg,#eef2ff,#e0e7ff)">';
+                  <div style="border:3px solid #000;padding:15px;margin:10px 0;text-align:center">';
 
       if ($ordenesEnPrograma == 0) {
           // PRIMERA ORDEN EN EL PROGRAMA - Mensaje de bienvenida
-          echo '    <div style="font-size:18px;font-weight:900;color:#6366f1;margin-bottom:8px">
-                      &#127775; MONEDERO EGS &#127775;
+          echo '    <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:8px">
+                      *** MONEDERO EGS ***
                     </div>
-                    <div style="font-size:13px;color:#1e1b4b;font-weight:600;margin-bottom:6px">
-                      &#127873; ¡Bienvenido al programa de recompensas!
+                    <div style="font-size:13px;color:#000;font-weight:700;margin-bottom:6px">
+                      ¡Bienvenido al programa de recompensas!
                     </div>
-                    <div style="font-size:12px;color:#312e81;line-height:1.5;margin-bottom:8px">
+                    <div style="font-size:12px;color:#000;line-height:1.5;margin-bottom:8px">
                       Por cada orden entregada acumulas <b>dinero electrónico</b> que puedes usar como descuento en tu próximo servicio.
                     </div>
-                    <div style="background:#fff;border-radius:8px;padding:8px;margin:6px 0">
-                      <div style="font-size:11px;color:#4338ca;font-weight:700">
-                        &#9733; Clientes nuevos: <b>1%</b> de recompensa<br>
-                        &#9733; +3 órdenes entregadas: <b>2%</b> de recompensa<br>
-                        &#9733; +5 órdenes entregadas: <b>3%</b> de recompensa
+                    <div style="border:1px solid #000;padding:8px;margin:6px 0">
+                      <div style="font-size:11px;color:#000;font-weight:700">
+                        * Clientes nuevos: <b>1%</b> de recompensa<br>
+                        * +3 órdenes entregadas: <b>2%</b> de recompensa<br>
+                        * +5 órdenes entregadas: <b>3%</b> de recompensa
                       </div>
                     </div>
-                    <div style="font-size:13px;color:#16a34a;font-weight:800;margin-top:8px">
-                      &#128176; Esta orden te generará $'.number_format($montoGenerado, 2).' en dinero electrónico al ser entregada
+                    <div style="font-size:13px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:8px">
+                      Esta orden te generará $'.number_format($montoGenerado, 2).' en dinero electrónico al ser entregada
                     </div>';
       } else {
           // CLIENTE CON HISTORIAL - Mostrar saldo y recompensa generada
-          echo '    <div style="font-size:18px;font-weight:900;color:#6366f1;margin-bottom:8px">
-                      &#128179; MONEDERO EGS &#128179;
+          echo '    <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:8px">
+                      *** MONEDERO EGS ***
                     </div>
-                    <div style="background:#fff;border-radius:10px;padding:12px;margin:6px 0;text-align:center">
-                      <div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:1px">Tu saldo disponible</div>
-                      <div style="font-size:28px;font-weight:900;color:#16a34a;margin:4px 0">$'.number_format($saldoElectronico, 2).'</div>
-                      <div style="font-size:10px;color:#94a3b8">Nivel: '.$porcentajeCliente.'% | '.$entregadasCliente.' órdenes entregadas</div>
+                    <div style="border:1px solid #000;padding:12px;margin:6px 0;text-align:center">
+                      <div style="font-size:11px;color:#000;font-weight:700;text-transform:uppercase;letter-spacing:1px">Tu saldo disponible</div>
+                      <div style="font-size:28px;font-weight:900;color:#000;margin:4px 0">$'.number_format($saldoElectronico, 2).'</div>
+                      <div style="font-size:10px;color:#000">Nivel: '.$porcentajeCliente.'% | '.$entregadasCliente.' órdenes entregadas</div>
                     </div>';
 
           $textoGenerado = ($value["estado"] == "Entregado (Ent)") ? 'generó' : 'generará al ser entregada';
-          echo '  <div style="font-size:14px;color:#16a34a;font-weight:800;margin-top:8px;background:#f0fdf4;border:2px solid #16a34a;border-radius:6px;padding:10px;text-align:center">
-                    &#128176; Esta orden te '.$textoGenerado.'<br>
+          echo '  <div style="font-size:14px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:10px;text-align:center">
+                    Esta orden te '.$textoGenerado.'<br>
                     <span style="font-size:22px;display:block;margin:4px 0">$'.number_format($montoGenerado, 2).'</span>
-                    <span style="font-size:11px;color:#15803d">en dinero electrónico ('.$porcentajeCliente.'% de $'.number_format($totalOrden, 2).')</span>
+                    <span style="font-size:11px;color:#000">en dinero electrónico ('.$porcentajeCliente.'% de $'.number_format($totalOrden, 2).')</span>
                   </div>';
 
-          echo '    <div style="font-size:10px;color:#6b7280;margin-top:6px">Tu dinero electrónico vence cada 6 meses. ¡Úsalo antes!</div>';
+          echo '    <div style="font-size:10px;color:#000;margin-top:6px">Tu dinero electrónico vence cada 6 meses. ¡Úsalo antes!</div>';
       }
 
       // QR para consultar monedero
@@ -590,8 +590,8 @@ class ImprimirTicketsOrden{
           $urlMonedero = 'https://backend.comercializadoraegs.com/monedero.php?token=' . $tokenMonedero;
           $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($urlMonedero);
 
-          echo '    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed #a5b4fc">
-                      <div style="font-size:11px;color:#4338ca;font-weight:700;margin-bottom:6px">Escanea para ver tu monedero:</div>
+          echo '    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed #000">
+                      <div style="font-size:11px;color:#000;font-weight:700;margin-bottom:6px">Escanea para ver tu monedero:</div>
                       <img src="'.$qrUrl.'" alt="QR Monedero" style="width:150px;height:150px">
                     </div>';
       }
