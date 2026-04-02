@@ -565,7 +565,8 @@ class ImprimirTicketsOrden{
                     </div>';
           if ($esEstadoREV) {
               echo '  <div style="font-size:13px;color:#000;font-weight:700;margin-top:8px;border:2px solid #000;padding:8px">
-                        Tu equipo está en revisión. Es muy pronto para evaluar tu retorno en dinero electrónico.
+                        Tu equipo se encuentra en revisión por nuestro equipo técnico.<br>
+                        <span style="font-size:11px;font-weight:500;display:block;margin-top:4px">Una vez definido el servicio, podrás conocer el monto de dinero electrónico que esta orden generará para ti.</span>
                       </div>';
           } else {
               echo '  <div style="font-size:13px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:8px">
@@ -585,8 +586,8 @@ class ImprimirTicketsOrden{
 
           if ($esEstadoREV) {
               echo '  <div style="font-size:14px;color:#000;font-weight:700;margin-top:8px;border:2px solid #000;padding:10px;text-align:center">
-                        Tu equipo está en revisión.<br>
-                        <span style="font-size:12px;display:block;margin:4px 0">Es muy pronto para evaluar tu retorno en dinero electrónico.</span>
+                        Tu equipo se encuentra en revisión.<br>
+                        <span style="font-size:12px;font-weight:500;display:block;margin:4px 0">El monto de dinero electrónico se calculará una vez definido el servicio. ¡Pronto tendrás novedades!</span>
                       </div>';
           } else {
               $textoGenerado = ($value["estado"] == "Entregado (Ent)") ? 'generó' : 'generará al ser entregada';
