@@ -682,14 +682,14 @@
         // Botones de acción
         var actionsHtml = '<div class="egs-cal-event-actions">';
         if (ev.id_orden) {
-          actionsHtml += '<a href="index.php?ruta=pantallacitas&citaId=' + ev.id + '" class="egs-cal-btn-orden"><i class="fa-solid fa-eye"></i> Orden</a>';
+          actionsHtml += '<a href="index.php?ruta=infoOrden&idOrden=' + ev.id_orden + '" class="egs-cal-btn-orden"><i class="fa-solid fa-eye"></i> Orden</a>';
         }
         if (gcalUrl) {
           actionsHtml += '<a href="' + gcalUrl + '" target="_blank" class="egs-cal-btn-gcal"><i class="fa-brands fa-google"></i> Calendar</a>';
         }
         actionsHtml += '</div>';
 
-        html += '<div class="egs-cal-event">' +
+        html += '<div class="egs-cal-event" data-cita-id="' + ev.id + '" style="cursor:pointer;">' +
           '<span class="egs-cal-event-dot" style="background:' + (ev.color || '#3a87ad') + '"></span>' +
           '<div class="egs-cal-event-info">' +
             '<div class="egs-cal-event-title">' + $('<span>').text(ev.title || 'Sin título').html() + '</div>' +
@@ -755,6 +755,17 @@
     if ($(e.target).hasClass('egs-cal-tab')) {
       e.stopPropagation();
     }
+  });
+
+  // Click en evento de agenda → ir al calendario y abrir modal de la cita
+  $(document).on('click', '.egs-cal-event', function(e){
+    // No interceptar clicks en los botones de acción (Orden, Google Calendar)
+    if ($(e.target).closest('.egs-cal-event-actions').length) return;
+    var citaId = $(this).data('cita-id');
+    if (!citaId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = 'index.php?ruta=pantallacitas&citaId=' + citaId;
   });
 
   // Quick add button — cerrar dropdown primero, luego abrir modal
