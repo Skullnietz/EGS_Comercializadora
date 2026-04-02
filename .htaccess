@@ -15,8 +15,13 @@
 Options +FollowSymLinks
 RewriteEngine On
 
+# Permitir acceso directo a archivos PHP que existen (monedero.php, etc.)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule \.(php|html?)$ - [L]
+
 # Routing limpio: /inicio → index.php?ruta=inicio
-RewriteRule ^([-a-zA-Z0-9/]+)$ index.php?ruta=$1
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([-a-zA-Z0-9/]+)$ index.php?ruta=$1 [L]
 
 # Redirigir HTTP → HTTPS  (solo en producción — se omite en localhost/127.0.0.1)
 RewriteCond %{HTTPS} off
