@@ -5,10 +5,10 @@
  * URL: /monedero.php?token=XXXXX
  */
 
-require_once "config/env.php";
-require_once "config/Database.php";
-require_once "modelos/recompensas.modelo.php";
-require_once "controladores/recompensas.controlador.php";
+require_once __DIR__ . "/config/env.php";
+require_once __DIR__ . "/config/Database.php";
+require_once __DIR__ . "/modelos/recompensas.modelo.php";
+require_once __DIR__ . "/controladores/recompensas.controlador.php";
 
 $token = isset($_GET["token"]) ? trim($_GET["token"]) : '';
 
