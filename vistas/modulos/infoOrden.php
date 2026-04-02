@@ -1969,9 +1969,21 @@ $(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
 						</div>
 					</div>
 
-					<div id="egs_de_sinSaldo" style="display:none;text-align:center;padding:12px;background:#fffbeb;border-radius:8px;border:1px solid #fde68a;margin-bottom:12px">
-						<i class="fa-solid fa-info-circle" style="color:#d97706;margin-right:4px"></i>
-						<span style="font-size:12px;color:#92400e;font-weight:600">No tienes saldo disponible para canjear en esta orden.</span>
+					<div id="egs_de_sinSaldo" style="display:none;text-align:center;padding:16px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-radius:12px;border:2px solid #6366f1;margin-bottom:12px">
+						<div style="font-size:28px;margin-bottom:6px">&#127873;</div>
+						<div style="font-size:14px;font-weight:800;color:#4338ca;margin-bottom:6px">¡Esta orden te dará dinero electrónico!</div>
+						<div style="font-size:12px;color:#312e81;line-height:1.5;margin-bottom:10px">
+							Al entregar esta orden acumularás <b id="egs_de_montoGenerar">$0.00</b> en tu <b>Monedero EGS</b>.<br>
+							Podrás usarlo como descuento en tu próximo servicio.
+						</div>
+						<div style="background:#fff;border-radius:8px;padding:10px;text-align:left;font-size:11px;color:#4338ca">
+							<div style="font-weight:700;margin-bottom:4px;color:#1e1b4b">&#9733; Mientras más órdenes, mayor recompensa:</div>
+							<div style="padding-left:8px">
+								&#8226; Hasta 3 órdenes entregadas: <b>1%</b><br>
+								&#8226; Más de 3 órdenes entregadas: <b>2%</b><br>
+								&#8226; Más de 5 órdenes entregadas: <b>3%</b>
+							</div>
+						</div>
 					</div>
 
 					<div id="egs_de_conSaldo" style="display:none">
@@ -2057,6 +2069,8 @@ $(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
 				} else {
 					$('#egs_de_sinSaldo').show();
 					$('#egs_de_conSaldo').hide();
+					var montoGenerar = (totalOrden * (data.porcentaje / 100)).toFixed(2);
+					$('#egs_de_montoGenerar').text('$' + montoGenerar);
 				}
 			},
 			error: function() {
@@ -2065,6 +2079,8 @@ $(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
 				$('#egs_de_saldo').text('$0.00');
 				$('#egs_de_sinSaldo').show();
 				$('#egs_de_conSaldo').hide();
+				var montoGenerar = (totalOrden * 0.01).toFixed(2);
+				$('#egs_de_montoGenerar').text('$' + montoGenerar);
 			}
 		});
 	}
