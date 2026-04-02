@@ -174,6 +174,18 @@ if (isset($_POST["accion"]) && $_POST["accion"] == "actualizarDescripcion") {
     }
 }
 
+// Reagendar cita (cambiar fecha/hora)
+if (isset($_POST["accion"]) && $_POST["accion"] == "reagendarCita") {
+    $idCita = isset($_POST["idCita"]) ? intval($_POST["idCita"]) : 0;
+    $nuevaFecha = isset($_POST["nuevaFecha"]) ? trim($_POST["nuevaFecha"]) : "";
+
+    if ($idCita > 0 && !empty($nuevaFecha)) {
+        echo ModeloCitas::mdlReagendarCita("citas", $idCita, $nuevaFecha);
+    } else {
+        echo "error";
+    }
+}
+
 // Obtener Orden Info
 if (isset($_POST["obtenerOrden"])) {
     $infoOrden = new AjaxCitas();

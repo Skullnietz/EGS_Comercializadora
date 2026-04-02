@@ -370,4 +370,22 @@ class ModeloCitas
 		}
 	}
 
+	/*=============================================
+	REAGENDAR CITA (cambiar fecha/hora)
+	=============================================*/
+	static public function mdlReagendarCita($tabla, $idCita, $nuevaFecha)
+	{
+		$stmt = Conexion::conectar()->prepare("UPDATE $tabla SET start = :start, end = :start WHERE id = :id");
+		$stmt->bindParam(":start", $nuevaFecha, PDO::PARAM_STR);
+		$stmt->bindParam(":id", $idCita, PDO::PARAM_INT);
+
+		if ($stmt->execute()) {
+			$stmt = null;
+			return "ok";
+		} else {
+			$stmt = null;
+			return "error";
+		}
+	}
+
 }

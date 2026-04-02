@@ -625,6 +625,191 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
 
+            // ═══ REAGENDAR ═══
+            var dcReagFecha = 'manana';
+            var dcReagHora  = '';
+
+            function dcReagRenderChips() {
+                var chips = [
+                    {key:'manana',   label:'Mañana',    icon:'fa-sun'},
+                    {key:'lunes',    label:'Lunes',     icon:'fa-calendar-day'},
+                    {key:'martes',   label:'Martes',    icon:'fa-calendar-day'},
+                    {key:'miercoles',label:'Miércoles', icon:'fa-calendar-day'},
+                    {key:'jueves',   label:'Jueves',    icon:'fa-calendar-day'},
+                    {key:'viernes',  label:'Viernes',   icon:'fa-calendar-day'},
+                    {key:'sabado',   label:'Sábado',    icon:'fa-calendar-day'}
+                ];
+                var html = '';
+                chips.forEach(function(c) {
+                    html += '<div class="egs-pc-qd-chip' + (dcReagFecha === c.key ? ' active' : '') + '" data-fecha="' + c.key + '">' +
+                        '<i class="fa-solid ' + c.icon + '"></i>' + c.label + '</div>';
+                });
+                html += '<div class="egs-pc-qd-chip egs-pc-qd-custom' + (dcReagFecha === 'personalizado' ? ' active' : '') + '" data-fecha="personalizado">' +
+                    '<i class="fa-solid fa-calendar-plus"></i>Otra fecha</div>';
+                $('#dcReagendarChips').html(html);
+            }
+
+            function dcReagRenderTimeGrid() {
+                var d = dcReagFecha === 'personalizado'
+                    ? (function(){ var v = $('#dcReagendarCustomDate').val(); return v ? new Date(v.replace(/-/g,'/')) : new Date(); })()
+                    : calcFecha(dcReagFecha);
+                var dow = d.getDay();
+                var horas = getHorasParaDia(dow);
+                var $grid = $('#dcReagendarTimeGrid');
+
+                if (esDomingo(dow)) {
+                    $grid.html('<div style="text-align:center;padding:10px;color:#ef4444;font-size:12px;"><i class="fa-solid fa-ban" style="margin-right:4px;"></i>Domingo no disponible</div>');
+                    dcReagHora = '';
+                    dcReagUpdatePreview();
+                    return;
+                }
+
+                // Filter past hours if selecting today
+                var ahora = new Date();
+                var hoyDate = new Date(); hoyDate.setHours(0,0,0,0);
+                var fechaSel = new Date(d); fechaSel.setHours(0,0,0,0);
+                var esHoy = fechaSel.getTime() === hoyDate.getTime();
+                var horaActual = ahora.getHours().toString().padStart(2,'0') + ':' + ahora.getMinutes().toString().padStart(2,'0');
+                var horasFiltradas = esHoy ? horas.filter(function(h){ return h > horaActual; }) : horas;
+
+                if (horasFiltradas.length === 0) {
+                    $grid.html('<div style="text-align:center;padding:10px;color:#d97706;font-size:12px;"><i class="fa-solid fa-clock" style="margin-right:4px;"></i>Sin horarios disponibles</div>');
+                    dcReagHora = '';
+                    dcReagUpdatePreview();
+                    return;
+                }
+
+                var html = '';
+                var found = false;
+                horasFiltradas.forEach(function(h) {
+                    var isActive = (h === dcReagHora);
+                    if (isActive) found = true;
+                    html += '<button type="button" class="egs-pc-time-chip' + (isActive ? ' active' : '') + '" data-hora="' + h + '">' + h + '</button>';
+                });
+                $grid.html(html);
+
+                if (!found && horasFiltradas.length) {
+                    dcReagHora = horasFiltradas[0];
+                    $grid.find('.egs-pc-time-chip').first().addClass('active');
+                }
+                dcReagUpdatePreview();
+            }
+
+            function dcReagUpdatePreview() {
+                var d = dcReagFecha === 'personalizado'
+                    ? (function(){ var v = $('#dcReagendarCustomDate').val(); return v ? new Date(v.replace(/-/g,'/')) : new Date(); })()
+                    : calcFecha(dcReagFecha);
+                var txt = diasEs[d.getDay()] + ' ' + d.getDate() + ' de ' + mesesEs[d.getMonth()];
+                if (dcReagHora) txt += ' — ' + dcReagHora;
+                $('#dcReagendarPreview').text(txt);
+            }
+
+            function dcReagBuildFecha() {
+                var d = dcReagFecha === 'personalizado'
+                    ? (function(){ var v = $('#dcReagendarCustomDate').val(); return v ? new Date(v.replace(/-/g,'/')) : new Date(); })()
+                    : calcFecha(dcReagFecha);
+                if (!dcReagHora) return null;
+                var parts = dcReagHora.split(':');
+                d.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+                return d.getFullYear() + '-' +
+                    ('0' + (d.getMonth()+1)).slice(-2) + '-' +
+                    ('0' + d.getDate()).slice(-2) + ' ' +
+                    ('0' + d.getHours()).slice(-2) + ':' +
+                    ('0' + d.getMinutes()).slice(-2) + ':00';
+            }
+
+            // Hide section by default
+            $('#dcReagendarSection').hide();
+            $('#dcReagendarStatus').text('');
+
+            // Toggle reagendar panel
+            $('#dcBtnReagendar').off('click').on('click', function() {
+                var $sec = $('#dcReagendarSection');
+                if ($sec.is(':visible')) {
+                    $sec.slideUp(200);
+                } else {
+                    dcReagFecha = 'manana';
+                    dcReagHora = '';
+                    dcReagRenderChips();
+                    dcReagRenderTimeGrid();
+                    $('#dcReagendarCustomWrap').hide();
+                    $sec.slideDown(200);
+                }
+            });
+
+            // Date chip click
+            $('#dcReagendarChips').off('click', '.egs-pc-qd-chip').on('click', '.egs-pc-qd-chip', function() {
+                dcReagFecha = $(this).data('fecha');
+                $('#dcReagendarChips .egs-pc-qd-chip').removeClass('active');
+                $(this).addClass('active');
+                if (dcReagFecha === 'personalizado') {
+                    $('#dcReagendarCustomWrap').show();
+                } else {
+                    $('#dcReagendarCustomWrap').hide();
+                }
+                dcReagRenderTimeGrid();
+            });
+
+            // Custom date change
+            $('#dcReagendarCustomDate').off('change').on('change', function() {
+                dcReagRenderTimeGrid();
+            });
+
+            // Time chip click
+            $('#dcReagendarTimeGrid').off('click', '.egs-pc-time-chip').on('click', '.egs-pc-time-chip', function() {
+                dcReagHora = $(this).data('hora');
+                $('#dcReagendarTimeGrid .egs-pc-time-chip').removeClass('active');
+                $(this).addClass('active');
+                dcReagUpdatePreview();
+            });
+
+            // Cancel
+            $('#dcBtnCancelReagendar').off('click').on('click', function() {
+                $('#dcReagendarSection').slideUp(200);
+            });
+
+            // Confirm reagendar
+            $('#dcBtnConfirmReagendar').off('click').on('click', function() {
+                var nuevaFecha = dcReagBuildFecha();
+                if (!nuevaFecha) {
+                    $('#dcReagendarStatus').text('Selecciona fecha y hora').css('color', '#ef4444');
+                    return;
+                }
+                var $btn = $(this);
+                $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+
+                $.ajax({
+                    url: 'ajax/citas.ajax.php',
+                    type: 'POST',
+                    data: { accion: 'reagendarCita', idCita: currentCitaId, nuevaFecha: nuevaFecha },
+                    success: function(resp) {
+                        if (resp === 'ok') {
+                            $('#dcReagendarStatus').text('Reagendada ✓').css('color', '#16a34a');
+                            calendar.refetchEvents();
+                            // Update the header date in the modal
+                            var nd = new Date(nuevaFecha.replace(/-/g,'/').replace(' ','T'));
+                            if (!isNaN(nd)) {
+                                var fechaTxt = diasEs[nd.getDay()] + ', ' + nd.getDate() + ' ' + mesesEs[nd.getMonth()].substring(0,3) + ' ' + nd.getFullYear() +
+                                    ' · ' + ('0'+nd.getHours()).slice(-2) + ':' + ('0'+nd.getMinutes()).slice(-2);
+                                $('#dcFecha').text(fechaTxt);
+                            }
+                            setTimeout(function() {
+                                $('#dcReagendarSection').slideUp(200);
+                                $('#dcReagendarStatus').text('');
+                            }, 1500);
+                        } else {
+                            $('#dcReagendarStatus').text('Error al reagendar').css('color', '#ef4444');
+                        }
+                    },
+                    error: function() {
+                        $('#dcReagendarStatus').text('Error de conexión').css('color', '#ef4444');
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false).html('<i class="fa-solid fa-check" style="margin-right:4px;"></i>Confirmar');
+                    }
+                });
+            });
+
             // Open modal
             $('#modalDetalleCita').modal('show');
         }

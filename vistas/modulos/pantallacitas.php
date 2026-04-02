@@ -317,6 +317,36 @@
                     </div>
                 </div>
 
+                <!-- ═══ Reagendar (collapsible) ═══ -->
+                <div id="dcReagendarSection" style="padding:14px 0;border-top:1px solid #f1f5f9;display:none;">
+                    <div class="egs-dc-section-label"><i class="fa-solid fa-calendar-pen" style="margin-right:4px;"></i>Reagendar cita</div>
+
+                    <!-- Date chips -->
+                    <div id="dcReagendarChips" class="egs-pc-quick-dates" style="margin-bottom:10px;"></div>
+
+                    <!-- Custom date input (hidden by default) -->
+                    <div id="dcReagendarCustomWrap" style="display:none;margin-bottom:10px;">
+                        <input type="date" id="dcReagendarCustomDate" class="form-control egs-pc-input" style="max-width:200px;">
+                    </div>
+
+                    <!-- Time grid -->
+                    <div id="dcReagendarTimeGrid" class="egs-pc-time-grid" style="margin-bottom:10px;"></div>
+
+                    <!-- Preview + confirm -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                        <span id="dcReagendarPreview" style="font-size:12px;color:#64748b;"></span>
+                        <div style="display:flex;gap:6px;">
+                            <button type="button" id="dcBtnCancelReagendar" class="btn" style="border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;background:#f1f5f9;color:#64748b;border:none;">
+                                Cancelar
+                            </button>
+                            <button type="button" id="dcBtnConfirmReagendar" class="btn" style="border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;background:#f59e0b;color:#fff;border:none;">
+                                <i class="fa-solid fa-check" style="margin-right:4px;"></i>Confirmar
+                            </button>
+                        </div>
+                    </div>
+                    <span id="dcReagendarStatus" style="font-size:11px;color:#94a3b8;display:block;margin-top:4px;"></span>
+                </div>
+
             </div>
 
             <!-- Footer acciones -->
@@ -330,6 +360,9 @@
                 <a id="dcBtnWhatsApp" href="#" target="_blank" class="egs-dc-action-btn" style="display:none;background:#f0fdf4;color:#16a34a;border-color:#bbf7d0;">
                     <i class="fa-brands fa-whatsapp"></i> WhatsApp
                 </a>
+                <button type="button" id="dcBtnReagendar" class="egs-dc-action-btn" style="background:#fffbeb;color:#d97706;border-color:#fde68a;">
+                    <i class="fa-solid fa-calendar-pen"></i> Reagendar
+                </button>
                 <button type="button" id="dcBtnOcultar" class="egs-dc-action-btn" style="background:#fff;color:#ef4444;border-color:#fecaca;">
                     <i class="fa-solid fa-eye-slash"></i> Ocultar
                 </button>
