@@ -27,6 +27,19 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
         $entregadas = $data["entregadas"];
         $porcentaje = $data["porcentaje"];
         $nombreCliente = $data["nombre_cliente"];
+        // Acortar nombre si es muy largo (max 24 chars para que quepa en la tarjeta)
+        $nombreCorto = $nombreCliente;
+        if (mb_strlen($nombreCorto) > 24) {
+            // Intentar usar solo el primer nombre + primer apellido
+            $partes = explode(' ', trim($nombreCorto));
+            if (count($partes) >= 2) {
+                $nombreCorto = $partes[0] . ' ' . $partes[1];
+            }
+            // Si aún es largo, cortar con puntos suspensivos
+            if (mb_strlen($nombreCorto) > 24) {
+                $nombreCorto = mb_substr($nombreCorto, 0, 22) . '...';
+            }
+        }
     }
 }
 ?>
@@ -73,6 +86,10 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
         .chip-icon{width:44px;height:32px;background:linear-gradient(135deg,#daa520,#f0c060,#daa520);border-radius:6px;display:flex;align-items:center;justify-content:center}
         .chip-icon::after{content:'';width:20px;height:16px;border:1.5px solid rgba(139,90,0,.4);border-radius:3px}
 
+        .card-titular{position:relative;z-index:1;margin-bottom:16px}
+        .card-titular-label{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.4);margin-bottom:3px}
+        .card-titular-name{font-size:18px;font-weight:800;letter-spacing:.5px;color:#fff}
+
         .card-saldo{position:relative;z-index:1;margin-bottom:20px}
         .card-saldo-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.5);margin-bottom:6px}
         .card-saldo-periodo{font-size:10px;font-weight:500;color:rgba(255,255,255,.35);margin-top:8px;letter-spacing:.3px}
@@ -81,8 +98,7 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
         .card-saldo-amount.zero{background:linear-gradient(135deg,#64748b 0%,#475569 100%);-webkit-background-clip:text;background-clip:text}
 
         .card-bottom{display:flex;align-items:flex-end;justify-content:space-between;position:relative;z-index:1}
-        .card-holder-label{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.4);margin-bottom:3px}
-        .card-holder-name{font-size:14px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+        .card-bottom-type{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.4)}
         .card-nivel{text-align:right}
         .card-nivel-badge{
             display:inline-flex;align-items:center;gap:5px;
@@ -182,19 +198,20 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
     <div class="credit-card">
         <div class="card-top">
             <img src="https://backend.comercializadoraegs.com/vistas/img/perfiles/651.png" class="card-logo" alt="EGS">
-            <span class="card-brand">Dinero Electr&oacute;nico</span>
+            <span class="card-brand">Monedero EGS</span>
         </div>
         <div class="card-chip"><div class="chip-icon"></div></div>
+        <div class="card-titular">
+            <div class="card-titular-label">Titular</div>
+            <div class="card-titular-name"><?php echo htmlspecialchars(mb_strtoupper($nombreCorto)); ?></div>
+        </div>
         <div class="card-saldo">
             <div class="card-saldo-label">Saldo disponible</div>
             <div class="card-saldo-amount <?php echo $saldo <= 0 ? 'zero' : ''; ?>">$<?php echo number_format($saldo, 2); ?></div>
             <div class="card-saldo-periodo">&uacute;ltimos 6 meses</div>
         </div>
         <div class="card-bottom">
-            <div>
-                <div class="card-holder-label">Titular</div>
-                <div class="card-holder-name"><?php echo htmlspecialchars($nombreCliente); ?></div>
-            </div>
+            <div class="card-bottom-type">Dinero Electr&oacute;nico</div>
             <div class="card-nivel nivel-<?php echo $porcentaje; ?>">
                 <div class="card-nivel-badge">
                     <span class="card-nivel-dot"></span>
