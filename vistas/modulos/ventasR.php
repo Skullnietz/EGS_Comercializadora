@@ -926,32 +926,93 @@ const $input11 = document.querySelector(' #productoDiez');
     #modalAgregarVenta .box-body {
       background: var(--crm-surface);
       border: 1px solid var(--crm-border);
-      border-radius: var(--crm-radius); padding: 18px;
+      border-radius: var(--crm-radius); padding: 20px;
     }
+
+    /* ─── Inputs & Selects refinados ─── */
+    #modalAgregarVenta .form-group { margin-bottom: 12px; }
+
     #modalAgregarVenta .input-group-addon {
       background: #f8fafc; color: var(--crm-text2);
       border-color: var(--crm-border); font-weight: 600;
-      font-size: 12px;
+      font-size: 12px; padding: 6px 12px;
+      min-width: 42px; text-align: center;
     }
     #modalAgregarVenta .form-control {
       border-color: var(--crm-border); border-radius: 8px; box-shadow: none;
       transition: border-color .15s, box-shadow .15s;
+      font-size: 13px; height: 38px; padding: 6px 12px;
+      color: var(--crm-text);
     }
     #modalAgregarVenta .form-control:focus {
       border-color: var(--crm-accent);
       box-shadow: 0 0 0 3px rgba(99,102,241,.12);
     }
+    #modalAgregarVenta select.form-control {
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23475569' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    #modalAgregarVenta .form-control::placeholder {
+      color: var(--crm-muted); font-weight: 400;
+    }
+    /* Quitar input-lg overrides dentro del modal */
+    #modalAgregarVenta .input-lg,
+    #modalAgregarVenta .form-control.input-lg {
+      height: 38px; font-size: 13px; padding: 6px 12px;
+      border-radius: 8px; line-height: 1.5;
+    }
+
+    /* ─── Input groups: bordes limpios ─── */
+    #modalAgregarVenta .input-group .input-group-addon:first-child {
+      border-radius: 8px 0 0 8px; border-right: 0;
+    }
+    #modalAgregarVenta .input-group .form-control:last-child,
+    #modalAgregarVenta .input-group .form-control:not(:first-child) {
+      border-radius: 0 8px 8px 0;
+    }
+    #modalAgregarVenta .input-group .input-group-addon + .form-control {
+      border-left: 1px solid var(--crm-border);
+    }
+
+    /* ─── Producto rows compactas ─── */
+    #modalAgregarVenta .form-group.row { margin-left: -6px; margin-right: -6px; }
+    #modalAgregarVenta .form-group.row > [class*="col-"] { padding-left: 6px; padding-right: 6px; }
+
+    /* ─── Section divider de productos ─── */
+    #modalAgregarVenta .vr-products-header {
+      display: flex; align-items: center; gap: 10px;
+      margin: 16px 0 12px; padding: 0;
+    }
+    #modalAgregarVenta .vr-products-header h5 {
+      margin: 0; font-size: 13px; font-weight: 700;
+      color: var(--crm-text); text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    #modalAgregarVenta .vr-products-header::after {
+      content: ''; flex: 1; height: 1px; background: var(--crm-border);
+    }
+
+    /* ─── Total section ─── */
     #modalAgregarVenta #Caltotal {
       background: linear-gradient(90deg, #eef2ff 0%, #f0fdf4 100%);
       border: 1px dashed #c7d2fe; border-radius: var(--crm-radius);
-      padding: 14px 0;
+      padding: 16px 0; margin-top: 8px;
     }
     #modalAgregarVenta #Resultado,
     #modalAgregarVenta #pagoCliente,
     #modalAgregarVenta #cambio {
-      font-size: 34px; font-weight: 800; color: var(--crm-text);
+      font-size: 32px !important; font-weight: 800; color: var(--crm-text);
       text-align: center; letter-spacing: -.02em;
+      height: auto !important;
     }
+
+    /* ─── Payment method ─── */
+    #modalAgregarVenta .METODOPAGO { margin-top: 12px; }
+
+    /* ─── Footer ─── */
     #modalAgregarVenta .modal-footer {
       border-top: 1px solid #f1f5f9; background: var(--crm-bg);
       padding: 14px 22px;
@@ -969,6 +1030,21 @@ const $input11 = document.querySelector(' #productoDiez');
     }
     #modalAgregarVenta .modal-footer .btn-primary:hover {
       background: linear-gradient(135deg, #4f46e5, #6366f1);
+    }
+
+    /* ─── Nuevo cliente section ─── */
+    #nuevoClienteSection {
+      border-radius: var(--crm-radius-sm) !important;
+      border-color: #a5b4fc !important;
+      background: #eef2ff !important;
+    }
+    #nuevoClienteSection .input-group-addon {
+      background: #e0e7ff; border-color: #a5b4fc; color: #3730a3;
+    }
+
+    /* ─── Dinero electrónico section ─── */
+    #egs_deVentaR_section {
+      border-radius: var(--crm-radius-sm) !important;
     }
 </style>
 
@@ -1267,39 +1343,16 @@ MODAL AGREGAR PRODUCTO
             <!--=====================================
             ENTRADA PARA LOS PRODUCTOS
             ======================================-->   
-            <div class="form-group row">
-                <center><h3>PRODUCTOS A AGREGAR</h3></center>
-                <div class="formgroup col-md-1"></div>
-                <div class="formgroup col-md-8">
-            <select id="selprod" class="form-control">
-                  <option value="0">Numero de productos</option>
-                      <?php
-                      for ($i=1; $i <= 10; $i++) {
-                       echo '<option value="'.$i.'">'.$i.'</option>';
-                      }
-                       ?>
+            <div class="vr-products-header"><h5><i class="fa-solid fa-boxes-stacked"></i> Productos</h5></div>
+            <div class="form-group" style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+              <select id="selprod" class="form-control" style="max-width:200px">
+                <option value="0">Nº de productos</option>
+                <?php for ($i=1; $i <= 10; $i++) { echo '<option value="'.$i.'">'.$i.'</option>'; } ?>
               </select>
-              </div>
-                <div class="col">
-                 
-                 
-
-                 <a href="#" onclick="AgregarCamposPedidos();">
-                  
-                  <!--<div id="camposProductos">-->
-                
-                    <input type="button" class="btn btn-primary plus" value="Agregar producto"/></br></br>
-                </a>
-                </div>
-               
-            
-            
-                </div>
-                
-              
-            
-
-<hr>
+              <a href="#" onclick="AgregarCamposPedidos();" style="text-decoration:none">
+                <button type="button" class="btn btn-primary" style="border-radius:8px;font-size:13px;font-weight:600;padding:6px 16px"><i class="fa fa-plus" style="margin-right:4px"></i> Agregar</button>
+              </a>
+            </div>
             <div class="form-group row" id="productouno">
 
               <!--=====================================
@@ -1313,7 +1366,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoUno" class="form-control input-lg " type="text"  name="productoUno" placeholder="Nombre del producto">
                   
@@ -1325,7 +1378,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input class="form-control input-lg"   name="precioUno" id="precioUno" value=""   step="any" placeholder="Precio">
@@ -1349,7 +1402,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadUno"  id="cantidadUno" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1374,7 +1427,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoDos" class="form-control input-lg " type="text"  name="productoDos" placeholder="Nombre del producto">
                   
@@ -1386,7 +1439,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input class="form-control input-lg"   name="precioDos" id="precioDos" value=""   step="any" placeholder="Precio">
@@ -1410,7 +1463,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadDos"  id="cantidadDos" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1436,7 +1489,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoTres" class="form-control input-lg" type="text"  name="productoTres" placeholder="Nombre del producto">
                   
@@ -1448,7 +1501,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input class="form-control input-lg"   name="precioTres" id="precioTres" value=""  step="any" placeholder="Precio">
@@ -1472,7 +1525,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadTres"  id="cantidadTres" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1497,7 +1550,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoCuatro" class="form-control input-lg " type="text"  name="productoCuatro" placeholder="Nombre del producto">
                   
@@ -1509,7 +1562,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input class="form-control input-lg"   name="precioCuatro" id="precioCuatro" value="" step="any" placeholder="Precio">
@@ -1528,7 +1581,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadCuatro"  id="cantidadCuatro" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1553,7 +1606,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoCinco" class="form-control input-lg " type="text"  name="productoCinco" placeholder="Nombre del producto">
                   
@@ -1565,7 +1618,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input class="form-control input-lg"   name="precioCinco" id="precioCinco" value=""   step="any" placeholder="Precio">
@@ -1584,7 +1637,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadCinco"  id="cantidadCinco" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1609,7 +1662,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoSeis" class="form-control input-lg " type="text"  name="productoSeis" placeholder="Nombre del producto">
                   
@@ -1621,7 +1674,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input class="form-control input-lg"   name="precioSeis" id="precioSeis" value=""  step="any" placeholder="Precio">
@@ -1640,7 +1693,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadSeis"  id="cantidadSeis" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1665,7 +1718,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoSiete" class="form-control input-lg " type="text"  name="productoSiete" placeholder="Nombre del producto">
                   
@@ -1677,7 +1730,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input class="form-control input-lg"   name="precioSiete" id="precioSiete" value=""   step="any" placeholder="Precio">
@@ -1696,7 +1749,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadSiete"  id="cantidadSiete" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1722,7 +1775,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoOcho" class="form-control input-lg " type="text"  name="productoOcho" placeholder="Nombre del producto">
                   
@@ -1734,7 +1787,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input class="form-control input-lg"   name="precioOcho" id="precioOcho" value=""   step="any" placeholder="Precio">
@@ -1753,7 +1806,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadOcho"  id="cantidadOcho" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1778,7 +1831,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoNueve" class="form-control input-lg " type="text"  name="productoNueve" placeholder="Nombre del producto">
                   
@@ -1790,7 +1843,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input class="form-control input-lg"   name="precioNueve" id="precioNueve" value=""  step="any" placeholder="Precio">
@@ -1809,7 +1862,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadNueve"  id="cantidadNueve" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1834,7 +1887,7 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="input-group">
                         
-                  <span class="input-group-addon"><i class="fab fa-product-hunt"></i> | Producto</span> 
+                  <span class="input-group-addon"><i class="fa-solid fa-tag"></i></span> 
                           
                   <input id="productoDiez" class="form-control input-lg " type="text"  name="productoDiez" placeholder="Nombre del producto">
                   
@@ -1846,7 +1899,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp2">
                            
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-money-bill-alt"></i> | Precio</span> 
+                    <span class="input-group-addon"><i class="fa-solid fa-dollar-sign"></i></span> 
                     
                              
                   <input  class="form-control input-lg"   name="precioDiez" id="precioDiez" value=""   step="any" placeholder="Precio">
@@ -1865,7 +1918,7 @@ MODAL AGREGAR PRODUCTO
               <div class="col-lg-3 productosp1">
                          
                 <div class="input-group">
-                     <span class="input-group-addon"><i class="fas fa-sort-amount-up-alt"></i> | Cantidad</span> 
+                     <span class="input-group-addon"><i class="fa-solid fa-hashtag"></i></span> 
                            
                   <input class="form-control input-lg"  type="number" name="cantidadDiez"  id="cantidadDiez" value="0"  min="0" step="any" placeholder="Cantidad">
                   
@@ -1883,7 +1936,6 @@ MODAL AGREGAR PRODUCTO
               
 
               <div class="form-group row" id="Caltotal">
-<hr>
                 <!--=====================================
                 PRODUCTO CALCULAR TOTALES
                 ======================================-->
@@ -1891,14 +1943,14 @@ MODAL AGREGAR PRODUCTO
 
                 <div class="col-xs-3"></div>
                 <div class="col-xs-6">
-                        <span><h5><center>TOTAL</center></h5></span>
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--crm-muted);text-align:center;margin-bottom:6px">Total</div>
                   <div class="input-group">
 
                     <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span> 
-                    <input type="number" class="form-control input-lg" name="pago" id="Resultado" value="0"  readonly>
+                    <input type="number" class="form-control" name="pago" id="Resultado" value="0" readonly style="font-size:28px!important;font-weight:800;height:auto!important;text-align:center">
                     
                     
-                    <input type="hidden" class="form-control input-lg" name="cantidadProductos" id="cantidadProductos" min="0" value="0" readonly>
+                    <input type="hidden" class="form-control" name="cantidadProductos" id="cantidadProductos" min="0" value="0" readonly>
 
                   </div>
 
@@ -1916,16 +1968,16 @@ MODAL AGREGAR PRODUCTO
               		<div class="input-group">
               			
               			<span class="input-group-addon"><i class="fas fa-hand-holding-usd"></i></span>
-                   		<select  class="form-control input-lg" id="metodopago" name="metodo"> 
-                   		<option >  Seleccione metodo de pago </option>
-                   		<option value="Efectivo">  Efectivo </option>
-                   		<option value="Tarjeta de Credito"> Tarjeta de Credito </option>
-                   		<option value="Tarjeta de Debito"> Tarjeta de Debito </option>
-                   		<option value="Transferencia bancaria">Transferencia bancaria </option>
-                   		<option value="MercadoPago">MercadoPago </option>
-                   		<option value="Paypal">Paypal </option>
-                   		<option value="Credito">Credito </option>
-                   		<option value="Puntos"> Puntos </option>
+                   		<select class="form-control" id="metodopago" name="metodo"> 
+                   		<option>Seleccione método de pago</option>
+                   		<option value="Efectivo">Efectivo</option>
+                   		<option value="Tarjeta de Credito">Tarjeta de Crédito</option>
+                   		<option value="Tarjeta de Debito">Tarjeta de Débito</option>
+                   		<option value="Transferencia bancaria">Transferencia bancaria</option>
+                   		<option value="MercadoPago">MercadoPago</option>
+                   		<option value="Paypal">Paypal</option>
+                   		<option value="Credito">Crédito</option>
+                   		<option value="Puntos">Puntos</option>
                    		</select>
 
               	</div>
@@ -1938,33 +1990,25 @@ MODAL AGREGAR PRODUCTO
                 CAMBIO A REGRESAR
                 ======================================-->
                 <div class="col-xs-6">
-                    </br></br>
-                    
-                    <span><h5><center>Pago del Cliente</center></h5></span>
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--crm-muted);text-align:center;margin:14px 0 6px">Pago del Cliente</div>
                   
                   <div class="input-group">
                                   
                                   
                   <span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
                          
-                    <input class="form-control input-lg"  type="number" name="pagoCliente" id="pagoCliente" value="0"  min="0" step="any" placeholder="pago Cliente">
+                    <input class="form-control" type="number" name="pagoCliente" id="pagoCliente" value="0" min="0" step="any" placeholder="Pago cliente" style="font-size:22px!important;font-weight:700;height:auto!important;text-align:center">
                   </div>
 
                 </div>
-                        
-                <div class="col-xs-6">
-                   </br></br>
-                  
-
-                </div>
 
                 <div class="col-xs-6">
-                        <span><h5><center>Cambio a Regresar</center></h5></span>
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--crm-muted);text-align:center;margin:14px 0 6px">Cambio a Regresar</div>
                   <div class="input-group"> 
 
                     <span class="input-group-addon"><i class="fas fa-cash-register"></i></span>
 
-                    <input type="number" class="form-control input-lg" name="cambio" id="cambio" min="0" value="0"  step="any" readonly>
+                    <input type="number" class="form-control" name="cambio" id="cambio" min="0" value="0" step="any" readonly style="font-size:22px!important;font-weight:700;height:auto!important;text-align:center">
 
                   </div>
 
