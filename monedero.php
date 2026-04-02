@@ -5,22 +5,10 @@
  * URL: /monedero.php?token=XXXXX
  */
 
-// ── DEBUG TEMPORAL — quitar después de resolver el problema ──
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-// ── FIN DEBUG ──
-
-try {
-    require_once __DIR__ . "/config/env.php";
-    require_once __DIR__ . "/config/Database.php";
-    require_once __DIR__ . "/modelos/recompensas.modelo.php";
-    require_once __DIR__ . "/controladores/recompensas.controlador.php";
-} catch (Exception $e) {
-    die("Error en require: " . $e->getMessage());
-} catch (Error $e) {
-    die("Error fatal en require: " . $e->getMessage());
-}
+require_once __DIR__ . "/config/env.php";
+require_once __DIR__ . "/config/Database.php";
+require_once __DIR__ . "/modelos/recompensas.modelo.php";
+require_once __DIR__ . "/controladores/recompensas.controlador.php";
 
 $token = isset($_GET["token"]) ? trim($_GET["token"]) : '';
 
@@ -28,14 +16,7 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
     $error = true;
     $errorMsg = "Enlace inválido. Escanea el código QR de tu ticket para acceder a tu monedero.";
 } else {
-    try {
-        $data = ControladorRecompensas::ctrObtenerMonederoPorToken($token);
-    } catch (Exception $e) {
-        die("Error DB: " . $e->getMessage());
-    } catch (Error $e) {
-        die("Error fatal DB: " . $e->getMessage());
-    }
-
+    $data = ControladorRecompensas::ctrObtenerMonederoPorToken($token);
     if (!$data) {
         $error = true;
         $errorMsg = "No se encontró el monedero. Verifica que el código QR sea correcto.";

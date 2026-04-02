@@ -252,11 +252,26 @@ class ModeloRecompensas
     =============================================*/
     static public function mdlObtenerNombreCliente($idCliente)
     {
-        $pdo = Database::conectar(Database::SISTEMA);
-        $stmt = $pdo->prepare("SELECT nombre FROM clientesTienda WHERE id = :id");
-        $stmt->bindParam(":id", $idCliente, PDO::PARAM_INT);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ? $result["nombre"] : "Cliente";
+        try {
+            $pdo = Database::conectar(Database::SISTEMA);
+            $stmt = $pdo->prepare("SELECT nombre FROM clientesTienda WHERE id = :id");
+            $stmt->bindParam(":id", $idCliente, PDO::PARAM_INT);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? $result["nombre"] : "Cliente";
+        } catch (Exception $e) {
+            // Fallback: intentar con cross-database query vía conexión WORDPRESS
+            try {
+                $pdo = ConexionWP::conectarWP();
+                $dbSistema = getenv('DB_SISTEMA_NAME') ?: 'egsequip_dbsistema';
+                $stmt = $pdo->prepare("SELECT nombre FROM `" . $dbSistema . "`.clientesTienda WHERE id = :id");
+                $stmt->bindParam(":id", $idCliente, PDO::PARAM_INT);
+                $stmt->execute();
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                return $result ? $result["nombre"] : "Cliente";
+            } catch (Exception $e2) {
+                return "Cliente";
+            }
+        }
     }
 }
