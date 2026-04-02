@@ -1046,6 +1046,63 @@ const $input11 = document.querySelector(' #productoDiez');
     #egs_deVentaR_section {
       border-radius: var(--crm-radius-sm) !important;
     }
+
+    /* ─── Choices.js dentro del modal ─── */
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices {
+      width: 100%;
+    }
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices__inner {
+      background: var(--crm-surface) !important;
+      border: 1px solid var(--crm-border) !important;
+      border-radius: 8px !important;
+      min-height: 38px !important;
+      padding: 4px 8px !important;
+      font-size: 13px !important;
+      box-shadow: none !important;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices.is-open .choices__inner,
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices.is-focused .choices__inner {
+      border-color: var(--crm-accent) !important;
+      box-shadow: 0 0 0 3px rgba(99,102,241,.12) !important;
+    }
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices__list--single .choices__item {
+      color: var(--crm-text) !important;
+      font-size: 13px !important;
+    }
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices__placeholder {
+      color: var(--crm-muted) !important;
+      opacity: 1 !important;
+    }
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices__input {
+      background: transparent !important;
+      color: var(--crm-text) !important;
+      font-size: 13px !important;
+      padding: 0 !important;
+      margin-bottom: 0 !important;
+    }
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices__list--dropdown,
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices__list[aria-expanded] {
+      background: var(--crm-surface) !important;
+      border: 1px solid var(--crm-border) !important;
+      border-radius: 0 0 8px 8px !important;
+      box-shadow: 0 8px 24px rgba(15,23,42,.12) !important;
+      z-index: 10000 !important;
+    }
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices__list--dropdown .choices__item {
+      color: var(--crm-text) !important;
+      font-size: 13px !important;
+      padding: 8px 12px !important;
+    }
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices__list--dropdown .choices__item--selectable.is-highlighted {
+      background: #eef2ff !important;
+      color: var(--crm-accent) !important;
+    }
+    #modalAgregarVenta .egs-cliente-choices-wrap .choices__list--dropdown .choices__item[data-value="nuevo"] {
+      color: #1e40af !important;
+      font-weight: 700 !important;
+      border-top: 1px solid var(--crm-border);
+    }
 </style>
 
 <div class="content-wrapper">
@@ -1260,24 +1317,22 @@ MODAL AGREGAR PRODUCTO
             </div>
             
             <!--=====================================
-            CLIENTE (obligatorio)
+            CLIENTE (obligatorio) – Choices.js buscador
             ======================================-->
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-user"></i> Cliente</span>
-                <select class="form-control input-lg" id="egs_clienteVentaR" name="id_cliente" required>
-                  <option value="">-- Seleccionar cliente * --</option>
-                  <option value="nuevo" style="color:#1e40af;font-weight:700;">+ Agregar nuevo cliente</option>
-                  <?php
-                    $clientesVR = ControladorClientes::ctrMostrarClientes(null, null);
-                    if (is_array($clientesVR)) {
-                      foreach ($clientesVR as $clVR) {
-                        echo '<option value="'.intval($clVR["id"]).'" data-nombre="'.htmlspecialchars($clVR["nombre"]).'">'.htmlspecialchars($clVR["nombre"]).'</option>';
-                      }
+            <div class="form-group egs-cliente-choices-wrap">
+              <label style="font-size:12px;font-weight:600;color:var(--crm-text2);margin-bottom:6px;display:block"><i class="fas fa-user" style="margin-right:4px;opacity:.6"></i> Cliente <span style="color:#dc2626">*</span></label>
+              <select id="egs_clienteVentaR" name="id_cliente" required>
+                <option value="">Buscar cliente...</option>
+                <option value="nuevo">+ Agregar nuevo cliente</option>
+                <?php
+                  $clientesVR = ControladorClientes::ctrMostrarClientes(null, null);
+                  if (is_array($clientesVR)) {
+                    foreach ($clientesVR as $clVR) {
+                      echo '<option value="'.intval($clVR["id"]).'" data-nombre="'.htmlspecialchars($clVR["nombre"]).'">'.htmlspecialchars($clVR["nombre"]).'</option>';
                     }
-                  ?>
-                </select>
-              </div>
+                  }
+                ?>
+              </select>
             </div>
 
             <!-- Sección para agregar nuevo cliente (oculta por defecto) -->
@@ -2067,10 +2122,32 @@ MODAL AGREGAR PRODUCTO
 // ═══════════════════════════════════════════════
 (function(){
   var _deVR_saldo = 0;
+  var _clienteChoices = null;
+  var _clienteSelect = document.getElementById('egs_clienteVentaR');
+
+  // ── Inicializar Choices.js en el select de cliente ──
+  function initClienteChoices() {
+    if (_clienteChoices) { _clienteChoices.destroy(); }
+    _clienteChoices = new Choices(_clienteSelect, {
+      searchEnabled: true,
+      shouldSort: false,
+      removeItemButton: false,
+      placeholderValue: 'Buscar cliente...',
+      searchPlaceholderValue: 'Escribe para buscar...',
+      itemSelectText: '',
+      noResultsText: 'Sin resultados',
+      noChoicesText: 'Sin opciones'
+    });
+  }
+
+  // Inicializar cuando se abre el modal (para que el DOM esté visible)
+  $('#modalAgregarVenta').on('shown.bs.modal', function(){
+    if (!_clienteChoices) { initClienteChoices(); }
+  });
 
   // ── Mostrar/ocultar sección nuevo cliente y dinero electrónico ──
-  $('#egs_clienteVentaR').on('change', function(){
-    var val = $(this).val();
+  _clienteSelect.addEventListener('change', function(){
+    var val = this.value;
 
     // Si eligió "nuevo cliente"
     if (val === 'nuevo') {
@@ -2091,7 +2168,8 @@ MODAL AGREGAR PRODUCTO
     
     // Auto-rellenar nombre del cliente
     if (idCliente > 0) {
-      var nombreSel = $(this).find('option:selected').data('nombre') || $(this).find('option:selected').text();
+      var $sel = $(_clienteSelect);
+      var nombreSel = $sel.find('option:selected').data('nombre') || $sel.find('option:selected').text();
       $('#nombrecliente').val(nombreSel);
     } else {
       $('#nombrecliente').val('');
@@ -2217,14 +2295,20 @@ MODAL AGREGAR PRODUCTO
       dataType: 'json',
       success: function(resp) {
         if (resp.status === 'ok' && resp.id > 0) {
-          // Agregar la nueva opción al select y seleccionarla
-          var $newOpt = $('<option>', {
-            value: resp.id,
-            text: resp.nombre,
-            'data-nombre': resp.nombre
-          });
-          $select.append($newOpt);
-          $select.val(resp.id);
+          // Agregar la nueva opción via Choices.js y seleccionarla
+          if (_clienteChoices) {
+            _clienteChoices.setChoices([{
+              value: String(resp.id),
+              label: resp.nombre,
+              selected: true,
+              customProperties: { nombre: resp.nombre }
+            }], 'value', 'label', false);
+            _clienteChoices.setChoiceByValue(String(resp.id));
+          } else {
+            var $newOpt = $('<option>', { value: resp.id, text: resp.nombre, 'data-nombre': resp.nombre });
+            $select.append($newOpt);
+            $select.val(resp.id);
+          }
           $('#nombrecliente').val(resp.nombre);
           $('#nuevoClienteSection').hide();
 
