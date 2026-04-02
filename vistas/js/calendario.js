@@ -197,6 +197,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 info.el.style.setProperty('background-color', color, 'important');
                 info.el.style.setProperty('border-color', color, 'important');
             }
+            // Marcar el elemento con el ID de la cita para poder localizarlo
+            info.el.setAttribute('data-cita-id', info.event.id);
         },
 
         dateClick: function (info) {
@@ -797,6 +799,40 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     calendar.render();
+
+    /* ═══════════════════════════════════════════
+       Auto-open cita modal from URL param
+       ═══════════════════════════════════════════ */
+    (function() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var pendingCitaId = urlParams.get('citaId');
+        if (!pendingCitaId) return;
+
+        // Esperar a que FullCalendar cargue los eventos
+        var intentos = 0;
+        var maxIntentos = 50; // 10 segundos máximo
+        var checker = setInterval(function() {
+            intentos++;
+            var ev = calendar.getEventById(pendingCitaId);
+            if (ev) {
+                clearInterval(checker);
+                // Navegar a la fecha del evento
+                calendar.gotoDate(ev.start);
+                // Esperar que el DOM se actualice y hacer click en el evento
+                setTimeout(function() {
+                    var el = document.querySelector('[data-cita-id="' + pendingCitaId + '"]');
+                    if (el) {
+                        el.click();
+                    }
+                    // Limpiar el parámetro de la URL sin recargar
+                    var cleanUrl = window.location.pathname + '?ruta=pantallacitas';
+                    window.history.replaceState({}, '', cleanUrl);
+                }, 400);
+            } else if (intentos >= maxIntentos) {
+                clearInterval(checker);
+            }
+        }, 200);
+    })();
 
     /* ═══════════════════════════════════════════
        Helper Functions

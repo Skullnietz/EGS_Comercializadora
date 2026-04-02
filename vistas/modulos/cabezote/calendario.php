@@ -682,7 +682,7 @@
         // Botones de acción
         var actionsHtml = '<div class="egs-cal-event-actions">';
         if (ev.id_orden) {
-          actionsHtml += '<a href="index.php?ruta=infoOrden&idOrden=' + ev.id_orden + '" class="egs-cal-btn-orden"><i class="fa-solid fa-eye"></i> Orden</a>';
+          actionsHtml += '<a href="index.php?ruta=pantallacitas&citaId=' + ev.id + '" class="egs-cal-btn-orden"><i class="fa-solid fa-eye"></i> Orden</a>';
         }
         if (gcalUrl) {
           actionsHtml += '<a href="' + gcalUrl + '" target="_blank" class="egs-cal-btn-gcal"><i class="fa-brands fa-google"></i> Calendar</a>';
