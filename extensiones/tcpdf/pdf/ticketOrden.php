@@ -543,6 +543,8 @@ class ImprimirTicketsOrden{
                 <td align="center" colspan="3">
                   <div style="border:3px solid #000;padding:15px;margin:10px 0;text-align:center">';
 
+      $esEstadoREV = (stripos($estadoOrden, 'REV') !== false);
+
       if ($ordenesEnPrograma == 0) {
           // PRIMERA ORDEN EN EL PROGRAMA - Mensaje de bienvenida
           echo '    <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:8px">
@@ -560,10 +562,16 @@ class ImprimirTicketsOrden{
                         * +3 órdenes entregadas: <b>2%</b> de recompensa<br>
                         * +5 órdenes entregadas: <b>3%</b> de recompensa
                       </div>
-                    </div>
-                    <div style="font-size:13px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:8px">
-                      Esta orden te generará $'.number_format($montoGenerado, 2).' en dinero electrónico al ser entregada
                     </div>';
+          if ($esEstadoREV) {
+              echo '  <div style="font-size:13px;color:#000;font-weight:700;margin-top:8px;border:2px solid #000;padding:8px">
+                        Tu equipo está en revisión. Es muy pronto para evaluar tu retorno en dinero electrónico.
+                      </div>';
+          } else {
+              echo '  <div style="font-size:13px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:8px">
+                        Esta orden te generará $'.number_format($montoGenerado, 2).' en dinero electrónico al ser entregada
+                      </div>';
+          }
       } else {
           // CLIENTE CON HISTORIAL - Mostrar saldo y recompensa generada
           echo '    <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:8px">
@@ -575,12 +583,19 @@ class ImprimirTicketsOrden{
                       <div style="font-size:10px;color:#000">Nivel: '.$porcentajeCliente.'% | '.$entregadasCliente.' órdenes entregadas</div>
                     </div>';
 
-          $textoGenerado = ($value["estado"] == "Entregado (Ent)") ? 'generó' : 'generará al ser entregada';
-          echo '  <div style="font-size:14px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:10px;text-align:center">
-                    Esta orden te '.$textoGenerado.'<br>
-                    <span style="font-size:22px;display:block;margin:4px 0">$'.number_format($montoGenerado, 2).'</span>
-                    <span style="font-size:11px;color:#000">en dinero electrónico ('.$porcentajeCliente.'% de $'.number_format($totalOrden, 2).')</span>
-                  </div>';
+          if ($esEstadoREV) {
+              echo '  <div style="font-size:14px;color:#000;font-weight:700;margin-top:8px;border:2px solid #000;padding:10px;text-align:center">
+                        Tu equipo está en revisión.<br>
+                        <span style="font-size:12px;display:block;margin:4px 0">Es muy pronto para evaluar tu retorno en dinero electrónico.</span>
+                      </div>';
+          } else {
+              $textoGenerado = ($value["estado"] == "Entregado (Ent)") ? 'generó' : 'generará al ser entregada';
+              echo '  <div style="font-size:14px;color:#000;font-weight:900;margin-top:8px;border:2px solid #000;padding:10px;text-align:center">
+                        Esta orden te '.$textoGenerado.'<br>
+                        <span style="font-size:22px;display:block;margin:4px 0">$'.number_format($montoGenerado, 2).'</span>
+                        <span style="font-size:11px;color:#000">en dinero electrónico ('.$porcentajeCliente.'% de $'.number_format($totalOrden, 2).')</span>
+                      </div>';
+          }
 
           echo '    <div style="font-size:10px;color:#000;margin-top:6px">Tu dinero electrónico vence cada 6 meses. ¡Úsalo antes!</div>';
       }
