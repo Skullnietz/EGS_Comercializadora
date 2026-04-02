@@ -88,13 +88,13 @@ class ModeloCitas
 			} catch (Exception $e) {}
 		}
 
-		// Consultar técnicos (BD ecommerce — tabla usuarios)
+		// Consultar técnicos (BD ecommerce — tabla tecnicos)
 		$tecnicoMap = array();
 		if (!empty($tecnicoIds)) {
 			$tecnicoIds = array_unique($tecnicoIds);
 			$inTec = implode(',', $tecnicoIds);
 			try {
-				$stmtTec = Conexion::conectar()->prepare("SELECT id, nombre, foto FROM usuarios WHERE id IN ($inTec)");
+				$stmtTec = Conexion::conectar()->prepare("SELECT id, nombre FROM tecnicos WHERE id IN ($inTec)");
 				$stmtTec->execute();
 				$tecnicos = $stmtTec->fetchAll(PDO::FETCH_ASSOC);
 				$stmtTec = null;
@@ -104,13 +104,13 @@ class ModeloCitas
 			} catch (Exception $e) {}
 		}
 
-		// Consultar asesores (BD ecommerce — tabla usuarios)
+		// Consultar asesores (BD ecommerce — tabla asesores)
 		$asesorMap = array();
 		if (!empty($asesorIds)) {
 			$asesorIds = array_unique($asesorIds);
 			$inAs = implode(',', $asesorIds);
 			try {
-				$stmtAs = Conexion::conectar()->prepare("SELECT id, nombre, foto FROM usuarios WHERE id IN ($inAs)");
+				$stmtAs = Conexion::conectar()->prepare("SELECT id, nombre FROM asesores WHERE id IN ($inAs)");
 				$stmtAs->execute();
 				$asesores = $stmtAs->fetchAll(PDO::FETCH_ASSOC);
 				$stmtAs = null;
@@ -139,9 +139,7 @@ class ModeloCitas
 			$c["cliente_nombre"] = "";
 			$c["cliente_telefono"] = "";
 			$c["tecnico_nombre"] = "";
-			$c["tecnico_foto"] = "";
 			$c["asesor_nombre"] = "";
-			$c["asesor_foto"] = "";
 			$c["orden_estado"] = "";
 			$c["orden_portada"] = "";
 			$c["orden_marca"] = "";
@@ -172,15 +170,13 @@ class ModeloCitas
 				}
 				// Técnico
 				if (!empty($o["id_tecnico"]) && isset($tecnicoMap[intval($o["id_tecnico"])])) {
-					$t = $tecnicoMap[intval($o["id_tecnico"])];
+				$t = $tecnicoMap[intval($o["id_tecnico"])];
 					$c["tecnico_nombre"] = $t["nombre"];
-					$c["tecnico_foto"] = isset($t["foto"]) ? $t["foto"] : "";
 				}
 				// Asesor
 				if (!empty($o["id_Asesor"]) && isset($asesorMap[intval($o["id_Asesor"])])) {
 					$a = $asesorMap[intval($o["id_Asesor"])];
 					$c["asesor_nombre"] = $a["nombre"];
-					$c["asesor_foto"] = isset($a["foto"]) ? $a["foto"] : "";
 				}
 			}
 		}
