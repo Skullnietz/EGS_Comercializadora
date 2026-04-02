@@ -1273,38 +1273,46 @@ MODAL AGREGAR PRODUCTO
             </div>
             
             <!--=====================================
-            NOMBRE CLIENTE
-            ======================================-->
-            <div class="form-group">
-              	
-             	<div class="input-group">
-              		
-              		<span class="input-group-addon"><i class="fas fa-user"></i></span>
-                   	<input id="nombrecliente" type="text" class="form-control input-lg" name="nombreCliente" placeholder="Nombre del cliente">    
-
-              	</div>
-
-            </div>
-
-            <!--=====================================
-            BUSCAR CLIENTE REGISTRADO (para dinero electrónico)
+            CLIENTE (obligatorio)
             ======================================-->
             <div class="form-group">
               <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-search"></i></span>
-                <select class="form-control input-lg" id="egs_clienteVentaR" name="id_cliente">
-                  <option value="0">Vincular cliente registrado (opcional - para dinero electrónico)</option>
+                <span class="input-group-addon"><i class="fas fa-user"></i> Cliente</span>
+                <select class="form-control input-lg" id="egs_clienteVentaR" name="id_cliente" required>
+                  <option value="">-- Seleccionar cliente * --</option>
+                  <option value="nuevo" style="color:#1e40af;font-weight:700;">+ Agregar nuevo cliente</option>
                   <?php
                     $clientesVR = ControladorClientes::ctrMostrarClientes(null, null);
                     if (is_array($clientesVR)) {
                       foreach ($clientesVR as $clVR) {
-                        echo '<option value="'.intval($clVR["id"]).'">'.htmlspecialchars($clVR["nombre"]).'</option>';
+                        echo '<option value="'.intval($clVR["id"]).'" data-nombre="'.htmlspecialchars($clVR["nombre"]).'">'.htmlspecialchars($clVR["nombre"]).'</option>';
                       }
                     }
                   ?>
                 </select>
               </div>
             </div>
+
+            <!-- Sección para agregar nuevo cliente (oculta por defecto) -->
+            <div id="nuevoClienteSection" style="display:none;background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px;margin-bottom:12px">
+              <div style="font-weight:700;color:#1e40af;margin-bottom:8px"><i class="fas fa-user-plus"></i> Nuevo Cliente</div>
+              <div class="form-group" style="margin-bottom:8px">
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fas fa-user"></i></span>
+                  <input type="text" class="form-control input-lg" id="nuevoClienteNombre" placeholder="Nombre del cliente *">
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fab fa-whatsapp" style="color:#25d366"></i></span>
+                  <input type="text" class="form-control input-lg" id="nuevoClienteWhatsapp" placeholder="WhatsApp del cliente *">
+                </div>
+              </div>
+              <div id="nuevoClienteError" style="display:none;color:#dc2626;font-size:12px;margin-top:6px"></div>
+            </div>
+
+            <!-- Campo oculto para nombre del cliente (se auto-rellena) -->
+            <input type="hidden" id="nombrecliente" name="nombreCliente" value="">
 
             <!-- Sección dinero electrónico (oculta hasta seleccionar cliente) -->
             <div id="egs_deVentaR_section" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:12px">
@@ -2100,13 +2108,40 @@ MODAL AGREGAR PRODUCTO
 
 <script>
 // ═══════════════════════════════════════════════
-// DINERO ELECTRÓNICO EN VENTAS RÁPIDAS
+// CLIENTE OBLIGATORIO + NUEVO CLIENTE + DINERO ELECTRÓNICO
 // ═══════════════════════════════════════════════
 (function(){
   var _deVR_saldo = 0;
 
+  // ── Mostrar/ocultar sección nuevo cliente y dinero electrónico ──
   $('#egs_clienteVentaR').on('change', function(){
-    var idCliente = parseInt($(this).val()) || 0;
+    var val = $(this).val();
+
+    // Si eligió "nuevo cliente"
+    if (val === 'nuevo') {
+      $('#nuevoClienteSection').slideDown(200);
+      $('#egs_deVentaR_section').hide();
+      $('#egs_montoCanjeElectronicoVenta').val(0);
+      $('#nombrecliente').val('');
+      return;
+    }
+
+    // Si eligió un cliente existente
+    $('#nuevoClienteSection').slideUp(200);
+    $('#nuevoClienteNombre').val('');
+    $('#nuevoClienteWhatsapp').val('');
+    $('#nuevoClienteError').hide();
+
+    var idCliente = parseInt(val) || 0;
+    
+    // Auto-rellenar nombre del cliente
+    if (idCliente > 0) {
+      var nombreSel = $(this).find('option:selected').data('nombre') || $(this).find('option:selected').text();
+      $('#nombrecliente').val(nombreSel);
+    } else {
+      $('#nombrecliente').val('');
+    }
+
     if (idCliente <= 0) {
       $('#egs_deVentaR_section').hide();
       $('#egs_montoCanjeElectronicoVenta').val(0);
@@ -2177,5 +2212,83 @@ MODAL AGREGAR PRODUCTO
     if (val < 0) val = 0;
     $('#egs_montoCanjeElectronicoVenta').val(val.toFixed(2));
   });
+
+  // ── Interceptar envío del formulario para validar/crear cliente ──
+  $('#modalAgregarVenta form').on('submit', function(e){
+    var $select = $('#egs_clienteVentaR');
+    var val = $select.val();
+
+    // Validar que se seleccionó un cliente
+    if (!val || val === '') {
+      e.preventDefault();
+      swal({
+        type: 'warning',
+        title: 'Cliente obligatorio',
+        text: 'Debes seleccionar o agregar un cliente para registrar la venta.',
+        confirmButtonText: 'Entendido'
+      });
+      return false;
+    }
+
+    // Si es cliente existente, dejar pasar
+    if (val !== 'nuevo') {
+      return true;
+    }
+
+    // Si es nuevo cliente, validar campos y crear vía AJAX
+    e.preventDefault();
+    var nombre = $.trim($('#nuevoClienteNombre').val());
+    var whatsapp = $.trim($('#nuevoClienteWhatsapp').val());
+
+    if (nombre === '' || whatsapp === '') {
+      $('#nuevoClienteError').text('El nombre y WhatsApp del nuevo cliente son obligatorios.').show();
+      return false;
+    }
+
+    $('#nuevoClienteError').hide();
+    var $form = $(this);
+    var $btnSubmit = $form.find('button[type="submit"]');
+    $btnSubmit.prop('disabled', true).text('Guardando cliente...');
+
+    $.ajax({
+      url: 'ajax/clientes.ajax.php',
+      method: 'POST',
+      data: {
+        crearClienteRapido: 1,
+        nombreClienteRapido: nombre,
+        whatsappClienteRapido: whatsapp,
+        empresaClienteRapido: $('#id_empresa').val() || 0
+      },
+      dataType: 'json',
+      success: function(resp) {
+        if (resp.status === 'ok' && resp.id > 0) {
+          // Agregar la nueva opción al select y seleccionarla
+          var $newOpt = $('<option>', {
+            value: resp.id,
+            text: resp.nombre,
+            'data-nombre': resp.nombre
+          });
+          $select.append($newOpt);
+          $select.val(resp.id);
+          $('#nombrecliente').val(resp.nombre);
+          $('#nuevoClienteSection').hide();
+
+          // Ahora sí enviar el formulario
+          $btnSubmit.prop('disabled', false).text('Guardar Venta');
+          $form[0].submit();
+        } else {
+          $btnSubmit.prop('disabled', false).text('Guardar Venta');
+          $('#nuevoClienteError').text(resp.mensaje || 'Error al crear el cliente. Intenta de nuevo.').show();
+        }
+      },
+      error: function() {
+        $btnSubmit.prop('disabled', false).text('Guardar Venta');
+        $('#nuevoClienteError').text('Error de conexión. Intenta de nuevo.').show();
+      }
+    });
+
+    return false;
+  });
+
 })();
 </script>
