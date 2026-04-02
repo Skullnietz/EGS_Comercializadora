@@ -363,9 +363,11 @@
                 <button type="button" id="dcBtnReagendar" class="egs-dc-action-btn" style="background:#fffbeb;color:#d97706;border-color:#fde68a;">
                     <i class="fa-solid fa-calendar-pen"></i> Reagendar
                 </button>
+                <?php if (isset($_SESSION["perfil"]) && ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador")): ?>
                 <button type="button" id="dcBtnOcultar" class="egs-dc-action-btn" style="background:#fff;color:#ef4444;border-color:#fecaca;">
                     <i class="fa-solid fa-eye-slash"></i> Ocultar
                 </button>
+                <?php endif; ?>
             </div>
 
         </div>

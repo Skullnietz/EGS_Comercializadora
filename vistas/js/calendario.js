@@ -485,27 +485,29 @@ document.addEventListener('DOMContentLoaded', function () {
             // ═══ TÉCNICO / ASESOR ═══
             var tecNombre = props.tecnico_nombre || '';
             if (tecNombre) {
-                $('#dcTecnicoNombre').text(tecNombre);
+                $('#dcTecnicoNombre').text(tecNombre).css('color', '#334155');
                 var tecFoto = props.tecnico_foto;
                 if (tecFoto) { $('#dcTecnicoFoto').attr('src', tecFoto).show(); $('#dcTecnicoIcon').hide(); }
                 else { $('#dcTecnicoFoto').hide(); $('#dcTecnicoIcon').show(); }
-                $('#dcTecnicoBlock').show();
             } else {
-                $('#dcTecnicoBlock').hide();
+                $('#dcTecnicoNombre').text('Sin asignar').css('color', '#94a3b8');
+                $('#dcTecnicoFoto').hide(); $('#dcTecnicoIcon').show();
             }
+            $('#dcTecnicoBlock').show();
 
             var aseNombre = props.asesor_nombre || '';
             if (aseNombre) {
-                $('#dcAsesorNombre').text(aseNombre);
+                $('#dcAsesorNombre').text(aseNombre).css('color', '#334155');
                 var aseFoto = props.asesor_foto;
                 if (aseFoto) { $('#dcAsesorFoto').attr('src', aseFoto).show(); $('#dcAsesorIcon').hide(); }
                 else { $('#dcAsesorFoto').hide(); $('#dcAsesorIcon').show(); }
-                $('#dcAsesorBlock').show();
             } else {
-                $('#dcAsesorBlock').hide();
+                $('#dcAsesorNombre').text('Sin asignar').css('color', '#94a3b8');
+                $('#dcAsesorFoto').hide(); $('#dcAsesorIcon').show();
             }
+            $('#dcAsesorBlock').show();
 
-            if (!tecNombre && !aseNombre) { $('#dcEquipoSection').hide(); } else { $('#dcEquipoSection').show(); }
+            $('#dcEquipoSection').show();
 
             // ═══ INFO EXTRA (solo si tiene orden) ═══
             if (hasOrden) {
