@@ -145,6 +145,13 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     border-color: #138a1e;
     color: #138a1e;
 }
+.btn-toggle-view:focus {
+    outline: none;
+    box-shadow: none;
+}
+.btn-toggle-view:active:not(.active) {
+    background: #e8f5e9;
+}
 .btn-toggle-view.active {
     background: #138a1e;
     color: #fff;

@@ -19,6 +19,7 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 		{ "targets": [7, 8, 9], "visible": false, "searchable": false },
 		{
 			"targets": [0],
+			"type": "num",
 			"render": function(data, type, row){
 				if(type === 'sort' || type === 'type'){
 					return parseInt(data) || 0;
@@ -57,8 +58,27 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 	}
 });
 
+/* Sincronizar botones con el orden real de la tabla */
+function syncToggleButtons(order){
+	$(".btn-toggle-view").removeClass("active");
+	if(order.length === 1 && order[0][0] === 0){
+		$("#btnOrdenID").addClass("active");
+	} else if(order.length >= 1 && order[0][0] === 9 && order[0][1] === "desc"){
+		$("#btnMejoresClientes").addClass("active");
+	} else if(order.length >= 1 && order[0][0] === 9 && order[0][1] === "asc"){
+		$("#btnMalosClientes").addClass("active");
+	} else {
+		$("#btnOrdenID").addClass("active");
+	}
+}
+
+/* Sincronizar al hacer clic en encabezados de columna */
+tablaClientes.on("order.dt", function(){
+	syncToggleButtons(tablaClientes.order());
+});
+
 /*=============================================
-TOGGLE: Mejores Clientes / Malos Clientes
+TOGGLE: Por ID / Mejores Clientes / Malos Clientes
 =============================================*/
 $("#btnOrdenID").on("click", function(){
 	$(".btn-toggle-view").removeClass("active");
