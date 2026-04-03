@@ -17,7 +17,8 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 	/* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw, 9 = calificación, 10 = ID cliente) */
 	"columnDefs": [
 		{ "targets": [7, 8, 9, 10], "visible": false, "searchable": false },
-		{ "targets": [0], "type": "num" }
+		{ "targets": [10], "type": "num" },
+		{ "targets": [0], "orderData": [10] }
 	],
 
 	/* Default: orden por ID descendente (más recientes primero) */
