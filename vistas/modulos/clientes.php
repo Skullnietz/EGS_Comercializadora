@@ -329,7 +329,6 @@ $(document).ready(function(){
               <th>_ordenes</th>
               <th>_fecha</th>
               <th>_calificacion</th>
-              <th>_id</th>
             </tr>
           </thead>
 
