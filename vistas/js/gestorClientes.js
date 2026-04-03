@@ -22,7 +22,7 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 	],
 
 	/* Default: orden por ID descendente (más recientes primero) */
-	"order": [[0, "desc"]],
+	"order": [[10, "desc"]],
 
 	"language": {
 		"sProcessing":     "Procesando...",
@@ -56,7 +56,7 @@ TOGGLE: Mejores Clientes / Malos Clientes
 $("#btnOrdenID").on("click", function(){
 	$(".btn-toggle-view").removeClass("active");
 	$(this).addClass("active");
-	tablaClientes.order([[0, "desc"]]).draw();
+	tablaClientes.order([[10, "desc"]]).draw();
 });
 
 $("#btnMejoresClientes").on("click", function(){
