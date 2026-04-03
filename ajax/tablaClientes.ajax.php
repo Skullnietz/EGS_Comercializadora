@@ -248,7 +248,7 @@ class TablaClientes{
 			$bh = ClienteBadgesHelper::getInstance();
 
 			$data[] = [
-				($i + 1),
+				$idCliente,
 				$bh->renderWithName($clientes[$i]["nombre"], $idCliente),
 				$nombre_asesor,
 				$contacto,
