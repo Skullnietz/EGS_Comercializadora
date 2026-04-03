@@ -14,13 +14,13 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 	"destroy": true,
 	"processing": true,
 
-	/* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw, 9 = calificación) */
+	/* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw, 9 = calificación, 10 = ID cliente) */
 	"columnDefs": [
-		{ "targets": [7, 8, 9], "visible": false, "searchable": false }
+		{ "targets": [7, 8, 9, 10], "visible": false, "searchable": false }
 	],
 
-	/* Default: mejores clientes (calificación desc + órdenes desc) */
-	"order": [[9, "desc"], [7, "desc"]],
+	/* Default: orden por ID descendente (más recientes primero) */
+	"order": [[10, "desc"]],
 
 	"language": {
 		"sProcessing":     "Procesando...",
@@ -51,6 +51,12 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 /*=============================================
 TOGGLE: Mejores Clientes / Malos Clientes
 =============================================*/
+$("#btnOrdenID").on("click", function(){
+	$(".btn-toggle-view").removeClass("active");
+	$(this).addClass("active");
+	tablaClientes.order([[10, "desc"]]).draw();
+});
+
 $("#btnMejoresClientes").on("click", function(){
 	$(".btn-toggle-view").removeClass("active");
 	$(this).addClass("active");

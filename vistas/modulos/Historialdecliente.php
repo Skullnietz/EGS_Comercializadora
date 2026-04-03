@@ -13,6 +13,11 @@ try {
     $_hc_cliente = ControladorClientes::ctrMostrarClientes("id", $_hc_idCliente);
 } catch (Exception $e) {}
 
+// Usar el nombre completo de la base de datos si está disponible
+if (is_array($_hc_cliente) && !empty($_hc_cliente["nombre"])) {
+    $_hc_nombreCli = htmlspecialchars($_hc_cliente["nombre"]);
+}
+
 $_hc_email = (is_array($_hc_cliente) && isset($_hc_cliente["correo"])) ? $_hc_cliente["correo"] : "";
 $_hc_tel1  = (is_array($_hc_cliente) && isset($_hc_cliente["telefono"])) ? trim($_hc_cliente["telefono"]) : "";
 $_hc_tel2  = (is_array($_hc_cliente) && isset($_hc_cliente["telefonoDos"])) ? trim($_hc_cliente["telefonoDos"]) : "";
@@ -112,6 +117,34 @@ if ($_hc_primeraFecha) {
         else $_hc_antiguedad = $diff->d . " día" . ($diff->d > 1 ? "s" : "");
     } catch (Exception $e) {}
 }
+
+// ── Cache de técnicos y asesores para el historial ──
+$_hc_tecnicosCache = [];
+$_hc_asesoresCache = [];
+
+function _hc_getNombreTecnico($idTec, &$cache) {
+    if (empty($idTec) || $idTec == "0") return "Sin asignar";
+    if (isset($cache[$idTec])) return $cache[$idTec];
+    try {
+        $tec = ControladorTecnicos::ctrMostrarTecnicos("id", $idTec);
+        $cache[$idTec] = isset($tec["nombre"]) ? $tec["nombre"] : "Sin asignar";
+    } catch (Exception $e) {
+        $cache[$idTec] = "Sin asignar";
+    }
+    return $cache[$idTec];
+}
+
+function _hc_getNombreAsesor($idAs, &$cache) {
+    if (empty($idAs) || $idAs == "0") return "Sin asignar";
+    if (isset($cache[$idAs])) return $cache[$idAs];
+    try {
+        $as = Controladorasesores::ctrMostrarAsesoresEleg("id", $idAs);
+        $cache[$idAs] = isset($as["nombre"]) ? $as["nombre"] : "Sin asignar";
+    } catch (Exception $e) {
+        $cache[$idAs] = "Sin asignar";
+    }
+    return $cache[$idAs];
+}
 ?>
 
 <style>
@@ -164,6 +197,14 @@ if ($_hc_primeraFecha) {
         <div style="flex:1;min-width:200px">
           <div style="font-size:18px;font-weight:800;color:#0f172a;margin-bottom:4px"><?php echo $_hc_nombreCli; ?></div>
           <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#64748b">
+            <?php
+              // Mostrar asesor del cliente
+              $idAsesorCliente = (is_array($_hc_cliente) && isset($_hc_cliente["id_Asesor"])) ? $_hc_cliente["id_Asesor"] : "";
+              $nombreAsesorCliente = _hc_getNombreAsesor($idAsesorCliente, $_hc_asesoresCache);
+              if ($nombreAsesorCliente !== "Sin asignar"):
+            ?>
+              <span><i class="fa-solid fa-headphones" style="margin-right:4px;color:#6366f1"></i>Asesor: <strong><?php echo htmlspecialchars($nombreAsesorCliente); ?></strong></span>
+            <?php endif; ?>
             <?php if (!empty($_hc_email)): ?>
               <?php if ($_hc_emailOk): ?>
                 <a href="mailto:<?php echo htmlspecialchars($_hc_email); ?>" style="text-decoration:none">
@@ -289,6 +330,8 @@ if ($_hc_primeraFecha) {
                   <th>Orden</th>
                   <th style="width:56px"></th>
                   <th>Equipo</th>
+                  <th>Técnico</th>
+                  <th>Asesor</th>
                   <th>Estado</th>
                   <th style="text-align:right">Total</th>
                   <th>Ingreso</th>
@@ -342,6 +385,12 @@ if ($_hc_primeraFecha) {
                       .'&tecnico='.(isset($o["id_tecnico"]) ? $o["id_tecnico"] : '')
                       .'&tecnicodos='.(isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : '')
                       .'&pedido='.(isset($o["id_pedido"]) ? $o["id_pedido"] : '');
+
+                  // Nombres de técnico y asesor
+                  $idTec = isset($o["id_tecnico"]) ? $o["id_tecnico"] : "";
+                  $nombreTecnico = _hc_getNombreTecnico($idTec, $_hc_tecnicosCache);
+                  $idAsesor = isset($o["id_Asesor"]) ? $o["id_Asesor"] : "";
+                  $nombreAsesor = _hc_getNombreAsesor($idAsesor, $_hc_asesoresCache);
                 ?>
                 <tr>
                   <td><span style="font-weight:700;color:#6366f1">#<?php echo $o["id"]; ?></span></td>
@@ -365,6 +414,16 @@ if ($_hc_primeraFecha) {
                     <?php if (!empty($o["numeroDeSerieDelEquipo"])): ?>
                       <div style="font-size:10px;color:#94a3b8">S/N: <?php echo htmlspecialchars($o["numeroDeSerieDelEquipo"]); ?></div>
                     <?php endif; ?>
+                  </td>
+                  <td>
+                    <div style="font-size:12px;font-weight:600;color:#0f172a">
+                      <i class="fa-solid fa-screwdriver-wrench" style="color:#94a3b8;margin-right:3px;font-size:10px"></i><?php echo htmlspecialchars($nombreTecnico); ?>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="font-size:12px;font-weight:600;color:#0f172a">
+                      <i class="fa-solid fa-headphones" style="color:#94a3b8;margin-right:3px;font-size:10px"></i><?php echo htmlspecialchars($nombreAsesor); ?>
+                    </div>
                   </td>
                   <td><span class="hc-badge" style="background:<?php echo $bc; ?>;color:<?php echo $btc; ?>"><?php echo $elbl; ?></span></td>
                   <td style="text-align:right;font-weight:700">$<?php echo number_format($total, 0); ?></td>

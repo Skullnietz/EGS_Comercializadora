@@ -257,7 +257,8 @@ class TablaClientes{
 				$fechaDisplay,
 				$totalOrdenes,
 				$fecha ? $fecha : "2000-01-01",
-				$califRatio
+				$califRatio,
+				$idCliente
 			];
 		}
 
