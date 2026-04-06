@@ -195,7 +195,8 @@
       "Bash(grep -r \"CREATE TABLE.*clientesTienda\\\\|ALTER TABLE.*clientesTienda\" /c/Users/black/Desktop/EGS --include=*.php --include=*.sql)",
       "Bash(find /c/Users/black/Desktop/EGS -type f \\\\\\(-name *.sql -o -name *.dump \\\\\\))",
       "Bash(grep -E \"\\\\.\\(php|html\\)$\")",
-      "Bash(grep -r \"qrcode\\\\|QR\" /c/Users/black/Desktop/EGS/extensiones/tcpdf/pdf/*.php)"
+      "Bash(grep -r \"qrcode\\\\|QR\" /c/Users/black/Desktop/EGS/extensiones/tcpdf/pdf/*.php)",
+      "Bash(find /c/Users/black/Desktop/EGS -type f \\\\\\(-name *.sql -o -name *.txt \\\\\\))"
     ]
   }
 }

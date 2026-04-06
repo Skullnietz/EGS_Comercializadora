@@ -155,6 +155,33 @@ class ControladorClientes{
 			}
 
 
+			// Validar duplicados antes de insertar
+			$duplicado = ModeloClientes::mdlValidarDuplicado($tabla, $_POST["AgregarNombreCliente"], $whatsapp);
+			if($duplicado){
+				$nombreDB = strtolower(trim($duplicado["nombre"]));
+				$nombreInput = strtolower(trim($_POST["AgregarNombreCliente"]));
+				$whatsLimpio = trim($whatsapp);
+
+				if($nombreDB === $nombreInput && !empty($whatsLimpio) && $whatsLimpio !== "sin whatsapp" &&
+				   ($duplicado["telefonoDos"] === $whatsLimpio || $duplicado["telefono"] === $whatsLimpio)){
+					$msgDup = "Ya existe un cliente con el mismo nombre y WhatsApp: \"" . $duplicado["nombre"] . "\"";
+				} elseif($nombreDB === $nombreInput){
+					$msgDup = "Ya existe un cliente con el nombre \"" . $duplicado["nombre"] . "\"";
+				} else {
+					$msgDup = "El WhatsApp " . $whatsLimpio . " ya está registrado con el cliente \"" . $duplicado["nombre"] . "\"";
+				}
+
+				echo '<script>
+					swal({
+						title: "¡Cliente duplicado!",
+						text: "' . $msgDup . '",
+						type: "warning",
+						confirmButtonText: "¡Entendido!"
+					});
+				</script>';
+				return;
+			}
+
 			$datos = array("AgregarNombreCliente" =>$_POST["AgregarNombreCliente"],
 					  	   "AgregarCorreoCliente" =>$_POST["AgregarCorreoCliente"],
 					       "telefonoUnoCliente" => $telefonoCasa,
@@ -218,10 +245,37 @@ class ControladorClientes{
   	AGREGAR CLIENTE
   	=============================================*/	
 	function ctrMostrarAgregarClienteDnetroDeVenta(){
-		
+
 		if (isset($_POST["AgregarNombreCliente"])){
-			
+
 			$tabla = "clientesTienda";
+
+			$whatsVenta = isset($_POST["telefonoDosCliente"]) ? trim($_POST["telefonoDosCliente"]) : "";
+			$duplicado = ModeloClientes::mdlValidarDuplicado($tabla, $_POST["AgregarNombreCliente"], $whatsVenta);
+			if($duplicado){
+				$nombreDB = strtolower(trim($duplicado["nombre"]));
+				$nombreInput = strtolower(trim($_POST["AgregarNombreCliente"]));
+				$whatsLimpio = trim($whatsVenta);
+
+				if($nombreDB === $nombreInput){
+					$msgDup = "Ya existe un cliente con el nombre \"" . $duplicado["nombre"] . "\"";
+				} elseif(!empty($whatsLimpio) && $whatsLimpio !== "sin whatsapp" &&
+				   ($duplicado["telefonoDos"] === $whatsLimpio || $duplicado["telefono"] === $whatsLimpio)){
+					$msgDup = "El WhatsApp " . $whatsLimpio . " ya está registrado con \"" . $duplicado["nombre"] . "\"";
+				} else {
+					$msgDup = "Ya existe un cliente con datos similares: \"" . $duplicado["nombre"] . "\"";
+				}
+
+				echo '<script>
+					swal({
+						title: "¡Cliente duplicado!",
+						text: "' . $msgDup . '",
+						type: "warning",
+						confirmButtonText: "¡Entendido!"
+					});
+				</script>';
+				return;
+			}
 
 			$datos = array("AgregarNombreCliente" =>$_POST["AgregarNombreCliente"],
 					  	   "AgregarCorreoCliente" =>$_POST["AgregarCorreoCliente"],
@@ -290,6 +344,22 @@ static public function ctrEditarCliente(){
 			   preg_match('/^[^0-9][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[@][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,4}$/', $_POST["EditarCorreoCliente"])){
 
 				$tabla = "clientesTienda";
+
+				// Validar duplicados al editar (excluyendo el cliente actual)
+				$whatsEdit = isset($_POST["EditarSegundoNumeroDeTel"]) ? trim($_POST["EditarSegundoNumeroDeTel"]) : "";
+				$duplicadoEdit = ModeloClientes::mdlValidarDuplicado($tabla, "", $whatsEdit, intval($_POST["idCliente"]));
+				if($duplicadoEdit && !empty($whatsEdit) && $whatsEdit !== "sin whatsapp"){
+					$msgDupEdit = "El WhatsApp " . $whatsEdit . " ya está registrado con el cliente \"" . $duplicadoEdit["nombre"] . "\"";
+					echo '<script>
+						swal({
+							title: "¡WhatsApp duplicado!",
+							text: "' . $msgDupEdit . '",
+							type: "warning",
+							confirmButtonText: "¡Entendido!"
+						});
+					</script>';
+					return;
+				}
 
 				$datos = array("id" => $_POST["idCliente"],
 							   "editarNombreDelCliente" => $_POST["editarNombreDelCliente"],

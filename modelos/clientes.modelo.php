@@ -87,8 +87,44 @@ class ModeloClientes{
 	}
 	
 	/*=============================================
+	VALIDAR DUPLICADOS POR NOMBRE O WHATSAPP
+	=============================================*/
+	static public function mdlValidarDuplicado($tabla, $nombre, $whatsapp, $excluirId = null){
+		$condiciones = [];
+		$params = [];
+
+		if(!empty($nombre)){
+			$condiciones[] = "LOWER(TRIM(nombre)) = LOWER(TRIM(:nombre))";
+			$params[":nombre"] = $nombre;
+		}
+		if(!empty($whatsapp) && $whatsapp !== "sin whatsapp" && $whatsapp !== "sin Telefono"){
+			$condiciones[] = "(telefonoDos = :whatsapp OR telefono = :whatsapp2)";
+			$params[":whatsapp"] = $whatsapp;
+			$params[":whatsapp2"] = $whatsapp;
+		}
+
+		if(empty($condiciones)) return null;
+
+		$sql = "SELECT id, nombre, telefono, telefonoDos FROM $tabla WHERE (" . implode(" OR ", $condiciones) . ")";
+		if($excluirId !== null){
+			$sql .= " AND id != :excluirId";
+			$params[":excluirId"] = $excluirId;
+		}
+		$sql .= " LIMIT 1";
+
+		$stmt = Conexion::conectar()->prepare($sql);
+		foreach($params as $k => $v){
+			$stmt->bindValue($k, $v, PDO::PARAM_STR);
+		}
+		$stmt->execute();
+		$resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt = null;
+		return $resultado ? $resultado : null;
+	}
+
+	/*=============================================
   	AGREGAR USUARIO
-  	=============================================*/	
+  	=============================================*/
 	function mdlAgregarCliente($tabla,$datos){
 		
 		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(nombre, id_Asesor, correo, telefono, telefonoDos, etiqueta, id_empresa) VALUES (:nombre, :id_Asesor, :correo, :telefono, :telefonoDos, :etiqueta, :id_empresa)");

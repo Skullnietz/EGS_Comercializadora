@@ -118,6 +118,20 @@ if ($_hc_primeraFecha) {
     } catch (Exception $e) {}
 }
 
+// ── Dinero electrónico / Monedero ──
+$_hc_recompensas = null;
+$_hc_saldo = 0;
+$_hc_porcentaje = 0;
+$_hc_ordenesPrograma = 0;
+try {
+    $_hc_recompensas = ControladorRecompensas::ctrObtenerInfoRecompensas($_hc_idCliente);
+    if (is_array($_hc_recompensas)) {
+        $_hc_saldo = floatval($_hc_recompensas["saldo"]);
+        $_hc_porcentaje = intval($_hc_recompensas["porcentaje"]);
+        $_hc_ordenesPrograma = intval($_hc_recompensas["ordenes_en_programa"]);
+    }
+} catch (Exception $e) {}
+
 // ── Cache de técnicos y asesores para el historial ──
 $_hc_tecnicosCache = [];
 $_hc_asesoresCache = [];
@@ -299,6 +313,49 @@ function _hc_getNombreAsesor($idAs, &$cache) {
           <div class="hc-stat-lbl">Pedidos</div>
         </div>
       </div>
+    </div>
+
+    <!-- ══ MONEDERO ELECTRÓNICO ══ -->
+    <div class="hc-card">
+      <div style="padding:20px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <!-- Icono monedero -->
+        <div style="width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(245,158,11,.3)">
+          <i class="fa-solid fa-wallet"></i>
+        </div>
+        <!-- Info principal -->
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:13px;font-weight:600;color:#64748b;margin-bottom:2px">Dinero Electrónico</div>
+          <div style="font-size:28px;font-weight:800;color:<?php echo $_hc_saldo > 0 ? '#16a34a' : '#94a3b8'; ?>;letter-spacing:-.02em">
+            $<?php echo number_format($_hc_saldo, 2); ?>
+          </div>
+        </div>
+        <!-- Detalles -->
+        <div style="display:flex;gap:16px;flex-shrink:0;flex-wrap:wrap">
+          <div style="text-align:center;padding:10px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
+            <div style="font-size:18px;font-weight:800;color:#6366f1"><?php echo $_hc_porcentaje; ?>%</div>
+            <div style="font-size:10px;font-weight:600;color:#94a3b8;margin-top:2px">Recompensa</div>
+          </div>
+          <div style="text-align:center;padding:10px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
+            <div style="font-size:18px;font-weight:800;color:#0f172a"><?php echo $_hc_ordenesPrograma; ?></div>
+            <div style="font-size:10px;font-weight:600;color:#94a3b8;margin-top:2px">En programa</div>
+          </div>
+          <div style="text-align:center;padding:10px 16px;background:<?php echo $_hc_saldo > 0 ? '#f0fdf4' : '#f8fafc'; ?>;border-radius:10px;border:1px solid <?php echo $_hc_saldo > 0 ? '#bbf7d0' : '#e2e8f0'; ?>">
+            <div style="font-size:18px;font-weight:800;color:<?php echo $_hc_saldo > 0 ? '#16a34a' : '#94a3b8'; ?>">$<?php echo number_format($_hc_saldo, 2); ?></div>
+            <div style="font-size:10px;font-weight:600;color:#94a3b8;margin-top:2px">Saldo disponible</div>
+          </div>
+        </div>
+      </div>
+      <?php if ($_hc_saldo > 0): ?>
+        <div style="padding:0 22px 14px;font-size:11px;color:#64748b">
+          <i class="fa-solid fa-circle-info" style="color:#6366f1;margin-right:4px"></i>
+          El saldo se calcula a partir de las órdenes entregadas en los últimos 6 meses. Nivel actual: <strong><?php echo $_hc_porcentaje; ?>%</strong> de recompensa.
+        </div>
+      <?php else: ?>
+        <div style="padding:0 22px 14px;font-size:11px;color:#94a3b8">
+          <i class="fa-solid fa-circle-info" style="margin-right:4px"></i>
+          Este cliente no tiene saldo de dinero electrónico disponible actualmente.
+        </div>
+      <?php endif; ?>
     </div>
 
     <!-- ══ TABS: Órdenes / Pedidos ══ -->
