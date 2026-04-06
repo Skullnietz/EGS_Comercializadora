@@ -129,16 +129,19 @@ $(".tablaClientesOrden").on("click", ".btnEditarCliente", function(){
 })
 
 /*=============================================
-VALIDAR NO REPETIR CLIENTES
+VALIDAR NO REPETIR CLIENTES (por nombre)
 =============================================*/
 $(".nombreCliente").change(function(){
 
-	$(".alert").remove();
+	$(".alert-duplicado-nombre").remove();
 
 	var nombre = $(this).val();
+	if(!nombre || nombre.trim() === "") return;
 
 	var datos = new FormData();
-	datos.append("nombreCliente", nombre);
+	datos.append("validarDuplicadoCliente", true);
+	datos.append("validarNombre", nombre);
+	datos.append("validarWhatsapp", "");
 
 	$.ajax({
 	    url:"ajax/clientes.ajax.php",
@@ -150,9 +153,9 @@ $(".nombreCliente").change(function(){
 	    dataType: "json",
 	    success:function(respuesta){
 
-    		if(respuesta.length != 0){
+    		if(respuesta.duplicado){
 
-    			$(".nombreCliente").parent().after('<div class="alert alert-warning">El cliente ya existe en la base de datos</div>');
+    			$(".nombreCliente").parent().after('<div class="alert alert-warning alert-duplicado-nombre" style="margin-top:5px"><i class="fa fa-exclamation-triangle"></i> El cliente "<strong>' + respuesta.cliente + '</strong>" ya está registrado</div>');
 
 	    		$(".nombreCliente").val("");
 
@@ -162,6 +165,196 @@ $(".nombreCliente").change(function(){
 
    	})
 
+})
+
+/*=============================================
+VALIDAR NO REPETIR NÚMERO DE WHATSAPP (agregar)
+=============================================*/
+$("#whatsapp, .telwhatsapp").on("change blur", function(){
+
+	$(".alert-duplicado-whatsapp").remove();
+
+	var whatsapp = $(this).val();
+	if(!whatsapp || whatsapp.trim() === "") return;
+
+	var whatsappLimpio = whatsapp.replace(/\D/g, "");
+	if(whatsappLimpio.length < 10) return;
+
+	var campo = $(this);
+
+	var datos = new FormData();
+	datos.append("validarDuplicadoCliente", true);
+	datos.append("validarNombre", "");
+	datos.append("validarWhatsapp", whatsappLimpio);
+
+	$.ajax({
+	    url:"ajax/clientes.ajax.php",
+	    method:"POST",
+	    data: datos,
+	    cache: false,
+	    contentType: false,
+	    processData: false,
+	    dataType: "json",
+	    success:function(respuesta){
+
+    		if(respuesta.duplicado){
+
+    			campo.parent().after('<div class="alert alert-warning alert-duplicado-whatsapp" style="margin-top:5px"><i class="fa fa-exclamation-triangle"></i> Este número ya está registrado con el cliente "<strong>' + respuesta.cliente + '</strong>"</div>');
+
+	    		campo.val("");
+
+    		}
+
+	    }
+
+   	})
+
+})
+
+/*=============================================
+VALIDAR NO REPETIR NÚMERO DE TELÉFONO (agregar)
+=============================================*/
+$("#telefono").on("change blur", function(){
+
+	$(".alert-duplicado-telefono").remove();
+
+	var telefono = $(this).val();
+	if(!telefono || telefono.trim() === "") return;
+
+	var telefonoLimpio = telefono.replace(/\D/g, "");
+	if(telefonoLimpio.length < 10) return;
+
+	var campo = $(this);
+
+	var datos = new FormData();
+	datos.append("validarDuplicadoCliente", true);
+	datos.append("validarNombre", "");
+	datos.append("validarWhatsapp", telefonoLimpio);
+
+	$.ajax({
+	    url:"ajax/clientes.ajax.php",
+	    method:"POST",
+	    data: datos,
+	    cache: false,
+	    contentType: false,
+	    processData: false,
+	    dataType: "json",
+	    success:function(respuesta){
+
+    		if(respuesta.duplicado){
+
+    			campo.parent().after('<div class="alert alert-warning alert-duplicado-telefono" style="margin-top:5px"><i class="fa fa-exclamation-triangle"></i> Este número ya está registrado con el cliente "<strong>' + respuesta.cliente + '</strong>"</div>');
+
+	    		campo.val("");
+
+    		}
+
+	    }
+
+   	})
+
+})
+
+/*=============================================
+VALIDAR NO REPETIR WHATSAPP AL EDITAR
+=============================================*/
+$("#EditarSegundoNumeroDeTel").on("change blur", function(){
+
+	$(".alert-duplicado-whatsapp-edit").remove();
+
+	var whatsapp = $(this).val();
+	if(!whatsapp || whatsapp.trim() === "") return;
+
+	var whatsappLimpio = whatsapp.replace(/\D/g, "");
+	if(whatsappLimpio.length < 10) return;
+
+	var idClienteActual = $("#idCliente").val();
+	var campo = $(this);
+
+	var datos = new FormData();
+	datos.append("validarDuplicadoCliente", true);
+	datos.append("validarNombre", "");
+	datos.append("validarWhatsapp", whatsappLimpio);
+	if(idClienteActual) datos.append("validarExcluirId", idClienteActual);
+
+	$.ajax({
+	    url:"ajax/clientes.ajax.php",
+	    method:"POST",
+	    data: datos,
+	    cache: false,
+	    contentType: false,
+	    processData: false,
+	    dataType: "json",
+	    success:function(respuesta){
+
+    		if(respuesta.duplicado){
+
+    			campo.parent().after('<div class="alert alert-warning alert-duplicado-whatsapp-edit" style="margin-top:5px"><i class="fa fa-exclamation-triangle"></i> Este número ya está registrado con el cliente "<strong>' + respuesta.cliente + '</strong>"</div>');
+
+	    		campo.val("");
+
+    		}
+
+	    }
+
+   	})
+
+})
+
+/*=============================================
+VALIDAR NO REPETIR TELÉFONO AL EDITAR
+=============================================*/
+$("#EditarNumeroDelCliente").on("change blur", function(){
+
+	$(".alert-duplicado-telefono-edit").remove();
+
+	var telefono = $(this).val();
+	if(!telefono || telefono.trim() === "") return;
+
+	var telefonoLimpio = telefono.replace(/\D/g, "");
+	if(telefonoLimpio.length < 10) return;
+
+	var idClienteActual = $("#idCliente").val();
+	var campo = $(this);
+
+	var datos = new FormData();
+	datos.append("validarDuplicadoCliente", true);
+	datos.append("validarNombre", "");
+	datos.append("validarWhatsapp", telefonoLimpio);
+	if(idClienteActual) datos.append("validarExcluirId", idClienteActual);
+
+	$.ajax({
+	    url:"ajax/clientes.ajax.php",
+	    method:"POST",
+	    data: datos,
+	    cache: false,
+	    contentType: false,
+	    processData: false,
+	    dataType: "json",
+	    success:function(respuesta){
+
+    		if(respuesta.duplicado){
+
+    			campo.parent().after('<div class="alert alert-warning alert-duplicado-telefono-edit" style="margin-top:5px"><i class="fa fa-exclamation-triangle"></i> Este número ya está registrado con el cliente "<strong>' + respuesta.cliente + '</strong>"</div>');
+
+	    		campo.val("");
+
+    		}
+
+	    }
+
+   	})
+
+})
+
+/*=============================================
+LIMPIAR ALERTAS AL ABRIR MODALES
+=============================================*/
+$("#modalAgregarUsuario").on("show.bs.modal", function(){
+	$(".alert-duplicado-nombre, .alert-duplicado-whatsapp, .alert-duplicado-telefono").remove();
+})
+$("#modalEditarUsuario").on("show.bs.modal", function(){
+	$(".alert-duplicado-whatsapp-edit, .alert-duplicado-telefono-edit").remove();
 })
 
 }); /* end document.ready */
