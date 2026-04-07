@@ -132,20 +132,33 @@ class ModeloRecompensas
     const FECHA_INICIO_PROGRAMA = '2026-04-01';
 
     /*=============================================
-    CALCULAR SALDO DINÁMICO
-    Suma el % correspondiente del total de cada orden,
-    pedido y venta rápida entregados desde el inicio del
-    programa (abril 2026) cuya recompensa no haya vencido
-    (máx 6 meses) y resta los canjes del mismo periodo.
+    FECHA DE CAMBIO A 1% FIJO
+    Antes de esta fecha se aplica el porcentaje por niveles.
+    Desde esta fecha en adelante se aplica 1% para todos.
     =============================================*/
-    static public function mdlCalcularSaldoDinamico($idCliente, $porcentaje)
+    const FECHA_CAMBIO_PORCENTAJE = '2026-04-07';
+
+    /*=============================================
+    CALCULAR SALDO DINÁMICO
+    Divide el cálculo en dos periodos:
+    - Antes de FECHA_CAMBIO_PORCENTAJE: usa el porcentaje
+      histórico del cliente (1%, 2% o 3%) para respetar
+      el dinero ya acumulado.
+    - Desde FECHA_CAMBIO_PORCENTAJE: usa 1% fijo.
+    Resta los canjes del periodo vigente.
+    =============================================*/
+    static public function mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHistorico = null)
     {
+        if ($porcentajeHistorico === null) $porcentajeHistorico = $porcentaje;
+
         $pdo = ConexionWP::conectarWP();
         $hace6meses = date('Y-m-d', strtotime('-6 months'));
-        // La ventana inicia en la fecha más reciente entre hace 6 meses y el inicio del programa
         $fechaDesde = max($hace6meses, self::FECHA_INICIO_PROGRAMA);
+        $fechaCambio = self::FECHA_CAMBIO_PORCENTAJE;
 
-        // 1) Sumar recompensas de órdenes entregadas en la ventana vigente
+        // ── PERIODO HISTÓRICO (antes del cambio, con porcentaje por niveles) ──
+
+        // 1a) Órdenes antes del cambio
         $stmt = $pdo->prepare("
             SELECT COALESCE(SUM(total), 0) as suma_totales
             FROM ordenes
@@ -153,15 +166,16 @@ class ModeloRecompensas
               AND estado LIKE '%Ent%'
               AND fecha_Salida IS NOT NULL
               AND fecha_Salida >= :fechaDesde
+              AND fecha_Salida < :fechaCambio
         ");
         $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmt->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
+        $stmt->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
         $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $sumaTotalesOrdenes = floatval($row["suma_totales"]);
+        $sumaOrdenesAntes = floatval($stmt->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
-        // 2) Sumar recompensas de pedidos entregados en la ventana vigente (ecommerce DB)
         $pdoEc = Conexion::conectar();
+        // 1b) Pedidos antes del cambio
         $stmtPed = $pdoEc->prepare("
             SELECT COALESCE(SUM(total), 0) as suma_totales
             FROM pedidos
@@ -169,30 +183,78 @@ class ModeloRecompensas
               AND estado LIKE '%Entregado%'
               AND fechaEntrega IS NOT NULL
               AND fechaEntrega >= :fechaDesde
+              AND fechaEntrega < :fechaCambio
         ");
         $stmtPed->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmtPed->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
+        $stmtPed->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
         $stmtPed->execute();
-        $rowPed = $stmtPed->fetch(PDO::FETCH_ASSOC);
-        $sumaTotalesPedidos = floatval($rowPed["suma_totales"]);
+        $sumaPedidosAntes = floatval($stmtPed->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
-        // 3) Sumar recompensas de ventas rápidas con cliente asociado (ecommerce DB)
+        // 1c) Ventas antes del cambio
         $stmtVta = $pdoEc->prepare("
             SELECT COALESCE(SUM(pago), 0) as suma_totales
             FROM compras
             WHERE id_cliente = :id_cliente
               AND fecha >= :fechaDesde
+              AND fecha < :fechaCambio
         ");
         $stmtVta->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmtVta->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
+        $stmtVta->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
         $stmtVta->execute();
-        $rowVta = $stmtVta->fetch(PDO::FETCH_ASSOC);
-        $sumaTotalesVentas = floatval($rowVta["suma_totales"]);
+        $sumaVentasAntes = floatval($stmtVta->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
-        $sumaTotales = $sumaTotalesOrdenes + $sumaTotalesPedidos + $sumaTotalesVentas;
-        $acumulado = round($sumaTotales * ($porcentaje / 100), 2);
+        $acumuladoAntes = round(($sumaOrdenesAntes + $sumaPedidosAntes + $sumaVentasAntes) * ($porcentajeHistorico / 100), 2);
 
-        // 4) Restar canjes realizados desde el inicio del programa
+        // ── PERIODO NUEVO (desde el cambio, 1% fijo) ──
+
+        // 2a) Órdenes desde el cambio
+        $stmt2 = $pdo->prepare("
+            SELECT COALESCE(SUM(total), 0) as suma_totales
+            FROM ordenes
+            WHERE id_usuario = :id_cliente
+              AND estado LIKE '%Ent%'
+              AND fecha_Salida IS NOT NULL
+              AND fecha_Salida >= :fechaCambio
+        ");
+        $stmt2->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
+        $stmt2->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
+        $stmt2->execute();
+        $sumaOrdenesDesp = floatval($stmt2->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
+
+        // 2b) Pedidos desde el cambio
+        $stmtPed2 = $pdoEc->prepare("
+            SELECT COALESCE(SUM(total), 0) as suma_totales
+            FROM pedidos
+            WHERE id_cliente = :id_cliente
+              AND estado LIKE '%Entregado%'
+              AND fechaEntrega IS NOT NULL
+              AND fechaEntrega >= :fechaCambio
+        ");
+        $stmtPed2->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
+        $stmtPed2->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
+        $stmtPed2->execute();
+        $sumaPedidosDesp = floatval($stmtPed2->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
+
+        // 2c) Ventas desde el cambio
+        $stmtVta2 = $pdoEc->prepare("
+            SELECT COALESCE(SUM(pago), 0) as suma_totales
+            FROM compras
+            WHERE id_cliente = :id_cliente
+              AND fecha >= :fechaCambio
+        ");
+        $stmtVta2->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
+        $stmtVta2->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
+        $stmtVta2->execute();
+        $sumaVentasDesp = floatval($stmtVta2->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
+
+        $acumuladoDespues = round(($sumaOrdenesDesp + $sumaPedidosDesp + $sumaVentasDesp) * ($porcentaje / 100), 2);
+
+        // ── TOTAL ACUMULADO ──
+        $acumulado = $acumuladoAntes + $acumuladoDespues;
+
+        // 3) Restar canjes realizados desde el inicio del programa
         $stmtCanjes = $pdo->prepare("
             SELECT COALESCE(SUM(ABS(monto)), 0) as total_canjes
             FROM dinero_electronico_movimientos
@@ -217,11 +279,14 @@ class ModeloRecompensas
     (para la vista del monedero público)
     Incluye órdenes, pedidos y ventas rápidas
     =============================================*/
-    static public function mdlObtenerOrdenesConRecompensa($idCliente, $porcentaje)
+    static public function mdlObtenerOrdenesConRecompensa($idCliente, $porcentaje, $porcentajeHistorico = null)
     {
+        if ($porcentajeHistorico === null) $porcentajeHistorico = $porcentaje;
+
         $pdo = ConexionWP::conectarWP();
         $hace6meses = date('Y-m-d', strtotime('-6 months'));
         $fechaDesde = max($hace6meses, self::FECHA_INICIO_PROGRAMA);
+        $fechaCambio = self::FECHA_CAMBIO_PORCENTAJE;
 
         // Órdenes entregadas
         $stmt = $pdo->prepare("
@@ -240,12 +305,14 @@ class ModeloRecompensas
 
         $resultado = array();
         foreach ($ordenes as $ord) {
-            $recompensa = round(floatval($ord["total"]) * ($porcentaje / 100), 2);
+            $pctAplicado = ($ord["fecha_Salida"] < $fechaCambio) ? $porcentajeHistorico : $porcentaje;
+            $recompensa = round(floatval($ord["total"]) * ($pctAplicado / 100), 2);
             $resultado[] = array(
                 "id_orden" => $ord["id"],
                 "fuente" => "orden",
                 "total_orden" => floatval($ord["total"]),
                 "recompensa" => $recompensa,
+                "porcentaje_aplicado" => $pctAplicado,
                 "fecha_entrega" => $ord["fecha_Salida"]
             );
         }
@@ -267,12 +334,14 @@ class ModeloRecompensas
         $pedidos = $stmtPed->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($pedidos as $ped) {
-            $recompensa = round(floatval($ped["total"]) * ($porcentaje / 100), 2);
+            $pctAplicado = ($ped["fechaEntrega"] < $fechaCambio) ? $porcentajeHistorico : $porcentaje;
+            $recompensa = round(floatval($ped["total"]) * ($pctAplicado / 100), 2);
             $resultado[] = array(
                 "id_orden" => $ped["id"],
                 "fuente" => "pedido",
                 "total_orden" => floatval($ped["total"]),
                 "recompensa" => $recompensa,
+                "porcentaje_aplicado" => $pctAplicado,
                 "fecha_entrega" => $ped["fechaEntrega"]
             );
         }
@@ -291,12 +360,14 @@ class ModeloRecompensas
         $ventas = $stmtVta->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($ventas as $vta) {
-            $recompensa = round(floatval($vta["pago"]) * ($porcentaje / 100), 2);
+            $pctAplicado = ($vta["fecha"] < $fechaCambio) ? $porcentajeHistorico : $porcentaje;
+            $recompensa = round(floatval($vta["pago"]) * ($pctAplicado / 100), 2);
             $resultado[] = array(
                 "id_orden" => $vta["id"],
                 "fuente" => "venta",
                 "total_orden" => floatval($vta["pago"]),
                 "recompensa" => $recompensa,
+                "porcentaje_aplicado" => $pctAplicado,
                 "fecha_entrega" => $vta["fecha"]
             );
         }

@@ -1891,7 +1891,7 @@ $('.tablaPedidos tbody').on("click", ".btnEditarPedido", function(){
             window._dePedido_saldo = saldoDE;
             window._dePedido_porcentaje = parseFloat(dataDE.porcentaje) || 1;
             $(".egs_dePedido_saldo").val("$" + saldoDE.toFixed(2));
-            $("#egs_dePedido_nivel").text("Nivel: " + dataDE.porcentaje + "% | " + dataDE.entregadas + " transacciones");
+            $("#egs_dePedido_nivel").text("Recompensa: 1% | " + dataDE.entregadas + " transacciones");
 
             var totalPedido = parseFloat($(".pagoPedidoEdidato").val()) || 0;
             var estadoSeleccionado = $(".EstadoDelPedido").val() || "";

@@ -332,7 +332,7 @@ function _hc_getNombreAsesor($idAs, &$cache) {
         <!-- Detalles -->
         <div style="display:flex;gap:16px;flex-shrink:0;flex-wrap:wrap">
           <div style="text-align:center;padding:10px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-            <div style="font-size:18px;font-weight:800;color:#6366f1"><?php echo $_hc_porcentaje; ?>%</div>
+            <div style="font-size:18px;font-weight:800;color:#6366f1">1%</div>
             <div style="font-size:10px;font-weight:600;color:#94a3b8;margin-top:2px">Recompensa</div>
           </div>
           <div style="text-align:center;padding:10px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
@@ -348,7 +348,7 @@ function _hc_getNombreAsesor($idAs, &$cache) {
       <?php if ($_hc_saldo > 0): ?>
         <div style="padding:0 22px 14px;font-size:11px;color:#64748b">
           <i class="fa-solid fa-circle-info" style="color:#6366f1;margin-right:4px"></i>
-          El saldo se calcula a partir de las órdenes entregadas en los últimos 6 meses. Nivel actual: <strong><?php echo $_hc_porcentaje; ?>%</strong> de recompensa.
+          El saldo se calcula a partir de las órdenes entregadas en los últimos 6 meses. Recompensa: <strong>1%</strong> del total.
         </div>
       <?php else: ?>
         <div style="padding:0 22px 14px;font-size:11px;color:#94a3b8">

@@ -295,11 +295,6 @@ if (is_array($ordenes) && !empty($ordenes)) {
 // Cliente
 $usuario = ControladorClientes::ctrMostrarClientesOrdenes("id", $_GET["cliente"]);
 
-$_historialClienteUrl = "index.php?ruta=Historialdecliente&idCliente="
-	. intval($_GET["cliente"] ?? 0)
-	. "&nombreCliente="
-	. urlencode((string)($usuario["nombre"] ?? "Cliente"));
-
 // Datos de la orden
 foreach ($ordenes as $key => $value) {
 	$portada = $value["portada"];
@@ -464,13 +459,6 @@ function _egsEstadoClass($estado) {
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fas fa-user"></i></span>
 								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" readonly>
-								<?php if ($isAdmin || $isVendedor): ?>
-								<span class="input-group-btn">
-									<a class="btn btn-default" href="<?php echo htmlspecialchars($_historialClienteUrl); ?>" target="_blank" title="Ver historial del cliente">
-										<i class="fas fa-history"></i> Historial
-									</a>
-								</span>
-								<?php endif; ?>
 							</div>
 						</div>
 
@@ -493,7 +481,7 @@ function _egsEstadoClass($estado) {
 								<span class="input-group-btn">
 									<button class="btn btn-default" type="button" title="Copiar número"
 									        onclick="_egsCopiarTel(this, '<?php echo htmlspecialchars($_wa_display); ?>')">
-									<i class="fas fa-copy"></i> Copiar
+									<i class="fas fa-copy"></i>
 									</button>
 								</span>
 							</div>
@@ -508,7 +496,7 @@ function _egsEstadoClass($estado) {
 								<span class="input-group-btn">
 									<button class="btn btn-default" type="button" title="Copiar número"
 									        onclick="_egsCopiarTel(this, '<?php echo htmlspecialchars($_tel_display); ?>')">
-									<i class="fas fa-copy"></i> Copiar
+									<i class="fas fa-copy"></i>
 									</button>
 								</span>
 							</div>
@@ -544,11 +532,6 @@ function _egsEstadoClass($estado) {
 								<i class="fab fa-whatsapp"></i> <?php echo htmlspecialchars($_wb['label']); ?>
 							</a>
 							<?php endforeach; ?>
-							<a class="btn btn-sm" href="index.php?ruta=pantallacitas" target="_blank"
-							   style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;"
-							   onclick="event.preventDefault();_egsAgendarCitaDesdeOrden();">
-								<i class="fa-regular fa-calendar-plus"></i> Agendar Cita
-							</a>
 						</div>
 						<?php endif; ?>
 					</div>
@@ -1230,7 +1213,6 @@ function _egsEstadoClass($estado) {
 								<input type="hidden" class="form-control" value="<?php echo htmlspecialchars($usuario["correo"]); ?>" name="correoCliente" form="formObservaciones" readonly>
 								<input type="hidden" value="<?php echo htmlspecialchars($fecha_ingreso); ?>" name="fecha_ingreso" form="formObservaciones">
 								<input type="hidden" value="<?php echo htmlspecialchars($_GET["idOrden"]); ?>" name="idOrden" form="formObservaciones">
-								<input type="hidden" id="egs_montoCanjeElectronico" name="montoCanjeElectronico" value="0" form="formObservaciones">
 
 								<!-- TOTAL -->
 								<div class="egs-total-bar">
@@ -1656,20 +1638,11 @@ function _egsEstadoClass($estado) {
 							<?php } ?>
 							</div>
 
-							<!-- Botón agregar observación + agendar cita -->
+							<!-- Botón agregar observación -->
 							<div style="margin-top:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
 								<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#exampleModal">
 									<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar observación
 								</button>
-								<?php if ($isAdmin || $isVendedor): ?>
-								<button type="button" class="btn btnAgendarCitaOrden"
-									style="border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;border:1.5px solid #6366f1;color:#6366f1;background:#fff;transition:all .15s;display:inline-flex;align-items:center;gap:5px;"
-									onmouseover="this.style.background='#6366f1';this.style.color='#fff';"
-									onmouseout="this.style.background='#fff';this.style.color='#6366f1';"
-									data-orden="<?php echo htmlspecialchars($_GET['idOrden']); ?>">
-									<i class="fa-regular fa-calendar-plus"></i>Agendar cita
-								</button>
-								<?php endif; ?>
 							</div>
 
 							<hr style="margin:20px 0 12px">
@@ -1733,18 +1706,7 @@ function _egsEstadoClass($estado) {
 							<input name="id_creador" type="hidden" value="<?php echo $_SESSION["id"]; ?>">
 							<input name="_obs_token" type="hidden" value="<?php echo bin2hex(random_bytes(16)); ?>">
 						</div>
-						<div class="modal-footer" style="border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:8px;">
-							<?php if ($isAdmin || $isVendedor): ?>
-							<button type="button" class="btn btnAgendarCitaDesdeObs"
-								style="border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;border:1.5px solid #6366f1;color:#6366f1;background:#fff;transition:all .15s;display:inline-flex;align-items:center;gap:5px;margin-right:auto;"
-								onmouseover="this.style.background='#6366f1';this.style.color='#fff';"
-								onmouseout="this.style.background='#fff';this.style.color='#6366f1';"
-								data-orden="<?php echo htmlspecialchars($_GET['idOrden']); ?>">
-								<i class="fa-regular fa-calendar-plus"></i>Agendar cita
-							</button>
-							<?php else: ?>
-							<span style="margin-right:auto;"></span>
-							<?php endif; ?>
+						<div class="modal-footer" style="border-top:1px solid #f1f5f9">
 							<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
 							<button type="submit" class="btn egs-btn-accent" id="btnGuardarObs">
 								<i class="fa-solid fa-paper-plane" style="margin-right:4px"></i>Guardar observación
@@ -1902,263 +1864,6 @@ function _egsCopiarFallback(texto, cb) {
 	try { document.execCommand('copy'); cb(); } catch(e) {}
 	document.body.removeChild(ta);
 }
-</script>
-
-<!-- JS: Agendar cita desde observaciones de orden -->
-<script>
-// Agendar cita desde la sección de datos del cliente
-function _egsAgendarCitaDesdeOrden() {
-  lockCitaFields(<?php echo intval($value["id"]); ?>);
-  $('#modalCitaRapida').modal('show');
-}
-
-// Bloquear campos cuando se abre desde una orden
-function lockCitaFields(idOrden) {
-  $('#crTitulo').val('Cita Orden #' + idOrden).prop('readonly', true)
-    .css({'background':'#f1f5f9','color':'#475569','cursor':'not-allowed'});
-  $('#crOrdenId').val(idOrden).prop('readonly', true)
-    .css({'background':'#f1f5f9','color':'#475569','cursor':'not-allowed'})
-    .trigger('input');
-}
-
-$(document).on('click', '.btnAgendarCitaOrden', function(){
-  lockCitaFields($(this).data('orden'));
-  $('#modalCitaRapida').modal('show');
-});
-
-// Desde dentro del modal de observaciones
-$(document).on('click', '.btnAgendarCitaDesdeObs', function(){
-  var idOrden = $(this).data('orden');
-  $('#exampleModal').modal('hide');
-  setTimeout(function(){
-    lockCitaFields(idOrden);
-    $('#modalCitaRapida').modal('show');
-  }, 300);
-});
-
-// Desbloquear al cerrar el modal
-$(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
-  $('#crTitulo').prop('readonly', false).css({'background':'','color':'','cursor':''});
-  $('#crOrdenId').prop('readonly', false).css({'background':'','color':'','cursor':''});
-});
-</script>
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- MODAL: Usar Dinero Electrónico al entregar orden               -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="modal fade" id="modalDineroElectronico" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog" role="document" style="max-width:440px">
-		<div class="modal-content" style="border-radius:16px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15)">
-			<div class="modal-header" style="background:linear-gradient(135deg,#6366f1 0%,#818cf8 100%);color:#fff;border:none;padding:18px 24px">
-				<button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:.8;font-size:22px"><span>&times;</span></button>
-				<h4 class="modal-title" style="font-weight:700;font-size:17px">
-					<i class="fa-solid fa-wallet" style="margin-right:8px"></i>Monedero EGS - Dinero Electrónico
-				</h4>
-			</div>
-			<div class="modal-body" style="padding:24px">
-				<div id="egs_de_loading" style="text-align:center;padding:30px">
-					<i class="fa fa-spinner fa-spin fa-2x" style="color:#6366f1"></i>
-					<p style="margin-top:10px;color:#64748b">Consultando monedero...</p>
-				</div>
-				<div id="egs_de_content" style="display:none">
-					<div style="text-align:center;margin-bottom:16px">
-						<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #22c55e;border-radius:12px;padding:16px;display:inline-block;min-width:200px">
-							<div style="font-size:10px;color:#16a34a;font-weight:700;text-transform:uppercase;letter-spacing:1px">Saldo disponible</div>
-							<div id="egs_de_saldo" style="font-size:32px;font-weight:900;color:#16a34a;margin:4px 0">$0.00</div>
-							<div id="egs_de_nivel" style="font-size:10px;color:#64748b"></div>
-						</div>
-					</div>
-
-					<div id="egs_de_sinSaldo" style="display:none;text-align:center;padding:16px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-radius:12px;border:2px solid #6366f1;margin-bottom:12px">
-						<div style="font-size:28px;margin-bottom:6px">&#127873;</div>
-						<div style="font-size:14px;font-weight:800;color:#4338ca;margin-bottom:6px">¡Esta orden te dará dinero electrónico!</div>
-						<div style="font-size:12px;color:#312e81;line-height:1.5;margin-bottom:10px">
-							Al entregar esta orden acumularás <b id="egs_de_montoGenerar">$0.00</b> en tu <b>Monedero EGS</b>.<br>
-							Podrás usarlo como descuento en tu próximo servicio.
-						</div>
-						<div style="background:#fff;border-radius:8px;padding:10px;text-align:left;font-size:11px;color:#4338ca">
-							<div style="font-weight:700;margin-bottom:4px;color:#1e1b4b">&#9733; Mientras más órdenes, mayor recompensa:</div>
-							<div style="padding-left:8px">
-								&#8226; Hasta 3 órdenes entregadas: <b>1%</b><br>
-								&#8226; Más de 3 órdenes entregadas: <b>2%</b><br>
-								&#8226; Más de 5 órdenes entregadas: <b>3%</b>
-							</div>
-						</div>
-					</div>
-
-					<div id="egs_de_conSaldo" style="display:none">
-						<div style="background:#f8fafc;border-radius:10px;padding:16px;border:1px solid #e2e8f0">
-							<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-								<label class="egs-de-check" style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:14px;color:#1e293b;margin:0">
-									<input type="checkbox" id="egs_de_usarSaldo" style="width:18px;height:18px;accent-color:#6366f1">
-									Usar dinero electrónico
-								</label>
-							</div>
-							<div id="egs_de_montoSection" style="display:none">
-								<label style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;display:block">Monto a usar (máx: <span id="egs_de_maxMonto">$0.00</span>)</label>
-								<div class="input-group">
-									<span class="input-group-addon" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:700">$</span>
-									<input type="number" id="egs_de_montoInput" class="form-control" min="0" step="0.01" placeholder="Ingresa el monto a usar" style="font-weight:700;font-size:16px">
-								</div>
-								<div style="margin-top:8px;text-align:right">
-									<button type="button" id="egs_de_usarTodo" class="btn btn-xs" style="background:#eef2ff;color:#6366f1;font-weight:600;border:1px solid #c7d2fe;border-radius:6px">
-										Usar todo el saldo
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer" style="border-top:1px solid #f1f5f9;padding:14px 24px;display:flex;gap:8px;justify-content:flex-end">
-				<button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius:8px">Cancelar</button>
-				<button type="button" id="egs_de_confirmar" class="btn" style="background:#16a34a;color:#fff;border-radius:8px;font-weight:700;padding:8px 24px">
-					<i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar entrega
-				</button>
-			</div>
-		</div>
-	</div>
-</div>
-
-<script>
-(function(){
-	var idCliente = <?php echo intval($_GET["cliente"]); ?>;
-	var idOrden = <?php echo intval($_GET["idOrden"]); ?>;
-	var totalOrden = <?php echo floatval($value["total"]); ?>;
-	var _de_saldoDisponible = 0;
-	var _de_formPendiente = null;
-
-	// Interceptar cambio de estado a "Entregado (Ent)"
-	$(document).on('submit', '#formObservaciones', function(e){
-		var estadoSelect = $('select[name="estado"][form="formObservaciones"], select[name="estado"]').filter(':visible');
-		var estadoHidden = $('input[name="estado"][form="formObservaciones"]');
-		var estadoVal = estadoSelect.length ? estadoSelect.val() : (estadoHidden.length ? estadoHidden.val() : '');
-
-		if (estadoVal === 'Entregado (Ent)' && !_de_formPendiente) {
-			e.preventDefault();
-			_de_formPendiente = this;
-			$('#modalDineroElectronico').modal('show');
-			cargarInfoRecompensas();
-			return false;
-		}
-	});
-
-	function cargarInfoRecompensas() {
-		$('#egs_de_loading').show();
-		$('#egs_de_content').hide();
-
-		$.ajax({
-			url: 'ajax/recompensas.ajax.php',
-			method: 'POST',
-			data: { idClienteRecompensas: idCliente },
-			dataType: 'json',
-			success: function(data) {
-				$('#egs_de_loading').hide();
-				$('#egs_de_content').show();
-
-				_de_saldoDisponible = parseFloat(data.saldo) || 0;
-				$('#egs_de_saldo').text('$' + _de_saldoDisponible.toFixed(2));
-				$('#egs_de_nivel').text('Nivel: ' + data.porcentaje + '% | ' + data.entregadas + ' órdenes entregadas');
-
-				if (_de_saldoDisponible > 0) {
-					$('#egs_de_sinSaldo').hide();
-					$('#egs_de_conSaldo').show();
-					var maxUsar = Math.min(_de_saldoDisponible, totalOrden);
-					$('#egs_de_maxMonto').text('$' + maxUsar.toFixed(2));
-					$('#egs_de_montoInput').attr('max', maxUsar).val('');
-				} else {
-					$('#egs_de_sinSaldo').show();
-					$('#egs_de_conSaldo').hide();
-					var montoGenerar = (totalOrden * (data.porcentaje / 100)).toFixed(2);
-					$('#egs_de_montoGenerar').text('$' + montoGenerar);
-				}
-			},
-			error: function() {
-				$('#egs_de_loading').hide();
-				$('#egs_de_content').show();
-				$('#egs_de_saldo').text('$0.00');
-				$('#egs_de_sinSaldo').show();
-				$('#egs_de_conSaldo').hide();
-				var montoGenerar = (totalOrden * 0.01).toFixed(2);
-				$('#egs_de_montoGenerar').text('$' + montoGenerar);
-			}
-		});
-	}
-
-	$('#egs_de_usarSaldo').on('change', function(){
-		$('#egs_de_montoSection').toggle(this.checked);
-		if (!this.checked) {
-			$('#egs_de_montoInput').val('0');
-		}
-	});
-
-	$('#egs_de_usarTodo').on('click', function(){
-		var maxUsar = Math.min(_de_saldoDisponible, totalOrden);
-		$('#egs_de_montoInput').val(maxUsar.toFixed(2));
-	});
-
-	$('#egs_de_confirmar').on('click', function(){
-		var btn = $(this);
-		btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Procesando...');
-
-		var montoCanje = 0;
-		if ($('#egs_de_usarSaldo').is(':checked')) {
-			montoCanje = parseFloat($('#egs_de_montoInput').val()) || 0;
-			var maxUsar = Math.min(_de_saldoDisponible, totalOrden);
-			if (montoCanje > maxUsar) montoCanje = maxUsar;
-			if (montoCanje < 0) montoCanje = 0;
-		}
-
-		function procederConEntrega() {
-			$('#egs_montoCanjeElectronico').val(montoCanje);
-			$('#modalDineroElectronico').modal('hide');
-			if (_de_formPendiente) {
-				var form = _de_formPendiente;
-				_de_formPendiente = 'submitted';
-				form.submit();
-			}
-		}
-
-		if (montoCanje > 0) {
-			// Canjear dinero electrónico antes de entregar
-			$.ajax({
-				url: 'ajax/recompensas.ajax.php',
-				method: 'POST',
-				data: {
-					idClienteCanje: idCliente,
-					idOrdenCanje: idOrden,
-					montoCanje: montoCanje
-				},
-				dataType: 'json',
-				success: function(resp) {
-					if (resp.status === 'ok') {
-						procederConEntrega();
-					} else {
-						btn.prop('disabled', false).html('<i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar entrega');
-						alert('Error al canjear: ' + (resp.mensaje || 'Saldo insuficiente'));
-					}
-				},
-				error: function() {
-					btn.prop('disabled', false).html('<i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar entrega');
-					alert('Error de conexión al canjear.');
-				}
-			});
-		} else {
-			procederConEntrega();
-		}
-	});
-
-	// Reset al cerrar modal sin confirmar
-	$('#modalDineroElectronico').on('hidden.bs.modal', function(){
-		if (_de_formPendiente && _de_formPendiente !== 'submitted') {
-			_de_formPendiente = null;
-		}
-		$('#egs_de_usarSaldo').prop('checked', false);
-		$('#egs_de_montoSection').hide();
-		$('#egs_de_montoInput').val('0');
-		$('#egs_de_confirmar').prop('disabled', false).html('<i class="fa-solid fa-check" style="margin-right:4px"></i>Confirmar entrega');
-	});
-})();
 </script>
 
 <?php
