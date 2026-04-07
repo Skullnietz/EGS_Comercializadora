@@ -117,3 +117,22 @@ if (isset($_POST["idClienteCanjeVenta"])) {
     $recompensas->montoCanjeVenta = $_POST["montoCanjeVenta"];
     $recompensas->ajaxCanjearRecompensaVenta();
 }
+
+/*=============================================
+TOGGLE RECOMPENSAS EN VENTAS
+=============================================*/
+if (isset($_POST["toggleRecompensasVentas"])) {
+    $activo = intval($_POST["toggleRecompensasVentas"]);
+    $resultado = ControladorRecompensas::ctrToggleRecompensasVentas($activo);
+    header('Content-Type: application/json');
+    echo json_encode(array("status" => $resultado ? "ok" : "error", "activo" => $activo));
+}
+
+/*=============================================
+CONSULTAR ESTADO DE RECOMPENSAS EN VENTAS
+=============================================*/
+if (isset($_POST["consultarRecompensasVentas"])) {
+    $activo = ControladorRecompensas::ctrRecompensasVentasActivas();
+    header('Content-Type: application/json');
+    echo json_encode(array("activo" => $activo ? 1 : 0));
+}

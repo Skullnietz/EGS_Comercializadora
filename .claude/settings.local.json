@@ -199,7 +199,11 @@
       "Bash(find /c/Users/black/Desktop/EGS -type f \\\\\\(-name *.sql -o -name *.txt \\\\\\))",
       "Bash(grep -r \"FECHA_INICIO_PROGRAMA\\\\|1%\" /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora --include=*.php)",
       "Bash(grep -r \"ctrCalcularPorcentaje\\\\|Nivel\\\\|>3\\\\|>5\" /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora --include=*.php)",
-      "Bash(grep -rn \"6 meses\\\\|seis meses\" /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora --include=*.php)"
+      "Bash(grep -rn \"6 meses\\\\|seis meses\" /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora --include=*.php)",
+      "Bash(grep -n \"montoCanjeElectronico\" \"C:\\\\Users\\\\CarlosGuizar\\\\Desktop\\\\Proyectos\\\\EGS\\\\EGS_Comercializadora\\\\vistas\\\\modulos\"/*.php)",
+      "Bash(grep -E \"\\\\.\\(js|php\\)$\")",
+      "Bash(grep -E \"\\\\.\\(php|js\\)$\")",
+      "Bash(grep -l \"1%\\\\|porcentaje.*recompensa\\\\|reward.*percent\" \"C:/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/modulos\"/*.php)"
     ]
   }
 }

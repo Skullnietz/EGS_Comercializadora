@@ -95,7 +95,7 @@ class ImprimirTickets{
       $Sitio = $respuesta["Sitio"];
 
       // ═══════════════════════════════════════
-      // RECOMPENSAS - DINERO ELECTRÓNICO
+      // RECOMPENSAS - DINERO ELECTRÓNICO (solo si está activo)
       // ═══════════════════════════════════════
       $idClienteVenta = intval($ventas["id_cliente"] ?? 0);
       $totalVenta = floatval($PagoTotal);
@@ -105,8 +105,15 @@ class ImprimirTickets{
       $ordenesEnPrograma = 0;
       $tokenMonedero = '';
       $montoGenerado = 0;
+      $recompensasVentasActivas = false;
 
-      if ($idClienteVenta > 0) {
+      try {
+          $recompensasVentasActivas = ControladorRecompensas::ctrRecompensasVentasActivas();
+      } catch (Exception $e) {
+          $recompensasVentasActivas = false;
+      }
+
+      if ($recompensasVentasActivas && $idClienteVenta > 0) {
           try {
               $infoRecompensas = ControladorRecompensas::ctrObtenerInfoRecompensas($idClienteVenta);
               $saldoElectronico = $infoRecompensas["saldo"];
@@ -364,8 +371,9 @@ class ImprimirTickets{
 
       // ═══════════════════════════════════════════════════════════════
       // SECCIÓN DE RECOMPENSAS - MONEDERO ELECTRÓNICO EGS (VENTA)
+      // Solo se muestra si el sistema de recompensas está activo
       // ═══════════════════════════════════════════════════════════════
-      if ($idClienteVenta > 0) {
+      if ($recompensasVentasActivas && $idClienteVenta > 0) {
       echo '<hr size="5" style="margin: 20px 0 10px;">
             <table border="0" align="center" width="100%">
               <tr>

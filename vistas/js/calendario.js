@@ -835,6 +835,24 @@ document.addEventListener('DOMContentLoaded', function () {
     })();
 
     /* ═══════════════════════════════════════════
+       Auto-open new cita from URL param idOrden
+       ═══════════════════════════════════════════ */
+    (function() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var prefilledOrden = urlParams.get('idOrden');
+        if (!prefilledOrden || parseInt(prefilledOrden) < 1) return;
+
+        // Pre-llenar el campo de orden y abrir el modal
+        $('#idOrden').val(prefilledOrden);
+        $('#idOrden').trigger('change'); // dispara auto-color
+        $('#modalAgregarCita').modal('show');
+
+        // Limpiar el parámetro de la URL sin recargar
+        var cleanUrl = window.location.pathname + '?ruta=pantallacitas';
+        window.history.replaceState({}, '', cleanUrl);
+    })();
+
+    /* ═══════════════════════════════════════════
        Helper Functions
        ═══════════════════════════════════════════ */
     function formatGCalDate(d) {

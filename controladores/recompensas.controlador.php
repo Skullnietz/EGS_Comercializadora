@@ -250,4 +250,23 @@ class ControladorRecompensas
         $porcentajeHistorico = self::ctrCalcularPorcentajeHistorico($idCliente);
         return ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHistorico);
     }
+
+    /*=============================================
+    VERIFICAR SI LAS RECOMPENSAS EN VENTAS ESTÁN ACTIVAS
+    =============================================*/
+    static public function ctrRecompensasVentasActivas()
+    {
+        ModeloRecompensas::mdlCrearTablaConfiguracion();
+        $valor = ModeloRecompensas::mdlObtenerConfiguracion('recompensas_ventas_activo');
+        return ($valor === '1');
+    }
+
+    /*=============================================
+    TOGGLE RECOMPENSAS EN VENTAS
+    =============================================*/
+    static public function ctrToggleRecompensasVentas($activo)
+    {
+        ModeloRecompensas::mdlCrearTablaConfiguracion();
+        return ModeloRecompensas::mdlActualizarConfiguracion('recompensas_ventas_activo', $activo ? '1' : '0');
+    }
 }

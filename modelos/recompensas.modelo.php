@@ -530,4 +530,47 @@ class ModeloRecompensas
             return "Cliente";
         }
     }
+
+    /*=============================================
+    CONFIGURACIÓN DEL SISTEMA DE RECOMPENSAS
+    Tabla egs_configuracion en WordPress DB
+    =============================================*/
+    static public function mdlCrearTablaConfiguracion()
+    {
+        $pdo = ConexionWP::conectarWP();
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `egs_configuracion` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `clave` VARCHAR(100) NOT NULL,
+            `valor` VARCHAR(255) NOT NULL DEFAULT '',
+            `fecha_actualizacion` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `uk_clave` (`clave`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
+        // Insertar valor por defecto si no existe
+        $stmt = $pdo->prepare("INSERT IGNORE INTO egs_configuracion (clave, valor) VALUES ('recompensas_ventas_activo', '1')");
+        $stmt->execute();
+    }
+
+    static public function mdlObtenerConfiguracion($clave)
+    {
+        $pdo = ConexionWP::conectarWP();
+        $stmt = $pdo->prepare("SELECT valor FROM egs_configuracion WHERE clave = :clave");
+        $stmt->bindParam(":clave", $clave, PDO::PARAM_STR);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result["valor"] : null;
+    }
+
+    static public function mdlActualizarConfiguracion($clave, $valor)
+    {
+        $pdo = ConexionWP::conectarWP();
+        $stmt = $pdo->prepare("INSERT INTO egs_configuracion (clave, valor) VALUES (:clave, :valor)
+            ON DUPLICATE KEY UPDATE valor = :valor2, fecha_actualizacion = NOW()");
+        $stmt->bindParam(":clave", $clave, PDO::PARAM_STR);
+        $stmt->bindParam(":valor", $valor, PDO::PARAM_STR);
+        $stmt->bindParam(":valor2", $valor, PDO::PARAM_STR);
+        $stmt->execute();
+        return true;
+    }
 }

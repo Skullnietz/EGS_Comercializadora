@@ -326,7 +326,7 @@ class ControladorVentas{
 
 				$respuesta = ModeloVentas::mdlIngresarVenta($tabla, $datos);
 
-				// ── Recompensas: canjear dinero electrónico si se solicitó ──
+				// ── Recompensas: canjear dinero electrónico si se solicitó y está activo ──
 				$_egs_idClienteVenta = isset($_POST["id_cliente"]) ? intval($_POST["id_cliente"]) : 0;
 				$_egs_montoCanjeVenta = isset($_POST["montoCanjeElectronicoVenta"]) ? floatval($_POST["montoCanjeElectronicoVenta"]) : 0;
 
@@ -334,12 +334,14 @@ class ControladorVentas{
 					try {
 						require_once "recompensas.controlador.php";
 						require_once __DIR__ . "/../modelos/recompensas.modelo.php";
-						$ultimaVenta = ModeloVentas::mdlObtenerUltimaVenta(intval($_POST["empresa"]));
-						if ($ultimaVenta > 0) {
-							// Verificar que no exista un canje previo para esta venta
-							$canjeExistente = ModeloRecompensas::mdlObtenerCanjeVenta($ultimaVenta);
-							if (!$canjeExistente) {
-								ControladorRecompensas::ctrCanjearRecompensaVenta($_egs_idClienteVenta, $ultimaVenta, $_egs_montoCanjeVenta);
+						// Solo procesar si el sistema de recompensas en ventas está activo
+						if (ControladorRecompensas::ctrRecompensasVentasActivas()) {
+							$ultimaVenta = ModeloVentas::mdlObtenerUltimaVenta(intval($_POST["empresa"]));
+							if ($ultimaVenta > 0) {
+								$canjeExistente = ModeloRecompensas::mdlObtenerCanjeVenta($ultimaVenta);
+								if (!$canjeExistente) {
+									ControladorRecompensas::ctrCanjearRecompensaVenta($_egs_idClienteVenta, $ultimaVenta, $_egs_montoCanjeVenta);
+								}
 							}
 						}
 					} catch (Exception $e) {
