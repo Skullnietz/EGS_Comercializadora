@@ -789,8 +789,8 @@
           data: { obtenerOrden: ordenId },
           dataType: 'json',
           success: function(orden) {
-            if (orden && orden.descripcion) {
-              $('#crTitulo').val(orden.descripcion);
+            if (orden && orden.titulo) {
+              $('#crTitulo').val(orden.titulo);
             }
           }
         });

@@ -853,8 +853,8 @@ document.addEventListener('DOMContentLoaded', function () {
             data: { obtenerOrden: prefilledOrden },
             dataType: 'json',
             success: function(orden) {
-                if (orden && orden.descripcion) {
-                    $('#tituloCita').val(orden.descripcion);
+                if (orden && orden.titulo) {
+                    $('#tituloCita').val(orden.titulo);
                 }
             }
         });
