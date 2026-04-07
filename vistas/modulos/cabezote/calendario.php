@@ -769,13 +769,32 @@
   });
 
   // Quick add button — cerrar dropdown primero, luego abrir modal
+  // Si estamos en infoOrden, pre-llenar con datos de la orden
   $(document).on('click', '#egsCalQuickAdd', function(e){
     e.preventDefault();
     e.stopPropagation();
-    // Cerrar el dropdown de Bootstrap correctamente
     $('#egsCalendarToggle').dropdown('toggle');
-    // Abrir modal después de que el dropdown se cierre
+
+    var urlParams = new URLSearchParams(window.location.search);
+    var ruta = urlParams.get('ruta');
+    var ordenId = urlParams.get('idOrden');
+
     setTimeout(function(){
+      if (ruta === 'infoOrden' && ordenId && parseInt(ordenId) > 0) {
+        $('#crOrdenId').val(ordenId).trigger('input');
+        // Obtener título de la orden
+        $.ajax({
+          url: 'ajax/citas.ajax.php',
+          method: 'POST',
+          data: { obtenerOrden: ordenId },
+          dataType: 'json',
+          success: function(orden) {
+            if (orden && orden.descripcion) {
+              $('#crTitulo').val(orden.descripcion);
+            }
+          }
+        });
+      }
       $('#modalCitaRapida').modal('show');
     }, 200);
   });
@@ -1113,11 +1132,15 @@
     });
   });
 
-  // Agendar cita desde infoOrden — pre-llena el modal rápido con el ID de orden
+  // Agendar cita desde infoOrden — pre-llena el modal rápido con el ID de orden y título
   $(document).on('click', '.btnAgendarCitaDesdeOrden', function(){
     var ordenId = $(this).data('orden-id');
+    var ordenTitulo = $(this).data('orden-titulo');
     if (!ordenId || parseInt(ordenId) < 1) return;
     $('#crOrdenId').val(ordenId).trigger('input');
+    if (ordenTitulo) {
+      $('#crTitulo').val(ordenTitulo);
+    }
     $('#modalCitaRapida').modal('show');
   });
 

@@ -845,6 +845,20 @@ document.addEventListener('DOMContentLoaded', function () {
         // Pre-llenar el campo de orden y abrir el modal
         $('#idOrden').val(prefilledOrden);
         $('#idOrden').trigger('change'); // dispara auto-color
+
+        // Obtener título de la orden vía AJAX
+        $.ajax({
+            url: 'ajax/citas.ajax.php',
+            method: 'POST',
+            data: { obtenerOrden: prefilledOrden },
+            dataType: 'json',
+            success: function(orden) {
+                if (orden && orden.descripcion) {
+                    $('#tituloCita').val(orden.descripcion);
+                }
+            }
+        });
+
         $('#modalAgregarCita').modal('show');
 
         // Limpiar el parámetro de la URL sin recargar
