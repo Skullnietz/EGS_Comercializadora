@@ -1113,5 +1113,13 @@
     });
   });
 
+  // Agendar cita desde infoOrden — pre-llena el modal rápido con el ID de orden
+  $(document).on('click', '.btnAgendarCitaDesdeOrden', function(){
+    var ordenId = $(this).data('orden-id');
+    if (!ordenId || parseInt(ordenId) < 1) return;
+    $('#crOrdenId').val(ordenId).trigger('input');
+    $('#modalCitaRapida').modal('show');
+  });
+
 })();
 </script>

@@ -532,9 +532,9 @@ function _egsEstadoClass($estado) {
 								<i class="fab fa-whatsapp"></i> <?php echo htmlspecialchars($_wb['label']); ?>
 							</a>
 							<?php endforeach; ?>
-							<a class="btn btn-sm" href="index.php?ruta=pantallacitas&idOrden=<?php echo intval($valor); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:6px;">
+							<button type="button" class="btn btn-sm btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($valor); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:6px;">
 								<i class="fa-solid fa-calendar-plus"></i> Agendar Cita
-							</a>
+							</button>
 						</div>
 						<?php endif; ?>
 					</div>
