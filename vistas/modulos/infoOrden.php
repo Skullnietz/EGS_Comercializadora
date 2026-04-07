@@ -532,8 +532,8 @@ function _egsEstadoClass($estado) {
 								<i class="fab fa-whatsapp"></i> <?php echo htmlspecialchars($_wb['label']); ?>
 							</a>
 							<?php endforeach; ?>
-							<button type="button" class="btn btn-sm btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($valor); ?>" data-orden-titulo="<?php echo htmlspecialchars($value["titulo"]); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:6px;">
-								<i class="fa-solid fa-calendar-plus"></i> Agendar Cita
+							<button type="button" class="btn btn-sm btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($valor); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:6px;">
+								<i class="fa-solid fa-calendar-plus"></i> Nueva Cita
 							</button>
 						</div>
 						<?php endif; ?>
@@ -1641,10 +1641,13 @@ function _egsEstadoClass($estado) {
 							<?php } ?>
 							</div>
 
-							<!-- Botón agregar observación -->
+							<!-- Botón agregar observación + agendar cita -->
 							<div style="margin-top:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
 								<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#exampleModal">
 									<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar observación
+								</button>
+								<button type="button" class="btn btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($valor); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:8px;">
+									<i class="fa-solid fa-calendar-plus" style="margin-right:4px"></i>Nueva Cita
 								</button>
 							</div>
 

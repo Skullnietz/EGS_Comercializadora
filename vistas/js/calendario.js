@@ -843,23 +843,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!prefilledOrden || parseInt(prefilledOrden) < 1) return;
 
         // Pre-llenar el campo de orden y abrir el modal
-        $('#idOrden').val(prefilledOrden);
+        $('#idOrden').val(prefilledOrden).prop('readonly', true);
         $('#idOrden').trigger('change'); // dispara auto-color
-
-        // Obtener título de la orden vía AJAX
-        $.ajax({
-            url: 'ajax/citas.ajax.php',
-            method: 'POST',
-            data: { obtenerOrden: prefilledOrden },
-            dataType: 'json',
-            success: function(orden) {
-                if (orden && orden.titulo) {
-                    $('#tituloCita').val(orden.titulo);
-                }
-            }
-        });
+        $('#tituloCita').val('Cita #' + prefilledOrden);
 
         $('#modalAgregarCita').modal('show');
+
+        // Restaurar campo al cerrar
+        $('#modalAgregarCita').one('hidden.bs.modal', function(){
+            $('#idOrden').prop('readonly', false);
+        });
 
         // Limpiar el parámetro de la URL sin recargar
         var cleanUrl = window.location.pathname + '?ruta=pantallacitas';

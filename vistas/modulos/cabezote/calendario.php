@@ -781,19 +781,8 @@
 
     setTimeout(function(){
       if (ruta === 'infoOrden' && ordenId && parseInt(ordenId) > 0) {
-        $('#crOrdenId').val(ordenId).trigger('input');
-        // Obtener título de la orden
-        $.ajax({
-          url: 'ajax/citas.ajax.php',
-          method: 'POST',
-          data: { obtenerOrden: ordenId },
-          dataType: 'json',
-          success: function(orden) {
-            if (orden && orden.titulo) {
-              $('#crTitulo').val(orden.titulo);
-            }
-          }
-        });
+        $('#crOrdenId').val(ordenId).prop('readonly', true).trigger('input');
+        $('#crTitulo').val('Cita #' + ordenId);
       }
       $('#modalCitaRapida').modal('show');
     }, 200);
@@ -1132,16 +1121,18 @@
     });
   });
 
-  // Agendar cita desde infoOrden — pre-llena el modal rápido con el ID de orden y título
+  // Agendar cita desde infoOrden — pre-llena el modal rápido con el ID de orden
   $(document).on('click', '.btnAgendarCitaDesdeOrden', function(){
     var ordenId = $(this).data('orden-id');
-    var ordenTitulo = $(this).data('orden-titulo');
     if (!ordenId || parseInt(ordenId) < 1) return;
-    $('#crOrdenId').val(ordenId).trigger('input');
-    if (ordenTitulo) {
-      $('#crTitulo').val(ordenTitulo);
-    }
+    $('#crOrdenId').val(ordenId).prop('readonly', true).trigger('input');
+    $('#crTitulo').val('Cita #' + ordenId);
     $('#modalCitaRapida').modal('show');
+  });
+
+  // Restaurar campo de orden al cerrar el modal
+  $('#modalCitaRapida').on('hidden.bs.modal', function(){
+    $('#crOrdenId').prop('readonly', false);
   });
 
 })();
