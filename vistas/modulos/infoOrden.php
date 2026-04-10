@@ -740,11 +740,15 @@ function _egsEstadoClass($estado) {
 						<?php
 						// Construir array de todas las imágenes
 						$_gal_imgs = array();
-						if (!empty($portada)) $_gal_imgs[] = $portada;
+						$_default_img = 'vistas/img/default/default.png';
 						if (!empty($AlbumDeImagenes)) {
 							foreach ($AlbumDeImagenes as $_gi) {
-								if (isset($_gi["foto"]) && !empty($_gi["foto"])) $_gal_imgs[] = $_gi["foto"];
+								if (isset($_gi["foto"]) && !empty($_gi["foto"]) && $_gi["foto"] !== $_default_img) $_gal_imgs[] = $_gi["foto"];
 							}
+						}
+						// Solo agregar portada si no hay imágenes en el álbum
+						if (empty($_gal_imgs) && !empty($portada) && $portada !== $_default_img) {
+							$_gal_imgs[] = $portada;
 						}
 						$_gal_total = count($_gal_imgs);
 
