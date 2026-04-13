@@ -209,7 +209,8 @@
       "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/lateral/menu.php\")",
       "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/pantallacitas.php\")",
       "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/crearcita.php\")",
-      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/cabezote/calendario.php\")"
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/cabezote/calendario.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php\")"
     ]
   }
 }

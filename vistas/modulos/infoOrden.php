@@ -1650,9 +1650,11 @@ function _egsEstadoClass($estado) {
 								<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#exampleModal">
 									<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar observación
 								</button>
+								<?php if (!$isTecnico): ?>
 								<button type="button" class="btn btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($valor); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:8px;">
 									<i class="fa-solid fa-calendar-plus" style="margin-right:4px"></i>Nueva Cita
 								</button>
+								<?php endif; ?>
 							</div>
 
 							<hr style="margin:20px 0 12px">
