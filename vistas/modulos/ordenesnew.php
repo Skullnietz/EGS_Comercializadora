@@ -829,16 +829,27 @@ MODAL AGREGAR OORDENES
                   <div style="font-size:11px;color:#64748b;margin:-2px 0 6px 0;">
                     Los clientes más recientes aparecen primero para facilitar la captura.
                   </div>
+                  <?php
+                  $item = "id_empresa"; $valor = $_SESSION["empresa"];
+                  $usuario = ControladorClientes::ctrMostrarClientesTabla($item, $valor);
+                  if (is_array($usuario)) {
+                    usort($usuario, function($a, $b){
+                      return intval($b["id"]) - intval($a["id"]);
+                    });
+                  }
+                  $_ultimoClienteReciente = (is_array($usuario) && !empty($usuario) && !empty($usuario[0]["nombre"])) ? $usuario[0]["nombre"] : "";
+                  ?>
+                  <?php if (!empty($_ultimoClienteReciente)): ?>
+                  <div style="margin:0 0 8px 0;">
+                    <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#f8fafc;border:1px solid #e2e8f0;color:#475569;font-size:11px;font-weight:600;max-width:100%;">
+                      <i class="fa-solid fa-clock-rotate-left" style="color:#0ea5e9"></i>
+                      Ultimo registro: <span style="color:#0f172a"><?php echo htmlspecialchars($_ultimoClienteReciente); ?></span>
+                    </span>
+                  </div>
+                  <?php endif; ?>
                   <select class="form-control cliente" style="width:100%" required>
                     <option>Seleccionar cliente</option>
                     <?php
-                    $item = "id_empresa"; $valor = $_SESSION["empresa"];
-                    $usuario = ControladorClientes::ctrMostrarClientesTabla($item, $valor);
-                    if (is_array($usuario)) {
-                      usort($usuario, function($a, $b){
-                        return intval($b["id"]) - intval($a["id"]);
-                      });
-                    }
                     $_cli_ordenesMap = []; $_cli_estadoMap = []; $_cli_recogidaMap = [];
                     try { $_cli_ordenesMap = ControladorClientes::ctrContarOrdenesClientesBulk(); } catch(Exception $e) {}
                     try { $_cli_estadoMap = ControladorClientes::ctrContarOrdenesEstadoBulk(); } catch(Exception $e) {}
