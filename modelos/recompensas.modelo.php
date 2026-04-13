@@ -102,8 +102,8 @@ class ModeloRecompensas
     static public function mdlContarOrdenesEntregadas($idCliente)
     {
         $pdo = ConexionWP::conectarWP();
-        // Órdenes entregadas
-        $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM ordenes WHERE id_usuario = :id_cliente AND estado LIKE '%Ent%'");
+        // Órdenes entregadas (excluir las que vienen de pedidos para no contar doble)
+        $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM ordenes WHERE id_usuario = :id_cliente AND estado LIKE 'Entregado%' AND (id_pedido IS NULL OR id_pedido = 0)");
         $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmt->execute();
         $totalOrdenes = intval($stmt->fetch(PDO::FETCH_ASSOC)["total"]);
@@ -158,12 +158,13 @@ class ModeloRecompensas
 
         // ── PERIODO HISTÓRICO (antes del cambio, con porcentaje por niveles) ──
 
-        // 1a) Órdenes antes del cambio
+        // 1a) Órdenes antes del cambio (excluir las que vienen de pedidos)
         $stmt = $pdo->prepare("
             SELECT COALESCE(SUM(total), 0) as suma_totales
             FROM ordenes
             WHERE id_usuario = :id_cliente
-              AND estado LIKE '%Ent%'
+              AND estado LIKE 'Entregado%'
+              AND (id_pedido IS NULL OR id_pedido = 0)
               AND fecha_Salida IS NOT NULL
               AND fecha_Salida >= :fechaDesde
               AND fecha_Salida < :fechaCambio
@@ -208,18 +209,21 @@ class ModeloRecompensas
         $acumuladoAntes = round(($sumaOrdenesAntes + $sumaPedidosAntes + $sumaVentasAntes) * ($porcentajeHistorico / 100), 2);
 
         // ── PERIODO NUEVO (desde el cambio, 1% fijo) ──
+        // Usar max(fechaCambio, fechaDesde) para respetar la ventana de 6 meses
+        $fechaDesdePeriodo2 = max($fechaCambio, $fechaDesde);
 
-        // 2a) Órdenes desde el cambio
+        // 2a) Órdenes desde el cambio (excluir las que vienen de pedidos)
         $stmt2 = $pdo->prepare("
             SELECT COALESCE(SUM(total), 0) as suma_totales
             FROM ordenes
             WHERE id_usuario = :id_cliente
-              AND estado LIKE '%Ent%'
+              AND estado LIKE 'Entregado%'
+              AND (id_pedido IS NULL OR id_pedido = 0)
               AND fecha_Salida IS NOT NULL
-              AND fecha_Salida >= :fechaCambio
+              AND fecha_Salida >= :fechaDesdePeriodo2
         ");
         $stmt2->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmt2->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
+        $stmt2->bindParam(":fechaDesdePeriodo2", $fechaDesdePeriodo2, PDO::PARAM_STR);
         $stmt2->execute();
         $sumaOrdenesDesp = floatval($stmt2->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
@@ -230,10 +234,10 @@ class ModeloRecompensas
             WHERE id_cliente = :id_cliente
               AND estado LIKE '%Entregado%'
               AND fechaEntrega IS NOT NULL
-              AND fechaEntrega >= :fechaCambio
+              AND fechaEntrega >= :fechaDesdePeriodo2
         ");
         $stmtPed2->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmtPed2->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
+        $stmtPed2->bindParam(":fechaDesdePeriodo2", $fechaDesdePeriodo2, PDO::PARAM_STR);
         $stmtPed2->execute();
         $sumaPedidosDesp = floatval($stmtPed2->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
@@ -242,10 +246,10 @@ class ModeloRecompensas
             SELECT COALESCE(SUM(pago), 0) as suma_totales
             FROM compras
             WHERE id_cliente = :id_cliente
-              AND fecha >= :fechaCambio
+              AND fecha >= :fechaDesdePeriodo2
         ");
         $stmtVta2->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmtVta2->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
+        $stmtVta2->bindParam(":fechaDesdePeriodo2", $fechaDesdePeriodo2, PDO::PARAM_STR);
         $stmtVta2->execute();
         $sumaVentasDesp = floatval($stmtVta2->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
@@ -288,12 +292,13 @@ class ModeloRecompensas
         $fechaDesde = max($hace6meses, self::FECHA_INICIO_PROGRAMA);
         $fechaCambio = self::FECHA_CAMBIO_PORCENTAJE;
 
-        // Órdenes entregadas
+        // Órdenes entregadas (excluir las que vienen de pedidos para no duplicar)
         $stmt = $pdo->prepare("
             SELECT id, total, fecha_Salida
             FROM ordenes
             WHERE id_usuario = :id_cliente
-              AND estado LIKE '%Ent%'
+              AND estado LIKE 'Entregado%'
+              AND (id_pedido IS NULL OR id_pedido = 0)
               AND fecha_Salida IS NOT NULL
               AND fecha_Salida >= :fechaDesde
             ORDER BY fecha_Salida DESC
@@ -386,12 +391,13 @@ class ModeloRecompensas
         $hace6meses = date('Y-m-d', strtotime('-6 months'));
         $fechaDesde = max($hace6meses, self::FECHA_INICIO_PROGRAMA);
 
-        // Órdenes entregadas
+        // Órdenes entregadas (excluir las que vienen de pedidos)
         $stmt = $pdo->prepare("
             SELECT COUNT(*) as total
             FROM ordenes
             WHERE id_usuario = :id_cliente
-              AND estado LIKE '%Ent%'
+              AND estado LIKE 'Entregado%'
+              AND (id_pedido IS NULL OR id_pedido = 0)
               AND fecha_Salida IS NOT NULL
               AND fecha_Salida >= :fechaDesde
         ");
