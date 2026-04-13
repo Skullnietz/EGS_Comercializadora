@@ -459,6 +459,13 @@ function _egsEstadoClass($estado) {
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fas fa-user"></i></span>
 								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" readonly>
+								<?php if (intval($_GET["cliente"]) > 0): ?>
+								<span class="input-group-btn">
+									<a class="btn btn-info" href="index.php?ruta=Historialdecliente&idCliente=<?php echo intval($_GET["cliente"]); ?>&nombreCliente=<?php echo rawurlencode($usuario["nombre"]); ?>" target="_blank" title="Ver historial del cliente">
+										<i class="fa-solid fa-clock-rotate-left"></i>
+									</a>
+								</span>
+								<?php endif; ?>
 							</div>
 						</div>
 

@@ -71,6 +71,17 @@ class TablaVentas{
             $NombreEmpresa = $respuestaEmpresa["empresa"];
 
             $cliente = trim($ventas[$i]["nombreCliente"]);
+            $idCliente = isset($ventas[$i]["id_cliente"]) ? intval($ventas[$i]["id_cliente"]) : 0;
+            $nombreClienteUrl = rawurlencode($cliente !== "" ? $cliente : "Cliente");
+
+            if ($idCliente > 0) {
+                $historialUrl = "index.php?ruta=Historialdecliente&idCliente=".$idCliente."&nombreCliente=".$nombreClienteUrl;
+                $cliente = "<a href='".$historialUrl."' target='_blank' style='font-weight:600;color:#2563eb;text-decoration:none;'>".htmlspecialchars($cliente, ENT_QUOTES, "UTF-8")."</a>";
+                $historialVenta = "<a class='btn btn-info btn-sm' href='".$historialUrl."' target='_blank' title='Ver historial del cliente'><i class='fa-solid fa-clock-rotate-left'></i></a>";
+            } else {
+                $cliente = htmlspecialchars($cliente !== "" ? $cliente : "Sin cliente", ENT_QUOTES, "UTF-8");
+                $historialVenta = "<button class='btn btn-default btn-sm' type='button' disabled title='Venta sin cliente vinculado'><i class='fa-solid fa-clock-rotate-left'></i></button>";
+            }
             
             // Añadir cada fila como un array asociativo
             $datos[] = array(
@@ -80,6 +91,7 @@ class TablaVentas{
                 $ventas[$i]["productoUno"],
                 $ventas[$i]["cantidadProductos"],
                 $ventas[$i]["pago"],
+                $historialVenta,
                 $ticket,
                 $eliminarVenta
             );

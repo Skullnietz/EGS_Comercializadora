@@ -1210,6 +1210,7 @@ const $input11 = document.querySelector(' #productoDiez');
               <th>Producto</th>
               <th>Cantidad</th>
               <th>Precio</th>
+              <th>Historial</th>
               <th>Ticket</th>
               <th>Eliminar Venta</th>
             </tr>
