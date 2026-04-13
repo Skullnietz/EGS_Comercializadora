@@ -203,7 +203,13 @@
       "Bash(grep -n \"montoCanjeElectronico\" \"C:\\\\Users\\\\CarlosGuizar\\\\Desktop\\\\Proyectos\\\\EGS\\\\EGS_Comercializadora\\\\vistas\\\\modulos\"/*.php)",
       "Bash(grep -E \"\\\\.\\(js|php\\)$\")",
       "Bash(grep -E \"\\\\.\\(php|js\\)$\")",
-      "Bash(grep -l \"1%\\\\|porcentaje.*recompensa\\\\|reward.*percent\" \"C:/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/modulos\"/*.php)"
+      "Bash(grep -l \"1%\\\\|porcentaje.*recompensa\\\\|reward.*percent\" \"C:/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora/vistas/modulos\"/*.php)",
+      "Bash(find /c/Users/black/Desktop/EGS -name \"*.sql\" -exec cat {} \\\\;)",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/ajax/citas.ajax.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/lateral/menu.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/pantallacitas.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/crearcita.php\")",
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/cabezote/calendario.php\")"
     ]
   }
 }

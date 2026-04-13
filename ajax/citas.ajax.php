@@ -6,6 +6,21 @@ require_once "../controladores/citas.controlador.php";
 require_once "../modelos/citas.modelo.php";
 
 /*=============================================
+HELPER: Obtener el ID real del técnico (tabla tecnicos)
+a partir del email de sesión (tabla administradores)
+=============================================*/
+function obtenerIdTecnicoReal() {
+    if (!isset($_SESSION["email"])) return 0;
+    require_once "../controladores/tecnicos.controlador.php";
+    require_once "../modelos/tecnicos.modelo.php";
+    $tecData = ControladorTecnicos::ctrMostrarTecnicos("correo", $_SESSION["email"]);
+    if (is_array($tecData) && isset($tecData["id"])) {
+        return intval($tecData["id"]);
+    }
+    return 0;
+}
+
+/*=============================================
 HELPER: Obtener IDs de órdenes de un técnico
 =============================================*/
 function obtenerOrdenesDelTecnico($idTecnico) {
@@ -143,7 +158,8 @@ ACCIONES
 if (isset($_POST["accion"]) && $_POST["accion"] == "mostrar") {
 
     if (esTecnico()) {
-        $ordenIds = obtenerOrdenesDelTecnico($_SESSION["id"]);
+        $idTecReal = obtenerIdTecnicoReal();
+        $ordenIds = obtenerOrdenesDelTecnico($idTecReal);
         $respuesta = ModeloCitas::mdlMostrarCitasPorOrdenes("citas", $ordenIds);
         $respuesta = censurarDatosCliente($respuesta);
         echo json_encode($respuesta);
@@ -286,7 +302,8 @@ if (isset($_POST["accion"]) && $_POST["accion"] == "citasPorRango") {
     }
 
     if (esTecnico()) {
-        $ordenIds = obtenerOrdenesDelTecnico($_SESSION["id"]);
+        $idTecReal = obtenerIdTecnicoReal();
+        $ordenIds = obtenerOrdenesDelTecnico($idTecReal);
         $respuesta = ModeloCitas::mdlCitasPorRangoYOrdenes("citas", $inicio, $fin, $ordenIds);
         $respuesta = censurarDatosCliente($respuesta);
     } else {

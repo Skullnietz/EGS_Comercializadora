@@ -438,8 +438,19 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
       </li>';
   }
 
-  // ── Citas + Cotización + Peticiones (vendedor / administrador) ──
-  if ($_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "administrador") {
+  // ── Citas (técnico: solo ver pantalla) ──
+  if ($_SESSION["perfil"] == "tecnico") {
+    echo '
+      <li>
+          <a href="index.php?ruta=pantallacitas">
+            <i class="far fa-calendar-alt"></i>
+            <span>Mis Citas</span>
+          </a>
+      </li>';
+  }
+
+  // ── Citas + Cotización + Peticiones (vendedor / administrador / secretaria) ──
+  if ($_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "secretaria") {
     echo '
       <li class="treeview">
           <a href="#">
@@ -454,8 +465,11 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
             <li><a href="index.php?ruta=listacitas"><i class="far fa-circle"></i> Lista de citas</a></li>
             <li><a href="index.php?ruta=crearcita"><i class="far fa-calendar-plus"></i> Agregar cita</a></li>
           </ul>
-      </li>
+      </li>';
+  }
 
+  if ($_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "administrador") {
+    echo '
       <li class="treeview">
           <a href="#">
             <i class="fas fa-file-invoice-dollar"></i>

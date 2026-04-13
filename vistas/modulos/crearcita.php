@@ -4,7 +4,7 @@
 
 
 
-if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"){
+if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor" AND $_SESSION["perfil"] != "secretaria"){
 
 
 
