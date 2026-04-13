@@ -1651,7 +1651,7 @@ function _egsEstadoClass($estado) {
 									<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar observación
 								</button>
 								<?php if (!$isTecnico): ?>
-								<button type="button" class="btn btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($valor); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:8px;">
+								<button type="button" class="btn btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($_GET["idOrden"]); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:8px;">
 									<i class="fa-solid fa-calendar-plus" style="margin-right:4px"></i>Nueva Cita
 								</button>
 								<?php endif; ?>
@@ -1884,9 +1884,17 @@ $(document).on('click', '.btnAgendarCitaDesdeOrden', function(){
 	var ordenId = $(this).data('orden-id');
 	var $modal = $('#modalCitaRapida');
 	if (!$modal.length) return;
-	// Prellenar el ID de orden y disparar el auto-color
-	$('#crOrdenId').val(ordenId).trigger('change');
+	// Prellenar el ID de orden, disparar auto-color y bloquear edición
+	var $campo = $('#crOrdenId');
+	$campo.val(ordenId).trigger('change');
+	// Deshabilitar visualmente pero guardar valor para el submit
+	$campo.prop('disabled', true).data('orden-forzada', ordenId);
 	$modal.modal('show');
+});
+// Al cerrar el modal, restaurar el campo por si lo abren desde otro lugar
+$(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
+	var $campo = $('#crOrdenId');
+	$campo.prop('disabled', false).removeData('orden-forzada');
 });
 </script>
 

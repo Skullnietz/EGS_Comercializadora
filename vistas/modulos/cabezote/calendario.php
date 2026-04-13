@@ -1020,8 +1020,8 @@
     var titulo = $('#crTitulo').val().trim();
     if (!titulo) return;
 
-    // Validar orden/pedido (opcional)
-    var ordenId = $('#crOrdenId').val();
+    // Validar orden/pedido (opcional) — si viene de infoOrden el campo está disabled
+    var ordenId = $('#crOrdenId').data('orden-forzada') || $('#crOrdenId').val();
 
     // Validar que no sea domingo y que haya hora seleccionada
     if (!selectedHora) {
