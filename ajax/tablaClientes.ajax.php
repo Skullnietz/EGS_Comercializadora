@@ -248,12 +248,17 @@ class TablaClientes{
 
 			$bh = ClienteBadgesHelper::getInstance();
 
-			$nombreClienteHtml = "<span style='display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:4px;max-width:100%;white-space:normal;line-height:1.35'>"
-			                  . "<span style='display:inline-block;white-space:normal;word-break:break-word;'>"
+			$nombreClienteBadges = $bh->render($idCliente);
+			$nombreClienteHtml = "<div style='display:flex;flex-direction:column;gap:6px;max-width:260px;'>"
+			                  . "<span style='display:block;font-weight:700;color:#1a252f;white-space:normal;word-break:break-word;line-height:1.32;'>"
 			                  . htmlspecialchars($clientes[$i]["nombre"])
-			                  . "</span>"
-			                  . $bh->render($idCliente)
 			                  . "</span>";
+			if(!empty($nombreClienteBadges)){
+				$nombreClienteHtml .= "<div style='display:flex;align-items:center;flex-wrap:wrap;margin-left:-4px;'>"
+				                   . $nombreClienteBadges
+				                   . "</div>";
+			}
+			$nombreClienteHtml .= "</div>";
 			if($idCliente === $ultimoClienteId){
 				$nombreClienteHtml = "<div class='cli-ultimo-registro' style='display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:12px;background:linear-gradient(135deg,#ecfeff,#f0fdf4);border:1px solid #a5f3fc;box-shadow:0 8px 18px rgba(34,211,238,.12);'>"
 				                  . "<span style='display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#0f172a;color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;'>"
