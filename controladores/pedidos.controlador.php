@@ -168,7 +168,20 @@ class ControladorPedidos{
 				
 				$respuesta = ModeloPedidos::mdlEditarPedido("pedidos", $datosPedioEditado);
 
-				// Sistema de recompensas deshabilitado en pedidos
+				// Procesar canje de dinero electrónico SOLO si el estado es Entregado
+				$montoCanje = floatval($datos["montoCanjeElectronicoPedido"] ?? 0);
+				$idClienteDE = intval($datos["idClientePedidoDE"] ?? 0);
+				$esEntregado = (stripos($datos["EstadoDelPedido"], 'Entregado') !== false);
+
+				if ($respuesta == "ok" && $montoCanje > 0 && $idClienteDE > 0 && $esEntregado) {
+					require_once __DIR__ . "/recompensas.controlador.php";
+					require_once __DIR__ . "/../modelos/recompensas.modelo.php";
+					// Verificar que no exista un canje previo para este pedido
+					$canjeExistente = ModeloRecompensas::mdlObtenerCanjePedido($datos["idPedido"]);
+					if (!$canjeExistente) {
+						ControladorRecompensas::ctrCanjearRecompensaPedido($idClienteDE, $datos["idPedido"], $montoCanje);
+					}
+				}
 
 				return $respuesta;
 

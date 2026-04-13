@@ -107,6 +107,8 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
             padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;color:#c7d2fe;
         }
         .card-nivel-dot{width:7px;height:7px;border-radius:50%;background:#818cf8;box-shadow:0 0 8px rgba(129,140,248,.6)}
+        .nivel-2 .card-nivel-dot{background:#a78bfa;box-shadow:0 0 8px rgba(167,139,250,.6)}
+        .nivel-3 .card-nivel-dot{background:#34d399;box-shadow:0 0 8px rgba(52,211,153,.6)}
 
         .contactless{position:absolute;bottom:24px;right:24px;z-index:1;opacity:.3}
         .contactless svg{width:24px;height:24px}
@@ -210,10 +212,10 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
         </div>
         <div class="card-bottom">
             <div class="card-bottom-type">Dinero Electr&oacute;nico</div>
-            <div class="card-nivel">
+            <div class="card-nivel nivel-<?php echo $porcentaje; ?>">
                 <div class="card-nivel-badge">
                     <span class="card-nivel-dot"></span>
-                    Recompensa 1%
+                    Nivel <?php echo $porcentaje; ?>%
                 </div>
             </div>
         </div>
@@ -228,7 +230,7 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
                 <div class="stat-label">&Oacute;rdenes entregadas</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">1%</div>
+                <div class="stat-value"><?php echo $porcentaje; ?>%</div>
                 <div class="stat-label">Tu recompensa</div>
             </div>
         </div>
@@ -239,11 +241,21 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
         </div>
 
         <div class="levels-section">
-            <div class="section-title">Recompensa</div>
-            <div class="level-row active">
-                <span class="level-name">Recompensa por compra</span>
+            <div class="section-title">Niveles de recompensa</div>
+            <div class="level-row <?php echo $porcentaje == 1 ? 'active' : ''; ?>">
+                <span class="level-name">Nivel Inicial</span>
                 <span class="level-pct">1%</span>
-                <span class="level-check">&#10003;</span>
+                <?php if ($porcentaje >= 1): ?><span class="level-check">&#10003;</span><?php endif; ?>
+            </div>
+            <div class="level-row <?php echo $porcentaje == 2 ? 'active' : ''; ?>">
+                <span class="level-name">+3 &oacute;rdenes entregadas</span>
+                <span class="level-pct">2%</span>
+                <?php if ($porcentaje >= 2): ?><span class="level-check">&#10003;</span><?php endif; ?>
+            </div>
+            <div class="level-row <?php echo $porcentaje == 3 ? 'active' : ''; ?>">
+                <span class="level-name">+5 &oacute;rdenes entregadas</span>
+                <span class="level-pct">3%</span>
+                <?php if ($porcentaje >= 3): ?><span class="level-check">&#10003;</span><?php endif; ?>
             </div>
         </div>
 

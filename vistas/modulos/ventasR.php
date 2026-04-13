@@ -1135,27 +1135,6 @@ const $input11 = document.querySelector(' #productoDiez');
           <?php echo $_vrFechaHoy; ?> &mdash; Panel operativo con indicadores en vivo y acceso rápido a captura y reportes
         </p>
       </div>
-      <?php if ($_SESSION["perfil"] === "administrador" || $_SESSION["perfil"] === "Super-Administrador"): ?>
-      <!-- Toggle Recompensas en Ventas -->
-      <div id="egs_toggleRecompensasContainer" style="position:relative;z-index:1;margin-top:14px;display:flex;align-items:center;gap:10px">
-        <label style="color:rgba(255,255,255,.85);font-size:13px;font-weight:600;margin:0;cursor:pointer;display:flex;align-items:center;gap:8px" for="egs_toggleRecompensasVentas">
-          <i class="fa-solid fa-wallet" style="opacity:.7"></i> Sistema de Recompensas en Ventas
-        </label>
-        <label class="egs-switch" style="margin:0">
-          <input type="checkbox" id="egs_toggleRecompensasVentas">
-          <span class="egs-switch-slider"></span>
-        </label>
-        <span id="egs_toggleRecompensasStatus" style="color:rgba(255,255,255,.5);font-size:12px"></span>
-      </div>
-      <style>
-        .egs-switch{position:relative;display:inline-block;width:44px;height:24px}
-        .egs-switch input{opacity:0;width:0;height:0}
-        .egs-switch-slider{position:absolute;cursor:pointer;inset:0;background:#475569;transition:.3s;border-radius:24px}
-        .egs-switch-slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;transition:.3s;border-radius:50%}
-        .egs-switch input:checked+.egs-switch-slider{background:#22c55e}
-        .egs-switch input:checked+.egs-switch-slider:before{transform:translateX(20px)}
-      </style>
-      <?php endif; ?>
     </div>
 
     <!-- ══ KPI CARDS ══ -->
@@ -2196,7 +2175,7 @@ MODAL AGREGAR PRODUCTO
       $('#nombrecliente').val('');
     }
 
-    if (idCliente <= 0 || !window._egs_recompensasVentasActivas) {
+    if (idCliente <= 0) {
       $('#egs_deVentaR_section').hide();
       $('#egs_montoCanjeElectronicoVenta').val(0);
       return;
@@ -2216,7 +2195,7 @@ MODAL AGREGAR PRODUCTO
 
         _deVR_saldo = parseFloat(data.saldo) || 0;
         $('#egs_deVentaR_saldo').text('$' + _deVR_saldo.toFixed(2));
-        $('#egs_deVentaR_nivel').text('Recompensa: 1% | ' + data.entregadas + ' transacciones');
+        $('#egs_deVentaR_nivel').text('Nivel: ' + data.porcentaje + '% | ' + data.entregadas + ' transacciones');
 
         var totalVenta = parseFloat($('#Resultado').val()) || 0;
 
@@ -2350,64 +2329,5 @@ MODAL AGREGAR PRODUCTO
     return false;
   });
 
-})();
-
-// ═══════════════════════════════════════════════
-// TOGGLE SISTEMA DE RECOMPENSAS EN VENTAS
-// ═══════════════════════════════════════════════
-window._egs_recompensasVentasActivas = false;
-
-(function(){
-  var $toggle = $('#egs_toggleRecompensasVentas');
-  var $status = $('#egs_toggleRecompensasStatus');
-
-  // Consultar estado actual al cargar la página
-  $.ajax({
-    url: 'ajax/recompensas.ajax.php',
-    method: 'POST',
-    data: { consultarRecompensasVentas: 1 },
-    dataType: 'json',
-    success: function(resp) {
-      var activo = parseInt(resp.activo) === 1;
-      window._egs_recompensasVentasActivas = activo;
-      $toggle.prop('checked', activo);
-      $status.text(activo ? 'Activo' : 'Desactivado').css('color', activo ? 'rgba(74,222,128,.9)' : 'rgba(255,255,255,.5)');
-    },
-    error: function() {
-      window._egs_recompensasVentasActivas = false;
-      $toggle.prop('checked', false);
-      $status.text('Desactivado');
-    }
-  });
-
-  // Toggle al cambiar el switch
-  $toggle.on('change', function(){
-    var nuevoEstado = this.checked ? 1 : 0;
-    $status.text('Guardando...').css('color', 'rgba(255,255,255,.5)');
-
-    $.ajax({
-      url: 'ajax/recompensas.ajax.php',
-      method: 'POST',
-      data: { toggleRecompensasVentas: nuevoEstado },
-      dataType: 'json',
-      success: function(resp) {
-        if (resp.status === 'ok') {
-          window._egs_recompensasVentasActivas = (nuevoEstado === 1);
-          $status.text(nuevoEstado === 1 ? 'Activo' : 'Desactivado')
-            .css('color', nuevoEstado === 1 ? 'rgba(74,222,128,.9)' : 'rgba(255,255,255,.5)');
-          // Si se desactivó, ocultar la sección de recompensas si estaba visible
-          if (nuevoEstado === 0) {
-            $('#egs_deVentaR_section').hide();
-            $('#egs_montoCanjeElectronicoVenta').val(0);
-          }
-        }
-      },
-      error: function() {
-        // Revertir el toggle en caso de error
-        $toggle.prop('checked', !$toggle.prop('checked'));
-        $status.text('Error al guardar');
-      }
-    });
-  });
 })();
 </script>

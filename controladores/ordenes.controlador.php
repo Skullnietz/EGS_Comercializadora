@@ -513,7 +513,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				$rutaPortada = "";
+				$rutaPortada = "../vistas/img/default/default.png";
 
 
 
@@ -647,7 +647,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				$rutaFotoPrincipal = "";
+				$rutaFotoPrincipal = "../vistas/img/default/default.png";
 
 
 
@@ -845,9 +845,9 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 					"totalOrden" => $datos["totalOrden"],
 
-					"imgPortada" => $rutaPortada !== "" ? substr($rutaPortada, 3) : "",
+					"imgPortada" => substr($rutaPortada, 3),
 
-					"imgFotoPrincipal" => $rutaFotoPrincipal !== "" ? substr($rutaFotoPrincipal, 3) : "",
+					"imgFotoPrincipal" => substr($rutaFotoPrincipal, 3),
 
 					"fecha_ingreso" => $fechaDeIngreso,
 
@@ -1061,9 +1061,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-					if (!empty($datos["antiguaFotoPortada"]) && $datos["antiguaFotoPortada"] !== "vistas/img/default/default.png") {
-						unlink("../" . $datos["antiguaFotoPortada"]);
-					}
+					unlink("../" . $datos["antiguaFotoPortada"]);
 
 
 
@@ -1209,9 +1207,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-					if (!empty($datos["antiguaFotoPrincipal"]) && $datos["antiguaFotoPrincipal"] !== "vistas/img/default/default.png") {
-						unlink("../" . $datos["antiguaFotoPrincipal"]);
-					}
+					unlink("../" . $datos["antiguaFotoPrincipal"]);
 
 
 
@@ -1407,9 +1403,9 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 					"totalOrdenEditar" => $datos["totalOrdenEditar"],
 
-					"imgPortada" => $rutaPortada !== "" ? substr($rutaPortada, 3) : "",
+					"imgPortada" => substr($rutaPortada, 3),
 
-					"imgFotoPrincipal" => $rutaFotoPrincipal !== "" ? substr($rutaFotoPrincipal, 3) : "",
+					"imgFotoPrincipal" => substr($rutaFotoPrincipal, 3),
 
 					"seleccionarPedido" => $datos["seleccionarPedido"],
 

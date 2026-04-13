@@ -769,21 +769,13 @@
   });
 
   // Quick add button — cerrar dropdown primero, luego abrir modal
-  // Si estamos en infoOrden, pre-llenar con datos de la orden
   $(document).on('click', '#egsCalQuickAdd', function(e){
     e.preventDefault();
     e.stopPropagation();
+    // Cerrar el dropdown de Bootstrap correctamente
     $('#egsCalendarToggle').dropdown('toggle');
-
-    var urlParams = new URLSearchParams(window.location.search);
-    var ruta = urlParams.get('ruta');
-    var ordenId = urlParams.get('idOrden');
-
+    // Abrir modal después de que el dropdown se cierre
     setTimeout(function(){
-      if (ruta === 'infoOrden' && ordenId && parseInt(ordenId) > 0) {
-        $('#crOrdenId').val(ordenId).prop('readonly', true).trigger('input');
-        $('#crTitulo').val('Cita #' + ordenId);
-      }
       $('#modalCitaRapida').modal('show');
     }, 200);
   });
@@ -1119,20 +1111,6 @@
         $btn.prop('disabled', false).html('<i class="fa-solid fa-check" style="margin-right:5px;"></i>Agendar');
       }
     });
-  });
-
-  // Agendar cita desde infoOrden — pre-llena el modal rápido con el ID de orden
-  $(document).on('click', '.btnAgendarCitaDesdeOrden', function(){
-    var ordenId = $(this).data('orden-id');
-    if (!ordenId || parseInt(ordenId) < 1) return;
-    $('#crOrdenId').val(ordenId).prop('readonly', true).trigger('input');
-    $('#crTitulo').val('Cita #' + ordenId);
-    $('#modalCitaRapida').modal('show');
-  });
-
-  // Restaurar campo de orden al cerrar el modal
-  $('#modalCitaRapida').on('hidden.bs.modal', function(){
-    $('#crOrdenId').prop('readonly', false);
   });
 
 })();

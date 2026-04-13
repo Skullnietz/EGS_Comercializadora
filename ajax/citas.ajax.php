@@ -29,6 +29,28 @@ function esTecnico() {
     return isset($_SESSION["perfil"]) && $_SESSION["perfil"] == "tecnico";
 }
 
+/*=============================================
+HELPER: Censurar datos de contacto del cliente
+para técnicos (solo ven nombre parcial, sin teléfono)
+=============================================*/
+function censurarDatosCliente($citas) {
+    foreach ($citas as &$c) {
+        // Censurar teléfono completamente
+        $c["cliente_telefono"] = "";
+        // Censurar nombre: mostrar solo primer nombre + inicial del apellido
+        if (!empty($c["cliente_nombre"])) {
+            $partes = explode(" ", trim($c["cliente_nombre"]));
+            if (count($partes) > 1) {
+                $c["cliente_nombre"] = $partes[0] . " " . mb_substr($partes[1], 0, 1) . ".";
+            }
+        }
+        // Quitar badges de cliente (info sensible de comportamiento)
+        $c["cliente_badges"] = null;
+    }
+    unset($c);
+    return $citas;
+}
+
 class AjaxCitas
 {
 
@@ -123,6 +145,7 @@ if (isset($_POST["accion"]) && $_POST["accion"] == "mostrar") {
     if (esTecnico()) {
         $ordenIds = obtenerOrdenesDelTecnico($_SESSION["id"]);
         $respuesta = ModeloCitas::mdlMostrarCitasPorOrdenes("citas", $ordenIds);
+        $respuesta = censurarDatosCliente($respuesta);
         echo json_encode($respuesta);
     } else {
         $citas = new AjaxCitas();
@@ -265,6 +288,7 @@ if (isset($_POST["accion"]) && $_POST["accion"] == "citasPorRango") {
     if (esTecnico()) {
         $ordenIds = obtenerOrdenesDelTecnico($_SESSION["id"]);
         $respuesta = ModeloCitas::mdlCitasPorRangoYOrdenes("citas", $inicio, $fin, $ordenIds);
+        $respuesta = censurarDatosCliente($respuesta);
     } else {
         $respuesta = ModeloCitas::mdlCitasPorRango("citas", $inicio, $fin);
     }
