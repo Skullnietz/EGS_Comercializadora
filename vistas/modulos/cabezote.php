@@ -804,7 +804,9 @@
         <?php
         include "cabezote/calendario.php";
         include "cabezote/faq.php";
-        include "cabezote/notificaciones.php";
+        if (!(isset($_GET["ruta"]) && $_GET["ruta"] == "validar-cotizacion")) {
+          include "cabezote/notificaciones.php";
+        }
         include "cabezote/usuario.php";
         ?>
       </ul>

@@ -269,7 +269,9 @@
   <script src="vistas/js/gestorVisitas.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorUsuarios.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorAdministradores.js?v=<?= $jsVer ?>"></script>
+  <?php if (!(isset($_GET["ruta"]) && $_GET["ruta"] == "validar-cotizacion")): ?>
   <script src="vistas/js/gestorNotificaciones.js?v=<?= $jsVer ?>"></script>
+  <?php endif; ?>
   <script src="vistas/js/gestorAsesores.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorEmpresas.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorOrdenes.js?v=<?= $jsVer ?>"></script>
