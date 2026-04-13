@@ -117,8 +117,6 @@ class AjaxPedidos{
 	public $edicionProductoUnoPedido;
 	public $edicionProductoUnoPedidoDos;
 	public $EstadoDelPedido;
-	public $montoCanjeElectronicoPedido;
-	public $idClientePedidoDE;
 
 	public function  ajaxEditarPedido(){
 
@@ -138,9 +136,7 @@ class AjaxPedidos{
 			"abono5"=>$this->abono5,
 			"fechaAbono5"=>$this->fechaAbono5,
 			"adeudoPedidoEditado"=>$this->adeudoPedidoEditado,
-			"EstadoDelPedido"=>$this->EstadoDelPedido,
-			"montoCanjeElectronicoPedido"=>$this->montoCanjeElectronicoPedido,
-			"idClientePedidoDE"=>$this->idClientePedidoDE
+			"EstadoDelPedido"=>$this->EstadoDelPedido
 			);
 
 		$respuesta = ControladorPedidos::ctrEditarPedido($datos);
@@ -219,8 +215,6 @@ if(isset($_POST["id"])){
 	$editarPedido -> fechaAbono5 = $_POST["fechaAbono5"];
 	$editarPedido -> adeudoPedidoEditado = $_POST["adeudoPedidoEditado"];
 	$editarPedido -> EstadoDelPedido = $_POST["EstadoDelPedido"];
-	$editarPedido -> montoCanjeElectronicoPedido = $_POST["montoCanjeElectronicoPedido"] ?? 0;
-	$editarPedido -> idClientePedidoDE = $_POST["idClientePedidoDE"] ?? 0;
 
 	$editarPedido -> ajaxEditarPedido();
 

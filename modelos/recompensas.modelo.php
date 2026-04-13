@@ -97,7 +97,8 @@ class ModeloRecompensas
 
     /*=============================================
     CONTAR ORDENES ENTREGADAS POR CLIENTE (todas)
-    Incluye órdenes, pedidos entregados y ventas rápidas
+    Incluye órdenes y ventas rápidas.
+    Los pedidos ya no forman parte del sistema de recompensas.
     =============================================*/
     static public function mdlContarOrdenesEntregadas($idCliente)
     {
@@ -108,20 +109,13 @@ class ModeloRecompensas
         $stmt->execute();
         $totalOrdenes = intval($stmt->fetch(PDO::FETCH_ASSOC)["total"]);
 
-        // Pedidos entregados (ecommerce DB)
         $pdoEc = Conexion::conectar();
-        $stmt2 = $pdoEc->prepare("SELECT COUNT(*) as total FROM pedidos WHERE id_cliente = :id_cliente AND estado LIKE '%Entregado%'");
-        $stmt2->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmt2->execute();
-        $totalPedidos = intval($stmt2->fetch(PDO::FETCH_ASSOC)["total"]);
-
-        // Ventas rápidas con cliente asociado (ecommerce DB)
         $stmt3 = $pdoEc->prepare("SELECT COUNT(*) as total FROM compras WHERE id_cliente = :id_cliente");
         $stmt3->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmt3->execute();
         $totalVentas = intval($stmt3->fetch(PDO::FETCH_ASSOC)["total"]);
 
-        return $totalOrdenes + $totalPedidos + $totalVentas;
+        return $totalOrdenes + $totalVentas;
     }
 
     /*=============================================
@@ -176,22 +170,6 @@ class ModeloRecompensas
         $sumaOrdenesAntes = floatval($stmt->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
         $pdoEc = Conexion::conectar();
-        // 1b) Pedidos antes del cambio
-        $stmtPed = $pdoEc->prepare("
-            SELECT COALESCE(SUM(total), 0) as suma_totales
-            FROM pedidos
-            WHERE id_cliente = :id_cliente
-              AND estado LIKE '%Entregado%'
-              AND fechaEntrega IS NOT NULL
-              AND fechaEntrega >= :fechaDesde
-              AND fechaEntrega < :fechaCambio
-        ");
-        $stmtPed->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmtPed->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
-        $stmtPed->bindParam(":fechaCambio", $fechaCambio, PDO::PARAM_STR);
-        $stmtPed->execute();
-        $sumaPedidosAntes = floatval($stmtPed->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
-
         // 1c) Ventas antes del cambio
         $stmtVta = $pdoEc->prepare("
             SELECT COALESCE(SUM(pago), 0) as suma_totales
@@ -206,7 +184,7 @@ class ModeloRecompensas
         $stmtVta->execute();
         $sumaVentasAntes = floatval($stmtVta->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
-        $acumuladoAntes = round(($sumaOrdenesAntes + $sumaPedidosAntes + $sumaVentasAntes) * ($porcentajeHistorico / 100), 2);
+        $acumuladoAntes = round(($sumaOrdenesAntes + $sumaVentasAntes) * ($porcentajeHistorico / 100), 2);
 
         // ── PERIODO NUEVO (desde el cambio, 1% fijo) ──
         // Usar max(fechaCambio, fechaDesde) para respetar la ventana de 6 meses
@@ -227,20 +205,6 @@ class ModeloRecompensas
         $stmt2->execute();
         $sumaOrdenesDesp = floatval($stmt2->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
-        // 2b) Pedidos desde el cambio
-        $stmtPed2 = $pdoEc->prepare("
-            SELECT COALESCE(SUM(total), 0) as suma_totales
-            FROM pedidos
-            WHERE id_cliente = :id_cliente
-              AND estado LIKE '%Entregado%'
-              AND fechaEntrega IS NOT NULL
-              AND fechaEntrega >= :fechaDesdePeriodo2
-        ");
-        $stmtPed2->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmtPed2->bindParam(":fechaDesdePeriodo2", $fechaDesdePeriodo2, PDO::PARAM_STR);
-        $stmtPed2->execute();
-        $sumaPedidosDesp = floatval($stmtPed2->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
-
         // 2c) Ventas desde el cambio
         $stmtVta2 = $pdoEc->prepare("
             SELECT COALESCE(SUM(pago), 0) as suma_totales
@@ -253,7 +217,7 @@ class ModeloRecompensas
         $stmtVta2->execute();
         $sumaVentasDesp = floatval($stmtVta2->fetch(PDO::FETCH_ASSOC)["suma_totales"]);
 
-        $acumuladoDespues = round(($sumaOrdenesDesp + $sumaPedidosDesp + $sumaVentasDesp) * ($porcentaje / 100), 2);
+        $acumuladoDespues = round(($sumaOrdenesDesp + $sumaVentasDesp) * ($porcentaje / 100), 2);
 
         // ── TOTAL ACUMULADO ──
         $acumulado = $acumuladoAntes + $acumuladoDespues;
@@ -265,6 +229,7 @@ class ModeloRecompensas
             WHERE id_cliente = :id_cliente
               AND tipo = 'canje'
               AND fecha >= :fechaDesde
+              AND (descripcion IS NULL OR descripcion NOT LIKE '%Pedido%')
         ");
         $stmtCanjes->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmtCanjes->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
@@ -281,7 +246,8 @@ class ModeloRecompensas
     /*=============================================
     OBTENER DESGLOSE DE TRANSACCIONES QUE GENERAN SALDO
     (para la vista del monedero público)
-    Incluye órdenes, pedidos y ventas rápidas
+    Incluye órdenes y ventas rápidas.
+    Los pedidos se excluyen del monedero.
     =============================================*/
     static public function mdlObtenerOrdenesConRecompensa($idCliente, $porcentaje, $porcentajeHistorico = null)
     {
@@ -322,35 +288,7 @@ class ModeloRecompensas
             );
         }
 
-        // Pedidos entregados (ecommerce DB)
         $pdoEc = Conexion::conectar();
-        $stmtPed = $pdoEc->prepare("
-            SELECT id, total, fechaEntrega
-            FROM pedidos
-            WHERE id_cliente = :id_cliente
-              AND estado LIKE '%Entregado%'
-              AND fechaEntrega IS NOT NULL
-              AND fechaEntrega >= :fechaDesde
-            ORDER BY fechaEntrega DESC
-        ");
-        $stmtPed->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmtPed->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
-        $stmtPed->execute();
-        $pedidos = $stmtPed->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($pedidos as $ped) {
-            $pctAplicado = ($ped["fechaEntrega"] < $fechaCambio) ? $porcentajeHistorico : $porcentaje;
-            $recompensa = round(floatval($ped["total"]) * ($pctAplicado / 100), 2);
-            $resultado[] = array(
-                "id_orden" => $ped["id"],
-                "fuente" => "pedido",
-                "total_orden" => floatval($ped["total"]),
-                "recompensa" => $recompensa,
-                "porcentaje_aplicado" => $pctAplicado,
-                "fecha_entrega" => $ped["fechaEntrega"]
-            );
-        }
-
         // Ventas rápidas con cliente asociado (ecommerce DB)
         $stmtVta = $pdoEc->prepare("
             SELECT id, pago, fecha
@@ -383,7 +321,8 @@ class ModeloRecompensas
     /*=============================================
     CONTAR TRANSACCIONES ENTREGADAS DENTRO DEL PROGRAMA
     (desde abril 2026 y dentro de la ventana de 6 meses)
-    Incluye órdenes, pedidos y ventas rápidas
+    Incluye órdenes y ventas rápidas.
+    Los pedidos se excluyen del programa.
     =============================================*/
     static public function mdlContarOrdenesEnPrograma($idCliente)
     {
@@ -406,21 +345,7 @@ class ModeloRecompensas
         $stmt->execute();
         $totalOrdenes = intval($stmt->fetch(PDO::FETCH_ASSOC)["total"]);
 
-        // Pedidos entregados (ecommerce DB)
         $pdoEc = Conexion::conectar();
-        $stmtPed = $pdoEc->prepare("
-            SELECT COUNT(*) as total
-            FROM pedidos
-            WHERE id_cliente = :id_cliente
-              AND estado LIKE '%Entregado%'
-              AND fechaEntrega IS NOT NULL
-              AND fechaEntrega >= :fechaDesde
-        ");
-        $stmtPed->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmtPed->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
-        $stmtPed->execute();
-        $totalPedidos = intval($stmtPed->fetch(PDO::FETCH_ASSOC)["total"]);
-
         // Ventas rápidas con cliente asociado (ecommerce DB)
         $stmtVta = $pdoEc->prepare("
             SELECT COUNT(*) as total
@@ -433,7 +358,7 @@ class ModeloRecompensas
         $stmtVta->execute();
         $totalVentas = intval($stmtVta->fetch(PDO::FETCH_ASSOC)["total"]);
 
-        return $totalOrdenes + $totalPedidos + $totalVentas;
+        return $totalOrdenes + $totalVentas;
     }
 
     /*=============================================
@@ -476,7 +401,7 @@ class ModeloRecompensas
     static public function mdlObtenerCanjes($idCliente, $limite = 20)
     {
         $pdo = ConexionWP::conectarWP();
-        $stmt = $pdo->prepare("SELECT * FROM dinero_electronico_movimientos WHERE id_cliente = :id_cliente AND tipo = 'canje' ORDER BY fecha DESC LIMIT :limite");
+        $stmt = $pdo->prepare("SELECT * FROM dinero_electronico_movimientos WHERE id_cliente = :id_cliente AND tipo = 'canje' AND (descripcion IS NULL OR descripcion NOT LIKE '%Pedido%') ORDER BY fecha DESC LIMIT :limite");
         $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
         $stmt->execute();

@@ -100,25 +100,7 @@ class ControladorRecompensas
     =============================================*/
     static public function ctrCanjearRecompensaPedido($idCliente, $idPedido, $montoCanje)
     {
-        self::ctrCrearTablas();
-
-        $porcentaje = self::ctrCalcularPorcentaje($idCliente);
-        $porcentajeHistorico = self::ctrCalcularPorcentajeHistorico($idCliente);
-        $saldoDisponible = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHistorico);
-
-        if ($montoCanje > $saldoDisponible || $montoCanje <= 0) {
-            return false;
-        }
-
-        $descripcion = "Canje en Pedido #" . $idPedido;
-        ModeloRecompensas::mdlCanjearRecompensa($idCliente, $idPedido, $montoCanje, $descripcion);
-
-        $nuevoSaldo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHistorico);
-
-        return array(
-            "monto_canjeado" => $montoCanje,
-            "saldo_nuevo" => $nuevoSaldo
-        );
+        return false;
     }
 
     /*=============================================
@@ -174,8 +156,7 @@ class ControladorRecompensas
         $movimientos = array();
         foreach ($ordenesRecomp as $ord) {
             $fuenteLabel = "Orden";
-            if ($ord["fuente"] == "pedido") $fuenteLabel = "Pedido";
-            elseif ($ord["fuente"] == "venta") $fuenteLabel = "Venta";
+            if ($ord["fuente"] == "venta") $fuenteLabel = "Venta";
 
             $pctAplicado = isset($ord["porcentaje_aplicado"]) ? $ord["porcentaje_aplicado"] : $porcentaje;
             $movimientos[] = array(
@@ -227,8 +208,7 @@ class ControladorRecompensas
     =============================================*/
     static public function ctrObtenerCanjePedido($idPedido)
     {
-        self::ctrCrearTablas();
-        return ModeloRecompensas::mdlObtenerCanjePedido($idPedido);
+        return false;
     }
 
     /*=============================================
