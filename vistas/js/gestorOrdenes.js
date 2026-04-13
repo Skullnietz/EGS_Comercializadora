@@ -147,18 +147,68 @@ $(".tituloOrden").change(function(){
 AGREGAR MULTIMEDIA CON DROPZONE
 =============================================*/
 
+var formatosImagenPermitidos = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+var formatosImagenTexto = "JPG, PNG, WEBP o GIF";
+var pesoMaximoImagen = 10 * 1024 * 1024;
+var pesoMaximoImagenMB = 10;
 var arrayFiles = [];
+
+function mostrarErrorImagen(texto){
+	swal({
+		title: "Error al subir la imagen",
+		text: texto,
+		type: "error",
+		confirmButtonText: "¡Cerrar!"
+	});
+}
+
+function validarArchivoImagen(file){
+	if(!file){
+		return { valido: false, mensaje: "No se seleccionó ningún archivo." };
+	}
+
+	if(formatosImagenPermitidos.indexOf(file.type) === -1){
+		return {
+			valido: false,
+			mensaje: "La imagen debe estar en formato " + formatosImagenTexto + "."
+		};
+	}
+
+	if(file.size > pesoMaximoImagen){
+		return {
+			valido: false,
+			mensaje: "La imagen no debe pesar más de " + pesoMaximoImagenMB + "MB."
+		};
+	}
+
+	return { valido: true };
+}
+
+function previsualizarImagen(file, selector){
+	var datosImagen = new FileReader();
+	datosImagen.readAsDataURL(file);
+
+	$(datosImagen).on("load", function(event){
+		$(selector).attr("src", event.target.result);
+	});
+}
 
 $(".multimediaOrden").dropzone({
 
 	url: "/",
 	addRemoveLinks: true,
-	acceptedFiles: "image/jpeg, image/png",
-	maxFilesize: 2,
+	acceptedFiles: formatosImagenPermitidos.join(", "),
+	maxFilesize: pesoMaximoImagenMB,
 	maxFiles: 10,
 	init: function(){
 
 		this.on("addedfile", function(file){
+			var validacion = validarArchivoImagen(file);
+			if(!validacion.valido){
+				this.removeFile(file);
+				mostrarErrorImagen(validacion.mensaje);
+				return;
+			}
 
 			arrayFiles.push(file);
 
@@ -285,7 +335,43 @@ $(".fotoPrincipal").change(function(){
 
   	}
 
-})/*=============================================
+})
+
+$(".fotoPortada").off("change").on("change", function(){
+
+	imagenPortada = this.files[0];
+
+	var validacionPortada = validarArchivoImagen(imagenPortada);
+
+	if(!validacionPortada.valido){
+		imagenPortada = null;
+		$(".fotoPortada").val("");
+		mostrarErrorImagen(validacionPortada.mensaje);
+		return;
+	}
+
+	previsualizarImagen(imagenPortada, ".previsualizarPortada");
+
+});
+
+$(".fotoPrincipal").off("change").on("change", function(){
+
+	imagenFotoPrincipalOrden = this.files[0];
+
+	var validacionPrincipal = validarArchivoImagen(imagenFotoPrincipalOrden);
+
+	if(!validacionPrincipal.valido){
+		imagenFotoPrincipalOrden = null;
+		$(".fotoPrincipal").val("");
+		mostrarErrorImagen(validacionPrincipal.mensaje);
+		return;
+	}
+
+	previsualizarImagen(imagenFotoPrincipalOrden, ".previsualizarPrincipal");
+
+});
+
+/*=============================================
 GUARDAR EL PRODUCTO
 =============================================*/
 
@@ -308,6 +394,7 @@ $(".guardarOrden").click(function(){
 
 	   			var listaMultimedia = [];
 	   			var finalFor = 0;
+	   			var huboErrorMultimedia = false;
 
 	   			for(var i = 0; i < arrayFiles.length; i++){
 
@@ -340,6 +427,12 @@ $(".guardarOrden").click(function(){
 						success: function(respuesta){
 
 							$("#status").remove();
+
+							if(typeof respuesta === "string" && respuesta.indexOf("error::") === 0){
+								huboErrorMultimedia = true;
+								mostrarErrorImagen(respuesta.replace("error::", ""));
+								return;
+							}
 							
 							listaMultimedia.push({"foto" : respuesta.substr(3)})
 							multimediaOrden = JSON.stringify(listaMultimedia);
@@ -367,7 +460,7 @@ $(".guardarOrden").click(function(){
 
 							}
 
-							if((finalFor + 1) == arrayFiles.length){
+							if(!huboErrorMultimedia && (finalFor + 1) == arrayFiles.length){
 
 								agregarMiOrden(multimediaOrden);
 								finalFor = 0;
@@ -506,6 +599,10 @@ function agregarMiOrden(imagen){
 
 							}
 						})
+					}else{
+
+						mostrarErrorImagen(respuesta || "No se pudo guardar la orden.");
+
 					}
 
 				}
@@ -963,6 +1060,7 @@ $(".guardarCambiosOrden").click(function(){
 		
 		var listaMultimedia = [];
 		var finalFor = 0;
+		var huboErrorMultimedia = false;
 
 		for(var i = 0; i < arrayFiles.length; i++){
 			var datosMultimedia = new FormData();
@@ -994,6 +1092,12 @@ $(".guardarCambiosOrden").click(function(){
 
 				$("#status").remove();
 
+				if(typeof respuesta === "string" && respuesta.indexOf("error::") === 0){
+					huboErrorMultimedia = true;
+					mostrarErrorImagen(respuesta.replace("error::", ""));
+					return;
+				}
+
 				listaMultimedia.push({"foto" : respuesta.substr(3)});
 				multimediaFisica = JSON.stringify(listaMultimedia);
 				if(localStorage.getItem("multimediaFisica") != null){
@@ -1010,7 +1114,7 @@ $(".guardarCambiosOrden").click(function(){
 					});
 						return;
 				}
-				if((finalFor + 1) == arrayFiles.length){
+				if(!huboErrorMultimedia && (finalFor + 1) == arrayFiles.length){
 
 					editarMiOrden(multimediaFisica);
 					finalFor = 0;
@@ -1135,7 +1239,7 @@ function editarMiOrden(imagen){
 	}	
 
 	datosOrden.append("fotoPortada", imagenPortada);
-	datosOrden.append("fotoPrincipal", imagenFotoPrincipal);
+	datosOrden.append("fotoPrincipal", imagenFotoPrincipalOrden);
 	datosOrden.append("antiguaFotoPortada", antiguaFotoPortada);
 	datosOrden.append("antiguaFotoPrincipal", antiguaFotoPrincipal);
 
@@ -1165,6 +1269,10 @@ function editarMiOrden(imagen){
 
 						}
 					})
+				}else{
+
+					mostrarErrorImagen(respuesta || "No se pudo actualizar la orden.");
+
 				}
 
 			}

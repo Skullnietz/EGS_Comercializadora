@@ -91,6 +91,224 @@ class controladorOrdenes
 		return ($httpCode >= 200 && $httpCode < 300);
 	}
 
+	static private function ctrNormalizarSlug($texto, $fallback = 'imagen')
+	{
+		$texto = strtolower(trim((string) $texto));
+		$texto = str_replace(
+			array('á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü'),
+			array('a', 'e', 'i', 'o', 'u', 'n', 'u'),
+			$texto
+		);
+		$texto = preg_replace('/[^a-z0-9_-]+/', '-', $texto);
+		$texto = preg_replace('/-+/', '-', $texto);
+		$texto = trim($texto, '-_');
+
+		if ($texto === '') {
+			$texto = $fallback;
+		}
+
+		return $texto;
+	}
+
+	static private function ctrValidarArchivoImagen($archivo, $maxBytes = 10485760)
+	{
+		if (
+			!is_array($archivo) ||
+			!isset($archivo["tmp_name"]) ||
+			empty($archivo["tmp_name"]) ||
+			!file_exists($archivo["tmp_name"])
+		) {
+			return array("ok" => false, "mensaje" => "No se recibió ninguna imagen válida.");
+		}
+
+		if (isset($archivo["error"]) && intval($archivo["error"]) !== UPLOAD_ERR_OK) {
+			return array("ok" => false, "mensaje" => "La imagen no se pudo subir correctamente.");
+		}
+
+		$tamano = isset($archivo["size"]) ? intval($archivo["size"]) : 0;
+		if ($tamano <= 0) {
+			return array("ok" => false, "mensaje" => "La imagen enviada está vacía.");
+		}
+
+		if ($tamano > $maxBytes) {
+			return array(
+				"ok" => false,
+				"mensaje" => "La imagen supera el límite permitido de " . round($maxBytes / 1048576, 1) . " MB."
+			);
+		}
+
+		$info = @getimagesize($archivo["tmp_name"]);
+		if ($info === false || empty($info["mime"])) {
+			return array("ok" => false, "mensaje" => "El archivo no es una imagen compatible.");
+		}
+
+		$mimesPermitidos = array(
+			'image/jpeg',
+			'image/png',
+			'image/webp',
+			'image/gif'
+		);
+
+		if (!in_array($info["mime"], $mimesPermitidos, true)) {
+			return array("ok" => false, "mensaje" => "Formato no permitido. Usa JPG, PNG, WEBP o GIF.");
+		}
+
+		return array(
+			"ok" => true,
+			"mime" => $info["mime"],
+			"ancho" => intval($info[0]),
+			"alto" => intval($info[1]),
+			"tamano" => $tamano
+		);
+	}
+
+	static private function ctrImagenTieneTransparencia($imagen, $ancho, $alto, $mime)
+	{
+		if ($mime === 'image/jpeg') {
+			return false;
+		}
+
+		if (function_exists('imagecolortransparent') && imagecolortransparent($imagen) >= 0) {
+			return true;
+		}
+
+		if (!in_array($mime, array('image/png', 'image/webp', 'image/gif'), true)) {
+			return false;
+		}
+
+		$pasoX = max(1, intval($ancho / 12));
+		$pasoY = max(1, intval($alto / 12));
+
+		for ($x = 0; $x < $ancho; $x += $pasoX) {
+			for ($y = 0; $y < $alto; $y += $pasoY) {
+				$rgba = imagecolorat($imagen, $x, $y);
+				$alpha = ($rgba & 0x7F000000) >> 24;
+				if ($alpha > 0) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	static private function ctrCrearLienzo($ancho, $alto, $transparente)
+	{
+		$lienzo = imagecreatetruecolor($ancho, $alto);
+
+		if ($transparente) {
+			imagealphablending($lienzo, false);
+			imagesavealpha($lienzo, true);
+			$fondo = imagecolorallocatealpha($lienzo, 0, 0, 0, 127);
+		} else {
+			$fondo = imagecolorallocate($lienzo, 255, 255, 255);
+		}
+
+		imagefilledrectangle($lienzo, 0, 0, $ancho, $alto, $fondo);
+
+		return $lienzo;
+	}
+
+	static private function ctrGuardarImagenProcesada($imagen, $rutaDestino, $mimeSalida)
+	{
+		if ($mimeSalida === 'image/png') {
+			imagealphablending($imagen, false);
+			imagesavealpha($imagen, true);
+			return imagepng($imagen, $rutaDestino, 8);
+		}
+
+		imageinterlace($imagen, true);
+		return imagejpeg($imagen, $rutaDestino, 82);
+	}
+
+	static private function ctrPuedeEliminarArchivo($ruta)
+	{
+		$ruta = trim((string) $ruta);
+		if ($ruta === '' || $ruta === 'vistas/img/default/default.png') {
+			return false;
+		}
+
+		$rutaFisica = $ruta;
+		if (strpos($rutaFisica, '../') !== 0) {
+			$rutaFisica = '../' . ltrim($rutaFisica, '/');
+		}
+
+		return file_exists($rutaFisica);
+	}
+
+	static private function ctrOptimizarImagenSubida($archivo, $config = array())
+	{
+		$validacion = self::ctrValidarArchivoImagen(
+			$archivo,
+			isset($config["max_bytes"]) ? intval($config["max_bytes"]) : 10485760
+		);
+
+		if (!$validacion["ok"]) {
+			return $validacion;
+		}
+
+		$contenido = @file_get_contents($archivo["tmp_name"]);
+		if ($contenido === false) {
+			return array("ok" => false, "mensaje" => "No fue posible leer la imagen recibida.");
+		}
+
+		$origen = @imagecreatefromstring($contenido);
+		if ($origen === false) {
+			return array("ok" => false, "mensaje" => "No fue posible procesar el formato de imagen.");
+		}
+
+		$anchoOrigen = $validacion["ancho"];
+		$altoOrigen = $validacion["alto"];
+		$transparencia = self::ctrImagenTieneTransparencia($origen, $anchoOrigen, $altoOrigen, $validacion["mime"]);
+		$mimeSalida = $transparencia ? 'image/png' : 'image/jpeg';
+		$extensionSalida = $mimeSalida === 'image/png' ? 'png' : 'jpg';
+
+		$directorio = isset($config["directorio"]) ? rtrim($config["directorio"], '/') : '../vistas/img/multimedia';
+		if (!file_exists($directorio) && !mkdir($directorio, 0755, true)) {
+			imagedestroy($origen);
+			return array("ok" => false, "mensaje" => "No se pudo preparar el directorio de imágenes.");
+		}
+
+		$baseNombre = self::ctrNormalizarSlug(
+			isset($config["nombre"]) ? $config["nombre"] : pathinfo($archivo["name"], PATHINFO_FILENAME),
+			'orden-' . time()
+		);
+
+		$rutaDestino = $directorio . '/' . $baseNombre . '.' . $extensionSalida;
+		$modo = isset($config["modo"]) ? $config["modo"] : 'contain';
+		$objetivoAncho = isset($config["ancho"]) ? max(1, intval($config["ancho"])) : $anchoOrigen;
+		$objetivoAlto = isset($config["alto"]) ? max(1, intval($config["alto"])) : $altoOrigen;
+
+		if ($modo === 'canvas') {
+			$destino = self::ctrCrearLienzo($objetivoAncho, $objetivoAlto, $transparencia);
+			$escala = min($objetivoAncho / $anchoOrigen, $objetivoAlto / $altoOrigen, 1);
+			$nuevoAncho = max(1, intval(round($anchoOrigen * $escala)));
+			$nuevoAlto = max(1, intval(round($altoOrigen * $escala)));
+			$destinoX = intval(($objetivoAncho - $nuevoAncho) / 2);
+			$destinoY = intval(($objetivoAlto - $nuevoAlto) / 2);
+
+			imagecopyresampled($destino, $origen, $destinoX, $destinoY, 0, 0, $nuevoAncho, $nuevoAlto, $anchoOrigen, $altoOrigen);
+		} else {
+			$escala = min($objetivoAncho / $anchoOrigen, $objetivoAlto / $altoOrigen, 1);
+			$nuevoAncho = max(1, intval(round($anchoOrigen * $escala)));
+			$nuevoAlto = max(1, intval(round($altoOrigen * $escala)));
+			$destino = self::ctrCrearLienzo($nuevoAncho, $nuevoAlto, $transparencia);
+
+			imagecopyresampled($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $anchoOrigen, $altoOrigen);
+		}
+
+		$guardada = self::ctrGuardarImagenProcesada($destino, $rutaDestino, $mimeSalida);
+
+		imagedestroy($origen);
+		imagedestroy($destino);
+
+		if (!$guardada) {
+			return array("ok" => false, "mensaje" => "No se pudo guardar la imagen optimizada.");
+		}
+
+		return array("ok" => true, "ruta" => $rutaDestino);
+	}
+
 
 
 	static public function ctrMostrarOrdenes($campo, $empresa)
@@ -333,146 +551,26 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 	static public function ctrSubirMultimediaOrden($datos, $ruta)
 	{
-
-
-
-
-
 		if (isset($datos["tmp_name"]) && !empty($datos["tmp_name"])) {
 
+			$rutaSegura = self::ctrNormalizarSlug($ruta, 'orden-' . time());
+			$nombreBase = self::ctrNormalizarSlug(pathinfo($datos["name"], PATHINFO_FILENAME), 'multimedia-' . time());
+			$nombreArchivo = $nombreBase . '-' . substr(md5(uniqid('', true)), 0, 8);
 
+			$imagenProcesada = self::ctrOptimizarImagenSubida($datos, array(
+				"directorio" => "../vistas/img/multimedia/" . $rutaSegura,
+				"nombre" => $nombreArchivo,
+				"ancho" => 1600,
+				"alto" => 1600,
+				"modo" => "contain",
+				"max_bytes" => 10485760
+			));
 
-
-
-			/*=============================================
-
-			DEFINIMOS LAS MEDIDAS
-
-			=============================================*/
-
-			list($ancho, $alto) = getimagesize($datos["tmp_name"]);
-
-
-
-			$nuevoAncho = 1000;
-
-			$nuevoAlto = 1000;
-
-
-
-			/*=============================================
-
-			CREAMOS EL DIRECTORIO DONDE VAMOS A GUARDAR LA FOTO DE LA MULTIMEDIA
-
-			=============================================*/
-
-			$directorio = "../vistas/img/multimedia/" . $ruta;
-
-
-
-
-
-			if (!file_exists($directorio)) {
-
-
-
-				mkdir($directorio, 0755);
-
-
-
+			if (!$imagenProcesada["ok"]) {
+				return "error::" . $imagenProcesada["mensaje"];
 			}
 
-
-
-			/*=============================================
-
-			DE ACUERDO AL TIPO DE IMAGEN APLICAMOS LAS FUNCIONES POR DEFECTO DE PHP
-
-			=============================================*/
-
-
-
-			if ($datos["type"] == "image/jpeg") {
-
-
-
-				/*=============================================
-
-				GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-				=============================================*/
-
-
-
-				$rutaMultimedia = $directorio . "/" . $datos["name"];
-
-
-
-				$origen = imagecreatefromjpeg($datos["tmp_name"]);
-
-
-
-				$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-				imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-				imagejpeg($destino, $rutaMultimedia);
-
-
-
-			}
-
-
-
-			if ($datos["type"] == "image/png") {
-
-
-
-				/*=============================================
-
-				GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-				=============================================*/
-
-
-
-				$rutaMultimedia = $directorio . "/" . $datos["name"];
-
-
-
-				$origen = imagecreatefrompng($datos["tmp_name"]);
-
-
-
-				$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-				imagealphablending($destino, FALSE);
-
-
-
-				imagesavealpha($destino, TRUE);
-
-
-
-				imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-				imagepng($destino, $rutaMultimedia);
-
-
-
-			}
-
-
-
-			return $rutaMultimedia;
+			return $imagenProcesada["ruta"];
 
 
 
@@ -519,122 +617,20 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 				if (isset($datos["fotoPortada"]["tmp_name"]) && !empty($datos["fotoPortada"]["tmp_name"])) {
 
+					$portadaProcesada = self::ctrOptimizarImagenSubida($datos["fotoPortada"], array(
+						"directorio" => "../vistas/img/cabeceras",
+						"nombre" => $datos["rutaOrden"],
+						"ancho" => 1280,
+						"alto" => 720,
+						"modo" => "canvas",
+						"max_bytes" => 10485760
+					));
 
-
-					/*=============================================
-
-					DEFINIMOS LAS MEDIDAS
-
-					=============================================*/
-
-
-
-					list($ancho, $alto) = getimagesize($datos["fotoPortada"]["tmp_name"]);
-
-
-
-					$nuevoAncho = 1280;
-
-					$nuevoAlto = 720;
-
-
-
-
-
-					/*=============================================
-
-					DE ACUERDO AL TIPO DE IMAGEN APLICAMOS LAS FUNCIONES POR DEFECTO DE PHP
-
-					=============================================*/
-
-
-
-					if ($datos["fotoPortada"]["type"] == "image/jpeg") {
-
-
-
-						/*=============================================
-
-						GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-						=============================================*/
-
-
-
-						$aleatorio = mt_rand(100, 999);
-
-
-
-						$rutaPortada = "../vistas/img/cabeceras/" . $datos["rutaOrden"] . ".jpg";
-
-
-
-						$origen = imagecreatefromjpeg($datos["fotoPortada"]["tmp_name"]);
-
-						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-						imagejpeg($destino, $rutaPortada);
-
-
-
+					if (!$portadaProcesada["ok"]) {
+						return $portadaProcesada["mensaje"];
 					}
 
-
-
-					if ($datos["fotoPortada"]["type"] == "image/png") {
-
-
-
-						/*=============================================
-
-						GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-						=============================================*/
-
-
-
-						$aleatorio = mt_rand(100, 999);
-
-
-
-						$rutaPortada = "../vistas/img/cabeceras/" . $datos["rutaOrden"] . ".png";
-
-
-
-						$origen = imagecreatefrompng($datos["fotoPortada"]["tmp_name"]);
-
-
-
-						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-						imagealphablending($destino, FALSE);
-
-
-
-						imagesavealpha($destino, TRUE);
-
-
-
-						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-						imagepng($destino, $rutaPortada);
-
-
-
-					}
-
-
-
+					$rutaPortada = $portadaProcesada["ruta"];
 				}
 
 
@@ -653,122 +649,20 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 				if (isset($datos["fotoPrincipal"]["tmp_name"]) && !empty($datos["fotoPrincipal"]["tmp_name"])) {
 
+					$principalProcesada = self::ctrOptimizarImagenSubida($datos["fotoPrincipal"], array(
+						"directorio" => "../vistas/img/productos",
+						"nombre" => $datos["rutaOrden"],
+						"ancho" => 400,
+						"alto" => 450,
+						"modo" => "canvas",
+						"max_bytes" => 10485760
+					));
 
-
-					/*=============================================
-
-					DEFINIMOS LAS MEDIDAS
-
-					=============================================*/
-
-
-
-					list($ancho, $alto) = getimagesize($datos["fotoPrincipal"]["tmp_name"]);
-
-
-
-					$nuevoAncho = 400;
-
-					$nuevoAlto = 450;
-
-
-
-					/*=============================================
-
-					DE ACUERDO AL TIPO DE IMAGEN APLICAMOS LAS FUNCIONES POR DEFECTO DE PHP
-
-					=============================================*/
-
-
-
-					if ($datos["fotoPrincipal"]["type"] == "image/jpeg") {
-
-
-
-						/*=============================================
-
-						GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-						=============================================*/
-
-
-
-						$aleatorio = mt_rand(100, 999);
-
-
-
-						$rutaFotoPrincipal = "../vistas/img/productos/" . $datos["rutaOrden"] . ".jpg";
-
-
-
-						$origen = imagecreatefromjpeg($datos["fotoPrincipal"]["tmp_name"]);
-
-
-
-						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-						imagejpeg($destino, $rutaFotoPrincipal);
-
-
-
+					if (!$principalProcesada["ok"]) {
+						return $principalProcesada["mensaje"];
 					}
 
-
-
-					if ($datos["fotoPrincipal"]["type"] == "image/png") {
-
-
-
-						/*=============================================
-
-						GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-						=============================================*/
-
-
-
-						$aleatorio = mt_rand(100, 999);
-
-
-
-						$rutaFotoPrincipal = "../vistas/img/productos/" . $datos["rutaOrden"] . ".png";
-
-
-
-						$origen = imagecreatefrompng($datos["fotoPrincipal"]["tmp_name"]);
-
-
-
-						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-						imagealphablending($destino, FALSE);
-
-
-
-						imagesavealpha($destino, TRUE);
-
-
-
-						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-						imagepng($destino, $rutaFotoPrincipal);
-
-
-
-					}
-
-
-
+					$rutaFotoPrincipal = $principalProcesada["ruta"];
 				}
 
 
@@ -1021,7 +915,9 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-						unlink("../" . $value);
+						if (self::ctrPuedeEliminarArchivo($value)) {
+							unlink("../" . $value);
+						}
 
 
 
@@ -1051,134 +947,24 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 				if (isset($datos["fotoPortada"]["tmp_name"]) && !empty($datos["fotoPortada"]["tmp_name"])) {
 
+					$portadaProcesada = self::ctrOptimizarImagenSubida($datos["fotoPortada"], array(
+						"directorio" => "../vistas/img/cabeceras",
+						"nombre" => $datos["rutaOrden"],
+						"ancho" => 1280,
+						"alto" => 720,
+						"modo" => "canvas",
+						"max_bytes" => 10485760
+					));
 
-
-					/*=============================================
-
-					BORRAMOS ANTIGUA FOTO PORTADA
-
-					=============================================*/
-
-
-
-					unlink("../" . $datos["antiguaFotoPortada"]);
-
-
-
-					/*=============================================
-
-					DEFINIMOS LAS MEDIDAS
-
-					=============================================*/
-
-
-
-					list($ancho, $alto) = getimagesize($datos["fotoPortada"]["tmp_name"]);
-
-
-
-					$nuevoAncho = 1280;
-
-					$nuevoAlto = 720;
-
-
-
-
-
-					/*=============================================
-
-					DE ACUERDO AL TIPO DE IMAGEN APLICAMOS LAS FUNCIONES POR DEFECTO DE PHP
-
-					=============================================*/
-
-
-
-					if ($datos["fotoPortada"]["type"] == "image/jpeg") {
-
-
-
-						/*=============================================
-
-						GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-						=============================================*/
-
-
-
-						$aleatorio = mt_rand(100, 999);
-
-
-
-						$rutaPortada = "../vistas/img/cabeceras/" . $datos["rutaOrden"] . ".jpg";
-
-
-
-						$origen = imagecreatefromjpeg($datos["fotoPortada"]["tmp_name"]);
-
-						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-						imagejpeg($destino, $rutaPortada);
-
-
-
+					if (!$portadaProcesada["ok"]) {
+						return $portadaProcesada["mensaje"];
 					}
 
-
-
-					if ($datos["fotoPortada"]["type"] == "image/png") {
-
-
-
-						/*=============================================
-
-						GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-						=============================================*/
-
-
-
-						$aleatorio = mt_rand(100, 999);
-
-
-
-						$rutaPortada = "../vistas/img/cabeceras/" . $datos["rutaOrden"] . ".png";
-
-
-
-						$origen = imagecreatefrompng($datos["fotoPortada"]["tmp_name"]);
-
-
-
-						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-						imagealphablending($destino, FALSE);
-
-
-
-						imagesavealpha($destino, TRUE);
-
-
-
-						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-						imagepng($destino, $rutaPortada);
-
-
-
+					if (self::ctrPuedeEliminarArchivo($datos["antiguaFotoPortada"])) {
+						unlink("../" . $datos["antiguaFotoPortada"]);
 					}
 
-
-
+					$rutaPortada = $portadaProcesada["ruta"];
 				}
 
 
@@ -1197,136 +983,24 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 				if (isset($datos["fotoPrincipal"]["tmp_name"]) && !empty($datos["fotoPrincipal"]["tmp_name"])) {
 
+					$principalProcesada = self::ctrOptimizarImagenSubida($datos["fotoPrincipal"], array(
+						"directorio" => "../vistas/img/productos",
+						"nombre" => $datos["rutaOrden"],
+						"ancho" => 400,
+						"alto" => 450,
+						"modo" => "canvas",
+						"max_bytes" => 10485760
+					));
 
-
-					/*=============================================
-
-					BORRAMOS ANTIGUA FOTO PRINCIPAL
-
-					=============================================*/
-
-
-
-					unlink("../" . $datos["antiguaFotoPrincipal"]);
-
-
-
-					/*=============================================
-
-					DEFINIMOS LAS MEDIDAS
-
-					=============================================*/
-
-
-
-					list($ancho, $alto) = getimagesize($datos["fotoPrincipal"]["tmp_name"]);
-
-
-
-					$nuevoAncho = 400;
-
-					$nuevoAlto = 450;
-
-
-
-
-
-					/*=============================================
-
-					DE ACUERDO AL TIPO DE IMAGEN APLICAMOS LAS FUNCIONES POR DEFECTO DE PHP
-
-					=============================================*/
-
-
-
-					if ($datos["fotoPrincipal"]["type"] == "image/jpeg") {
-
-
-
-						/*=============================================
-
-						GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-						=============================================*/
-
-
-
-						$aleatorio = mt_rand(100, 999);
-
-
-
-						$rutaFotoPrincipal = "../vistas/img/productos/" . $datos["rutaOrden"] . ".jpg";
-
-
-
-						$origen = imagecreatefromjpeg($datos["fotoPrincipal"]["tmp_name"]);
-
-
-
-						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-						imagejpeg($destino, $rutaFotoPrincipal);
-
-
-
+					if (!$principalProcesada["ok"]) {
+						return $principalProcesada["mensaje"];
 					}
 
-
-
-					if ($datos["fotoPrincipal"]["type"] == "image/png") {
-
-
-
-						/*=============================================
-
-						GUARDAMOS LA IMAGEN EN EL DIRECTORIO
-
-						=============================================*/
-
-
-
-						$aleatorio = mt_rand(100, 999);
-
-
-
-						$rutaFotoPrincipal = "../vistas/img/productos/" . $datos["rutaOrden"] . ".png";
-
-
-
-						$origen = imagecreatefrompng($datos["fotoPrincipal"]["tmp_name"]);
-
-
-
-						$destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-
-
-						imagealphablending($destino, FALSE);
-
-
-
-						imagesavealpha($destino, TRUE);
-
-
-
-						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
-
-
-
-						imagepng($destino, $rutaFotoPrincipal);
-
-
-
+					if (self::ctrPuedeEliminarArchivo($datos["antiguaFotoPrincipal"])) {
+						unlink("../" . $datos["antiguaFotoPrincipal"]);
 					}
 
-
-
+					$rutaFotoPrincipal = $principalProcesada["ruta"];
 				}
 
 
