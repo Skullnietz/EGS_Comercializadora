@@ -240,334 +240,134 @@ class ImprimirTicketsOrden{
         </table>';
       }
 
+      // ═══════════════════════════════════════
+      // DETALLE DE SERVICIOS / PARTIDAS
+      // ═══════════════════════════════════════
       echo '
-        <br>
+        <div style="margin-top:10px">
+          <div style="font-size:12px;font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:1px;padding-bottom:6px">Detalle de servicios</div>
+          <div style="border-top:2px solid #000;margin-bottom:8px"></div>
 
-        <!-- Mostramos los detalles de la venta en el documento HTML -->
+          <table border="0" width="100%" cellpadding="0" cellspacing="0">
+            <tr style="border-bottom:1px solid #000">
+              <td style="font-size:10px;font-weight:700;text-transform:uppercase;padding:4px 0;border-bottom:1px solid #000" width="75%">Descripcion</td>
+              <td style="font-size:10px;font-weight:700;text-transform:uppercase;padding:4px 0;border-bottom:1px solid #000;text-align:right" width="25%">Precio</td>
+            </tr>';
 
-        <table border="0" align="center" width="10px">
+      // Contador para numerar partidas visibles
+      $numPartida = 1;
 
+      // Array con las 10 partidas fijas
+      $partidasFijas = array(
+          array("desc" => $value["partidaUno"], "precio" => $precioUno),
+          array("desc" => $value["partidaDos"], "precio" => $precioDos),
+          array("desc" => $value["partidaTres"], "precio" => $precioTres),
+          array("desc" => $value["partidaCuatro"], "precio" => $precioCuatro),
+          array("desc" => $value["partidaCinco"], "precio" => $precioCinco),
+          array("desc" => $value["partidaSeis"], "precio" => $precioSeis),
+          array("desc" => $value["partidaSiete"], "precio" => $precioSiete),
+          array("desc" => $value["partidaOcho"], "precio" => $precioOcho),
+          array("desc" => $value["partidaNueve"], "precio" => $precioNueve),
+          array("desc" => $value["partidaDiez"], "precio" => $precioDiez),
+      );
+
+      foreach ($partidasFijas as $pf) {
+          if (trim($pf["desc"]) != "") {
+              echo '<tr>
+                <td style="text-transform:uppercase;padding:6px 0 6px 2px;font-size:11px;border-bottom:1px dotted #ccc">'.$numPartida.'. '.$pf["desc"].'</td>
+                <td style="text-align:right;padding:6px 2px 6px 0;font-size:12px;font-weight:700;border-bottom:1px dotted #ccc;white-space:nowrap">$'.$pf["precio"].'</td>
+              </tr>';
+              $numPartida++;
+          }
+      }
+
+      // Partidas dinamicas (JSON)
+      if (is_array($partidas)) {
+          foreach ($partidas as $valuePartidas) {
+              if (isset($valuePartidas["descripcion"]) && trim($valuePartidas["descripcion"]) != "") {
+                  echo '<tr>
+                    <td style="text-transform:uppercase;padding:6px 0 6px 2px;font-size:11px;border-bottom:1px dotted #ccc">'.$numPartida.'. '.$valuePartidas["descripcion"].'</td>
+                    <td style="text-align:right;padding:6px 2px 6px 0;font-size:12px;font-weight:700;border-bottom:1px dotted #ccc;white-space:nowrap">$'.$valuePartidas["precioPartida"].'</td>
+                  </tr>';
+                  $numPartida++;
+              }
+          }
+      }
+
+      // Fila de TOTAL
+      echo '
             <tr>
-               <td>Part.</td>
-               <td align="left">Total</td>
-
+              <td style="padding:10px 0 4px 2px;font-size:13px;font-weight:900;text-align:right;border-top:2px solid #000">TOTAL</td>
+              <td style="padding:10px 2px 4px 0;font-size:16px;font-weight:900;text-align:right;border-top:2px solid #000;white-space:nowrap">$'.$value["total"].'</td>
             </tr>
-
-          <tr>
-
-            <td colspan="4">====================================================</td>
-
-          </tr>';
-
-              //$precioTotal = number_format($item["pago"], 2);
-
-               echo '<tr></tr>
-                      <!-- Mostramos los totales de la venta en el documento HTML -->';
-
-                      if ($value["partidaUno"] != "") {
-
-                         echo'<tr>
-                         <!--PARTIDA UNO -->
-                        <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaUno"].'</td>
-                        <td></br></br>
-                        <td align="right"><b>$'.$precioUno.'</b></td>';
-                      }else{
-
-                        echo'<tr  style="display:none">
-                        <!-- PARTIDA UNO OCULTA -->
-                            <td  style="display:none">'.$uno.' '.$value["partidaUno"].'</td>
-                            <td align="right"  style="display:none"><b></b></td>
-                            <td align="right"  style="display:none"><b>$'.$precioUno.'</b></td>
-                        </tr>';
-                      }
-
-                    echo'<tr></tr>';
-                    if ($value["partidaDos"] != "") {
-
-                      echo'<tr>
-                      <!-- PARTIDA DOS -->
-                      <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaDos"].'</td>
-                      <td></br></br>
-                      <td align="right"><b>$'.$precioDos.'</b></td>';
-                    }else{
-
-                      echo'<tr style="display:none">
-                       <!-- PARTIDA DOS OCULTA -->
-                      <td style="display:none">'.$uno.' '.$value["partidaDos"].'</td>
-                      <td style="display:none"></br></br>
-                      <td align="right" style="display:none"><b>$'.$precioDos.'</b></td>';
-                    }
-
-
-                    echo'</tr><tr>';
-                    if ($value["partidaTres"] != "") {
-
-                      echo'<tr>
-                       <!--  //PARTIDA TRES -->
-                      <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaTres"].'</td>
-                      <td></br></br>
-                      <td align="right"><b>$'.$precioTres.'</b></td>';
-
-                    }else{
-
-                      echo'<tr style="display:none">
-                       <!--PARTIDA TRES OCULTA-->
-                      <td style="display:none">'.$uno.' '.$value["partidaTres"].'</td>
-                      <td style="display:none"></br></br>
-                      <td align="right" style="display:none"><b>$'.$value["precioTres"].'</b></td>';
-
-                    }
-
-                    echo'</tr><tr>';
-                    if ($value["partidaCuatro"] != "") {
-
-                      echo'<tr>
-                      <!--PARTIDA CUATRO -->
-                        <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaCuatro"].'</td>
-                        <td></br></br>
-                        <td align="right"><b>$'.$precioCuatro.'</b></td>';
-                    }else{
-
-                      echo'<tr style="display:none">
-                      <!--PARTIDA CUATRO OCULTA -->
-                      <td style="display:none">'.$uno.' '.$value["partidaCuatro"].'</td>
-                      <td style="display:none"></br></br>
-                      <td align="right" style="display:none"><b>$'.$precioCuatro.'</b></td>';
-
-                    }
-
-                     echo'</tr><tr>';
-                    if ($value["partidaCinco"] != ""){
-
-                      echo'<tr>
-                      <!--PARTIDA CINCO-->
-                        <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaCinco"].'</td>
-                        <td></br></br>
-                        <td align="right"><b>$'.$precioCinco.'</b></td>';
-                    }else{
-
-                       echo'<tr  style="display:none">
-                            <!--PARTIDA CINCO OCULTA-->
-                            <td  style="display:none">'.$uno.' '.$$value["partidaCinco"].'</td>
-                            <td align="right"  style="display:none"><b></b></td>
-                            <td align="right"  style="display:none"><b>$'.$precioCinco.'</b></td>
-                        </tr>';
-
-                    }
-                     echo'</tr><tr>';
-                    if($value["partidaSeis"] != ""){
-
-                      echo'<tr>
-                      <!--PARTIDA SEIS -->
-                        <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaSeis"].'</td>
-                        <td></br></br>
-                        <td align="right"><b>$'.$precioSeis.'</b></td>';
-                    }else{
-
-                       echo'<tr  style="display:none">
-                       <!--PARTIDA SEIS OCULTA -->
-                            <td  style="display:none">'.$uno.' '.$value["partidaSeis"].'</td>
-                            <td align="right"  style="display:none"><b></b></td>
-                            <td align="right"  style="display:none"><b>$'.$precioSeis.'</b></td>
-                        </tr>';
-
-                    }
-                  echo'</tr><tr>';
-                    if($value["partidaSiete"] != ""){
-
-                      echo'<tr>
-                      <!--PARTIDA SIETE-->
-                        <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaSiete"].'</td>
-                        <td></br></br>
-                        <td align="right"><b>$'.$precioSiete.'</b></td>';
-                    }else{
-
-                       echo'<tr  style="display:none">
-                       <!--PARTIDA SIETE OCULTA -->
-                            <td  style="display:none">'.$uno.' '.$$value["partidaSiete"].'</td>
-                            <td align="right"  style="display:none"><b></b></td>
-                            <td align="right"  style="display:none"><b>$'.$precioSiete.'</b></td>
-                        </tr>';
-
-                    }
-
-                  echo'</tr><tr>';
-                    if ($value["partidaOcho"] != "") {
-
-                       echo'<tr>
-                       <!--PARTIDA OCHO-->
-                      <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaOcho"].'</td>
-                      <td></br></br>
-                      <td align="right"><b>$'.$precioOcho.'</b></td>';
-
-                    }else{
-
-                       echo'<tr  style="display:none">
-                            <!--PARTIDA OCHO OCULTA -->
-                            <td  style="display:none">'.$uno.' '.$value["partidaOcho"].'</td>
-                            <td align="right"  style="display:none"><b></b></td>
-                            <td align="right"  style="display:none"><b>$'.$precioSiete.'</b></td>
-                        </tr>';
-
-                    }
-
-                  echo'</tr><tr>';
-                    if($value["partidaNueve"] != ""){
-
-                       echo'<tr>
-                       <!--PARTIDA NUEVA -->
-                      <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaNueve"].'</td>
-                      <td></br></br>
-                      <td align="right"><b>$'.$precioNueve.'</b></td>';
-                    }else{
-
-                      echo'<tr  style="display:none">
-                            <!--PARTIDA NUEVE OCULTA -->
-                            <td  style="display:none">'.$uno.' '.$value["partidaNueve"].'</td>
-                            <td align="right"><b></b></td>
-                            <td align="right"  style="display:none"><b>$'.$precioSiete.'</b></td>
-                        </tr>';
-                    }
-
-
-                  echo'</tr><tr>';
-                    if($value["partidaDiez"] != ""){
-
-                      echo'<tr>
-                      <!--PARTIDA DIEZ -->
-                        <td style="text-transform:uppercase;">'.$uno.' '.$value["partidaDiez"].'</td>
-                        <td></br></br>
-                        <td align="right"><b>$'.$precioDiez.'</b></td>';
-                    }else{
-
-                        echo'<tr style="display:none">
-                         <!--PARTIDA DIEZ OCULTA -->
-                        <td  style="display:none">'.$uno.' '.$value["partidaDiez"].'</td>
-                        <td></br></br>
-                        <td align="right"  style="display:none"><b>$'.$precioDiez.'</b></td>';
-
-                    }
-
-                    echo'</tr>';
-
-                    foreach ($partidas as $key => $valuePartidas) {
-
-                      if ($valuePartidas["descripcion"] != "") {
-                         echo'<tr>
-                      <!--PARTIDAS -->
-                        <td>'.$uno.' '.$valuePartidas["descripcion"].'</td>
-                        <td></br></br>
-                        <td align="right"><b>$'.$valuePartidas["precioPartida"].'</b></td>';
-
-                      }else{
-
-                        echo'<tr style="display:none">
-                         <!--PARTIDAS OCULTAS -->
-                        <td style="display:none">'.$uno.' '.$valuePartidas["descripcion"].'</td>
-                        <td></br></br>
-                        <td align="right"  style="display:none"><b>$'.$valuePartidas["precioPartida"].'</b></td>';
-
-                      }
-                    }
-
-                echo' </tr>
-                <tr>
-                  <td>&nbsp;</td>
-                  <td align="right"><b>TOTAL:</b></td>
-                  <td align="right"><b>$'.$value["total"].'</b></td>
-                </tr>';
-
-                // ═══════════════════════════════════════
-                // MOSTRAR AHORRO POR DINERO ELECTRÓNICO
-                // ═══════════════════════════════════════
-                if ($montoCanjeado > 0) {
-                    echo '<tr>
-                      <td colspan="3" style="padding-top:8px">
-                        <div style="border:2px dashed #000;padding:10px;text-align:center">
-                          <span style="font-size:14px;font-weight:800;color:#000">AHORRASTE $'.number_format($montoCanjeado, 2).' CON TU MONEDERO EGS</span>
-                        </div>
-                      </td>
-                    </tr>';
-                }
-
-                }
-
-
-                echo'<tr>
-                    <td colspan="4">&nbsp;</td>
-                </tr>
-                <ul>
-                <tr>
-
-                    <td colspan="4" align="left"> <li>La garantía del servicio es por 30 días a partir de la fecha de entrega. </li></td>
-                </tr>
-                <tr>
-
-                    <td colspan="4" align="left"> <li>La empresa no se responsabiliza por accesorios que el cliente reclame y no se encuentren detallados en esta orden. </li></td>
-                </tr>
-
-                <tr>
-
-                    <td colspan="4" align="left"> <li>El equipo será entregado solamente al portador de esta orden, en su defecto debera retirar el propietario que en esta orden funge como CLIENTE exhibiendo copia de documento de identidad INE. </li></td>
-                </tr>
-
-                <tr>
-                    <td colspan="4" align="left"> <li>Toda reparación debe ser retirada dentro de los 30 días de comunicado su arreglo, caso contrario se perderá el reclamo. </li></td>
-                </tr>
-
-                <tr>
-
-                    <td colspan="4" align="left"> <li>En consumibles originales y compatibles no hay garantía. </li></td>
-                </tr>
-                <tr>
-                    <td colspan="4" align="left"> <li>No nos responsabilizamos de la información contenida en su equipo. </li></td>
-                </tr>
-                 <tr>
-                    <td colspan="4" align="left"><li>Al ingresar su orden acepta que esta sera publica en nuestro stio web www.comercializadoraegs.com sin mostrar datos del cliente solamente datos tecnicos y fotos del equipo recibido</li></td>
-                </tr>
-                </ul>
-                <tr>
-                  <td colspan="4" align="left"><b><center><h4>Recuerda que para facturación debes solicitar tu factura en: https://comercializadoraegs.com/facturacion</h4></center></b></td>
-                </tr>
-                  <tr>
-                    <td colspan="4" align="left"><b>Lunes a Viernes de 10:00 am a 6:30 pm <br> Sabados de 9:00 am a 2:00 pm
-</b></td>
-                </tr>
-                <tr>
-                    <td colspan="4" align="left"><b>Asesor:'.$NombreAsesor.'</b></td>
-
-                </tr>
-
-                 <tr>
-                    <td colspan="4" align="left"><b>Tecnico:'.$NombreTecnico.'</b></td>
-                </tr>
-
-                 <!--<tr>
-                    <td colspan="4" align="left"><b>Horario De Comida:'.$hrsComida.'</b></td>
-                </tr>-->
-                <tr>
-                    <td colspan="4" align="left"><h4><b><center>IMPORTANTE</center></b><h4></td>
-                </tr>
-                 <tr>
-                <center>
-                <b><hr></b>
-                FIRMA
-                </center>
-                </tr>
-                <tr>
-                    <td colspan="4" align="left"><h3><b><center>Por seguridad y atención a sus servicios dentro del horario de comida 2:00pm a 4:00pm no se realizan entregas de ningún tipo. Gracias.</center></b><h3></td>
-                </tr>
-
-                <tr>
-
-                    <!-- Mostramos los datos del cliente en el documento HTML -->
-                    <td colspan="4" align="center">'.$nombreDelCliente.'</td>
-
-                </tr>
-
+          </table>';
+
+      // Ahorro por dinero electronico
+      if ($montoCanjeado > 0) {
+          echo '<div style="border:2px dashed #000;padding:10px;text-align:center;margin-top:8px">
+                  <span style="font-size:14px;font-weight:800;color:#000">AHORRASTE $'.number_format($montoCanjeado, 2).' CON TU MONEDERO EGS</span>
+                </div>';
+      }
+
+      } // fin foreach ordenes
+
+      // ═══════════════════════════════════════
+      // ATENDIDO POR
+      // ═══════════════════════════════════════
+      echo '
+          <div style="margin-top:14px;border-top:1px solid #000;padding-top:8px">
+            <table border="0" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="font-size:11px;font-weight:700;padding:2px 0;width:28%">Asesor:</td>
+                <td style="font-size:11px;padding:2px 0">'.$NombreAsesor.'</td>
               </tr>
+              <tr>
+                <td style="font-size:11px;font-weight:700;padding:2px 0">Tecnico:</td>
+                <td style="font-size:11px;padding:2px 0">'.$NombreTecnico.'</td>
+              </tr>
+            </table>
+          </div>';
 
-            </table>';
+      // ═══════════════════════════════════════
+      // FIRMA DEL CLIENTE
+      // ═══════════════════════════════════════
+      echo '
+          <div style="margin-top:24px;text-align:center">
+            <div style="border-bottom:1px solid #000;width:70%;margin:0 auto"></div>
+            <div style="font-size:11px;font-weight:700;margin-top:4px;text-transform:uppercase;letter-spacing:1px">Firma del cliente</div>
+          </div>';
+
+      // ═══════════════════════════════════════
+      // TERMINOS Y CONDICIONES
+      // ═══════════════════════════════════════
+      echo '
+          <div style="margin-top:16px;border-top:1px dashed #000;padding-top:8px">
+            <div style="font-size:10px;font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Terminos y condiciones</div>
+            <div style="font-size:9px;color:#000;line-height:1.6">
+              <div style="padding:2px 0">1. La garantia del servicio es por 30 dias a partir de la fecha de entrega.</div>
+              <div style="padding:2px 0">2. La empresa no se responsabiliza por accesorios que el cliente reclame y no se encuentren detallados en esta orden.</div>
+              <div style="padding:2px 0">3. El equipo sera entregado solamente al portador de esta orden, en su defecto debera retirar el propietario que funge como CLIENTE exhibiendo INE.</div>
+              <div style="padding:2px 0">4. Toda reparacion debe ser retirada dentro de los 30 dias de comunicado su arreglo, caso contrario se perdera el reclamo.</div>
+              <div style="padding:2px 0">5. En consumibles originales y compatibles no hay garantia.</div>
+              <div style="padding:2px 0">6. No nos responsabilizamos de la informacion contenida en su equipo.</div>
+              <div style="padding:2px 0">7. Al ingresar su orden acepta que esta sera publica en nuestro sitio web sin mostrar datos del cliente, solamente datos tecnicos y fotos del equipo.</div>
+            </div>
+          </div>';
+
+      // ═══════════════════════════════════════
+      // FACTURACION Y HORARIO
+      // ═══════════════════════════════════════
+      echo '
+          <div style="margin-top:10px;border:1px solid #000;padding:8px;text-align:center">
+            <div style="font-size:10px;font-weight:700;margin-bottom:4px">Facturacion: comercializadoraegs.com/facturacion</div>
+            <div style="font-size:10px">Lunes a Viernes 10:00am - 6:30pm | Sabados 9:00am - 2:00pm</div>
+          </div>
+
+          <div style="margin-top:8px;border:2px solid #000;padding:8px;text-align:center">
+            <div style="font-size:11px;font-weight:900;text-transform:uppercase">Importante</div>
+            <div style="font-size:10px;margin-top:4px">Por seguridad, dentro del horario de comida <b>2:00pm a 4:00pm</b> no se realizan entregas de ningun tipo.</div>
+          </div>
+        </div>';
 
       // ═══════════════════════════════════════════════════════════════
       // SECCIÓN DE RECOMPENSAS - MONEDERO ELECTRÓNICO EGS
