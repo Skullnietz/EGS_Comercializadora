@@ -578,7 +578,7 @@ function _hc_obtenerProductosVenta($venta) {
                       }
                   }
 
-                  $pLink = 'index.php?ruta=infopedido&idPedido='.$p["id"]
+                  $pLink = 'https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/ticketpedido.php/?idPedido='.$p["id"]
                       .'&empresa='.(isset($p["id_empresa"]) ? $p["id_empresa"] : '')
                       .'&asesor='.(isset($p["id_Asesor"]) ? $p["id_Asesor"] : '')
                       .'&cliente='.(isset($p["id_cliente"]) ? $p["id_cliente"] : '');
@@ -604,7 +604,7 @@ function _hc_obtenerProductosVenta($venta) {
                     <a href="<?php echo $pLink; ?>" target="_blank"
                        style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#8b5cf6;color:#fff;font-size:12px;text-decoration:none;transition:background .15s"
                        onmouseover="this.style.background='#7c3aed'" onmouseout="this.style.background='#8b5cf6'">
-                      <i class="fa-solid fa-eye"></i>
+                      <i class="fa-solid fa-print"></i>
                     </a>
                   </td>
                 </tr>
@@ -642,7 +642,8 @@ function _hc_obtenerProductosVenta($venta) {
                   $vMetodo = isset($v["metodo"]) && trim($v["metodo"]) !== "" ? trim($v["metodo"]) : "No especificado";
                   $vFecha = isset($v["fecha"]) ? trim($v["fecha"]) : "";
                   $vTotal = floatval(isset($v["pago"]) ? $v["pago"] : 0);
-                  $vLink = 'index.php?ruta=ventasR&idventa=' . $v["id"];
+                  $vLink = 'https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/ticketR.php/?idventa=' . $v["id"]
+                      . '&empresa=' . (isset($v["empresa"]) ? $v["empresa"] : '');
                 ?>
                 <tr>
                   <td><span style="font-weight:700;color:#0ea5e9">#<?php echo $v["id"]; ?></span></td>
@@ -670,7 +671,7 @@ function _hc_obtenerProductosVenta($venta) {
                     <a href="<?php echo $vLink; ?>" target="_blank"
                        style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#0ea5e9;color:#fff;font-size:12px;text-decoration:none;transition:background .15s"
                        onmouseover="this.style.background='#0284c7'" onmouseout="this.style.background='#0ea5e9'">
-                      <i class="fa-solid fa-eye"></i>
+                      <i class="fa-solid fa-print"></i>
                     </a>
                   </td>
                 </tr>
