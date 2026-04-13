@@ -21,10 +21,12 @@
                     <i class="fa-solid fa-calendar-check" style="font-size:18px;opacity:.9;"></i>
                     <span style="font-size:16px;font-weight:700;">Agenda de Citas</span>
                 </div>
+                <?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
                 <button type="button" class="btn" data-toggle="modal" data-target="#modalAgregarCita"
                     style="background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;transition:all .15s;">
                     <i class="fa-solid fa-plus" style="margin-right:5px;"></i>Nueva Cita
                 </button>
+                <?php endif; ?>
             </div>
 
             <div class="egs-body" style="padding:20px;background:#fff;border-radius:0 0 14px 14px;">
@@ -37,6 +39,7 @@
 
 </div>
 
+<?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
 <!-- ═══════════════════════════════════════════════════════════
      MODAL: Agregar Cita (chips de fecha + grid de hora)
      ═══════════════════════════════════════════════════════════ -->
@@ -154,6 +157,7 @@
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════
      MODAL: Detalle de Cita (contexto completo)
@@ -248,15 +252,20 @@
                         <div style="flex:1;min-width:0;">
                             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                                 <span id="dcClienteNombre" style="font-size:14px;font-weight:700;color:#1e293b;"></span>
+                                <?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
                                 <span id="dcClienteCalifBadge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;"></span>
                                 <span id="dcClienteRecBadge" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f1f5f9;color:#64748b;"></span>
+                                <?php endif; ?>
                             </div>
+                            <?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
                             <div id="dcClienteTel" style="font-size:12px;color:#64748b;margin-top:2px;display:flex;align-items:center;gap:5px;">
                                 <i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i><span></span>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
+                    <?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
                     <!-- Alerta cancelación inline -->
                     <div id="dcAlertaCancelacion" style="display:none;margin-top:8px;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;align-items:center;gap:5px;">
                         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -267,6 +276,7 @@
                     <div id="dcClienteBadgesWrap" style="display:none;margin-top:6px;">
                         <span id="dcClienteBadges"></span>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Info extra (total, fecha ingreso) -->
@@ -295,6 +305,7 @@
                     </div>
                 </div>
 
+                <?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
                 <!-- ═══ Reagendar (collapsible) ═══ -->
                 <div id="dcReagendarSection" style="padding:14px 0;border-top:1px solid #f1f5f9;display:none;">
                     <div class="egs-dc-section-label"><i class="fa-solid fa-calendar-pen" style="margin-right:4px;"></i>Reagendar cita</div>
@@ -324,6 +335,7 @@
                     </div>
                     <span id="dcReagendarStatus" style="font-size:11px;color:#94a3b8;display:block;margin-top:4px;"></span>
                 </div>
+                <?php endif; ?>
 
             </div>
 
@@ -335,12 +347,14 @@
                 <a id="dcBtnGCal" href="#" target="_blank" class="egs-dc-action-btn" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;">
                     <i class="fa-brands fa-google"></i> Calendar
                 </a>
+                <?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
                 <a id="dcBtnWhatsApp" href="#" target="_blank" class="egs-dc-action-btn" style="display:none;background:#f0fdf4;color:#16a34a;border-color:#bbf7d0;">
                     <i class="fa-brands fa-whatsapp"></i> WhatsApp
                 </a>
                 <button type="button" id="dcBtnReagendar" class="egs-dc-action-btn" style="background:#fffbeb;color:#d97706;border-color:#fde68a;">
                     <i class="fa-solid fa-calendar-pen"></i> Reagendar
                 </button>
+                <?php endif; ?>
                 <?php if (isset($_SESSION["perfil"]) && ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador")): ?>
                 <button type="button" id="dcBtnOcultar" class="egs-dc-action-btn" style="background:#fff;color:#ef4444;border-color:#fecaca;">
                     <i class="fa-solid fa-eye-slash"></i> Ocultar

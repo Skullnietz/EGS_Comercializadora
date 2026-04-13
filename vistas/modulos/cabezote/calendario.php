@@ -35,14 +35,17 @@
       <a href="index.php?ruta=pantallacitas">
         <i class="fa-solid fa-expand"></i> Ver calendario completo
       </a>
+      <?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
       <a href="#" id="egsCalQuickAdd" class="egs-cal-add-btn">
         <i class="fa-solid fa-plus"></i> Nueva cita
       </a>
+      <?php endif; ?>
     </li>
 
   </ul>
 </li>
 
+<?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
 <!-- ═══ Modal: Cita Rápida — se mueve a body via JS para evitar conflictos con dropdown ═══ -->
 <div class="modal fade egs-modal-cita-rapida" id="modalCitaRapida" tabindex="-1" role="dialog" style="display:none;">
   <div class="modal-dialog" role="document" style="max-width:480px;margin:80px auto;">
@@ -177,6 +180,7 @@
     </div>
   </div>
 </div>
+<?php endif; ?>
 
 <style>
 /* ═══ Calendar Trigger — Pill destacado en navbar ═══ */
