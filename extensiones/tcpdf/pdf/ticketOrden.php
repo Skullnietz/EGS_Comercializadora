@@ -195,8 +195,52 @@ class ImprimirTicketsOrden{
              <b>Cliente:</b> '.$NombreUsuario.'
             </center></tr>
 
-        </table>
+        </table>';
 
+      // ═══════════════════════════════════════
+      // DATOS DEL EQUIPO (Marca, Modelo, Serie)
+      // ═══════════════════════════════════════
+      $marcaEquipo = isset($value["marcaDelEquipo"]) ? trim($value["marcaDelEquipo"]) : '';
+      $modeloEquipo = isset($value["modeloDelEquipo"]) ? trim($value["modeloDelEquipo"]) : '';
+      $serieEquipo = isset($value["numeroDeSerieDelEquipo"]) ? trim($value["numeroDeSerieDelEquipo"]) : '';
+
+      if ($marcaEquipo !== '' || $modeloEquipo !== '' || $serieEquipo !== '') {
+          echo '
+        <table border="0" align="center" width="100%" style="margin:8px 0 4px">
+          <tr>
+            <td colspan="2" style="border-bottom:1px dashed #000;padding-bottom:4px">
+              <div style="font-size:12px;font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:1px">Datos del equipo</div>
+            </td>
+          </tr>';
+          if ($marcaEquipo !== '') {
+              echo '
+          <tr>
+            <td style="font-size:11px;font-weight:700;padding:3px 4px;width:30%">Marca:</td>
+            <td style="font-size:12px;padding:3px 4px;text-transform:uppercase">'.$marcaEquipo.'</td>
+          </tr>';
+          }
+          if ($modeloEquipo !== '') {
+              echo '
+          <tr>
+            <td style="font-size:11px;font-weight:700;padding:3px 4px;width:30%">Modelo:</td>
+            <td style="font-size:12px;padding:3px 4px;text-transform:uppercase">'.$modeloEquipo.'</td>
+          </tr>';
+          }
+          if ($serieEquipo !== '') {
+              echo '
+          <tr>
+            <td style="font-size:11px;font-weight:700;padding:3px 4px;width:30%">No. Serie:</td>
+            <td style="font-size:12px;padding:3px 4px;text-transform:uppercase;font-weight:700;letter-spacing:0.5px">'.$serieEquipo.'</td>
+          </tr>';
+          }
+          echo '
+          <tr>
+            <td colspan="2" style="border-bottom:1px dashed #000;padding-top:2px"></td>
+          </tr>
+        </table>';
+      }
+
+      echo '
         <br>
 
         <!-- Mostramos los detalles de la venta en el documento HTML -->

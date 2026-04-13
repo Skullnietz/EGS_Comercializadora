@@ -210,7 +210,10 @@
       "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/pantallacitas.php\")",
       "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/crearcita.php\")",
       "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/cabezote/calendario.php\")",
-      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php\")"
+      "Bash(php -l \"C:/Users/black/Desktop/EGS/vistas/modulos/infoOrden.php\")",
+      "Bash(find /c/Users/black/Desktop/EGS -name \"*.php\" -type f -exec grep -l \"json_encode.*partida\\\\|json_decode.*partida\" {} \\\\;)",
+      "Bash(grep -n 'POST.*partida\\\\|$_POST.*partida' /c/Users/black/Desktop/EGS/controladores/ordenes.controlador.php)",
+      "Bash(find /c/Users/black/Desktop/EGS -type f -name \"*.php\" -exec grep -l \"CREATE TABLE.*ordenes\\\\|DESCRIBE.*ordenes\" {} \\\\;)"
     ]
   }
 }
