@@ -8,11 +8,36 @@ var Empresa_del_perfil = $("#Empresa_del_perfil").val();
 /* Solo inicializar si estamos en la página de clientes */
 if(!Empresa_del_perfil || !$(".tablaClientesOrden").length) return;
 
+function ajustarColumnaNombreCliente(){
+	var $tabla = $(".tablaClientesOrden");
+	var $nombres = $tabla.find("tbody tr:visible .cli-nombre-text");
+	var $boxes = $tabla.find("tbody tr:visible .cli-nombre-box");
+	if(!$nombres.length || !$boxes.length) return;
+
+	var maxWidth = 0;
+	$nombres.each(function(){
+		maxWidth = Math.max(maxWidth, this.scrollWidth || 0);
+	});
+
+	var wrapperWidth = $tabla.closest(".dataTables_wrapper").width() || $(window).width() || 1200;
+	var maxPermitido = Math.max(240, Math.min(460, Math.floor(wrapperWidth * 0.30)));
+	var minPermitido = 190;
+	var targetWidth = Math.min(Math.max(maxWidth + 12, minPermitido), maxPermitido);
+
+	$boxes.css({
+		width: targetWidth + "px",
+		maxWidth: targetWidth + "px"
+	});
+}
+
 var tablaClientes = $(".tablaClientesOrden").DataTable({
 	"ajax": "ajax/tablaClientes.ajax.php?empresa=" + Empresa_del_perfil,
 	"deferRender": true,
 	"destroy": true,
 	"processing": true,
+	"drawCallback": function(){
+		ajustarColumnaNombreCliente();
+	},
 	"createdRow": function(row, data){
 		if ((data[1] || "").indexOf("cli-ultimo-registro") !== -1) {
 			$(row).addClass("fila-ultimo-cliente");
@@ -81,6 +106,14 @@ function syncToggleButtons(order){
 tablaClientes.on("order.dt", function(){
 	syncToggleButtons(tablaClientes.order());
 });
+
+$(window).on("resize", function(){
+	ajustarColumnaNombreCliente();
+});
+
+setTimeout(function(){
+	ajustarColumnaNombreCliente();
+}, 150);
 
 /*=============================================
 TOGGLE: Por ID / Mejores Clientes / Malos Clientes

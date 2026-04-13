@@ -249,8 +249,8 @@ class TablaClientes{
 			$bh = ClienteBadgesHelper::getInstance();
 
 			$nombreClienteBadges = $bh->render($idCliente);
-			$nombreClienteHtml = "<div style='display:flex;flex-direction:column;gap:6px;max-width:260px;'>"
-			                  . "<span style='display:block;font-weight:700;color:#1a252f;white-space:normal;word-break:break-word;line-height:1.32;'>"
+			$nombreClienteHtml = "<div class='cli-nombre-box' style='display:flex;flex-direction:column;gap:6px;width:100%;'>"
+			                  . "<span class='cli-nombre-text' style='display:block;font-weight:700;color:#1a252f;white-space:normal;word-break:break-word;line-height:1.32;'>"
 			                  . htmlspecialchars($clientes[$i]["nombre"])
 			                  . "</span>";
 			if(!empty($nombreClienteBadges)){
