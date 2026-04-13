@@ -114,6 +114,13 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
     border-color: #f0f3f7 !important;
 }
 .tablaClientesOrden tbody tr:hover { background: #f8fffe; }
+.tablaClientesOrden tbody tr.fila-ultimo-cliente {
+    background: linear-gradient(90deg, #ecfeff 0%, #f0fdf4 100%) !important;
+    box-shadow: inset 4px 0 0 #06b6d4;
+}
+.tablaClientesOrden tbody tr.fila-ultimo-cliente:hover {
+    background: linear-gradient(90deg, #cffafe 0%, #dcfce7 100%) !important;
+}
 
 /* ── Nombre en tabla ─────────────────────────────────────── */
 .cliente-nombre {
@@ -317,7 +324,7 @@ $(document).ready(function(){
         </div>
         <div style="font-size:13px;color:#888;">
           <i class="fas fa-info-circle"></i>&nbsp;
-          Los badges de <strong>Contacto</strong> son clicables para llamar, abrir WhatsApp o correo.
+          Los badges de <strong>Contacto</strong> son clicables para llamar, abrir WhatsApp o correo. El último cliente registrado aparece primero y se resalta visualmente.
         </div>
       </div>
 

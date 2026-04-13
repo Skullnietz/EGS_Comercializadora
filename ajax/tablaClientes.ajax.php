@@ -22,6 +22,7 @@ class TablaClientes{
 		$clientes = ControladorClientes::ctrMostrarClientesTabla($item, $valor);
 
 		if(!is_array($clientes)) $clientes = [];
+		$ultimoClienteId = !empty($clientes) ? intval($clientes[0]["id"]) : 0;
 
 		// Una sola query para contar órdenes de TODOS los clientes
 		try {
@@ -247,9 +248,18 @@ class TablaClientes{
 
 			$bh = ClienteBadgesHelper::getInstance();
 
+			$nombreClienteHtml = $bh->renderWithName($clientes[$i]["nombre"], $idCliente);
+			if($idCliente === $ultimoClienteId){
+				$nombreClienteHtml = "<div class='cli-ultimo-registro' style='display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:12px;background:linear-gradient(135deg,#ecfeff,#f0fdf4);border:1px solid #a5f3fc;box-shadow:0 8px 18px rgba(34,211,238,.12);'>"
+				                  . "<span style='display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#0f172a;color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;'>"
+				                  . "<i class='fas fa-sparkles' style='font-size:10px;color:#facc15;'></i> Último registro</span>"
+				                  . "<div style='min-width:0;flex:1;'>".$nombreClienteHtml."</div>"
+				                  . "</div>";
+			}
+
 			$data[] = [
 				$idCliente,
-				$bh->renderWithName($clientes[$i]["nombre"], $idCliente),
+				$nombreClienteHtml,
 				$nombre_asesor,
 				$contacto,
 				$clasificacion,

@@ -13,6 +13,11 @@ var tablaClientes = $(".tablaClientesOrden").DataTable({
 	"deferRender": true,
 	"destroy": true,
 	"processing": true,
+	"createdRow": function(row, data){
+		if ((data[1] || "").indexOf("cli-ultimo-registro") !== -1) {
+			$(row).addClass("fila-ultimo-cliente");
+		}
+	},
 
 	/* Columnas ocultas para sorting (7 = órdenes, 8 = fecha raw, 9 = calificación) */
 	"columnDefs": [

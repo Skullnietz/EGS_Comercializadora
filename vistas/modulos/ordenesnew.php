@@ -826,11 +826,19 @@ MODAL AGREGAR OORDENES
               <div class="col-md-6">
                 <div class="form-group">
                   <label class="egs-lbl"><i class="fa-solid fa-user" style="margin-right:4px"></i>Cliente<span class="egs-req">*</span></label>
+                  <div style="font-size:11px;color:#64748b;margin:-2px 0 6px 0;">
+                    Los clientes más recientes aparecen primero para facilitar la captura.
+                  </div>
                   <select class="form-control cliente" style="width:100%" required>
                     <option>Seleccionar cliente</option>
                     <?php
                     $item = "id_empresa"; $valor = $_SESSION["empresa"];
                     $usuario = ControladorClientes::ctrMostrarClientesTabla($item, $valor);
+                    if (is_array($usuario)) {
+                      usort($usuario, function($a, $b){
+                        return intval($b["id"]) - intval($a["id"]);
+                      });
+                    }
                     $_cli_ordenesMap = []; $_cli_estadoMap = []; $_cli_recogidaMap = [];
                     try { $_cli_ordenesMap = ControladorClientes::ctrContarOrdenesClientesBulk(); } catch(Exception $e) {}
                     try { $_cli_estadoMap = ControladorClientes::ctrContarOrdenesEstadoBulk(); } catch(Exception $e) {}
