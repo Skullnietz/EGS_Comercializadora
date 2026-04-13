@@ -26,6 +26,10 @@ if (is_array($cotizacion) && !empty($cotizacion)) {
         }
     }
 }
+
+$_vc_subtotal = (is_array($cotizacion) && isset($cotizacion["neto"])) ? floatval($cotizacion["neto"]) : 0;
+$_vc_iva = (is_array($cotizacion) && isset($cotizacion["impuesto"])) ? floatval($cotizacion["impuesto"]) : 0;
+$_vc_total = (is_array($cotizacion) && isset($cotizacion["total"])) ? floatval($cotizacion["total"]) : 0;
 ?>
 
 <style>
@@ -135,6 +139,35 @@ body .content-wrapper { margin-left: 0 !important; }
     text-transform: uppercase; letter-spacing: .05em;
 }
 .vc-total-amount { font-size: 28px; font-weight: 800; }
+.vc-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+.vc-summary-card {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+.vc-summary-card .label {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 4px;
+}
+.vc-summary-card .amount {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+}
+.vc-summary-card.total {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+.vc-summary-card.total .amount { color: #16a34a; }
 
 .vc-msg-box {
     text-align: center;
@@ -180,6 +213,8 @@ body .content-wrapper { margin-left: 0 !important; }
     .vc-table-wrap tbody td { padding: 8px 10px; font-size: 12px; }
     .vc-total-amount { font-size: 22px; }
     .vc-tachado .amount { font-size: 20px; }
+    .vc-summary { grid-template-columns: 1fr; }
+    .vc-summary-card .amount { font-size: 20px; }
     .vc-btn { padding: 10px 20px; font-size: 12px; width: 100%; justify-content: center; }
     .vc-msg-box p { font-size: 13px; }
     .vc-box { border-radius: 12px; }
@@ -243,9 +278,19 @@ body .content-wrapper { margin-left: 0 !important; }
                             </p>
                         </div>
 
-                        <div class="vc-tachado">
-                            <div class="label">Total cotizado (ya no vigente)</div>
-                            <div class="amount">$<?php echo number_format($cotizacion["total"], 2); ?></div>
+                        <div class="vc-summary">
+                            <div class="vc-summary-card">
+                                <div class="label">Subtotal</div>
+                                <div class="amount">$<?php echo number_format($_vc_subtotal, 2); ?></div>
+                            </div>
+                            <div class="vc-summary-card">
+                                <div class="label">IVA</div>
+                                <div class="amount">$<?php echo number_format($_vc_iva, 2); ?></div>
+                            </div>
+                            <div class="vc-summary-card total">
+                                <div class="label">Total cotizado</div>
+                                <div class="amount">$<?php echo number_format($_vc_total, 2); ?></div>
+                            </div>
                         </div>
 
                         <div class="vc-contact">
@@ -330,9 +375,19 @@ body .content-wrapper { margin-left: 0 !important; }
                             </table>
                         </div>
 
-                        <div class="vc-total-box" style="background:#f0fdf4;border:1px solid #bbf7d0">
-                            <div class="vc-total-label">Total</div>
-                            <div class="vc-total-amount" style="color:#16a34a">$<?php echo number_format($cotizacion["total"], 2); ?></div>
+                        <div class="vc-summary">
+                            <div class="vc-summary-card">
+                                <div class="label">Subtotal</div>
+                                <div class="amount">$<?php echo number_format($_vc_subtotal, 2); ?></div>
+                            </div>
+                            <div class="vc-summary-card">
+                                <div class="label">IVA</div>
+                                <div class="amount">$<?php echo number_format($_vc_iva, 2); ?></div>
+                            </div>
+                            <div class="vc-summary-card total">
+                                <div class="label">Total</div>
+                                <div class="amount">$<?php echo number_format($_vc_total, 2); ?></div>
+                            </div>
                         </div>
                     </div>
                 </div>
