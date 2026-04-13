@@ -46,6 +46,12 @@ try {
     if (!is_array($_hc_pedidos)) $_hc_pedidos = array();
 } catch (Exception $e) { $_hc_pedidos = array(); }
 
+$_hc_ventas = array();
+try {
+    $_hc_ventas = ControladorVentas::ctrMostrarVentasParaEmpresa("id_cliente", $_hc_idCliente);
+    if (!is_array($_hc_ventas)) $_hc_ventas = array();
+} catch (Exception $e) { $_hc_ventas = array(); }
+
 // ── Estadísticas rápidas ──
 $_hc_totalGastado = 0;
 $_hc_entregadas = 0;
@@ -159,6 +165,29 @@ function _hc_getNombreAsesor($idAs, &$cache) {
     }
     return $cache[$idAs];
 }
+
+function _hc_obtenerProductosVenta($venta) {
+    $sufijos = array("Uno", "Dos", "Tres", "Cuatro", "Cinco", "Seis", "Siete", "Ocho", "Nueve", "Diez");
+    $productos = array();
+
+    foreach ($sufijos as $sufijo) {
+        $campoProducto = "producto" . $sufijo;
+        $campoCantidad = "cantidad" . $sufijo;
+
+        $producto = isset($venta[$campoProducto]) ? trim($venta[$campoProducto]) : "";
+        if ($producto === "" || $producto === "0") continue;
+
+        $cantidad = isset($venta[$campoCantidad]) ? floatval($venta[$campoCantidad]) : 0;
+        if ($cantidad > 0) {
+            $cantidadTxt = rtrim(rtrim(number_format($cantidad, 2, ".", ""), "0"), ".");
+            $productos[] = $cantidadTxt . " x " . $producto;
+        } else {
+            $productos[] = $producto;
+        }
+    }
+
+    return $productos;
+}
 ?>
 
 <style>
@@ -270,7 +299,7 @@ function _hc_getNombreAsesor($idAs, &$cache) {
       </div>
 
       <!-- Stats strip -->
-      <div style="display:flex;border-top:1px solid #f1f5f9">
+      <div style="display:flex;flex-wrap:wrap;border-top:1px solid #f1f5f9">
         <div class="hc-stat" style="flex:1">
           <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;background:<?php echo $_hc_califBg; ?>;margin-bottom:4px">
             <i class="fa-solid <?php echo $_hc_califIcon; ?>" style="color:<?php echo $_hc_califColor; ?>;font-size:14px"></i>
@@ -311,6 +340,10 @@ function _hc_getNombreAsesor($idAs, &$cache) {
         <div class="hc-stat" style="flex:1">
           <div class="hc-stat-val"><?php echo count($_hc_pedidos); ?></div>
           <div class="hc-stat-lbl">Pedidos</div>
+        </div>
+        <div class="hc-stat" style="flex:1">
+          <div class="hc-stat-val" style="color:#0ea5e9"><?php echo count($_hc_ventas); ?></div>
+          <div class="hc-stat-lbl">Ventas</div>
         </div>
       </div>
     </div>
@@ -368,6 +401,9 @@ function _hc_getNombreAsesor($idAs, &$cache) {
           </button>
           <button type="button" class="hc-tab" data-tab="pedidos">
             <i class="fa-solid fa-box-open" style="margin-right:4px"></i>Pedidos (<?php echo count($_hc_pedidos); ?>)
+          </button>
+          <button type="button" class="hc-tab" data-tab="ventas">
+            <i class="fa-solid fa-cart-shopping" style="margin-right:4px"></i>Ventas (<?php echo count($_hc_ventas); ?>)
           </button>
         </div>
       </div>
@@ -579,6 +615,72 @@ function _hc_getNombreAsesor($idAs, &$cache) {
         <?php endif; ?>
       </div>
 
+      <div id="hcTabVentas" style="display:none">
+        <?php if (empty($_hc_ventas)): ?>
+          <div class="hc-empty">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <strong style="display:block;color:#0f172a;font-size:14px">Sin ventas registradas</strong>
+          </div>
+        <?php else: ?>
+          <div class="table-responsive">
+            <table class="hc-table">
+              <thead>
+                <tr>
+                  <th>Venta</th>
+                  <th>Producto(s)</th>
+                  <th>Asesor</th>
+                  <th>Metodo</th>
+                  <th>Fecha</th>
+                  <th style="text-align:right">Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($_hc_ventas as $v):
+                  $vProductos = _hc_obtenerProductosVenta($v);
+                  $vAsesor = isset($v["asesor"]) && trim($v["asesor"]) !== "" ? trim($v["asesor"]) : "Sin asignar";
+                  $vMetodo = isset($v["metodo"]) && trim($v["metodo"]) !== "" ? trim($v["metodo"]) : "No especificado";
+                  $vFecha = isset($v["fecha"]) ? trim($v["fecha"]) : "";
+                  $vTotal = floatval(isset($v["pago"]) ? $v["pago"] : 0);
+                  $vLink = 'index.php?ruta=ventasR&idventa=' . $v["id"];
+                ?>
+                <tr>
+                  <td><span style="font-weight:700;color:#0ea5e9">#<?php echo $v["id"]; ?></span></td>
+                  <td style="min-width:220px">
+                    <?php if (empty($vProductos)): ?>
+                      <span style="color:#94a3b8;font-size:12px">Sin productos capturados</span>
+                    <?php else: ?>
+                      <?php foreach (array_slice($vProductos, 0, 2) as $productoVenta): ?>
+                        <div style="font-size:12px;font-weight:600;color:#0f172a;line-height:1.45">
+                          <?php echo htmlspecialchars($productoVenta); ?>
+                        </div>
+                      <?php endforeach; ?>
+                      <?php if (count($vProductos) > 2): ?>
+                        <div style="font-size:11px;color:#94a3b8">+<?php echo count($vProductos) - 2; ?> mas</div>
+                      <?php endif; ?>
+                    <?php endif; ?>
+                  </td>
+                  <td style="font-size:12px;font-weight:600"><?php echo htmlspecialchars($vAsesor); ?></td>
+                  <td>
+                    <span class="hc-badge" style="background:#ecfeff;color:#0f766e"><?php echo htmlspecialchars($vMetodo); ?></span>
+                  </td>
+                  <td style="font-size:12px;color:#64748b"><?php echo !empty($vFecha) ? date("d/m/Y", strtotime($vFecha)) : "--"; ?></td>
+                  <td style="text-align:right;font-weight:700">$<?php echo number_format($vTotal, 0); ?></td>
+                  <td style="text-align:center">
+                    <a href="<?php echo $vLink; ?>" target="_blank"
+                       style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#0ea5e9;color:#fff;font-size:12px;text-decoration:none;transition:background .15s"
+                       onmouseover="this.style.background='#0284c7'" onmouseout="this.style.background='#0ea5e9'">
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        <?php endif; ?>
+      </div>
+
     </div>
 
   </section>
@@ -590,12 +692,14 @@ $(function(){
     var tab = $(this).data('tab');
     $('#hcTabs .hc-tab').removeClass('active').css({background:'transparent',color:'#64748b'});
     $(this).addClass('active').css({background:'#6366f1',color:'#fff'});
+    $('#hcTabOrdenes, #hcTabPedidos, #hcTabVentas').hide();
+
     if (tab === 'ordenes') {
       $('#hcTabOrdenes').show();
-      $('#hcTabPedidos').hide();
-    } else {
-      $('#hcTabOrdenes').hide();
+    } else if (tab === 'pedidos') {
       $('#hcTabPedidos').show();
+    } else if (tab === 'ventas') {
+      $('#hcTabVentas').show();
     }
   });
 });
