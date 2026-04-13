@@ -61,6 +61,8 @@ function censurarDatosCliente($citas) {
         }
         // Quitar badges de cliente (info sensible de comportamiento)
         $c["cliente_badges"] = null;
+        // Quitar total de la orden (info financiera)
+        $c["orden_total"] = "";
     }
     unset($c);
     return $citas;

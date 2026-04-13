@@ -281,10 +281,12 @@
 
                 <!-- Info extra (total, fecha ingreso) -->
                 <div id="dcInfoExtra" style="padding:14px 0;display:none;grid-template-columns:1fr 1fr;gap:8px;">
+                    <?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
                     <div id="dcTotalBlock" class="egs-dc-stat-box" style="display:none;">
                         <div class="egs-dc-stat-label">Total</div>
                         <div id="dcTotal" class="egs-dc-stat-val"></div>
                     </div>
+                    <?php endif; ?>
                     <div id="dcFechaIngresoBlock" class="egs-dc-stat-box" style="display:none;">
                         <div class="egs-dc-stat-label">Ingreso</div>
                         <div id="dcFechaIngreso" class="egs-dc-stat-val" style="font-size:13px;"></div>
@@ -341,9 +343,11 @@
 
             <!-- Footer acciones -->
             <div style="padding:14px 24px 18px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #f1f5f9;background:#f8fafc;">
+                <?php if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "tecnico"): ?>
                 <a id="dcBtnOrden" href="#" class="egs-dc-action-btn" style="display:none;background:#eef2ff;color:#4f46e5;border-color:#c7d2fe;">
                     <i class="fa-solid fa-eye"></i> Ver Orden
                 </a>
+                <?php endif; ?>
                 <a id="dcBtnGCal" href="#" target="_blank" class="egs-dc-action-btn" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;">
                     <i class="fa-brands fa-google"></i> Calendar
                 </a>
