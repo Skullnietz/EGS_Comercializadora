@@ -1878,6 +1878,18 @@ function _egsCopiarFallback(texto, cb) {
 }
 </script>
 
+<!-- Handler: Agendar cita desde orden (abre el modal de cita rápida del navbar) -->
+<script>
+$(document).on('click', '.btnAgendarCitaDesdeOrden', function(){
+	var ordenId = $(this).data('orden-id');
+	var $modal = $('#modalCitaRapida');
+	if (!$modal.length) return;
+	// Prellenar el ID de orden y disparar el auto-color
+	$('#crOrdenId').val(ordenId).trigger('change');
+	$modal.modal('show');
+});
+</script>
+
 <?php
 $insertarobservacion = new controladorObservaciones();
 $insertarobservacion->ctrlCrearObservacion();
