@@ -505,7 +505,10 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
             "render": function (data, type, row, meta ) {
                 var nombre = data.cliente_nombre || 'Sin cliente';
                 var badges = _renderCliBadges(data.id_usuario);
-                return "<span style='display:inline-flex;align-items:center;max-width:100%;white-space:nowrap'><span style='overflow:hidden;text-overflow:ellipsis;max-width:120px;display:inline-block;vertical-align:middle' title='"+nombre+"'>"+nombre+"</span>"+badges+"</span>";
+                return "<span style='display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:4px;max-width:100%;white-space:normal;line-height:1.35'>"
+                     + "<span style='display:inline-block;white-space:normal;word-break:break-word;min-width:180px' title='"+nombre+"'>"+nombre+"</span>"
+                     + badges
+                     + "</span>";
             }},
         {data: null,
             "render": function (data, type, row, meta ) {

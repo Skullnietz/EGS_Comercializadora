@@ -822,7 +822,12 @@ function _ordGetBadgeClass($estadoText) {
 
 
 
-                  $NombreUsuario = ClienteBadgesHelper::getInstance()->renderWithName($usuario["nombre"], intval($valueOrdenes["id_usuario"]));
+                  $NombreUsuario = "<span style='display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:4px;max-width:100%;white-space:normal;line-height:1.35'>"
+                                 . "<span style='display:inline-block;white-space:normal;word-break:break-word;min-width:180px;'>"
+                                 . htmlspecialchars($usuario["nombre"])
+                                 . "</span>"
+                                 . ClienteBadgesHelper::getInstance()->render(intval($valueOrdenes["id_usuario"]))
+                                 . "</span>";
 
 
                   /*LINK DE IMPRESION DE EDITAR ORDEN https://backend.comercializadoraegs.com/index.php?ruta=infoOrden&idOrden=5240&empresa=1&asesor=9&cliente=2726&tecnico=4&pedido=0*/
@@ -1069,7 +1074,12 @@ function _ordGetBadgeClass($estadoText) {
 
 
 
-                    $NombreUsuario = ClienteBadgesHelper::getInstance()->renderWithName($usuario["nombre"], intval($valueOrdenes["id_usuario"]));
+                    $NombreUsuario = "<span style='display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:4px;max-width:100%;white-space:normal;line-height:1.35'>"
+                                   . "<span style='display:inline-block;white-space:normal;word-break:break-word;min-width:180px;'>"
+                                   . htmlspecialchars($usuario["nombre"])
+                                   . "</span>"
+                                   . ClienteBadgesHelper::getInstance()->render(intval($valueOrdenes["id_usuario"]))
+                                   . "</span>";
 
 
 
@@ -1318,7 +1328,12 @@ function _ordGetBadgeClass($estadoText) {
 
 
 
-                    $NombreUsuario = ClienteBadgesHelper::getInstance()->renderWithName($usuario["nombre"], intval($valueOrdeneDelTecnico["id_usuario"]));
+                    $NombreUsuario = "<span style='display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:4px;max-width:100%;white-space:normal;line-height:1.35'>"
+                                   . "<span style='display:inline-block;white-space:normal;word-break:break-word;min-width:180px;'>"
+                                   . htmlspecialchars($usuario["nombre"])
+                                   . "</span>"
+                                   . ClienteBadgesHelper::getInstance()->render(intval($valueOrdeneDelTecnico["id_usuario"]))
+                                   . "</span>";
 
 
 
