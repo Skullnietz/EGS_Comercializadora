@@ -1,10 +1,7 @@
 <?php
 
 require_once "../modelos/conexion.php";
-require_once "../controladores/ordenes.controlador.php";
-require_once "../modelos/ordenes.modelo.php";
-require_once "../controladores/clientes.controlador.php";
-require_once "../modelos/clientes.modelo.php";
+require_once "../modelos/conexionWordpress.php";
 require_once "../modelos/observacionOrdenes.modelo.php";
 
 class AjaxFormulariosTablet {
@@ -12,32 +9,37 @@ class AjaxFormulariosTablet {
     public $estado;
 
     public function ajaxObtenerUltimaOrden() {
-        $pdo = Conexion::conectar();
         
         $estadoLike = "%" . $this->estado . "%";
         
-        $stmt = $pdo->prepare("SELECT id, id_cliente, marcaDelEquipo, modeloDelEquipo, numeroDeSerieDelEquipo, fecha, estado 
+        // La tabla ordenes está en la BD secundaria (WP / Respaldo)
+        $pdoWP = ConexionWP::conectarWP();
+        $stmt = $pdoWP->prepare("SELECT id, id_usuario, marcaDelEquipo, modeloDelEquipo, numeroDeSerieDelEquipo, fecha, estado 
                                FROM ordenes 
                                WHERE estado LIKE :estado 
                                ORDER BY id DESC LIMIT 1");
         $stmt->bindParam(":estado", $estadoLike, PDO::PARAM_STR);
-        $stmt->execute();
         
-        $orden = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if($orden){
-            // Traer el nombre del cliente
-            $stmtCliente = $pdo->prepare("SELECT nombre FROM clientes WHERE id = :id");
-            $stmtCliente->bindParam(":id", $orden["id_cliente"], PDO::PARAM_INT);
-            $stmtCliente->execute();
-            $cliente = $stmtCliente->fetch(PDO::FETCH_ASSOC);
-            $orden["nombre_cliente"] = $cliente ? $cliente["nombre"] : "Desconocido";
+        try {
+            $stmt->execute();
+            $orden = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Format fecha
-            $orden["fecha"] = date("d/m/Y", strtotime($orden["fecha"]));
-        }
+            if($orden) {
+                // La tabla clientes está en la BD principal
+                $pdo = Conexion::conectar();
+                $stmtCliente = $pdo->prepare("SELECT nombre FROM clientes WHERE id = :id");
+                $stmtCliente->bindParam(":id", $orden["id_usuario"], PDO::PARAM_INT);
+                $stmtCliente->execute();
+                $cliente = $stmtCliente->fetch(PDO::FETCH_ASSOC);
+                $orden["nombre_cliente"] = $cliente ? $cliente["nombre"] : "Desconocido";
+                
+                $orden["fecha"] = date("d/m/Y", strtotime($orden["fecha"]));
+            }
 
-        echo json_encode($orden);
+            echo json_encode($orden);
+        } catch (Exception $e) {
+            echo json_encode(["error" => "Error de BD: " . $e->getMessage()]);
+        }
     }
 
     public $idOrden;
@@ -53,8 +55,12 @@ class AjaxFormulariosTablet {
             "observacion" => $observacion
         );
 
-        $respuesta = ModeloObservaciones::mdlCrearObservacion("observacionesOrdenes", $datos);
-        echo json_encode(["status" => $respuesta]);
+        try {
+            $respuesta = ModeloObservaciones::mdlCrearObservacion("observacionesOrdenes", $datos);
+            echo json_encode(["status" => $respuesta]);
+        } catch (Exception $e) {
+            echo json_encode(["error" => "Error al guardar observación: " . $e->getMessage()]);
+        }
     }
 }
 
