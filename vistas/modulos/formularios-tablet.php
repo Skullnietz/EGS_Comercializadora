@@ -33,7 +33,7 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
 .content-wrapper { margin-left: 0 !important; padding-top:0 !important; background: #eef2f5 !important; }
 
 .tablet-kiosk {
-    padding: 30px;
+    padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
     font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: #333;
     max-width: 1000px;
@@ -53,14 +53,16 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
 }
 .kiosk-btn {
     width: 100%;
-    height: 300px;
+    min-height: clamp(180px, 30vw, 300px);
     border-radius: 20px;
-    font-size: 32px;
+    font-size: clamp(24px, 3.4vw, 32px);
     font-weight: 800;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
+    padding: 24px 18px;
     color: white;
     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     transition: transform 0.2s;
@@ -70,12 +72,13 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
 .kiosk-btn:active { transform: scale(0.97); }
 .btn-ingreso { background: linear-gradient(135deg, #007bff, #0056b3); }
 .btn-salida { background: linear-gradient(135deg, #28a745, #1d8835); }
-.kiosk-btn i { font-size: 80px; margin-bottom: 20px; }
+.kiosk-btn i { font-size: clamp(56px, 9vw, 80px); margin-bottom: 16px; }
+.kiosk-btn small { font-size: clamp(15px, 2.1vw, 18px); line-height: 1.35; }
 
 .kiosk-panel {
     background: white;
     border-radius: 15px;
-    padding: 30px;
+    padding: clamp(18px, 3vw, 30px);
     box-shadow: 0 5px 25px rgba(0,0,0,0.08);
     display: none; 
     animation: fadeIn 0.4s ease;
@@ -83,49 +86,57 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 .kiosk-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-.kiosk-header h1 { font-weight: 800; color: #2c3e50; }
+.kiosk-header h1 { font-weight: 800; color: #2c3e50; font-size: clamp(28px, 4vw, 40px); line-height: 1.2; margin: 0 0 8px; }
+.kiosk-header p { font-size: clamp(17px, 2.5vw, 20px) !important; line-height: 1.45; }
+.kiosk-home-title { font-weight: 900; color:#2c3e50; font-size: clamp(28px, 4.2vw, 35px); line-height: 1.15; margin: 0 0 10px; }
+.kiosk-home-subtitle { font-size: clamp(18px, 2.8vw, 22px); color:#7f8c8d; margin: 0; }
+#screenHome h2 { font-size: clamp(28px, 4.2vw, 35px) !important; line-height: 1.15; }
+#screenHome p { font-size: clamp(18px, 2.8vw, 22px) !important; }
 
 .order-confirm {
     background: #fdf5ce;
     border-left: 8px solid #f39c12;
-    padding: 30px;
+    padding: clamp(18px, 3vw, 30px);
     border-radius: 10px;
     margin-bottom: 30px;
-    font-size: 24px;
+    font-size: clamp(19px, 2.8vw, 24px);
     line-height: 1.5;
+    overflow-wrap: anywhere;
 }
-.order-confirm b { color: #d35400; font-size: 28px; }
+.order-confirm b { color: #d35400; font-size: clamp(22px, 3.2vw, 28px); }
 
 .kiosk-form-group { margin-bottom: 35px; }
 .kiosk-form-group label {
     display: block;
-    font-size: 22px;
+    font-size: clamp(18px, 2.8vw, 22px);
     font-weight: 700;
     margin-bottom: 15px;
     color: #34495e;
+    line-height: 1.35;
 }
 .kiosk-input {
     width: 100%;
-    padding: 18px;
-    font-size: 20px;
+    padding: 16px 18px;
+    font-size: clamp(18px, 2.7vw, 20px);
     border: 2px solid #bdc3c7;
     border-radius: 10px;
     background: #fafafa;
     transition: border 0.3s, background 0.3s;
     resize: vertical;
+    min-height: 58px;
 }
 .kiosk-input:focus { border-color: #3498db; background: white; outline: none; }
 
 /* Radio Buttons estilo Chips gigantes */
 .radio-chips { display: flex; gap: 15px; flex-wrap: wrap; }
 .radio-chips label {
-    flex: 1;
+    flex: 1 1 180px;
     text-align: center;
     background: #ecf0f1;
     border: 2px solid #bdc3c7;
     border-radius: 10px;
-    padding: 20px;
-    font-size: 22px;
+    padding: 18px 16px;
+    font-size: clamp(18px, 2.8vw, 22px);
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
@@ -146,13 +157,87 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
     margin-bottom: 10px;
     overflow: hidden;
 }
-#signature-pad { touch-action: none; width: 100%; height: 300px; cursor: crosshair; }
+#signature-pad { touch-action: none; width: 100%; height: clamp(220px, 34vh, 320px); cursor: crosshair; }
 
 .kiosk-action-btn {
-    font-size: 24px;
-    padding: 15px 40px;
+    font-size: clamp(18px, 2.8vw, 24px);
+    padding: 14px 26px;
     border-radius: 12px;
     font-weight: bold;
+    white-space: normal;
+    min-height: 58px;
+}
+.kiosk-actions {
+    display:flex;
+    justify-content:space-between;
+    gap: 16px;
+    margin-top: 40px;
+}
+.kiosk-actions .kiosk-action-btn {
+    flex: 1 1 0;
+}
+.kiosk-note {
+    background: #e1f5fe;
+    padding: 20px;
+    border-radius: 10px;
+}
+.kiosk-note b { font-size: clamp(18px, 2.6vw, 20px) !important; }
+.kiosk-note span { font-size: clamp(16px, 2.4vw, 18px) !important; line-height: 1.45; }
+#screenSuccess h1 { font-size: clamp(28px, 4.8vw, 40px) !important; line-height: 1.2; }
+#screenSuccess p { font-size: clamp(18px, 2.8vw, 24px) !important; }
+#screenSuccess i { font-size: clamp(84px, 12vw, 120px) !important; }
+
+@media (max-width: 991px) {
+    .tablet-kiosk { max-width: 100%; }
+    .kiosk-form-group { margin-bottom: 26px; }
+}
+
+@media (max-width: 820px), (orientation: landscape) and (max-height: 720px) {
+    .tablet-kiosk .egs-av {
+        width: 124px;
+        height: 124px;
+    }
+    .kiosk-btn {
+        min-height: clamp(160px, 28vw, 220px);
+    }
+    .kiosk-actions {
+        gap: 12px;
+        margin-top: 28px;
+    }
+}
+
+@media (max-width: 767px), (orientation: landscape) and (max-height: 640px) {
+    .tablet-kiosk {
+        padding: 14px;
+    }
+    .kiosk-panel {
+        border-radius: 12px;
+    }
+    .radio-chips label {
+        flex-basis: 100%;
+    }
+    .kiosk-actions {
+        flex-direction: column;
+    }
+    .kiosk-actions .kiosk-action-btn {
+        width: 100%;
+    }
+    #screenSuccess {
+        padding: 60px 18px !important;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+    .kiosk-header {
+        margin-bottom: 18px;
+        padding-bottom: 10px;
+    }
+    .kiosk-form-group {
+        margin-bottom: 18px;
+    }
+    #signature-pad {
+        height: 200px;
+    }
 }
 </style>
 
@@ -189,7 +274,7 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
          <div class="order-confirm" id="confirmData">
             <!-- Data Injected VIA JS -->
          </div>
-         <div style="display:flex; justify-content:space-between; margin-top:40px;">
+         <div class="kiosk-actions">
             <button class="btn btn-danger kiosk-action-btn" onclick="app.goHome()"><i class="fa fa-arrow-left"></i> NO, VOLVER</button>
             <button class="btn btn-success kiosk-action-btn" onclick="app.goToForm()"><i class="fa fa-check"></i> SÍ, ES CORRECTO</button>
          </div>
@@ -234,7 +319,7 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
                  </div>
              </div>
          </form>
-         <div style="display:flex; justify-content:space-between; margin-top:40px;">
+         <div class="kiosk-actions">
             <button class="btn btn-default kiosk-action-btn" onclick="app.goHome()"><i class="fa fa-times"></i> CANCELAR</button>
             <button class="btn btn-primary kiosk-action-btn" onclick="app.goToSignature()"><i class="fa fa-pen"></i> CONTINUAR A FIRMA</button>
          </div>
@@ -268,7 +353,7 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
                     <input type="radio" name="sal_exp_gar" id="sr3_no" value="No"><label for="sr3_no">NO</label>
                  </div>
              </div>
-             <div class="kiosk-form-group" style="background: #e1f5fe; padding:20px; border-radius:10px;">
+             <div class="kiosk-form-group kiosk-note">
                  <i class="fa fa-info-circle text-info" style="font-size:24px;"></i> 
                  <b style="font-size:20px;">Nota de Mantenimiento:</b> <span style="font-size:18px;">Si usted pidió mantenimiento, pida que le abran el equipo (si es posible) para mostrar que se haya realizado.</span>
              </div>
@@ -288,7 +373,7 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
                  </div>
              </div>
          </form>
-         <div style="display:flex; justify-content:space-between; margin-top:40px;">
+         <div class="kiosk-actions">
             <button class="btn btn-default kiosk-action-btn" onclick="app.goHome()"><i class="fa fa-times"></i> CANCELAR</button>
             <button class="btn btn-primary kiosk-action-btn" onclick="app.goToSignature()"><i class="fa fa-pen"></i> CONTINUAR A FIRMA</button>
          </div>
@@ -306,7 +391,7 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
          <div class="text-right" style="margin-bottom:20px;">
              <button class="btn btn-warning btn-lg" onclick="app.clearSignature()"><i class="fa fa-eraser"></i> Limpiar Firma</button>
          </div>
-         <div style="display:flex; justify-content:space-between; margin-top:40px;">
+         <div class="kiosk-actions">
             <button class="btn btn-default kiosk-action-btn" onclick="app.goBackToForm()"><i class="fa fa-arrow-left"></i> REGRESAR AL FORMULARIO</button>
             <button class="btn btn-success kiosk-action-btn" style="font-size:28px;" onclick="app.saveForm()"><i class="fa fa-save"></i> GUARDAR Y FINALIZAR</button>
          </div>
@@ -359,6 +444,17 @@ const app = {
         window.onresize = () => this.resizeCanvas();
     },
 
+    getSignatureHeight: function() {
+        const viewportHeight = window.innerHeight || 800;
+        const viewportWidth = window.innerWidth || 1280;
+        const isLandscape = viewportWidth > viewportHeight;
+
+        if (isLandscape && viewportHeight <= 540) return 200;
+        if (isLandscape && viewportHeight <= 640) return 220;
+        if (viewportWidth <= 820) return 240;
+        return 300;
+    },
+
     initSignaturePad: function() {
         const canvas = document.getElementById('signature-pad');
         // Destruir instancia anterior si existe
@@ -369,10 +465,11 @@ const app = {
         // Dimensionar canvas ANTES de crear SignaturePad
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
         const parentWidth = canvas.parentElement.offsetWidth;
+        const signatureHeight = this.getSignatureHeight();
         canvas.width = parentWidth * ratio;
-        canvas.height = 300 * ratio;
+        canvas.height = signatureHeight * ratio;
         canvas.style.width = parentWidth + 'px';
-        canvas.style.height = '300px';
+        canvas.style.height = signatureHeight + 'px';
         canvas.getContext("2d").scale(ratio, ratio);
         // Crear nueva instancia con canvas visible y dimensionado
         this.signaturePad = new SignaturePad(canvas, {
