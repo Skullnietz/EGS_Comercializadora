@@ -1631,7 +1631,40 @@ function _egsEstadoClass($estado) {
 												<i class="fa-regular fa-clock" style="font-size:9px"></i> <?php echo $fecha; ?>
 											</span>
 										</div>
-										<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5"><?php echo htmlspecialchars($valueobs["observacion"]); ?></p>
+										<?php
+										$obsTexto = trim($valueobs["observacion"]);
+										if (strpos($obsTexto, 'FORMULARIO_TABLET_JSON:') === 0) {
+											$jsonStr = substr($obsTexto, 24); // 23 chars for prefix + 1 space
+											$formData = json_decode($jsonStr, true);
+											if(is_array($formData)) {
+												echo '<div style="background:#fff;border:2px dashed #cbd5e1;border-radius:10px;padding:16px;margin-top:10px;box-shadow:inset 0 0 10px rgba(0,0,0,0.02)">';
+												echo '<h4 style="margin:0 0 12px;color:#4f46e5;font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-tablet-screen-button"></i> ' . htmlspecialchars($formData["tipo_formulario"]) . '</h4>';
+												echo '<p style="font-size:13px;color:#475569;margin-bottom:12px;font-weight:600">Equipo: <span style="color:#0f172a">' . htmlspecialchars($formData["marcaModelo"]) . '</span></p>';
+												
+												echo '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:16px">';
+												foreach($formData["respuestas"] as $pregunta => $respuesta) {
+													$preguntaFormateada = str_replace("_", " ", $pregunta);
+													echo '<div style="background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #e2e8f0">';
+													echo '<label style="display:block;font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px;font-weight:700">' . htmlspecialchars($preguntaFormateada) . '</label>';
+													echo '<span style="font-size:13px;color:#1e293b;font-weight:600">' . htmlspecialchars($respuesta) . '</span>';
+													echo '</div>';
+												}
+												echo '</div>';
+												
+												if(isset($formData["firma"]) && !empty($formData["firma"])) {
+													echo '<div style="border-top:1px solid #e2e8f0;padding-top:12px;text-align:center;width:max-content;margin:0 auto">';
+													echo '<img src="' . htmlspecialchars($formData["firma"]) . '" style="max-width:250px;height:auto;display:block;margin:0 auto;filter:contrast(1.2)">';
+													echo '<div style="border-top:2px solid #000;padding-top:4px;font-size:12px;font-weight:700;color:#000;margin-top:-10px;position:relative;z-index:2;letter-spacing:1px">FIRMA DIGITAL DEL CLIENTE</div>';
+													echo '</div>';
+												}
+												echo '</div>';
+											} else {
+												echo '<p style="margin:0;color:#334155;font-weight:500;font-size:13px;line-height:1.5">' . htmlspecialchars($obsTexto) . '</p>';
+											}
+										} else {
+											echo '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' . htmlspecialchars($obsTexto) . '</p>';
+										}
+										?>
 										<?php if ($isAdmin): ?>
 										<button type="button" class="btn btn-xs eliminarObservacion" idObs="<?php echo $valueobs["id"]; ?>"
 												style="margin-top:6px;color:#ef4444;font-size:11px;padding:2px 8px;border:1px solid #fecaca;border-radius:6px;background:#fff"
@@ -1834,7 +1867,36 @@ $(document).ready(function(){
 							}
 							html += '<span style="font-size:11px;color:#94a3b8;margin-left:auto;flex-shrink:0"><i class="fa-regular fa-clock" style="font-size:9px"></i> '+fechaStr+'</span>';
 							html += '</div>';
-							html += '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' + (obs.observacion || '') + '</p>';
+							let tx = obs.observacion || '';
+							if(tx.startsWith("FORMULARIO_TABLET_JSON:")) {
+								try {
+									let jsData = JSON.parse(tx.substring(24));
+									let cardHtml = '<div style="background:#fff;border:2px dashed #cbd5e1;border-radius:10px;padding:16px;margin-top:10px;box-shadow:inset 0 0 10px rgba(0,0,0,0.02)">';
+									cardHtml += '<h4 style="margin:0 0 12px;color:#4f46e5;font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-tablet-screen-button"></i> ' + jsData.tipo_formulario + '</h4>';
+									cardHtml += '<p style="font-size:13px;color:#475569;margin-bottom:12px;font-weight:600">Equipo: <span style="color:#0f172a">' + (jsData.marcaModelo || '') + '</span></p>';
+									cardHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:16px">';
+									for(let key in jsData.respuestas) {
+										let labelForm = key.replace(/_/g, " ");
+										cardHtml += '<div style="background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #e2e8f0">';
+										cardHtml += '<label style="display:block;font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px;font-weight:700">' + labelForm + '</label>';
+										cardHtml += '<span style="font-size:13px;color:#1e293b;font-weight:600">' + jsData.respuestas[key] + '</span>';
+										cardHtml += '</div>';
+									}
+									cardHtml += '</div>';
+									if(jsData.firma) {
+										cardHtml += '<div style="border-top:1px solid #e2e8f0;padding-top:12px;text-align:center;width:max-content;margin:0 auto">';
+										cardHtml += '<img src="' + jsData.firma + '" style="max-width:250px;height:auto;display:block;margin:0 auto;filter:contrast(1.2)">';
+										cardHtml += '<div style="border-top:2px solid #000;padding-top:4px;font-size:12px;font-weight:700;color:#000;margin-top:-10px;position:relative;z-index:2;letter-spacing:1px">FIRMA DIGITAL DEL CLIENTE</div>';
+										cardHtml += '</div>';
+									}
+									cardHtml += '</div>';
+									html += cardHtml;
+								}catch(e){
+									html += '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' + tx + '</p>';
+								}
+							} else {
+								html += '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' + tx + '</p>';
+							}
 							html += '</div></div>';
 							container.append(html);
 						}
