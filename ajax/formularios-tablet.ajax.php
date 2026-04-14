@@ -295,6 +295,37 @@ function tabletValidateSignature(string $signature): string
     return $signature;
 }
 
+function tabletValidateSignatureMeta($meta): array
+{
+    if (!is_array($meta)) {
+        tabletJsonResponse(["error" => "La firma digital no contiene datos suficientes para validarse."], 422);
+    }
+
+    $strokeCount = isset($meta["strokeCount"]) ? (int) $meta["strokeCount"] : 0;
+    $pointCount = isset($meta["pointCount"]) ? (int) $meta["pointCount"] : 0;
+    $width = isset($meta["width"]) ? (int) $meta["width"] : 0;
+    $height = isset($meta["height"]) ? (int) $meta["height"] : 0;
+
+    if ($strokeCount < 1 || $pointCount < 18) {
+        tabletJsonResponse(["error" => "La firma es demasiado simple. Debe dibujar un trazo más completo."], 422);
+    }
+
+    if ($width < 36 && $height < 18) {
+        tabletJsonResponse(["error" => "La firma es demasiado pequeña para ser válida."], 422);
+    }
+
+    if (($width * $height) < 900) {
+        tabletJsonResponse(["error" => "La firma es demasiado corta o pequeña. Intente firmar nuevamente."], 422);
+    }
+
+    return [
+        "strokeCount" => $strokeCount,
+        "pointCount" => $pointCount,
+        "width" => $width,
+        "height" => $height
+    ];
+}
+
 function tabletPendingOrderOrFail(int $orderId, string $tipoFormulario): array
 {
     $pending = $_SESSION["formularios_tablet_pending_order"] ?? null;
@@ -417,6 +448,7 @@ function tabletHandleSaveForm(): void
 
     $respuestas = isset($decoded["respuestas"]) && is_array($decoded["respuestas"]) ? $decoded["respuestas"] : [];
     $firma = tabletValidateSignature((string) ($decoded["firma"] ?? ""));
+    $firmaMeta = tabletValidateSignatureMeta($decoded["firma_meta"] ?? null);
 
     $respuestasLimpias = $tipoFormulario === "INGRESO DE EQUIPO"
         ? tabletSanitizeIngresoAnswers($respuestas)
@@ -430,7 +462,8 @@ function tabletHandleSaveForm(): void
             tabletNormalizeText(($orden["marcaDelEquipo"] ?? "") . " " . ($orden["modeloDelEquipo"] ?? ""), 160)
         ),
         "respuestas" => $respuestasLimpias,
-        "firma" => $firma
+        "firma" => $firma,
+        "firma_meta" => $firmaMeta
     ];
 
     $existingObservationId = tabletFindExistingFormObservationId($orderId, $tipoFormulario);

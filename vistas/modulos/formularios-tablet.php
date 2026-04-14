@@ -433,6 +433,70 @@ function cleanText(value) {
     return String(value || "").replace(/\s+/g, " ").trim();
 }
 
+function getSignatureMetrics(signaturePad) {
+    const strokes = signaturePad ? signaturePad.toData() : [];
+    let strokeCount = 0;
+    let pointCount = 0;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    strokes.forEach(function(group) {
+        const points = Array.isArray(group.points) ? group.points : [];
+        if (!points.length) {
+            return;
+        }
+
+        strokeCount += 1;
+        pointCount += points.length;
+
+        points.forEach(function(point) {
+            if (typeof point.x !== "number" || typeof point.y !== "number") {
+                return;
+            }
+            minX = Math.min(minX, point.x);
+            minY = Math.min(minY, point.y);
+            maxX = Math.max(maxX, point.x);
+            maxY = Math.max(maxY, point.y);
+        });
+    });
+
+    const width = Number.isFinite(minX) && Number.isFinite(maxX) ? Math.max(0, maxX - minX) : 0;
+    const height = Number.isFinite(minY) && Number.isFinite(maxY) ? Math.max(0, maxY - minY) : 0;
+
+    return {
+        strokeCount: strokeCount,
+        pointCount: pointCount,
+        width: Math.round(width),
+        height: Math.round(height)
+    };
+}
+
+function isSignatureTooSimple(metrics) {
+    if (!metrics || typeof metrics !== "object") {
+        return true;
+    }
+
+    if (metrics.strokeCount < 1) {
+        return true;
+    }
+
+    if (metrics.pointCount < 18) {
+        return true;
+    }
+
+    if (metrics.width < 36 && metrics.height < 18) {
+        return true;
+    }
+
+    if ((metrics.width * metrics.height) < 900) {
+        return true;
+    }
+
+    return false;
+}
+
 // Controller Logic para el Quiosco
 const app = {
     currentFlow: null, // 'REV' o 'Entregado'
@@ -644,13 +708,25 @@ const app = {
             return;
         }
 
+        const signatureMetrics = getSignatureMetrics(this.signaturePad);
+        if (isSignatureTooSimple(signatureMetrics)) {
+            swal({
+                type: 'warning',
+                title: 'Firma demasiado simple',
+                text: 'La firma debe tener un trazo más completo. Un punto o una marca mínima no es válida.',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
         const dataObj = {
             tipo_formulario: this.currentFlow === 'REV' ? "INGRESO DE EQUIPO" : "SALIDA DE EQUIPO",
             nombre_cliente: this.currentOrder.nombre_cliente || '',
             orden_id: this.currentOrder.id,
             marcaModelo: this.currentOrder.marcaDelEquipo + " " + this.currentOrder.modeloDelEquipo,
             respuestas: {},
-            firma: this.signaturePad.toDataURL()
+            firma: this.signaturePad.toDataURL(),
+            firma_meta: signatureMetrics
         };
 
         if(this.currentFlow === 'REV') {
