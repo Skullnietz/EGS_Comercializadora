@@ -1611,6 +1611,8 @@ function _egsEstadoClass($estado) {
 										$_obs_nombre = $_clienteNombre;
 										$_obs_perfil = 'Titular de la orden';
 										$_obs_col = ['#16a34a', '#dcfce7', 'fa-user-check'];
+										$_obs_foto = '';
+										$_obs_initial = mb_strtoupper(mb_substr($_obs_nombre, 0, 1));
 									}
 							?>
 								<div class="egs-obs-item" style="display:flex;gap:12px;padding:14px;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:8px;transition:background .12s"
@@ -1855,29 +1857,13 @@ $(document).ready(function(){
 						for(var i = lastObsCount; i < res.observaciones.length; i++){
 							var obs = res.observaciones[i];
 							var nombre = obs.nombre || 'Usuario';
-							var ini = nombre.charAt(0).toUpperCase();
-							var grad = grads[i % grads.length];
-							var fecha = obs.fecha ? new Date(obs.fecha) : null;
-							var fechaStr = fecha ? (fecha.getDate()+'/'+(fecha.getMonth()+1)+'/'+fecha.getFullYear()+' '+fecha.getHours()+':'+String(fecha.getMinutes()).padStart(2,'0')) : '';
-							// Determinar color/icono según perfil
-							var perfil = obs.perfil || '';
-							var pLow = perfil.toLowerCase();
-							var pColor = '#64748b', pBg = '#f1f5f9', pIcon = 'fa-user';
-							if(pLow.indexOf('admin')>-1){ pColor='#6366f1'; pBg='#eef2ff'; pIcon='fa-shield-halved'; }
-							else if(pLow.indexOf('vendedor')>-1||pLow.indexOf('asesor')>-1){ pColor='#8b5cf6'; pBg='#f5f3ff'; pIcon='fa-headset'; }
-							else if(pLow.indexOf('tecnico')>-1||pLow.indexOf('técnico')>-1){ pColor='#06b6d4'; pBg='#ecfeff'; pIcon='fa-wrench'; }
-							else if(pLow.indexOf('secretaria')>-1){ pColor='#f59e0b'; pBg='#fffbeb'; pIcon='fa-clipboard'; }
-
-							var html = '<div class="egs-obs-item" style="display:flex;gap:12px;padding:14px;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:8px;transition:background .12s" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'#fff\'">';
-							if(obs.foto){
-								html += '<img src="'+obs.foto+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0" onerror="this.onerror=null;this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">';
-								html += '<div style="display:none;width:40px;height:40px;border-radius:50%;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:'+grad+'">'+ini+'</div>';
-							} else {
-								html += '<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:'+grad+'">'+ini+'</div>';
-							}
 							var tx = obs.observacion || '';
 							var isDigForm = tx.startsWith("FORMULARIO_TABLET_JSON:");
 							var _fallbackCliente = $('input[name="nombreCliente"]').val() || 'CLIENTE';
+							
+							var perfil = obs.perfil || '';
+							var pColor = '#64748b', pBg = '#f1f5f9', pIcon = 'fa-user';
+
 							if (isDigForm) {
 								try {
 									var _tmpJson = JSON.parse(tx.substring(24));
@@ -1889,6 +1875,26 @@ $(document).ready(function(){
 								pColor = '#16a34a';
 								pBg = '#dcfce7';
 								pIcon = 'fa-user-check';
+								obs.foto = ''; // Wipe technician photo
+							} else {
+								var pLow = perfil.toLowerCase();
+								if(pLow.indexOf('admin')>-1){ pColor='#6366f1'; pBg='#eef2ff'; pIcon='fa-shield-halved'; }
+								else if(pLow.indexOf('vendedor')>-1||pLow.indexOf('asesor')>-1){ pColor='#8b5cf6'; pBg='#f5f3ff'; pIcon='fa-headset'; }
+								else if(pLow.indexOf('tecnico')>-1||pLow.indexOf('técnico')>-1){ pColor='#06b6d4'; pBg='#ecfeff'; pIcon='fa-wrench'; }
+								else if(pLow.indexOf('secretaria')>-1){ pColor='#f59e0b'; pBg='#fffbeb'; pIcon='fa-clipboard'; }
+							}
+
+							var ini = nombre.charAt(0).toUpperCase();
+							var grad = grads[i % grads.length];
+							var fecha = obs.fecha ? new Date(obs.fecha) : null;
+							var fechaStr = fecha ? (fecha.getDate()+'/'+(fecha.getMonth()+1)+'/'+fecha.getFullYear()+' '+fecha.getHours()+':'+String(fecha.getMinutes()).padStart(2,'0')) : '';
+
+							var html = '<div class="egs-obs-item" style="display:flex;gap:12px;padding:14px;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:8px;transition:background .12s" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'#fff\'">';
+							if(obs.foto){
+								html += '<img src="'+obs.foto+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0" onerror="this.onerror=null;this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">';
+								html += '<div style="display:none;width:40px;height:40px;border-radius:50%;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:'+grad+'">'+ini+'</div>';
+							} else {
+								html += '<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:'+grad+'">'+ini+'</div>';
 							}
 							html += '<div style="flex:1;min-width:0">';
 							html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">';
