@@ -297,7 +297,7 @@ class ImprimirTicketsOrden{
       echo '
         <div style="margin-top:6px;border-top:1px dashed #000;padding-top:3px">
           <div style="font-size:9px;font-weight:900;text-align:center;text-transform:uppercase;margin-bottom:2px">Terminos y condiciones</div>
-          <div style="font-size:8px;color:#000;line-height:1.3">
+          <div style="font-size:9px;color:#000;line-height:1.4">
             <div style="padding:1px 0">1. La garantia del servicio es por 30 dias a partir de la fecha de entrega.</div>
             <div style="padding:1px 0">2. La empresa no se responsabiliza por accesorios que el cliente reclame y no se encuentren detallados en esta orden.</div>
             <div style="padding:1px 0">3. El equipo sera entregado solamente al portador de esta orden, en su defecto debera retirar el propietario que funge como CLIENTE exhibiendo INE.</div>
