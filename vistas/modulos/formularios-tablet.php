@@ -1,9 +1,27 @@
 <?php
 // Validar sesión
-if (!isset($_SESSION["validarSesionBackend"]) || $_SESSION["validarSesionBackend"] != "ok") {
+if (false && (!isset($_SESSION["validarSesionBackend"]) || $_SESSION["validarSesionBackend"] != "ok")) {
     echo '<script>window.location = "inicio";</script>';
     exit();
 }
+?>
+<?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+if (empty($_SESSION["formularios_tablet_csrf"])) {
+    try {
+        $_SESSION["formularios_tablet_csrf"] = bin2hex(random_bytes(32));
+    } catch (Exception $e) {
+        $_SESSION["formularios_tablet_csrf"] = sha1(uniqid("formularios_tablet_", true));
+    }
+}
+
+$_SESSION["formularios_tablet_rendered_at"] = microtime(true);
+
+$tabletCsrfToken = $_SESSION["formularios_tablet_csrf"];
+$tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (getenv("TABLET_FORM_PUBLIC_USER_ID") ?: 1);
 ?>
 
 <!-- Import Signature Pad JS -->
@@ -128,6 +146,7 @@ if (!isset($_SESSION["validarSesionBackend"]) || $_SESSION["validarSesionBackend
 
 <div class="content-wrapper">
   <div class="tablet-kiosk" id="appRoot">
+     <input type="text" id="tablet_guard" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;opacity:0;">
      
      <!-- SCREEN 1: HOME -->
      <div class="row" id="screenHome">
@@ -296,11 +315,31 @@ if (!isset($_SESSION["validarSesionBackend"]) || $_SESSION["validarSesionBackend
 // Deshabilitar sidebar en este modulo
 $("body").addClass("sidebar-collapse");
 
+const TABLET_FORM_CSRF = <?php echo json_encode($tabletCsrfToken); ?>;
+const TABLET_FORM_CREATOR_ID = <?php echo json_encode((string) $tabletCreatorId); ?>;
+
+function escapeHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, function(char) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "\"": "&quot;",
+            "'": "&#39;"
+        }[char];
+    });
+}
+
+function cleanText(value) {
+    return String(value || "").replace(/\s+/g, " ").trim();
+}
+
 // Controller Logic para el Quiosco
 const app = {
     currentFlow: null, // 'REV' o 'Entregado'
     currentOrder: null,
     signaturePad: null,
+    flowStartedAt: null,
 
     init: function() {
         this.hideAll();
@@ -343,6 +382,7 @@ const app = {
     goHome: function() {
         this.currentFlow = null;
         this.currentOrder = null;
+        this.flowStartedAt = null;
         if(this.signaturePad) {
             this.signaturePad.off();
             this.signaturePad = null;
@@ -355,6 +395,7 @@ const app = {
 
     startFlow: function(flow) {
         this.currentFlow = flow;
+        this.flowStartedAt = Date.now();
         
         swal({
             title: 'Buscando Orden...',
@@ -366,7 +407,11 @@ const app = {
         $.ajax({
             url: "ajax/formularios-tablet.ajax.php",
             method: "POST",
-            data: { estado: flow },
+            data: {
+                estado: flow,
+                csrfToken: TABLET_FORM_CSRF,
+                tabletGuard: $("#tablet_guard").val()
+            },
             dataType: "json",
             success: function(respuesta) {
                 if(respuesta && respuesta.error) {
@@ -409,11 +454,11 @@ const app = {
         const o = this.currentOrder;
         
         let html = `Equipo a recibir:<br>
-                    <b>${o.marcaDelEquipo || ''} ${o.modeloDelEquipo || ''}</b><br>
-                    No. de Serie: <span style="color:#2c3e50; font-weight:bold;">${o.numeroDeSerieDelEquipo || 'No Registrado'}</span><br><br>
+                    <b>${escapeHtml(o.marcaDelEquipo || '')} ${escapeHtml(o.modeloDelEquipo || '')}</b><br>
+                    No. de Serie: <span style="color:#2c3e50; font-weight:bold;">${escapeHtml(o.numeroDeSerieDelEquipo || 'No Registrado')}</span><br><br>
                     Cliente detectado:<br>
-                    <b>${o.nombre_cliente}</b><br><br>
-                    Orden Original No. <b>${o.id}</b> - Creada el: ${o.fecha}`;
+                    <b>${escapeHtml(o.nombre_cliente || '')}</b><br><br>
+                    Orden Original No. <b>${escapeHtml(o.id)}</b> - Creada el: ${escapeHtml(o.fecha)}`;
         
         $("#confirmData").html(html);
         $("#confirmTitle").text(this.currentFlow === 'REV' ? 'Confirmación de Ingreso' : 'Confirmación de Entrega');
@@ -506,7 +551,7 @@ const app = {
             dataObj.respuestas["Calificacion_servicio"] = $("input[name='sal_calif']:checked").val();
         }
 
-        const idCreador = '<?php echo isset($_SESSION["id"]) ? $_SESSION["id"] : "1"; ?>';
+        const idCreador = TABLET_FORM_CREATOR_ID;
 
         swal({
             title: 'Guardando',
@@ -522,7 +567,10 @@ const app = {
                 guardarFormulario: true,
                 idOrden: app.currentOrder.id,
                 formData: JSON.stringify(dataObj),
-                idCreador: idCreador
+                idCreador: idCreador,
+                csrfToken: TABLET_FORM_CSRF,
+                elapsedMs: Math.max(0, Date.now() - (app.flowStartedAt || Date.now())),
+                tabletGuard: $("#tablet_guard").val()
             },
             dataType: "json",
             success: function(respuesta) {
@@ -534,7 +582,7 @@ const app = {
                     swal({
                         type: 'error',
                         title: 'Error',
-                        text: 'Hubo un error al guardar los datos.',
+                        text: respuesta.error || 'Hubo un error al guardar los datos.',
                         confirmButtonText: 'Cerrar'
                     });
                 }

@@ -1,4 +1,15 @@
-<?php $jsVer = '1.4.1'; ?>
+<?php
+$jsVer = '1.4.1';
+$rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
+$hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
+$isTabletPublicRoute = ($rutaActual === "formularios-tablet");
+
+if ($isTabletPublicRoute) {
+  header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+  header("Pragma: no-cache");
+  header("X-Robots-Tag: noindex, nofollow", true);
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -6,6 +17,9 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>EGS EQUIPO DE COMPUTO | Panel de Control</title>
+  <?php if ($isTabletPublicRoute): ?>
+  <meta name="robots" content="noindex,nofollow">
+  <?php endif; ?>
 
   <link rel="icon" href="vistas/img/plantilla/icono.png">
 
@@ -196,7 +210,20 @@
 
   <?php
 
-  if (isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok" || (isset($_GET["ruta"]) && $_GET["ruta"] == "validar-cotizacion")) {
+  if ($hasBackendSession || $rutaActual == "validar-cotizacion" || $isTabletPublicRoute) {
+
+    require_once 'config/Router.php';
+    $router = new Router(require 'config/routes.php');
+
+    if ($isTabletPublicRoute) {
+
+      if ($router->isAllowed($rutaActual)) {
+        include_once "modulos/" . $rutaActual . ".php";
+      } else {
+        include_once "modulos/error404.php";
+      }
+
+    } else {
 
     echo '<div class="wrapper">';
 
@@ -223,9 +250,6 @@
      Reemplaza el bloque if/elseif de ~70 comparaciones.
      Las rutas permitidas se gestionan en config/routes.php.
      =============================================*/
-    require_once 'config/Router.php';
-    $router = new Router(require 'config/routes.php');
-
     if (!isset($_GET["ruta"]) || $_GET["ruta"] === "") {
 
       echo '<script>window.location = "?ruta=inicio";</script>';
@@ -249,6 +273,7 @@
 
 
     echo '</div>';
+    }
 
   } else {
 
@@ -259,6 +284,7 @@
 
   ?>
 
+  <?php if (!$isTabletPublicRoute): ?>
   <script src="vistas/js/plantilla.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorComercio.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorCategorias.js?v=<?= $jsVer ?>"></script>
@@ -325,6 +351,7 @@
     })();
   </script>
   <?php } ?>
+  <?php endif; ?>
 
 
 </body>
