@@ -53,7 +53,7 @@ class AjaxFormulariosTablet {
             "observacion" => $observacion
         );
 
-        $respuesta = ModeloObservaciones::mdlCrearObservacion("observacion_ordenes", $datos);
+        $respuesta = ModeloObservaciones::mdlCrearObservacion("observacionesOrdenes", $datos);
         echo json_encode(["status" => $respuesta]);
     }
 }
