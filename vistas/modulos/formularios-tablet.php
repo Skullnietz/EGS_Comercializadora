@@ -308,17 +308,8 @@ const app = {
 
         // Inicializar canvas de firma responsivo
         const canvas = document.getElementById('signature-pad');
-        function resizeCanvas() {
-            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
-            const parentWidth = canvas.parentElement.offsetWidth;
-            canvas.width = parentWidth * ratio;
-            canvas.height = 300 * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-            if(app.signaturePad) app.signaturePad.clear();
-        }
-        window.onresize = resizeCanvas;
+        window.onresize = () => this.resizeCanvas();
         
-        setTimeout(resizeCanvas, 500); // Dar tiemp a que randerice todo
         this.signaturePad = new SignaturePad(canvas, {
             backgroundColor: 'rgba(255, 255, 255, 0)',
             penColor: 'rgb(0, 0, 0)'
@@ -437,8 +428,26 @@ const app = {
         }
 
         this.hideAll();
+        $("#screenSignature").show();
+        
+        // Resize canvas NOW that it's visible so offsetWidth is correct > 0
+        this.resizeCanvas();
         this.signaturePad.clear();
-        $("#screenSignature").fadeIn();
+    },
+
+    resizeCanvas: function() {
+        const canvas = document.getElementById('signature-pad');
+        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+        const parentWidth = canvas.parentElement.offsetWidth;
+        
+        if (parentWidth === 0) return; // Still hidden
+        
+        // Only set if different to avoid clearing unintentionally
+        if(canvas.width !== parentWidth * ratio) {
+            canvas.width = parentWidth * ratio;
+            canvas.height = 300 * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+        }
     },
 
     clearSignature: function() {
