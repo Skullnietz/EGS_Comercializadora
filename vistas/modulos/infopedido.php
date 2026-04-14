@@ -498,6 +498,11 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
   elseif (stripos($estadoRaw, 'Pagado') !== false) $statusClass = 'ped-status-pagado';
   elseif (stripos($estadoRaw, 'Credito') !== false || stripos($estadoRaw, 'Crédito') !== false) $statusClass = 'ped-status-credito';
   elseif (stripos($estadoRaw, 'cancelado') !== false) $statusClass = 'ped-status-cancelado';
+
+  $perfilActual = isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "";
+  $puedeEditarPedidoCompleto = ($perfilActual == "administrador" || $perfilActual == "Super-Administrador");
+  $puedeAgregarObservaciones = ($puedeEditarPedidoCompleto || $perfilActual == "vendedor");
+  $puedeAsignarPedido = $puedeAgregarObservaciones;
 ?>
 
 <div class="content-wrapper">
@@ -521,11 +526,18 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
           <h1>Pedido #<?php echo htmlspecialchars($_GET["idPedido"]); ?></h1>
           <span class="ped-status <?php echo $statusClass; ?>"><?php echo htmlspecialchars($estadoRaw); ?></span>
         </div>
+        <?php if ($puedeAsignarPedido): ?>
         <button class="ped-btn ped-btn-outline" data-toggle="modal" data-target="#modalAsignarPedido">
           <i class="fa-solid fa-link"></i> Asignar a Orden
         </button>
+        <?php endif; ?>
       </div>
     </div>
+
+    <form role="form" method="post">
+      <input type="hidden" value="<?php echo htmlspecialchars($_GET["idPedido"]); ?>" name="idPedido">
+      <input type="hidden" class="PagosListados" name="PagosListados">
+      <input type="hidden" id="listarObservacionesPedidos" name="listarObservacionesPedidos">
 
     <div class="row">
 
@@ -600,12 +612,11 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
           <div class="ped-card-body">
 
             <!-- Estado -->
-            <form role="form" method="post">
               <div class="ped-info-row" style="flex-wrap:wrap; gap:8px;">
                 <div class="ped-info-icon orange"><i class="fa-solid fa-toggle-on"></i></div>
                 <div style="flex:1; min-width:160px;">
                   <div class="ped-info-label">Estado del Pedido</div>
-                  <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "editor" || $_SESSION["perfil"] == "vendedor"): ?>
+                  <?php if ($puedeEditarPedidoCompleto): ?>
                     <select class="ped-select" name="EstadoPedidoDinamico" style="margin-top:6px;">
                       <option><?php echo htmlspecialchars($valuePedidos["estado"]); ?></option>
                       <option value="Pedido Pendiente">Pedido Pendiente</option>
@@ -725,8 +736,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                   $productos = json_decode($valuePedidos["productos"], true);
                   if (is_array($productos)) {
                     foreach ($productos as $key => $valueProductos) {
-                      $isAdmin = ($_SESSION["perfil"] == "administrador");
-                      $ro = $isAdmin ? '' : ' readonly';
+                      $ro = $puedeEditarPedidoCompleto ? '' : ' readonly';
                       echo '<tr>
                         <td class="ped-input-cell"><input type="text" value="'.htmlspecialchars($valueProductos["Descripcion"]).'" class="descripcioParaListar"'.$ro.'></td>
                         <td class="ped-input-cell"><input type="number" value="'.htmlspecialchars($valueProductos["cantidad"]).'" class="cantidadProductoParaListar"'.$ro.'></td>
@@ -746,7 +756,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                   <td class="ped-input-cell">
                     <div style="display:flex;align-items:center;gap:6px;">
                       <span style="font-weight:800;color:var(--crm-accent);font-size:16px;">$</span>
-                      <input type="number" class="form-control totalPagarPedidoDinamico" name="totalPagarPedidoDinamico" value="<?php echo htmlspecialchars($valuePedidos["total"]); ?>"
+                      <input type="number" class="form-control totalPagarPedidoDinamico" name="totalPagarPedidoDinamico" value="<?php echo htmlspecialchars($valuePedidos["total"]); ?>" <?php echo $puedeEditarPedidoCompleto ? '' : 'readonly'; ?>
                         style="border:1px solid var(--crm-border);border-radius:8px;font-weight:800;font-size:16px;color:var(--crm-accent);padding:6px 10px;">
                     </div>
                   </td>
@@ -759,13 +769,14 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
         <!-- ══════════════════════════════════════
              PAYMENTS CARD
         ══════════════════════════════════════ -->
-        <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "editor" || $_SESSION["perfil"] == "vendedor"): ?>
         <div class="ped-card">
           <div class="ped-card-head">
             <h4 class="ped-card-title"><i class="fa-solid fa-credit-card"></i> Pagos y Abonos</h4>
+            <?php if ($puedeEditarPedidoCompleto): ?>
             <button type="button" class="ped-btn ped-btn-outline btnToggleNewPayment" style="padding:6px 14px; font-size:12px;">
               <i class="fa-solid fa-plus"></i> Nuevo Pago
             </button>
+            <?php endif; ?>
           </div>
           <div class="ped-card-body">
 
@@ -811,6 +822,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
             </div>
 
             <!-- New payment inline form -->
+            <?php if ($puedeEditarPedidoCompleto): ?>
             <div class="ped-new-payment" id="pedNewPaymentForm">
               <div class="ped-new-payment-title">
                 <i class="fa-solid fa-plus-circle"></i> Registrar Nuevo Abono
@@ -826,12 +838,10 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 </div>
               </div>
             </div>
+            <?php endif; ?>
 
             <!-- Hidden structure for legacy JS compatibility -->
             <div class="nuevoCampoPagoPedido" style="display:none;"></div>
-
-            <input type="hidden" class="PagosListados" name="PagosListados">
-            <input type="hidden" value="<?php echo htmlspecialchars($_GET["idPedido"]); ?>" name="idPedido">
 
             <!-- Summary boxes -->
             <div class="ped-summary-box">
@@ -845,27 +855,28 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
               <div class="ped-summary-item debt">
                 <div class="ped-summary-label">Adeudo</div>
                 <div class="ped-summary-value">
-                  <input type="number" class="form-control adeudoPedidoDinamico" name="adeudoPedidoDinamico" readonly
+                  <input type="number" class="form-control adeudoPedidoDinamico" name="adeudoPedidoDinamico" readonly value="<?php echo htmlspecialchars($valuePedidos["adeudo"]); ?>"
                     style="border:none;background:transparent;text-align:center;font-size:18px;font-weight:800;color:#991b1b;box-shadow:none;padding:0;height:auto;">
                 </div>
               </div>
             </div>
 
+            <?php if (!$puedeEditarPedidoCompleto): ?>
+            <div style="margin-top:16px;padding:12px 14px;border-radius:10px;background:#f8fafc;color:var(--crm-text2);font-size:12px;line-height:1.5;">
+              Solo el administrador puede editar productos, pagos, abonos, total y estado del pedido.
+            </div>
+            <?php endif; ?>
+
+            <?php if ($puedeEditarPedidoCompleto): ?>
             <div style="margin-top:16px; text-align:right;">
               <button type="submit" class="ped-btn ped-btn-success">
                 <i class="fa-solid fa-floppy-disk"></i> Guardar Pedido
               </button>
             </div>
+            <?php endif; ?>
 
           </div>
         </div>
-
-        <?php
-          $editarOrdenDinamica = new ControladorPedidos();
-          $editarOrdenDinamica->ctrEditarOrdenDinamica();
-        ?>
-        </form>
-        <?php endif; ?>
 
         <!-- Observations Card -->
         <div class="ped-card">
@@ -881,12 +892,11 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
           </div>
           <div class="ped-card-body">
 
-            <?php echo '<input type="hidden" class="usuarioQueCaptura" value="'.htmlspecialchars($_SESSION["nombre"]).'" name="usuarioQueCaptura">'; ?>
+            <?php echo '<input type="hidden" class="usuarioActualPedido" value="'.htmlspecialchars($_SESSION["nombre"]).'">'; ?>
             <textarea class="form-control input-lg" id="fechaVista" style="display:none;"></textarea>
-            <input type="hidden" id="listarObservacionesPedidos" name="listarObservacionesPedidos">
 
             <!-- Compose new observation (inline, always visible for authorized users) -->
-            <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor"): ?>
+            <?php if ($puedeAgregarObservaciones): ?>
               <?php
                 $sesIni = pedGetInitials($_SESSION["nombre"]);
                 $sesGrad = pedGetGrad($_SESSION["nombre"], $_obsGrads);
@@ -913,7 +923,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
             <?php if (is_array($observaciones) && count($observaciones) > 0): ?>
               <div class="ped-obs-list">
                 <?php foreach ($observaciones as $key => $valueObservaciones):
-                  if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "tecnico"):
+                  if ($puedeAgregarObservaciones || $_SESSION["perfil"] == "tecnico"):
                     $obsName = isset($valueObservaciones["creador"]) ? $valueObservaciones["creador"] : 'Usuario';
                     $obsIni  = pedGetInitials($obsName);
                     $obsGrad = pedGetGrad($obsName, $_obsGrads);
@@ -926,7 +936,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                         <span class="ped-obs-date"><?php echo htmlspecialchars($valueObservaciones["fecha"]); ?></span>
                       </div>
                       <div class="ped-obs-content">
-                        <textarea class="nuevaObservacion" readonly><?php echo htmlspecialchars($valueObservaciones["observacion"]); ?></textarea>
+                        <textarea class="nuevaObservacion" readonly data-creador="<?php echo htmlspecialchars($obsName); ?>" fecha="<?php echo htmlspecialchars($valueObservaciones["fecha"]); ?>"><?php echo htmlspecialchars($valueObservaciones["observacion"]); ?></textarea>
                       </div>
                     </div>
                   </div>
@@ -941,12 +951,26 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
               </div>
             <?php endif; ?>
 
+            <?php if ($puedeAgregarObservaciones && !$puedeEditarPedidoCompleto): ?>
+            <div style="margin-top:16px; text-align:right;">
+              <button type="submit" class="ped-btn ped-btn-success">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar observaciones
+              </button>
+            </div>
+            <?php endif; ?>
+
           </div>
         </div>
 
       </div><!-- /right col -->
 
     </div><!-- /row -->
+    </form>
+
+    <?php
+      $editarOrdenDinamica = new ControladorPedidos();
+      $editarOrdenDinamica->ctrEditarOrdenDinamica();
+    ?>
 
   </section>
 
@@ -1868,6 +1892,7 @@ $(document).ready(function(){
 
   listarProductosPedidoDinamico()
   listarPrimerPago()
+  listarObservacionesPedidos()
   listarNuevosPreciosDePedido()
 
 });  
@@ -2038,7 +2063,7 @@ $(document).on("change", "input.PagoClientePedidoDinamico", function(){
 
 
 
-var valor_sesion = $('.usuarioQueCaptura').val();
+var valor_sesion = $('.usuarioActualPedido').val();
 
 
 
@@ -2073,6 +2098,7 @@ $('.AgregarCampoDeObservacionPedidos').click(function() {
   var grad = obsGrads[Math.abs(hash) % obsGrads.length];
 
   // Insert visual item at top of the list
+  var obsKey = 'obs-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
   var newItem =
     '<div class="ped-obs-item" style="animation:pedSlideIn .25s var(--crm-ease);">'+
       '<div class="ped-obs-avatar" style="background:'+grad+';">'+initials+'</div>'+
@@ -2083,7 +2109,7 @@ $('.AgregarCampoDeObservacionPedidos').click(function() {
         '</div>'+
         '<div class="ped-obs-content">'+$('<span>').text(obsText).html()+'</div>'+
       '</div>'+
-      '<button type="button" class="ped-btn-danger quitarObservacion" style="align-self:flex-start;margin-top:2px;"><i class="fa-solid fa-times"></i></button>'+
+      '<button type="button" class="ped-btn-danger quitarObservacion" data-obs-key="'+obsKey+'" style="align-self:flex-start;margin-top:2px;"><i class="fa-solid fa-times"></i></button>'+
     '</div>';
 
   // Ensure the list exists
@@ -2097,10 +2123,9 @@ $('.AgregarCampoDeObservacionPedidos').click(function() {
 
   // Add hidden fields for serialization
   $(".cajaObervacionesPedidos").show();
-  $(".agregarcampoobervacionesPedidos").append(
-    '<div class="pedHiddenObs">'+
-      '<textarea class="nuevaObservacion" fecha="'+fecha+'" style="display:none;">'+$('<span>').text(obsText).html()+'</textarea>'+
-      '<input type="hidden" class="usuarioQueCaptura" value="'+valor_sesion+'" name="usuarioQueCaptura">'+
+  $(".agregarcampoobervacionesPedidos").prepend(
+    '<div class="pedHiddenObs" data-obs-key="'+obsKey+'">'+
+      '<textarea class="nuevaObservacion" data-creador="'+$('<span>').text(valor_sesion).html()+'" fecha="'+fecha+'" style="display:none;">'+$('<span>').text(obsText).html()+'</textarea>'+
     '</div>'
   );
 
@@ -2118,9 +2143,8 @@ $('.AgregarCampoDeObservacionPedidos').click(function() {
 /* Remove a newly-added observation */
 $(document).on("click", ".quitarObservacion", function() {
   var $item = $(this).closest('.ped-obs-item');
-  var idx = $('.ped-obs-list .ped-obs-item').index($item);
-  // Remove matching hidden serialization entry
-  $('.agregarcampoobervacionesPedidos .pedHiddenObs').eq(idx).remove();
+  var obsKey = $(this).attr('data-obs-key');
+  $('.agregarcampoobervacionesPedidos .pedHiddenObs[data-obs-key="'+obsKey+'"]').remove();
   $item.remove();
   // Update count
   var totalObs = $('.ped-obs-item').length;
@@ -2185,13 +2209,11 @@ function listarObservacionesPedidos(){
 
   var descripcion = $(".nuevaObservacion");
 
-  var creador = $(".usuarioQueCaptura");
-
   for (var i =0; i < descripcion.length; i++){
 
     listarnuvasObservacionesPedidos.push({"observacion" : $(descripcion[i]).val(), 
 
-                     "creador" : $(creador[i]).val(),
+                     "creador" : $(descripcion[i]).attr("data-creador"),
 
                      "fecha" : $(descripcion[i]).attr("fecha")})
 

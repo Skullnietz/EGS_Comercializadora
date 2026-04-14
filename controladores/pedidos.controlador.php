@@ -1012,17 +1012,55 @@ class ControladorPedidos{
 
 	public function ctrEditarOrdenDinamica(){
 		
-		if (isset($_POST["EstadoPedidoDinamico"])) {
+		if (isset($_POST["idPedido"])) {
 			
 			$tabla = "pedidos";
+			$idPedido = intval($_POST["idPedido"]);
+			$perfilActual = isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "";
+			$puedeEditarPedidoCompleto = ($perfilActual == "administrador" || $perfilActual == "Super-Administrador");
+			$puedeAgregarObservaciones = ($puedeEditarPedidoCompleto || $perfilActual == "vendedor");
 
-			$datosPedido = array("id" => $_POST["idPedido"],
-								 "estado" => $_POST["EstadoPedidoDinamico"],
-								 "pago" => $_POST["PagosListados"],
-								 "adeudo" => $_POST["adeudoPedidoDinamico"],
-								 "observaciones" => $_POST["listarObservacionesPedidos"],
-								 "productos"=>$_POST["ListarPreciosActualizados"],
-								 "total" => $_POST["totalPagarPedidoDinamico"]
+			$pedidoActual = self::ctrMostrarorpedidosParaValidar("id", $idPedido);
+			$pedidoBase = array();
+
+			if (is_array($pedidoActual)) {
+				if (isset($pedidoActual[0]) && is_array($pedidoActual[0])) {
+					$pedidoBase = $pedidoActual[0];
+				} else {
+					$pedidoBase = $pedidoActual;
+				}
+			}
+
+			if (empty($pedidoBase) || !$puedeAgregarObservaciones) {
+				return;
+			}
+
+			$estado = isset($pedidoBase["estado"]) ? $pedidoBase["estado"] : "";
+			$pagos = isset($pedidoBase["pagos"]) ? $pedidoBase["pagos"] : "";
+			$adeudo = isset($pedidoBase["adeudo"]) ? $pedidoBase["adeudo"] : "";
+			$observaciones = isset($pedidoBase["observaciones"]) ? $pedidoBase["observaciones"] : "[]";
+			$productos = isset($pedidoBase["productos"]) ? $pedidoBase["productos"] : "";
+			$total = isset($pedidoBase["total"]) ? $pedidoBase["total"] : "";
+
+			if ($puedeEditarPedidoCompleto) {
+				$estado = isset($_POST["EstadoPedidoDinamico"]) ? $_POST["EstadoPedidoDinamico"] : $estado;
+				$pagos = isset($_POST["PagosListados"]) ? $_POST["PagosListados"] : $pagos;
+				$adeudo = isset($_POST["adeudoPedidoDinamico"]) ? $_POST["adeudoPedidoDinamico"] : $adeudo;
+				$productos = isset($_POST["ListarPreciosActualizados"]) ? $_POST["ListarPreciosActualizados"] : $productos;
+				$total = isset($_POST["totalPagarPedidoDinamico"]) ? $_POST["totalPagarPedidoDinamico"] : $total;
+			}
+
+			if (isset($_POST["listarObservacionesPedidos"]) && $_POST["listarObservacionesPedidos"] != "") {
+				$observaciones = $_POST["listarObservacionesPedidos"];
+			}
+
+			$datosPedido = array("id" => $idPedido,
+								 "estado" => $estado,
+								 "pago" => $pagos,
+								 "adeudo" => $adeudo,
+								 "observaciones" => $observaciones,
+								 "productos"=> $productos,
+								 "total" => $total
 								);
 
 			$respuesta = ModeloPedidos::mdlEditarPedidoDinamico($tabla, $datosPedido);
@@ -1045,7 +1083,7 @@ class ControladorPedidos{
 
 						if(result.value){
 							
-							window.location = "index.php?ruta=pedidos";
+							window.location = "'.$_SERVER["REQUEST_URI"].'";
 
 					
 

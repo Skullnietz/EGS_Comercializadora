@@ -582,6 +582,11 @@ function _hc_obtenerProductosVenta($venta) {
                       .'&empresa='.(isset($p["id_empresa"]) ? $p["id_empresa"] : '')
                       .'&asesor='.(isset($p["id_Asesor"]) ? $p["id_Asesor"] : '')
                       .'&cliente='.(isset($p["id_cliente"]) ? $p["id_cliente"] : '');
+                  $pInfoLink = 'index.php?ruta=infopedido'
+                      .'&idPedido='.(isset($p["id"]) ? $p["id"] : '')
+                      .'&empresa='.(isset($p["id_empresa"]) ? $p["id_empresa"] : '')
+                      .'&asesor='.(isset($p["id_Asesor"]) ? $p["id_Asesor"] : '')
+                      .'&cliente='.(isset($p["id_cliente"]) ? $p["id_cliente"] : '');
                 ?>
                 <tr>
                   <td><span style="font-weight:700;color:#8b5cf6">#<?php echo $p["id"]; ?></span></td>
@@ -601,8 +606,15 @@ function _hc_obtenerProductosVenta($venta) {
                   </td>
                   <td style="text-align:right;font-weight:700">$<?php echo number_format($pTotal, 0); ?></td>
                   <td style="text-align:center">
+                    <a href="<?php echo $pInfoLink; ?>"
+                       style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#2563eb;color:#fff;font-size:12px;text-decoration:none;transition:background .15s;margin-right:6px"
+                       onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'"
+                       title="Ver pedido">
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
                     <a href="<?php echo $pLink; ?>" target="_blank"
                        style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#8b5cf6;color:#fff;font-size:12px;text-decoration:none;transition:background .15s"
+                       title="Imprimir pedido"
                        onmouseover="this.style.background='#7c3aed'" onmouseout="this.style.background='#8b5cf6'">
                       <i class="fa-solid fa-print"></i>
                     </a>
