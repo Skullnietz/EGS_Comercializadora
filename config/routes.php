@@ -110,6 +110,9 @@ return [
     'categoriasp',
     'ingreso',
 
+    /* ── Formularios Tablet ─────────────────────── */
+    'formularios-tablet',
+
     /* ── Misceláneos ────────────────────────────── */
     'preguntas',
     'salir',
