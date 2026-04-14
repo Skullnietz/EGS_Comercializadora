@@ -26,7 +26,7 @@ class AjaxFormulariosTablet {
             if($orden) {
                 // La tabla clientes está en la BD principal
                 $pdo = Conexion::conectar();
-                $stmtCliente = $pdo->prepare("SELECT nombre FROM clientes WHERE id = :id");
+                $stmtCliente = $pdo->prepare("SELECT nombre FROM clientesTienda WHERE id = :id");
                 $stmtCliente->bindParam(":id", $orden["id_usuario"], PDO::PARAM_INT);
                 $stmtCliente->execute();
                 $cliente = $stmtCliente->fetch(PDO::FETCH_ASSOC);
