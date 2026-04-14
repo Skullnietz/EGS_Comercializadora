@@ -407,25 +407,25 @@ class ImprimirTicketsOrden{
       // =============================================
       if (stripos($estadoOrden, 'REV') !== false) {
           echo '
-          <div class="zona_impresion" style="font-family:\'Arial Narrow\',Arial,Helvetica,sans-serif; page-break-before: always; margin-top:10px;">
+          <div class="zona_impresion" style="font-family:Arial,Helvetica,sans-serif; page-break-before: always; margin-top:10px;">
             <div style="border-top:1px dashed #000; margin-bottom:5px;"></div>
-            <div style="font-size:12px; text-align:justify; line-height:1.3;">
-              <div style="text-align:center;font-weight:900;margin-bottom:8px;font-size:13px;">AVISO Y POLÍTICA DE PRIVACIDAD PARA EL MANEJO DE DATOS PERSONALES</div>
-              <div style="text-align:center;font-weight:700;margin-bottom:8px;">COMERCIALIZADORA EGS (EQUIPO DE CÓMPUTO Y SOFTWARE)</div>
-              <p style="margin:4px 0;"><b>Asunto:</b> Confidencialidad y Autorización de Mensajes Promocionales</p>
-              <p style="margin:4px 0;">ESTIMADO/A CLIENTE: <b>'.$NombreUsuario.'</b></p>
-              <p style="margin:4px 0;">En COMERCIALIZADORA EGS valoramos la confianza que depositas en nosotros. Para proteger tu información, nos comprometemos a mantener la confidencialidad de los datos que compartas con nosotros.</p>
-              <p style="margin:4px 0;">Además, nos gustaría mantenerte al tanto de nuestras ofertas y novedades. Si deseas recibir mensajes promocionales de COMERCIALIZADORA EGS a través de WhatsApp, por favor, responde a este aviso seleccionando "ACEPTO".</p>
+            <div style="font-size:15px; text-align:justify; line-height:1.4;">
+              <div style="text-align:center;font-weight:900;margin-bottom:8px;font-size:17px;">AVISO Y POLÍTICA DE PRIVACIDAD PARA EL MANEJO DE DATOS PERSONALES</div>
+              <div style="text-align:center;font-weight:700;margin-bottom:10px;font-size:16px;">COMERCIALIZADORA EGS (EQUIPO DE CÓMPUTO Y SOFTWARE)</div>
+              <p style="margin:6px 0;"><b>Asunto:</b> Confidencialidad y Autorización de Mensajes Promocionales</p>
+              <p style="margin:6px 0;">ESTIMADO/A CLIENTE: <b>'.$NombreUsuario.'</b></p>
+              <p style="margin:6px 0;">En COMERCIALIZADORA EGS valoramos la confianza que depositas en nosotros. Para proteger tu información, nos comprometemos a mantener la confidencialidad de los datos que compartas con nosotros.</p>
+              <p style="margin:6px 0;">Además, nos gustaría mantenerte al tanto de nuestras ofertas y novedades. Si deseas recibir mensajes promocionales de COMERCIALIZADORA EGS a través de WhatsApp, por favor, responde a este aviso seleccionando "ACEPTO".</p>
               
-              <div style="text-align:center; font-weight:900; margin:14px 0;">[ &nbsp;&nbsp; ] ACEPTO &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp;&nbsp; ] NO ACEPTO</div>
+              <div style="text-align:center; font-weight:900; margin:16px 0; font-size:16px;">[ &nbsp;&nbsp; ] ACEPTO &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp;&nbsp; ] NO ACEPTO</div>
               
-              <p style="margin:4px 0;">Esta carta o acuerdo de confidencialidad de la empresa COMERCIALIZADORA EGS se fundamenta principalmente en la protección de datos personales. Se apega a los siguientes artículos y leyes fundamentales:</p>
+              <p style="margin:6px 0;">Esta carta o acuerdo de confidencialidad de la empresa COMERCIALIZADORA EGS se fundamenta principalmente en la protección de datos personales. Se apega a los siguientes artículos y leyes fundamentales:</p>
               
-              <div style="margin:4px 0;">
+              <div style="margin:6px 0;">
                 <b>1. Constitución Política de los Estados Unidos Mexicanos</b><br>
                 Artículo 16 (Segundo párrafo): Protege el derecho a la protección de datos personales, el acceso, rectificación, cancelación y oposición (derechos ARCO), así como la privacidad de las comunicaciones.
               </div>
-              <div style="margin:4px 0;">
+              <div style="margin:6px 0;">
                 <b>2. Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</b><br>
                 Esta es la ley principal para el manejo de información de clientes.<br>
                 - <b>Artículo 6:</b> Establece que los responsables del tratamiento de datos (la empresa) deben garantizar la confidencialidad.<br>
@@ -433,13 +433,13 @@ class ImprimirTicketsOrden{
                 - <b>Artículo 21:</b> Obliga a los terceros que reciban datos a mantener la confidencialidad.
               </div>
               
-              <p style="margin:6px 0;">Tu privacidad es importante. Puedes revocar este permiso por escrito en cualquier momento.</p>
-              <p style="text-align:center;margin:12px 0 25px 0;">Atentamente,<br><b>COMERCIALIZADORA EGS</b></p>
+              <p style="margin:8px 0;">Tu privacidad es importante. Puedes revocar este permiso por escrito en cualquier momento.</p>
+              <p style="text-align:center;margin:16px 0 30px 0;">Atentamente,<br><b>COMERCIALIZADORA EGS</b></p>
               
-              <div style="margin-top:30px;text-align:center">
-                  <div style="border-bottom:1px solid #000;width:70%;margin:0 auto"></div>
-                  <div style="font-size:12px;font-weight:700;margin-top:4px;text-transform:uppercase">FIRMA DE CONFORMIDAD</div>
-                  <div style="font-size:11px;font-weight:700;margin-top:15px;text-align:left;">FECHA: '.date_format($fecha, 'd/m/Y').'</div>
+              <div style="margin-top:40px;text-align:center">
+                  <div style="border-bottom:1px solid #000;width:80%;margin:0 auto"></div>
+                  <div style="font-size:15px;font-weight:700;margin-top:6px;text-transform:uppercase">FIRMA DE CONFORMIDAD</div>
+                  <div style="font-size:14px;font-weight:700;margin-top:15px;text-align:left;">FECHA: '.date_format($fecha, 'd/m/Y').'</div>
               </div>
             </div>
           </div>';
