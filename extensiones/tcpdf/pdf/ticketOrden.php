@@ -140,8 +140,16 @@ class ImprimirTicketsOrden{
       // =============================================
       echo '<div class="zona_impresion">
         <div style="text-align:center">
-          <img src="https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/images/logoEGS (1).png" alt="LOGO" style="display:block;margin:0 auto">
-          <div style="font-size:16px;font-weight:900;margin:2px 0">Comercializadora EGS</div>
+          <table border="0" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="width:60px;vertical-align:middle;text-align:center">
+                <img src="https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/images/logoEGS (1).png" alt="LOGO" style="width:55px;height:auto">
+              </td>
+              <td style="vertical-align:middle;text-align:center">
+                <div style="font-size:15px;font-weight:900">Comercializadora EGS</div>
+              </td>
+            </tr>
+          </table>
           <hr style="margin:2px 0">
           <div style="font-size:10px;font-weight:700">'.$Sitio.'</div>
           <div style="font-size:10px;font-weight:700;margin:2px 0">'.$Direccion.'</div>
