@@ -162,6 +162,20 @@ tbody td:nth-child(2),tbody td:nth-child(3),tbody td:nth-child(4) { text-align:c
 .qr-footer { margin-top:20mm; display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center }
 .qr-footer .qr-meta { font-size:12px; color:#555 }
 
+/* Privacy sheet */
+.privacy-sheet { padding:0 }
+.privacy-content { padding:9mm 10mm 10mm; color:#111; font-size:14px; line-height:1.55 }
+.privacy-title { text-align:center; font-weight:900; font-size:22px; letter-spacing:.2px; margin:0 0 6px }
+.privacy-subtitle { text-align:center; font-weight:700; font-size:15px; margin:0 0 18px; color:#333 }
+.privacy-content p { margin:10px 0 }
+.privacy-choices { text-align:center; font-weight:900; margin:22px 0; font-size:17px; letter-spacing:.3px }
+.privacy-law { margin:12px 0 }
+.privacy-signoff { text-align:center; margin:24px 0 34px }
+.privacy-signature { margin-top:46px }
+.privacy-signature-line { border-bottom:1px solid #000; width:80%; margin:0 auto }
+.privacy-signature-label { font-size:15px; font-weight:700; margin-top:8px; text-transform:uppercase; text-align:center }
+.privacy-date { font-size:14px; font-weight:700; margin-top:18px }
+
 /* Expired banner */
 .expired-banner { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:10px 16px; border-radius:8px; margin-bottom:12px; display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600 }
 .expired-banner i { font-size:18px; color:#dc2626 }
@@ -181,6 +195,7 @@ tbody td:nth-child(2),tbody td:nth-child(3),tbody td:nth-child(4) { text-align:c
   .head-grid,.row2 { gap:6px }
   table,.totals,.signatures { page-break-inside:avoid }
   .expired-banner { -webkit-print-color-adjust:exact; print-color-adjust:exact }
+    .privacy-sheet { page-break-before:always }
 }
 </style>
 </head>
@@ -313,6 +328,75 @@ tbody td:nth-child(2),tbody td:nth-child(3),tbody td:nth-child(4) { text-align:c
                 Escanea para validar cotización<br>
                 ID: <strong><?php echo htmlspecialchars($_ic_cot['codigo_qr']); ?></strong>
             </div>
+        </div>
+    </main>
+</section>
+
+<section class="sheet privacy-sheet">
+    <header class="header">
+        <div class="head-grid">
+            <div>
+                <div class="brand">
+                    <div class="logo"><img src="<?php echo $_ic_emp['logo']; ?>" alt="Logo"></div>
+                    <div class="company">
+                        <h1><?php echo htmlspecialchars($_ic_emp['nombre']); ?></h1>
+                        <div class="underline"></div>
+                    </div>
+                </div>
+                <div class="addr"><b>Dirección:</b> <?php echo htmlspecialchars($_ic_emp['direccion']); ?></div>
+                <?php if (!empty($_ic_emp['telefonos'])): ?>
+                <div class="tel"><b>Teléfonos:</b> <?php echo htmlspecialchars($_ic_emp['telefonos']); ?></div>
+                <?php endif; ?>
+            </div>
+            <div class="right">
+                <h2>AVISO DE PRIVACIDAD</h2>
+                <div class="kv">
+                    <label>FECHA:</label>
+                    <span><?php echo $_ic_fecha; ?></span>
+                    <label>CLIENTE:</label>
+                    <span><?php echo htmlspecialchars($_ic_cot['nombre_cliente']); ?></span>
+                    <label>DOCUMENTO:</label>
+                    <span>Cotización #<?php echo intval($_ic_cot['id']); ?></span>
+                </div>
+            </div>
+        </div>
+        <div class="bar"></div>
+    </header>
+
+    <main class="privacy-content">
+        <h3 class="privacy-title">AVISO Y POLÍTICA DE PRIVACIDAD PARA EL MANEJO DE DATOS PERSONALES</h3>
+        <div class="privacy-subtitle">COMERCIALIZADORA EGS (EQUIPO DE CÓMPUTO Y SOFTWARE)</div>
+
+        <p><b>Asunto:</b> Confidencialidad y Autorización de Mensajes Promocionales</p>
+        <p>ESTIMADO/A CLIENTE: <b><?php echo htmlspecialchars($_ic_cot['nombre_cliente']); ?></b></p>
+        <p>En COMERCIALIZADORA EGS valoramos la confianza que depositas en nosotros. Para proteger tu información, nos comprometemos a mantener la confidencialidad de los datos que compartas con nosotros.</p>
+        <p>Además, nos gustaría mantenerte al tanto de nuestras ofertas y novedades. Si deseas recibir mensajes promocionales de COMERCIALIZADORA EGS a través de WhatsApp, por favor, responde a este aviso seleccionando "ACEPTO".</p>
+
+        <div class="privacy-choices">[ &nbsp;&nbsp; ] ACEPTO &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp;&nbsp; ] NO ACEPTO</div>
+
+        <p>Esta carta o acuerdo de confidencialidad de la empresa COMERCIALIZADORA EGS se fundamenta principalmente en la protección de datos personales. Se apega a los siguientes artículos y leyes fundamentales:</p>
+
+        <div class="privacy-law">
+            <b>1. Constitución Política de los Estados Unidos Mexicanos</b><br>
+            Artículo 16 (Segundo párrafo): Protege el derecho a la protección de datos personales, el acceso, rectificación, cancelación y oposición (derechos ARCO), así como la privacidad de las comunicaciones.
+        </div>
+
+        <div class="privacy-law">
+            <b>2. Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</b><br>
+            Esta es la ley principal para el manejo de información de clientes.<br>
+            - <b>Artículo 6:</b> Establece que los responsables del tratamiento de datos (la empresa) deben garantizar la confidencialidad.<br>
+            - <b>Artículos 14 y 15:</b> Obligan a que el tratamiento de datos se limite a las finalidades acordadas y se proteja contra el uso indebido.<br>
+            - <b>Artículo 21:</b> Obliga a los terceros que reciban datos a mantener la confidencialidad.
+        </div>
+
+        <p>Tu privacidad es importante. Puedes revocar este permiso por escrito en cualquier momento.</p>
+
+        <p class="privacy-signoff">Atentamente,<br><b>COMERCIALIZADORA EGS</b></p>
+
+        <div class="privacy-signature">
+            <div class="privacy-signature-line"></div>
+            <div class="privacy-signature-label">FIRMA DE CONFORMIDAD</div>
+            <div class="privacy-date">FECHA: <?php echo $_ic_fecha; ?></div>
         </div>
     </main>
 </section>
