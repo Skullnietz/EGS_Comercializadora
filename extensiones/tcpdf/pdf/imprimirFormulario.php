@@ -1,5 +1,6 @@
 <?php
 require_once "../../../modelos/conexion.php";
+require_once "../../../modelos/conexionWordpress.php";
 
 if (!isset($_GET["idObs"])) {
     die("ID de observacion no proporcionado");
@@ -29,6 +30,25 @@ try {
 
     if (!is_array($formData)) {
         die("Error leyendo el formato digital JSON.");
+    }
+
+    // Obtener nombre del cliente desde la orden si no está en el JSON
+    $nombreClientePrint = '';
+    if (!empty($formData["nombre_cliente"])) {
+        $nombreClientePrint = $formData["nombre_cliente"];
+    } elseif (isset($_GET["idOrden"])) {
+        $pdoWP = ConexionWP::conectarWP();
+        $stmtOrd = $pdoWP->prepare("SELECT id_usuario FROM ordenes WHERE id = :id");
+        $stmtOrd->bindParam(":id", $_GET["idOrden"], PDO::PARAM_INT);
+        $stmtOrd->execute();
+        $ordRow = $stmtOrd->fetch(PDO::FETCH_ASSOC);
+        if ($ordRow) {
+            $stmtCli = $pdo->prepare("SELECT nombre FROM clientesTienda WHERE id = :id");
+            $stmtCli->bindParam(":id", $ordRow["id_usuario"], PDO::PARAM_INT);
+            $stmtCli->execute();
+            $cliRow = $stmtCli->fetch(PDO::FETCH_ASSOC);
+            if ($cliRow) $nombreClientePrint = $cliRow["nombre"];
+        }
     }
 
 } catch (Exception $e) {
@@ -144,8 +164,8 @@ try {
     </div>
 
     <div class="info-basica">
-        <?php if(!empty($formData["nombre_cliente"])): ?>
-        <div><strong>Cliente:</strong> <?php echo htmlspecialchars($formData["nombre_cliente"]); ?></div>
+        <?php if(!empty($nombreClientePrint)): ?>
+        <div><strong>Cliente:</strong> <?php echo htmlspecialchars($nombreClientePrint); ?></div>
         <?php endif; ?>
         <div style="margin-top:8px"><strong>Orden Asignada:</strong> #<?php echo htmlspecialchars($_GET["idOrden"]); ?></div>
         <div style="margin-top:8px"><strong>Equipo:</strong> <?php echo htmlspecialchars($formData["marcaModelo"]); ?></div>
