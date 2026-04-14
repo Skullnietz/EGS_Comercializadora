@@ -39,6 +39,18 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
     max-width: 1000px;
     margin: 0 auto;
 }
+.tablet-kiosk .egs-av {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 6px solid #ffffff;
+    box-shadow: 0 14px 34px rgba(44, 62, 80, 0.18);
+    background: #ffffff;
+    padding: 6px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
 .kiosk-btn {
     width: 100%;
     height: 300px;
@@ -151,7 +163,7 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
      <!-- SCREEN 1: HOME -->
      <div class="row" id="screenHome">
         <div class="col-md-12 text-center" style="margin-bottom:40px;">
-           <img src="vistas/img/plantilla/logoEGS (1).png" style="width:150px; margin-bottom:20px;">
+           <img src="vistas/img/perfiles/651.png" class="egs-av" alt="EGS">
            <h2 style="font-weight:900; color:#2c3e50; font-size:35px;">ASISTENTE DE RECEPCIÓN Y ENTREGA</h2>
            <p style="font-size:22px; color:#7f8c8d;">Seleccione una opción para comenzar</p>
         </div>
