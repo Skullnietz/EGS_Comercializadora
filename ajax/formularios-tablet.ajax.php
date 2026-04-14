@@ -14,8 +14,7 @@ class AjaxFormulariosTablet {
         
         // La tabla ordenes está en la BD secundaria (WP / Respaldo)
         $pdoWP = ConexionWP::conectarWP();
-        $stmt = $pdoWP->prepare("SELECT id, id_usuario, marcaDelEquipo, modeloDelEquipo, numeroDeSerieDelEquipo, fecha, estado 
-                               FROM ordenes 
+        $stmt = $pdoWP->prepare("SELECT * FROM ordenes 
                                WHERE estado LIKE :estado 
                                ORDER BY id DESC LIMIT 1");
         $stmt->bindParam(":estado", $estadoLike, PDO::PARAM_STR);

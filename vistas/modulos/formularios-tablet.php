@@ -356,6 +356,16 @@ const app = {
             data: { estado: flow },
             dataType: "json",
             success: function(respuesta) {
+                if(respuesta && respuesta.error) {
+                    swal({
+                        type: 'error',
+                        title: 'Error de BD',
+                        text: respuesta.error,
+                        confirmButtonText: 'Cerrar'
+                    });
+                    return;
+                }
+
                 if(!respuesta || !respuesta.id) {
                     swal({
                         type: 'warning',
