@@ -343,12 +343,11 @@ const app = {
     startFlow: function(flow) {
         this.currentFlow = flow;
         
-        // Peticion AJAX para buscar la última orden de ese estado
-        Swal.fire({
+        swal({
             title: 'Buscando Orden...',
-            text: 'Obteniendo datos de la última orden.',
+            text: 'Aguarde un momento por favor.',
             allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading() }
+            onOpen: () => { swal.showLoading(); }
         });
 
         $.ajax({
@@ -358,16 +357,26 @@ const app = {
             dataType: "json",
             success: function(respuesta) {
                 if(!respuesta || !respuesta.id) {
-                    Swal.fire('Atención', 'No se encontraron órdenes recientes con el estado solicitado.', 'warning');
+                    swal({
+                        type: 'warning',
+                        title: 'Atención',
+                        text: 'No se encontraron órdenes recientes con el estado solicitado.',
+                        confirmButtonText: 'Cerrar'
+                    });
                     return;
                 }
                 
                 app.currentOrder = respuesta;
-                Swal.close();
+                swal.close();
                 app.showConfirmScreen();
             },
             error: function() {
-                Swal.fire('Error', 'Hubo un error de conexión al consultar las órdenes.', 'error');
+                swal({
+                    type: 'error',
+                    title: 'Error',
+                    text: 'Hubo un error de conexión al consultar las órdenes.',
+                    confirmButtonText: 'Cerrar'
+                });
             }
         });
     },
@@ -428,7 +437,12 @@ const app = {
 
     saveForm: function() {
         if(this.signaturePad.isEmpty()) {
-            Swal.fire("Firma Requerida", "Por favor, dibuje su firma para continuar.", "warning");
+            swal({
+                type: 'warning',
+                title: 'Firma Requerida',
+                text: 'Por favor, dibuje su firma para continuar.',
+                confirmButtonText: 'Entendido'
+            });
             return;
         }
 
@@ -454,14 +468,13 @@ const app = {
             dataObj.respuestas["Calificacion_servicio"] = $("input[name='sal_calif']:checked").val();
         }
 
-        // Obtener el ID del creador desde session (Inyectado por PHP)
         const idCreador = '<?php echo isset($_SESSION["id"]) ? $_SESSION["id"] : "1"; ?>';
 
-        Swal.fire({
+        swal({
             title: 'Guardando',
             text: 'Enviando respuestas al sistema...',
             allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading() }
+            onOpen: () => { swal.showLoading(); }
         });
 
         $.ajax({
@@ -475,16 +488,26 @@ const app = {
             },
             dataType: "json",
             success: function(respuesta) {
-                Swal.close();
+                swal.close();
                 if(respuesta.status == "ok") {
                     app.hideAll();
                     $("#screenSuccess").fadeIn();
                 } else {
-                    Swal.fire('Error', 'Hubo un error al guardar los datos.', 'error');
+                    swal({
+                        type: 'error',
+                        title: 'Error',
+                        text: 'Hubo un error al guardar los datos.',
+                        confirmButtonText: 'Cerrar'
+                    });
                 }
             },
             error: function() {
-                Swal.fire('Error', 'Error de red o conexión al intentar guardar.', 'error');
+                swal({
+                    type: 'error',
+                    title: 'Error',
+                    text: 'Error de red o conexión al intentar guardar.',
+                    confirmButtonText: 'Cerrar'
+                });
             }
         });
     }
