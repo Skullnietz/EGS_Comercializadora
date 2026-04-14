@@ -1,6 +1,6 @@
 <?php
 
-require_once "../config/Database.php";
+require_once "../modelos/conexion.php";
 require_once "../controladores/ordenes.controlador.php";
 require_once "../modelos/ordenes.modelo.php";
 require_once "../controladores/clientes.controlador.php";
