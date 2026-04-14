@@ -120,246 +120,119 @@ class ImprimirTickets{
           }
       }
 
+      $lineasVenta = array(
+          array("descripcion" => $productoUno, "precio" => $PrecioUno, "cantidad" => $CantidadUno),
+          array("descripcion" => $productoDos, "precio" => $PrecioDos, "cantidad" => $CantidadDos),
+          array("descripcion" => $productoTres, "precio" => $PrecioTres, "cantidad" => $CantidadTres),
+          array("descripcion" => $productoCuatro, "precio" => $PrecioCuatro, "cantidad" => $CantidadCuatro),
+          array("descripcion" => $productoCinco, "precio" => $PrecioCinco, "cantidad" => $CantidadCinco),
+          array("descripcion" => $productoSeis, "precio" => $PrecioSeis, "cantidad" => $CantidadSeis),
+          array("descripcion" => $productoSiete, "precio" => $PrecioSiete, "cantidad" => $CantidadSiete),
+          array("descripcion" => $productoOcho, "precio" => $PrecioOcho, "cantidad" => $CantidadOcho),
+          array("descripcion" => $productoNueve, "precio" => $PrecioNueve, "cantidad" => $CantidadNueve),
+          array("descripcion" => $productoDiez, "precio" => $PrecioDiez, "cantidad" => $CantidadDiez),
+      );
 
-      echo '<div class="zona_impresion">
-         <br>
 
-
-              
-                
-
-                  <!-- Mostramos los datos de la empresa en el documento HTML -->
-                        <div><img src="https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/images/logoEGS (1).png" alt="LOGO" style="float: left"></div>
-                        <center>
-                        <div style="margin-top:20px;font-size: 200%"><strong>'.$NombreEmpresa.'</strong></div>
-                        <hr><div style="font-size: 100%"><b>'.$Sitio.'</b></div><br>
-                        <div><h3><b>'.$Direccion.' <h3><b> TELEFONOS<br> '.$Telefono.' <br> '.$Telefono3.' <br> '.$Telefono4.'</b></h3></div><div>Sólo Whatsapp (No llamar): '.$Telefono2.'</div>
-                
-                
-<b><hr></b>
-<center>
-<div>'.$nuevaFecha.'</div>
-                        <div><b> Venta No.'.$id.'</b></div>
-                        <div> Cliente: '.$nombreDelCliente.'</div>
-                        </center>
-      
-        <!-- Mostramos los detalles de la venta en el documento HTML -->
-
-        <table border="0" align="center" width="10px">
-            
+      echo '<div class="zona_impresion" style="font-family:\'Arial Narrow\',Arial,Helvetica,sans-serif">
+        <div style="text-align:center">
+          <table border="0" width="100%" cellpadding="0" cellspacing="0">
             <tr>
-                <td>Pzas.</td>
-                <td align="center">Productos<td>
-                <td align="left">P.U</td>
-                <td>TOTAL</td>
-
+              <td style="width:60px;vertical-align:middle;text-align:center">
+                <img src="https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/images/logoEGS (1).png" alt="LOGO" style="width:55px;height:auto">
+              </td>
+              <td style="vertical-align:middle;text-align:center">
+                <div style="font-size:15px;font-weight:900">'.$NombreEmpresa.'</div>
+              </td>
             </tr>
+          </table>
+          <hr style="margin:2px 0">
+          <div style="font-size:12px;font-weight:700">'.$Sitio.'</div>
+          <div style="font-size:12px;font-weight:700;margin:2px 0">'.$Direccion.'</div>
+          <div style="font-size:12px">'.$Telefono.' | '.$Telefono3.' | '.$Telefono4.'</div>
+          <div style="font-size:12px">Solo WhatsApp (No llamar): '.$Telefono2.'</div>
+        </div>
 
-          <tr>
+        <hr style="margin:3px 0">
+        <div style="text-align:center">
+          <div style="font-size:12px">'.$nuevaFecha.'</div>
+          <div style="font-size:20px;font-weight:900;margin:2px 0">VENTA No.'.$id.'</div>
+          <div style="font-size:12px;margin:2px 0"><b>Cliente:</b> '.$nombreDelCliente.'</div>
+        </div>';
 
-            <td colspan="5">==============================================</td>
-             
-          </tr>';
-              
-              //$precioTotal = number_format($item["pago"], 2);
-              if ($producto != "") {
-              
-               echo '<tr>
-                      '.$producto.'
-                    </tr>';
-              }
+      if (trim($producto) != '') {
+          echo '<div style="margin-top:3px;border-top:1px dashed #000;border-bottom:1px dashed #000;padding:3px 2px;font-size:12px;text-transform:uppercase">'.$producto.'</div>';
+      }
 
-              if ($productoUno != "") {
+      echo '
+        <div style="margin-top:4px">
+          <div style="font-size:12px;font-weight:900;text-align:center;text-transform:uppercase;padding-bottom:2px">Detalle de venta</div>
+          <table border="0" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:12px;font-weight:700;text-transform:uppercase;padding:2px 0;border-bottom:1px solid #000;text-align:center" width="12%">Pzas.</td>
+              <td style="font-size:12px;font-weight:700;text-transform:uppercase;padding:2px 2px;border-bottom:1px solid #000" width="52%">Producto</td>
+              <td style="font-size:12px;font-weight:700;text-transform:uppercase;padding:2px 0;border-bottom:1px solid #000;text-align:right" width="18%">P.U.</td>
+              <td style="font-size:12px;font-weight:700;text-transform:uppercase;padding:2px 0;border-bottom:1px solid #000;text-align:right" width="18%">Total</td>
+            </tr>';
 
-                  $precioTotal = $PrecioUno * $CantidadUno;
-                  echo'<!-- Mostramos los totales de la venta en el documento HTML -->
-                    <tr>
-                      <td>'.$CantidadUno.'</td>
-                      <td style="text-transform:uppercase;">'.$productoUno.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioUno.'</b></td>
-                      <center><td align="right"><b>$'.$precioTotal.'</b></td></center>
-                    </tr>
-                    <tr></tr>
-                    <tr>';
-              }
+      foreach ($lineasVenta as $lineaVenta) {
+          $descripcionLinea = isset($lineaVenta["descripcion"]) ? trim($lineaVenta["descripcion"]) : '';
 
-              if ($productoDos != "") {
+          if ($descripcionLinea === '') {
+              continue;
+          }
 
-                $precioTotal = $PrecioDos * $CantidadDos;
+          $cantidadLinea = floatval($lineaVenta["cantidad"]);
+          $precioLinea = floatval($lineaVenta["precio"]);
+          $totalLinea = round($cantidadLinea * $precioLinea, 2);
+          $cantidadTexto = floor($cantidadLinea) == $cantidadLinea ? number_format($cantidadLinea, 0) : rtrim(rtrim(number_format($cantidadLinea, 2, '.', ''), '0'), '.');
 
-                  echo'<td>'.$CantidadDos.'</td>
-                      <td style="text-transform:uppercase;">'.$productoDos.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioDos.'</b></td>
-                      <td align="right"><b>$'.$precioTotal.'</b></td>
-                    </tr>
-                    <tr>';
-              }
-              
-              if ($productoTres != ""){
-                 
-                 $precioTotal = $PrecioTres * $CantidadTres;
+          echo '<tr>
+              <td style="padding:3px 0;font-size:12px;border-bottom:1px dotted #ccc;text-align:center">'.$cantidadTexto.'</td>
+              <td style="text-transform:uppercase;padding:3px 2px;font-size:12px;border-bottom:1px dotted #ccc">'.$descripcionLinea.'</td>
+              <td style="text-align:right;padding:3px 2px;font-size:12px;font-weight:700;border-bottom:1px dotted #ccc;white-space:nowrap">$'.number_format($precioLinea, 2).'</td>
+              <td style="text-align:right;padding:3px 2px;font-size:12px;font-weight:700;border-bottom:1px dotted #ccc;white-space:nowrap">$'.number_format($totalLinea, 2).'</td>
+            </tr>';
+      }
 
-                 echo'<td>'.$CantidadTres.'</td>
-                      <td style="text-transform:uppercase;">'.$productoTres.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioTres.'</b></td>
-                      <td align="right"><b>$'.$precioTotal.'</b></td>
-                    </tr>';
-                }
-                if ($productoCuatro != ""){
-                 
-                 $precioTotal = $PrecioCuatro * $CantidadCuatro;
-
-                 echo'<td>'.$CantidadCuatro.'</td>
-                      <td style="text-transform:uppercase;">'.$productoCuatro.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioCuatro.'</b></td>
-                      <td align="right"><b>$'.$precioTotal.'</b></td>
-                    </tr>';
-                }
-                if ($productoCinco != ""){
-                 
-                 $precioTotal = $PrecioCinco * $CantidadCinco;
-
-                 echo'<td>'.$CantidadCinco.'</td>
-                      <td style="text-transform:uppercase;">'.$productoCinco.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioCinco.'</b></td>
-                      <td align="right"><b>$'.$precioTotal.'</b></td>
-                    </tr>';
-                }
-                if ($productoSeis != ""){
-                 
-                 $precioTotal = $PrecioSeis * $CantidadSeis;
-
-                 echo'<td>'.$CantidadSeis.'</td>
-                      <td style="text-transform:uppercase;">'.$productoSeis.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioSeis.'</b></td>
-                      <td align="right"><b>$'.$precioTotal.'</b></td>
-                    </tr>';
-                }
-                if ($productoSiete != ""){
-                 
-                 $precioTotal = $PrecioSiete * $CantidadSiete;
-
-                 echo'<td>'.$CantidadSiete.'</td>
-                      <td style="text-transform:uppercase;">'.$productoSiete.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioSiete.'</b></td>
-                      <td align="right"><b>$'.$precioTotal.'</b></td>
-                    </tr>';
-                }
-                if ($productoOcho != ""){
-                 
-                 $precioTotal = $PrecioOcho * $CantidadOcho;
-
-                 echo'<td>'.$CantidadOcho.'</td>
-                      <td style="text-transform:uppercase;">'.$productoOcho.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioOcho.'</b></td>
-                      <td align="right"><b>$'.$precioTotal.'</b></td>
-                    </tr>';
-                }
-                if ($productoNueve != ""){
-                 
-                 $precioTotal = $PrecioNueve * $CantidadNueve;
-
-                 echo'<td>'.$CantidadNueve.'</td>
-                      <td style="text-transform:uppercase;">'.$productoNueve.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioNueve.'</b></td>
-                      <td align="right"><b>$'.$precioTotal.'</b></td>
-                    </tr>';
-                }
-                if ($productoDiez != ""){
-                 
-                 $precioTotal = $PrecioDiez * $CantidadDiez;
-
-                 echo'<td>'.$CantidadDiez.'</td>
-                      <td style="text-transform:uppercase;">'.$productoDiez.'</br></br>
-                      <td></td>
-                      <td align="right"><b>$'.$PrecioDiez.'</b></td>
-                      <td align="right"><b>$'.$precioTotal.'</b></td>
-                    </tr>';
-                }
-                    
-
-                echo'<tr>                            
-                  <td>&nbsp;</td>
-                  <td align="right"><b>TOTAL:</b></td>
-                  <td align="right"><b>$'.$PagoTotal.'</b></td>
-                </tr>
-
-                 <tr>
-                  <td colspan="4"> Artículos: '.$CantidadDeProductos.'</td>
-                </tr>';
-
-                echo'<tr>
-                    <td colspan="4">&nbsp;</td>
-                </tr> 
-                
-                <tr>      
-                    <td colspan="4" align="left"><b>Asesor:'.$asesor.'</b></td>
- 
-                </tr>
-                <ul>
-                <tr>
-                    
-                    <td colspan="4" align="left"> <li>La garantía del servicio es por 30 días a partir de la fecha de entrega. </li></td>
-                </tr>
-                <tr>
-                  
-                    <td colspan="4" align="left"> <li>La empresa no se responsabiliza por accesorios que el cliente reclame y no se encuentren detallados en esta orden. </li></td>
-                </tr>
-                
-                <tr>
-                  
-                    <td colspan="4" align="left"> <li>El equipo será entregado solamente al portador de esta orden, en su defecto debera retirar el propietario que en esta orden funge como CLIENTE exhibiendo copia de documento de identidad INE. </li></td>
-                </tr>
-
-                <tr>
-                    <td colspan="4" align="left"> <li>Toda reparación debe ser retirada dentro de los 30 días de comunicado su arreglo, caso contrario se perderá el reclamo. </li></td>
-                </tr>
-                
-                <tr>
-                    
-                    <td colspan="4" align="left"> <li>En consumibles originales y compatibles no hay garantía. </li></td>
-                </tr>
-                <tr>
-                    <td colspan="4" align="left"> <li>No nos responsabilizamos de la información contenida en su equipo. </li></td>
-                </tr>
-                 <tr>
-                    <td colspan="4" align="left"><li>Al ingresar su orden acepta que esta sera publica en nuestro stio web www.comercializadoraegs.com sin mostrar datos del cliente solamente datos tecnicos y fotos del equipo recibido</li></td>
-                </tr>
-                </ul>
-                <tr>
-                  <td colspan="4" align="left"><b><center><h4>Recuerda que para facturación debes solicitar tu factura en: https://comercializadoraegs.com/facturacion</h4></center></b></td>
-        
+      echo '<tr>
+              <td colspan="3" style="padding:4px 2px 2px 2px;font-size:12px;font-weight:900;text-align:right;border-top:2px solid #000">TOTAL</td>
+              <td style="padding:4px 2px 2px 0;font-size:14px;font-weight:900;text-align:right;border-top:2px solid #000;white-space:nowrap">$'.number_format(floatval($PagoTotal), 2).'</td>
             </tr>
+          </table>
+        </div>
 
+        <div style="margin-top:4px;border-top:1px solid #000;padding-top:3px;font-size:12px;text-align:center">
+          <b>Articulos:</b> '.$CantidadDeProductos.' &nbsp;|&nbsp; <b>Asesor:</b> '.$asesor.'
+        </div>
 
+        <div style="margin-top:6px;border-top:1px dashed #000;padding-top:3px">
+          <div style="font-size:12px;font-weight:900;text-align:center;text-transform:uppercase;margin-bottom:2px">Terminos y condiciones</div>
+          <div style="font-size:12px;color:#000;line-height:1.4">
+            <div style="padding:1px 0">1. La garantia del servicio es por 30 dias a partir de la fecha de entrega.</div>
+            <div style="padding:1px 0">2. La empresa no se responsabiliza por accesorios que el cliente reclame y no se encuentren detallados en esta venta.</div>
+            <div style="padding:1px 0">3. Toda reparacion debe ser retirada dentro de los 30 dias de comunicado su arreglo, caso contrario se perdera el reclamo.</div>
+            <div style="padding:1px 0">4. En consumibles originales y compatibles no hay garantia.</div>
+            <div style="padding:1px 0">5. No nos responsabilizamos de la informacion contenida en su equipo.</div>
+            <div style="padding:1px 0">6. Al ingresar su orden acepta que esta sera publica en nuestro sitio web sin mostrar datos del cliente, solamente datos tecnicos y fotos del equipo.</div>
+          </div>
+        </div>
 
+        <div style="margin-top:4px;border:1px solid #000;padding:3px 4px;text-align:center;font-size:12px">
+          <div><b>Facturacion:</b> comercializadoraegs.com/facturacion</div>
+        </div>
 
-                <tr>  
-                      
-                    <!-- Mostramos los datos del cliente en el documento HTML -->
-                    <br><br>
-                    <td colspan="4" align="center">'.$nombreDelCliente.'</td>
+        <div style="margin-top:10px;text-align:center">
+          <div style="border-bottom:1px solid #000;width:65%;margin:0 auto"></div>
+          <div style="font-size:12px;font-weight:700;margin-top:2px;text-transform:uppercase">'.$nombreDelCliente.'</div>
+        </div>';
 
-                </tr>
-                   
-              </tr>
-
-             
-
-            </table>
-                  
-
-        
-              <center>¡Gracias por su compra!<div><img src="https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/images/facebook-logo.png" alt="LOGO" width="30px"><b>'.$Facebook.'</b></div></center>';
+      echo '<div style="margin-top:6px;text-align:center;font-size:12px;font-weight:700">
+              Gracias por su compra
+            </div>
+            <div style="text-align:center;font-size:12px;margin-top:2px">
+              <img src="https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/images/facebook-logo.png" alt="LOGO" width="22px" style="vertical-align:middle"> <b>'.$Facebook.'</b>
+            </div>';
 
       // ═══════════════════════════════════════════════════════════════
       // SECCIÓN DE RECOMPENSAS - MONEDERO ELECTRÓNICO EGS (VENTA)
