@@ -503,6 +503,8 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
   $puedeEditarPedidoCompleto = ($perfilActual == "administrador" || $perfilActual == "Super-Administrador");
   $puedeAgregarObservaciones = ($puedeEditarPedidoCompleto || $perfilActual == "vendedor");
   $puedeAsignarPedido = $puedeAgregarObservaciones;
+  $historialClienteLink = 'index.php?ruta=Historialdecliente&idCliente='.(isset($_GET["cliente"]) ? intval($_GET["cliente"]) : 0)
+    .'&nombreCliente='.(isset($usuario["nombre"]) ? urlencode($usuario["nombre"]) : 'Cliente');
 ?>
 
 <div class="content-wrapper">
@@ -554,10 +556,13 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
           <div class="ped-card-body">
             <div class="ped-info-row">
               <div class="ped-info-icon blue"><i class="fa-solid fa-user"></i></div>
-              <div>
+              <div style="flex:1;">
                 <div class="ped-info-label">Nombre</div>
                 <div class="ped-info-value"><?php echo htmlspecialchars($usuario["nombre"]); ?></div>
               </div>
+              <a href="<?php echo $historialClienteLink; ?>" class="ped-btn ped-btn-outline" style="padding:7px 12px; font-size:12px;" title="Ver historial del cliente">
+                <i class="fa-solid fa-clock-rotate-left"></i> Historial
+              </a>
             </div>
             <?php
               $correoValid = !empty($usuario["correo"]) && filter_var($usuario["correo"], FILTER_VALIDATE_EMAIL);
