@@ -144,7 +144,10 @@ try {
     </div>
 
     <div class="info-basica">
-        <div><strong>Orden Asignada:</strong> #<?php echo htmlspecialchars($_GET["idOrden"]); ?></div>
+        <?php if(!empty($formData["nombre_cliente"])): ?>
+        <div><strong>Cliente:</strong> <?php echo htmlspecialchars($formData["nombre_cliente"]); ?></div>
+        <?php endif; ?>
+        <div style="margin-top:8px"><strong>Orden Asignada:</strong> #<?php echo htmlspecialchars($_GET["idOrden"]); ?></div>
         <div style="margin-top:8px"><strong>Equipo:</strong> <?php echo htmlspecialchars($formData["marcaModelo"]); ?></div>
         <div style="margin-top:8px"><strong>Fecha de Registro:</strong> <?php echo date("d/m/Y H:i:s", strtotime($observacion["fecha"])); ?></div>
     </div>

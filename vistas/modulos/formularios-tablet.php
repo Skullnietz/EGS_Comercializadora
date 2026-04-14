@@ -311,8 +311,12 @@ const app = {
         window.onresize = () => this.resizeCanvas();
         
         this.signaturePad = new SignaturePad(canvas, {
-            backgroundColor: 'rgba(255, 255, 255, 0)',
-            penColor: 'rgb(0, 0, 0)'
+            backgroundColor: 'rgb(255, 255, 255)',
+            penColor: 'rgb(0, 0, 0)',
+            minWidth: 1.5,
+            maxWidth: 3.5,
+            throttle: 0,
+            velocityFilterWeight: 0.4
         });
     },
 
@@ -467,6 +471,8 @@ const app = {
 
         const dataObj = {
             tipo_formulario: this.currentFlow === 'REV' ? "INGRESO DE EQUIPO" : "SALIDA DE EQUIPO",
+            nombre_cliente: this.currentOrder.nombre_cliente || '',
+            orden_id: this.currentOrder.id,
             marcaModelo: this.currentOrder.marcaDelEquipo + " " + this.currentOrder.modeloDelEquipo,
             respuestas: {},
             firma: this.signaturePad.toDataURL()

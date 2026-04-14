@@ -1606,7 +1606,9 @@ function _egsEstadoClass($estado) {
 									$obsTexto = trim($valueobs["observacion"]);
 									$isDigitalForm = (strpos($obsTexto, 'FORMULARIO_TABLET_JSON:') === 0);
 									if($isDigitalForm) {
-										$_obs_nombre = 'CLIENTE ORIGINAL';
+										$_jsonTmp = json_decode(substr($obsTexto, 24), true);
+										$_clienteNombre = (is_array($_jsonTmp) && !empty($_jsonTmp["nombre_cliente"])) ? $_jsonTmp["nombre_cliente"] : 'CLIENTE';
+										$_obs_nombre = $_clienteNombre;
 										$_obs_perfil = 'Titular de la orden';
 										$_obs_col = ['#16a34a', '#dcfce7', 'fa-user-check'];
 									}
@@ -1649,8 +1651,11 @@ function _egsEstadoClass($estado) {
 												echo '<h4 style="margin:0;color:#4f46e5;font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-tablet-screen-button"></i> ' . htmlspecialchars($formData["tipo_formulario"]) . '</h4>';
 												echo '<a href="extensiones/tcpdf/pdf/imprimirFormulario.php?idOrden=' . urlencode($_GET["idOrden"]) . '&idObs=' . urlencode($valueobs["id"]) . '" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #cbd5e1;color:#475569;font-weight:600;font-size:11px;border-radius:6px" title="Imprimir Formato en Papel"><i class="fa-solid fa-print"></i> Imprimir</a>';
 												echo '</div>';
+												if(!empty($formData["nombre_cliente"])) {
+													echo '<p style="font-size:13px;color:#475569;margin-bottom:6px;font-weight:600">Cliente: <span style="color:#0f172a;font-weight:800">' . htmlspecialchars($formData["nombre_cliente"]) . '</span></p>';
+												}
 												echo '<p style="font-size:13px;color:#475569;margin-bottom:12px;font-weight:600">Equipo: <span style="color:#0f172a">' . htmlspecialchars($formData["marcaModelo"]) . '</span></p>';
-												
+
 												echo '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:16px">';
 												foreach($formData["respuestas"] as $pregunta => $respuesta) {
 													$preguntaFormateada = str_replace("_", " ", $pregunta);
@@ -1872,7 +1877,12 @@ $(document).ready(function(){
 							let tx = obs.observacion || '';
 							let isDigForm = tx.startsWith("FORMULARIO_TABLET_JSON:");
 							if (isDigForm) {
-								nombre = 'CLIENTE ORIGINAL';
+								try {
+									let _tmpJson = JSON.parse(tx.substring(24));
+									nombre = (_tmpJson.nombre_cliente && _tmpJson.nombre_cliente.trim() !== '') ? _tmpJson.nombre_cliente : 'CLIENTE';
+								} catch(e) {
+									nombre = 'CLIENTE';
+								}
 								perfil = 'Titular de la orden';
 								pColor = '#16a34a';
 								pBg = '#dcfce7';
@@ -1895,6 +1905,9 @@ $(document).ready(function(){
 									cardHtml += '<h4 style="margin:0;color:#4f46e5;font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-tablet-screen-button"></i> ' + jsData.tipo_formulario + '</h4>';
 									cardHtml += '<a href="extensiones/tcpdf/pdf/imprimirFormulario.php?idOrden=' + encodeURIComponent(obs.id_orden) + '&idObs=' + encodeURIComponent(obs.id) + '" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #cbd5e1;color:#475569;font-weight:600;font-size:11px;border-radius:6px" title="Imprimir Formato en Papel"><i class="fa-solid fa-print"></i> Imprimir</a>';
 									cardHtml += '</div>';
+									if(jsData.nombre_cliente && jsData.nombre_cliente.trim() !== '') {
+										cardHtml += '<p style="font-size:13px;color:#475569;margin-bottom:6px;font-weight:600">Cliente: <span style="color:#0f172a;font-weight:800">' + jsData.nombre_cliente + '</span></p>';
+									}
 									cardHtml += '<p style="font-size:13px;color:#475569;margin-bottom:12px;font-weight:600">Equipo: <span style="color:#0f172a">' + (jsData.marcaModelo || '') + '</span></p>';
 									cardHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:16px">';
 									for(let key in jsData.respuestas) {
