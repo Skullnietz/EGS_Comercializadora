@@ -138,7 +138,7 @@ class ImprimirTicketsOrden{
       // =============================================
       // ENCABEZADO: LOGO + DATOS DE EMPRESA
       // =============================================
-      echo '<div class="zona_impresion">
+      echo '<div class="zona_impresion" style="font-family:\'Arial Narrow\',Arial,Helvetica,sans-serif">
         <div style="text-align:center">
           <table border="0" width="100%" cellpadding="0" cellspacing="0">
             <tr>
@@ -154,9 +154,9 @@ class ImprimirTicketsOrden{
           <div style="font-size:10px;font-weight:700">'.$Sitio.'</div>
           <div style="font-size:10px;font-weight:700;margin:2px 0">'.$Direccion.'</div>
           <div style="font-size:10px">'.$Telefono.' | '.$Telefono3.' | '.$Telefono4.'</div>
-          <div style="font-size:9px">Solo WhatsApp (No llamar): '.$Telefono2.'</div>
-          <div style="font-size:9px;margin:2px 0">L-V 10:00-14:00 y 16:00-18:30 | Sab 9:00-14:30</div>
-          <div style="font-size:9px;font-weight:700">Estado de tu orden: comercializadoraegs.com/ordenes</div>
+          <div style="font-size:10px">Solo WhatsApp (No llamar): '.$Telefono2.'</div>
+          <div style="font-size:10px;margin:2px 0">L-V 10:00-14:00 y 16:00-18:30 | Sab 9:00-14:30</div>
+          <div style="font-size:10px;font-weight:700">Estado de tu orden: comercializadoraegs.com/ordenes</div>
         </div>';
 
       // =============================================
@@ -221,8 +221,8 @@ class ImprimirTicketsOrden{
           <div style="font-size:10px;font-weight:900;text-align:center;text-transform:uppercase;padding-bottom:2px">Detalle de servicios</div>
           <table border="0" width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 0;border-bottom:1px solid #000" width="78%">Descripcion</td>
-              <td style="font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 0;border-bottom:1px solid #000;text-align:right" width="22%">Precio</td>
+              <td style="font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 0;border-bottom:1px solid #000" width="78%">Descripcion</td>
+              <td style="font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 0;border-bottom:1px solid #000;text-align:right" width="22%">Precio</td>
             </tr>';
 
       $numPartida = 1;
@@ -304,8 +304,8 @@ class ImprimirTicketsOrden{
       // =============================================
       echo '
         <div style="margin-top:6px;border-top:1px dashed #000;padding-top:3px">
-          <div style="font-size:9.5px;font-weight:900;text-align:center;text-transform:uppercase;margin-bottom:2px">Terminos y condiciones</div>
-          <div style="font-size:9.5px;color:#000;line-height:1.4">
+          <div style="font-size:10px;font-weight:900;text-align:center;text-transform:uppercase;margin-bottom:2px">Terminos y condiciones</div>
+          <div style="font-size:10px;color:#000;line-height:1.4">
             <div style="padding:1px 0">1. La garantia del servicio es por 30 dias a partir de la fecha de entrega.</div>
             <div style="padding:1px 0">2. La empresa no se responsabiliza por accesorios que el cliente reclame y no se encuentren detallados en esta orden.</div>
             <div style="padding:1px 0">3. El equipo sera entregado solamente al portador de esta orden, en su defecto debera retirar el propietario que funge como CLIENTE exhibiendo INE.</div>
@@ -320,7 +320,7 @@ class ImprimirTicketsOrden{
       // FACTURACION + IMPORTANTE (combinados)
       // =============================================
       echo '
-        <div style="margin-top:4px;border:1px solid #000;padding:3px 4px;text-align:center;font-size:9px">
+        <div style="margin-top:4px;border:1px solid #000;padding:3px 4px;text-align:center;font-size:10px">
           <div><b>Facturacion:</b> comercializadoraegs.com/facturacion</div>
           <div style="margin-top:2px"><b>Importante:</b> En horario de comida <b>2:00pm a 4:00pm</b> no se realizan entregas.</div>
         </div>';
@@ -344,11 +344,11 @@ class ImprimirTicketsOrden{
           // PRIMERA ORDEN - Mensaje de bienvenida
           echo '<div style="font-size:13px;font-weight:900;margin-bottom:3px">*** MONEDERO EGS ***</div>
                 <div style="font-size:10px;font-weight:700;margin-bottom:3px">Bienvenido al programa de recompensas</div>
-                <div style="font-size:9px;line-height:1.3;margin-bottom:4px">Por cada orden entregada acumulas <b>dinero electronico</b> que puedes usar como descuento en tu proximo servicio. Acumulas el <b>1%</b> del total como recompensa.</div>';
+                <div style="font-size:10px;line-height:1.3;margin-bottom:4px">Por cada orden entregada acumulas <b>dinero electronico</b> que puedes usar como descuento en tu proximo servicio. Acumulas el <b>1%</b> del total como recompensa.</div>';
           if ($esEstadoREV) {
               echo '<div style="font-size:10px;font-weight:700;border:1px solid #000;padding:4px">
                       Tu equipo se encuentra en revision por nuestro equipo tecnico.
-                      <span style="font-size:9px;font-weight:400;display:block;margin-top:2px">Una vez definido el servicio, podras conocer el monto de dinero electronico que esta orden generara para ti.</span>
+                      <span style="font-size:10px;font-weight:400;display:block;margin-top:2px">Una vez definido el servicio, podras conocer el monto de dinero electronico que esta orden generara para ti.</span>
                     </div>';
           } else {
               echo '<div style="font-size:11px;font-weight:900;border:1px solid #000;padding:4px">
@@ -359,26 +359,26 @@ class ImprimirTicketsOrden{
           // CLIENTE CON HISTORIAL
           echo '<div style="font-size:13px;font-weight:900;margin-bottom:3px">*** MONEDERO EGS ***</div>
                 <div style="border:1px solid #000;padding:4px;margin-bottom:4px">
-                  <div style="font-size:9px;font-weight:700;text-transform:uppercase">Tu saldo disponible</div>
+                  <div style="font-size:10px;font-weight:700;text-transform:uppercase">Tu saldo disponible</div>
                   <div style="font-size:20px;font-weight:900;margin:2px 0">$'.number_format($saldoElectronico, 2).'</div>
-                  <div style="font-size:9px">Recompensa: 1% | '.$entregadasCliente.' ordenes entregadas</div>
+                  <div style="font-size:10px">Recompensa: 1% | '.$entregadasCliente.' ordenes entregadas</div>
                 </div>';
 
           if ($esEstadoREV) {
               echo '<div style="font-size:10px;font-weight:700;border:1px solid #000;padding:4px">
                       Tu equipo se encuentra en revision.
-                      <span style="font-size:9px;font-weight:400;display:block;margin-top:2px">El monto de dinero electronico se calculara una vez definido el servicio.</span>
+                      <span style="font-size:10px;font-weight:400;display:block;margin-top:2px">El monto de dinero electronico se calculara una vez definido el servicio.</span>
                     </div>';
           } else {
               $textoGenerado = ($value["estado"] == "Entregado (Ent)") ? 'genero' : 'generara al ser entregada';
               echo '<div style="font-size:10px;font-weight:900;border:1px solid #000;padding:4px">
                       Esta orden te '.$textoGenerado.'
                       <span style="font-size:16px;display:block;margin:2px 0">$'.number_format($montoGenerado, 2).'</span>
-                      <span style="font-size:9px">en dinero electronico ('.$porcentajeCliente.'% de $'.number_format($totalOrden, 2).')</span>
+                      <span style="font-size:10px">en dinero electronico ('.$porcentajeCliente.'% de $'.number_format($totalOrden, 2).')</span>
                     </div>';
           }
 
-          echo '<div style="font-size:8px;margin-top:3px">Tu dinero electronico vence cada 6 meses. Usalo antes!</div>';
+          echo '<div style="font-size:10px;margin-top:3px">Tu dinero electronico vence cada 6 meses. Usalo antes!</div>';
       }
 
       // QR para consultar monedero
@@ -387,7 +387,7 @@ class ImprimirTicketsOrden{
           $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . urlencode($urlMonedero);
 
           echo '<div style="margin-top:4px;padding-top:4px;border-top:1px dashed #000">
-                  <div style="font-size:9px;font-weight:700;margin-bottom:3px">Escanea para ver tu monedero:</div>
+                  <div style="font-size:10px;font-weight:700;margin-bottom:3px">Escanea para ver tu monedero:</div>
                   <img src="'.$qrUrl.'" alt="QR Monedero" style="width:100px;height:100px">
                 </div>';
       }
