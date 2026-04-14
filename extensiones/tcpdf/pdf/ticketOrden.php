@@ -409,7 +409,6 @@ class ImprimirTicketsOrden{
           echo '
           <div class="zona_impresion" style="font-family:\'Arial Narrow\',Arial,Helvetica,sans-serif; page-break-before: always; margin-top:10px;">
             <div style="border-top:1px dashed #000; margin-bottom:5px;"></div>
-            <div style="text-align:center;font-size:10px;font-weight:700;margin-bottom:10px;">- CORTE DE ETIQUETADORA -</div>
             <div style="font-size:12px; text-align:justify; line-height:1.3;">
               <div style="text-align:center;font-weight:900;margin-bottom:8px;font-size:13px;">AVISO Y POLÍTICA DE PRIVACIDAD PARA EL MANEJO DE DATOS PERSONALES</div>
               <div style="text-align:center;font-weight:700;margin-bottom:8px;">COMERCIALIZADORA EGS (EQUIPO DE CÓMPUTO Y SOFTWARE)</div>
@@ -440,7 +439,7 @@ class ImprimirTicketsOrden{
               <div style="margin-top:30px;text-align:center">
                   <div style="border-bottom:1px solid #000;width:70%;margin:0 auto"></div>
                   <div style="font-size:12px;font-weight:700;margin-top:4px;text-transform:uppercase">FIRMA DE CONFORMIDAD</div>
-                  <div style="font-size:11px;font-weight:700;margin-top:15px;text-align:left;">FECHA: _____/_____/_________</div>
+                  <div style="font-size:11px;font-weight:700;margin-top:15px;text-align:left;">FECHA: '.date_format($fecha, 'd/m/Y').'</div>
               </div>
             </div>
           </div>';
