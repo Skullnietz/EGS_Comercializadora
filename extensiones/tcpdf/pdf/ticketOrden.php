@@ -361,7 +361,7 @@ class ImprimirTicketsOrden{
                 <div style="border:1px solid #000;padding:4px;margin-bottom:4px">
                   <div style="font-size:12px;font-weight:700;text-transform:uppercase">Tu saldo disponible</div>
                   <div style="font-size:20px;font-weight:900;margin:2px 0">$'.number_format($saldoElectronico, 2).'</div>
-                  <div style="font-size:12px">Recompensa: 1% | '.$entregadasCliente.' ordenes entregadas</div>
+                  <div style="font-size:12px">Recompensa vigente: '.$porcentajeCliente.'% fijo</div>
                 </div>';
 
           if ($esEstadoREV) {

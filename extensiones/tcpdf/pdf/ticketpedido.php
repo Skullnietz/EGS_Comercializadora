@@ -416,7 +416,7 @@ class ImprimirTicketsPedido{
               echo '    <div style="border:1px solid #000;padding:12px;margin:6px 0;text-align:center">
                           <div style="font-size:11px;color:#000;font-weight:700;text-transform:uppercase;letter-spacing:1px">Tu saldo disponible</div>
                           <div style="font-size:28px;font-weight:900;color:#000;margin:4px 0">$'.number_format($saldoElectronico, 2).'</div>
-                          <div style="font-size:10px;color:#000">Nivel: '.$porcentajeCliente.'% | '.$entregadasCliente.' transacciones</div>
+                          <div style="font-size:10px;color:#000">Recompensa vigente: '.$porcentajeCliente.'% fijo</div>
                         </div>';
           }
 
@@ -436,9 +436,7 @@ class ImprimirTicketsPedido{
                     </div>
                     <div style="border:1px solid #000;padding:8px;margin:6px 0">
                       <div style="font-size:11px;color:#000;font-weight:700">
-                        * Clientes nuevos: <b>1%</b> de recompensa<br>
-                        * +3 transacciones: <b>2%</b> de recompensa<br>
-                        * +5 transacciones: <b>3%</b> de recompensa
+                        Actualmente acumulas <b>'.$porcentajeCliente.'%</b> fijo en dinero electrónico por cada servicio elegible.
                       </div>
                     </div>';
       }

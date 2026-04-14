@@ -97,18 +97,8 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
             background:linear-gradient(135deg,#fff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .card-saldo-amount.zero{background:linear-gradient(135deg,#64748b 0%,#475569 100%);-webkit-background-clip:text;background-clip:text}
 
-        .card-bottom{display:flex;align-items:flex-end;justify-content:space-between;position:relative;z-index:1}
+        .card-bottom{display:flex;align-items:flex-end;justify-content:flex-start;position:relative;z-index:1}
         .card-bottom-type{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.4)}
-        .card-nivel{text-align:right}
-        .card-nivel-badge{
-            display:inline-flex;align-items:center;gap:5px;
-            background:rgba(99,102,241,.3);backdrop-filter:blur(8px);
-            border:1px solid rgba(99,102,241,.4);
-            padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;color:#c7d2fe;
-        }
-        .card-nivel-dot{width:7px;height:7px;border-radius:50%;background:#818cf8;box-shadow:0 0 8px rgba(129,140,248,.6)}
-        .nivel-2 .card-nivel-dot{background:#a78bfa;box-shadow:0 0 8px rgba(167,139,250,.6)}
-        .nivel-3 .card-nivel-dot{background:#34d399;box-shadow:0 0 8px rgba(52,211,153,.6)}
 
         .contactless{position:absolute;bottom:24px;right:24px;z-index:1;opacity:.3}
         .contactless svg{width:24px;height:24px}
@@ -127,18 +117,10 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
         .info-banner-text{font-size:11px;color:#94a3b8;line-height:1.5}
         .info-banner-text strong{color:#c7d2fe;font-weight:700}
 
-        /* ── Niveles ── */
-        .levels-section{padding:20px}
         .section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin-bottom:14px}
-        .level-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-radius:12px;margin-bottom:6px;font-size:13px;transition:all .2s}
-        .level-row.active{background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3)}
-        .level-row:not(.active){background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
-        .level-name{font-weight:600;color:#cbd5e1}
-        .level-pct{font-weight:800;color:#818cf8;font-size:14px}
-        .level-check{color:#34d399;font-weight:800;font-size:15px}
 
         /* ── Movimientos ── */
-        .movimientos-section{padding:0 20px 20px}
+        .movimientos-section{padding:20px}
         .mov-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
         .mov-count{font-size:10px;color:#475569;font-weight:500}
         .mov-item{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
@@ -212,12 +194,6 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
         </div>
         <div class="card-bottom">
             <div class="card-bottom-type">Dinero Electr&oacute;nico</div>
-            <div class="card-nivel nivel-<?php echo $porcentaje; ?>">
-                <div class="card-nivel-badge">
-                    <span class="card-nivel-dot"></span>
-                    Nivel <?php echo $porcentaje; ?>%
-                </div>
-            </div>
         </div>
         <div class="contactless"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 17.5a8.5 8.5 0 0 1 0-11"/><path d="M10 15a5 5 0 0 1 0-6"/><path d="M13.5 12.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" fill="currentColor" stroke="none"/></svg></div>
     </div>
@@ -231,32 +207,13 @@ if (empty($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
             </div>
             <div class="stat-item">
                 <div class="stat-value"><?php echo $porcentaje; ?>%</div>
-                <div class="stat-label">Tu recompensa</div>
+                <div class="stat-label">Recompensa vigente</div>
             </div>
         </div>
 
         <div class="info-banner">
             <span class="info-banner-icon">&#9432;</span>
             <span class="info-banner-text">Tu saldo corresponde a las recompensas acumuladas en los <strong>&uacute;ltimos 6 meses</strong>. El dinero electr&oacute;nico vence 6 meses despu&eacute;s de ser generado.</span>
-        </div>
-
-        <div class="levels-section">
-            <div class="section-title">Niveles de recompensa</div>
-            <div class="level-row <?php echo $porcentaje == 1 ? 'active' : ''; ?>">
-                <span class="level-name">Nivel Inicial</span>
-                <span class="level-pct">1%</span>
-                <?php if ($porcentaje >= 1): ?><span class="level-check">&#10003;</span><?php endif; ?>
-            </div>
-            <div class="level-row <?php echo $porcentaje == 2 ? 'active' : ''; ?>">
-                <span class="level-name">+3 &oacute;rdenes entregadas</span>
-                <span class="level-pct">2%</span>
-                <?php if ($porcentaje >= 2): ?><span class="level-check">&#10003;</span><?php endif; ?>
-            </div>
-            <div class="level-row <?php echo $porcentaje == 3 ? 'active' : ''; ?>">
-                <span class="level-name">+5 &oacute;rdenes entregadas</span>
-                <span class="level-pct">3%</span>
-                <?php if ($porcentaje >= 3): ?><span class="level-check">&#10003;</span><?php endif; ?>
-            </div>
         </div>
 
         <div class="movimientos-section">

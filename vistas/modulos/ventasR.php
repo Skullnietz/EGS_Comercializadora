@@ -2196,7 +2196,7 @@ MODAL AGREGAR PRODUCTO
 
         _deVR_saldo = parseFloat(data.saldo) || 0;
         $('#egs_deVentaR_saldo').text('$' + _deVR_saldo.toFixed(2));
-        $('#egs_deVentaR_nivel').text('Nivel: ' + data.porcentaje + '% | ' + data.entregadas + ' transacciones');
+        $('#egs_deVentaR_nivel').text('Recompensa vigente: ' + data.porcentaje + '% fijo');
 
         var totalVenta = parseFloat($('#Resultado').val()) || 0;
 
