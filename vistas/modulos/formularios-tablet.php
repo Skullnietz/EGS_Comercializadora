@@ -305,11 +305,25 @@ const app = {
     init: function() {
         this.hideAll();
         $("#screenHome").show();
-
-        // Inicializar canvas de firma responsivo
-        const canvas = document.getElementById('signature-pad');
         window.onresize = () => this.resizeCanvas();
-        
+    },
+
+    initSignaturePad: function() {
+        const canvas = document.getElementById('signature-pad');
+        // Destruir instancia anterior si existe
+        if(this.signaturePad) {
+            this.signaturePad.off();
+            this.signaturePad = null;
+        }
+        // Dimensionar canvas ANTES de crear SignaturePad
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        const parentWidth = canvas.parentElement.offsetWidth;
+        canvas.width = parentWidth * ratio;
+        canvas.height = 300 * ratio;
+        canvas.style.width = parentWidth + 'px';
+        canvas.style.height = '300px';
+        canvas.getContext("2d").scale(ratio, ratio);
+        // Crear nueva instancia con canvas visible y dimensionado
         this.signaturePad = new SignaturePad(canvas, {
             backgroundColor: 'rgb(255, 255, 255)',
             penColor: 'rgb(0, 0, 0)',
@@ -318,6 +332,7 @@ const app = {
             throttle: 0,
             velocityFilterWeight: 0.4
         });
+        this.signaturePad.clear();
     },
 
     hideAll: function() {
@@ -328,7 +343,10 @@ const app = {
     goHome: function() {
         this.currentFlow = null;
         this.currentOrder = null;
-        if(this.signaturePad) this.signaturePad.clear();
+        if(this.signaturePad) {
+            this.signaturePad.off();
+            this.signaturePad = null;
+        }
         document.getElementById("formIngreso").reset();
         document.getElementById("formSalida").reset();
         this.hideAll();
@@ -433,29 +451,24 @@ const app = {
 
         this.hideAll();
         $("#screenSignature").show();
-        
-        // Resize canvas NOW that it's visible so offsetWidth is correct > 0
-        this.resizeCanvas();
-        this.signaturePad.clear();
+
+        // Esperar un frame para que el layout se calcule, luego inicializar
+        requestAnimationFrame(() => {
+            this.initSignaturePad();
+        });
     },
 
     resizeCanvas: function() {
+        if(!this.signaturePad) return;
         const canvas = document.getElementById('signature-pad');
-        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
         const parentWidth = canvas.parentElement.offsetWidth;
-        
-        if (parentWidth === 0) return; // Still hidden
-        
-        // Only set if different to avoid clearing unintentionally
-        if(canvas.width !== parentWidth * ratio) {
-            canvas.width = parentWidth * ratio;
-            canvas.height = 300 * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-        }
+        if (parentWidth === 0) return;
+        // Re-inicializar si cambió el tamaño (rotación de tablet, etc.)
+        this.initSignaturePad();
     },
 
     clearSignature: function() {
-        this.signaturePad.clear();
+        if(this.signaturePad) this.signaturePad.clear();
     },
 
     saveForm: function() {
