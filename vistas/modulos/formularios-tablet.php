@@ -145,9 +145,11 @@ $tabletCreatorId = isset($_SESSION["id"]) ? (int) $_SESSION["id"] : (int) (geten
 }
 .radio-chips input[type="radio"] { display: none; }
 .radio-chips input[type="radio"]:checked + label {
-    background: #3498db;
-    border-color: #2980b9;
-    color: white;
+    background: #3498db !important;
+    border-color: #2980b9 !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 22px rgba(52, 152, 219, 0.28);
+    transform: translateY(-1px);
 }
 
 #signature-wrapper {
@@ -437,6 +439,7 @@ const app = {
     currentOrder: null,
     signaturePad: null,
     flowStartedAt: null,
+    isSaving: false,
 
     init: function() {
         this.hideAll();
@@ -492,6 +495,7 @@ const app = {
         this.currentFlow = null;
         this.currentOrder = null;
         this.flowStartedAt = null;
+        this.isSaving = false;
         if(this.signaturePad) {
             this.signaturePad.off();
             this.signaturePad = null;
@@ -626,6 +630,10 @@ const app = {
     },
 
     saveForm: function() {
+        if(this.isSaving) {
+            return;
+        }
+
         if(this.signaturePad.isEmpty()) {
             swal({
                 type: 'warning',
@@ -661,6 +669,7 @@ const app = {
         }
 
         const idCreador = TABLET_FORM_CREATOR_ID;
+        this.isSaving = true;
 
         swal({
             title: 'Guardando',
@@ -685,9 +694,23 @@ const app = {
             success: function(respuesta) {
                 swal.close();
                 if(respuesta.status == "ok") {
+                    app.isSaving = false;
+                    if (respuesta.duplicate) {
+                        swal({
+                            type: 'info',
+                            title: 'Formulario ya registrado',
+                            text: respuesta.message || 'Este formulario ya había sido guardado y no se duplicó.',
+                            confirmButtonText: 'Entendido'
+                        }).then(function() {
+                            app.hideAll();
+                            $("#screenSuccess").fadeIn();
+                        });
+                        return;
+                    }
                     app.hideAll();
                     $("#screenSuccess").fadeIn();
                 } else {
+                    app.isSaving = false;
                     swal({
                         type: 'error',
                         title: 'Error',
@@ -697,6 +720,7 @@ const app = {
                 }
             },
             error: function() {
+                app.isSaving = false;
                 swal({
                     type: 'error',
                     title: 'Error',

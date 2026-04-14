@@ -320,6 +320,42 @@ function tabletPendingOrderOrFail(int $orderId, string $tipoFormulario): array
     return $pending;
 }
 
+function tabletFindExistingFormObservationId(int $orderId, string $tipoFormulario): int
+{
+    $pdo = Conexion::conectar();
+    $stmt = $pdo->prepare(
+        "SELECT id, observacion
+         FROM observacionesOrdenes
+         WHERE id_orden = :id_orden
+           AND observacion LIKE :prefix
+         ORDER BY id DESC
+         LIMIT 50"
+    );
+    $stmt->bindValue(":id_orden", $orderId, PDO::PARAM_INT);
+    $stmt->bindValue(":prefix", "FORMULARIO_TABLET_JSON:%", PDO::PARAM_STR);
+    $stmt->execute();
+
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($rows as $row) {
+        $observacion = (string) ($row["observacion"] ?? "");
+        if (strpos($observacion, "FORMULARIO_TABLET_JSON: ") !== 0) {
+            continue;
+        }
+
+        $payload = json_decode(substr($observacion, 24), true);
+        if (!is_array($payload)) {
+            continue;
+        }
+
+        $savedType = tabletNormalizeText($payload["tipo_formulario"] ?? "", 40);
+        if ($savedType === $tipoFormulario) {
+            return (int) ($row["id"] ?? 0);
+        }
+    }
+
+    return 0;
+}
+
 function tabletHandleFetchOrder(): void
 {
     tabletRequireCsrfToken();
@@ -396,6 +432,16 @@ function tabletHandleSaveForm(): void
         "respuestas" => $respuestasLimpias,
         "firma" => $firma
     ];
+
+    $existingObservationId = tabletFindExistingFormObservationId($orderId, $tipoFormulario);
+    if ($existingObservationId > 0) {
+        unset($_SESSION["formularios_tablet_pending_order"]);
+        tabletJsonResponse([
+            "status" => "ok",
+            "duplicate" => true,
+            "message" => "Este formulario ya estaba registrado para la orden #" . $orderId . "."
+        ]);
+    }
 
     $observacion = "FORMULARIO_TABLET_JSON: " . json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     $datos = [
