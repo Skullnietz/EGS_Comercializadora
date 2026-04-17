@@ -913,7 +913,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 <div class="ped-obs-compose-body">
                   <textarea id="pedNewObsText" class="form-control" placeholder="Escribe una observación..." rows="2"></textarea>
                   <div class="ped-obs-compose-actions">
-                    <button type="button" class="ped-btn ped-btn-primary AgregarCampoDeObservacionPedidos" style="padding:7px 16px; font-size:12px;">
+                    <button type="button" class="ped-btn ped-btn-primary btnAgregarObservacionInfoPedido" style="padding:7px 16px; font-size:12px;">
                       <i class="fa-solid fa-paper-plane"></i> Agregar
                     </button>
                   </div>
@@ -2070,14 +2070,13 @@ $(document).on("change", "input.PagoClientePedidoDinamico", function(){
 
 
 
-var valor_sesion = $('.usuarioActualPedido').val();
-
-
-
 $("#fechaVista").attr("fecha", fecha);
 
 
-$('.AgregarCampoDeObservacionPedidos').click(function() {
+
+$('.btnAgregarObservacionInfoPedido').click(function() {
+  
+  var valor_sesion = $('.usuarioActualPedido').val() || "Usuario";
 
   var obsText = $('#pedNewObsText').val();
   if (!obsText || !obsText.trim()) {
