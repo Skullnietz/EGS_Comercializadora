@@ -379,6 +379,7 @@ $('.tablaPedidos tbody').on("click", ".btnEditarPedido", function(){
          $(".adeudoPedidoEditado").val(respuesta[0]["adeudo"]);
          $(".fechaEntregaPedidoEditado").val(respuesta[0]["fechaEntrega"]);
          $(".optionEstadoPedido").html(respuesta[0]["estado"]);
+         $(".optionEstadoPedido").val(respuesta[0]["estado"]);
          $(".NumeroDePedido").html(respuesta[0]["id"]);
          /*=============================================
          DATOS PEDIDO DOS

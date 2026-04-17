@@ -752,6 +752,8 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                   }
                 ?>
                 <input type="hidden" id="ListarPreciosActualizados" name="ListarPreciosActualizados">
+                <input type="hidden" id="listarObservacionesPedidos" name="listarObservacionesPedidos">
+                <input type="hidden" class="PagosListados" name="PagosListados">
 
                 <!-- Total row -->
                 <tr class="ped-total-row">
