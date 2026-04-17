@@ -459,13 +459,6 @@ function _egsEstadoClass($estado) {
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fas fa-user"></i></span>
 								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" readonly>
-								<?php if (intval($_GET["cliente"]) > 0): ?>
-								<span class="input-group-btn">
-									<a class="btn btn-info" href="index.php?ruta=Historialdecliente&idCliente=<?php echo intval($_GET["cliente"]); ?>&nombreCliente=<?php echo rawurlencode($usuario["nombre"]); ?>" target="_blank" title="Ver historial del cliente">
-										<i class="fa-solid fa-clock-rotate-left"></i>
-									</a>
-								</span>
-								<?php endif; ?>
 							</div>
 						</div>
 
@@ -1603,17 +1596,6 @@ function _egsEstadoClass($estado) {
 									$_obs_initial = mb_strtoupper(mb_substr($_obs_nombre, 0, 1));
 									$_obs_grad = $_obs_grads[$_oi % count($_obs_grads)];
 									$_obs_col = _obsColorPerfil($_obs_perfil);
-									$obsTexto = trim($valueobs["observacion"]);
-									$isDigitalForm = (strpos($obsTexto, 'FORMULARIO_TABLET_JSON:') === 0);
-									if($isDigitalForm) {
-										$_jsonTmp = json_decode(substr($obsTexto, 24), true);
-										$_clienteNombre = (is_array($_jsonTmp) && !empty($_jsonTmp["nombre_cliente"])) ? $_jsonTmp["nombre_cliente"] : (isset($usuario["nombre"]) ? $usuario["nombre"] : 'CLIENTE');
-										$_obs_nombre = $_clienteNombre;
-										$_obs_perfil = 'Titular de la orden';
-										$_obs_col = ['#16a34a', '#dcfce7', 'fa-user-check'];
-										$_obs_foto = '';
-										$_obs_initial = mb_strtoupper(mb_substr($_obs_nombre, 0, 1));
-									}
 							?>
 								<div class="egs-obs-item" style="display:flex;gap:12px;padding:14px;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:8px;transition:background .12s"
 									 onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
@@ -1642,47 +1624,7 @@ function _egsEstadoClass($estado) {
 												<i class="fa-regular fa-clock" style="font-size:9px"></i> <?php echo $fecha; ?>
 											</span>
 										</div>
-										<?php
-										$obsTexto = trim($valueobs["observacion"]);
-										if (strpos($obsTexto, 'FORMULARIO_TABLET_JSON:') === 0) {
-											$jsonStr = substr($obsTexto, 24); // 23 chars for prefix + 1 space
-											$formData = json_decode($jsonStr, true);
-											if(is_array($formData)) {
-												echo '<div style="background:#fff;border:2px dashed #cbd5e1;border-radius:10px;padding:16px;margin-top:10px;box-shadow:inset 0 0 10px rgba(0,0,0,0.02)">';
-												echo '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-												echo '<h4 style="margin:0;color:#4f46e5;font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-tablet-screen-button"></i> ' . htmlspecialchars($formData["tipo_formulario"]) . '</h4>';
-												echo '<a href="extensiones/tcpdf/pdf/imprimirFormulario.php?idOrden=' . urlencode($_GET["idOrden"]) . '&idObs=' . urlencode($valueobs["id"]) . '" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #cbd5e1;color:#475569;font-weight:600;font-size:11px;border-radius:6px" title="Imprimir Formato en Papel"><i class="fa-solid fa-print"></i> Imprimir</a>';
-												echo '</div>';
-												$_formCliente = !empty($formData["nombre_cliente"]) ? $formData["nombre_cliente"] : (isset($usuario["nombre"]) ? $usuario["nombre"] : '');
-												if(!empty($_formCliente)) {
-													echo '<p style="font-size:13px;color:#475569;margin-bottom:6px;font-weight:600">Cliente: <span style="color:#0f172a;font-weight:800">' . htmlspecialchars($_formCliente) . '</span></p>';
-												}
-												echo '<p style="font-size:13px;color:#475569;margin-bottom:12px;font-weight:600">Equipo: <span style="color:#0f172a">' . htmlspecialchars($formData["marcaModelo"]) . '</span></p>';
-
-												echo '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:16px">';
-												foreach($formData["respuestas"] as $pregunta => $respuesta) {
-													$preguntaFormateada = str_replace("_", " ", $pregunta);
-													echo '<div style="background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #e2e8f0">';
-													echo '<label style="display:block;font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px;font-weight:700">' . htmlspecialchars($preguntaFormateada) . '</label>';
-													echo '<span style="font-size:13px;color:#1e293b;font-weight:600">' . htmlspecialchars($respuesta) . '</span>';
-													echo '</div>';
-												}
-												echo '</div>';
-												
-												if(isset($formData["firma"]) && !empty($formData["firma"])) {
-													echo '<div style="border-top:1px solid #e2e8f0;padding-top:12px;text-align:center;width:max-content;margin:0 auto">';
-													echo '<img src="' . htmlspecialchars($formData["firma"]) . '" style="max-width:250px;height:auto;display:block;margin:0 auto;filter:contrast(1.2)">';
-													echo '<div style="border-top:2px solid #000;padding-top:4px;font-size:12px;font-weight:700;color:#000;margin-top:-10px;position:relative;z-index:2;letter-spacing:1px">FIRMA DIGITAL DEL CLIENTE</div>';
-													echo '</div>';
-												}
-												echo '</div>';
-											} else {
-												echo '<p style="margin:0;color:#334155;font-weight:500;font-size:13px;line-height:1.5">' . htmlspecialchars($obsTexto) . '</p>';
-											}
-										} else {
-											echo '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' . htmlspecialchars($obsTexto) . '</p>';
-										}
-										?>
+										<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5"><?php echo htmlspecialchars($valueobs["observacion"]); ?></p>
 										<?php if ($isAdmin): ?>
 										<button type="button" class="btn btn-xs eliminarObservacion" idObs="<?php echo $valueobs["id"]; ?>"
 												style="margin-top:6px;color:#ef4444;font-size:11px;padding:2px 8px;border:1px solid #fecaca;border-radius:6px;background:#fff"
@@ -1708,11 +1650,9 @@ function _egsEstadoClass($estado) {
 								<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#exampleModal">
 									<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar observación
 								</button>
-								<?php if (!$isTecnico): ?>
-								<button type="button" class="btn btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($_GET["idOrden"]); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:8px;">
+								<button type="button" class="btn btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($valor); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:8px;">
 									<i class="fa-solid fa-calendar-plus" style="margin-right:4px"></i>Nueva Cita
 								</button>
-								<?php endif; ?>
 							</div>
 
 							<hr style="margin:20px 0 12px">
@@ -1857,37 +1797,18 @@ $(document).ready(function(){
 						for(var i = lastObsCount; i < res.observaciones.length; i++){
 							var obs = res.observaciones[i];
 							var nombre = obs.nombre || 'Usuario';
-							var tx = obs.observacion || '';
-							var isDigForm = tx.startsWith("FORMULARIO_TABLET_JSON:");
-							var _fallbackCliente = $('input[name="nombreCliente"]').val() || 'CLIENTE';
-							
-							var perfil = obs.perfil || '';
-							var pColor = '#64748b', pBg = '#f1f5f9', pIcon = 'fa-user';
-
-							if (isDigForm) {
-								try {
-									var _tmpJson = JSON.parse(tx.substring(24));
-									nombre = (_tmpJson.nombre_cliente && _tmpJson.nombre_cliente.trim() !== '') ? _tmpJson.nombre_cliente : _fallbackCliente;
-								} catch(e) {
-									nombre = _fallbackCliente;
-								}
-								perfil = 'Titular de la orden';
-								pColor = '#16a34a';
-								pBg = '#dcfce7';
-								pIcon = 'fa-user-check';
-								obs.foto = ''; // Wipe technician photo
-							} else {
-								var pLow = perfil.toLowerCase();
-								if(pLow.indexOf('admin')>-1){ pColor='#6366f1'; pBg='#eef2ff'; pIcon='fa-shield-halved'; }
-								else if(pLow.indexOf('vendedor')>-1||pLow.indexOf('asesor')>-1){ pColor='#8b5cf6'; pBg='#f5f3ff'; pIcon='fa-headset'; }
-								else if(pLow.indexOf('tecnico')>-1||pLow.indexOf('técnico')>-1){ pColor='#06b6d4'; pBg='#ecfeff'; pIcon='fa-wrench'; }
-								else if(pLow.indexOf('secretaria')>-1){ pColor='#f59e0b'; pBg='#fffbeb'; pIcon='fa-clipboard'; }
-							}
-
 							var ini = nombre.charAt(0).toUpperCase();
 							var grad = grads[i % grads.length];
 							var fecha = obs.fecha ? new Date(obs.fecha) : null;
 							var fechaStr = fecha ? (fecha.getDate()+'/'+(fecha.getMonth()+1)+'/'+fecha.getFullYear()+' '+fecha.getHours()+':'+String(fecha.getMinutes()).padStart(2,'0')) : '';
+							// Determinar color/icono según perfil
+							var perfil = obs.perfil || '';
+							var pLow = perfil.toLowerCase();
+							var pColor = '#64748b', pBg = '#f1f5f9', pIcon = 'fa-user';
+							if(pLow.indexOf('admin')>-1){ pColor='#6366f1'; pBg='#eef2ff'; pIcon='fa-shield-halved'; }
+							else if(pLow.indexOf('vendedor')>-1||pLow.indexOf('asesor')>-1){ pColor='#8b5cf6'; pBg='#f5f3ff'; pIcon='fa-headset'; }
+							else if(pLow.indexOf('tecnico')>-1||pLow.indexOf('técnico')>-1){ pColor='#06b6d4'; pBg='#ecfeff'; pIcon='fa-wrench'; }
+							else if(pLow.indexOf('secretaria')>-1){ pColor='#f59e0b'; pBg='#fffbeb'; pIcon='fa-clipboard'; }
 
 							var html = '<div class="egs-obs-item" style="display:flex;gap:12px;padding:14px;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:8px;transition:background .12s" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'#fff\'">';
 							if(obs.foto){
@@ -1904,40 +1825,7 @@ $(document).ready(function(){
 							}
 							html += '<span style="font-size:11px;color:#94a3b8;margin-left:auto;flex-shrink:0"><i class="fa-regular fa-clock" style="font-size:9px"></i> '+fechaStr+'</span>';
 							html += '</div>';
-							if(tx.startsWith("FORMULARIO_TABLET_JSON:")) {
-								try {
-									var jsData = JSON.parse(tx.substring(24));
-									var cardCliente = (jsData.nombre_cliente && jsData.nombre_cliente.trim() !== '') ? jsData.nombre_cliente : _fallbackCliente;
-									var cardHtml = '<div style="background:#fff;border:2px dashed #cbd5e1;border-radius:10px;padding:16px;margin-top:10px;box-shadow:inset 0 0 10px rgba(0,0,0,0.02)">';
-									cardHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-									cardHtml += '<h4 style="margin:0;color:#4f46e5;font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-tablet-screen-button"></i> ' + jsData.tipo_formulario + '</h4>';
-									cardHtml += '<a href="extensiones/tcpdf/pdf/imprimirFormulario.php?idOrden=' + encodeURIComponent(obs.id_orden) + '&idObs=' + encodeURIComponent(obs.id) + '" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #cbd5e1;color:#475569;font-weight:600;font-size:11px;border-radius:6px" title="Imprimir Formato en Papel"><i class="fa-solid fa-print"></i> Imprimir</a>';
-									cardHtml += '</div>';
-									cardHtml += '<p style="font-size:13px;color:#475569;margin-bottom:6px;font-weight:600">Cliente: <span style="color:#0f172a;font-weight:800">' + cardCliente + '</span></p>';
-									cardHtml += '<p style="font-size:13px;color:#475569;margin-bottom:12px;font-weight:600">Equipo: <span style="color:#0f172a">' + (jsData.marcaModelo || '') + '</span></p>';
-									cardHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:16px">';
-									for(let key in jsData.respuestas) {
-										let labelForm = key.replace(/_/g, " ");
-										cardHtml += '<div style="background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #e2e8f0">';
-										cardHtml += '<label style="display:block;font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px;font-weight:700">' + labelForm + '</label>';
-										cardHtml += '<span style="font-size:13px;color:#1e293b;font-weight:600">' + jsData.respuestas[key] + '</span>';
-										cardHtml += '</div>';
-									}
-									cardHtml += '</div>';
-									if(jsData.firma) {
-										cardHtml += '<div style="border-top:1px solid #e2e8f0;padding-top:12px;text-align:center;width:max-content;margin:0 auto">';
-										cardHtml += '<img src="' + jsData.firma + '" style="max-width:250px;height:auto;display:block;margin:0 auto;filter:contrast(1.2)">';
-										cardHtml += '<div style="border-top:2px solid #000;padding-top:4px;font-size:12px;font-weight:700;color:#000;margin-top:-10px;position:relative;z-index:2;letter-spacing:1px">FIRMA DIGITAL DEL CLIENTE</div>';
-										cardHtml += '</div>';
-									}
-									cardHtml += '</div>';
-									html += cardHtml;
-								}catch(e){
-									html += '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' + tx + '</p>';
-								}
-							} else {
-								html += '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' + tx + '</p>';
-							}
+							html += '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' + (obs.observacion || '') + '</p>';
 							html += '</div></div>';
 							container.append(html);
 						}
@@ -1986,26 +1874,6 @@ function _egsCopiarFallback(texto, cb) {
 	try { document.execCommand('copy'); cb(); } catch(e) {}
 	document.body.removeChild(ta);
 }
-</script>
-
-<!-- Handler: Agendar cita desde orden (abre el modal de cita rápida del navbar) -->
-<script>
-$(document).on('click', '.btnAgendarCitaDesdeOrden', function(){
-	var ordenId = $(this).data('orden-id');
-	var $modal = $('#modalCitaRapida');
-	if (!$modal.length) return;
-	// Prellenar el ID de orden, disparar auto-color y bloquear edición
-	var $campo = $('#crOrdenId');
-	$campo.val(ordenId).trigger('change');
-	// Deshabilitar visualmente pero guardar valor para el submit
-	$campo.prop('disabled', true).data('orden-forzada', ordenId);
-	$modal.modal('show');
-});
-// Al cerrar el modal, restaurar el campo por si lo abren desde otro lugar
-$(document).on('hidden.bs.modal', '#modalCitaRapida', function(){
-	var $campo = $('#crOrdenId');
-	$campo.prop('disabled', false).removeData('orden-forzada');
-});
 </script>
 
 <?php

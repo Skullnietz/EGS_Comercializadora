@@ -623,7 +623,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                   <div class="ped-info-label">Estado del Pedido</div>
                   <?php if ($puedeEditarPedidoCompleto): ?>
                     <select class="ped-select" name="EstadoPedidoDinamico" style="margin-top:6px;">
-                      <option><?php echo htmlspecialchars($valuePedidos["estado"]); ?></option>
+                      <option value="<?php echo htmlspecialchars($valuePedidos["estado"]); ?>"><?php echo htmlspecialchars($valuePedidos["estado"]); ?></option>
                       <option value="Pedido Pendiente">Pedido Pendiente</option>
                       <option value="Pedido Adquirido">Pedido Adquirido</option>
                       <option value="Producto en Almacen">Producto en Almacén</option>
@@ -2254,5 +2254,15 @@ function listarNuevosPreciosDePedido(){
   $("#ListarPreciosActualizados").val(JSON.stringify(listarNuevosPrecios));
 
 }
+
+/*=============================================
+SERIALIZAR ANTES DE ENVIAR EL FORMULARIO
+=============================================*/
+$('form[method="post"]').on('submit', function() {
+  listarProductosPedidoDinamico();
+  listarPrimerPago();
+  listarObservacionesPedidos();
+  listarNuevosPreciosDePedido();
+});
 
 </script>

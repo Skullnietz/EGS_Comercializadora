@@ -1067,33 +1067,31 @@ class ControladorPedidos{
 
 			if ($respuesta == "ok") {
 
-
 					echo '<script>
-
-
-
 					swal({
-
 						type: "success",
 						title: "¡El pedido se ha guardado correctamente!",
 						showConfirmButton: true,
 						confirmButtonText: "Cerrar"
-
 					}).then(function(result){
-
 						if(result.value){
-							
 							window.location = "'.$_SERVER["REQUEST_URI"].'";
-
-					
-
 						}
-
 					});
-				
-
 					</script>';
-				}
+
+			} else {
+
+					echo '<script>
+					swal({
+						type: "error",
+						title: "Error al guardar",
+						text: "No se pudo guardar el pedido. Verifica que la base de datos tenga las columnas necesarias (pagos, observaciones, productos) o contacta al administrador.",
+						showConfirmButton: true,
+						confirmButtonText: "Cerrar"
+					});
+					</script>';
+			}
 		}
 	}
 

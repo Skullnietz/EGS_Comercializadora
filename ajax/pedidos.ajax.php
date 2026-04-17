@@ -206,6 +206,7 @@ if(isset($_POST["id"])){
 	$editarPedido -> abono1 = $_POST["abono1"];
 	$editarPedido -> fechaAbono1 = $_POST["fechaAbono1"];
 	$editarPedido -> edicionProductoUnoPedidoDos = $_POST["edicionProductoUnoPedidoDos"];
+	$editarPedido -> abono2 = $_POST["abono2"];
 	$editarPedido -> fechaAbono2 = $_POST["fechaAbono2"];
 	$editarPedido -> abono3 = $_POST["abono3"];		
 	$editarPedido -> fechaAbono3 = $_POST["fechaAbono3"];
