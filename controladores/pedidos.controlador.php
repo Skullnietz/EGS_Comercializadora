@@ -1063,7 +1063,9 @@ class ControladorPedidos{
 								 "total" => $total
 								);
 
+            error_log(print_r($datosPedido, true), 3, dirname(__FILE__).'/../test_db_log.txt');
 			$respuesta = ModeloPedidos::mdlEditarPedidoDinamico($tabla, $datosPedido);
+            error_log("DB RESPUESTA: " . $respuesta . "\n", 3, dirname(__FILE__).'/../test_db_log.txt');
 
 			if ($respuesta == "ok") {
 

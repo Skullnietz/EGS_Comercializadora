@@ -1142,23 +1142,28 @@ LISTAR OBERVACIONES
 function listarObservacionesPedidos(){
 
   var listarnuvasObservacionesPedidos = [];
-
   var descripcion = $(".nuevaObservacion");
-
-  var creador = $(".usuarioQueCaptura");
+  var creadorLegacy = $(".usuarioQueCaptura");
 
   for (var i =0; i < descripcion.length; i++){
+    var creadorName = "Usuario";
+    
+    if (creadorLegacy.length > i && $(creadorLegacy[i]).val()) {
+        creadorName = $(creadorLegacy[i]).val();
+    } else if ($(descripcion[i]).attr("data-creador")) {
+        creadorName = $(descripcion[i]).attr("data-creador");
+    } else if ($('.usuarioActualPedido').length > 0) {
+        creadorName = $('.usuarioActualPedido').val();
+    }
 
-    listarnuvasObservacionesPedidos.push({"observacion" : $(descripcion[i]).val(), 
-
-                     "creador" : $(creador[i]).val(),
-
-                     "fecha" : $(descripcion[i]).attr("fecha")})
-
+    listarnuvasObservacionesPedidos.push({
+      "observacion" : $(descripcion[i]).val(), 
+      "creador" : creadorName,
+      "fecha" : $(descripcion[i]).attr("fecha")
+    });
   }
 
   $("#listarObservacionesPedidos").val(JSON.stringify(listarnuvasObservacionesPedidos));
-
 }
 
 /*=============================================

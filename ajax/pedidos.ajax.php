@@ -145,6 +145,35 @@ class AjaxPedidos{
 
 	}	
 
+	/*=============================================
+	EDITAR SOLO OBSERVACIONES
+	=============================================*/
+	public $idPedidoDinamicoAjax;
+	public $observacionesDinamicoAjax;
+
+	public function ajaxEditarObservacionesDinamico(){
+		$item = "id";
+		$valor = $this->idPedidoDinamicoAjax;
+		$pedidoActual = ControladorPedidos::ctrMostrarorpedidosParaValidar($item, $valor);
+		if (!empty($pedidoActual)) {
+            $pedidoBase = is_array($pedidoActual[0]) ? $pedidoActual[0] : $pedidoActual;
+            
+            $datosPedido = array(
+                "id" => $this->idPedidoDinamicoAjax,
+                "estado" => $pedidoBase["estado"],
+                "pago" => $pedidoBase["pagos"],
+                "adeudo" => $pedidoBase["adeudo"],
+                "observaciones" => $this->observacionesDinamicoAjax,
+                "productos"=> $pedidoBase["productos"],
+                "total" => $pedidoBase["total"]
+            );
+            $respuesta = ModeloPedidos::mdlEditarPedidoDinamico("pedidos", $datosPedido);
+            echo $respuesta;
+		} else {
+            echo "error";
+        }
+	}
+
 }
 #CREAR PEDIDO
 #-----------------------------------------------------------
@@ -219,4 +248,14 @@ if(isset($_POST["id"])){
 
 	$editarPedido -> ajaxEditarPedido();
 
+}
+
+/*=============================================
+EDITAR SOLO OBSERVACIONES (AJAX)
+=============================================*/
+if(isset($_POST["idPedidoDinamicoAjax"])){
+	$editarObservaciones = new AjaxPedidos();
+	$editarObservaciones -> idPedidoDinamicoAjax = $_POST["idPedidoDinamicoAjax"];
+	$editarObservaciones -> observacionesDinamicoAjax = $_POST["observacionesDinamicoAjax"];
+	$editarObservaciones -> ajaxEditarObservacionesDinamico();
 }

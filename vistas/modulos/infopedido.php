@@ -2144,6 +2144,7 @@ $('.btnAgregarObservacionInfoPedido').click(function() {
 
   listarObservacionesPedidos();
   listarNuevosPreciosDePedido();
+  guardarObservacionesAjax();
 });
 
 /* Remove a newly-added observation */
@@ -2158,7 +2159,35 @@ $(document).on("click", ".quitarObservacion", function() {
     .text(totalObs + ' comentario' + (totalObs !== 1 ? 's' : ''));
   listarObservacionesPedidos();
   listarNuevosPreciosDePedido();
+  guardarObservacionesAjax();
 });
+
+function guardarObservacionesAjax() {
+  var idPedidoActual = $("input[name='idPedido']").val();
+  var observacionesJSON = $("#listarObservacionesPedidos").val();
+
+  var datosAjax = new FormData();
+  datosAjax.append("idPedidoDinamicoAjax", idPedidoActual);
+  datosAjax.append("observacionesDinamicoAjax", observacionesJSON);
+
+  $.ajax({
+    url:"ajax/pedidos.ajax.php",
+    method: "POST",
+    data: datosAjax,
+    cache: false,
+    contentType: false,
+    processData: false,
+    success: function(respuesta){
+      if(respuesta.trim() != "ok"){
+         swal({
+           type: "error",
+           title: "Error al guardar",
+           text: "La observación no pudo sincronizarse en la base de datos."
+         });
+      }
+    }
+  });
+}
 
 $(document).on("change", ".nuevaObservacion", function() {
 
