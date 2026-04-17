@@ -1651,7 +1651,7 @@ MODAL AGREGAR ORDENES
                         else $cp["r"] = [$dt,"#dc2626","#fef2f2"];
                       }
                       $cpAttr = !empty($cp) ? " data-custom-properties='" . htmlspecialchars(json_encode($cp, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . "'" : "";
-                      echo '<option value="' . $cId . '"' . $cpAttr . '>' . htmlspecialchars($value["nombre"]) . '</option>';
+                      echo '<option value="' . $cId . '"' . $cpAttr . '>' . htmlspecialchars($value["nombre"]) . ' — #' . $cId . '</option>';
                     }
                     ?>
                   </select>
