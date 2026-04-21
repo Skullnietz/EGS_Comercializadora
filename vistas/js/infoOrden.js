@@ -432,7 +432,7 @@ y prellena el No. de Orden usando la API ya existente (data-orden-forzada).
 =============================================*/
 $(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
 	e.preventDefault();
-	var ordenId = $(this).data("orden-id");
+	var ordenId = parseInt($(this).data("orden-id"), 10) || 0;
 	var $modal = $("#modalCitaRapida");
 	if ($modal.length === 0) {
 		if (typeof swal === "function") {
@@ -447,9 +447,15 @@ $(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
 		return;
 	}
 	var $inputOrden = $("#crOrdenId");
-	if ($inputOrden.length && ordenId) {
-		$inputOrden.val(ordenId);
-		$inputOrden.data("orden-forzada", ordenId);
+	if ($inputOrden.length) {
+		if (ordenId > 0) {
+			$inputOrden.val(ordenId);
+			$inputOrden.data("orden-forzada", ordenId);
+			$inputOrden.prop("disabled", true);
+		} else {
+			$inputOrden.prop("disabled", false);
+			$inputOrden.data("orden-forzada", "");
+		}
 		$inputOrden.trigger("change");
 	}
 	$modal.modal("show");

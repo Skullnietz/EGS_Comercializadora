@@ -774,6 +774,8 @@
   $(document).on('click', '#egsCalQuickAdd', function(e){
     e.preventDefault();
     e.stopPropagation();
+    $('#crOrdenId').prop('disabled', false).val('').data('orden-forzada', '');
+    $('#crOrdenId').trigger('change');
     // Cerrar el dropdown de Bootstrap correctamente
     $('#egsCalendarToggle').dropdown('toggle');
     // Abrir modal después de que el dropdown se cierre
@@ -786,6 +788,12 @@
   $(document).ready(function(){
     // Mover el modal fuera del navbar al body para evitar conflictos de z-index
     $('#modalCitaRapida').appendTo('body');
+
+    $('#modalCitaRapida').on('hidden.bs.modal', function(){
+      $('#crOrdenId').prop('disabled', false).val('').data('orden-forzada', '');
+      $('#crOrdenPreview').hide();
+      $('#crOrdenId').trigger('change');
+    });
 
     $.ajax({
       url: 'ajax/citas.ajax.php',
@@ -1080,7 +1088,7 @@
         if (resp == 'ok') {
           $('#modalCitaRapida').modal('hide');
           $('#formCitaRapida')[0].reset();
-          $('#crOrdenId').val('');
+          $('#crOrdenId').prop('disabled', false).val('').data('orden-forzada', '');
           $('#crOrdenPreview').hide();
           // Reset auto-color
           $('#egsAutoColorDot').css('background', '#3a87ad');
