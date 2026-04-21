@@ -2123,8 +2123,37 @@ MODAL AGREGAR PRODUCTO
 // ═══════════════════════════════════════════════
 (function(){
   var _deVR_saldo = 0;
+  var _deVR_porcentaje = 0;
   var _clienteChoices = null;
   var _clienteSelect = document.getElementById('egs_clienteVentaR');
+
+  function actualizarInterfazMonedero() {
+     var totalVenta = parseFloat($('#Resultado').val()) || 0;
+     if (_deVR_saldo > 0) {
+       $('#egs_deVentaR_sinSaldo').hide();
+       $('#egs_deVentaR_conSaldo').show();
+       var maxUsar = Math.min(_deVR_saldo, totalVenta);
+       $('#egs_deVentaR_maxMonto').text('$' + maxUsar.toFixed(2));
+       $('#egs_deVentaR_montoInput').attr('max', maxUsar);
+       
+       var currentVal = parseFloat($('#egs_deVentaR_montoInput').val()) || 0;
+       if (currentVal > maxUsar) {
+           $('#egs_deVentaR_montoInput').val(maxUsar.toFixed(2));
+           $('#egs_montoCanjeElectronicoVenta').val(maxUsar.toFixed(2));
+       }
+     } else {
+       $('#egs_deVentaR_sinSaldo').show();
+       $('#egs_deVentaR_conSaldo').hide();
+       var montoGenerar = (totalVenta * (_deVR_porcentaje / 100)).toFixed(2);
+       $('#egs_deVentaR_montoGenerar').text('$' + montoGenerar);
+     }
+  }
+
+  $('#Resultado').on('change', function() {
+       if ($('#egs_deVentaR_section').is(':visible')) {
+           actualizarInterfazMonedero();
+       }
+  });
 
   // ── Inicializar Choices.js en el select de cliente ──
   function initClienteChoices() {
@@ -2195,23 +2224,15 @@ MODAL AGREGAR PRODUCTO
         $('#egs_deVentaR_content').show();
 
         _deVR_saldo = parseFloat(data.saldo) || 0;
+        _deVR_porcentaje = parseFloat(data.porcentaje) || 0;
         $('#egs_deVentaR_saldo').text('$' + _deVR_saldo.toFixed(2));
         $('#egs_deVentaR_nivel').text('Recompensa vigente: ' + data.porcentaje + '% fijo');
 
-        var totalVenta = parseFloat($('#Resultado').val()) || 0;
-
         if (_deVR_saldo > 0) {
-          $('#egs_deVentaR_sinSaldo').hide();
-          $('#egs_deVentaR_conSaldo').show();
-          var maxUsar = Math.min(_deVR_saldo, totalVenta);
-          $('#egs_deVentaR_maxMonto').text('$' + maxUsar.toFixed(2));
-          $('#egs_deVentaR_montoInput').attr('max', maxUsar).val('');
-        } else {
-          $('#egs_deVentaR_sinSaldo').show();
-          $('#egs_deVentaR_conSaldo').hide();
-          var montoGenerar = (totalVenta * (data.porcentaje / 100)).toFixed(2);
-          $('#egs_deVentaR_montoGenerar').text('$' + montoGenerar);
+            $('#egs_deVentaR_montoInput').val('');
         }
+        
+        actualizarInterfazMonedero();
       },
       error: function() {
         $('#egs_deVentaR_loading').hide();
