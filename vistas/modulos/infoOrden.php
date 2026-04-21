@@ -280,10 +280,12 @@ $(document).ready(function(){
 $item = "id";
 $valor = $_GET["idOrden"];
 $ordenes = controladorOrdenes::ctrMostrarordenesParaValidar($item, $valor);
+$idOrdenActual = isset($_GET["idOrden"]) ? intval($_GET["idOrden"]) : 0;
 
 // Fallback: si faltan parámetros GET, obtenerlos de la orden misma
 if (is_array($ordenes) && !empty($ordenes)) {
 	$_ord0 = $ordenes[0];
+	if ($idOrdenActual <= 0 && isset($_ord0["id"])) $idOrdenActual = intval($_ord0["id"]);
 	if (!isset($_GET["cliente"]))  $_GET["cliente"]  = isset($_ord0["id_usuario"])   ? $_ord0["id_usuario"]   : 0;
 	if (!isset($_GET["empresa"]))  $_GET["empresa"]  = isset($_ord0["id_empresa"])   ? $_ord0["id_empresa"]   : 0;
 	if (!isset($_GET["asesor"]))   $_GET["asesor"]   = isset($_ord0["id_Asesor"])    ? $_ord0["id_Asesor"]    : 0;
@@ -532,7 +534,7 @@ function _egsEstadoClass($estado) {
 								<i class="fab fa-whatsapp"></i> <?php echo htmlspecialchars($_wb['label']); ?>
 							</a>
 							<?php endforeach; ?>
-							<button type="button" class="btn btn-sm btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($valor); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:6px;">
+							<button type="button" class="btn btn-sm btnAgendarCitaDesdeOrden" data-toggle="modal" data-target="#modalCitaRapida" data-orden-id="<?php echo $idOrdenActual; ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:6px;">
 								<i class="fa-solid fa-calendar-plus"></i> Nueva Cita
 							</button>
 						</div>
@@ -1650,7 +1652,7 @@ function _egsEstadoClass($estado) {
 								<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#exampleModal">
 									<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar observación
 								</button>
-								<button type="button" class="btn btnAgendarCitaDesdeOrden" data-orden-id="<?php echo intval($valor); ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:8px;">
+								<button type="button" class="btn btnAgendarCitaDesdeOrden" data-toggle="modal" data-target="#modalCitaRapida" data-orden-id="<?php echo $idOrdenActual; ?>" style="background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;border-radius:8px;">
 									<i class="fa-solid fa-calendar-plus" style="margin-right:4px"></i>Nueva Cita
 								</button>
 							</div>
