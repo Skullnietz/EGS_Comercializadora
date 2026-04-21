@@ -75,8 +75,7 @@
             <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;">
               <i class="fa-solid fa-file-lines" style="margin-right:4px;color:#6366f1;"></i>No. de Orden o Pedido
             </label>
-            <input type="number" class="form-control" id="crOrdenId" placeholder="Ingresa el ID de la orden o pedido (opcional)" min="1"
-              style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 12px;font-size:13px;transition:border-color .2s;">
+            <input type="number" class="form-control" id="crOrdenId" placeholder="Ingresa el ID de la orden o pedido (opcional)" min="1" style="border-radius:8px;border:1.5px solid #e2e8f0;padding:10px 12px;font-size:13px;transition:border-color .2s;" autocomplete="off">
             <div id="crOrdenPreview" style="display:none;margin-top:6px;padding:6px 10px;border-radius:8px;font-size:11px;"></div>
           </div>
 
@@ -794,14 +793,30 @@
       var $modal = $(this);
       var forcedId = parseInt($modal.data('prefill-order-id'), 10) || 0;
       var lockId = !!$modal.data('lock-order-id');
+      
+      // Comportamiento contextual inteligente
+      if (forcedId <= 0) {
+        if (typeof window.EGS_INFO_ORDEN_ID !== "undefined" && window.EGS_INFO_ORDEN_ID > 0) {
+          forcedId = parseInt(window.EGS_INFO_ORDEN_ID, 10);
+          lockId = true; // Desde infoOrden siempre queda ligada a la orden activa
+        } else if (typeof window.URLSearchParams !== "undefined") {
+          var sp = new URLSearchParams(window.location.search || "");
+          var oId = parseInt(sp.get("idOrden"), 10) || parseInt(sp.get("idPedido"), 10) || parseInt(sp.get("orden"), 10) || 0;
+          if (oId > 0 && (window.location.search.indexOf("ruta=infoOrden") !== -1 || window.location.search.indexOf("ruta=infopedido") !== -1)) {
+            forcedId = oId;
+            lockId = true; // Desde infoPedido también queda ligada a la orden activa
+          }
+        }
+      }
+
       var $orden = $('#crOrdenId');
 
       if (forcedId > 0) {
         $orden.val(forcedId).data('orden-forzada', forcedId).prop('disabled', lockId);
-        $orden.trigger('change');
       } else {
-        $orden.prop('disabled', false);
+        $orden.prop('disabled', false).val('').data('orden-forzada', '');
       }
+      $orden.trigger('change');
     });
 
     $('#modalCitaRapida').on('hidden.bs.modal', function(){
