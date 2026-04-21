@@ -668,6 +668,12 @@ function sumarTotalPrecios(){
 	$("#totalVenta").val(sumaTotalPrecio);
 	$("#nuevoTotalVenta").attr("total",sumaTotalPrecio);
 
+	// Al cambiar el total base, re-aplicar canje del monedero si el cliente tiene saldo.
+	if (typeof egsCanjeAplicadoActual !== "undefined") {
+		egsCanjeAplicadoActual = 0;
+		if (typeof aplicarCanjeMonedero === "function") aplicarCanjeMonedero();
+	}
+
 }
 
 /*=============================================
@@ -675,9 +681,11 @@ FUNCION AGREGAR DESCUENTO -
 =============================================*/
 $("#nuevodescuentoventaEntero").change(function(){
 
+	egsCanjeAplicadoActual = 0;
 	agregarDescuento()
 
 	agregarDescuentoPorcentaje()
+	aplicarCanjeMonedero();
 })
 function agregarDescuento(){
 
@@ -700,8 +708,10 @@ FUNCION AGREGAR DESCUENTO -
 =============================================*/
 $("#nuevodescuentoPorcentaje").change(function(){
 
+	egsCanjeAplicadoActual = 0;
 	agregarDescuentoPorcentaje()
-	
+	aplicarCanjeMonedero();
+
 })
 function agregarDescuentoPorcentaje(){
 
@@ -788,8 +798,98 @@ CUANDO CAMBIA EL IMPUESTO
 =============================================*/
 $("#Inversion").change(function(){
 
+	egsCanjeAplicadoActual = 0;
 	agregarInversion();
+	aplicarCanjeMonedero();
 });
+
+/*=============================================
+MONEDERO ELECTRÓNICO EN VENTA RÁPIDA
+Al seleccionar cliente se consulta el saldo.
+El monto ingresado se descuenta del total final de la venta.
+=============================================*/
+var egsSaldoMonederoCliente = 0;
+
+$(document).on("change", "#seleccionarCliente", function(){
+	var idCliente = parseInt($(this).val(), 10);
+	var nombreCliente = $(this).find("option:selected").text();
+
+	// Sincroniza los hidden que espera el backend.
+	$("#id_cliente").val(idCliente > 0 ? idCliente : 0);
+	$("#nombreCliente").val(idCliente > 0 ? nombreCliente : "");
+
+	// Resetear UI del monedero
+	$("#egsMontoCanjeVenta").val(0);
+	$("#egsMonederoMsg").text("");
+	egsSaldoMonederoCliente = 0;
+
+	if (!idCliente || idCliente <= 0) {
+		$("#egsMonederoVentaRapida").hide();
+		$("#egsSaldoMonederoLabel").text("$0.00");
+		aplicarCanjeMonedero();
+		return;
+	}
+
+	$.ajax({
+		url: "ajax/recompensas.ajax.php",
+		method: "POST",
+		data: { idClienteRecompensas: idCliente },
+		dataType: "json",
+		success: function(resp){
+			var saldo = 0;
+			if (resp && typeof resp.saldo !== "undefined") saldo = parseFloat(resp.saldo) || 0;
+			egsSaldoMonederoCliente = saldo;
+			$("#egsSaldoMonederoLabel").text("$" + saldo.toFixed(2));
+			$("#egsMontoCanjeVenta").attr("max", saldo);
+			$("#egsMonederoVentaRapida").show();
+			if (saldo <= 0) {
+				$("#egsMonederoMsg").text("Este cliente no tiene saldo disponible.").css("color","#64748b");
+				$("#egsMontoCanjeVenta").prop("disabled", true);
+			} else {
+				$("#egsMonederoMsg").text("Puedes aplicar hasta $" + saldo.toFixed(2) + " a esta venta.").css("color","#16a34a");
+				$("#egsMontoCanjeVenta").prop("disabled", false);
+			}
+			aplicarCanjeMonedero();
+		},
+		error: function(){
+			$("#egsMonederoVentaRapida").hide();
+			egsSaldoMonederoCliente = 0;
+			aplicarCanjeMonedero();
+		}
+	});
+});
+
+$(document).on("click", "#egsAplicarMaxMonedero", function(){
+	var precioTotalBase = Number($("#nuevoTotalVenta").attr("total")) || 0;
+	var maxAplicable = Math.min(egsSaldoMonederoCliente, precioTotalBase);
+	$("#egsMontoCanjeVenta").val(maxAplicable.toFixed(2));
+	aplicarCanjeMonedero();
+});
+
+$(document).on("input change", "#egsMontoCanjeVenta", function(){
+	aplicarCanjeMonedero();
+});
+
+var egsCanjeAplicadoActual = 0;
+
+function aplicarCanjeMonedero(){
+	var canje = parseFloat($("#egsMontoCanjeVenta").val()) || 0;
+	if (canje < 0) canje = 0;
+	if (canje > egsSaldoMonederoCliente) canje = egsSaldoMonederoCliente;
+
+	// Restaurar total "sin canje" (los mutadores previos ya aplicaron descuentos/inversión sobre #nuevoTotalVenta)
+	var totalVisible = parseFloat($("#nuevoTotalVenta").val()) || 0;
+	var totalSinCanje = totalVisible + egsCanjeAplicadoActual;
+
+	if (canje > totalSinCanje) canje = totalSinCanje > 0 ? totalSinCanje : 0;
+
+	var totalFinal = Math.max(0, totalSinCanje - canje);
+	$("#egsMontoCanjeVenta").val(canje.toFixed(2));
+	$("#nuevoTotalVenta").val(totalFinal.toFixed(2));
+	$("#totalVenta").val(totalFinal.toFixed(2));
+	egsCanjeAplicadoActual = canje;
+}
+
 /*=============================================
 FORMATO AL PRECIO FINAL
 =============================================*/

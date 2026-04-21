@@ -42,6 +42,25 @@ class ImprimirTicketsVentasD{
 
       $codigo =  $ventas["id"];
       $PagoTotal = $ventas["pago"];
+
+      // ── Canje de dinero electrónico aplicado a esta venta (si existe) ──
+      $montoCanjeVenta = 0;
+      if (isset($ventas["id"]) && intval($ventas["id"]) > 0) {
+          if (!class_exists('ModeloRecompensas')) {
+              @require_once __DIR__ . "/../../../modelos/recompensas.modelo.php";
+          }
+          if (class_exists('ModeloRecompensas') && method_exists('ModeloRecompensas', 'mdlObtenerCanjeVenta')) {
+              try {
+                  $canjeVenta = ModeloRecompensas::mdlObtenerCanjeVenta(intval($ventas["id"]));
+                  if ($canjeVenta && isset($canjeVenta["monto"])) {
+                      $montoCanjeVenta = abs(floatval($canjeVenta["monto"]));
+                  }
+              } catch (Exception $e) {
+                  $montoCanjeVenta = 0;
+              }
+          }
+      }
+      $subtotalAntesCanje = floatval($PagoTotal) + floatval($montoCanjeVenta);
       
       $fecha = date_create($ventas["fecha"]);
       $nuevaFecha = date_format($fecha, 'd/m/Y H:i:s');
@@ -170,10 +189,23 @@ class ImprimirTicketsVentasD{
 
         }              
               
-                echo'<tr>                            
+                if ($montoCanjeVenta > 0) {
+                    echo '<tr>
+                      <td>&nbsp;</td>
+                      <td align="right">Subtotal:</td>
+                      <td align="right">$'.number_format($subtotalAntesCanje, 2).'</td>
+                    </tr>
+                    <tr>
+                      <td>&nbsp;</td>
+                      <td align="right">Dinero electrónico:</td>
+                      <td align="right">-$'.number_format($montoCanjeVenta, 2).'</td>
+                    </tr>';
+                }
+
+                echo'<tr>
                   <td>&nbsp;</td>
                   <td align="right"><b>TOTAL:</b></td>
-                  <td align="right"><b>$'.$PagoTotal.'</b></td>
+                  <td align="right"><b>$'.number_format(floatval($PagoTotal), 2).'</b></td>
                 </tr>';
         foreach ($productos as $key => $itemDos) {
 

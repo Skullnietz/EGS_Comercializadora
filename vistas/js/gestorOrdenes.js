@@ -392,88 +392,63 @@ $(".guardarOrden").click(function(){
 
 	   		if(arrayFiles.length > 0 && $(".rutaOrden").val() != ""){
 
-	   			var listaMultimedia = [];
-	   			var finalFor = 0;
-	   			var huboErrorMultimedia = false;
-
-	   			for(var i = 0; i < arrayFiles.length; i++){
-
-	   				var datosMultimedia = new FormData();
-	   				datosMultimedia.append("file", arrayFiles[i]);
-					datosMultimedia.append("ruta", $(".rutaOrden").val());
-
-					$.ajax({
-						url:"ajax/ordenes.ajax.php",
-						method: "POST",
-						data: datosMultimedia,
-						cache: false,
-						contentType: false,
-						processData: false,
-						beforeSend: function(){
-
-							$(".modal-footer .preload").html(`
-
-
-								<center>
-
-									<img src="vistas/img/plantilla/status.gif" id="status" />
-									<br>
-
-								</center>
-
-							`);
-
-						},
-						success: function(respuesta){
-
-							$("#status").remove();
-
-							if(typeof respuesta === "string" && respuesta.indexOf("error::") === 0){
-								huboErrorMultimedia = true;
-								mostrarErrorImagen(respuesta.replace("error::", ""));
-								return;
-							}
-							
-							listaMultimedia.push({"foto" : respuesta.substr(3)})
-							multimediaOrden = JSON.stringify(listaMultimedia);
-
-							if(multimediaOrden == null){
-
-							 	swal({
-							      title: "El campo de multimedia no debe estar vacío",
-							      type: "error",
-							      confirmButtonText: "¡Cerrar!"
-							    });
-
-							 	return;
-
-							}
-							if ($('.cliente').val().trim() === '') {
-							       
-							       swal({
-							      title: "El campo de cliente no debe ir vacío",
-							      type: "error",
-							      confirmButtonText: "¡Cerrar!"
-							    });
-
-								return;
-
-							}
-
-							if(!huboErrorMultimedia && (finalFor + 1) == arrayFiles.length){
-
-								agregarMiOrden(multimediaOrden);
-								finalFor = 0;
-
-							}
-
-							finalFor++;
-
-						}
-
-					})
-
+	   			if ($('.cliente').val().trim() === '') {
+	   				swal({ title: "El campo de cliente no debe ir vacío", type: "error", confirmButtonText: "¡Cerrar!" });
+	   				return;
 	   			}
+
+	   			$(".modal-footer .preload").html('<center><img src="vistas/img/plantilla/status.gif" id="status" /><br></center>');
+
+	   			// Subir TODAS las imágenes en paralelo, conservando el orden de arrayFiles.
+	   			var uploadsOrdenados = arrayFiles.map(function(file){
+	   				var fd = new FormData();
+	   				fd.append("file", file);
+	   				fd.append("ruta", $(".rutaOrden").val());
+	   				return $.ajax({
+	   					url: "ajax/ordenes.ajax.php",
+	   					method: "POST",
+	   					data: fd,
+	   					cache: false,
+	   					contentType: false,
+	   					processData: false
+	   				});
+	   			});
+
+	   			$.when.apply($, uploadsOrdenados).then(function(){
+	   				$("#status").remove();
+	   				// Normalizar argumentos: si hay un solo upload, arguments[0] es la respuesta directa.
+	   				var respuestas = (uploadsOrdenados.length === 1)
+	   					? [arguments[0]]
+	   					: Array.prototype.slice.call(arguments).map(function(a){ return a[0]; });
+
+	   				var listaMultimedia = [];
+	   				var hayError = false;
+	   				for (var i = 0; i < respuestas.length; i++) {
+	   					var respuesta = respuestas[i];
+	   					if (typeof respuesta === "string" && respuesta.indexOf("error::") === 0) {
+	   						hayError = true;
+	   						mostrarErrorImagen(respuesta.replace("error::", ""));
+	   						break;
+	   					}
+	   					if (typeof respuesta === "string" && respuesta.length > 3) {
+	   						listaMultimedia.push({ "foto": respuesta.substr(3) });
+	   					}
+	   				}
+
+	   				if (hayError) return;
+
+	   				if (listaMultimedia.length === 0) {
+	   					swal({ title: "No se pudo procesar ninguna imagen", type: "error", confirmButtonText: "¡Cerrar!" });
+	   					return;
+	   				}
+
+	   				multimediaOrden = JSON.stringify(listaMultimedia);
+	   				agregarMiOrden(multimediaOrden);
+
+	   			}, function(xhr){
+	   				$("#status").remove();
+	   				mostrarErrorImagen("Error al subir una o más imágenes. Intenta de nuevo.");
+	   			});
 
 	   		}
 
@@ -1057,75 +1032,58 @@ $(".guardarCambiosOrden").click(function(){
 	PREGUNTAMOS SI VIENEN IMÁGENES PARA MULTIMEDIA 
 	=============================================*/
 	if (arrayFiles.length > 0 && $("#modalEditarOrden .rutaOrden").val() != ""){
-		
-		var listaMultimedia = [];
-		var finalFor = 0;
-		var huboErrorMultimedia = false;
 
-		for(var i = 0; i < arrayFiles.length; i++){
-			var datosMultimedia = new FormData();
-			datosMultimedia.append("file", arrayFiles[i]);
-			datosMultimedia.append("ruta", $("#modalEditarOrden .rutaOrden").val());
+		$(".modal-footer .preload").html('<center><img src="vistas/img/plantilla/status.gif" id="status" /><br></center>');
 
-			$.ajax({
-				url:"ajax/ordenes.ajax.php",
+		var uploadsOrdenadosEdit = arrayFiles.map(function(file){
+			var fd = new FormData();
+			fd.append("file", file);
+			fd.append("ruta", $("#modalEditarOrden .rutaOrden").val());
+			return $.ajax({
+				url: "ajax/ordenes.ajax.php",
 				method: "POST",
-				data: datosMultimedia,
+				data: fd,
 				cache: false,
 				contentType: false,
-				processData: false,
-				beforeSend: function(){
-					$(".modal-footer .preload").html(`
+				processData: false
+			});
+		});
 
+		$.when.apply($, uploadsOrdenadosEdit).then(function(){
+			$("#status").remove();
+			var respuestas = (uploadsOrdenadosEdit.length === 1)
+				? [arguments[0]]
+				: Array.prototype.slice.call(arguments).map(function(a){ return a[0]; });
 
-						<center>
-
-							<img src="vistas/img/plantilla/status.gif" id="status" />
-							<br>
-
-						</center>
-
-					`);
-			},
-
-			success: function(respuesta){
-
-				$("#status").remove();
-
-				if(typeof respuesta === "string" && respuesta.indexOf("error::") === 0){
-					huboErrorMultimedia = true;
+			var listaMultimedia = [];
+			var hayError = false;
+			for (var i = 0; i < respuestas.length; i++) {
+				var respuesta = respuestas[i];
+				if (typeof respuesta === "string" && respuesta.indexOf("error::") === 0) {
+					hayError = true;
 					mostrarErrorImagen(respuesta.replace("error::", ""));
-					return;
+					break;
 				}
-
-				listaMultimedia.push({"foto" : respuesta.substr(3)});
-				multimediaFisica = JSON.stringify(listaMultimedia);
-				if(localStorage.getItem("multimediaFisica") != null){
-					var jsonLocalStorage = JSON.parse(localStorage.getItem("multimediaFisica"));
-					var jsonMultimediaFisica = listaMultimedia.concat(jsonLocalStorage);
-					multimediaFisica = JSON.stringify(jsonMultimediaFisica);												
+				if (typeof respuesta === "string" && respuesta.length > 3) {
+					listaMultimedia.push({ "foto": respuesta.substr(3) });
 				}
-				if(multimediaFisica == null){
-
-					swal({
-						title: "El campo de multimedia no debe estar vacío",
-						type: "error",
-						confirmButtonText: "¡Cerrar!"
-					});
-						return;
-				}
-				if(!huboErrorMultimedia && (finalFor + 1) == arrayFiles.length){
-
-					editarMiOrden(multimediaFisica);
-					finalFor = 0;
-
-				}
-
-				finalFor++;		
 			}
 
-			})
-		}
+			if (hayError) return;
+
+			// Combinar con las fotos físicas ya existentes (persistidas en localStorage por el editor)
+			if (localStorage.getItem("multimediaFisica") != null) {
+				var jsonLocalStorage = JSON.parse(localStorage.getItem("multimediaFisica"));
+				listaMultimedia = listaMultimedia.concat(jsonLocalStorage);
+			}
+
+			multimediaFisica = JSON.stringify(listaMultimedia);
+			editarMiOrden(multimediaFisica);
+
+		}, function(xhr){
+			$("#status").remove();
+			mostrarErrorImagen("Error al subir una o más imágenes. Intenta de nuevo.");
+		});
 
 	}else{
 
@@ -1134,11 +1092,9 @@ $(".guardarCambiosOrden").click(function(){
 
 		multimediaFisica = JSON.stringify(jsonLocalStorage);
 
-		editarMiOrden(multimediaFisica);	
+		editarMiOrden(multimediaFisica);
 
 	}
-
-	editarMiOrden(multimediaVirtual);	
 
 	}else{
 

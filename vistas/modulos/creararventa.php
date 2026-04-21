@@ -160,10 +160,33 @@
 
                     
                     <span style="border-radius: 0px 5px 5px 0px;" class="input-group-addon"><button type="button"  class="btn btn-default btn-xs" data-toggle="modal" data-target="#modalAgregarUsuario" data-dismiss="modal">Agregar cliente</button></span>
-                  
+
                   </div>
-                
+
                 </div>
+
+                <!--=====================================
+                MONEDERO ELECTRÓNICO DEL CLIENTE (Canje en venta rápida)
+                ======================================-->
+                <div id="egsMonederoVentaRapida" class="form-group" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;margin-bottom:10px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <span style="font-weight:600;color:#b45309;font-size:13px;"><i class="fa-solid fa-wallet"></i> Dinero electrónico</span>
+                    <span style="font-size:12px;color:#64748b;">Saldo disponible: <b id="egsSaldoMonederoLabel" style="color:#16a34a;">$0.00</b></span>
+                  </div>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-addon"><i class="fa-solid fa-coins"></i></span>
+                    <input type="number" id="egsMontoCanjeVenta" name="montoCanjeElectronicoVenta" class="form-control" min="0" step="0.01" value="0" placeholder="Monto a aplicar">
+                    <span class="input-group-btn">
+                      <button type="button" id="egsAplicarMaxMonedero" class="btn btn-warning btn-sm">Usar todo</button>
+                    </span>
+                  </div>
+                  <small id="egsMonederoMsg" style="color:#64748b;display:block;margin-top:4px;"></small>
+                </div>
+
+                <!-- Hidden inputs para compatibilidad con backend (id_cliente + nombreCliente + correo) -->
+                <input type="hidden" id="id_cliente" name="id_cliente" value="0">
+                <input type="hidden" id="nombreCliente" name="nombreCliente" value="">
+                <input type="hidden" id="correoClienteVenta" name="correo" value="">
 
                 <!--=====================================
                 ENTRADA PARA AGREGAR PRODUCTO

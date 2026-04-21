@@ -934,7 +934,25 @@ class ControladorVentas{
 
 				$respuesta = ModeloVentas::mdlIngresarVentaDinamica($tablaVentas,$datos);
 
+				// ── Recompensas: canjear dinero electrónico si aplica ──
+				$_egs_idClienteVentaDin = isset($_POST["id_cliente"]) ? intval($_POST["id_cliente"]) : intval($_POST["seleccionarCliente"]);
+				$_egs_montoCanjeVentaDin = isset($_POST["montoCanjeElectronicoVenta"]) ? floatval($_POST["montoCanjeElectronicoVenta"]) : 0;
 
+				if ($respuesta == "ok" && $_egs_montoCanjeVentaDin > 0 && $_egs_idClienteVentaDin > 0) {
+					try {
+						require_once "recompensas.controlador.php";
+						require_once __DIR__ . "/../modelos/recompensas.modelo.php";
+						$ultimaVenta = ModeloVentas::mdlObtenerUltimaVenta(intval($_POST["empresa"]));
+						if ($ultimaVenta > 0) {
+							$canjeExistente = ModeloRecompensas::mdlObtenerCanjeVenta($ultimaVenta);
+							if (!$canjeExistente) {
+								ControladorRecompensas::ctrCanjearRecompensaVenta($_egs_idClienteVentaDin, $ultimaVenta, $_egs_montoCanjeVentaDin);
+							}
+						}
+					} catch (Exception $e) {
+						// No bloquear la venta si falla el canje
+					}
+				}
 
 				if ($respuesta == "ok") {
 

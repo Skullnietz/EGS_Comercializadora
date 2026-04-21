@@ -251,10 +251,11 @@ $(document).ready(function(){
 /*=============================================
 SUMAR TOTAL DE LAS INVERSIONES
 =============================================*/
-$(document).on("change", ".precioNuevainversion", function() {
+$(document).on("change input", ".precioNuevainversion", function() {
 	var sum = 0;
 	$(".precioNuevainversion").each(function(){
-		sum += +$(this).val();
+		var v = parseFloat($(this).val());
+		if (!isNaN(v)) sum += v;
 	});
 	$("#costoTotalInversiones").val(sum);
 
@@ -263,6 +264,22 @@ $(document).on("change", ".precioNuevainversion", function() {
 	listarObservaciones();
 	listaPartidasTecncioDos();
 	listarinversion();
+});
+
+/*=============================================
+GARANTIZAR QUE EL JSON DE INVERSIONES SE SERIALICE
+ANTES DE ENVIAR EL FORMULARIO DE OBSERVACIONES
+=============================================*/
+$(document).on("submit", "#formObservaciones", function() {
+	if (typeof _egsIsAdmin === 'undefined' || _egsIsAdmin) {
+		var sum = 0;
+		$(".precioNuevainversion").each(function(){
+			var v = parseFloat($(this).val());
+			if (!isNaN(v)) sum += v;
+		});
+		$("#costoTotalInversiones").val(sum);
+		listarinversion();
+	}
 });
 
 /*=============================================
@@ -406,5 +423,29 @@ $(document).on("click", ".eliminarObservacion", function(){
 			window.location = window.location.pathname + window.location.search + "&idobs=" + idObs;
 		}
 	});
+});
+
+/*=============================================
+AGENDAR CITA DESDE INFO ORDEN
+Reutiliza #modalCitaRapida (definido en cabezote/calendario.php)
+y prellena el No. de Orden usando la API ya existente (data-orden-forzada).
+=============================================*/
+$(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
+	e.preventDefault();
+	var ordenId = $(this).data("orden-id");
+	var $modal = $("#modalCitaRapida");
+	if ($modal.length === 0) {
+		if (typeof swal === "function") {
+			swal({ icon: "error", title: "Modal no disponible", text: "El widget de citas no está cargado en esta pantalla." });
+		}
+		return;
+	}
+	var $inputOrden = $("#crOrdenId");
+	if ($inputOrden.length && ordenId) {
+		$inputOrden.val(ordenId);
+		$inputOrden.data("orden-forzada", ordenId);
+		$inputOrden.trigger("change");
+	}
+	$modal.modal("show");
 });
 
