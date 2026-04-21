@@ -436,7 +436,13 @@ $(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
 	var $modal = $("#modalCitaRapida");
 	if ($modal.length === 0) {
 		if (typeof swal === "function") {
-			swal({ icon: "error", title: "Modal no disponible", text: "El widget de citas no está cargado en esta pantalla." });
+			swal({
+				title: "Modal no disponible",
+				text: "El widget de citas no está cargado en esta pantalla.",
+				type: "error"
+			});
+		} else {
+			alert("El widget de citas no está cargado en esta pantalla.");
 		}
 		return;
 	}
