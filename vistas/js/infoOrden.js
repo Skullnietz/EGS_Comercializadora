@@ -477,6 +477,8 @@ $(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
 			$inputOrden.val(ordenId);
 			$inputOrden.data("orden-forzada", ordenId);
 			$inputOrden.prop("disabled", true);
+			$modal.data("prefill-order-id", ordenId);
+			$modal.data("lock-order-id", true);
 			// Reaplicar al mostrarse por si otro handler limpia el campo durante la apertura.
 			$modal.off("shown.bs.modal.infoOrdenPrefill").on("shown.bs.modal.infoOrdenPrefill", function(){
 				$inputOrden.val(ordenId);
@@ -487,6 +489,8 @@ $(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
 		} else {
 			$inputOrden.prop("disabled", false);
 			$inputOrden.data("orden-forzada", "");
+			$modal.data("prefill-order-id", "");
+			$modal.data("lock-order-id", false);
 			$modal.off("shown.bs.modal.infoOrdenPrefill");
 		}
 		$inputOrden.trigger("change");

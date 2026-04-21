@@ -774,6 +774,7 @@
   $(document).on('click', '#egsCalQuickAdd', function(e){
     e.preventDefault();
     e.stopPropagation();
+    $('#modalCitaRapida').data('prefill-order-id', '').data('lock-order-id', false);
     $('#crOrdenId').prop('disabled', false).val('').data('orden-forzada', '');
     $('#crOrdenId').trigger('change');
     // Cerrar el dropdown de Bootstrap correctamente
@@ -789,7 +790,22 @@
     // Mover el modal fuera del navbar al body para evitar conflictos de z-index
     $('#modalCitaRapida').appendTo('body');
 
+    $('#modalCitaRapida').on('show.bs.modal', function(){
+      var $modal = $(this);
+      var forcedId = parseInt($modal.data('prefill-order-id'), 10) || 0;
+      var lockId = !!$modal.data('lock-order-id');
+      var $orden = $('#crOrdenId');
+
+      if (forcedId > 0) {
+        $orden.val(forcedId).data('orden-forzada', forcedId).prop('disabled', lockId);
+        $orden.trigger('change');
+      } else {
+        $orden.prop('disabled', false);
+      }
+    });
+
     $('#modalCitaRapida').on('hidden.bs.modal', function(){
+      $(this).data('prefill-order-id', '').data('lock-order-id', false);
       $('#crOrdenId').prop('disabled', false).val('').data('orden-forzada', '');
       $('#crOrdenPreview').hide();
       $('#crOrdenId').trigger('change');
