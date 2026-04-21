@@ -398,137 +398,36 @@ $('#minus10').click(function(){
 
 
     
-// Multiplicar precio segun cantidad
- $('#cantidadUno, #multiplo1').change(function() {
-     var cantidadUno = $("#cantidadUno").val();
-     var precioUno = $("#precioUno").val();  
-     var multiplo1 = Number(cantidadUno) * Number(precioUno);
-     $("#multiplo1").val(multiplo1);
- })
- $('#cantidadDos, #multiplo2').change(function() {
-     var cantidadDos = $("#cantidadDos").val();
-     var precioDos = $("#precioDos").val();  
-     var multiplo2 = Number(cantidadDos) * Number(precioDos);
-     $("#multiplo2").val(multiplo2);
- })
- $('#cantidadTres, #multiplo3').change(function() {
-     var cantidadTres = $("#cantidadTres").val();
-     var precioTres = $("#precioTres").val();  
-     var multiplo3 = Number(cantidadTres) * Number(precioTres);
-     $("#multiplo3").val(multiplo3);
- })
-  $('#cantidadCuatro, #multiplo4').change(function() {
-     var cantidadCuatro = $("#cantidadCuatro").val();
-     var precioCuatro = $("#precioCuatro").val();  
-     var multiplo4 = Number(cantidadCuatro) * Number(precioCuatro);
-     $("#multiplo4").val(multiplo4);
- })
- 
- $('#cantidadCinco, #multiplo5').change(function() {
-     var cantidadCinco = $("#cantidadCinco").val();
-     var precioCinco = $("#precioCinco").val();  
-     var multiplo5 = Number(cantidadCinco) * Number(precioCinco);
-     $("#multiplo5").val(multiplo5);
- })
- 
-  $('#cantidadSeis, #multiplo6').change(function() {
-     var cantidadSeis = $("#cantidadSeis").val();
-     var precioSeis = $("#precioSeis").val();  
-     var multiplo6 = Number(cantidadSeis) * Number(precioSeis);
-     $("#multiplo6").val(multiplo6);
- })
-  $('#cantidadSiete, #multiplo7').change(function() {
-     var cantidadSiete = $("#cantidadSiete").val();
-     var precioSiete = $("#precioSiete").val();  
-     var multiplo7 = Number(cantidadSiete) * Number(precioSiete);
-     $("#multiplo7").val(multiplo7);
- })
-  $('#cantidadOcho, #multiplo8').change(function() {
-     var cantidadOcho = $("#cantidadOcho").val();
-     var precioOcho = $("#precioOcho").val();  
-     var multiplo8 = Number(cantidadOcho) * Number(precioOcho);
-     $("#multiplo8").val(multiplo8);
- })
-  $('#cantidadNueve, #multiplo9').change(function() {
-     var cantidadNueve = $("#cantidadNueve").val();
-     var precioNueve = $("#precioNueve").val();  
-     var multiplo9 = Number(cantidadNueve) * Number(precioNueve);
-     $("#multiplo9").val(multiplo9);
- })
-  $('#cantidadDiez, #multiplo10').change(function() {
-     var cantidadDiez = $("#cantidadDiez").val();
-     var precioDiez = $("#precioDiez").val();  
-     var multiplo10 = Number(cantidadDiez) * Number(precioDiez);
-     $("#multiplo10").val(multiplo10);
- })
- 
-// Sumar segun los cambios en los precios
-              $("#cantidadUno,#cantidadDos,#cantidadTres,#cantidadCuatro,#cantidadCinco,#cantidadSeis,#cantidadSiete,#cantidadOcho,#cantidadNueve,#cantidadDiez").change(function() {
-             var multiplo1= $("#multiplo1").val();
-             var multiplo2= $("#multiplo2").val();
-             var multiplo3= $("#multiplo3").val();
-             var multiplo4= $("#multiplo4").val();
-             var multiplo5= $("#multiplo5").val();
-             var multiplo6= $("#multiplo6").val();
-             var multiplo7= $("#multiplo7").val();
-             var multiplo8= $("#multiplo8").val();
-             var multiplo9= $("#multiplo9").val();
-             var multiplo10= $("#multiplo10").val();
-             var resultado= Number(multiplo1) + Number(multiplo2) + Number(multiplo3)+ Number(multiplo4)+ Number(multiplo5)+ Number(multiplo6)+ Number(multiplo7)+ Number(multiplo8)+ Number(multiplo9)+ Number(multiplo10);
-              $("#Resultado").val(resultado).trigger('change');
-              $("#Resultado").addClass('positivo');
-        setTimeout(function () {
-            $("#Resultado").removeClass('positivo');
-        }, 2000);
-              
-               // Sumar cantidades
-             var Uno= $("#cantidadUno").val();
-             var Dos= $("#cantidadDos").val();
-             var Tres= $("#cantidadTres").val();
-             var Cuatro= $("#cantidadCuatro").val();
-             var Cinco= $("#cantidadCinco").val();
-             var Seis= $("#cantidadSeis").val();
-             var Siete= $("#cantidadSiete").val();
-             var Ocho= $("#cantidadOcho").val();
-             var Nueve= $("#cantidadNueve").val();
-             var Diez= $("#cantidadDiez").val();
-             var resultado2= Number(Uno) + Number(Dos) + Number(Tres)+ Number(Cuatro)+ Number(Cinco)+ Number(Seis)+ Number(Siete)+ Number(Ocho)+ Number(Nueve)+ Number(Diez);
-              $("#cantidadProductos").val(resultado2);
-})
- $(".minus").click(function() {
-             var multiplo1= $("#multiplo1").val();
-             var multiplo2= $("#multiplo2").val();
-             var multiplo3= $("#multiplo3").val();
-             var multiplo4= $("#multiplo4").val();
-             var multiplo5= $("#multiplo5").val();
-             var multiplo6= $("#multiplo6").val();
-             var multiplo7= $("#multiplo7").val();
-             var multiplo8= $("#multiplo8").val();
-             var multiplo9= $("#multiplo9").val();
-             var multiplo10= $("#multiplo10").val();
-             var resultado= Number(multiplo1) + Number(multiplo2) + Number(multiplo3)+ Number(multiplo4)+ Number(multiplo5)+ Number(multiplo6)+ Number(multiplo7)+ Number(multiplo8)+ Number(multiplo9)+ Number(multiplo10);
-              $("#Resultado").val(resultado).trigger('change');
-              $("#Resultado").addClass('negativo');
-        setTimeout(function () {
-            $("#Resultado").removeClass('negativo');
-        }, 2000);
-              
-               // Sumar cantidades
-             var Uno= $("#cantidadUno").val();
-             var Dos= $("#cantidadDos").val();
-             var Tres= $("#cantidadTres").val();
-             var Cuatro= $("#cantidadCuatro").val();
-             var Cinco= $("#cantidadCinco").val();
-             var Seis= $("#cantidadSeis").val();
-             var Siete= $("#cantidadSiete").val();
-             var Ocho= $("#cantidadOcho").val();
-             var Nueve= $("#cantidadNueve").val();
-             var Diez= $("#cantidadDiez").val();
-             var resultado2= Number(Uno) + Number(Dos) + Number(Tres)+ Number(Cuatro)+ Number(Cinco)+ Number(Seis)+ Number(Siete)+ Number(Ocho)+ Number(Nueve)+ Number(Diez);
-              $("#cantidadProductos").val(resultado2);
-              
-              
-})
+function recalcularTotalVR() {
+    var granTotal = 0;
+    var totalProductos = 0;
+    var sufijos = ['Uno','Dos','Tres','Cuatro','Cinco','Seis','Siete','Ocho','Nueve','Diez'];
+    for(var i=0; i<10; i++){
+        var s = sufijos[i];
+        var c = parseFloat($('#cantidad'+s).val()) || 0;
+        var p = parseFloat($('#precio'+s).val()) || 0;
+        var mult = c * p;
+        $('#multiplo'+(i+1)).val(mult);
+        granTotal += mult;
+        totalProductos += c;
+    }
+    
+    $('#Resultado').val(granTotal).trigger('change');
+    $('#Resultado').addClass('positivo');
+    setTimeout(function () { $('#Resultado').removeClass('positivo'); }, 2000);
+    $('#cantidadProductos').val(totalProductos);
+}
+
+var selectoresArray = [];
+['Uno','Dos','Tres','Cuatro','Cinco','Seis','Siete','Ocho','Nueve','Diez'].forEach(function(s){
+    selectoresArray.push('#cantidad'+s);
+    selectoresArray.push('#precio'+s);
+});
+$(document).on('change input', selectoresArray.join(','), recalcularTotalVR);
+
+$(".minus").click(function() {
+    setTimeout(recalcularTotalVR, 50);
+});
 // Cambio a dar al cliente
  $('#pagoCliente').keyup(function() {
      var dinerocliente = $("#pagoCliente").val();
