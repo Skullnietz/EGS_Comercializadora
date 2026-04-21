@@ -430,14 +430,34 @@ AGENDAR CITA DESDE INFO ORDEN
 Reutiliza #modalCitaRapida (definido en cabezote/calendario.php)
 y prellena el No. de Orden usando la API ya existente (data-orden-forzada).
 =============================================*/
+function _egsResolveOrderIdFromContext($btn){
+	var ordenId = parseInt($btn.data("orden-id"), 10) || 0;
+
+	if (ordenId <= 0) {
+		ordenId = parseInt($btn.attr("data-orden-id"), 10) || 0;
+	}
+
+	if (ordenId <= 0 && typeof window.EGS_INFO_ORDEN_ID !== "undefined") {
+		ordenId = parseInt(window.EGS_INFO_ORDEN_ID, 10) || 0;
+	}
+
+	if (ordenId <= 0 && typeof window.URLSearchParams !== "undefined") {
+		var sp = new URLSearchParams(window.location.search || "");
+		ordenId = parseInt(sp.get("idOrden"), 10) || parseInt(sp.get("id_orden"), 10) || parseInt(sp.get("orden"), 10) || 0;
+	}
+
+	if (ordenId <= 0) {
+		var m = (window.location.search || "").match(/[?&](idOrden|id_orden|orden)=([0-9]+)/i);
+		if (m && m[2]) ordenId = parseInt(m[2], 10) || 0;
+	}
+
+	return ordenId;
+}
+
 $(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
 	e.preventDefault();
-	var ordenId = parseInt($(this).data("orden-id"), 10) || 0;
-	if (ordenId <= 0 && typeof window.URLSearchParams !== "undefined") {
-		var _sp = new URLSearchParams(window.location.search || "");
-		var _idFromUrl = parseInt(_sp.get("idOrden"), 10) || 0;
-		if (_idFromUrl > 0) ordenId = _idFromUrl;
-	}
+	var $btn = $(this);
+	var ordenId = _egsResolveOrderIdFromContext($btn);
 	var $modal = $("#modalCitaRapida");
 	if ($modal.length === 0) {
 		if (typeof swal === "function") {

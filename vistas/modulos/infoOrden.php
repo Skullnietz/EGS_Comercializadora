@@ -281,6 +281,7 @@ $item = "id";
 $valor = $_GET["idOrden"];
 $ordenes = controladorOrdenes::ctrMostrarordenesParaValidar($item, $valor);
 $idOrdenActual = isset($_GET["idOrden"]) ? intval($_GET["idOrden"]) : 0;
+echo '<script>window.EGS_INFO_ORDEN_ID=' . intval($idOrdenActual) . ';</script>';
 
 // Fallback: si faltan parámetros GET, obtenerlos de la orden misma
 if (is_array($ordenes) && !empty($ordenes)) {
