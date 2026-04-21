@@ -433,6 +433,11 @@ y prellena el No. de Orden usando la API ya existente (data-orden-forzada).
 $(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
 	e.preventDefault();
 	var ordenId = parseInt($(this).data("orden-id"), 10) || 0;
+	if (ordenId <= 0 && typeof window.URLSearchParams !== "undefined") {
+		var _sp = new URLSearchParams(window.location.search || "");
+		var _idFromUrl = parseInt(_sp.get("idOrden"), 10) || 0;
+		if (_idFromUrl > 0) ordenId = _idFromUrl;
+	}
 	var $modal = $("#modalCitaRapida");
 	if ($modal.length === 0) {
 		if (typeof swal === "function") {
@@ -452,9 +457,17 @@ $(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
 			$inputOrden.val(ordenId);
 			$inputOrden.data("orden-forzada", ordenId);
 			$inputOrden.prop("disabled", true);
+			// Reaplicar al mostrarse por si otro handler limpia el campo durante la apertura.
+			$modal.off("shown.bs.modal.infoOrdenPrefill").on("shown.bs.modal.infoOrdenPrefill", function(){
+				$inputOrden.val(ordenId);
+				$inputOrden.data("orden-forzada", ordenId);
+				$inputOrden.prop("disabled", true);
+				$inputOrden.trigger("change");
+			});
 		} else {
 			$inputOrden.prop("disabled", false);
 			$inputOrden.data("orden-forzada", "");
+			$modal.off("shown.bs.modal.infoOrdenPrefill");
 		}
 		$inputOrden.trigger("change");
 	}
