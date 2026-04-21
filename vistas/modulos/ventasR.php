@@ -475,7 +475,7 @@ $('#minus10').click(function(){
              var multiplo9= $("#multiplo9").val();
              var multiplo10= $("#multiplo10").val();
              var resultado= Number(multiplo1) + Number(multiplo2) + Number(multiplo3)+ Number(multiplo4)+ Number(multiplo5)+ Number(multiplo6)+ Number(multiplo7)+ Number(multiplo8)+ Number(multiplo9)+ Number(multiplo10);
-              $("#Resultado").val(resultado);
+              $("#Resultado").val(resultado).trigger('change');
               $("#Resultado").addClass('positivo');
         setTimeout(function () {
             $("#Resultado").removeClass('positivo');
@@ -507,7 +507,7 @@ $('#minus10').click(function(){
              var multiplo9= $("#multiplo9").val();
              var multiplo10= $("#multiplo10").val();
              var resultado= Number(multiplo1) + Number(multiplo2) + Number(multiplo3)+ Number(multiplo4)+ Number(multiplo5)+ Number(multiplo6)+ Number(multiplo7)+ Number(multiplo8)+ Number(multiplo9)+ Number(multiplo10);
-              $("#Resultado").val(resultado);
+              $("#Resultado").val(resultado).trigger('change');
               $("#Resultado").addClass('negativo');
         setTimeout(function () {
             $("#Resultado").removeClass('negativo');
