@@ -1,431 +1,184 @@
-<p align="center">
-  <img src="vistas/img/plantilla/logo.png" alt="EGS Logo" width="180">
-</p>
+# EGS Comercializadora
 
-<h1 align="center">EGS Equipo de Computo — Panel de Administracion</h1>
+Panel de administracion interno para la operacion comercial de EGS Equipo de Computo. El proyecto centraliza procesos de ordenes de servicio, ventas, pedidos, cotizaciones, clientes, inventario, comisiones, metas, tickets y administracion general.
 
-<p align="center">
-  Sistema ERP/CRM interno para la gestion integral de ordenes de servicio, ventas, compras, inventario, cotizaciones, comisiones y clientes de <strong>EGS Equipo de Computo</strong>.
-</p>
+## Resumen
 
-<p align="center">
-  <img src="https://img.shields.io/badge/PHP-7.1+-777BB4?logo=php&logoColor=white" alt="PHP">
-  <img src="https://img.shields.io/badge/MySQL-3%20databases-4479A1?logo=mysql&logoColor=white" alt="MySQL">
-  <img src="https://img.shields.io/badge/AdminLTE-2-3C8DBC?logo=bootstrap&logoColor=white" alt="AdminLTE">
-  <img src="https://img.shields.io/badge/jQuery-3.6.0-0769AD?logo=jquery&logoColor=white" alt="jQuery">
-  <img src="https://img.shields.io/badge/License-Privado-red" alt="License">
-</p>
+- Arquitectura MVC en PHP sin framework.
+- Frontend basado en AdminLTE 2, Bootstrap 3 y jQuery.
+- Ruteo por `mod_rewrite` de Apache y lista blanca en `config/routes.php`.
+- Integracion con 3 bases de datos MySQL.
+- Soporte para PDFs, correo SMTP y webhook/servicios auxiliares.
 
----
+## Alcance funcional
 
-## Tabla de Contenidos
+Los modulos principales del sistema incluyen:
 
-- [Descripcion General](#descripcion-general)
-- [Arquitectura](#arquitectura)
-- [Stack Tecnologico](#stack-tecnologico)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Modulos Principales](#modulos-principales)
-- [Base de Datos](#base-de-datos)
-- [Instalacion y Configuracion](#instalacion-y-configuracion)
-- [Variables de Entorno](#variables-de-entorno)
-- [Sistema de Rutas](#sistema-de-rutas)
-- [Autenticacion y Roles](#autenticacion-y-roles)
-- [Librerias Externas](#librerias-externas)
-- [Estructura de Archivos Clave](#estructura-de-archivos-clave)
-- [Despliegue](#despliegue)
-- [Roadmap](#roadmap)
+- Ordenes de servicio y seguimiento.
+- Ventas, cortes y reportes.
+- Pedidos y control comercial.
+- Cotizaciones e impresion.
+- Clientes y CRM.
+- Productos, categorias, stock y almacenes.
+- Tecnicos, asesores, comisiones y metas.
+- Tickets internos.
+- Reportes administrativos.
+- Configuracion de WhatsApp y componentes auxiliares.
 
----
-
-## Descripcion General
-
-**EGS Comercializadora** es un panel de administracion backend completo que centraliza las operaciones de una empresa distribuidora de equipo de computo y servicios tecnologicos. El sistema gestiona todo el ciclo de vida comercial: desde la cotizacion inicial, pasando por ordenes de servicio y compras a proveedores, hasta el corte de ventas y calculo de comisiones.
-
-### Empresas soportadas
-
-El sistema es multi-empresa, soportando actualmente 4 razones sociales:
-
-| Empresa | Abreviatura |
-|---------|-------------|
-| EGS Equipo de Computo | EGS |
-| LOCE | LOCE |
-| Toluca | TGV |
-| Cartuchos | CPI |
-
----
-
-## Arquitectura
-
-El proyecto sigue un patron **MVC (Modelo-Vista-Controlador) personalizado** sin framework, con comunicacion AJAX intensiva para operaciones dinamicas.
-
-```
-                    ┌─────────────┐
-                    │   Cliente    │
-                    │  (Browser)  │
-                    └──────┬──────┘
-                           │
-                    ┌──────▼──────┐
-                    │  .htaccess  │  ← mod_rewrite
-                    │   Router    │
-                    └──────┬──────┘
-                           │
-                    ┌──────▼──────┐
-                    │  index.php  │  ← Entry point
-                    └──────┬──────┘
-                           │
-          ┌────────────────┼────────────────┐
-          │                │                │
-  ┌───────▼───────┐ ┌─────▼─────┐ ┌────────▼────────┐
-  │ Controladores │ │  Vistas   │ │  AJAX Handlers  │
-  │   (35 files)  │ │(176 mods) │ │   (43 files)    │
-  └───────┬───────┘ └───────────┘ └────────┬────────┘
-          │                                │
-  ┌───────▼────────────────────────────────▼──┐
-  │              Modelos (39 files)            │
-  └───────────────────┬───────────────────────┘
-                      │
-     ┌────────────────┼────────────────┐
-     │                │                │
-┌────▼────┐    ┌──────▼──────┐   ┌────▼────┐
-│ Sistema │    │  E-commerce │   │  Main   │
-│ (mysqli)│    │   (PDO)     │   │  (PDO)  │
-└─────────┘    └─────────────┘   └─────────┘
-```
-
----
-
-## Stack Tecnologico
+## Stack del proyecto
 
 | Capa | Tecnologia |
-|------|------------|
-| **Backend** | PHP 7.1+ (MVC custom) |
-| **Base de datos** | MySQL (3 instancias separadas) |
-| **Acceso a datos** | PDO + mysqli |
-| **Frontend** | AdminLTE 2 + Bootstrap 3.3.7 |
-| **JavaScript** | jQuery 3.6.0 + DataTables (server-side) |
-| **Iconografia** | Font Awesome 6 (CDN) + Ionicons |
-| **Generacion PDF** | TCPDF |
-| **Correo** | PHPMailer |
-| **Servidor web** | Apache (mod_rewrite) |
-| **Hosting** | cPanel (shared hosting) |
+| --- | --- |
+| Backend | PHP 7.1+ |
+| Base de datos | MySQL |
+| Acceso a datos | mysqli + PDO |
+| Frontend | AdminLTE 2 + Bootstrap 3 |
+| JavaScript | jQuery + DataTables |
+| Correo | PHPMailer |
+| PDF | TCPDF |
+| Servidor | Apache con `mod_rewrite` |
+| Dependencias PHP | Composer |
 
----
+## Estructura principal
 
-## Estructura del Proyecto
-
-```
+```text
 EGS_Comercializadora/
-│
-├── index.php                    # Punto de entrada principal
-├── .htaccess                    # Rewrite rules + seguridad Apache
-├── .env.example                 # Plantilla de variables de entorno
-├── composer.json                # Dependencias PHP (PSR-4 autoload)
-├── php.ini                      # Configuracion PHP
-│
-├── config/                      # Configuracion central
-│   ├── Conexion.php             # Wrapper mysqli (DB sistema)
-│   ├── Database.php             # Configuracion unificada PDO
-│   ├── env.php                  # Cargador de .env
-│   ├── global.php               # Constantes globales
-│   └── routes.php               # Whitelist de rutas permitidas
-│
-├── controladores/               # Logica de negocio (35 archivos)
-│   ├── ordenes.controlador.php
-│   ├── ventas.controlador.php
-│   ├── pedidos.controlador.php
-│   ├── clientes.controlador.php
-│   ├── cotizaciones.controlador.php
-│   ├── comisiones.controlador.php
-│   └── ...
-│
-├── modelos/                     # Capa de acceso a datos (39 archivos)
-│   ├── conexion.php             # PDO wrapper (e-commerce)
-│   ├── conexionWordpress.php    # PDO wrapper (principal)
-│   ├── ordenes.modelo.php
-│   ├── ventas.modelo.php
-│   ├── pedidos.modelo.php
-│   └── ...
-│
-├── vistas/                      # Capa de presentacion
-│   ├── plantilla.php            # Layout principal (AdminLTE)
-│   ├── modulos/                 # 176 modulos PHP (vistas parciales)
-│   ├── js/                      # 32 scripts JS custom
-│   ├── css/                     # Estilos personalizados
-│   ├── img/                     # Imagenes y logos
-│   ├── bower_components/        # Librerias frontend
-│   └── dist/                    # Tema AdminLTE compilado
-│
-├── ajax/                        # Handlers AJAX (43 archivos)
-│   ├── ordenes.ajax.php
-│   ├── tablaOrdenes.ajax.php
-│   └── ...
-│
-├── ServerSide/                  # DataTables server-side processing
-│   ├── serverside.php
-│   └── serversideConexion.php
-│
-└── extensiones/                 # Librerias de terceros
-    ├── PHPMailer/               # Envio de correos
-    ├── tcpdf/                   # Generacion de PDFs
-    └── libreriawoocommerce/     # Integracion WooCommerce
+|-- ajax/                 Endpoints AJAX
+|-- config/               Configuracion, entorno, router y rutas
+|-- controladores/        Logica del sistema
+|-- extensiones/          Librerias de terceros
+|-- modelos/              Acceso a datos
+|-- ServerSide/           Soporte para DataTables server-side
+|-- sql/                  Scripts SQL y migraciones puntuales
+|-- vistas/               Plantillas, modulos, JS, CSS e imagenes
+|-- webhook/              Componentes auxiliares de integracion
+|-- .env.example          Plantilla de variables de entorno
+|-- .htaccess             Reglas de Apache
+|-- composer.json         Configuracion de Composer
+|-- index.php             Punto de entrada
+`-- documentacion_proyecto_egs.md
 ```
 
----
+## Inventario rapido del codigo
 
-## Modulos Principales
+Conteo actual del repo:
 
-### Ordenes de Servicio
-Gestion completa del ciclo de vida de ordenes: creacion, autorizacion, asignacion de tecnicos, seguimiento de estatus (Pendiente → Autorizada → En Proceso → Entregada), manejo de partidas (hasta 10 items), adjuntos multimedia y control de fechas de entrega.
+- `controladores/`: 37 archivos
+- `modelos/`: 41 archivos
+- `ajax/`: 51 archivos
+- `vistas/modulos/`: 122 archivos
+- `vistas/js/`: 33 archivos
+- `config/routes.php`: 72 rutas permitidas
 
-### Ventas y Punto de Venta
-Registro de ventas, procesamiento de pagos, historial por rango de fechas, cortes de caja y comisiones por asesor. Incluye sistema dinamico de ventas con calculo en tiempo real.
+## Flujo general
 
-### Compras / Pedidos
-Ordenes de compra a proveedores, gestion de credito, seguimiento de entregas, estatus de pago y control de inventario entrante. Uno de los modulos mas robustos (~14K lineas en modelo).
+1. Apache redirige la solicitud a `index.php`.
+2. `index.php` carga entorno, controladores, modelos y extensiones necesarias.
+3. `controladores/plantilla.controlador.php` delega la vista principal.
+4. `vistas/plantilla.php` resuelve la ruta solicitada.
+5. `config/routes.php` limita los slugs permitidos.
+6. Los modulos interactuan con modelos y endpoints AJAX segun la operacion.
 
-### Cotizaciones
-Generacion de cotizaciones con codigo QR, sistema de descuentos escalonados, validacion de flujo de aprobacion y exportacion a PDF via TCPDF.
+## Configuracion de entorno
 
-### Clientes y CRM
-Registro de clientes, historial de compras, notas/observaciones, dashboard CRM con metricas y gestion de contactos.
+El proyecto usa un archivo `.env` cargado desde `config/env.php`. La plantilla disponible es `.env.example`.
 
-### Inventario / Stock
-Catalogo de productos con categorias y subcategorias, gestion de codigos de barras, niveles de stock, alertas de inventario bajo y control multi-almacen.
+Variables relevantes:
 
-### Comisiones
-Calculo quincenal automatizado de comisiones para tecnicos y asesores, con generacion de reportes y metricas de desempeno.
+- `APP_ENV`
+- `APP_NAME`
+- `DB_SISTEMA_*`
+- `DB_ECOMMERCE_*`
+- `DB_WORDPRESS_*`
+- `MAIL_*`
+- `NODE_WHATSAPP_*`
 
-### Metas y Objetivos
-Definicion de metas por departamento, seguimiento de objetivos de venta y metricas de rendimiento por rol.
+## Bases de datos
 
-### Tecnicos y Asesores
-Directorio de personal, asignacion de ordenes, seguimiento de carga de trabajo y evaluacion de desempeno.
+El sistema trabaja con tres conexiones:
 
-### Tickets Internos
-Sistema de soporte interno con creacion, asignacion y seguimiento de tickets.
+| Conexion | Archivo principal | Driver | Uso |
+| --- | --- | --- | --- |
+| Sistema | `config/Conexion.php` | mysqli | Operacion del sistema de ventas |
+| E-commerce | `modelos/conexion.php` | PDO | Catalogo y datos comerciales relacionados |
+| Principal | `modelos/conexionWordpress.php` | PDO | Ordenes, pedidos, comisiones y procesos centrales |
 
-### Reportes
-Exportacion a Excel, reportes de ordenes por estatus/fecha, resumenes de ventas, reportes de comisiones y actividad de usuarios.
+La configuracion central tambien se apoya en `config/Database.php`.
 
----
+## Instalacion local
 
-## Base de Datos
+1. Colocar el proyecto en un servidor Apache con PHP.
+2. Crear el archivo `.env` a partir de `.env.example`.
+3. Configurar las tres conexiones MySQL.
+4. Ejecutar `composer install`.
+5. Verificar que `mod_rewrite` este habilitado.
+6. Apuntar el DocumentRoot al proyecto o abrirlo como subdirectorio.
 
-El sistema utiliza **3 bases de datos MySQL** independientes:
-
-| Conexion | Driver | Base de datos | Proposito |
-|----------|--------|---------------|-----------|
-| **Sistema** | mysqli | `egsequip_dbsistema` | Tablas del sistema de ventas |
-| **E-commerce** | PDO | `egsequip_ecomerce` | Productos, categorias, catalogo |
-| **Principal** | PDO | `egsequip_respaldo` | Ordenes, pedidos, comisiones, facturacion |
-
-La configuracion centralizada se encuentra en `config/Database.php`, que lee credenciales desde el archivo `.env`.
-
----
-
-## Instalacion y Configuracion
-
-### Requisitos previos
-
-- PHP >= 7.1 con extensiones: `pdo`, `pdo_mysql`, `mysqli`, `mbstring`, `gd`
-- MySQL 5.7+
-- Apache con `mod_rewrite` habilitado
-- Composer (para autoload PSR-4)
-
-### Pasos
+Ejemplo:
 
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/EGS_Comercializadora.git
-cd EGS_Comercializadora
-
-# 2. Instalar dependencias (autoload)
 composer install
-
-# 3. Configurar variables de entorno
 cp .env.example .env
-# Editar .env con las credenciales reales de las 3 bases de datos
-
-# 4. Importar las bases de datos
-# Importar los esquemas SQL en MySQL para las 3 bases de datos:
-#   - egsequip_dbsistema
-#   - egsequip_ecomerce
-#   - egsequip_respaldo
-
-# 5. Verificar que mod_rewrite este activo
-# En Apache, asegurar que AllowOverride All este habilitado
-
-# 6. Acceder al sistema
-# Navegar a http://localhost/EGS_Comercializadora/
 ```
 
----
+## Archivos clave
 
-## Variables de Entorno
+- `index.php`: bootstrap principal del sistema.
+- `config/env.php`: carga de variables de entorno.
+- `config/Database.php`: configuracion unificada de base de datos.
+- `config/routes.php`: rutas permitidas del panel.
+- `config/Router.php`: soporte del sistema de ruteo.
+- `vistas/plantilla.php`: layout principal y resolucion de modulos.
+- `ServerSide/`: procesamiento de tablas con carga dinamica.
 
-El archivo `.env` (nunca versionado) contiene las credenciales sensibles. Usar `.env.example` como plantilla:
+## Integraciones y dependencias incluidas
 
-```env
-# Entorno
-APP_ENV=production
-APP_NAME="EGS Equipo de Computo"
+- `extensiones/PHPMailer/` para envio de correos.
+- `extensiones/tcpdf/` para generacion de PDFs.
+- `extensiones/vendor/` para dependencias instaladas por Composer.
+- `webhook/` para integraciones auxiliares.
+- Variables `NODE_WHATSAPP_*` para comunicar eventos a un servicio externo.
 
-# DB Sistema (mysqli)
-DB_SISTEMA_HOST=localhost
-DB_SISTEMA_NAME=egsequip_dbsistema
-DB_SISTEMA_USER=
-DB_SISTEMA_PASS=
+## Rutas y modulos
 
-# DB E-commerce (PDO)
-DB_ECOMMERCE_HOST=localhost
-DB_ECOMMERCE_NAME=egsequip_ecomerce
-DB_ECOMMERCE_USER=
-DB_ECOMMERCE_PASS=
+Las rutas autorizadas viven en `config/routes.php`. Algunas areas del sistema son:
 
-# DB Principal (PDO)
-DB_WORDPRESS_HOST=localhost
-DB_WORDPRESS_NAME=egsequip_respaldo
-DB_WORDPRESS_USER=
-DB_WORDPRESS_PASS=
+- `inicio`
+- `ordenes`
+- `ventas`
+- `pedidos`
+- `cotizacion`
+- `clientes`
+- `crm`
+- `tecnicos`
+- `comisiones`
+- `metas`
+- `almacenes`
+- `tickets`
+- `reportes`
+- `config-whatsapp`
 
-# Correo (PHPMailer)
-MAIL_HOST=smtp.example.com
-MAIL_PORT=587
-MAIL_USERNAME=
-MAIL_PASSWORD=
-MAIL_FROM_NAME="EGS Equipo de Computo"
-MAIL_ENCRYPTION=tls
-```
+Para agregar una nueva vista publica dentro del panel:
 
----
-
-## Sistema de Rutas
-
-El routing se maneja via **Apache mod_rewrite** en `.htaccess`:
-
-```apache
-RewriteRule ^([-a-zA-Z0-9/]+)$ index.php?ruta=$1
-```
-
-Las rutas estan registradas en un whitelist en `config/routes.php`. Ejemplos:
-
-| Ruta | Modulo | Descripcion |
-|------|--------|-------------|
-| `/inicio` | Dashboard | Panel principal con metricas |
-| `/ordenes` | Ordenes | Listado de ordenes de servicio |
-| `/ventas` | Ventas | Modulo de punto de venta |
-| `/pedidos` | Compras | Ordenes de compra |
-| `/cotizacion` | Cotizaciones | Generador de cotizaciones |
-| `/clientes` | Clientes | Directorio de clientes |
-| `/productos` | Inventario | Catalogo de productos |
-| `/comisiones` | Comisiones | Calculo de comisiones |
-| `/tecnicos` | Personal | Gestion de tecnicos |
-| `/reportes` | Reportes | Generacion de reportes |
-| `/crm` | CRM | Dashboard de relacion con clientes |
-| `/tickets` | Tickets | Sistema de tickets internos |
-
----
-
-## Autenticacion y Roles
-
-El sistema usa **autenticacion basada en sesiones PHP** con los siguientes roles:
-
-| Rol | Acceso |
-|-----|--------|
-| **Administrador** | Acceso completo a todos los modulos |
-| **Asesor** | Ventas, ordenes, cotizaciones, clientes |
-| **Tecnico** | Ordenes de servicio asignadas |
-| **Especial** | Permisos personalizados |
-
-Cada inicio de sesion se registra en la tabla `INICIOS_DE_SESION` con IP, user-agent y timestamp. El sistema previene sesiones multiples por usuario.
-
----
-
-## Librerias Externas
-
-### Backend (PHP)
-| Libreria | Ubicacion | Uso |
-|----------|-----------|-----|
-| **PHPMailer** | `extensiones/PHPMailer/` | Envio de correos SMTP |
-| **TCPDF** | `extensiones/tcpdf/` | Generacion de PDFs (cotizaciones, reportes) |
-| **WooCommerce API** | `extensiones/libreriawoocommerce/` | Sincronizacion de productos (parcial) |
-
-### Frontend (JS/CSS)
-| Libreria | Version | Uso |
-|----------|---------|-----|
-| **AdminLTE** | 2.x | Template del dashboard |
-| **Bootstrap** | 3.3.7 | Grid y componentes UI |
-| **jQuery** | 3.6.0 | Manipulacion DOM y AJAX |
-| **DataTables** | - | Tablas interactivas con server-side processing |
-| **Moment.js** | 2.24 | Parsing y formato de fechas |
-| **Dropzone.js** | - | Subida de archivos drag & drop |
-| **Morris.js** | - | Graficas en dashboard |
-| **Choices.js** | - | Selects mejorados |
-| **Font Awesome** | 6.x | Iconografia (CDN) |
-
----
-
-## Estructura de Archivos Clave
-
-| Archivo | Lineas | Descripcion |
-|---------|--------|-------------|
-| `controladores/ordenes.controlador.php` | ~6,300 | Logica de negocio de ordenes |
-| `modelos/ventas.modelo.php` | ~16,000 | Acceso a datos de ventas |
-| `modelos/pedidos.modelo.php` | ~14,000 | Acceso a datos de compras |
-| `modelos/productos.modelo.php` | ~12,000 | Acceso a datos de productos |
-| `vistas/js/gestorOrdenes.js` | ~55 KB | Frontend de gestion de ordenes |
-| `vistas/js/gestorProductos.js` | ~46 KB | Frontend de gestion de productos |
-| `vistas/js/ventasDinamicas.js` | ~29 KB | Punto de venta dinamico |
-| `vistas/modulos/cotizacion.php` | ~35 KB | Vista del cotizador |
-
----
+1. Crear el archivo correspondiente en `vistas/modulos/`.
+2. Registrar el slug en `config/routes.php`.
+3. Conectar la vista con su controlador, modelo o AJAX segun corresponda.
 
 ## Despliegue
 
-### Produccion (cPanel)
+Consideraciones practicas para produccion:
 
-1. Subir archivos via FTP o Git Deploy
-2. Crear el archivo `.env` en la raiz del servidor con credenciales reales
-3. Ejecutar `composer dump-autoload --optimize`
-4. Verificar permisos de escritura en `vistas/img/` y `extensiones/tcpdf/pdf/`
-5. Confirmar que las 3 bases de datos estan accesibles
-6. Probar rutas: `/inicio`, `/ordenes`, `/ventas`
+- No versionar el archivo `.env`.
+- Revisar permisos de escritura para cargas de archivos y generacion de PDFs.
+- Confirmar acceso a las tres bases de datos antes de publicar cambios.
+- Mantener sincronizadas las reglas de `.htaccess` con el entorno Apache/cPanel.
 
-### Seguridad en produccion
+## Documentacion adicional
 
-El `.htaccess` incluye:
-- Redireccion HTTP → HTTPS
-- Bloqueo de acceso a `.env`, `composer.json`, `config/`
-- Headers de seguridad (X-Frame-Options, X-XSS-Protection, etc.)
-- Compresion Gzip
-- Cache de assets estaticos (1 mes imagenes, 1 semana CSS/JS)
+El archivo `documentacion_proyecto_egs.md` conserva una documentacion mas extensa del sistema. Este `README.md` funciona como referencia rapida de onboarding y operacion tecnica.
 
-### Configuracion PHP recomendada
+## Notas de mantenimiento
 
-```ini
-memory_limit = 384M
-post_max_size = 256M
-upload_max_filesize = 256M
-max_execution_time = 30
-display_errors = Off
-```
-
----
-
-## Roadmap
-
-- [ ] Migrar a PHP 8.1+ (PHP 7.1 esta en End of Life desde 2019)
-- [ ] Parametrizar todas las consultas SQL (prevenir inyeccion SQL)
-- [ ] Implementar tokens CSRF en formularios
-- [ ] Migrar hashing de passwords a `password_hash()` / `password_verify()`
-- [ ] Agregar pruebas unitarias (PHPUnit ya configurado en composer.json)
-- [ ] Completar integracion WooCommerce
-- [ ] Migrar a Bootstrap 5 / AdminLTE 3
-- [ ] Implementar API REST formal
-- [ ] Documentar esquemas de base de datos
-
----
-
-<p align="center">
-  <sub>Desarrollado para <strong>EGS Equipo de Computo</strong> | Panel de Administracion Backend</sub>
-</p>
+- El proyecto sigue dependiendo de PHP 7.1+, por lo que cualquier actualizacion de entorno debe validarse con cuidado.
+- Existen componentes legacy y modulos grandes; conviene probar flujos criticos despues de cambios en ordenes, ventas, pedidos y cotizaciones.
+- Antes de tocar rutas o bootstrap, revisar `index.php`, `config/routes.php` y `vistas/plantilla.php` en conjunto.

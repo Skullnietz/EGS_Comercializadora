@@ -370,6 +370,8 @@ $_em_tieneCorreo = (filter_var($_em_correo, FILTER_VALIDATE_EMAIL) !== false);
 $_em_subject     = "";
 $_em_body        = "";
 $_em_nombreCliente = $usuario["nombre"] ?? "";
+$_historialClienteLink = 'index.php?ruta=Historialdecliente&idCliente=' . intval($_GET["cliente"] ?? 0)
+    . '&nombreCliente=' . urlencode($_em_nombreCliente ?: 'Cliente');
 
 if ($_em_tieneCorreo) {
     if ($estado === 'Pendiente de autorización (AUT') {
@@ -462,6 +464,11 @@ function _egsEstadoClass($estado) {
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fas fa-user"></i></span>
 								<input type="text" class="form-control" value="<?php echo htmlspecialchars($usuario["nombre"]); ?>" readonly>
+								<span class="input-group-btn">
+									<a href="<?php echo htmlspecialchars($_historialClienteLink); ?>" class="btn btn-default" title="Ver historial del cliente">
+										<i class="fa-solid fa-clock-rotate-left"></i>
+									</a>
+								</span>
 							</div>
 						</div>
 

@@ -55,9 +55,11 @@ if($_SESSION["perfil"] != "administrador"  AND $_SESSION["perfil"]!= "vendedor" 
 				            ======================================-->
 				            <?php
 							//TRAER CLIENTE (USUARIO)
-							$item = "id";
+						    $item = "id";
 						    $valor = $_GET["cliente"];
 						    $usuario = ControladorClientes::ctrMostrarClientes($item,$valor);
+						    $historialClienteLink = 'index.php?ruta=Historialdecliente&idCliente=' . intval($_GET["cliente"] ?? 0)
+						    	. '&nombreCliente=' . urlencode($usuario["nombre"] ?? 'Cliente');
 						    ?>
 						    <div class="form-group">
 						    	
@@ -66,6 +68,12 @@ if($_SESSION["perfil"] != "administrador"  AND $_SESSION["perfil"]!= "vendedor" 
 						    		<span class="input-group-addon"><i class="fas fa-user"></i></span>
 						    		
 						    		<input type="text" class="form-control" value="<?php echo $usuario["nombre"] ?>" name="nombreCliente" readonly>
+
+						    		<span class="input-group-btn">
+						    			<a href="<?php echo htmlspecialchars($historialClienteLink); ?>" class="btn btn-default" title="Ver historial del cliente">
+						    				<i class="fa-solid fa-clock-rotate-left"></i>
+						    			</a>
+						    		</span>
 
 						    	</div>
 
