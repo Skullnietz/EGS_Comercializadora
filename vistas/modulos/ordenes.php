@@ -869,7 +869,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td data-order="' . (int)$valueOrdenes["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdenes["id"] . '</span></td>
+                      <td data-order="' . (int)$valueOrdenes["id"] . '"><a href="index.php?ruta=infoOrden&idOrden=' . $valueOrdenes["id"] . '&empresa=' . $valueOrdenes["id_empresa"] . '&asesor=' . $valueOrdenes["id_Asesor"] . '&cliente=' . $valueOrdenes["id_usuario"] . '&tecnico=' . $valueOrdenes["id_tecnico"] . '&tecnicodos=' . $valueOrdenes["id_tecnicoDos"] . '&pedido=' . $valueOrdenes["id_pedido"] . '" style="font-weight:800;color:#6366f1;text-decoration:none" target="_blank">#' . $valueOrdenes["id"] . '</a></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -920,7 +920,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td data-order="' . (int)$valueOrdenes["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdenes["id"] . '</span></td>
+                      <td data-order="' . (int)$valueOrdenes["id"] . '"><a href="index.php?ruta=infoOrden&idOrden=' . $valueOrdenes["id"] . '&empresa=' . $valueOrdenes["id_empresa"] . '&asesor=' . $valueOrdenes["id_Asesor"] . '&cliente=' . $valueOrdenes["id_usuario"] . '&tecnico=' . $valueOrdenes["id_tecnico"] . '&tecnicodos=' . $valueOrdenes["id_tecnicoDos"] . '&pedido=' . $valueOrdenes["id_pedido"] . '" style="font-weight:800;color:#6366f1;text-decoration:none" target="_blank">#' . $valueOrdenes["id"] . '</a></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -1126,7 +1126,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td data-order="' . (int)$valueOrdenes["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdenes["id"] . '</span></td>
+                      <td data-order="' . (int)$valueOrdenes["id"] . '"><a href="index.php?ruta=infoOrden&idOrden=' . $valueOrdenes["id"] . '&empresa=' . $valueOrdenes["id_empresa"] . '&asesor=' . $valueOrdenes["id_Asesor"] . '&cliente=' . $valueOrdenes["id_usuario"] . '&tecnico=' . $valueOrdenes["id_tecnico"] . '&tecnicodos=' . $valueOrdenes["id_tecnicoDos"] . '&pedido=' . $valueOrdenes["id_pedido"] . '" style="font-weight:800;color:#6366f1;text-decoration:none" target="_blank">#' . $valueOrdenes["id"] . '</a></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -1178,7 +1178,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td data-order="' . (int)$valueOrdenes["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdenes["id"] . '</span></td>
+                      <td data-order="' . (int)$valueOrdenes["id"] . '"><a href="index.php?ruta=infoOrden&idOrden=' . $valueOrdenes["id"] . '&empresa=' . $valueOrdenes["id_empresa"] . '&asesor=' . $valueOrdenes["id_Asesor"] . '&cliente=' . $valueOrdenes["id_usuario"] . '&tecnico=' . $valueOrdenes["id_tecnico"] . '&tecnicodos=' . $valueOrdenes["id_tecnicoDos"] . '&pedido=' . $valueOrdenes["id_pedido"] . '" style="font-weight:800;color:#6366f1;text-decoration:none" target="_blank">#' . $valueOrdenes["id"] . '</a></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -1378,7 +1378,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td data-order="' . (int)$valueOrdeneDelTecnico["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdeneDelTecnico["id"] . '</span></td>
+                      <td data-order="' . (int)$valueOrdeneDelTecnico["id"] . '"><a href="index.php?ruta=infoOrden&idOrden=' . $valueOrdeneDelTecnico["id"] . '&empresa=' . $valueOrdeneDelTecnico["id_empresa"] . '&asesor=' . $valueOrdeneDelTecnico["id_Asesor"] . '&cliente=' . $valueOrdeneDelTecnico["id_usuario"] . '&tecnico=' . $valueOrdeneDelTecnico["id_tecnico"] . '&tecnicodos=' . $valueOrdeneDelTecnico["id_tecnicoDos"] . '&pedido=' . $valueOrdeneDelTecnico["id_pedido"] . '" style="font-weight:800;color:#6366f1;text-decoration:none" target="_blank">#' . $valueOrdeneDelTecnico["id"] . '</a></td>
 
                       <td>' . $NombreTecnico . '</td>
 
@@ -1436,7 +1436,7 @@ function _ordGetBadgeClass($estadoText) {
                       
 
 
-                      <td data-order="' . (int)$valueOrdeneDelTecnico["id"] . '"><span style="font-weight:800;color:#6366f1">#' . $valueOrdeneDelTecnico["id"] . '</span></td>
+                      <td data-order="' . (int)$valueOrdeneDelTecnico["id"] . '"><a href="index.php?ruta=infoOrden&idOrden=' . $valueOrdeneDelTecnico["id"] . '&empresa=' . $valueOrdeneDelTecnico["id_empresa"] . '&asesor=' . $valueOrdeneDelTecnico["id_Asesor"] . '&cliente=' . $valueOrdeneDelTecnico["id_usuario"] . '&tecnico=' . $valueOrdeneDelTecnico["id_tecnico"] . '&tecnicodos=' . $valueOrdeneDelTecnico["id_tecnicoDos"] . '&pedido=' . $valueOrdeneDelTecnico["id_pedido"] . '" style="font-weight:800;color:#6366f1;text-decoration:none" target="_blank">#' . $valueOrdeneDelTecnico["id"] . '</a></td>
 
                       <td>' . $NombreTecnico . '</td>
 

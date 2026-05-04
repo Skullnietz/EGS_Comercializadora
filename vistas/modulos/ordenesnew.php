@@ -499,7 +499,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
         {data: null,
             "render": function (data, type, row, meta ) {
                 if (type === 'sort' || type === 'type') return parseInt(data.id) || 0;
-                return '<span style="font-weight:800;color:#6366f1">#'+data.id+'</span>';
+                return '<a href="index.php?ruta=infoOrden&idOrden='+data.id+'&empresa='+data.id_empresa+'&asesor='+data.id_Asesor+'&cliente='+data.id_usuario+'&tecnico='+data.id_tecnico+'&tecnicodos='+data.id_tecnicoDos+'&pedido='+data.id_pedido+'" style="font-weight:800;color:#6366f1;text-decoration:none" target="_blank">#'+data.id+'</a>';
             }},
         {data: null,
             "render": function (data, type, row, meta ) {
