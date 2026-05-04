@@ -76,6 +76,18 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 	.egs-calc-summary i { margin-right: 4px; color: #cbd5e1; }
 
 	/* ═══════════════════════════════════════
+	   MONEDERO ELECTRÓNICO — panel en infoOrden
+	   ═══════════════════════════════════════ */
+	.egs-monedero-panel { display:none; background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%); border:2px solid #3b82f6; border-radius:10px; padding:16px; margin-top:12px; }
+	.egs-monedero-panel.visible { display:block; }
+	.egs-monedero-title { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:10px; display:flex; align-items:center; gap:7px; }
+	.egs-monedero-saldo { font-size:22px; font-weight:800; color:#1e40af; }
+	.egs-monedero-desglose { font-size:12px; color:#374151; margin-top:10px; border-top:1px solid #bfdbfe; padding-top:10px; line-height:1.8; }
+	.egs-monedero-desglose span { font-weight:700; float:right; }
+	.egs-monedero-total { font-size:14px; font-weight:800; color:#166534; margin-top:4px; }
+	.egs-monedero-total span { font-size:16px; }
+
+	/* ═══════════════════════════════════════
 	   GALLERY — Modern Carousel + Lightbox
 	   ═══════════════════════════════════════ */
 
@@ -297,6 +309,21 @@ if (is_array($ordenes) && !empty($ordenes)) {
 
 // Cliente
 $usuario = ControladorClientes::ctrMostrarClientesOrdenes("id", $_GET["cliente"]);
+
+// ── Recompensas del cliente ──────────────────────────────────────
+$_ord_idCliente  = intval($_GET["cliente"]);
+$_ord_infoRec    = array("saldo" => 0, "porcentaje" => 1);
+$_ord_saldoRec   = 0;
+if ($_ord_idCliente > 0 && !($isTecnico || $isSecretaria)) {
+    try {
+        require_once __DIR__ . "/../../controladores/recompensas.controlador.php";
+        require_once __DIR__ . "/../../modelos/recompensas.modelo.php";
+        $_ord_infoRec  = ControladorRecompensas::ctrObtenerInfoRecompensas($_ord_idCliente);
+        $_ord_saldoRec = floatval($_ord_infoRec["saldo"]);
+    } catch (Exception $e) {
+        $_ord_saldoRec = 0;
+    }
+}
 
 // Datos de la orden
 foreach ($ordenes as $key => $value) {
@@ -1423,6 +1450,60 @@ function _egsEstadoClass($estado) {
 							}
 							?>
 						</div>
+
+						<!-- ═══ MONEDERO ELECTRÓNICO ══════════════════ -->
+						<?php if (!$isTecnico && !$isSecretaria && $_ord_idCliente > 0 && $estado !== "Entregado (Ent)"): ?>
+						<div class="egs-field-row" id="egsMonederoWrap">
+							<div class="egs-monedero-panel" id="egsMonederoPanel">
+								<div class="egs-monedero-title">
+									<i class="fa-solid fa-wallet"></i> Monedero electrónico
+								</div>
+
+								<?php if ($_ord_saldoRec > 0): ?>
+								<div style="margin-bottom:8px">
+									<span class="egs-lbl" style="margin-bottom:2px">Saldo disponible del cliente</span>
+									<div class="egs-monedero-saldo">$<?php echo number_format($_ord_saldoRec, 2); ?></div>
+								</div>
+								<div class="egs-field-row" style="margin-bottom:6px">
+									<label class="egs-lbl">Monto a aplicar</label>
+									<div class="input-group">
+										<span class="input-group-addon" style="background:#3b82f6;color:#fff;border-color:#3b82f6">$</span>
+										<input type="number" id="egsMontoMonederoOrden"
+											class="form-control"
+											min="0"
+											max="<?php echo number_format($_ord_saldoRec, 2, '.', ''); ?>"
+											step="0.01"
+											placeholder="0.00"
+											style="font-weight:700">
+										<span class="input-group-btn">
+											<button type="button" class="btn btn-info" id="egsMonederoUsarTodo" title="Usar todo el saldo">
+												<i class="fa-solid fa-check-double"></i> Todo
+											</button>
+										</span>
+									</div>
+									<small class="text-muted">Máximo disponible: $<?php echo number_format($_ord_saldoRec, 2); ?></small>
+								</div>
+								<div class="egs-monedero-desglose" id="egsMonederoDesglose" style="display:none">
+									<div>Total del servicio: <span id="egsMondBruto">$0.00</span></div>
+									<div style="color:#dc2626">Descuento monedero: <span id="egsMondDescuento">-$0.00</span></div>
+									<div class="egs-monedero-total" style="margin-top:6px;border-top:1px solid #bbf7d0;padding-top:6px">
+										Total a cobrar: <span id="egsMondTotal">$0.00</span>
+									</div>
+								</div>
+								<?php else: ?>
+								<p style="font-size:13px;color:#64748b;margin:0">
+									<i class="fa-solid fa-info-circle" style="color:#3b82f6;margin-right:4px"></i>
+									Este cliente no tiene saldo disponible en monedero.
+								</p>
+								<?php endif; ?>
+
+								<!-- Inputs ocultos que van al form de la orden -->
+								<input type="hidden" id="egsMontoMonederoOrdenHidden" name="montoCanjeMonederoOrden" value="0" form="formObservaciones">
+								<input type="hidden" name="idClienteOrden" value="<?php echo intval($_ord_idCliente); ?>" form="formObservaciones">
+							</div>
+						</div>
+						<?php endif; ?>
+						<!-- ═══ /MONEDERO ELECTRÓNICO ══════════════════ -->
 
 					</div>
 				</div>

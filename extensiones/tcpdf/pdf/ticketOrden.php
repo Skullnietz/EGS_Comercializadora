@@ -111,6 +111,12 @@ class ImprimirTicketsOrden{
       $idOrden = intval($_GET["idOrden"]);
       $totalOrden = floatval($value["total"]);
 
+      // Si se aplicó monedero, usar el total pagado para calcular la recompensa generada
+      $totalBrutoOrden  = floatval(isset($value["total_bruto_monedero"])    ? $value["total_bruto_monedero"]    : $totalOrden);
+      $montoCanjeOrden  = floatval(isset($value["monto_monedero_aplicado"]) ? $value["monto_monedero_aplicado"] : 0);
+      $totalPagadoOrden = floatval(isset($value["total_pagado_cliente"])    ? $value["total_pagado_cliente"]    : $totalOrden);
+      $baseRecompensa   = $montoCanjeOrden > 0 ? $totalPagadoOrden : $totalOrden;
+
       try {
           $infoRecompensas = ControladorRecompensas::ctrObtenerInfoRecompensas($idCliente);
           $saldoElectronico = $infoRecompensas["saldo"];
@@ -120,7 +126,8 @@ class ImprimirTicketsOrden{
           $ordenesEnPrograma = intval($infoRecompensas["ordenes_en_programa"]);
           $tokenMonedero = $infoRecompensas["token"];
 
-          $montoGenerado = round($totalOrden * ($porcentajeCliente / 100), 2);
+          // Recompensa se calcula sobre el total final pagado (decisión de negocio)
+          $montoGenerado = round($baseRecompensa * ($porcentajeCliente / 100), 2);
 
           $canjeOrden = ControladorRecompensas::ctrObtenerCanjeOrden($idOrden);
           $montoCanjeado = $canjeOrden ? abs(floatval($canjeOrden["monto"])) : 0;
@@ -264,18 +271,31 @@ class ImprimirTicketsOrden{
       }
 
       // Fila de TOTAL
-      echo '
+      if ($montoCanjeOrden > 0) {
+          echo '
+            <tr>
+              <td style="padding:4px 0 2px 2px;font-size:12px;font-weight:700;text-align:right;border-top:2px solid #000;color:#666">Subtotal</td>
+              <td style="padding:4px 2px 2px 0;font-size:12px;font-weight:700;text-align:right;border-top:2px solid #000;white-space:nowrap;color:#666">$'.number_format($totalBrutoOrden, 2).'</td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 2px 2px;font-size:12px;font-weight:700;text-align:right">Monedero EGS</td>
+              <td style="padding:2px 2px;font-size:12px;font-weight:700;text-align:right;white-space:nowrap">-$'.number_format($montoCanjeOrden, 2).'</td>
+            </tr>
             <tr>
               <td style="padding:4px 0 2px 2px;font-size:12px;font-weight:900;text-align:right;border-top:2px solid #000">TOTAL</td>
-              <td style="padding:4px 2px 2px 0;font-size:14px;font-weight:900;text-align:right;border-top:2px solid #000;white-space:nowrap">$'.$value["total"].'</td>
+              <td style="padding:4px 2px 2px 0;font-size:14px;font-weight:900;text-align:right;border-top:2px solid #000;white-space:nowrap">$'.number_format($totalPagadoOrden, 2).'</td>
+            </tr>
+          </table>
+          <div style="border:1px dashed #000;padding:4px;text-align:center;margin-top:3px">
+            <span style="font-size:12px;font-weight:800">AHORRASTE $'.number_format($montoCanjeOrden, 2).' CON TU MONEDERO EGS</span>
+          </div>';
+      } else {
+          echo '
+            <tr>
+              <td style="padding:4px 0 2px 2px;font-size:12px;font-weight:900;text-align:right;border-top:2px solid #000">TOTAL</td>
+              <td style="padding:4px 2px 2px 0;font-size:14px;font-weight:900;text-align:right;border-top:2px solid #000;white-space:nowrap">$'.number_format($totalOrden, 2).'</td>
             </tr>
           </table>';
-
-      // Ahorro por dinero electronico
-      if ($montoCanjeado > 0) {
-          echo '<div style="border:1px dashed #000;padding:4px;text-align:center;margin-top:3px">
-                  <span style="font-size:12px;font-weight:800">AHORRASTE $'.number_format($montoCanjeado, 2).' CON TU MONEDERO EGS</span>
-                </div>';
       }
 
       echo '</div>';

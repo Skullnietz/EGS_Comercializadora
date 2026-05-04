@@ -436,6 +436,9 @@ function _hc_obtenerProductosVenta($venta) {
                 <?php foreach ($_hc_ordenes as $o):
                   $est = isset($o["estado"]) ? $o["estado"] : "";
                   $total = floatval(isset($o["total"]) ? $o["total"] : 0);
+                  $montoMonederoOrden  = floatval(isset($o["monto_monedero_aplicado"]) ? $o["monto_monedero_aplicado"] : 0);
+                  $totalPagadoOrden    = floatval(isset($o["total_pagado_cliente"])    ? $o["total_pagado_cliente"]    : 0);
+                  $totalBrutoOrden     = floatval(isset($o["total_bruto_monedero"])    ? $o["total_bruto_monedero"]    : $total);
                   $fi = isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "";
                   $marca = isset($o["marcaDelEquipo"]) ? $o["marcaDelEquipo"] : "";
                   $modelo = isset($o["modeloDelEquipo"]) ? $o["modeloDelEquipo"] : "";
@@ -519,7 +522,15 @@ function _hc_obtenerProductosVenta($venta) {
                     </div>
                   </td>
                   <td><span class="hc-badge" style="background:<?php echo $bc; ?>;color:<?php echo $btc; ?>"><?php echo $elbl; ?></span></td>
-                  <td style="text-align:right;font-weight:700">$<?php echo number_format($total, 0); ?></td>
+                  <td style="text-align:right">
+                    <?php if ($montoMonederoOrden > 0): ?>
+                      <div style="font-size:10px;color:#94a3b8;text-decoration:line-through">$<?php echo number_format($totalBrutoOrden, 0); ?></div>
+                      <div style="font-weight:700;color:#16a34a">$<?php echo number_format($totalPagadoOrden, 0); ?></div>
+                      <div style="font-size:10px;color:#3b82f6"><i class="fa-solid fa-wallet"></i> -$<?php echo number_format($montoMonederoOrden, 0); ?></div>
+                    <?php else: ?>
+                      <span style="font-weight:700">$<?php echo number_format($total, 0); ?></span>
+                    <?php endif; ?>
+                  </td>
                   <td style="font-size:12px;color:#64748b"><?php echo !empty($fi) ? date("d/m/Y", strtotime($fi)) : "—"; ?></td>
                   <td style="text-align:center">
                     <span style="font-weight:700;font-size:12px;color:<?php echo $dias > 30 ? '#ef4444' : ($dias > 15 ? '#f59e0b' : '#64748b'); ?>">
@@ -653,7 +664,9 @@ function _hc_obtenerProductosVenta($venta) {
                   $vAsesor = isset($v["asesor"]) && trim($v["asesor"]) !== "" ? trim($v["asesor"]) : "Sin asignar";
                   $vMetodo = isset($v["metodo"]) && trim($v["metodo"]) !== "" ? trim($v["metodo"]) : "No especificado";
                   $vFecha = isset($v["fecha"]) ? trim($v["fecha"]) : "";
-                  $vTotal = floatval(isset($v["pago"]) ? $v["pago"] : 0);
+                  $vTotal              = floatval(isset($v["pago"])                   ? $v["pago"]                   : 0);
+                  $vMontoMonedero      = floatval(isset($v["monto_monedero_aplicado"]) ? $v["monto_monedero_aplicado"] : 0);
+                  $vTotalAntesMonedero = floatval(isset($v["total_antes_monedero"])    ? $v["total_antes_monedero"]    : 0);
                   $vLink = 'https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/ticketR.php/?idventa=' . $v["id"]
                       . '&empresa=' . (isset($v["empresa"]) ? $v["empresa"] : '');
                 ?>
@@ -678,7 +691,15 @@ function _hc_obtenerProductosVenta($venta) {
                     <span class="hc-badge" style="background:#ecfeff;color:#0f766e"><?php echo htmlspecialchars($vMetodo); ?></span>
                   </td>
                   <td style="font-size:12px;color:#64748b"><?php echo !empty($vFecha) ? date("d/m/Y", strtotime($vFecha)) : "--"; ?></td>
-                  <td style="text-align:right;font-weight:700">$<?php echo number_format($vTotal, 0); ?></td>
+                  <td style="text-align:right">
+                    <?php if ($vMontoMonedero > 0): ?>
+                      <div style="font-size:10px;color:#94a3b8;text-decoration:line-through">$<?php echo number_format($vTotalAntesMonedero, 0); ?></div>
+                      <div style="font-weight:700;color:#16a34a">$<?php echo number_format($vTotal, 0); ?></div>
+                      <div style="font-size:10px;color:#3b82f6"><i class="fa-solid fa-wallet"></i> -$<?php echo number_format($vMontoMonedero, 0); ?></div>
+                    <?php else: ?>
+                      <span style="font-weight:700">$<?php echo number_format($vTotal, 0); ?></span>
+                    <?php endif; ?>
+                  </td>
                   <td style="text-align:center">
                     <a href="<?php echo $vLink; ?>" target="_blank"
                        style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#0ea5e9;color:#fff;font-size:12px;text-decoration:none;transition:background .15s"

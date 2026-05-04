@@ -1120,7 +1120,42 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 					$respuesta = ModeloOrdenes::mdlEditarFechaSalida("ordenes", $datosOrdenSalida);
 
-					// ── Recompensas: acumulación dinámica, no requiere registro ──
+					// ── Recompensas: canjear monedero si se solicitó ──
+					$_egs_montoCanjeOrden  = isset($_POST["montoCanjeMonederoOrden"]) ? floatval($_POST["montoCanjeMonederoOrden"]) : 0;
+					$_egs_idClienteOrden   = isset($_POST["idClienteOrden"])          ? intval($_POST["idClienteOrden"])            : intval($datos["cliente"] ?? 0);
+					$_egs_totalBrutoOrden  = isset($_POST["costoTotalDeOrden"])       ? floatval($_POST["costoTotalDeOrden"])       : 0;
+
+					if ($_egs_montoCanjeOrden > 0 && $_egs_idClienteOrden > 0) {
+						try {
+							require_once __DIR__ . "/recompensas.controlador.php";
+							require_once __DIR__ . "/../modelos/recompensas.modelo.php";
+
+							$_egs_totalNetoOrden = max(0, $_egs_totalBrutoOrden - $_egs_montoCanjeOrden);
+							$_egs_idEmpresa      = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : null;
+							$_egs_idUsuario      = isset($_SESSION["id"])      ? intval($_SESSION["id"])      : null;
+
+							$_egs_canjeResult = ControladorRecompensas::ctrCanjearEnOrden(
+								$_egs_idClienteOrden,
+								intval($datos["idOrden"]),
+								$_egs_montoCanjeOrden,
+								$_egs_idEmpresa,
+								$_egs_idUsuario,
+								$_egs_totalBrutoOrden,
+								$_egs_totalNetoOrden
+							);
+
+							if ($_egs_canjeResult !== false) {
+								ModeloOrdenes::mdlGuardarCanjeMonederoOrden(
+									intval($datos["idOrden"]),
+									$_egs_totalBrutoOrden,
+									$_egs_montoCanjeOrden,
+									$_egs_totalNetoOrden
+								);
+							}
+						} catch (Exception $e) {
+							// No bloquear la entrega si falla el canje
+						}
+					}
 
 				}
 

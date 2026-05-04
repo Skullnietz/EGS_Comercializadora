@@ -97,8 +97,12 @@ class ImprimirTickets{
       // ═══════════════════════════════════════
       // RECOMPENSAS - DINERO ELECTRÓNICO
       // ═══════════════════════════════════════
-      $idClienteVenta = intval($ventas["id_cliente"] ?? 0);
-      $totalVenta = floatval($PagoTotal);
+      $idClienteVenta       = intval($ventas["id_cliente"] ?? 0);
+      $totalVenta           = floatval($PagoTotal);
+      $montoCanjeVenta      = floatval($ventas["monto_monedero_aplicado"] ?? 0);
+      $totalAntesMonedero   = floatval($ventas["total_antes_monedero"] ?? 0);
+      // totalVenta ya es el neto (pago final); para el cálculo de recompensa usar el neto
+      $baseRecompensaVenta  = $totalVenta;
       $saldoElectronico = 0;
       $porcentajeCliente = 1;
       $entregadasCliente = 0;
@@ -114,7 +118,8 @@ class ImprimirTickets{
               $entregadasCliente = $infoRecompensas["entregadas"];
               $ordenesEnPrograma = intval($infoRecompensas["ordenes_en_programa"]);
               $tokenMonedero = $infoRecompensas["token"];
-              $montoGenerado = round($totalVenta * ($porcentajeCliente / 100), 2);
+              // Recompensa sobre el total final pagado (neto)
+              $montoGenerado = round($baseRecompensaVenta * ($porcentajeCliente / 100), 2);
           } catch (Exception $e) {
               // defaults already set
           }
@@ -195,11 +200,27 @@ class ImprimirTickets{
             </tr>';
       }
 
-      echo '<tr>
-              <td colspan="3" style="padding:4px 2px 2px 2px;font-size:12px;font-weight:900;text-align:right;border-top:2px solid #000">TOTAL</td>
-              <td style="padding:4px 2px 2px 0;font-size:14px;font-weight:900;text-align:right;border-top:2px solid #000;white-space:nowrap">$'.number_format(floatval($PagoTotal), 2).'</td>
-            </tr>
-          </table>
+      if ($montoCanjeVenta > 0) {
+          echo '<tr>
+                <td colspan="3" style="padding:4px 2px 2px 2px;font-size:12px;font-weight:700;text-align:right;border-top:2px solid #000;color:#666">Subtotal</td>
+                <td style="padding:4px 2px 2px 0;font-size:12px;font-weight:700;text-align:right;border-top:2px solid #000;white-space:nowrap;color:#666">$'.number_format($totalAntesMonedero, 2).'</td>
+              </tr>
+              <tr>
+                <td colspan="3" style="padding:2px 2px 2px 2px;font-size:12px;font-weight:700;text-align:right">Monedero EGS</td>
+                <td style="padding:2px 2px;font-size:12px;font-weight:700;text-align:right;white-space:nowrap">-$'.number_format($montoCanjeVenta, 2).'</td>
+              </tr>
+              <tr>
+                <td colspan="3" style="padding:4px 2px 2px 2px;font-size:12px;font-weight:900;text-align:right;border-top:2px solid #000">TOTAL</td>
+                <td style="padding:4px 2px 2px 0;font-size:14px;font-weight:900;text-align:right;border-top:2px solid #000;white-space:nowrap">$'.number_format(floatval($PagoTotal), 2).'</td>
+              </tr>';
+      } else {
+          echo '<tr>
+                <td colspan="3" style="padding:4px 2px 2px 2px;font-size:12px;font-weight:900;text-align:right;border-top:2px solid #000">TOTAL</td>
+                <td style="padding:4px 2px 2px 0;font-size:14px;font-weight:900;text-align:right;border-top:2px solid #000;white-space:nowrap">$'.number_format(floatval($PagoTotal), 2).'</td>
+              </tr>';
+      }
+
+      echo '  </table>
         </div>
 
         <div style="margin-top:4px;border-top:1px solid #000;padding-top:3px;font-size:12px;text-align:center">

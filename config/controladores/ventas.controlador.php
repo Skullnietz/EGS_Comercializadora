@@ -113,8 +113,8 @@ AGREGAR VENTA RAPIDA
 
 
 				$respuesta = ModeloVentas::mdlIngresarVenta($tabla, $datos);
-
-				if ($respuesta == "ok") {
+				// mdlIngresarVenta ahora devuelve el ID insertado (> 0) o 0 en error
+				if ($respuesta > 0) {
 					
 						echo '<script>
 
