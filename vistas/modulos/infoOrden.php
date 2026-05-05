@@ -1481,7 +1481,8 @@ function _egsEstadoClass($estado) {
 											</button>
 										</span>
 									</div>
-									<small class="text-muted">Máximo disponible: $<?php echo number_format($_ord_saldoRec, 2); ?></small>
+									<small class="text-muted" id="egsMonederoMaxLabel">Máximo aplicable: $0.00</small>
+									<small id="egsMonederoHint" style="display:block;margin-top:4px;color:#64748b"></small>
 								</div>
 								<div class="egs-monedero-desglose" id="egsMonederoDesglose" style="display:none">
 									<div>Total del servicio: <span id="egsMondBruto">$0.00</span></div>
@@ -1991,6 +1992,39 @@ $(document).ready(function () {
         return brutoPanel;
     }
 
+    function actualizarEstadoMonedero() {
+        var $montoInp = $('#egsMontoMonederoOrden');
+        var $btnTodo  = $('#egsMonederoUsarTodo');
+        if (!$montoInp.length) return;
+
+        var saldoMax = parseFloat($montoInp.attr('max') || 0);
+        var bruto    = obtenerBrutoMonedero();
+        var maxAplicable = Math.min(saldoMax, bruto);
+
+        $('#egsMonederoMaxLabel').text('Máximo aplicable: ' + fmt(maxAplicable));
+
+        if (bruto <= 0) {
+            $montoInp.prop('disabled', true).val('0.00');
+            $btnTodo.prop('disabled', true);
+            $('#egsMonederoHint').text('Primero captura el total de la orden para poder aplicar monedero.');
+            $('#egsMontoMonederoOrdenHidden').val('0.00');
+            $('#egsTotalPagadoMonederoOrden').val('0.00');
+            $('#egsMonederoDesglose').hide();
+            return;
+        }
+
+        $montoInp.prop('disabled', false);
+        $btnTodo.prop('disabled', false);
+
+        if (maxAplicable <= 0) {
+            $('#egsMonederoHint').text('El saldo disponible ya no puede aplicarse a esta orden.');
+        } else if (maxAplicable < saldoMax) {
+            $('#egsMonederoHint').text('El canje se limita al total actual de la orden: ' + fmt(bruto) + '.');
+        } else {
+            $('#egsMonederoHint').text('Puedes aplicar hasta ' + fmt(maxAplicable) + ' en esta orden.');
+        }
+    }
+
     function actualizarDesgloseMonedero() {
         var $montoInp  = $('#egsMontoMonederoOrden');
         var $hidden    = $('#egsMontoMonederoOrdenHidden');
@@ -1999,10 +2033,11 @@ $(document).ready(function () {
 
         var saldoMax = parseFloat($montoInp.attr('max') || 0);
         var bruto    = obtenerBrutoMonedero();
+        var maxAplicable = Math.min(saldoMax, bruto);
         var descto   = parseFloat($montoInp.val()) || 0;
 
-        if (descto > saldoMax) { descto = saldoMax; $montoInp.val(saldoMax.toFixed(2)); }
-        if (descto > bruto)    { descto = bruto;    $montoInp.val(bruto.toFixed(2)); }
+        if (descto > saldoMax)      { descto = saldoMax;      $montoInp.val(saldoMax.toFixed(2)); }
+        if (descto > maxAplicable)  { descto = maxAplicable;  $montoInp.val(maxAplicable.toFixed(2)); }
         if (descto < 0)        { descto = 0;        $montoInp.val('0'); }
 
         $hidden.val(descto.toFixed(2));
@@ -2026,6 +2061,7 @@ $(document).ready(function () {
 
         if ($(this).val() === 'Entregado (Ent)') {
             $panel.addClass('visible');
+            actualizarEstadoMonedero();
             actualizarDesgloseMonedero();
         } else {
             $panel.removeClass('visible');
@@ -2037,6 +2073,10 @@ $(document).ready(function () {
 
     // Monto input → recalculate desglose
     $(document).on('input change', '#egsMontoMonederoOrden', actualizarDesgloseMonedero);
+    $(document).on('input change', '#costoTotalDeOrden, .precioPartidaGuardada', function () {
+        actualizarEstadoMonedero();
+        actualizarDesgloseMonedero();
+    });
 
     // "Todo" button
     $(document).on('click', '#egsMonederoUsarTodo', function () {
@@ -2049,6 +2089,7 @@ $(document).ready(function () {
     });
 
     if ($('#egsMonederoPanel').hasClass('visible')) {
+        actualizarEstadoMonedero();
         actualizarDesgloseMonedero();
     }
 
