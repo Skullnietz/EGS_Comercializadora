@@ -1123,7 +1123,14 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 					// ── Recompensas: canjear monedero si se solicitó ──
 					$_egs_montoCanjeOrden  = isset($_POST["montoCanjeMonederoOrden"]) ? floatval($_POST["montoCanjeMonederoOrden"]) : 0;
 					$_egs_idClienteOrden   = isset($_POST["idClienteOrden"])          ? intval($_POST["idClienteOrden"])            : intval($datos["cliente"] ?? 0);
-					$_egs_totalBrutoOrden  = isset($_POST["costoTotalDeOrden"])       ? floatval($_POST["costoTotalDeOrden"])       : 0;
+					$_egs_totalBrutoOrden  = isset($_POST["totalBrutoMonederoOrden"]) ? floatval($_POST["totalBrutoMonederoOrden"]) : 0;
+					if ($_egs_totalBrutoOrden <= 0) {
+						$_egs_totalBrutoOrden = isset($_POST["costoTotalDeOrden"]) ? floatval($_POST["costoTotalDeOrden"]) : 0;
+					}
+
+					if ($_egs_totalBrutoOrden > 0 && $_egs_montoCanjeOrden > $_egs_totalBrutoOrden) {
+						$_egs_montoCanjeOrden = $_egs_totalBrutoOrden;
+					}
 
 					if ($_egs_montoCanjeOrden > 0 && $_egs_idClienteOrden > 0) {
 						try {

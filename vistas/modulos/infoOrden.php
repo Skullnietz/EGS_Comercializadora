@@ -2034,11 +2034,9 @@ $(document).ready(function () {
         $('#egsMonederoMaxLabel').text('Máximo aplicable: ' + fmt(maxAplicable));
 
         if (bruto <= 0) {
-            $montoInp.prop('disabled', true).val('0.00');
-            $btnTodo.prop('disabled', true);
-            $('#egsMonederoHint').text('Primero captura el total de la orden para poder aplicar monedero.');
-            $('#egsMontoMonederoOrdenHidden').val('0.00');
-            $('#egsTotalPagadoMonederoOrden').val('0.00');
+            $montoInp.prop('disabled', false);
+            $btnTodo.prop('disabled', false);
+            $('#egsMonederoHint').text('El saldo sale del monedero del cliente. Puedes capturarlo ahora, pero se validará contra el total real de la orden al guardar.');
             $('#egsMonederoDesglose').hide();
             return;
         }
@@ -2067,12 +2065,12 @@ $(document).ready(function () {
         var descto   = parseFloat($montoInp.val()) || 0;
 
         if (descto > saldoMax)      { descto = saldoMax;      $montoInp.val(saldoMax.toFixed(2)); }
-        if (descto > maxAplicable)  { descto = maxAplicable;  $montoInp.val(maxAplicable.toFixed(2)); }
+        if (bruto > 0 && descto > maxAplicable)  { descto = maxAplicable;  $montoInp.val(maxAplicable.toFixed(2)); }
         if (descto < 0)        { descto = 0;        $montoInp.val('0'); }
 
         $hidden.val(descto.toFixed(2));
         $('#egsTotalBrutoMonederoOrden').val(bruto.toFixed(2));
-        $('#egsTotalPagadoMonederoOrden').val(Math.max(0, bruto - descto).toFixed(2));
+        $('#egsTotalPagadoMonederoOrden').val(bruto > 0 ? Math.max(0, bruto - descto).toFixed(2) : '0.00');
 
         if (descto > 0 && bruto > 0) {
             $('#egsMondBruto').text(fmt(bruto));
@@ -2113,8 +2111,7 @@ $(document).ready(function () {
         var $montoInp = $('#egsMontoMonederoOrden');
         if (!$montoInp.length) return;
         var saldoMax = parseFloat($montoInp.attr('max') || 0);
-        var bruto    = obtenerBrutoMonedero();
-        $montoInp.val(Math.min(saldoMax, bruto).toFixed(2));
+        $montoInp.val(saldoMax.toFixed(2));
         actualizarDesgloseMonedero();
     });
 
