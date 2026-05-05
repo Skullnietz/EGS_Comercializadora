@@ -2022,6 +2022,15 @@ $(document).ready(function () {
         return brutoPanel;
     }
 
+    function obtenerMaxAplicableMonedero() {
+        var $montoInp = $('#egsMontoMonederoOrden');
+        if (!$montoInp.length) return 0;
+        var saldoMax = parseFloat($montoInp.attr('max') || 0) || 0;
+        var bruto    = obtenerBrutoMonedero();
+        if (bruto <= 0) return 0;
+        return Math.min(saldoMax, bruto);
+    }
+
     function actualizarEstadoMonedero() {
         var $montoInp = $('#egsMontoMonederoOrden');
         var $btnTodo  = $('#egsMonederoUsarTodo');
@@ -2029,20 +2038,23 @@ $(document).ready(function () {
 
         var saldoMax = parseFloat($montoInp.attr('max') || 0);
         var bruto    = obtenerBrutoMonedero();
-        var maxAplicable = Math.min(saldoMax, bruto);
+        var maxAplicable = obtenerMaxAplicableMonedero();
 
         $('#egsMonederoMaxLabel').text('Máximo aplicable: ' + fmt(maxAplicable));
 
         if (bruto <= 0) {
             $montoInp.prop('disabled', false);
-            $btnTodo.prop('disabled', false);
-            $('#egsMonederoHint').text('El saldo sale del monedero del cliente. Puedes capturarlo ahora, pero se validará contra el total real de la orden al guardar.');
+            $btnTodo.prop('disabled', true);
+            $('#egsMonederoHint').text('Esta orden no tiene total aplicable todavía. El máximo aplicable es $0.00 hasta que el total de la orden sea mayor a cero.');
+            $('#egsMontoMonederoOrdenHidden').val('0.00');
+            $('#egsTotalBrutoMonederoOrden').val('0.00');
+            $('#egsTotalPagadoMonederoOrden').val('0.00');
             $('#egsMonederoDesglose').hide();
             return;
         }
 
         $montoInp.prop('disabled', false);
-        $btnTodo.prop('disabled', false);
+        $btnTodo.prop('disabled', maxAplicable <= 0);
 
         if (maxAplicable <= 0) {
             $('#egsMonederoHint').text('El saldo disponible ya no puede aplicarse a esta orden.');
@@ -2061,16 +2073,22 @@ $(document).ready(function () {
 
         var saldoMax = parseFloat($montoInp.attr('max') || 0);
         var bruto    = obtenerBrutoMonedero();
-        var maxAplicable = Math.min(saldoMax, bruto);
-        var descto   = parseFloat($montoInp.val()) || 0;
+        var maxAplicable = obtenerMaxAplicableMonedero();
+        var solicitado   = parseFloat($montoInp.val()) || 0;
+        var descto       = solicitado;
 
-        if (descto > saldoMax)      { descto = saldoMax;      $montoInp.val(saldoMax.toFixed(2)); }
-        if (bruto > 0 && descto > maxAplicable)  { descto = maxAplicable;  $montoInp.val(maxAplicable.toFixed(2)); }
-        if (descto < 0)        { descto = 0;        $montoInp.val('0'); }
+        if (descto > saldoMax)      { descto = saldoMax; }
+        if (descto < 0)             { descto = 0; }
+        if (maxAplicable <= 0)      { descto = 0; }
+        else if (descto > maxAplicable) { descto = maxAplicable; }
 
         $hidden.val(descto.toFixed(2));
         $('#egsTotalBrutoMonederoOrden').val(bruto.toFixed(2));
         $('#egsTotalPagadoMonederoOrden').val(bruto > 0 ? Math.max(0, bruto - descto).toFixed(2) : '0.00');
+
+        if (solicitado !== descto) {
+            $('#egsMonederoHint').text('Capturaste ' + fmt(solicitado) + ', pero solo ' + fmt(descto) + ' es aplicable con el total actual de la orden.');
+        }
 
         if (descto > 0 && bruto > 0) {
             $('#egsMondBruto').text(fmt(bruto));
@@ -2110,8 +2128,8 @@ $(document).ready(function () {
     $(document).on('click', '#egsMonederoUsarTodo', function () {
         var $montoInp = $('#egsMontoMonederoOrden');
         if (!$montoInp.length) return;
-        var saldoMax = parseFloat($montoInp.attr('max') || 0);
-        $montoInp.val(saldoMax.toFixed(2));
+        var maxAplicable = obtenerMaxAplicableMonedero();
+        $montoInp.val(maxAplicable.toFixed(2));
         actualizarDesgloseMonedero();
     });
 
