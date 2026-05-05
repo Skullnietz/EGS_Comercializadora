@@ -1259,13 +1259,13 @@ function _egsEstadoClass($estado) {
 								<input type="hidden" value="<?php echo htmlspecialchars($_GET["idOrden"]); ?>" name="idOrden" form="formObservaciones">
 
 								<!-- TOTAL -->
-								<div class="egs-total-bar">
-									<span class="egs-total-label"><i class="fa-solid fa-calculator" style="margin-right:6px"></i>Total</span>
-									<div class="input-group">
-										<span class="input-group-addon egs-dollar">$</span>
-										<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" form="formObservaciones" readonly style="font-weight:700;font-size:18px">
-									</div>
+							<div class="egs-total-bar">
+								<span class="egs-total-label"><i class="fa-solid fa-calculator" style="margin-right:6px"></i>Total</span>
+								<div class="input-group">
+									<span class="input-group-addon egs-dollar">$</span>
+									<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" form="formObservaciones" readonly value="<?php echo htmlspecialchars($value["total"]); ?>" style="font-weight:700;font-size:18px">
 								</div>
+							</div>
 
 								<!-- TOTAL INVERSIONES -->
 								<?php if ($isAdmin): ?>
@@ -1454,7 +1454,7 @@ function _egsEstadoClass($estado) {
 						<!-- ═══ MONEDERO ELECTRÓNICO ══════════════════ -->
 						<?php if (!$isTecnico && !$isSecretaria && $_ord_idCliente > 0 && $estado !== "Entregado (Ent)"): ?>
 						<div class="egs-field-row" id="egsMonederoWrap">
-							<div class="egs-monedero-panel" id="egsMonederoPanel">
+							<div class="egs-monedero-panel" id="egsMonederoPanel" data-total-bruto="<?php echo number_format(floatval($value["total"]), 2, '.', ''); ?>">
 								<div class="egs-monedero-title">
 									<i class="fa-solid fa-wallet"></i> Monedero electrónico
 								</div>
@@ -1500,6 +1500,8 @@ function _egsEstadoClass($estado) {
 								<!-- Inputs ocultos que van al form de la orden -->
 								<input type="hidden" id="egsMontoMonederoOrdenHidden" name="montoCanjeMonederoOrden" value="0" form="formObservaciones">
 								<input type="hidden" name="idClienteOrden" value="<?php echo intval($_ord_idCliente); ?>" form="formObservaciones">
+								<input type="hidden" id="egsTotalBrutoMonederoOrden" name="totalBrutoMonederoOrden" value="<?php echo number_format(floatval($value["total"]), 2, '.', ''); ?>" form="formObservaciones">
+								<input type="hidden" id="egsTotalPagadoMonederoOrden" name="totalPagadoMonederoOrden" value="<?php echo number_format(floatval($value["total"]), 2, '.', ''); ?>" form="formObservaciones">
 							</div>
 						</div>
 						<?php endif; ?>
@@ -1978,6 +1980,17 @@ $(document).ready(function () {
     // ── Monedero electrónico: show/hide panel when estado changes ──
     function fmt(n) { return '$' + parseFloat(n).toFixed(2); }
 
+    function obtenerBrutoMonedero() {
+        var bruto = parseFloat($('#costoTotalDeOrden').val()) || 0;
+        if (bruto > 0) return bruto;
+
+        var brutoHidden = parseFloat($('#egsTotalBrutoMonederoOrden').val()) || 0;
+        if (brutoHidden > 0) return brutoHidden;
+
+        var brutoPanel = parseFloat($('#egsMonederoPanel').attr('data-total-bruto') || 0) || 0;
+        return brutoPanel;
+    }
+
     function actualizarDesgloseMonedero() {
         var $montoInp  = $('#egsMontoMonederoOrden');
         var $hidden    = $('#egsMontoMonederoOrdenHidden');
@@ -1985,7 +1998,7 @@ $(document).ready(function () {
         if (!$montoInp.length) return;
 
         var saldoMax = parseFloat($montoInp.attr('max') || 0);
-        var bruto    = parseFloat($('#costoTotalDeOrden').val()) || 0;
+        var bruto    = obtenerBrutoMonedero();
         var descto   = parseFloat($montoInp.val()) || 0;
 
         if (descto > saldoMax) { descto = saldoMax; $montoInp.val(saldoMax.toFixed(2)); }
@@ -1993,6 +2006,8 @@ $(document).ready(function () {
         if (descto < 0)        { descto = 0;        $montoInp.val('0'); }
 
         $hidden.val(descto.toFixed(2));
+        $('#egsTotalBrutoMonederoOrden').val(bruto.toFixed(2));
+        $('#egsTotalPagadoMonederoOrden').val(Math.max(0, bruto - descto).toFixed(2));
 
         if (descto > 0 && bruto > 0) {
             $('#egsMondBruto').text(fmt(bruto));
@@ -2028,10 +2043,14 @@ $(document).ready(function () {
         var $montoInp = $('#egsMontoMonederoOrden');
         if (!$montoInp.length) return;
         var saldoMax = parseFloat($montoInp.attr('max') || 0);
-        var bruto    = parseFloat($('#costoTotalDeOrden').val()) || 0;
+        var bruto    = obtenerBrutoMonedero();
         $montoInp.val(Math.min(saldoMax, bruto).toFixed(2));
         actualizarDesgloseMonedero();
     });
+
+    if ($('#egsMonederoPanel').hasClass('visible')) {
+        actualizarDesgloseMonedero();
+    }
 
 });
 </script>
