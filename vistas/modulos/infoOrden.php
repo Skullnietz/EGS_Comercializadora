@@ -1971,3 +1971,67 @@ function _egsCopiarFallback(texto, cb) {
 $insertarobservacion = new controladorObservaciones();
 $insertarobservacion->ctrlCrearObservacion();
 ?>
+
+<script>
+$(document).ready(function () {
+
+    // ── Monedero electrónico: show/hide panel when estado changes ──
+    function fmt(n) { return '$' + parseFloat(n).toFixed(2); }
+
+    function actualizarDesgloseMonedero() {
+        var $montoInp  = $('#egsMontoMonederoOrden');
+        var $hidden    = $('#egsMontoMonederoOrdenHidden');
+        var $desglose  = $('#egsMonederoDesglose');
+        if (!$montoInp.length) return;
+
+        var saldoMax = parseFloat($montoInp.attr('max') || 0);
+        var bruto    = parseFloat($('#costoTotalDeOrden').val()) || 0;
+        var descto   = parseFloat($montoInp.val()) || 0;
+
+        if (descto > saldoMax) { descto = saldoMax; $montoInp.val(saldoMax.toFixed(2)); }
+        if (descto > bruto)    { descto = bruto;    $montoInp.val(bruto.toFixed(2)); }
+        if (descto < 0)        { descto = 0;        $montoInp.val('0'); }
+
+        $hidden.val(descto.toFixed(2));
+
+        if (descto > 0 && bruto > 0) {
+            $('#egsMondBruto').text(fmt(bruto));
+            $('#egsMondDescuento').text('-' + fmt(descto));
+            $('#egsMondTotal').text(fmt(Math.max(0, bruto - descto)));
+            $desglose.show();
+        } else {
+            $desglose.hide();
+        }
+    }
+
+    // Estado select change → show/hide panel
+    $(document).on('change', 'select[name="estado"]', function () {
+        var $panel = $('#egsMonederoPanel');
+        if (!$panel.length) return;
+
+        if ($(this).val() === 'Entregado (Ent)') {
+            $panel.addClass('visible');
+            actualizarDesgloseMonedero();
+        } else {
+            $panel.removeClass('visible');
+            $('#egsMontoMonederoOrden').val('');
+            $('#egsMontoMonederoOrdenHidden').val('0');
+            $('#egsMonederoDesglose').hide();
+        }
+    });
+
+    // Monto input → recalculate desglose
+    $(document).on('input change', '#egsMontoMonederoOrden', actualizarDesgloseMonedero);
+
+    // "Todo" button
+    $(document).on('click', '#egsMonederoUsarTodo', function () {
+        var $montoInp = $('#egsMontoMonederoOrden');
+        if (!$montoInp.length) return;
+        var saldoMax = parseFloat($montoInp.attr('max') || 0);
+        var bruto    = parseFloat($('#costoTotalDeOrden').val()) || 0;
+        $montoInp.val(Math.min(saldoMax, bruto).toFixed(2));
+        actualizarDesgloseMonedero();
+    });
+
+});
+</script>
