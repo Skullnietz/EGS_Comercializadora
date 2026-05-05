@@ -343,6 +343,36 @@ foreach ($ordenes as $key => $value) {
 	$tecnicoDos = $value["id_tecnicoDos"];
 }
 
+$_ord_totalBrutoVista = floatval($value["total"] ?? 0);
+if ($_ord_totalBrutoVista <= 0) {
+	$_ord_totalCalculado = 0;
+	$_ord_precioCampos = array(
+		"precioUno", "precioDos", "precioTres", "precioCuatro", "precioCinco",
+		"precioSeis", "precioSiete", "precioOcho", "precioNueve", "precioDiez"
+	);
+	foreach ($_ord_precioCampos as $_ord_precioCampo) {
+		$_ord_totalCalculado += floatval($value[$_ord_precioCampo] ?? 0);
+	}
+
+	if (is_array($partidas) || is_object($partidas)) {
+		foreach ($partidas as $_ord_partidaTmp) {
+			$_ord_totalCalculado += floatval($_ord_partidaTmp["precioPartida"] ?? 0);
+		}
+	}
+
+	$_ord_totalCalculado += floatval($precioRecarga ?? 0);
+
+	if (is_array($partidasTecnicoDos) || is_object($partidasTecnicoDos)) {
+		foreach ($partidasTecnicoDos as $_ord_partidaTec2Tmp) {
+			$_ord_totalCalculado += floatval($_ord_partidaTec2Tmp["precioPartida"] ?? 0);
+		}
+	}
+
+	if ($_ord_totalCalculado > 0) {
+		$_ord_totalBrutoVista = $_ord_totalCalculado;
+	}
+}
+
 // ── Validación centralizada de contacto ─────────────────────────
 $_wa_tel1      = preg_replace('/\D/', '', (string)($usuario["telefonoDos"] ?? ""));
 $_wa_tel2      = preg_replace('/\D/', '', (string)($usuario["telefono"]   ?? ""));
@@ -1263,7 +1293,7 @@ function _egsEstadoClass($estado) {
 								<span class="egs-total-label"><i class="fa-solid fa-calculator" style="margin-right:6px"></i>Total</span>
 								<div class="input-group">
 									<span class="input-group-addon egs-dollar">$</span>
-									<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" form="formObservaciones" readonly value="<?php echo htmlspecialchars($value["total"]); ?>" style="font-weight:700;font-size:18px">
+									<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" form="formObservaciones" readonly value="<?php echo htmlspecialchars(number_format($_ord_totalBrutoVista, 2, '.', '')); ?>" style="font-weight:700;font-size:18px">
 								</div>
 							</div>
 
@@ -1454,7 +1484,7 @@ function _egsEstadoClass($estado) {
 						<!-- ═══ MONEDERO ELECTRÓNICO ══════════════════ -->
 						<?php if (!$isTecnico && !$isSecretaria && $_ord_idCliente > 0 && $estado !== "Entregado (Ent)"): ?>
 						<div class="egs-field-row" id="egsMonederoWrap">
-							<div class="egs-monedero-panel" id="egsMonederoPanel" data-total-bruto="<?php echo number_format(floatval($value["total"]), 2, '.', ''); ?>">
+							<div class="egs-monedero-panel" id="egsMonederoPanel" data-total-bruto="<?php echo number_format($_ord_totalBrutoVista, 2, '.', ''); ?>">
 								<div class="egs-monedero-title">
 									<i class="fa-solid fa-wallet"></i> Monedero electrónico
 								</div>
@@ -1501,8 +1531,8 @@ function _egsEstadoClass($estado) {
 								<!-- Inputs ocultos que van al form de la orden -->
 								<input type="hidden" id="egsMontoMonederoOrdenHidden" name="montoCanjeMonederoOrden" value="0" form="formObservaciones">
 								<input type="hidden" name="idClienteOrden" value="<?php echo intval($_ord_idCliente); ?>" form="formObservaciones">
-								<input type="hidden" id="egsTotalBrutoMonederoOrden" name="totalBrutoMonederoOrden" value="<?php echo number_format(floatval($value["total"]), 2, '.', ''); ?>" form="formObservaciones">
-								<input type="hidden" id="egsTotalPagadoMonederoOrden" name="totalPagadoMonederoOrden" value="<?php echo number_format(floatval($value["total"]), 2, '.', ''); ?>" form="formObservaciones">
+								<input type="hidden" id="egsTotalBrutoMonederoOrden" name="totalBrutoMonederoOrden" value="<?php echo number_format($_ord_totalBrutoVista, 2, '.', ''); ?>" form="formObservaciones">
+								<input type="hidden" id="egsTotalPagadoMonederoOrden" name="totalPagadoMonederoOrden" value="<?php echo number_format($_ord_totalBrutoVista, 2, '.', ''); ?>" form="formObservaciones">
 							</div>
 						</div>
 						<?php endif; ?>
