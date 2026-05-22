@@ -21,7 +21,7 @@ RewriteRule \.(php|html?)$ - [L]
 
 # Routing limpio: /inicio → index.php?ruta=inicio
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^([-a-zA-Z0-9/]+)$ index.php?ruta=$1 [L]
+RewriteRule ^([-a-zA-Z0-9/]+)$ index.php?ruta=$1 [QSA,L]
 
 # Redirigir HTTP → HTTPS  (solo en producción — se omite en localhost/127.0.0.1)
 RewriteCond %{HTTPS} off

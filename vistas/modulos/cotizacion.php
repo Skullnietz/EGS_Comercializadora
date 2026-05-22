@@ -64,6 +64,15 @@ $_SESSION['form_token'] = bin2hex(random_bytes(32));
 // Generar UUID para el código QR de esta cotización
 $codigoQr = bin2hex(random_bytes(16)); // 32 caracteres hex
 
+// Construir URL de validación absoluta y robusta
+$_qrValidUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+    . '://' . $_SERVER['HTTP_HOST']
+    . dirname($_SERVER['SCRIPT_NAME'])
+    . '/index.php?ruta=validar-cotizacion&codigo=' . $codigoQr;
+$_qrValidUrl = str_replace('\\', '/', $_qrValidUrl);
+$_qrValidUrl = str_replace('//', '/', $_qrValidUrl);
+$_qrValidUrl = preg_replace('#^(https?:)/#', '$1//', $_qrValidUrl);
+
 // ── Recotizar: cargar datos de cotización existente (sin precios) ──
 $_rc_data = null;
 if (isset($_GET['recotizar']) && intval($_GET['recotizar']) > 0) {
@@ -808,7 +817,7 @@ if (isset($_GET['recotizar']) && intval($_GET['recotizar']) > 0) {
   <script>
     const formToken = "<?php echo $_SESSION['form_token']; ?>";
     const codigoQrValue = "<?php echo $codigoQr; ?>";
-    const validationUrl = window.location.origin + "/validar-cotizacion?codigo=" + codigoQrValue;
+    const validationUrl = "<?php echo $_qrValidUrl; ?>";
 
     // Generar QR
     new QRCode(document.getElementById("qrcode-footer"), {
