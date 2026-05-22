@@ -270,8 +270,9 @@ class ModeloVentas{
 	}
 
 	static public function mdlIngresarVenta($tabla, $datos){
-		
-		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(productoUno, precioUno, cantidadUno, productoDos, precioDos, cantidadDos, productoTres, precioTres, cantidadTres, productoCuatro, precioCuatro, cantidadCuatro, productoCinco, precioCinco, cantidadCinco, productoSeis, precioSeis, cantidadSeis, productoSiete, precioSiete, cantidadSiete, productoOcho, precioOcho, cantidadOcho, productoNueve, precioNueve, cantidadNueve, productoDiez, precioDiez, cantidadDiez, cantidadProductos, asesor, empresa, pago, metodo, nombreCliente, correo, id_empresa, id_cliente) VALUES (:productoUno, :precioUno, :cantidadUno, :productoDos, :precioDos, :cantidadDos, :productoTres, :precioTres, :cantidadTres,:productoCuatro, :precioCuatro, :cantidadCuatro,:productoCinco, :precioCinco, :cantidadCinco,:productoSeis, :precioSeis, :cantidadSeis,:productoSiete, :precioSiete, :cantidadSiete,:productoOcho, :precioOcho, :cantidadOcho,:productoNueve, :precioNueve, :cantidadNueve,:productoDiez, :precioDiez, :cantidadDiez,  :cantidadProductos, :asesor, :empresa, :pago, :metodo, :nombreCliente, :correo, :id_empresa, :id_cliente)");
+
+		$pdo = Conexion::conectar();
+		$stmt = $pdo->prepare("INSERT INTO $tabla(productoUno, precioUno, cantidadUno, productoDos, precioDos, cantidadDos, productoTres, precioTres, cantidadTres, productoCuatro, precioCuatro, cantidadCuatro, productoCinco, precioCinco, cantidadCinco, productoSeis, precioSeis, cantidadSeis, productoSiete, precioSiete, cantidadSiete, productoOcho, precioOcho, cantidadOcho, productoNueve, precioNueve, cantidadNueve, productoDiez, precioDiez, cantidadDiez, cantidadProductos, asesor, empresa, pago, metodo, nombreCliente, correo, id_empresa, id_cliente, total_antes_monedero, monto_monedero_aplicado) VALUES (:productoUno, :precioUno, :cantidadUno, :productoDos, :precioDos, :cantidadDos, :productoTres, :precioTres, :cantidadTres,:productoCuatro, :precioCuatro, :cantidadCuatro,:productoCinco, :precioCinco, :cantidadCinco,:productoSeis, :precioSeis, :cantidadSeis,:productoSiete, :precioSiete, :cantidadSiete,:productoOcho, :precioOcho, :cantidadOcho,:productoNueve, :precioNueve, :cantidadNueve,:productoDiez, :precioDiez, :cantidadDiez,  :cantidadProductos, :asesor, :empresa, :pago, :metodo, :nombreCliente, :correo, :id_empresa, :id_cliente, :total_antes_monedero, :monto_monedero_aplicado)");
 
 		$stmt->bindParam(":empresa", $datos["empresa"], PDO::PARAM_INT);
 		$stmt->bindParam(":productoUno", $datos["productoUno"], PDO::PARAM_STR);
@@ -316,23 +317,22 @@ class ModeloVentas{
 		$idCliente = isset($datos["id_cliente"]) && $datos["id_cliente"] > 0 ? $datos["id_cliente"] : null;
 		$stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
 
+		$totalAntesMonedero    = isset($datos["total_antes_monedero"])    ? floatval($datos["total_antes_monedero"])    : null;
+		$montoMonederoAplicado = isset($datos["monto_monedero_aplicado"]) ? floatval($datos["monto_monedero_aplicado"]) : 0;
+		$stmt->bindParam(":total_antes_monedero",    $totalAntesMonedero);
+		$stmt->bindParam(":monto_monedero_aplicado", $montoMonederoAplicado);
+
 		if($stmt->execute()){
-
-			return "ok";	
-
-		}else{
-
-			return "error";
-		
+			return intval($pdo->lastInsertId());
 		}
 
-		$stmt->close();
-		
-		$stmt = null;
+		return 0;
 	}
 
 	/*=============================================
-	OBTENER ÚLTIMA VENTA INSERTADA (para vincular canje)
+	OBTENER ÚLTIMA VENTA INSERTADA — DEPRECADO
+	Mantener para compatibilidad, pero preferir el ID
+	devuelto por mdlIngresarVenta().
 	=============================================*/
 	static public function mdlObtenerUltimaVenta($idEmpresa){
 		$pdo = Conexion::conectar();
@@ -562,8 +562,9 @@ class ModeloVentas{
 		}
 
 	public function mdlIngresarVentaDinamica($tabla, $datos){
-		
-		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(id_usuario, id_Asesor, productos, impuesto, neto, pago, id_empresa, inversion, metodo) VALUES (:id_usuario, :id_Asesor, :productos, :impuesto, :neto, :pago, :id_empresa, :inversion, :metodo)");
+
+		$pdo = Conexion::conectar();
+		$stmt = $pdo->prepare("INSERT INTO $tabla(id_usuario, id_Asesor, productos, impuesto, neto, pago, id_empresa, inversion, metodo, total_antes_monedero, monto_monedero_aplicado) VALUES (:id_usuario, :id_Asesor, :productos, :impuesto, :neto, :pago, :id_empresa, :inversion, :metodo, :total_antes_monedero, :monto_monedero_aplicado)");
 
 		$stmt->bindParam(":id_usuario", $datos["id_usuario"], PDO::PARAM_INT);
 		$stmt->bindParam(":id_Asesor", $datos["id_Asesor"], PDO::PARAM_INT);
@@ -575,19 +576,16 @@ class ModeloVentas{
 		$stmt->bindParam(":id_empresa", $datos["id_empresa"], PDO::PARAM_STR);
 		$stmt->bindParam(":metodo", $datos["metodo"], PDO::PARAM_STR);
 
+		$totalAntesMonedero    = isset($datos["total_antes_monedero"])    ? floatval($datos["total_antes_monedero"])    : null;
+		$montoMonederoAplicado = isset($datos["monto_monedero_aplicado"]) ? floatval($datos["monto_monedero_aplicado"]) : 0;
+		$stmt->bindParam(":total_antes_monedero",    $totalAntesMonedero);
+		$stmt->bindParam(":monto_monedero_aplicado", $montoMonederoAplicado);
+
 		if($stmt->execute()){
-
-			return "ok";	
-
-		}else{
-
-			return "error";
-		
+			return intval($pdo->lastInsertId());
 		}
 
-		$stmt->close();
-		
-		$stmt = null;
+		return 0;
 	}
 
 

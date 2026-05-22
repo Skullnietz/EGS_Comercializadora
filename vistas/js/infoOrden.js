@@ -498,3 +498,6 @@ $(document).on("click", ".btnAgendarCitaDesdeOrden", function(e){
 	$modal.modal("show");
 });
 
+/* El JS del monedero en infoOrden se inyecta inline en infoOrden.php
+   porque ese módulo se carga dinámicamente después de este archivo. */
+

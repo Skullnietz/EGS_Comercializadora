@@ -223,21 +223,26 @@ class ModeloRecompensas
         $acumulado = $acumuladoAntes + $acumuladoDespues;
 
         // 3) Restar canjes realizados desde el inicio del programa
+        //    Excluir pedidos y sumar reversiones (devuelven saldo)
         $stmtCanjes = $pdo->prepare("
-            SELECT COALESCE(SUM(ABS(monto)), 0) as total_canjes
+            SELECT
+                COALESCE(SUM(CASE WHEN tipo = 'canje'     THEN ABS(monto) ELSE 0 END), 0) as total_canjes,
+                COALESCE(SUM(CASE WHEN tipo = 'reversion' THEN ABS(monto) ELSE 0 END), 0) as total_reversiones
             FROM dinero_electronico_movimientos
             WHERE id_cliente = :id_cliente
-              AND tipo = 'canje'
+              AND tipo IN ('canje', 'reversion')
               AND fecha >= :fechaDesde
-              AND (descripcion IS NULL OR descripcion NOT LIKE '%Pedido%')
+              AND (referencia_tipo IS NULL OR referencia_tipo != 'pedido')
+              AND (referencia_tipo IS NOT NULL OR (descripcion IS NULL OR descripcion NOT LIKE '%Pedido%'))
         ");
         $stmtCanjes->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
         $stmtCanjes->bindParam(":fechaDesde", $fechaDesde, PDO::PARAM_STR);
         $stmtCanjes->execute();
         $rowCanjes = $stmtCanjes->fetch(PDO::FETCH_ASSOC);
-        $totalCanjes = floatval($rowCanjes["total_canjes"]);
+        $totalCanjes      = floatval($rowCanjes["total_canjes"]);
+        $totalReversiones = floatval($rowCanjes["total_reversiones"]);
 
-        $saldo = $acumulado - $totalCanjes;
+        $saldo = $acumulado - $totalCanjes + $totalReversiones;
         if ($saldo < 0) $saldo = 0;
 
         return $saldo;
@@ -362,34 +367,114 @@ class ModeloRecompensas
     }
 
     /*=============================================
-    VERIFICAR SI YA SE REGISTRÓ CANJE PARA UNA ORDEN
+    VERIFICAR SI YA EXISTE UN CANJE PARA UNA REFERENCIA
+    Usa referencia_tipo + referencia_id (columnas nuevas).
     =============================================*/
-    static public function mdlExisteCanjeOrden($idOrden)
+    static public function mdlExisteCanje($tipo, $idReferencia)
     {
         $pdo = ConexionWP::conectarWP();
-        $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM dinero_electronico_movimientos WHERE id_orden = :id_orden AND tipo = 'canje'");
-        $stmt->bindParam(":id_orden", $idOrden, PDO::PARAM_INT);
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as total
+            FROM dinero_electronico_movimientos
+            WHERE referencia_tipo = :tipo
+              AND referencia_id   = :id_ref
+              AND tipo = 'canje'
+        ");
+        $stmt->bindParam(":tipo",   $tipo,        PDO::PARAM_STR);
+        $stmt->bindParam(":id_ref", $idReferencia, PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return intval($result["total"]) > 0;
+        return intval($stmt->fetch(PDO::FETCH_ASSOC)["total"]) > 0;
+    }
+
+    /*=============================================
+    OBTENER CANJE POR TIPO Y REFERENCIA
+    =============================================*/
+    static public function mdlObtenerCanje($tipo, $idReferencia)
+    {
+        $pdo = ConexionWP::conectarWP();
+        $stmt = $pdo->prepare("
+            SELECT * FROM dinero_electronico_movimientos
+            WHERE referencia_tipo = :tipo
+              AND referencia_id   = :id_ref
+              AND tipo = 'canje'
+            LIMIT 1
+        ");
+        $stmt->bindParam(":tipo",   $tipo,        PDO::PARAM_STR);
+        $stmt->bindParam(":id_ref", $idReferencia, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     /*=============================================
     REGISTRAR CANJE DE DINERO ELECTRÓNICO
-    (solo inserta el movimiento, el saldo se recalcula dinámicamente)
+    Guarda referencia estructurada + datos de auditoría de importes.
     =============================================*/
-    static public function mdlCanjearRecompensa($idCliente, $idOrden, $montoCanje, $descripcion)
-    {
+    static public function mdlCanjearRecompensa(
+        $idCliente, $idReferencia, $montoCanje, $descripcion,
+        $referenciaTipo = null, $idEmpresa = null, $idUsuarioAplico = null,
+        $totalBruto = null, $totalNeto = null
+    ) {
         $pdo = ConexionWP::conectarWP();
+        $montoNeg = -abs($montoCanje);
 
-        $montoNeg = -$montoCanje;
-        $stmt = $pdo->prepare("INSERT INTO dinero_electronico_movimientos
-            (id_cliente, id_orden, tipo, monto, saldo_anterior, saldo_nuevo, descripcion)
-            VALUES (:id_cliente, :id_orden, 'canje', :monto, 0, 0, :descripcion)");
-        $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmt->bindParam(":id_orden", $idOrden, PDO::PARAM_INT);
-        $stmt->bindParam(":monto", $montoNeg);
-        $stmt->bindParam(":descripcion", $descripcion, PDO::PARAM_STR);
+        $stmt = $pdo->prepare("
+            INSERT INTO dinero_electronico_movimientos
+                (id_cliente, id_orden, tipo, monto, saldo_anterior, saldo_nuevo,
+                 descripcion, referencia_tipo, referencia_id, id_empresa,
+                 id_usuario_aplico, origen_total_bruto, origen_total_neto, monto_aplicado)
+            VALUES
+                (:id_cliente, :id_orden, 'canje', :monto, 0, 0,
+                 :descripcion, :ref_tipo, :ref_id, :id_empresa,
+                 :id_usuario, :total_bruto, :total_neto, :monto_aplicado)
+        ");
+        $stmt->bindParam(":id_cliente",    $idCliente,       PDO::PARAM_INT);
+        $stmt->bindParam(":id_orden",      $idReferencia,    PDO::PARAM_INT);
+        $stmt->bindParam(":monto",         $montoNeg);
+        $stmt->bindParam(":descripcion",   $descripcion,     PDO::PARAM_STR);
+        $stmt->bindParam(":ref_tipo",      $referenciaTipo,  PDO::PARAM_STR);
+        $stmt->bindParam(":ref_id",        $idReferencia,    PDO::PARAM_INT);
+        $stmt->bindParam(":id_empresa",    $idEmpresa,       PDO::PARAM_INT);
+        $stmt->bindParam(":id_usuario",    $idUsuarioAplico, PDO::PARAM_INT);
+        $stmt->bindParam(":total_bruto",   $totalBruto);
+        $stmt->bindParam(":total_neto",    $totalNeto);
+        $stmt->bindParam(":monto_aplicado", $montoCanje);
+        $stmt->execute();
+
+        return true;
+    }
+
+    /*=============================================
+    REGISTRAR REVERSIÓN DE UN CANJE
+    Inserta un movimiento de tipo 'reversion' vinculado al canje original.
+    Nunca borra el canje original.
+    =============================================*/
+    static public function mdlRegistrarReversion(
+        $idCliente, $idReferencia, $montoReversion, $referenciaTipo,
+        $idEmpresa = null, $idUsuarioAplico = null, $descripcion = null
+    ) {
+        $pdo = ConexionWP::conectarWP();
+        if ($descripcion === null) {
+            $descripcion = "Reversión de canje en " . ucfirst($referenciaTipo) . " #" . $idReferencia;
+        }
+
+        $stmt = $pdo->prepare("
+            INSERT INTO dinero_electronico_movimientos
+                (id_cliente, id_orden, tipo, monto, saldo_anterior, saldo_nuevo,
+                 descripcion, referencia_tipo, referencia_id, id_empresa, id_usuario_aplico, monto_aplicado)
+            VALUES
+                (:id_cliente, :id_ref, 'reversion', :monto, 0, 0,
+                 :descripcion, :ref_tipo, :ref_id, :id_empresa, :id_usuario, :monto_aplicado)
+        ");
+        $montoPos = abs($montoReversion);
+        $stmt->bindParam(":id_cliente",    $idCliente,       PDO::PARAM_INT);
+        $stmt->bindParam(":id_ref",        $idReferencia,    PDO::PARAM_INT);
+        $stmt->bindParam(":monto",         $montoPos);
+        $stmt->bindParam(":descripcion",   $descripcion,     PDO::PARAM_STR);
+        $stmt->bindParam(":ref_tipo",      $referenciaTipo,  PDO::PARAM_STR);
+        $stmt->bindParam(":ref_id",        $idReferencia,    PDO::PARAM_INT);
+        $stmt->bindParam(":id_empresa",    $idEmpresa,       PDO::PARAM_INT);
+        $stmt->bindParam(":id_usuario",    $idUsuarioAplico, PDO::PARAM_INT);
+        $stmt->bindParam(":monto_aplicado", $montoPos);
         $stmt->execute();
 
         return true;
@@ -397,25 +482,46 @@ class ModeloRecompensas
 
     /*=============================================
     OBTENER CANJES DEL CLIENTE (para historial)
+    Excluye pedidos usando referencia_tipo.
     =============================================*/
     static public function mdlObtenerCanjes($idCliente, $limite = 20)
     {
         $pdo = ConexionWP::conectarWP();
-        $stmt = $pdo->prepare("SELECT * FROM dinero_electronico_movimientos WHERE id_cliente = :id_cliente AND tipo = 'canje' AND (descripcion IS NULL OR descripcion NOT LIKE '%Pedido%') ORDER BY fecha DESC LIMIT :limite");
+        $stmt = $pdo->prepare("
+            SELECT * FROM dinero_electronico_movimientos
+            WHERE id_cliente = :id_cliente
+              AND tipo = 'canje'
+              AND (referencia_tipo IS NULL OR referencia_tipo != 'pedido')
+              AND (referencia_tipo IS NOT NULL OR (descripcion IS NULL OR descripcion NOT LIKE '%Pedido%'))
+            ORDER BY fecha DESC
+            LIMIT :limite
+        ");
         $stmt->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
-        $stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
+        $stmt->bindParam(":limite",     $limite,    PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /*=============================================
     OBTENER CANJE DE UNA ORDEN ESPECÍFICA
+    Busca primero por referencia_tipo (nuevo), luego por descripcion (legado).
     =============================================*/
     static public function mdlObtenerCanjeOrden($idOrden)
     {
         $pdo = ConexionWP::conectarWP();
-        $stmt = $pdo->prepare("SELECT * FROM dinero_electronico_movimientos WHERE id_orden = :id_orden AND tipo = 'canje' AND descripcion LIKE '%Orden%' LIMIT 1");
-        $stmt->bindParam(":id_orden", $idOrden, PDO::PARAM_INT);
+        $stmt = $pdo->prepare("
+            SELECT * FROM dinero_electronico_movimientos
+            WHERE tipo = 'canje'
+              AND (
+                  (referencia_tipo = 'orden' AND referencia_id = :id1)
+                  OR
+                  (referencia_tipo IS NULL AND id_orden = :id2 AND descripcion LIKE '%Orden%')
+              )
+            ORDER BY referencia_tipo IS NOT NULL DESC
+            LIMIT 1
+        ");
+        $stmt->bindParam(":id1", $idOrden, PDO::PARAM_INT);
+        $stmt->bindParam(":id2", $idOrden, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -426,8 +532,19 @@ class ModeloRecompensas
     static public function mdlObtenerCanjePedido($idPedido)
     {
         $pdo = ConexionWP::conectarWP();
-        $stmt = $pdo->prepare("SELECT * FROM dinero_electronico_movimientos WHERE id_orden = :id_ref AND tipo = 'canje' AND descripcion LIKE '%Pedido%' LIMIT 1");
-        $stmt->bindParam(":id_ref", $idPedido, PDO::PARAM_INT);
+        $stmt = $pdo->prepare("
+            SELECT * FROM dinero_electronico_movimientos
+            WHERE tipo = 'canje'
+              AND (
+                  (referencia_tipo = 'pedido' AND referencia_id = :id1)
+                  OR
+                  (referencia_tipo IS NULL AND id_orden = :id2 AND descripcion LIKE '%Pedido%')
+              )
+            ORDER BY referencia_tipo IS NOT NULL DESC
+            LIMIT 1
+        ");
+        $stmt->bindParam(":id1", $idPedido, PDO::PARAM_INT);
+        $stmt->bindParam(":id2", $idPedido, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -438,8 +555,19 @@ class ModeloRecompensas
     static public function mdlObtenerCanjeVenta($idVenta)
     {
         $pdo = ConexionWP::conectarWP();
-        $stmt = $pdo->prepare("SELECT * FROM dinero_electronico_movimientos WHERE id_orden = :id_ref AND tipo = 'canje' AND descripcion LIKE '%Venta%' LIMIT 1");
-        $stmt->bindParam(":id_ref", $idVenta, PDO::PARAM_INT);
+        $stmt = $pdo->prepare("
+            SELECT * FROM dinero_electronico_movimientos
+            WHERE tipo = 'canje'
+              AND (
+                  (referencia_tipo = 'venta' AND referencia_id = :id1)
+                  OR
+                  (referencia_tipo IS NULL AND id_orden = :id2 AND descripcion LIKE '%Venta%')
+              )
+            ORDER BY referencia_tipo IS NOT NULL DESC
+            LIMIT 1
+        ");
+        $stmt->bindParam(":id1", $idVenta, PDO::PARAM_INT);
+        $stmt->bindParam(":id2", $idVenta, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }

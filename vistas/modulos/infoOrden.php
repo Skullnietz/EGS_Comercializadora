@@ -76,6 +76,18 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 	.egs-calc-summary i { margin-right: 4px; color: #cbd5e1; }
 
 	/* ═══════════════════════════════════════
+	   MONEDERO ELECTRÓNICO — panel en infoOrden
+	   ═══════════════════════════════════════ */
+	.egs-monedero-panel { display:none; background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%); border:2px solid #3b82f6; border-radius:10px; padding:16px; margin-top:12px; }
+	.egs-monedero-panel.visible { display:block; }
+	.egs-monedero-title { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:10px; display:flex; align-items:center; gap:7px; }
+	.egs-monedero-saldo { font-size:22px; font-weight:800; color:#1e40af; }
+	.egs-monedero-desglose { font-size:12px; color:#374151; margin-top:10px; border-top:1px solid #bfdbfe; padding-top:10px; line-height:1.8; }
+	.egs-monedero-desglose span { font-weight:700; float:right; }
+	.egs-monedero-total { font-size:14px; font-weight:800; color:#166534; margin-top:4px; }
+	.egs-monedero-total span { font-size:16px; }
+
+	/* ═══════════════════════════════════════
 	   GALLERY — Modern Carousel + Lightbox
 	   ═══════════════════════════════════════ */
 
@@ -298,6 +310,21 @@ if (is_array($ordenes) && !empty($ordenes)) {
 // Cliente
 $usuario = ControladorClientes::ctrMostrarClientesOrdenes("id", $_GET["cliente"]);
 
+// ── Recompensas del cliente ──────────────────────────────────────
+$_ord_idCliente  = intval($_GET["cliente"]);
+$_ord_infoRec    = array("saldo" => 0, "porcentaje" => 1);
+$_ord_saldoRec   = 0;
+if ($_ord_idCliente > 0 && !($isTecnico || $isSecretaria)) {
+    try {
+        require_once __DIR__ . "/../../controladores/recompensas.controlador.php";
+        require_once __DIR__ . "/../../modelos/recompensas.modelo.php";
+        $_ord_infoRec  = ControladorRecompensas::ctrObtenerInfoRecompensas($_ord_idCliente);
+        $_ord_saldoRec = floatval($_ord_infoRec["saldo"]);
+    } catch (Exception $e) {
+        $_ord_saldoRec = 0;
+    }
+}
+
 // Datos de la orden
 foreach ($ordenes as $key => $value) {
 	$portada = $value["portada"];
@@ -314,6 +341,36 @@ foreach ($ordenes as $key => $value) {
 	$partidasTecnicoDos = json_decode($value["partidasTecnicoDos"], true);
 	$totalTecnicosDos = $value["TotalTecnicoDos"];
 	$tecnicoDos = $value["id_tecnicoDos"];
+}
+
+$_ord_totalBrutoVista = floatval($value["total"] ?? 0);
+if ($_ord_totalBrutoVista <= 0) {
+	$_ord_totalCalculado = 0;
+	$_ord_precioCampos = array(
+		"precioUno", "precioDos", "precioTres", "precioCuatro", "precioCinco",
+		"precioSeis", "precioSiete", "precioOcho", "precioNueve", "precioDiez"
+	);
+	foreach ($_ord_precioCampos as $_ord_precioCampo) {
+		$_ord_totalCalculado += floatval($value[$_ord_precioCampo] ?? 0);
+	}
+
+	if (is_array($partidas) || is_object($partidas)) {
+		foreach ($partidas as $_ord_partidaTmp) {
+			$_ord_totalCalculado += floatval($_ord_partidaTmp["precioPartida"] ?? 0);
+		}
+	}
+
+	$_ord_totalCalculado += floatval($precioRecarga ?? 0);
+
+	if (is_array($partidasTecnicoDos) || is_object($partidasTecnicoDos)) {
+		foreach ($partidasTecnicoDos as $_ord_partidaTec2Tmp) {
+			$_ord_totalCalculado += floatval($_ord_partidaTec2Tmp["precioPartida"] ?? 0);
+		}
+	}
+
+	if ($_ord_totalCalculado > 0) {
+		$_ord_totalBrutoVista = $_ord_totalCalculado;
+	}
 }
 
 // ── Validación centralizada de contacto ─────────────────────────
@@ -1232,13 +1289,13 @@ function _egsEstadoClass($estado) {
 								<input type="hidden" value="<?php echo htmlspecialchars($_GET["idOrden"]); ?>" name="idOrden" form="formObservaciones">
 
 								<!-- TOTAL -->
-								<div class="egs-total-bar">
-									<span class="egs-total-label"><i class="fa-solid fa-calculator" style="margin-right:6px"></i>Total</span>
-									<div class="input-group">
-										<span class="input-group-addon egs-dollar">$</span>
-										<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" form="formObservaciones" readonly style="font-weight:700;font-size:18px">
-									</div>
+							<div class="egs-total-bar">
+								<span class="egs-total-label"><i class="fa-solid fa-calculator" style="margin-right:6px"></i>Total</span>
+								<div class="input-group">
+									<span class="input-group-addon egs-dollar">$</span>
+									<input type="number" class="form-control" id="costoTotalDeOrden" name="costoTotalDeOrden" form="formObservaciones" readonly value="<?php echo htmlspecialchars(number_format($_ord_totalBrutoVista, 2, '.', '')); ?>" style="font-weight:700;font-size:18px">
 								</div>
+							</div>
 
 								<!-- TOTAL INVERSIONES -->
 								<?php if ($isAdmin): ?>
@@ -1423,6 +1480,63 @@ function _egsEstadoClass($estado) {
 							}
 							?>
 						</div>
+
+						<!-- ═══ MONEDERO ELECTRÓNICO ══════════════════ -->
+						<?php if (!$isTecnico && !$isSecretaria && $_ord_idCliente > 0 && $estado !== "Entregado (Ent)"): ?>
+						<div class="egs-field-row" id="egsMonederoWrap">
+							<div class="egs-monedero-panel" id="egsMonederoPanel" data-total-bruto="<?php echo number_format($_ord_totalBrutoVista, 2, '.', ''); ?>">
+								<div class="egs-monedero-title">
+									<i class="fa-solid fa-wallet"></i> Monedero electrónico
+								</div>
+
+								<?php if ($_ord_saldoRec > 0): ?>
+								<div style="margin-bottom:8px">
+									<span class="egs-lbl" style="margin-bottom:2px">Saldo disponible del cliente</span>
+									<div class="egs-monedero-saldo">$<?php echo number_format($_ord_saldoRec, 2); ?></div>
+								</div>
+								<div class="egs-field-row" style="margin-bottom:6px">
+									<label class="egs-lbl">Monto a aplicar</label>
+									<div class="input-group">
+										<span class="input-group-addon" style="background:#3b82f6;color:#fff;border-color:#3b82f6">$</span>
+										<input type="number" id="egsMontoMonederoOrden"
+											class="form-control"
+											min="0"
+											max="<?php echo number_format($_ord_saldoRec, 2, '.', ''); ?>"
+											step="0.01"
+											placeholder="0.00"
+											style="font-weight:700">
+										<span class="input-group-btn">
+											<button type="button" class="btn btn-info" id="egsMonederoUsarTodo" title="Usar todo el saldo">
+												<i class="fa-solid fa-check-double"></i> Todo
+											</button>
+										</span>
+									</div>
+									<small class="text-muted" id="egsMonederoMaxLabel">Máximo aplicable: $0.00</small>
+									<small id="egsMonederoHint" style="display:block;margin-top:4px;color:#64748b"></small>
+								</div>
+								<div class="egs-monedero-desglose" id="egsMonederoDesglose" style="display:none">
+									<div>Total del servicio: <span id="egsMondBruto">$0.00</span></div>
+									<div style="color:#dc2626">Descuento monedero: <span id="egsMondDescuento">-$0.00</span></div>
+									<div class="egs-monedero-total" style="margin-top:6px;border-top:1px solid #bbf7d0;padding-top:6px">
+										Total a cobrar: <span id="egsMondTotal">$0.00</span>
+									</div>
+								</div>
+								<?php else: ?>
+								<p style="font-size:13px;color:#64748b;margin:0">
+									<i class="fa-solid fa-info-circle" style="color:#3b82f6;margin-right:4px"></i>
+									Este cliente no tiene saldo disponible en monedero.
+								</p>
+								<?php endif; ?>
+
+								<!-- Inputs ocultos que van al form de la orden -->
+								<input type="hidden" id="egsMontoMonederoOrdenHidden" name="montoCanjeMonederoOrden" value="0" form="formObservaciones">
+								<input type="hidden" name="idClienteOrden" value="<?php echo intval($_ord_idCliente); ?>" form="formObservaciones">
+								<input type="hidden" id="egsTotalBrutoMonederoOrden" name="totalBrutoMonederoOrden" value="<?php echo number_format($_ord_totalBrutoVista, 2, '.', ''); ?>" form="formObservaciones">
+								<input type="hidden" id="egsTotalPagadoMonederoOrden" name="totalPagadoMonederoOrden" value="<?php echo number_format($_ord_totalBrutoVista, 2, '.', ''); ?>" form="formObservaciones">
+							</div>
+						</div>
+						<?php endif; ?>
+						<!-- ═══ /MONEDERO ELECTRÓNICO ══════════════════ -->
 
 					</div>
 				</div>
@@ -1890,3 +2004,122 @@ function _egsCopiarFallback(texto, cb) {
 $insertarobservacion = new controladorObservaciones();
 $insertarobservacion->ctrlCrearObservacion();
 ?>
+
+<script>
+$(document).ready(function () {
+
+    // ── Monedero electrónico: show/hide panel when estado changes ──
+    function fmt(n) { return '$' + parseFloat(n).toFixed(2); }
+
+    function obtenerBrutoMonedero() {
+        var bruto = parseFloat($('#costoTotalDeOrden').val()) || 0;
+        if (bruto > 0) return bruto;
+
+        var brutoHidden = parseFloat($('#egsTotalBrutoMonederoOrden').val()) || 0;
+        if (brutoHidden > 0) return brutoHidden;
+
+        var brutoPanel = parseFloat($('#egsMonederoPanel').attr('data-total-bruto') || 0) || 0;
+        return brutoPanel;
+    }
+
+    function actualizarEstadoMonedero() {
+        var $montoInp = $('#egsMontoMonederoOrden');
+        var $btnTodo  = $('#egsMonederoUsarTodo');
+        if (!$montoInp.length) return;
+
+        var saldoMax = parseFloat($montoInp.attr('max') || 0);
+        var bruto    = obtenerBrutoMonedero();
+        var maxAplicable = saldoMax;
+
+        $('#egsMonederoMaxLabel').text('Máximo aplicable: ' + fmt(maxAplicable));
+
+        if (bruto <= 0) {
+            $montoInp.prop('disabled', false);
+            $btnTodo.prop('disabled', maxAplicable <= 0);
+            $('#egsMonederoHint').text('El saldo disponible del cliente es ' + fmt(saldoMax) + '. Si el total real de la orden resulta menor, el sistema lo validará al guardar.');
+            $('#egsMonederoDesglose').hide();
+            return;
+        }
+
+        $montoInp.prop('disabled', false);
+        $btnTodo.prop('disabled', maxAplicable <= 0);
+
+        if (maxAplicable <= 0) {
+            $('#egsMonederoHint').text('El saldo disponible ya no puede aplicarse a esta orden.');
+        } else {
+            $('#egsMonederoHint').text('Puedes aplicar hasta ' + fmt(maxAplicable) + ' en esta orden.');
+        }
+    }
+
+    function actualizarDesgloseMonedero() {
+        var $montoInp  = $('#egsMontoMonederoOrden');
+        var $hidden    = $('#egsMontoMonederoOrdenHidden');
+        var $desglose  = $('#egsMonederoDesglose');
+        if (!$montoInp.length) return;
+
+        var saldoMax = parseFloat($montoInp.attr('max') || 0);
+        var bruto    = obtenerBrutoMonedero();
+        var solicitado   = parseFloat($montoInp.val()) || 0;
+        var descto       = solicitado;
+
+        if (descto > saldoMax)      { descto = saldoMax; }
+        if (descto < 0)             { descto = 0; }
+
+        $hidden.val(descto.toFixed(2));
+        $('#egsTotalBrutoMonederoOrden').val(bruto.toFixed(2));
+        $('#egsTotalPagadoMonederoOrden').val(bruto > 0 ? Math.max(0, bruto - descto).toFixed(2) : '0.00');
+
+        if (solicitado !== descto) {
+            $('#egsMonederoHint').text('Capturaste ' + fmt(solicitado) + ', pero el saldo disponible del cliente es ' + fmt(descto) + '.');
+        }
+
+        if (descto > 0 && bruto > 0) {
+            $('#egsMondBruto').text(fmt(bruto));
+            $('#egsMondDescuento').text('-' + fmt(descto));
+            $('#egsMondTotal').text(fmt(Math.max(0, bruto - descto)));
+            $desglose.show();
+        } else {
+            $desglose.hide();
+        }
+    }
+
+    // Estado select change → show/hide panel
+    $(document).on('change', 'select[name="estado"]', function () {
+        var $panel = $('#egsMonederoPanel');
+        if (!$panel.length) return;
+
+        if ($(this).val() === 'Entregado (Ent)') {
+            $panel.addClass('visible');
+            actualizarEstadoMonedero();
+            actualizarDesgloseMonedero();
+        } else {
+            $panel.removeClass('visible');
+            $('#egsMontoMonederoOrden').val('');
+            $('#egsMontoMonederoOrdenHidden').val('0');
+            $('#egsMonederoDesglose').hide();
+        }
+    });
+
+    // Monto input → recalculate desglose
+    $(document).on('input change', '#egsMontoMonederoOrden', actualizarDesgloseMonedero);
+    $(document).on('input change', '#costoTotalDeOrden, .precioPartidaGuardada', function () {
+        actualizarEstadoMonedero();
+        actualizarDesgloseMonedero();
+    });
+
+    // "Todo" button
+    $(document).on('click', '#egsMonederoUsarTodo', function () {
+        var $montoInp = $('#egsMontoMonederoOrden');
+        if (!$montoInp.length) return;
+        var saldoMax = parseFloat($montoInp.attr('max') || 0) || 0;
+        $montoInp.val(saldoMax.toFixed(2));
+        actualizarDesgloseMonedero();
+    });
+
+    if ($('#egsMonederoPanel').hasClass('visible')) {
+        actualizarEstadoMonedero();
+        actualizarDesgloseMonedero();
+    }
+
+});
+</script>

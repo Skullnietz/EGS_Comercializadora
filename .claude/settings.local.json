@@ -214,7 +214,8 @@
       "Bash(find /c/Users/black/Desktop/EGS -name \"*.php\" -type f -exec grep -l \"json_encode.*partida\\\\|json_decode.*partida\" {} \\\\;)",
       "Bash(grep -n 'POST.*partida\\\\|$_POST.*partida' /c/Users/black/Desktop/EGS/controladores/ordenes.controlador.php)",
       "Bash(find /c/Users/black/Desktop/EGS -type f -name \"*.php\" -exec grep -l \"CREATE TABLE.*ordenes\\\\|DESCRIBE.*ordenes\" {} \\\\;)",
-      "Bash(grep -r 'move_uploaded_file\\\\|$_FILES' /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora '--include=*.php' -l)"
+      "Bash(grep -r 'move_uploaded_file\\\\|$_FILES' /c/Users/CarlosGuizar/Desktop/Proyectos/EGS/EGS_Comercializadora '--include=*.php' -l)",
+      "Bash(php -l \"C:\\\\Users\\\\black\\\\Desktop\\\\EGS\\\\vistas\\\\modulos\\\\infoOrden.php\")"
     ]
   }
 }

@@ -70,63 +70,99 @@ class ControladorRecompensas
 
     /*=============================================
     CANJEAR DINERO ELECTRÓNICO EN ORDEN
-    Valida contra el saldo dinámico antes de registrar.
+    Validaciones: saldo suficiente, no duplicado.
+    Retorna array con auditoría completa o false si falla.
     =============================================*/
-    static public function ctrCanjearRecompensa($idCliente, $idOrden, $montoCanje)
-    {
+    static public function ctrCanjearEnOrden(
+        $idCliente, $idOrden, $montoCanje,
+        $idEmpresa = null, $idUsuario = null,
+        $totalBruto = null, $totalNeto = null
+    ) {
         self::ctrCrearTablas();
 
-        $porcentaje = self::ctrCalcularPorcentaje($idCliente);
-        $porcentajeHistorico = self::ctrCalcularPorcentajeHistorico($idCliente);
-        $saldoDisponible = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHistorico);
+        if ($montoCanje <= 0) return false;
 
-        if ($montoCanje > $saldoDisponible || $montoCanje <= 0) {
-            return false;
-        }
+        // Prevenir duplicado
+        if (ModeloRecompensas::mdlExisteCanje('orden', $idOrden)) return false;
+
+        $porcentaje        = self::ctrCalcularPorcentaje($idCliente);
+        $porcentajeHist    = self::ctrCalcularPorcentajeHistorico($idCliente);
+        $saldoAnterior     = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHist);
+
+        if ($montoCanje > $saldoAnterior) return false;
 
         $descripcion = "Canje en Orden #" . $idOrden;
-        ModeloRecompensas::mdlCanjearRecompensa($idCliente, $idOrden, $montoCanje, $descripcion);
+        ModeloRecompensas::mdlCanjearRecompensa(
+            $idCliente, $idOrden, $montoCanje, $descripcion,
+            'orden', $idEmpresa, $idUsuario, $totalBruto, $totalNeto
+        );
 
-        $nuevoSaldo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHistorico);
+        $saldoNuevo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHist);
 
         return array(
-            "monto_canjeado" => $montoCanje,
-            "saldo_nuevo" => $nuevoSaldo
+            "monto_canjeado"  => $montoCanje,
+            "saldo_anterior"  => $saldoAnterior,
+            "saldo_nuevo"     => $saldoNuevo,
+            "referencia_tipo" => "orden",
+            "referencia_id"   => $idOrden
         );
-    }
-
-    /*=============================================
-    CANJEAR DINERO ELECTRÓNICO EN PEDIDO
-    =============================================*/
-    static public function ctrCanjearRecompensaPedido($idCliente, $idPedido, $montoCanje)
-    {
-        return false;
     }
 
     /*=============================================
     CANJEAR DINERO ELECTRÓNICO EN VENTA RÁPIDA
     =============================================*/
-    static public function ctrCanjearRecompensaVenta($idCliente, $idVenta, $montoCanje)
-    {
+    static public function ctrCanjearEnVenta(
+        $idCliente, $idVenta, $montoCanje,
+        $idEmpresa = null, $idUsuario = null,
+        $totalBruto = null, $totalNeto = null
+    ) {
         self::ctrCrearTablas();
 
-        $porcentaje = self::ctrCalcularPorcentaje($idCliente);
-        $porcentajeHistorico = self::ctrCalcularPorcentajeHistorico($idCliente);
-        $saldoDisponible = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHistorico);
+        if ($montoCanje <= 0) return false;
 
-        if ($montoCanje > $saldoDisponible || $montoCanje <= 0) {
-            return false;
-        }
+        // Prevenir duplicado
+        if (ModeloRecompensas::mdlExisteCanje('venta', $idVenta)) return false;
+
+        $porcentaje     = self::ctrCalcularPorcentaje($idCliente);
+        $porcentajeHist = self::ctrCalcularPorcentajeHistorico($idCliente);
+        $saldoAnterior  = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHist);
+
+        if ($montoCanje > $saldoAnterior) return false;
 
         $descripcion = "Canje en Venta #" . $idVenta;
-        ModeloRecompensas::mdlCanjearRecompensa($idCliente, $idVenta, $montoCanje, $descripcion);
+        ModeloRecompensas::mdlCanjearRecompensa(
+            $idCliente, $idVenta, $montoCanje, $descripcion,
+            'venta', $idEmpresa, $idUsuario, $totalBruto, $totalNeto
+        );
 
-        $nuevoSaldo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHistorico);
+        $saldoNuevo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHist);
 
         return array(
-            "monto_canjeado" => $montoCanje,
-            "saldo_nuevo" => $nuevoSaldo
+            "monto_canjeado"  => $montoCanje,
+            "saldo_anterior"  => $saldoAnterior,
+            "saldo_nuevo"     => $saldoNuevo,
+            "referencia_tipo" => "venta",
+            "referencia_id"   => $idVenta
         );
+    }
+
+    /*=============================================
+    MÉTODOS LEGACY — mantienen compatibilidad con código existente
+    que todavía llame a ctrCanjearRecompensa / ctrCanjearRecompensaVenta
+    =============================================*/
+    static public function ctrCanjearRecompensa($idCliente, $idOrden, $montoCanje)
+    {
+        return self::ctrCanjearEnOrden($idCliente, $idOrden, $montoCanje);
+    }
+
+    static public function ctrCanjearRecompensaPedido($idCliente, $idPedido, $montoCanje)
+    {
+        return false;
+    }
+
+    static public function ctrCanjearRecompensaVenta($idCliente, $idVenta, $montoCanje)
+    {
+        return self::ctrCanjearEnVenta($idCliente, $idVenta, $montoCanje);
     }
 
     /*=============================================
@@ -191,6 +227,36 @@ class ControladorRecompensas
             "entregadas" => $entregadas,
             "porcentaje" => $porcentaje,
             "nombre_cliente" => $nombreCliente
+        );
+    }
+
+    /*=============================================
+    REVERTIR UN CANJE EXISTENTE
+    Inserta un movimiento 'reversion' — nunca borra el canje.
+    Usar cuando se anula/cancela una venta u orden.
+    =============================================*/
+    static public function ctrRevertirCanje($referenciaTipo, $idReferencia, $idEmpresa = null, $idUsuario = null)
+    {
+        self::ctrCrearTablas();
+
+        $canje = ModeloRecompensas::mdlObtenerCanje($referenciaTipo, $idReferencia);
+        if (!$canje) return false;
+
+        $idCliente = intval($canje["id_cliente"]);
+        $monto     = abs(floatval($canje["monto"]));
+
+        ModeloRecompensas::mdlRegistrarReversion(
+            $idCliente, $idReferencia, $monto, $referenciaTipo,
+            $idEmpresa, $idUsuario
+        );
+
+        $porcentaje     = self::ctrCalcularPorcentaje($idCliente);
+        $porcentajeHist = self::ctrCalcularPorcentajeHistorico($idCliente);
+        $saldoNuevo     = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHist);
+
+        return array(
+            "monto_revertido" => $monto,
+            "saldo_nuevo"     => $saldoNuevo
         );
     }
 

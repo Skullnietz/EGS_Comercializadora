@@ -314,7 +314,7 @@ class ControladorVentas{
 
  							   "nombreCliente" => $_POST["nombreCliente"],	
 
- 							   "correo" => $_POST["correo"],			
+ 							   "correo" => $_POST["correo"],
 
  							   "empresa" => $_POST["empresa"],
 
@@ -322,30 +322,39 @@ class ControladorVentas{
 
 							   );
 
-
-
-				$respuesta = ModeloVentas::mdlIngresarVenta($tabla, $datos);
-
-				// ── Recompensas: canjear dinero electrónico si se solicitó ──
-				$_egs_idClienteVenta = isset($_POST["id_cliente"]) ? intval($_POST["id_cliente"]) : 0;
 				$_egs_montoCanjeVenta = isset($_POST["montoCanjeElectronicoVenta"]) ? floatval($_POST["montoCanjeElectronicoVenta"]) : 0;
+				$_egs_pagoOriginal    = floatval($_POST["pago"]);
 
-				if ($respuesta == "ok" && $_egs_montoCanjeVenta > 0 && $_egs_idClienteVenta > 0) {
+				if ($_egs_montoCanjeVenta > 0) {
+					$datos["total_antes_monedero"]    = $_egs_pagoOriginal;
+					$datos["monto_monedero_aplicado"] = $_egs_montoCanjeVenta;
+					$datos["pago"]                    = max(0, $_egs_pagoOriginal - $_egs_montoCanjeVenta);
+				}
+
+				$idVentaInsertada = ModeloVentas::mdlIngresarVenta($tabla, $datos);
+
+				// ── Recompensas: canjear con el ID real de la venta ──
+				$_egs_idClienteVenta = isset($_POST["id_cliente"]) ? intval($_POST["id_cliente"]) : 0;
+
+				if ($idVentaInsertada > 0 && $_egs_montoCanjeVenta > 0 && $_egs_idClienteVenta > 0) {
 					try {
 						require_once "recompensas.controlador.php";
 						require_once __DIR__ . "/../modelos/recompensas.modelo.php";
-						$ultimaVenta = ModeloVentas::mdlObtenerUltimaVenta(intval($_POST["empresa"]));
-						if ($ultimaVenta > 0) {
-							// Verificar que no exista un canje previo para esta venta
-							$canjeExistente = ModeloRecompensas::mdlObtenerCanjeVenta($ultimaVenta);
-							if (!$canjeExistente) {
-								ControladorRecompensas::ctrCanjearRecompensaVenta($_egs_idClienteVenta, $ultimaVenta, $_egs_montoCanjeVenta);
-							}
-						}
+						ControladorRecompensas::ctrCanjearEnVenta(
+							$_egs_idClienteVenta,
+							$idVentaInsertada,
+							$_egs_montoCanjeVenta,
+							intval($_POST["empresa"]),
+							null,
+							$_egs_pagoOriginal,
+							floatval($datos["pago"])
+						);
 					} catch (Exception $e) {
 						// No bloquear la venta si falla el canje
 					}
 				}
+
+				$respuesta = $idVentaInsertada > 0 ? "ok" : "error";
 
 				if ($respuesta == "ok") {
 
@@ -932,27 +941,38 @@ class ControladorVentas{
 
 
 
-				$respuesta = ModeloVentas::mdlIngresarVentaDinamica($tablaVentas,$datos);
-
-				// ── Recompensas: canjear dinero electrónico si aplica ──
-				$_egs_idClienteVentaDin = isset($_POST["id_cliente"]) ? intval($_POST["id_cliente"]) : intval($_POST["seleccionarCliente"]);
+				$_egs_idClienteVentaDin  = isset($_POST["id_cliente"]) ? intval($_POST["id_cliente"]) : intval($_POST["seleccionarCliente"]);
 				$_egs_montoCanjeVentaDin = isset($_POST["montoCanjeElectronicoVenta"]) ? floatval($_POST["montoCanjeElectronicoVenta"]) : 0;
+				$_egs_pagoOriginalDin    = floatval($_POST["totalVenta"]);
 
-				if ($respuesta == "ok" && $_egs_montoCanjeVentaDin > 0 && $_egs_idClienteVentaDin > 0) {
+				if ($_egs_montoCanjeVentaDin > 0) {
+					$datos["total_antes_monedero"]    = $_egs_pagoOriginalDin;
+					$datos["monto_monedero_aplicado"] = $_egs_montoCanjeVentaDin;
+					$datos["pago"]                    = max(0, $_egs_pagoOriginalDin - $_egs_montoCanjeVentaDin);
+				}
+
+				$idVentaDinamicaInsertada = ModeloVentas::mdlIngresarVentaDinamica($tablaVentas, $datos);
+
+				// ── Recompensas: canjear con el ID real de la venta ──
+				if ($idVentaDinamicaInsertada > 0 && $_egs_montoCanjeVentaDin > 0 && $_egs_idClienteVentaDin > 0) {
 					try {
 						require_once "recompensas.controlador.php";
 						require_once __DIR__ . "/../modelos/recompensas.modelo.php";
-						$ultimaVenta = ModeloVentas::mdlObtenerUltimaVenta(intval($_POST["empresa"]));
-						if ($ultimaVenta > 0) {
-							$canjeExistente = ModeloRecompensas::mdlObtenerCanjeVenta($ultimaVenta);
-							if (!$canjeExistente) {
-								ControladorRecompensas::ctrCanjearRecompensaVenta($_egs_idClienteVentaDin, $ultimaVenta, $_egs_montoCanjeVentaDin);
-							}
-						}
+						ControladorRecompensas::ctrCanjearEnVenta(
+							$_egs_idClienteVentaDin,
+							$idVentaDinamicaInsertada,
+							$_egs_montoCanjeVentaDin,
+							intval($_POST["empresa"]),
+							null,
+							$_egs_pagoOriginalDin,
+							floatval($datos["pago"])
+						);
 					} catch (Exception $e) {
 						// No bloquear la venta si falla el canje
 					}
 				}
+
+				$respuesta = $idVentaDinamicaInsertada > 0 ? "ok" : "error";
 
 				if ($respuesta == "ok") {
 

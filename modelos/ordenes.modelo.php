@@ -844,6 +844,30 @@ class ModeloOrdenes{
 	
 
 	/*=============================================
+	GUARDAR CAMPOS DE MONEDERO EN UNA ORDEN
+	Actualiza total_bruto_monedero, monto_monedero_aplicado,
+	total_pagado_cliente y fecha_canje_monedero.
+	=============================================*/
+	static public function mdlGuardarCanjeMonederoOrden($idOrden, $totalBruto, $montoAplicado, $totalPagado)
+	{
+		$pdo = ConexionWP::conectarWP();
+		$stmt = $pdo->prepare("
+			UPDATE ordenes
+			SET total_bruto_monedero    = :total_bruto,
+			    monto_monedero_aplicado = :monto_aplicado,
+			    total_pagado_cliente    = :total_pagado,
+			    fecha_canje_monedero    = NOW()
+			WHERE id = :id
+		");
+		$stmt->bindParam(":id",             $idOrden,      PDO::PARAM_INT);
+		$stmt->bindParam(":total_bruto",    $totalBruto);
+		$stmt->bindParam(":monto_aplicado", $montoAplicado);
+		$stmt->bindParam(":total_pagado",   $totalPagado);
+		$stmt->execute();
+		return true;
+	}
+
+	/*=============================================
 
 	ELIMINAR PRODUCTO
 
