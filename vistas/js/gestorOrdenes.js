@@ -139,6 +139,9 @@ function limpiarUrl(texto){
 
 $(".tituloOrden").change(function(){
 
+	var tituloLimpio = $(".tituloOrden").val().replace(/[^a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]/g, "");
+	$(".tituloOrden").val(tituloLimpio);
+
 	$(".rutaOrden").val(limpiarUrl($(".tituloOrden").val()));
 
 })
@@ -385,6 +388,17 @@ $(".guardarOrden").click(function(){
 
 	if($(".tituloOrden").val() != "" && 
 	   $(".descripcionOrden").val() != ""){
+	   
+	   	var regExpTitulo = /^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/;
+	   	if(!regExpTitulo.test($(".tituloOrden").val())){
+	   		swal({
+	   			title: "El nombre de la orden contiene caracteres especiales",
+	   			text: "Por favor, elimina los caracteres no permitidos antes de guardar.",
+	   			type: "error",
+	   			confirmButtonText: "¡Cerrar!"
+	   		});
+	   		return;
+	   	}
 	   
 	   	/*=============================================
 	   	PREGUNTAMOS SI VIENEN IMÁGENES PARA MULTIMEDIA O LINK DE YOUTUBE
@@ -1027,6 +1041,17 @@ $(".guardarCambiosOrden").click(function(){
 	=============================================*/
 	if ($("#modalEditarOrden .tituloOrden").val() != "" && 
 	    $("#modalEditarOrden .descripcionOrden").val() != ""){
+
+	   	var regExpTitulo = /^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/;
+	   	if(!regExpTitulo.test($("#modalEditarOrden .tituloOrden").val())){
+	   		swal({
+	   			title: "El nombre de la orden contiene caracteres especiales",
+	   			text: "Por favor, elimina los caracteres no permitidos antes de guardar.",
+	   			type: "error",
+	   			confirmButtonText: "¡Cerrar!"
+	   		});
+	   		return;
+	   	}
 
 	/*=============================================
 	PREGUNTAMOS SI VIENEN IMÁGENES PARA MULTIMEDIA 
