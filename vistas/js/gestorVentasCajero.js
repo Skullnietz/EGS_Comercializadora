@@ -378,6 +378,9 @@
     if (!$clienteSelect) return "";
     if (clienteChoices && typeof clienteChoices.getValue === "function") {
       var raw = clienteChoices.getValue(true);
+      if (Array.isArray(raw) && raw.length) {
+        return String(raw[0]);
+      }
       if (raw !== null && raw !== undefined && raw !== "") {
         return String(raw);
       }
@@ -385,21 +388,28 @@
     return $clienteSelect.value || "";
   }
 
+  function sincronizarClienteYMonedero() {
+    onClienteSeleccionado(getClienteSelectValue());
+  }
+
   function initClienteChoices() {
     if (!window.Choices || !$clienteSelect) return;
-    if (clienteChoices) {
-      clienteChoices.destroy();
+    try {
+      if (clienteChoices) {
+        clienteChoices.destroy();
+        clienteChoices = null;
+      }
+      clienteChoices = new Choices($clienteSelect, {
+        searchEnabled: true,
+        shouldSort: false,
+        itemSelectText: "",
+        searchPlaceholderValue: "Escribe para buscar...",
+        noResultsText: "Sin resultados",
+        noChoicesText: "Sin opciones"
+      });
+    } catch (err) {
       clienteChoices = null;
     }
-    clienteChoices = new Choices($clienteSelect, {
-      searchEnabled: true,
-      shouldSort: false,
-      itemSelectText: "",
-      searchPlaceholderValue: "Escribe para buscar...",
-      noResultsText: "Sin resultados",
-      noChoicesText: "Sin opciones"
-    });
-    bindClienteSelectEvents();
   }
 
   function syncClienteHidden(val) {
@@ -416,7 +426,7 @@
   }
 
   function ocultarMonederoPanel() {
-    $("#egsMonederoWrap").removeClass("is-visible");
+    $("#egsMonederoWrap").removeClass("is-visible").css("display", "");
     $("#egsMonederoLoading, #egsMonederoConSaldo, #egsMonederoSinSaldo").hide();
     $("#egsMontoMonederoVenta").val("");
     $("#egsMontoCanjeVentaHidden").val("0");
@@ -426,7 +436,7 @@
   }
 
   function mostrarMonederoCargando() {
-    $("#egsMonederoWrap").addClass("is-visible");
+    $("#egsMonederoWrap").addClass("is-visible").css("display", "block");
     $("#egsMonederoLoading").show();
     $("#egsMonederoConSaldo, #egsMonederoSinSaldo").hide();
   }
@@ -455,30 +465,42 @@
     if (!$clienteSelect || $clienteSelect._egsPosClienteBound) return;
     $clienteSelect._egsPosClienteBound = true;
 
-    function notificarCliente(val) {
-      onClienteSeleccionado(val === null || val === undefined ? "" : String(val));
+    function posponerSync() {
+      window.setTimeout(sincronizarClienteYMonedero, 0);
     }
 
-    $clienteSelect.addEventListener("change", function () {
-      notificarCliente(getClienteSelectValue());
-    });
+    $clienteSelect.addEventListener("change", posponerSync);
 
     $clienteSelect.addEventListener("addItem", function (e) {
       if (e.detail && e.detail.value !== undefined && e.detail.value !== "") {
-        notificarCliente(e.detail.value);
+        window.setTimeout(function () {
+          sincronizarClienteYMonedero();
+        }, 0);
       }
     });
 
-    $clienteSelect.addEventListener("removeItem", function () {
-      notificarCliente("");
-    });
+    /* Choices dispara removeItem al cambiar opción; no vaciar monedero aquí (rompe el panel). */
+    $clienteSelect.addEventListener("removeItem", posponerSync);
+  }
 
-    $clienteSelect.addEventListener("choice", function (e) {
-      var choice = e.detail && e.detail.choice ? e.detail.choice : null;
-      if (choice && choice.value !== undefined) {
-        notificarCliente(choice.value);
-      }
-    });
+  function initPosClienteMonedero() {
+    $clienteSelect = document.getElementById("egs_clienteVentaPOS");
+    if (!$clienteSelect) return;
+
+    initClienteChoices();
+    bindClienteSelectEvents();
+
+    $(document)
+      .off("change.egsPosCliente", "#egs_clienteVentaPOS")
+      .on("change.egsPosCliente", "#egs_clienteVentaPOS", function () {
+        sincronizarClienteYMonedero();
+      });
+
+    $(document)
+      .off("click.egsPosCliente", "#posCajeroRoot .choices__list--dropdown .choices__item--selectable")
+      .on("click.egsPosCliente", "#posCajeroRoot .choices__list--dropdown .choices__item--selectable", function () {
+        window.setTimeout(sincronizarClienteYMonedero, 0);
+      });
   }
 
   function cargarMonedero(idCliente) {
@@ -505,8 +527,10 @@
         var saldo = resp && typeof resp.saldo !== "undefined" ? parseFloat(resp.saldo) || 0 : 0;
         egsSaldoMonederoCliente = saldo;
         $("#egsSaldoMonederoLabel").text(formatMoney(saldo));
-        $("#egsMonederoWrap").addClass("is-visible");
+        $("#egsMonederoWrap").addClass("is-visible").css("display", "block");
         $("#egsMonederoLoading").hide();
+
+        $("#egsMonederoAjaxError").hide().text("");
 
         if (saldo > 0) {
           $("#egsMonederoConSaldo").show();
@@ -520,12 +544,16 @@
         actualizarEstadoMonedero();
         actualizarDesgloseMonedero();
       },
-      error: function () {
-        $("#egsMonederoWrap").addClass("is-visible");
+      error: function (xhr) {
+        $("#egsMonederoWrap").addClass("is-visible").css("display", "block");
         $("#egsMonederoLoading").hide();
         $("#egsMonederoConSaldo").hide();
         $("#egsMonederoSinSaldo").show();
-        $("#egsMonederoHint").text("No se pudo consultar el saldo. Puedes continuar sin monedero.");
+        var msg = "No se pudo consultar el saldo. Puedes continuar sin monedero.";
+        if (xhr && xhr.status) {
+          msg += " (HTTP " + xhr.status + ")";
+        }
+        $("#egsMonederoAjaxError").text(msg).show();
         recalcularTotales();
       }
     });
@@ -736,13 +764,7 @@
   });
 
   // ── Cliente + monedero al seleccionar ──
-  initClienteChoices();
-  if (!$clienteSelect || !window.Choices) {
-    bindClienteSelectEvents();
-    $(document).on("change", "#egs_clienteVentaPOS", function () {
-      onClienteSeleccionado(this.value);
-    });
-  }
+  initPosClienteMonedero();
 
   // ── Monedero (mismo flujo que infoOrden) ──
   $("#egsMonederoUsarTodo").on("click", function () {

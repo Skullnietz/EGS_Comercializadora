@@ -352,10 +352,11 @@
                 </div>
               </div>
               <div id="egsMonederoSinSaldo" style="display:none">
-                <p style="font-size:13px;color:#64748b;margin:0">
+                <p style="font-size:13px;color:#64748b;margin:0 0 6px">
                   <i class="fa-solid fa-info-circle" style="color:#3b82f6;margin-right:4px"></i>
                   Este cliente no tiene saldo disponible en monedero.
                 </p>
+                <p id="egsMonederoAjaxError" style="display:none;font-size:12px;color:#b45309;margin:0"></p>
               </div>
               <input type="hidden" id="egsMontoCanjeVentaHidden" name="montoCanjeElectronicoVenta" value="0">
               <input type="hidden" id="egsTotalBrutoMonederoVenta" value="0">

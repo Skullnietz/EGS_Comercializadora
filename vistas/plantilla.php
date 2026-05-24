@@ -1,5 +1,5 @@
 <?php
-$jsVer = '1.4.1';
+$jsVer = '1.4.2';
 $rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
 $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
