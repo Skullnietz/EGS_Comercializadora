@@ -778,6 +778,13 @@ const $input11 = document.querySelector(' #productoDiez');
       box-shadow: 0 0 0 3px rgba(99,102,241,.12);
     }
     #tablaVentasRapidasUI_wrapper .dataTables_paginate { margin-top: 14px; }
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination {
+      display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px;
+    }
+    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+      padding: 0 !important; margin: 0 !important;
+      background: transparent !important; border: 0 !important; box-shadow: none !important;
+    }
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
       border-radius: 8px !important;
       border: 1px solid var(--crm-border) !important;
@@ -802,9 +809,6 @@ const $input11 = document.querySelector(' #productoDiez');
     #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:focus {
       background: #f8fafc !important; border-color: #e2e8f0 !important;
       color: #94a3b8 !important; cursor: not-allowed;
-    }
-    #tablaVentasRapidasUI_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
-      background: transparent !important; border: 0 !important; box-shadow: none !important;
     }
 
     /* ─── Modal ─── */

@@ -891,6 +891,10 @@ class ControladorVentas{
 		$_egs_montoCanjeVentaDin = isset($_POST["montoCanjeElectronicoVenta"]) ? floatval($_POST["montoCanjeElectronicoVenta"]) : 0;
 		$_egs_pagoOriginalDin = floatval($_POST["totalVenta"]);
 
+		if ($_egs_montoCanjeVentaDin > $_egs_pagoOriginalDin) {
+			$_egs_montoCanjeVentaDin = $_egs_pagoOriginalDin;
+		}
+
 		if ($_egs_montoCanjeVentaDin > 0) {
 			$datos["total_antes_monedero"] = $_egs_pagoOriginalDin;
 			$datos["monto_monedero_aplicado"] = $_egs_montoCanjeVentaDin;

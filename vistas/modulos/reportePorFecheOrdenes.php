@@ -285,6 +285,11 @@ $totalCols    = $isAdmin ? 13 : 11;
   margin: 0;
   padding-left: 0;
   list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
 }
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li {
   list-style: none;
@@ -332,6 +337,8 @@ $totalCols    = $isAdmin ? 13 : 11;
 
 /* Limpia estilos residuales sobre el <li> para que no tape el boton interno */
 .rpt-table-wrap .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+  padding: 0 !important;
+  margin: 0 !important;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;

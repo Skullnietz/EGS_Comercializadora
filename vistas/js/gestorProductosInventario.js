@@ -6,7 +6,10 @@
     return;
   }
 
-  var $tabla = $(".tablaInventarioProductos");
+  var $tabla = $("#tablaInventarioProductos");
+  if (!$tabla.length) {
+    $tabla = $(".tablaInventarioProductos");
+  }
   var filtroActual = "todos";
   var productoSeleccionadoId = null;
   var dtInventario = null;

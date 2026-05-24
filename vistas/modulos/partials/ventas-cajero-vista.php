@@ -52,10 +52,23 @@
     .pos-total-box .pos-total-value { font-size: 32px; font-weight: 800; line-height: 1.1; }
     .pos-line-sub { font-size: 12px; color: var(--crm-muted); }
     .pos-line-code { font-family: monospace; font-size: 11px; color: var(--crm-accent); }
-    .pos-monedero {
-      display: none; background: #fffbeb; border: 1px solid #fde68a;
-      border-radius: 10px; padding: 10px; margin-bottom: 10px;
+    .egs-monedero-panel {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 2px solid #3b82f6; border-radius: 10px; padding: 16px; margin-bottom: 12px;
     }
+    .egs-monedero-title {
+      font-size: 13px; font-weight: 700; color: #1d4ed8; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .egs-monedero-saldo { font-size: 22px; font-weight: 800; color: #1e40af; }
+    .egs-monedero-desglose {
+      font-size: 12px; color: #374151; margin-top: 10px;
+      border-top: 1px solid #bfdbfe; padding-top: 10px; line-height: 1.8;
+    }
+    .egs-monedero-desglose span { font-weight: 700; float: right; }
+    .egs-monedero-total { font-size: 14px; font-weight: 800; color: #166534; margin-top: 4px; }
+    .egs-monedero-total span { font-size: 16px; }
+    .egs-lbl { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
     .pos-efectivo-row { display: none; gap: 8px; }
     .pos-efectivo-row.active { display: flex; }
     .pos-efectivo-row .form-group { flex: 1; margin-bottom: 0; }
@@ -317,19 +330,48 @@
             </select>
           </div>
 
-          <div id="egsMonederoVentaRapida" class="pos-monedero">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <span style="font-weight:600;color:#b45309;font-size:13px"><i class="fa-solid fa-wallet"></i> Monedero</span>
-              <span style="font-size:12px;color:#64748b">Saldo: <b id="egsSaldoMonederoLabel" style="color:#16a34a">$0.00</b></span>
+          <div id="egsMonederoWrap" style="display:none">
+            <div class="egs-monedero-panel" id="egsMonederoPanel">
+              <div class="egs-monedero-title">
+                <i class="fa-solid fa-wallet"></i> Monedero electrónico
+              </div>
+              <div id="egsMonederoConSaldo" style="display:none">
+                <div style="margin-bottom:8px">
+                  <span class="egs-lbl" style="margin-bottom:2px">Saldo disponible del cliente</span>
+                  <div class="egs-monedero-saldo" id="egsSaldoMonederoLabel">$0.00</div>
+                </div>
+                <div style="margin-bottom:6px">
+                  <label class="egs-lbl" for="egsMontoMonederoVenta">Monto a aplicar</label>
+                  <div class="input-group">
+                    <span class="input-group-addon" style="background:#3b82f6;color:#fff;border-color:#3b82f6">$</span>
+                    <input type="number" id="egsMontoMonederoVenta" class="form-control" min="0" step="0.01" placeholder="0.00" style="font-weight:700">
+                    <span class="input-group-btn">
+                      <button type="button" class="btn btn-info" id="egsMonederoUsarTodo" title="Usar todo el saldo">
+                        <i class="fa-solid fa-check-double"></i> Todo
+                      </button>
+                    </span>
+                  </div>
+                  <small class="text-muted" id="egsMonederoMaxLabel">Máximo aplicable: $0.00</small>
+                  <small id="egsMonederoHint" style="display:block;margin-top:4px;color:#64748b"></small>
+                </div>
+                <div class="egs-monedero-desglose" id="egsMonederoDesglose" style="display:none">
+                  <div>Total de la venta: <span id="egsMondBruto">$0.00</span></div>
+                  <div style="color:#dc2626">Descuento monedero: <span id="egsMondDescuento">-$0.00</span></div>
+                  <div class="egs-monedero-total" style="margin-top:6px;border-top:1px solid #bbf7d0;padding-top:6px">
+                    Total a cobrar: <span id="egsMondTotal">$0.00</span>
+                  </div>
+                </div>
+              </div>
+              <div id="egsMonederoSinSaldo" style="display:none">
+                <p style="font-size:13px;color:#64748b;margin:0">
+                  <i class="fa-solid fa-info-circle" style="color:#3b82f6;margin-right:4px"></i>
+                  Este cliente no tiene saldo disponible en monedero.
+                </p>
+              </div>
+              <input type="hidden" id="egsMontoCanjeVentaHidden" name="montoCanjeElectronicoVenta" value="0">
+              <input type="hidden" id="egsTotalBrutoMonederoVenta" value="0">
+              <input type="hidden" id="egsTotalPagadoMonederoVenta" value="0">
             </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-addon"><i class="fa-solid fa-coins"></i></span>
-              <input type="number" id="egsMontoCanjeVenta" name="montoCanjeElectronicoVenta" class="form-control" min="0" step="0.01" value="0" placeholder="Monto a aplicar">
-              <span class="input-group-btn">
-                <button type="button" id="egsAplicarMaxMonedero" class="btn btn-warning btn-sm">Usar todo</button>
-              </span>
-            </div>
-            <small id="egsMonederoMsg" style="color:#64748b;display:block;margin-top:4px"></small>
           </div>
 
           <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--crm-text2);margin-bottom:4px">

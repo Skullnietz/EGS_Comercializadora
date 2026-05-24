@@ -233,23 +233,90 @@
     $("#posSubtotalLabel").text(formatMoney(subtotal));
     $("#posDescuentoLabel").text("-" + formatMoney(descuento));
 
-    aplicarCanjeMonedero();
+    actualizarEstadoMonedero();
+    actualizarDesgloseMonedero();
     actualizarCambioEfectivo();
     validarCobro();
   }
 
-  function aplicarCanjeMonedero() {
-    var canje = parseFloat($("#egsMontoCanjeVenta").val()) || 0;
-    if (canje < 0) canje = 0;
-    if (canje > egsSaldoMonederoCliente) canje = egsSaldoMonederoCliente;
-    if (canje > totalSinCanje) canje = totalSinCanje;
+  function obtenerBrutoMonedero() {
+    if (totalSinCanje > 0) return totalSinCanje;
+    return parseFloat($("#totalVenta").val()) || 0;
+  }
 
-    var totalFinal = Math.max(0, totalSinCanje - canje);
-    $("#egsMontoCanjeVenta").val(canje.toFixed(2));
-    $("#totalVenta").val(totalSinCanje.toFixed(2));
-    $("#nuevoTotalVenta").val(totalFinal.toFixed(2));
-    $("#posTotalDisplay").text(formatMoney(totalFinal));
-    egsCanjeAplicadoActual = canje;
+  function actualizarEstadoMonedero() {
+    var $montoInp = $("#egsMontoMonederoVenta");
+    var $btnTodo = $("#egsMonederoUsarTodo");
+    if (!$montoInp.length || !$("#egsMonederoWrap").is(":visible")) return;
+
+    var saldoMax = egsSaldoMonederoCliente;
+    $montoInp.attr("max", saldoMax.toFixed(2));
+
+    var bruto = obtenerBrutoMonedero();
+    var maxAplicable = saldoMax;
+
+    $("#egsMonederoMaxLabel").text("Máximo aplicable: " + formatMoney(maxAplicable));
+
+    if (bruto <= 0) {
+      $montoInp.prop("disabled", false);
+      $btnTodo.prop("disabled", maxAplicable <= 0);
+      $("#egsMonederoHint").text(
+        "El saldo disponible del cliente es " + formatMoney(saldoMax) +
+        ". Si el total de la venta resulta menor, el sistema lo validará al guardar."
+      );
+      $("#egsMonederoDesglose").hide();
+      return;
+    }
+
+    $montoInp.prop("disabled", false);
+    $btnTodo.prop("disabled", maxAplicable <= 0);
+
+    if (maxAplicable <= 0) {
+      $("#egsMonederoHint").text("El saldo disponible ya no puede aplicarse a esta venta.");
+    } else {
+      $("#egsMonederoHint").text("Puedes aplicar hasta " + formatMoney(maxAplicable) + " en esta venta.");
+    }
+  }
+
+  function actualizarDesgloseMonedero() {
+    var $montoInp = $("#egsMontoMonederoVenta");
+    var $hidden = $("#egsMontoCanjeVentaHidden");
+    var $desglose = $("#egsMonederoDesglose");
+    if (!$montoInp.length) return;
+
+    var saldoMax = egsSaldoMonederoCliente;
+    var bruto = obtenerBrutoMonedero();
+    var solicitado = parseFloat($montoInp.val()) || 0;
+    var descto = solicitado;
+
+    if (descto > saldoMax) descto = saldoMax;
+    if (descto < 0) descto = 0;
+
+    $hidden.val(descto.toFixed(2));
+    $("#totalVenta").val(bruto.toFixed(2));
+    $("#egsTotalBrutoMonederoVenta").val(bruto.toFixed(2));
+
+    var totalPagado = bruto > 0 ? Math.max(0, bruto - descto) : 0;
+    $("#egsTotalPagadoMonederoVenta").val(totalPagado.toFixed(2));
+    $("#nuevoTotalVenta").val(totalPagado.toFixed(2));
+    $("#posTotalDisplay").text(formatMoney(totalPagado));
+    egsCanjeAplicadoActual = descto;
+
+    if (solicitado !== descto) {
+      $("#egsMonederoHint").text(
+        "Capturaste " + formatMoney(solicitado) + ", pero el saldo disponible del cliente es " + formatMoney(descto) + "."
+      );
+    }
+
+    if (descto > 0 && bruto > 0) {
+      $("#egsMondBruto").text(formatMoney(bruto));
+      $("#egsMondDescuento").text("-" + formatMoney(descto));
+      $("#egsMondTotal").text(formatMoney(totalPagado));
+      $desglose.show();
+    } else {
+      $desglose.hide();
+    }
+
     actualizarCambioEfectivo();
   }
 
@@ -336,13 +403,15 @@
   }
 
   function cargarMonedero(idCliente) {
-    $("#egsMontoCanjeVenta").val(0);
-    $("#egsMonederoMsg").text("");
+    $("#egsMontoMonederoVenta").val("");
+    $("#egsMontoCanjeVentaHidden").val("0");
+    $("#egsMonederoHint").text("");
+    $("#egsMonederoDesglose").hide();
     egsSaldoMonederoCliente = 0;
     egsCanjeAplicadoActual = 0;
 
     if (!idCliente || idCliente <= 0) {
-      $("#egsMonederoVentaRapida").hide();
+      $("#egsMonederoWrap").hide();
       recalcularTotales();
       return;
     }
@@ -356,20 +425,22 @@
         var saldo = resp && typeof resp.saldo !== "undefined" ? parseFloat(resp.saldo) || 0 : 0;
         egsSaldoMonederoCliente = saldo;
         $("#egsSaldoMonederoLabel").text(formatMoney(saldo));
-        $("#egsMontoCanjeVenta").attr("max", saldo);
+        $("#egsMonederoWrap").show();
+
         if (saldo > 0) {
-          $("#egsMonederoVentaRapida").show();
-          $("#egsMonederoMsg").text("Puedes aplicar hasta " + formatMoney(saldo) + ".").css("color", "#16a34a");
-          $("#egsMontoCanjeVenta").prop("disabled", false);
+          $("#egsMonederoConSaldo").show();
+          $("#egsMonederoSinSaldo").hide();
+          $("#egsMontoMonederoVenta").attr("max", saldo.toFixed(2));
         } else {
-          $("#egsMonederoVentaRapida").show();
-          $("#egsMonederoMsg").text("Este cliente no tiene saldo disponible.").css("color", "#64748b");
-          $("#egsMontoCanjeVenta").prop("disabled", true);
+          $("#egsMonederoConSaldo").hide();
+          $("#egsMonederoSinSaldo").show();
         }
-        recalcularTotales();
+
+        actualizarEstadoMonedero();
+        actualizarDesgloseMonedero();
       },
       error: function () {
-        $("#egsMonederoVentaRapida").hide();
+        $("#egsMonederoWrap").hide();
         recalcularTotales();
       }
     });
@@ -587,7 +658,7 @@
       var val = this.value;
       if (val === "nuevo") {
         $("#posNuevoClienteSection").slideDown(200);
-        $("#egsMonederoVentaRapida").hide();
+        $("#egsMonederoWrap").hide();
         syncClienteHidden(0);
         return;
       }
@@ -598,14 +669,19 @@
     });
   }
 
-  // ── Monedero ──
-  $("#egsAplicarMaxMonedero").on("click", function () {
-    var maxAplicable = Math.min(egsSaldoMonederoCliente, totalSinCanje);
-    $("#egsMontoCanjeVenta").val(maxAplicable.toFixed(2));
-    aplicarCanjeMonedero();
+  // ── Monedero (mismo flujo que infoOrden) ──
+  $("#egsMonederoUsarTodo").on("click", function () {
+    var $montoInp = $("#egsMontoMonederoVenta");
+    if (!$montoInp.length) return;
+    var saldoMax = parseFloat($montoInp.attr("max") || 0) || 0;
+    $montoInp.val(saldoMax.toFixed(2));
+    actualizarDesgloseMonedero();
   });
 
-  $("#egsMontoCanjeVenta").on("input change", aplicarCanjeMonedero);
+  $("#egsMontoMonederoVenta").on("input change", function () {
+    actualizarEstadoMonedero();
+    actualizarDesgloseMonedero();
+  });
   $("#posDescuentoPct").on("input change", recalcularTotales);
 
   // ── Pago ──
