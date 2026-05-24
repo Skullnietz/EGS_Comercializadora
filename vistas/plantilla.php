@@ -306,7 +306,11 @@ if ($isTabletPublicRoute) {
   <script src="vistas/js/reporteGrafica.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/CorteTotal.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorClientes.js?v=<?= $jsVer ?>"></script>
+  <?php if (isset($_GET["ruta"]) && $_GET["ruta"] === "creararventa"): ?>
+  <script src="vistas/js/gestorVentasCajero.js?v=<?= $jsVer ?>"></script>
+  <?php else: ?>
   <script src="vistas/js/ventasDinamicas.js?v=<?= $jsVer ?>"></script>
+  <?php endif; ?>
   <script src="vistas/js/gestorStockApuntoDeAgotarse.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorStockAlerta.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/infoOrden.js?v=<?= $jsVer ?>"></script>
