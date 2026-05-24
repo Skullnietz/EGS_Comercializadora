@@ -494,7 +494,7 @@ MODAL EDITAR PERFIL
               <div class="input-group">
                 <span class="input-group-addon"><i class="fas fa-user-tag"></i></span> 
                 <select class="form-control input-lg" name="Departamento" id="editarDepartamento">
-                  <option value="">Seleccionar Departamento</option>
+                  <option value="" id="editarDepartamentoOpcion"></option>
                   <option value="Ventas">Ventas</option>
                   <option value="Administracion">Administracion</option>
                   <option value="Ventas Externas">Ventas Externas</option>

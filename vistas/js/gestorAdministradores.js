@@ -134,7 +134,15 @@ $(".tablaPerfiles").on("click", ".btnEditarPerfil", function(){
       }
       
       // Set department
-      $("#editarDepartamento").val(respuesta["Departamento"] || "");
+      if (respuesta["Departamento"]) {
+        $("#editarDepartamentoOpcion").html(respuesta["Departamento"]);
+        $("#editarDepartamentoOpcion").val(respuesta["Departamento"]);
+        $("#editarDepartamento").val(respuesta["Departamento"]);
+      } else {
+        $("#editarDepartamentoOpcion").html("Seleccionar Departamento");
+        $("#editarDepartamentoOpcion").val("");
+        $("#editarDepartamento").val("");
+      }
 
       $("#fotoActual").val(respuesta["foto"]);
       $("#passwordActual").val(respuesta["password"]);
