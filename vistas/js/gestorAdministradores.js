@@ -115,24 +115,73 @@ $(".tablaPerfiles").on("click", ".btnEditarPerfil", function(){
       $("#editarNombre").val(respuesta["nombre"]);
       $("#idPerfil").val(respuesta["id"]);
       $("#editarEmail").val(respuesta["email"]);
-      $("#editarPerfil").html(respuesta["perfil"]);
-      $("#editarPerfil").val(respuesta["perfil"]);
+      $("#editarPerfilOpcion").html(respuesta["perfil"]);
+      $("#editarPerfilOpcion").val(respuesta["perfil"]);
+      $("#editarPerfilSelect").val(respuesta["perfil"]);
+
+      // Auto-fill technician data if available
+      if(respuesta["perfil"] == "tecnico"){
+        $("#editarNumeroUnoTecnico").val(respuesta["telefono_tec"] || "");
+        $("#editarTelefonoDosTecnico").val(respuesta["telefonoDos_tec"] || "");
+        $("#HoraDeComidaEditada").val(respuesta["HoraDeComida_tec"] || "");
+        $("#editarAreratecnico").val(respuesta["areratecnico_tec"] || "");
+      }
+      
+      // Auto-fill advisor data if available
+      if(respuesta["perfil"] == "vendedor"){
+        $("#editarNumeroUnoAsesor").val(respuesta["numeroTelefono_ase"] || "");
+        $("#editarTelefonoDosAsesor").val(respuesta["numerodeCelular_ase"] || "");
+      }
+      
+      // Set department
+      $("#editarDepartamento").val(respuesta["Departamento"] || "");
+
       $("#fotoActual").val(respuesta["foto"]);
       $("#passwordActual").val(respuesta["password"]);
 
       if(respuesta["foto"] != ""){
-
         $(".previsualizar").attr("src", respuesta["foto"]);
-
       }
+      
+      // Trigger change to display dynamic divs
+      $("#editarPerfilSelect").trigger("change");
 
     }
 
-
   })
 
-
 })
+
+/*=============================================
+MOSTRAR/OCULTAR CAMPOS DINÁMICOS POR ROL
+=============================================*/
+$("#nuevoPerfil").change(function(){
+  var perfil = $(this).val();
+  if(perfil == "tecnico"){
+    $("#divAdicionalTecnico").slideDown();
+    $("#divAdicionalAsesor").slideUp();
+  } else if(perfil == "vendedor"){
+    $("#divAdicionalAsesor").slideDown();
+    $("#divAdicionalTecnico").slideUp();
+  } else {
+    $("#divAdicionalTecnico").slideUp();
+    $("#divAdicionalAsesor").slideUp();
+  }
+});
+
+$("#editarPerfilSelect").change(function(){
+  var perfil = $(this).val();
+  if(perfil == "tecnico"){
+    $("#divAdicionalTecnicoEdit").slideDown();
+    $("#divAdicionalAsesorEdit").slideUp();
+  } else if(perfil == "vendedor"){
+    $("#divAdicionalAsesorEdit").slideDown();
+    $("#divAdicionalTecnicoEdit").slideUp();
+  } else {
+    $("#divAdicionalTecnicoEdit").slideUp();
+    $("#divAdicionalAsesorEdit").slideUp();
+  }
+});
 
 /*=============================================
 ELIMINAR USUARIO

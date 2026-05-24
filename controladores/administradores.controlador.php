@@ -1,6 +1,9 @@
 <?php
+require_once __DIR__ . '/../modelos/tecnicos.modelo.php';
+require_once __DIR__ . '/../modelos/modelo.asesores.php';
 
 class ControladorAdministradores{
+
 
 	/*=============================================
 	INGRESO DE ADMINISTRADOR
@@ -87,6 +90,24 @@ class ControladorAdministradores{
 		$tabla = "administradores";
 
 		$respuesta = ModeloAdministradores::MdlMostrarAdministradores($tabla, $item, $valor);
+
+		if($item == "id" && $respuesta){
+			if($respuesta["perfil"] == "tecnico"){
+				$tec = ModeloTecnicos::mdlMostrarTecnicos("tecnicos", "correo", $respuesta["email"]);
+				if($tec){
+					$respuesta["telefono_tec"] = $tec["telefono"];
+					$respuesta["telefonoDos_tec"] = $tec["telefonoDos"];
+					$respuesta["HoraDeComida_tec"] = $tec["HoraDeComida"];
+					$respuesta["areratecnico_tec"] = $tec["departamento"];
+				}
+			} elseif($respuesta["perfil"] == "vendedor"){
+				$ase = ModeloAsesores::mdlMostrarAsesoresEleg("asesores", "correo", $respuesta["email"]);
+				if($ase){
+					$respuesta["numeroTelefono_ase"] = $ase["numeroTelefono"];
+					$respuesta["numerodeCelular_ase"] = $ase["numerodeCelular"];
+				}
+			}
+		}
 
 		return $respuesta;
 	}
@@ -212,6 +233,30 @@ class ControladorAdministradores{
 
 
 				if(isset($respuesta) && $respuesta == "ok"){
+
+					if(isset($_POST["nuevoPerfil"]) && $_POST["nuevoPerfil"] == "tecnico"){
+						$datosTec = array(
+							"nombre" => $_POST["nuevoNombre"], 
+							"correo" => $_POST["nuevoEmail"], 
+							"telefono" => isset($_POST["numeroTelTecnico"]) ? $_POST["numeroTelTecnico"] : "", 
+							"telefonoDos" => isset($_POST["numeroTelDosTecnico"]) ? $_POST["numeroTelDosTecnico"] : "", 
+							"HoraDeComida" => isset($_POST["HoraDeComida"]) ? $_POST["HoraDeComida"] : "",
+							"areratecnico" => isset($_POST["areratecnico"]) ? $_POST["areratecnico"] : "",
+							"empresa" => $_POST["empresa"],
+							"estado" => "Activo"
+						);
+						ModeloTecnicos::mdlCrearTecnico("tecnicos", $datosTec);
+					} else if(isset($_POST["nuevoPerfil"]) && $_POST["nuevoPerfil"] == "vendedor"){
+						$datosAse = array(
+							"nombre" => $_POST["nuevoNombre"], 
+							"correo" => $_POST["nuevoEmail"], 
+							"numeroTelefono" => isset($_POST["nuevoNumeroUno"]) ? $_POST["nuevoNumeroUno"] : "", 
+							"numerodeCelular" => isset($_POST["nuevoNumeroDos"]) ? $_POST["nuevoNumeroDos"] : "", 
+							"empresa" => $_POST["empresa"],
+							"estado" => "Activo"
+						);
+						ModeloAsesores::mdlIngresarAsesores("asesores", $datosAse);
+					}
 
 					echo '<script>
 
@@ -415,9 +460,74 @@ class ControladorAdministradores{
 							   "id_empresa" =>$_POST["empresa"]
 				);
 
+				$oldProfile = ModeloAdministradores::mdlMostrarAdministradores($tabla, "id", $_POST["idPerfil"]);
+
 				$respuesta = ModeloAdministradores::mdlEditarPerfil($tabla, $datos);
 
 				if($respuesta == "ok"){
+
+					$newRole = $_POST["editarPerfil"];
+					$oldEmail = $oldProfile["email"];
+					$oldRole = $oldProfile["perfil"];
+					$newEmail = $_POST["editarEmail"];
+					
+					if($oldRole == "tecnico" && $newRole != "tecnico"){
+						$tec = ModeloTecnicos::mdlMostrarTecnicos("tecnicos", "correo", $oldEmail);
+						if($tec){
+							ModeloTecnicos::mdlActualizarTecnico("tecnicos", "estado", "Inactivo", "id", $tec["id"]);
+						}
+					} else if($oldRole == "vendedor" && $newRole != "vendedor"){
+						$ase = ModeloAsesores::mdlMostrarAsesoresEleg("asesores", "correo", $oldEmail);
+						if($ase){
+							$datosAse = array("id" => $ase["id"], "nombre" => $ase["nombre"], "correo" => $ase["correo"], "numerodeCelular" => $ase["numerodeCelular"], "numeroTelefono" => $ase["numeroTelefono"], "porcentajeComision" => $ase["porcentajeComision"], "estado" => "Inactivo");
+							ModeloAsesores::mdlEditarAsesor("asesores", $datosAse);
+						}
+					}
+
+					if($newRole == "tecnico"){
+						$tec = ModeloTecnicos::mdlMostrarTecnicos("tecnicos", "correo", $oldEmail);
+						$datosTec = array(
+							"nombre" => $_POST["editarNombre"], 
+							"correo" => $newEmail, 
+							"telefono" => isset($_POST["editarNumeroUnoTecnico"]) ? $_POST["editarNumeroUnoTecnico"] : "", 
+							"telefonoDos" => isset($_POST["editarTelefonoDosTecnico"]) ? $_POST["editarTelefonoDosTecnico"] : "", 
+							"HoraDeComidaEditada" => isset($_POST["HoraDeComidaEditada"]) ? $_POST["HoraDeComidaEditada"] : "",
+							"estado" => "Activo"
+						);
+						if($tec){
+							$datosTec["id"] = $tec["id"];
+							ModeloTecnicos::mdlEditarTecnico("tecnicos", $datosTec);
+						} else {
+							$datosTec["HoraDeComida"] = $datosTec["HoraDeComidaEditada"];
+							$datosTec["areratecnico"] = isset($_POST["editarAreratecnico"]) ? $_POST["editarAreratecnico"] : "";
+							$datosTec["empresa"] = $_POST["empresa"];
+							ModeloTecnicos::mdlCrearTecnico("tecnicos", $datosTec);
+						}
+					} else if($newRole == "vendedor"){
+						$ase = ModeloAsesores::mdlMostrarAsesoresEleg("asesores", "correo", $oldEmail);
+						if($ase){
+							$datosAse = array(
+								"id" => $ase["id"],
+								"nombre" => $_POST["editarNombre"],
+								"correo" => $newEmail,
+								"numerodeCelular" => isset($_POST["editarTelefonoDosAsesor"]) ? $_POST["editarTelefonoDosAsesor"] : "",
+								"numeroTelefono" => isset($_POST["editarNumeroUnoAsesor"]) ? $_POST["editarNumeroUnoAsesor"] : "",
+								"porcentajeComision" => $ase["porcentajeComision"],
+								"estado" => "Activo"
+							);
+							ModeloAsesores::mdlEditarAsesor("asesores", $datosAse);
+						} else {
+							$datosAse = array(
+								"nombre" => $_POST["editarNombre"], 
+								"correo" => $newEmail, 
+								"numeroTelefono" => isset($_POST["editarNumeroUnoAsesor"]) ? $_POST["editarNumeroUnoAsesor"] : "", 
+								"numerodeCelular" => isset($_POST["editarTelefonoDosAsesor"]) ? $_POST["editarTelefonoDosAsesor"] : "", 
+								"empresa" => $_POST["empresa"],
+								"estado" => "Activo"
+							);
+							ModeloAsesores::mdlIngresarAsesores("asesores", $datosAse);
+						}
+					}
 
 					echo'<script>
 
@@ -474,6 +584,22 @@ class ControladorAdministradores{
 
 			$tabla ="administradores";
 			$datos = $_GET["idPerfil"];
+
+			$profile = ModeloAdministradores::mdlMostrarAdministradores($tabla, "id", $datos);
+			if($profile){
+				$email = $profile["email"];
+				if($profile["perfil"] == "tecnico"){
+					$tec = ModeloTecnicos::mdlMostrarTecnicos("tecnicos", "correo", $email);
+					if($tec){
+						ModeloTecnicos::mdlEliminarTecnico("tecnicos", $tec["id"]);
+					}
+				} else if($profile["perfil"] == "vendedor"){
+					$ase = ModeloAsesores::mdlMostrarAsesoresEleg("asesores", "correo", $email);
+					if($ase){
+						ModeloAsesores::mdlEliminarAsesor("asesores", $ase["id"]);
+					}
+				}
+			}
 
 			if($_GET["fotoPerfil"] != ""){
 
