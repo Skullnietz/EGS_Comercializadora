@@ -247,7 +247,7 @@
   function actualizarEstadoMonedero() {
     var $montoInp = $("#egsMontoMonederoVenta");
     var $btnTodo = $("#egsMonederoUsarTodo");
-    if (!$montoInp.length || !$("#egsMonederoWrap").is(":visible")) return;
+    if (!$montoInp.length || !$("#egsMonederoWrap").hasClass("is-visible")) return;
 
     var saldoMax = egsSaldoMonederoCliente;
     $montoInp.attr("max", saldoMax.toFixed(2));
@@ -402,6 +402,55 @@
     validarCobro();
   }
 
+  function ocultarMonederoPanel() {
+    $("#egsMonederoWrap").removeClass("is-visible");
+    $("#egsMonederoLoading, #egsMonederoConSaldo, #egsMonederoSinSaldo").hide();
+    $("#egsMontoMonederoVenta").val("");
+    $("#egsMontoCanjeVentaHidden").val("0");
+    egsSaldoMonederoCliente = 0;
+    egsCanjeAplicadoActual = 0;
+    recalcularTotales();
+  }
+
+  function mostrarMonederoCargando() {
+    $("#egsMonederoWrap").addClass("is-visible");
+    $("#egsMonederoLoading").show();
+    $("#egsMonederoConSaldo, #egsMonederoSinSaldo").hide();
+  }
+
+  function onClienteSeleccionado(val) {
+    if (val === "nuevo") {
+      $("#posNuevoClienteSection").slideDown(200);
+      ocultarMonederoPanel();
+      syncClienteHidden(0);
+      return;
+    }
+
+    $("#posNuevoClienteSection").slideUp(200);
+    var idCliente = parseInt(val, 10) || 0;
+    syncClienteHidden(idCliente);
+
+    if (idCliente <= 0) {
+      ocultarMonederoPanel();
+      return;
+    }
+
+    cargarMonedero(idCliente);
+  }
+
+  function bindClienteSelectEvents() {
+    if (!$clienteSelect) return;
+
+    $clienteSelect.addEventListener("change", function () {
+      onClienteSeleccionado(this.value);
+    });
+
+    $clienteSelect.addEventListener("choice", function (e) {
+      var choice = e.detail && e.detail.choice ? e.detail.choice : null;
+      onClienteSeleccionado(choice ? choice.value : "");
+    });
+  }
+
   function cargarMonedero(idCliente) {
     $("#egsMontoMonederoVenta").val("");
     $("#egsMontoCanjeVentaHidden").val("0");
@@ -411,10 +460,11 @@
     egsCanjeAplicadoActual = 0;
 
     if (!idCliente || idCliente <= 0) {
-      $("#egsMonederoWrap").hide();
-      recalcularTotales();
+      ocultarMonederoPanel();
       return;
     }
+
+    mostrarMonederoCargando();
 
     $.ajax({
       url: "ajax/recompensas.ajax.php",
@@ -425,7 +475,8 @@
         var saldo = resp && typeof resp.saldo !== "undefined" ? parseFloat(resp.saldo) || 0 : 0;
         egsSaldoMonederoCliente = saldo;
         $("#egsSaldoMonederoLabel").text(formatMoney(saldo));
-        $("#egsMonederoWrap").show();
+        $("#egsMonederoWrap").addClass("is-visible");
+        $("#egsMonederoLoading").hide();
 
         if (saldo > 0) {
           $("#egsMonederoConSaldo").show();
@@ -440,7 +491,11 @@
         actualizarDesgloseMonedero();
       },
       error: function () {
-        $("#egsMonederoWrap").hide();
+        $("#egsMonederoWrap").addClass("is-visible");
+        $("#egsMonederoLoading").hide();
+        $("#egsMonederoConSaldo").hide();
+        $("#egsMonederoSinSaldo").show();
+        $("#egsMonederoHint").text("No se pudo consultar el saldo. Puedes continuar sin monedero.");
         recalcularTotales();
       }
     });
@@ -528,7 +583,7 @@
     $("#posNuevoClienteSection").hide();
     $("#posNuevoClienteNombre, #posNuevoClienteWhatsapp").val("");
     syncClienteHidden(0);
-    cargarMonedero(0);
+    ocultarMonederoPanel();
     $("#posDescuentoPct").val(0);
     $("#nuevoMetodoPago").val("").trigger("change");
     $("#posEfectivoRecibido, #posEfectivoCambio, #nuevoCodigoTransaccion").val("");
@@ -652,22 +707,11 @@
 
   // ── Cliente ──
   initClienteChoices();
+  bindClienteSelectEvents();
 
-  if ($clienteSelect) {
-    $clienteSelect.addEventListener("change", function () {
-      var val = this.value;
-      if (val === "nuevo") {
-        $("#posNuevoClienteSection").slideDown(200);
-        $("#egsMonederoWrap").hide();
-        syncClienteHidden(0);
-        return;
-      }
-      $("#posNuevoClienteSection").slideUp(200);
-      var idCliente = parseInt(val, 10) || 0;
-      syncClienteHidden(idCliente);
-      cargarMonedero(idCliente);
-    });
-  }
+  $(document).on("change", "#egs_clienteVentaPOS", function () {
+    onClienteSeleccionado(this.value);
+  });
 
   // ── Monedero (mismo flujo que infoOrden) ──
   $("#egsMonederoUsarTodo").on("click", function () {

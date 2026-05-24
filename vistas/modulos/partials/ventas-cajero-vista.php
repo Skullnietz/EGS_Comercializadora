@@ -69,6 +69,9 @@
     .egs-monedero-total { font-size: 14px; font-weight: 800; color: #166534; margin-top: 4px; }
     .egs-monedero-total span { font-size: 16px; }
     .egs-lbl { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
+    #egsMonederoWrap { display: none; margin-bottom: 12px; }
+    #egsMonederoWrap.is-visible { display: block !important; }
+    #egsMonederoLoading { text-align: center; padding: 10px 0; color: #64748b; font-size: 13px; }
     .pos-efectivo-row { display: none; gap: 8px; }
     .pos-efectivo-row.active { display: flex; }
     .pos-efectivo-row .form-group { flex: 1; margin-bottom: 0; }
@@ -313,27 +316,13 @@
             <small id="posNuevoClienteError" style="display:none;color:#dc2626"></small>
           </div>
 
-          <div class="form-group">
-            <label><i class="fas fa-user-tie"></i> Asesor</label>
-            <select class="form-control" name="asesor" id="posAsesor" required>
-              <option value="">Seleccionar asesor</option>
-              <?php
-                if (is_array($asesoresPos)) {
-                  foreach ($asesoresPos as $asesorPos) {
-                    $idAse = intval($asesorPos['id']);
-                    $nomAse = htmlspecialchars($asesorPos['nombre'], ENT_QUOTES, 'UTF-8');
-                    $sel = ($idAse === intval($idAsesorDefault)) ? ' selected' : '';
-                    echo '<option value="'.$idAse.'"'.$sel.'>'.$nomAse.'</option>';
-                  }
-                }
-              ?>
-            </select>
-          </div>
-
-          <div id="egsMonederoWrap" style="display:none">
+          <div id="egsMonederoWrap">
             <div class="egs-monedero-panel" id="egsMonederoPanel">
               <div class="egs-monedero-title">
                 <i class="fa-solid fa-wallet"></i> Monedero electrónico
+              </div>
+              <div id="egsMonederoLoading" style="display:none">
+                <i class="fa fa-spinner fa-spin"></i> Consultando saldo...
               </div>
               <div id="egsMonederoConSaldo" style="display:none">
                 <div style="margin-bottom:8px">
@@ -372,6 +361,23 @@
               <input type="hidden" id="egsTotalBrutoMonederoVenta" value="0">
               <input type="hidden" id="egsTotalPagadoMonederoVenta" value="0">
             </div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fas fa-user-tie"></i> Asesor</label>
+            <select class="form-control" name="asesor" id="posAsesor" required>
+              <option value="">Seleccionar asesor</option>
+              <?php
+                if (is_array($asesoresPos)) {
+                  foreach ($asesoresPos as $asesorPos) {
+                    $idAse = intval($asesorPos['id']);
+                    $nomAse = htmlspecialchars($asesorPos['nombre'], ENT_QUOTES, 'UTF-8');
+                    $sel = ($idAse === intval($idAsesorDefault)) ? ' selected' : '';
+                    echo '<option value="'.$idAse.'"'.$sel.'>'.$nomAse.'</option>';
+                  }
+                }
+              ?>
+            </select>
           </div>
 
           <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--crm-text2);margin-bottom:4px">
