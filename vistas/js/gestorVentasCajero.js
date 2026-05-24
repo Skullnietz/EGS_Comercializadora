@@ -376,15 +376,18 @@
   }
 
   function initCatalogo() {
-    if (!$("#modalPosCatalogo .tablaProductosPos").length) return null;
-    if ($.fn.DataTable.isDataTable("#modalPosCatalogo .tablaProductosPos")) {
-      return dtCatalogo;
+    var $tabla = $("#tablaProductosPos");
+    if (!$tabla.length) return null;
+
+    if ($.fn.DataTable.isDataTable($tabla)) {
+      $tabla.DataTable().destroy();
+      dtCatalogo = null;
     }
+
     try {
-      dtCatalogo = $("#modalPosCatalogo .tablaProductosPos").DataTable({
+      dtCatalogo = $tabla.DataTable({
         ajax: "ajax/tablaVentasDinamicas.ajax.php?perfil=" + encodeURIComponent($("#tipoDePerfil").val()) + "&empresa=" + encodeURIComponent($("#id_empresa").val()),
         deferRender: true,
-        retrieve: true,
         processing: true,
         pageLength: 15,
         lengthMenu: [[10, 15, 25, 50], [10, 15, 25, 50]],
@@ -403,6 +406,9 @@
           sInfo: "_START_–_END_ de _TOTAL_",
           sSearch: "Buscar:",
           oPaginate: { sNext: "Sig.", sPrevious: "Ant." }
+        },
+        initComplete: function () {
+          $("#tablaProductosPos_wrapper").addClass("pos-catalogo-dt-wrapper");
         }
       });
     } catch (err) {
