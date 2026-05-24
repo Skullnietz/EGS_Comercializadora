@@ -11,6 +11,7 @@
   var egsSaldoMonederoCliente = 0;
   var egsCanjeAplicadoActual = 0;
   var totalSinCanje = 0;
+  var ultimaVentaTicketUrl = "";
 
   var $scanner = $("#posScannerInput");
   var $cartBody = $("#posCartBody");
@@ -30,10 +31,29 @@
     return m ? decodeURIComponent(m[1]) : s;
   }
 
-  function toast(title, type) {
-    if (typeof swal === "function") {
-      swal({ title: title, type: type || "info", timer: 1800, showConfirmButton: false });
-    }
+  var toastIcons = {
+    success: "fa-circle-check",
+    error: "fa-circle-xmark",
+    warning: "fa-triangle-exclamation",
+    info: "fa-circle-info"
+  };
+
+  function toast(msg, type) {
+    type = type || "info";
+    var $host = $("#posToastHost");
+    if (!$host.length) return;
+
+    var $el = $(
+      '<div class="pos-toast pos-toast-' + type + '">' +
+        '<i class="fa-solid pos-toast-icon ' + (toastIcons[type] || toastIcons.info) + '"></i>' +
+        '<span class="pos-toast-msg">' + escapeHtml(msg) + '</span>' +
+      '</div>'
+    );
+    $host.append($el);
+
+    setTimeout(function () {
+      $el.fadeOut(200, function () { $(this).remove(); });
+    }, type === "error" ? 4200 : 2800);
   }
 
   function enfocarScanner() {
@@ -86,7 +106,7 @@
     if (!producto || !producto.id) return false;
 
     if (producto.stock <= 0) {
-      swal({ title: "Sin stock", text: "No hay stock disponible para \"" + producto.titulo + "\".", type: "error", confirmButtonText: "Cerrar" });
+      toast("Sin stock: " + producto.titulo, "error");
       return false;
     }
 
@@ -101,14 +121,14 @@
     if (existente) {
       var nuevaCant = existente.cantidad + cantidadAgregar;
       if (nuevaCant > producto.stock) {
-        swal({ title: "Stock insuficiente", text: "Solo hay " + producto.stock + " " + producto.medida + " disponibles.", type: "warning", confirmButtonText: "Cerrar" });
+        toast("Stock insuficiente: solo " + producto.stock + " " + producto.medida, "warning");
         return false;
       }
       existente.cantidad = nuevaCant;
       existente.stock = producto.stock;
     } else {
       if (cantidadAgregar > producto.stock) {
-        swal({ title: "Stock insuficiente", text: "Solo hay " + producto.stock + " " + producto.medida + " disponibles.", type: "warning", confirmButtonText: "Cerrar" });
+        toast("Stock insuficiente: solo " + producto.stock + " " + producto.medida, "warning");
         return false;
       }
       carrito.push({
@@ -274,7 +294,7 @@
     buscarProductoPorCodigo(codigo).done(function (respuesta) {
       var producto = productoDesdeRespuesta(respuesta);
       if (!producto) {
-        swal({ title: "Producto no encontrado", text: "No existe un producto con código \"" + codigo + "\".", type: "error", confirmButtonText: "Cerrar" });
+        toast("Producto no encontrado: " + codigo, "error");
         enfocarScanner();
         return;
       }
@@ -358,13 +378,15 @@
   function initCatalogo() {
     if (!$(".tablaProductosPos").length) return;
     if ($.fn.DataTable.isDataTable(".tablaProductosPos")) {
-      $(".tablaProductosPos").DataTable().destroy();
+      return dtCatalogo;
     }
     dtCatalogo = $(".tablaProductosPos").DataTable({
       ajax: "ajax/tablaVentasDinamicas.ajax.php?perfil=" + encodeURIComponent($("#tipoDePerfil").val()) + "&empresa=" + encodeURIComponent($("#id_empresa").val()),
       deferRender: true,
       retrieve: true,
       processing: true,
+      pageLength: 8,
+      lengthMenu: [[8, 15, 25], [8, 15, 25]],
       language: {
         sProcessing: "Procesando...",
         sLengthMenu: "Mostrar _MENU_",
@@ -375,25 +397,36 @@
         oPaginate: { sNext: "Sig.", sPrevious: "Ant." }
       }
     });
+    return dtCatalogo;
   }
 
-  function toggleCatalogo(forceOpen) {
-    var $panel = $("#posCatalogoPanel");
-    var abrir = typeof forceOpen === "boolean" ? forceOpen : !$panel.hasClass("open");
-    $panel.toggleClass("open", abrir);
-    $("#posToggleCatalogo").html(
-      abrir
-        ? '<i class="fa-solid fa-chevron-up"></i> Ocultar catálogo'
-        : '<i class="fa-solid fa-chevron-down"></i> Ver catálogo de productos'
-    );
-    if (abrir && !dtCatalogo) {
-      initCatalogo();
-    } else if (abrir && dtCatalogo) {
-      dtCatalogo.columns.adjust();
+  function enfocarBusquedaCatalogo() {
+    var $filter = $("#modalPosCatalogo").find(".dataTables_filter input");
+    if ($filter.length) {
+      setTimeout(function () { $filter.focus().select(); }, 150);
     }
   }
 
+  function abrirCatalogo() {
+    if (!dtCatalogo) {
+      initCatalogo();
+    }
+    $("#modalPosCatalogo").modal("show");
+  }
+
+  function ocultarBannerExito() {
+    $("#posVentaExitosa").removeClass("show");
+  }
+
+  function mostrarBannerExito(mensaje, ticketUrl) {
+    ultimaVentaTicketUrl = ticketUrl || "";
+    $("#posVentaExitosaMsg").text(mensaje || "Venta registrada correctamente");
+    $("#posVentaExitosa").addClass("show");
+    $("html, body").animate({ scrollTop: $("#posVentaExitosa").offset().top - 80 }, 250);
+  }
+
   function resetPosNuevaVenta() {
+    ocultarBannerExito();
     vaciarCarrito();
     if (clienteChoices) {
       clienteChoices.setChoiceByValue("");
@@ -411,53 +444,38 @@
   }
 
   window.egsPosVentaCompletada = function (tipo, mensaje, idVenta, idEmpresa, idAsesor) {
+    $btnCobrar.prop("disabled", false).html('<i class="fa-solid fa-check"></i> Cobrar');
+    validarCobro();
+
     if (tipo !== "success") {
-      swal({ type: "error", title: mensaje, confirmButtonText: "Cerrar" });
-      $btnCobrar.prop("disabled", false).html('<i class="fa-solid fa-check"></i> Cobrar');
-      validarCobro();
+      toast(mensaje, "error");
       return;
     }
 
     var ticketUrl = "extensiones/tcpdf/pdf/ticketVentasD.php?idventa=" + idVenta + "&empresa=" + idEmpresa + "&asesor=" + idAsesor;
-
-    if (typeof Swal !== "undefined" && typeof Swal.fire === "function") {
-      Swal.fire({
-        icon: "success",
-        title: mensaje,
-        text: "¿Qué deseas hacer ahora?",
-        showCancelButton: true,
-        showDenyButton: true,
-        confirmButtonText: "Nueva venta",
-        denyButtonText: "Imprimir ticket",
-        cancelButtonText: "Ver historial"
-      }).then(function (result) {
-        if (result.isConfirmed) {
-          resetPosNuevaVenta();
-        } else if (result.isDenied) {
-          window.open(ticketUrl, "_blank");
-          resetPosNuevaVenta();
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          window.location = "index.php?ruta=ventasD";
-        }
-      });
-      return;
-    }
-
-    swal({
-      type: "success",
-      title: mensaje,
-      text: "Venta registrada correctamente.",
-      showCancelButton: true,
-      confirmButtonText: "Nueva venta",
-      cancelButtonText: "Ver historial"
-    }).then(function (result) {
-      if (result.value || result.isConfirmed) {
-        resetPosNuevaVenta();
-      } else {
-        window.location = "index.php?ruta=ventasD";
-      }
-    });
+    toast("Venta registrada correctamente", "success");
+    mostrarBannerExito(mensaje, ticketUrl);
   };
+
+  $("#posBtnNuevaVenta").on("click", resetPosNuevaVenta);
+
+  $("#posBtnImprimirTicket").on("click", function () {
+    if (ultimaVentaTicketUrl) {
+      window.open(ultimaVentaTicketUrl, "_blank");
+    }
+  });
+
+  $("#modalPosCatalogo").on("shown.bs.modal", function () {
+    if (!dtCatalogo) {
+      initCatalogo();
+    } else {
+      dtCatalogo.columns.adjust();
+      if (dtCatalogo.ajax) {
+        dtCatalogo.ajax.reload(null, false);
+      }
+    }
+    enfocarBusquedaCatalogo();
+  });
 
   // ── Eventos scanner ──
   $scanner.on("keydown", function (e) {
@@ -512,23 +530,19 @@
 
   $("#posBtnVaciarCarrito").on("click", function () {
     if (!carrito.length) return;
-    swal({
-      title: "¿Vaciar carrito?",
-      type: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sí, vaciar",
-      cancelButtonText: "Cancelar"
-    }).then(function (r) {
-      if (r.value || r.isConfirmed) vaciarCarrito();
-    });
+    if (window.confirm("¿Vaciar el carrito?")) {
+      vaciarCarrito();
+      toast("Carrito vaciado", "info");
+    }
   });
 
-  // ── Catálogo ──
-  $("#posToggleCatalogo, #posBtnAbrirCatalogo").on("click", function () {
-    toggleCatalogo(true);
+  // ── Catálogo (modal) ──
+  $("#posBtnAbrirCatalogo").on("click", function (e) {
+    e.preventDefault();
+    abrirCatalogo();
   });
 
-  $(".tablaProductosPos").on("click", "button.agregarProducto", function () {
+  $("#modalPosCatalogo").on("click", "button.agregarProducto", function () {
     var idProducto = $(this).attr("idProducto");
     var $btn = $(this);
     $btn.prop("disabled", true);
@@ -600,7 +614,7 @@
   $("#posFormVenta").on("submit", function (e) {
     if (!carrito.length) {
       e.preventDefault();
-      swal({ type: "warning", title: "Carrito vacío", text: "Agrega al menos un producto.", confirmButtonText: "Entendido" });
+      toast("Agrega al menos un producto al carrito", "warning");
       return false;
     }
 
@@ -663,7 +677,7 @@
 
     if (!val || parseInt(val, 10) <= 0) {
       e.preventDefault();
-      swal({ type: "warning", title: "Cliente obligatorio", text: "Selecciona o agrega un cliente.", confirmButtonText: "Entendido" });
+      toast("Selecciona o agrega un cliente", "warning");
       return false;
     }
 
@@ -672,7 +686,7 @@
 
     if ($("#nuevoMetodoPago").val() !== "efectivo" && !($("#nuevoCodigoTransaccion").val() || "").trim()) {
       e.preventDefault();
-      swal({ type: "warning", title: "Referencia requerida", text: "Ingresa el código o referencia de la transacción.", confirmButtonText: "Entendido" });
+      toast("Ingresa la referencia de la transacción", "warning");
       return false;
     }
 
@@ -688,12 +702,15 @@
       enfocarScanner();
     }
     if (e.key === "Escape") {
-      $scanner.val("");
-      toggleCatalogo(false);
+      if ($("#modalPosCatalogo").is(":visible")) {
+        $("#modalPosCatalogo").modal("hide");
+      } else {
+        $scanner.val("");
+      }
     }
     if (e.ctrlKey && e.key === "b") {
       e.preventDefault();
-      toggleCatalogo(true);
+      abrirCatalogo();
     }
     if (e.ctrlKey && e.key === "Enter") {
       e.preventDefault();

@@ -63,9 +63,6 @@
       border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 5px;
       font-size: 10px; background: #fff; color: var(--crm-muted);
     }
-    .pos-catalog-toggle { margin-bottom: 12px; }
-    .pos-catalog-panel { display: none; margin-top: 12px; }
-    .pos-catalog-panel.open { display: block; }
     .pos-btn-cobrar {
       width: 100%; padding: 14px; font-size: 16px; font-weight: 800;
       border-radius: 10px; border: none; background: #16a34a; color: #fff;
@@ -78,6 +75,51 @@
     }
     .tablaProductosPos_wrapper .dataTables_filter input {
       border-radius: 10px !important; border: 1px solid var(--crm-border) !important;
+      min-width: 220px; height: 36px; padding: 6px 12px;
+    }
+    .pos-modal-catalogo .modal-dialog { width: 92%; max-width: 960px; }
+    .pos-modal-catalogo .modal-content {
+      border-radius: 14px; border: 1px solid var(--crm-border); overflow: hidden;
+    }
+    .pos-modal-catalogo .modal-header {
+      background: linear-gradient(135deg, #6366f1, #818cf8); color: #fff; border: 0;
+    }
+    .pos-modal-catalogo .modal-header .close { color: #fff; opacity: .85; }
+    .pos-modal-catalogo .modal-body { padding: 16px 18px 12px; background: var(--crm-bg); }
+    .pos-modal-hint { font-size: 12px; color: var(--crm-muted); margin-bottom: 12px; }
+    .pos-success-banner {
+      display: none; align-items: center; flex-wrap: wrap; gap: 10px;
+      background: #ecfdf5; border: 1px solid #86efac; border-radius: 12px;
+      padding: 12px 16px; margin-bottom: 16px;
+    }
+    .pos-success-banner.show { display: flex; }
+    .pos-success-banner strong { color: #166534; flex: 1; min-width: 180px; }
+    .pos-success-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pos-success-actions .btn { border-radius: 8px; font-weight: 700; }
+    #posToastHost {
+      position: fixed; top: 70px; right: 16px; z-index: 10050;
+      display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+      max-width: min(360px, calc(100vw - 32px));
+    }
+    .pos-toast {
+      pointer-events: auto; display: flex; align-items: flex-start; gap: 10px;
+      background: #fff; border: 1px solid var(--crm-border); border-left-width: 4px;
+      border-radius: 10px; padding: 12px 14px; box-shadow: var(--crm-shadow-lg);
+      animation: posToastIn .28s ease-out;
+    }
+    .pos-toast.pos-toast-success { border-left-color: #16a34a; }
+    .pos-toast.pos-toast-error { border-left-color: #dc2626; }
+    .pos-toast.pos-toast-warning { border-left-color: #d97706; }
+    .pos-toast.pos-toast-info { border-left-color: #6366f1; }
+    .pos-toast-icon { font-size: 16px; margin-top: 1px; }
+    .pos-toast-success .pos-toast-icon { color: #16a34a; }
+    .pos-toast-error .pos-toast-icon { color: #dc2626; }
+    .pos-toast-warning .pos-toast-icon { color: #d97706; }
+    .pos-toast-info .pos-toast-icon { color: #6366f1; }
+    .pos-toast-msg { font-size: 13px; font-weight: 600; color: var(--crm-text); line-height: 1.35; }
+    @keyframes posToastIn {
+      from { opacity: 0; transform: translateX(12px); }
+      to { opacity: 1; transform: translateX(0); }
     }
   </style>
 
@@ -91,6 +133,17 @@
         <span class="pos-kbd">Ctrl+B</span> catálogo ·
         <span class="pos-kbd">Ctrl+Enter</span> cobrar
       </p>
+    </div>
+  </div>
+
+  <div id="posToastHost" aria-live="polite"></div>
+
+  <div id="posVentaExitosa" class="pos-success-banner">
+    <strong><i class="fa-solid fa-circle-check"></i> <span id="posVentaExitosaMsg">Venta registrada</span></strong>
+    <div class="pos-success-actions">
+      <button type="button" class="btn btn-success btn-sm" id="posBtnNuevaVenta"><i class="fa-solid fa-plus"></i> Nueva venta</button>
+      <button type="button" class="btn btn-default btn-sm" id="posBtnImprimirTicket"><i class="fa-solid fa-print"></i> Imprimir ticket</button>
+      <a href="index.php?ruta=ventasD" class="btn btn-link btn-sm" id="posBtnVerHistorial">Ver historial</a>
     </div>
   </div>
 
@@ -261,15 +314,21 @@
         </div>
       </div>
     </div>
+  </form>
+</div>
 
-    <div class="pos-catalog-toggle">
-      <button type="button" class="btn btn-link" id="posToggleCatalogo"><i class="fa-solid fa-chevron-down"></i> Ver catálogo de productos</button>
-    </div>
-    <div class="pos-catalog-panel crm-card" id="posCatalogoPanel">
-      <div class="crm-card-head">
-        <h4 class="crm-card-title"><i class="fa-solid fa-box"></i> Catálogo</h4>
+<div class="modal fade pos-modal-catalogo" id="modalPosCatalogo" tabindex="-1" role="dialog" aria-labelledby="modalPosCatalogoLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modalPosCatalogoLabel"><i class="fa-solid fa-box"></i> Buscar producto</h4>
       </div>
-      <div class="crm-card-body-flush" style="padding:12px">
+      <div class="modal-body">
+        <p class="pos-modal-hint">
+          Escribe nombre o código en el buscador · clic en <strong>Agregar</strong> ·
+          <span class="pos-kbd">Esc</span> cerrar
+        </p>
         <table class="table table-bordered table-striped dt-responsive tablaProductosPos" width="100%">
           <thead>
             <tr>
@@ -284,5 +343,5 @@
         </table>
       </div>
     </div>
-  </form>
+  </div>
 </div>
