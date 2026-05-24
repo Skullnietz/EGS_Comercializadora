@@ -161,10 +161,44 @@ $(".tablaPerfiles").on("click", ".btnEditarPerfil", function(){
 })
 
 /*=============================================
-MOSTRAR/OCULTAR CAMPOS DINÁMICOS POR ROL
+MOSTRAR/OCULTAR CAMPOS DINÁMICOS POR ROL Y FILTRAR DEPARTAMENTOS
 =============================================*/
+function filtrarDepartamentos(perfil, selectObj) {
+  var opcionesVendedor = ["Ventas", "Ventas Externas"];
+  var opcionesTecnico = ["Sistemas", "Electronica", "Impresoras", "Desarrollo"];
+  var opcionesAdmin = ["Administracion", "Sistemas", "Desarrollo"];
+  var opcionesSecre = ["Administracion", "Ventas"];
+
+  selectObj.find("option").each(function(){
+    var val = $(this).val();
+    if(val === "") return; // Ignorar la opción por defecto
+
+    var mostrar = false;
+    if(perfil === "vendedor" && opcionesVendedor.indexOf(val) !== -1) mostrar = true;
+    else if(perfil === "tecnico" && opcionesTecnico.indexOf(val) !== -1) mostrar = true;
+    else if(perfil === "secretaria" && opcionesSecre.indexOf(val) !== -1) mostrar = true;
+    else if((perfil === "administrador" || perfil === "Super-Administrador") && opcionesAdmin.indexOf(val) !== -1) mostrar = true;
+    else if(!perfil) mostrar = true; // Si no hay perfil, mostrar todo
+    
+    if(mostrar){
+      $(this).show().prop('disabled', false);
+    } else {
+      $(this).hide().prop('disabled', true);
+    }
+  });
+  
+  if(selectObj.find("option:selected").prop("disabled")){
+    selectObj.val("");
+  }
+}
+
 $("#nuevoPerfil").change(function(){
   var perfil = $(this).val();
+  
+  // Filtrar el departamento
+  var selectDepto = $(this).closest("form").find("select[name='Departamento']");
+  filtrarDepartamentos(perfil, selectDepto);
+
   if(perfil == "tecnico"){
     $("#divAdicionalTecnico").slideDown();
     $("#divAdicionalAsesor").slideUp();
@@ -179,6 +213,11 @@ $("#nuevoPerfil").change(function(){
 
 $("#editarPerfilSelect").change(function(){
   var perfil = $(this).val();
+
+  // Filtrar el departamento
+  var selectDepto = $("#editarDepartamento");
+  filtrarDepartamentos(perfil, selectDepto);
+
   if(perfil == "tecnico"){
     $("#divAdicionalTecnicoEdit").slideDown();
     $("#divAdicionalAsesorEdit").slideUp();
