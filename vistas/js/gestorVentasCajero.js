@@ -386,9 +386,15 @@
         deferRender: true,
         retrieve: true,
         processing: true,
-        pageLength: 8,
-        lengthMenu: [[8, 15, 25], [8, 15, 25]],
+        pageLength: 15,
+        lengthMenu: [[10, 15, 25, 50], [10, 15, 25, 50]],
+        pagingType: "simple_numbers",
+        dom: '<"pos-cat-dt-top"lf>rt<"pos-cat-dt-bottom"ip>',
         autoWidth: false,
+        columnDefs: [
+          { orderable: false, targets: [1, 5] },
+          { className: "text-center", targets: [0, 1, 4, 5] }
+        ],
         language: {
           sProcessing: "Procesando...",
           sLengthMenu: "Mostrar _MENU_",

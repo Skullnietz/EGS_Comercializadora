@@ -77,6 +77,64 @@
       border-radius: 10px !important; border: 1px solid var(--crm-border) !important;
       min-width: 220px; height: 36px; padding: 6px 12px;
     }
+    .pos-cat-dt-top {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 10px;
+    }
+    .pos-cat-dt-top .dataTables_length,
+    .pos-cat-dt-top .dataTables_filter { margin: 0; }
+    .pos-cat-dt-top .dataTables_filter { text-align: right; }
+    .pos-cat-dt-bottom {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9;
+    }
+    .tablaProductosPos_wrapper .dataTables_info {
+      color: var(--crm-muted); font-size: 12px; font-weight: 600; padding: 0; white-space: normal;
+    }
+    .tablaProductosPos_wrapper .dataTables_paginate {
+      margin: 0; text-align: right; white-space: normal; flex: 1 1 auto; min-width: 0;
+    }
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination {
+      display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center;
+      gap: 4px; margin: 0; float: none !important;
+    }
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li {
+      display: inline-block; float: none !important;
+    }
+    /* Anula custom.css global que estiliza el <li> y deja cajas vacías */
+    .tablaProductosPos_wrapper .dataTables_paginate .paginate_button {
+      padding: 0 !important; margin: 0 !important; border: 0 !important;
+      background: transparent !important; box-shadow: none !important; float: none !important;
+    }
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a,
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > span {
+      border-radius: 8px !important; border: 1px solid #dbe3ef !important;
+      background: #fff !important; color: #334155 !important;
+      padding: 5px 11px !important; font-weight: 600; font-size: 12px;
+      margin: 0 !important; line-height: 1.4; display: inline-block;
+    }
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover {
+      background: #eef2ff !important; border-color: #a5b4fc !important; color: #3730a3 !important;
+    }
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a,
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:hover,
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:focus {
+      background: var(--crm-accent) !important; border-color: var(--crm-accent) !important; color: #fff !important;
+    }
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a,
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:hover,
+    .tablaProductosPos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > span {
+      background: #f8fafc !important; border-color: #e2e8f0 !important; color: #94a3b8 !important;
+      cursor: default;
+    }
+    @media (max-width: 767px) {
+      .pos-cat-dt-top .dataTables_length,
+      .pos-cat-dt-top .dataTables_filter { width: 100%; text-align: left; }
+      .pos-cat-dt-top .dataTables_filter input { width: 100%; min-width: 0; }
+      .pos-cat-dt-bottom { flex-direction: column; align-items: stretch; }
+      .tablaProductosPos_wrapper .dataTables_paginate { text-align: center; }
+      .tablaProductosPos_wrapper .dataTables_paginate ul.pagination { justify-content: center; }
+    }
     .pos-modal-catalogo { z-index: 10060 !important; }
     .pos-modal-catalogo .modal-dialog { width: 92%; max-width: 960px; margin: 30px auto; }
     .pos-modal-catalogo + .modal-backdrop,
@@ -332,7 +390,7 @@
           Escribe nombre o código en el buscador · clic en <strong>Agregar</strong> ·
           <span class="pos-kbd">Esc</span> cerrar
         </p>
-        <table class="table table-bordered table-striped dt-responsive tablaProductosPos" width="100%">
+        <table class="table table-bordered table-striped tablaProductosPos" width="100%">
           <thead>
             <tr>
               <th>#</th>
