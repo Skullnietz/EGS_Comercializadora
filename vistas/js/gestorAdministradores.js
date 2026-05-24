@@ -248,4 +248,47 @@ function incrementarContador(){
 }
 */
 
+/*=============================================
+VALIDAR CONTRASEÑAS AL CREAR Y EDITAR
+=============================================*/
+$("form").on("submit", function(e){
+  var nuevoPass = $(this).find("#nuevoPassword");
+  var nuevoPassConf = $(this).find("#nuevoPasswordConfirmar");
+
+  if(nuevoPass.length > 0 && nuevoPassConf.length > 0){
+    if(nuevoPass.val() !== nuevoPassConf.val()){
+      e.preventDefault();
+      swal({
+        title: "Error de contraseña",
+        text: "¡Las contraseñas no coinciden!",
+        type: "error",
+        confirmButtonText: "¡Cerrar!"
+      });
+      return false;
+    }
+  }
+
+  var editPass = $(this).find("#editarPassword");
+  var editPassConf = $(this).find("#editarPasswordConfirmar");
+
+  if(editPass.length > 0 && editPassConf.length > 0){
+    if(editPass.val() !== "" && editPass.val() !== editPassConf.val()){
+      e.preventDefault();
+      swal({
+        title: "Error de contraseña",
+        text: "¡Las contraseñas no coinciden!",
+        type: "error",
+        confirmButtonText: "¡Cerrar!"
+      });
+      return false;
+    }
+  }
+});
+
+/* Efecto hover zona de imagen */
+$(".nuevaFoto").hover(
+  function() { $(this).parent().css("border-color", "var(--crm-accent)"); },
+  function() { $(this).parent().css("border-color", "var(--crm-border)"); }
+);
+
 

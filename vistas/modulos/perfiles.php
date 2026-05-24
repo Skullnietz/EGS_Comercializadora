@@ -197,7 +197,14 @@ MODAL AGREGAR PERFIL
              <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fas fa-lock"></i></span> 
-                <input type="password" class="form-control input-lg" name="nuevoPassword" placeholder="Ingresar contraseña" required>
+                <input type="password" class="form-control input-lg" id="nuevoPassword" name="nuevoPassword" placeholder="Ingresar contraseña" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-group">
+                <span class="input-group-addon"><i class="fas fa-lock"></i></span> 
+                <input type="password" class="form-control input-lg" id="nuevoPasswordConfirmar" name="nuevoPasswordConfirmar" placeholder="Confirmar contraseña" required>
               </div>
             </div>
 
@@ -317,11 +324,11 @@ MODAL AGREGAR PERFIL
               </div>
             </div>
 
-             <div class="form-group">
-              <div class="panel">SUBIR FOTO</div>
-              <input type="file" class="nuevaFoto" name="nuevaFoto">
-              <p class="help-block">Peso máximo de la foto 2MB</p>
-              <img loading="lazy" src="vistas/img/perfiles/default/anonymous.png" class="img-thumbnail previsualizar" width="100px" style="border-radius:12px;">
+             <div class="form-group" style="border: 2px dashed var(--crm-border); padding: 20px; border-radius: var(--crm-radius); text-align: center; background: #f8fafc; position: relative; transition: all .2s var(--crm-ease);">
+              <h5 style="color: var(--crm-text2); font-weight: 600; margin-top: 0;"><i class="fas fa-cloud-upload-alt" style="font-size:24px; color:var(--crm-accent); display:block; margin-bottom:10px;"></i> Subir Foto de Perfil</h5>
+              <input type="file" class="nuevaFoto" name="nuevaFoto" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+              <p class="help-block" style="font-size: 12px;">Peso máximo de la foto 2MB (Formatos JPG, PNG)</p>
+              <img loading="lazy" src="vistas/img/perfiles/default/anonymous.png" class="img-thumbnail previsualizar" width="100px" style="border-radius:50%; margin-top: 10px; box-shadow: var(--crm-shadow);">
             </div>
 
           </div>
@@ -397,8 +404,15 @@ MODAL EDITAR PERFIL
              <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fas fa-lock"></i></span> 
-                <input type="password" class="form-control input-lg" name="editarPassword" placeholder="Escriba la nueva contraseña">
+                <input type="password" class="form-control input-lg" id="editarPassword" name="editarPassword" placeholder="Escriba la nueva contraseña">
                 <input type="hidden" id="passwordActual" name="passwordActual">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-group">
+                <span class="input-group-addon"><i class="fas fa-lock"></i></span> 
+                <input type="password" class="form-control input-lg" id="editarPasswordConfirmar" name="editarPasswordConfirmar" placeholder="Confirmar nueva contraseña">
               </div>
             </div>
 
@@ -518,11 +532,11 @@ MODAL EDITAR PERFIL
               </div>
             </div>
 
-             <div class="form-group">
-              <div class="panel">SUBIR FOTO</div>
-              <input type="file" class="nuevaFoto" name="editarFoto">
-              <p class="help-block">Peso máximo de la foto 2MB</p>
-              <img loading="lazy" src="vistas/img/perfiles/default/anonymous.png" class="img-thumbnail previsualizar" width="100px" style="border-radius:12px;">
+             <div class="form-group" style="border: 2px dashed var(--crm-border); padding: 20px; border-radius: var(--crm-radius); text-align: center; background: #f8fafc; position: relative; transition: all .2s var(--crm-ease);">
+              <h5 style="color: var(--crm-text2); font-weight: 600; margin-top: 0;"><i class="fas fa-cloud-upload-alt" style="font-size:24px; color:var(--crm-accent); display:block; margin-bottom:10px;"></i> Cambiar Foto de Perfil</h5>
+              <input type="file" class="nuevaFoto" name="editarFoto" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+              <p class="help-block" style="font-size: 12px;">Peso máximo de la foto 2MB (Formatos JPG, PNG)</p>
+              <img loading="lazy" src="vistas/img/perfiles/default/anonymous.png" class="img-thumbnail previsualizar" width="100px" style="border-radius:50%; margin-top: 10px; box-shadow: var(--crm-shadow);">
               <input type="hidden" name="fotoActual" id="fotoActual">
             </div>
 
