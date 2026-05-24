@@ -211,6 +211,9 @@
     deferRender: true,
     retrieve: true,
     processing: true,
+    pageLength: 25,
+    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+    dom: '<"row inv-dt-top"<"col-sm-6"l><"col-sm-6"f>>rt<"inv-dt-bottom"ip>',
     order: [[3, "asc"]],
     columnDefs: [
       { orderable: false, targets: [0, 1, 7] },

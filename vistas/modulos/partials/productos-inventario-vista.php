@@ -51,6 +51,74 @@
       }
       .inv-kbd { border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 5px; font-size: 10px; background: #fff; }
       .tablaInventarioProductos tbody tr.inv-row-highlight { background: #eef2ff !important; }
+
+      /* DataTables — controles y paginación */
+      .tablaInventarioProductos_wrapper { padding: 16px 18px 18px; }
+      .tablaInventarioProductos_wrapper .dataTables_length,
+      .tablaInventarioProductos_wrapper .dataTables_filter { margin-bottom: 12px; }
+      .tablaInventarioProductos_wrapper .dataTables_length label,
+      .tablaInventarioProductos_wrapper .dataTables_filter label {
+        color: var(--crm-text2); font-size: 12px; font-weight: 700;
+      }
+      .tablaInventarioProductos_wrapper .dataTables_length select {
+        border: 1px solid var(--crm-border) !important; border-radius: 8px;
+        background: #fff; color: var(--crm-text); height: 34px;
+        padding: 4px 26px 4px 10px; margin: 0 6px; font-size: 12px; font-weight: 600;
+      }
+      .tablaInventarioProductos_wrapper .dataTables_filter input {
+        border: 1px solid var(--crm-border) !important; border-radius: 10px;
+        background: #fff; color: var(--crm-text); height: 36px; min-width: 220px;
+        padding: 6px 12px; font-size: 12px; font-weight: 600;
+      }
+      .tablaInventarioProductos_wrapper .dataTables_length select:focus,
+      .tablaInventarioProductos_wrapper .dataTables_filter input:focus {
+        outline: none; border-color: #a5b4fc !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+      }
+      .tablaInventarioProductos_wrapper .dataTables_info {
+        color: var(--crm-muted); font-size: 12px; font-weight: 600; padding-top: 14px;
+      }
+      .tablaInventarioProductos_wrapper .dataTables_paginate { margin-top: 14px; text-align: right; }
+      .tablaInventarioProductos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a,
+      .tablaInventarioProductos_wrapper .dataTables_paginate .pagination > li > a,
+      .tablaInventarioProductos_wrapper .dataTables_paginate .pagination > li > span {
+        border-radius: 8px !important; border: 1px solid #dbe3ef !important;
+        background: #fff !important; color: #334155 !important;
+        margin-left: 6px; padding: 6px 12px !important; font-weight: 600;
+      }
+      .tablaInventarioProductos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover,
+      .tablaInventarioProductos_wrapper .dataTables_paginate .pagination > li > a:hover {
+        background: #eef2ff !important; border-color: #a5b4fc !important; color: #3730a3 !important;
+      }
+      .tablaInventarioProductos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a,
+      .tablaInventarioProductos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:hover,
+      .tablaInventarioProductos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:focus,
+      .tablaInventarioProductos_wrapper .dataTables_paginate .pagination > .active > a,
+      .tablaInventarioProductos_wrapper .dataTables_paginate .pagination > .active > a:hover,
+      .tablaInventarioProductos_wrapper .dataTables_paginate .pagination > .active > a:focus {
+        background: var(--crm-accent) !important; border-color: var(--crm-accent) !important; color: #fff !important;
+      }
+      .tablaInventarioProductos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a,
+      .tablaInventarioProductos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:hover,
+      .tablaInventarioProductos_wrapper .dataTables_paginate ul.pagination > li.paginate_button.disabled > a:focus,
+      .tablaInventarioProductos_wrapper .dataTables_paginate .pagination > .disabled > a {
+        background: #f8fafc !important; border-color: #e2e8f0 !important; color: #94a3b8 !important;
+        cursor: not-allowed;
+      }
+      .tablaInventarioProductos_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+        background: transparent !important; border: 0 !important; box-shadow: none !important;
+      }
+      .inv-dt-bottom {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: 10px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9;
+      }
+      @media (max-width: 767px) {
+        .tablaInventarioProductos_wrapper .dataTables_length,
+        .tablaInventarioProductos_wrapper .dataTables_filter { width: 100%; }
+        .tablaInventarioProductos_wrapper .dataTables_filter input { width: 100%; min-width: 0; }
+        .inv-dt-bottom { flex-direction: column; align-items: stretch; }
+        .tablaInventarioProductos_wrapper .dataTables_paginate { text-align: center; }
+      }
     </style>
 
     <div class="crm-section">
