@@ -261,42 +261,8 @@ MODAL AGREGAR PRODUCTO
             </div>
 
           </div>
-          <!--=====================================
-          ENTRADA PARA EL ALMACEN
-          ======================================-->
-          <input  type="hidden" class="id_empresa" value="<?php echo $_SESSION['empresa']?> ">
-          <!--=====================================
-          ENTRADA PARA EL ALMACEN
-          ======================================-->
-          <div class="form-group">
-
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-bookmark"></i></span>
-              <select class="form-control input-lg id_almacen">
-
-                <option value="">Selecionar Almacen</option>
-                
-                <?php
-
-                  $item = "id_empresa";
-                  $valor = $_SESSION["empresa"];
-
-                  $respuestaAlmacenes = AlmacenesControlador::ctrlMostrarAlmacenes($item, $valor);
-
-
-
-                  foreach ($respuestaAlmacenes as $key => $valueAlmacenes) {
-                    echo '<option value="'.$valueAlmacenes["id"].'" >'.$valueAlmacenes["nombre"].'</option>';
-
-                  }
-
-                ?>
-
-              </select>
-
-            </div>
-          </div>
+          <input type="hidden" class="id_empresa" value="<?php echo $_SESSION['empresa']?>">
+          <input type="hidden" class="id_almacen" value="0">
           <!--=====================================
           ENTRADA PARA LA RUTA DEL PRODUCTO
           ======================================-->

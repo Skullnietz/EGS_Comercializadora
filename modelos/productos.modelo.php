@@ -675,4 +675,52 @@ class ModeloProductos{
 	}
 
 
+	/*=============================================
+
+	RESUMEN DE INVENTARIO POR EMPRESA
+
+	=============================================*/
+
+	static public function mdlResumenInventario($tabla, $idEmpresa){
+
+		$stmt = Conexion::conectar()->prepare(
+			"SELECT
+				COUNT(*) AS total_activos,
+				SUM(CASE WHEN disponibilidad > 0 AND disponibilidad <= 15 THEN 1 ELSE 0 END) AS stock_bajo,
+				SUM(CASE WHEN disponibilidad = 0 THEN 1 ELSE 0 END) AS sin_stock,
+				COALESCE(SUM(precio * disponibilidad), 0) AS valor_inventario
+			FROM $tabla
+			WHERE id_empresa = :id_empresa AND estado = 1"
+		);
+
+		$stmt->bindParam(":id_empresa", $idEmpresa, PDO::PARAM_INT);
+		$stmt->execute();
+
+		return $stmt->fetch(PDO::FETCH_ASSOC);
+	}
+
+
+	/*=============================================
+
+	AJUSTAR STOCK (DELTA)
+
+	=============================================*/
+
+	static public function mdlAjustarStock($tabla, $datos){
+
+		$stmt = Conexion::conectar()->prepare(
+			"UPDATE $tabla SET disponibilidad = GREATEST(0, disponibilidad + :ajuste) WHERE id = :id"
+		);
+
+		$stmt->bindParam(":ajuste", $datos["ajuste"], PDO::PARAM_INT);
+		$stmt->bindParam(":id", $datos["id"], PDO::PARAM_INT);
+
+		if($stmt->execute()){
+			return "ok";
+		}
+
+		return "error";
+	}
+
+
 }

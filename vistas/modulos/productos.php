@@ -11,6 +11,13 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor")
   return;
 
 }
+
+require_once __DIR__ . '/../../config/InventarioHelper.php';
+InventarioHelper::ensureConfigTable();
+$resumenInventario = ControladorProductos::ctrResumenInventario($_SESSION["empresa"]);
+$tipoCambioUsd = InventarioHelper::getTipoCambioUsd();
+$esAdminInventario = ($_SESSION["perfil"] === "administrador" || $_SESSION["perfil"] === "Super-Administrador");
+$codigoDeepLink = isset($_GET['codigo']) ? htmlspecialchars($_GET['codigo'], ENT_QUOTES, 'UTF-8') : '';
 ?>
 <style>
   .alta-helper {
@@ -187,139 +194,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor")
     }
   }
 </style>
-<div class="content-wrapper">
-
-  <section class="content-header">
-
-     <h1>Gestor Productos</h1>
-
-     <ol class="breadcrumb"> 
-
-      <li><a href="inicio"><i class="fas fa-dashboard"></i> Inicio</a></li>
-
-      <li class="active">Gestor Productos</li> 
-
-    </ol>
-
-  </section>
-
-  <section class="content">
-
-    <div class="box">
-
-      <div class="box-header with-border">
-
-        <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarProducto">Agregar Producto</button>
-        <!-------------
-          AQUI SE VA A AGREGAR EL BOTON DE DESCARGAR REPORTE
-        -->
-
-
-        <?php
-        echo'<a href="vistas/modulos/descargar-reporte-productos.php?reporte=productos">
-            
-            <button class="btn btn-success">Descargar productos</button>
-
-        </a>';
-        
-        ?>
-
-
-      </div>
-
-      <div class="box-body">
-
-        <table class="table table-bordered table-striped dt-responsive tablaProductos" width="100%">
-
-          <thead>
-
-            <tr>
-
-              <th style="width:10px">#</th>
-              <th>Códig de Producto</th>  
-              <th>Empresa</th>
-              <th>Titulo</th>
-              <th>Categoria</th>
-              <th>Subcategoria</th>
-              <th>Ruta</th>
-              <th>Estado</th>
-              <th>Tipo</th>
-              <th>Descripción</th>
-              <th>palabras clave</th>
-              <th>Portada</th>
-              <th>imagen principal</th>
-              <th>Multimedia</th>
-              <th>Detalles</th>
-              <th>Precio</th>
-              <th>Peso</th>
-              <th>Tiempo de Entrega</th>
-              <th>Disponibilidad</th>
-              <th>Proveedor</th>
-              <th>Tipo de Oferta</th>
-              <th>Valor Oferta</th>
-              <th>Imagen Oferta</th>
-              <th>Fin Oferta</th>
-              <th>Acciones</th>
-
-            </tr>
-
-          </thead>
-          <?php
-
-          echo'<input  type="hidden" id="tipoDePerfil" value="'.$_SESSION["perfil"].'"  placeholder="'.$_SESSION["perfil"].'">
-              
-          <input  type="hidden" id="id_empresa" value="'.$_SESSION["empresa"].'">';
-
-          ?>
-        </table>
-
-      </div>
-
-    </div>
-
-  </section>
-
-</div>
-
-
-<?php
-
-  	$item = null;
-  	$valor = null;
-
-  	$productos = ControladorProductos::ctrMostrarProductos($item, $valor);
-
-  		foreach ($productos as $key => $valueP) {
-  		
-  		
-
-  	$item3 = "ruta";
-		$valor3 = $valueP["ruta"];
-
-		$cabeceras = ControladorCabeceras::ctrMostrarCabeceras($item3, $valor3);
-
-    $acciones = "<div class='btn-group'><button class='btn btn-warning btnEditarProducto' idProducto='".$valueP["id"]."' data-toggle='modal' data-target='#modalEditarProducto'><i class='fas fa-pencil'></i></button><button class='btn btn-danger btnEliminarProducto' idProducto='".$valueP["id"]."' imgOferta='".$valueP["imgOferta"]."' rutaCabecera='".$valueP["ruta"]."' imgPortada='".$cabeceras["portada"]."' imgPrincipal='".$valueP["portada"]."'><i class='fas fa-times'></i></button></div>";
-
-}
-?>
-<script type="text/javascript">
-	
-//$(document).ready(function(){
-          // $(".tablaProductos").DataTable({
-             // "processing": true,
-             // "serverSide": true,
-             // "sAjaxSource": "ServerSide/serversideProductos.php",
-             // "columnDefs":[{
-             //     "targets": -1,        
-            //	"defaultContent": "<div class='btn-group'><button class='btn btn-warning  btnEditarProducto'  data-toggle='modal' data-target='#modalEditarProducto'><i class='fas fa-pencil'></i></button></div>"
-   
-           // }]   
-   // }); 
-//});
-</script>
-
-
-
+<?php include __DIR__ . '/partials/productos-inventario-vista.php'; ?>
 <!--=====================================
 MODAL AGREGAR PRODUCTO
 ======================================-->
@@ -354,7 +229,8 @@ MODAL AGREGAR PRODUCTO
             <p>Usa una plantilla para precargar campos y revisa el avance antes de guardar.</p>
 
             <div class="alta-templates">
-              <button type="button" class="alta-template-btn" data-template="fisico">Plantilla producto fisico</button>
+              <button type="button" class="alta-template-btn" data-template="laptop">Plantilla laptop IT</button>
+              <button type="button" class="alta-template-btn" data-template="componente">Plantilla componente</button>
               <button type="button" class="alta-template-btn" data-template="servicio">Plantilla servicio</button>
               <button type="button" class="alta-template-btn" data-template="express">Alta express</button>
             </div>
@@ -378,7 +254,7 @@ MODAL AGREGAR PRODUCTO
                 <h6>Paso 1 Base</h6>
                 <div class="alta-check-item" id="chkPaso1Titulo"><span class="check-icon">...</span><span>Titulo capturado</span></div>
                 <div class="alta-check-item" id="chkPaso1Tipo"><span class="check-icon">...</span><span>Tipo definido</span></div>
-                <div class="alta-check-item" id="chkPaso1Almacen"><span class="check-icon">...</span><span>Almacen asignado</span></div>
+                <div class="alta-check-item" id="chkPaso1Codigo"><span class="check-icon">...</span><span>Código asignado</span></div>
               </div>
               <div class="alta-check-group">
                 <h6>Paso 2 Contenido</h6>
@@ -490,42 +366,8 @@ MODAL AGREGAR PRODUCTO
             </div>
 
           </div>
-          <!--=====================================
-          ENTRADA PARA EL ALMACEN
-          ======================================-->
-          <input  type="hidden" class="id_empresa" value="<?php echo $_SESSION['empresa']?> ">
-          <!--=====================================
-          ENTRADA PARA EL ALMACEN
-          ======================================-->
-          <div class="form-group">
-
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-bookmark"></i></span>
-              <select class="form-control input-lg id_almacen">
-
-                <option value="">Selecionar Almacen</option>
-                
-                <?php
-
-                  $item = "id_empresa";
-                  $valor = $_SESSION["empresa"];
-
-                  $respuestaAlmacenes = AlmacenesControlador::ctrlMostrarAlmacenes($item, $valor);
-
-
-
-                  foreach ($respuestaAlmacenes as $key => $valueAlmacenes) {
-                    echo '<option value="'.$valueAlmacenes["id"].'" >'.$valueAlmacenes["nombre"].'</option>';
-
-                  }
-
-                ?>
-
-              </select>
-
-            </div>
-          </div>
+          <input type="hidden" class="id_empresa" value="<?php echo $_SESSION['empresa']?>">
+          <input type="hidden" class="id_almacen" value="0">
           <!--=====================================
           ENTRADA PARA LA RUTA DEL PRODUCTO
           ======================================-->
@@ -802,7 +644,8 @@ MODAL AGREGAR PRODUCTO
                 <!-- PRECIO -->
                 <div class="col-md-4 col-xs-12">
 
-                  <div class="panel">PRECIO</div>
+                  <div class="panel">PRECIO (MXN)</div>
+                  <small class="text-muted" style="display:block;margin-bottom:6px">Referencia USD: <span id="refUsdAlta">—</span></small>
 
                   <div class="input-group">
 
@@ -1152,6 +995,9 @@ MODAL AGREGAR PRODUCTO
                             <svg id="barcode"></svg>
 
                           </div>
+                          <br>
+                          <small class="text-muted">QR del producto:</small>
+                          <div id="qrEditProducto" style="margin-top:8px"></div>
 
                         </div>
                         <!--=====================================
@@ -1346,7 +1192,8 @@ MODAL AGREGAR PRODUCTO
                                 <!-- PRECIO -->
                                 <div class="col-md-4 col-xs-12">
 
-                                  <div class="panel">PRECIO</div>
+                                  <div class="panel">PRECIO (MXN)</div>
+                                  <small class="text-muted" style="display:block;margin-bottom:6px">Referencia USD: <span id="refUsdEdit">—</span></small>
 
                                     <div class="input-group">
 

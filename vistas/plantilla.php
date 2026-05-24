@@ -290,6 +290,7 @@ if ($isTabletPublicRoute) {
   <script src="vistas/js/gestorCategorias.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorSubCategorias.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorProductos.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorProductosInventario.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorVentas.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorVentasR.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorVisitas.js?v=<?= $jsVer ?>"></script>

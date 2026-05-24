@@ -829,7 +829,6 @@
     var quickLinks = [
       { label: 'Tablero', icon: 'fa-solid fa-home', url: 'index.php?ruta=inicio', tags: 'inicio dashboard home tablero' },
       { label: 'Gestor Productos', icon: 'fab fa-product-hunt', url: 'index.php?ruta=productos', tags: 'productos inventario stock' },
-      { label: 'Gestor Almacenes', icon: 'fa-solid fa-warehouse', url: 'index.php?ruta=almacenes', tags: 'almacenes bodega almacen' },
       { label: 'Gestor Ventas', icon: 'fa-solid fa-shopping-cart', url: 'index.php?ruta=creararventa', tags: 'ventas vender factura' },
       { label: 'Gestor Ventas R', icon: 'fa-solid fa-cart-arrow-down', url: 'index.php?ruta=ventasR', tags: 'ventas reporte' },
       { label: 'Gestor Pedidos', icon: 'fa-solid fa-box-open', url: 'index.php?ruta=pedidos', tags: 'pedidos envios paquetes' },
