@@ -374,10 +374,22 @@
     });
   }
 
+  function getClienteSelectValue() {
+    if (!$clienteSelect) return "";
+    if (clienteChoices && typeof clienteChoices.getValue === "function") {
+      var raw = clienteChoices.getValue(true);
+      if (raw !== null && raw !== undefined && raw !== "") {
+        return String(raw);
+      }
+    }
+    return $clienteSelect.value || "";
+  }
+
   function initClienteChoices() {
     if (!window.Choices || !$clienteSelect) return;
     if (clienteChoices) {
       clienteChoices.destroy();
+      clienteChoices = null;
     }
     clienteChoices = new Choices($clienteSelect, {
       searchEnabled: true,
@@ -387,6 +399,7 @@
       noResultsText: "Sin resultados",
       noChoicesText: "Sin opciones"
     });
+    bindClienteSelectEvents();
   }
 
   function syncClienteHidden(val) {
@@ -439,15 +452,32 @@
   }
 
   function bindClienteSelectEvents() {
-    if (!$clienteSelect) return;
+    if (!$clienteSelect || $clienteSelect._egsPosClienteBound) return;
+    $clienteSelect._egsPosClienteBound = true;
+
+    function notificarCliente(val) {
+      onClienteSeleccionado(val === null || val === undefined ? "" : String(val));
+    }
 
     $clienteSelect.addEventListener("change", function () {
-      onClienteSeleccionado(this.value);
+      notificarCliente(getClienteSelectValue());
+    });
+
+    $clienteSelect.addEventListener("addItem", function (e) {
+      if (e.detail && e.detail.value !== undefined && e.detail.value !== "") {
+        notificarCliente(e.detail.value);
+      }
+    });
+
+    $clienteSelect.addEventListener("removeItem", function () {
+      notificarCliente("");
     });
 
     $clienteSelect.addEventListener("choice", function (e) {
       var choice = e.detail && e.detail.choice ? e.detail.choice : null;
-      onClienteSeleccionado(choice ? choice.value : "");
+      if (choice && choice.value !== undefined) {
+        notificarCliente(choice.value);
+      }
     });
   }
 
@@ -705,13 +735,14 @@
     });
   });
 
-  // ── Cliente ──
+  // ── Cliente + monedero al seleccionar ──
   initClienteChoices();
-  bindClienteSelectEvents();
-
-  $(document).on("change", "#egs_clienteVentaPOS", function () {
-    onClienteSeleccionado(this.value);
-  });
+  if (!$clienteSelect || !window.Choices) {
+    bindClienteSelectEvents();
+    $(document).on("change", "#egs_clienteVentaPOS", function () {
+      onClienteSeleccionado(this.value);
+    });
+  }
 
   // ── Monedero (mismo flujo que infoOrden) ──
   $("#egsMonederoUsarTodo").on("click", function () {
@@ -761,7 +792,7 @@
       return false;
     }
 
-    var val = $clienteSelect ? $clienteSelect.value : "";
+    var val = getClienteSelectValue();
 
     if (val === "nuevo") {
       e.preventDefault();
