@@ -77,7 +77,10 @@
       border-radius: 10px !important; border: 1px solid var(--crm-border) !important;
       min-width: 220px; height: 36px; padding: 6px 12px;
     }
-    .pos-modal-catalogo .modal-dialog { width: 92%; max-width: 960px; }
+    .pos-modal-catalogo { z-index: 10060 !important; }
+    .pos-modal-catalogo .modal-dialog { width: 92%; max-width: 960px; margin: 30px auto; }
+    .pos-modal-catalogo + .modal-backdrop,
+    body.modal-open .modal-backdrop { z-index: 10050 !important; }
     .pos-modal-catalogo .modal-content {
       border-radius: 14px; border: 1px solid var(--crm-border); overflow: hidden;
     }
@@ -168,7 +171,7 @@
         <input type="text" id="posScannerInput" placeholder="Escanear código de barras, QR o escribir SKU..." autocomplete="off">
         <button type="button" class="btn btn-default btn-sm" id="posBtnEnfocarScanner" title="F2"><i class="fa-solid fa-crosshairs"></i></button>
       </div>
-      <button type="button" class="crm-quick" id="posBtnAbrirCatalogo"><span class="crm-quick-icon"><i class="fa-solid fa-search"></i></span> Buscar catálogo</button>
+      <button type="button" class="crm-quick" id="posBtnAbrirCatalogo" data-toggle="modal" data-target="#modalPosCatalogo"><span class="crm-quick-icon"><i class="fa-solid fa-search"></i></span> Buscar catálogo</button>
       <button type="button" class="crm-quick" id="posBtnVaciarCarrito"><span class="crm-quick-icon"><i class="fa-solid fa-trash"></i></span> Vaciar</button>
     </div>
 

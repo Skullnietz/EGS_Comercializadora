@@ -376,42 +376,51 @@
   }
 
   function initCatalogo() {
-    if (!$(".tablaProductosPos").length) return;
-    if ($.fn.DataTable.isDataTable(".tablaProductosPos")) {
+    if (!$("#modalPosCatalogo .tablaProductosPos").length) return null;
+    if ($.fn.DataTable.isDataTable("#modalPosCatalogo .tablaProductosPos")) {
       return dtCatalogo;
     }
-    dtCatalogo = $(".tablaProductosPos").DataTable({
-      ajax: "ajax/tablaVentasDinamicas.ajax.php?perfil=" + encodeURIComponent($("#tipoDePerfil").val()) + "&empresa=" + encodeURIComponent($("#id_empresa").val()),
-      deferRender: true,
-      retrieve: true,
-      processing: true,
-      pageLength: 8,
-      lengthMenu: [[8, 15, 25], [8, 15, 25]],
-      language: {
-        sProcessing: "Procesando...",
-        sLengthMenu: "Mostrar _MENU_",
-        sZeroRecords: "Sin productos",
-        sEmptyTable: "Sin datos",
-        sInfo: "_START_–_END_ de _TOTAL_",
-        sSearch: "Buscar:",
-        oPaginate: { sNext: "Sig.", sPrevious: "Ant." }
-      }
-    });
+    try {
+      dtCatalogo = $("#modalPosCatalogo .tablaProductosPos").DataTable({
+        ajax: "ajax/tablaVentasDinamicas.ajax.php?perfil=" + encodeURIComponent($("#tipoDePerfil").val()) + "&empresa=" + encodeURIComponent($("#id_empresa").val()),
+        deferRender: true,
+        retrieve: true,
+        processing: true,
+        pageLength: 8,
+        lengthMenu: [[8, 15, 25], [8, 15, 25]],
+        autoWidth: false,
+        language: {
+          sProcessing: "Procesando...",
+          sLengthMenu: "Mostrar _MENU_",
+          sZeroRecords: "Sin productos",
+          sEmptyTable: "Sin datos",
+          sInfo: "_START_–_END_ de _TOTAL_",
+          sSearch: "Buscar:",
+          oPaginate: { sNext: "Sig.", sPrevious: "Ant." }
+        }
+      });
+    } catch (err) {
+      console.error("POS catálogo DataTable:", err);
+      toast("No se pudo cargar el catálogo", "error");
+      return null;
+    }
     return dtCatalogo;
   }
 
   function enfocarBusquedaCatalogo() {
     var $filter = $("#modalPosCatalogo").find(".dataTables_filter input");
     if ($filter.length) {
-      setTimeout(function () { $filter.focus().select(); }, 150);
+      setTimeout(function () { $filter.focus().select(); }, 200);
     }
   }
 
   function abrirCatalogo() {
-    if (!dtCatalogo) {
-      initCatalogo();
+    var $modal = $("#modalPosCatalogo");
+    if (!$modal.length) {
+      toast("Modal de catálogo no disponible", "error");
+      return;
     }
-    $("#modalPosCatalogo").modal("show");
+    $modal.modal("show");
   }
 
   function ocultarBannerExito() {
@@ -465,10 +474,12 @@
     }
   });
 
+  $("#modalPosCatalogo").appendTo("body");
+
   $("#modalPosCatalogo").on("shown.bs.modal", function () {
     if (!dtCatalogo) {
       initCatalogo();
-    } else {
+    } else if (dtCatalogo.columns) {
       dtCatalogo.columns.adjust();
       if (dtCatalogo.ajax) {
         dtCatalogo.ajax.reload(null, false);
