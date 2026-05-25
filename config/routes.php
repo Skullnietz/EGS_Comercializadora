@@ -103,6 +103,7 @@ return [
     'empresas',
     'config-whatsapp',
     'visitas',
+    'descargar-reporte-visitas',
     'reportes',
     'reportePorFecheOrdenes',
 

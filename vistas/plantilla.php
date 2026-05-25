@@ -83,6 +83,9 @@ if ($isTabletPublicRoute) {
   <link rel="stylesheet" href="vistas/dist/css/AdminLTE.css">
   <link rel="stylesheet" href="vistas/dist/css/skins/skin-blue.min.css">
   <link rel="stylesheet" href="vistas/css/custom.css">
+  <?php if ($rutaActual === 'visitas'): ?>
+  <link rel="stylesheet" href="vistas/css/visitas-dashboard.css?v=<?= $jsVer ?>">
+  <?php endif; ?>
   <!-- iCheck -->
   <link rel="stylesheet" href="vistas/plugins/iCheck/square/blue.css">
   <!-- Morris chart -->

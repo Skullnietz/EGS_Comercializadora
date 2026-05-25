@@ -35,6 +35,8 @@ require_once "controladores/ventas.controlador.php";
 
 require_once "controladores/visitas.controlador.php";
 
+require_once "controladores/analytics.controlador.php";
+
 require_once "controladores/subcategorias.controlador.php";
 
 require_once "controladores/cabeceras.controlador.php";
@@ -101,6 +103,8 @@ require_once "modelos/usuarios.modelo.php";
 require_once "modelos/ventas.modelo.php";
 
 require_once "modelos/visitas.modelo.php";
+
+require_once "modelos/analytics.modelo.php";
 
 require_once "modelos/subcategorias.modelo.php";
 

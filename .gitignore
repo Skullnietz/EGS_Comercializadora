@@ -10,6 +10,8 @@ node_modules/
 .env
 .env.local
 .env.production
+config/analytics.local.php
+storage/cache/*.json
 # .env.example SÍ se versiona — es la plantilla sin valores reales
 
 # ── Logs y debug ──────────────────────────────────────────────────────────────
