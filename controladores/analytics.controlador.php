@@ -6,7 +6,16 @@ class ControladorAnalytics
 {
 	public static function ctrObtenerConfig()
 	{
-		return require __DIR__ . '/../config/analytics.php';
+		try {
+			$path = __DIR__ . '/../config/analytics.php';
+			if (!is_file($path)) {
+				return array();
+			}
+			$cfg = require $path;
+			return is_array($cfg) ? $cfg : array();
+		} catch (Exception $e) {
+			return array();
+		}
 	}
 
 	/**

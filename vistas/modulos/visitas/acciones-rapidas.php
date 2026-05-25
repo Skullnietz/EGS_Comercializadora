@@ -1,6 +1,14 @@
 <?php
-$cfg = class_exists('ControladorAnalytics') ? ControladorAnalytics::ctrObtenerConfig() : array();
-$site = isset($cfg['site_url']) ? $cfg['site_url'] : 'https://comercializadoraegs.com/';
+$cfg = array();
+$site = 'https://comercializadoraegs.com/';
+if (class_exists('ControladorAnalytics')) {
+	try {
+		$cfg = ControladorAnalytics::ctrObtenerConfig();
+		if (isset($cfg['site_url']) && $cfg['site_url'] !== '') {
+			$site = $cfg['site_url'];
+		}
+	} catch (Exception $e) {}
+}
 ?>
 <div class="crm-card" style="margin-bottom:20px">
   <div class="crm-card-head">

@@ -41,6 +41,9 @@ class ModeloAnalytics
 	 */
 	public static function mdlConsultarGA4($propertyId, $credentialsPath)
 	{
+		if (!function_exists('curl_init') || !function_exists('openssl_sign')) {
+			return null;
+		}
 		if (!is_file($credentialsPath)) {
 			return null;
 		}

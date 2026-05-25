@@ -1,8 +1,36 @@
 <?php
-require_once __DIR__ . '/../../config/visitasInsights.helper.php';
+$panorama = array();
+$insights = array('recomendaciones' => array(), 'focos' => array());
+$visitasErrorCarga = null;
 
-$panorama = ControladorVisitas::ctrObtenerPanoramaWeb();
-$insights = VisitasInsightsHelper::generar($panorama);
+$helperPath = __DIR__ . '/../../config/visitasInsights.helper.php';
+if (is_file($helperPath)) {
+	require_once $helperPath;
+}
+
+try {
+	if (class_exists('ControladorVisitas')) {
+		$panorama = ControladorVisitas::ctrObtenerPanoramaWeb();
+	}
+} catch (Exception $e) {
+	$visitasErrorCarga = $e->getMessage();
+	$panorama = array(
+		'audit' => array('tracking_activo' => false, 'total_registros' => 0, 'ultima_fecha' => null, 'error' => $visitasErrorCarga),
+		'visitas_7d' => 0, 'visitas_30d' => 0, 'total_historico' => 0, 'nuevas_visitas' => 0,
+		'ventas_mes' => 0, 'pedidos_mes' => 0, 'prospectos_mes' => 0, 'ordenes_ingresadas' => 0,
+		'tendencia' => array(), 'top_paises' => array(), 'promedio_ip' => array('promedio' => 0, 'ips' => 0),
+		'recurrentes' => array(), 'extranjero' => array('pct' => 0), 'productos_top' => array(),
+		'total_prod_ventas' => 1, 'ga4' => array('activo' => false, 'metricas' => array()),
+	);
+}
+
+if (class_exists('VisitasInsightsHelper')) {
+	try {
+		$insights = VisitasInsightsHelper::generar($panorama);
+	} catch (Exception $e) {
+		$visitasErrorCarga = $visitasErrorCarga ? $visitasErrorCarga : $e->getMessage();
+	}
+}
 
 $audit = isset($panorama['audit']) ? $panorama['audit'] : array();
 $trackingActivo = !empty($audit['tracking_activo']);
@@ -21,7 +49,23 @@ $ultima = isset($audit['ultima_fecha']) ? $audit['ultima_fecha'] : null;
 
   <section class="content">
 
-    <?php include __DIR__ . '/partials/crm-styles.php'; ?>
+    <?php
+    $crmStyles = __DIR__ . '/partials/crm-styles.php';
+    if (is_file($crmStyles)) {
+      include $crmStyles;
+    }
+    ?>
+
+    <?php if ($visitasErrorCarga || !empty($audit['error'])): ?>
+    <div class="visitas-banner visitas-banner-warning">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <div>
+        <strong>Error al cargar datos</strong><br>
+        <?php echo htmlspecialchars($visitasErrorCarga ? $visitasErrorCarga : $audit['error']); ?>
+        <br><small>El panel se muestra con valores por defecto. Revisa la conexión a la BD e-commerce.</small>
+      </div>
+    </div>
+    <?php endif; ?>
 
     <?php if (!$trackingActivo): ?>
     <div class="visitas-banner visitas-banner-warning">
