@@ -35,6 +35,7 @@ if (class_exists('VisitasInsightsHelper')) {
 $audit = isset($panorama['audit']) ? $panorama['audit'] : array();
 $trackingActivo = !empty($audit['tracking_activo']);
 $ultima = isset($audit['ultima_fecha']) ? $audit['ultima_fecha'] : null;
+$tablasRecienCreadas = !empty($audit['instalacion']['creadas']) ? $audit['instalacion']['creadas'] : array();
 ?>
 
 <div class="content-wrapper visitas-page">
@@ -56,13 +57,24 @@ $ultima = isset($audit['ultima_fecha']) ? $audit['ultima_fecha'] : null;
     }
     ?>
 
-    <?php if ($visitasErrorCarga || !empty($audit['error'])): ?>
+    <?php if (!empty($tablasRecienCreadas)): ?>
+    <div class="visitas-banner visitas-banner-info">
+      <i class="fa-solid fa-database"></i>
+      <div>
+        <strong>Tablas de visitas instaladas</strong><br>
+        Se crearon automáticamente: <?php echo htmlspecialchars(implode(', ', $tablasRecienCreadas)); ?>.
+        Activa el script de tracking en comercializadoraegs.com para empezar a registrar visitas.
+      </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($visitasErrorCarga || (!empty($audit['error']) && empty($tablasRecienCreadas))): ?>
     <div class="visitas-banner visitas-banner-warning">
       <i class="fa-solid fa-circle-exclamation"></i>
       <div>
         <strong>Error al cargar datos</strong><br>
         <?php echo htmlspecialchars($visitasErrorCarga ? $visitasErrorCarga : $audit['error']); ?>
-        <br><small>El panel se muestra con valores por defecto. Revisa la conexión a la BD e-commerce.</small>
+        <br><small>Si persiste, ejecuta manualmente <code>sql/crear_tablas_visitas.sql</code> en la BD e-commerce.</small>
       </div>
     </div>
     <?php endif; ?>
@@ -103,18 +115,18 @@ $ultima = isset($audit['ultima_fecha']) ? $audit['ultima_fecha'] : null;
     </div>
 
     <div class="visitas-tabs" role="tablist">
-      <button type="button" class="visitas-tab active" data-tab="resumen" id="tab-resumen">Resumen</button>
-      <button type="button" class="visitas-tab" data-tab="geografia" id="tab-geografia">Geografía</button>
-      <button type="button" class="visitas-tab" data-tab="detalle" id="tab-detalle">Detalle</button>
-      <button type="button" class="visitas-tab" data-tab="legacy" id="tab-legacy">SeeTheStats</button>
-      <button type="button" class="visitas-tab" data-tab="config-analytics" id="tab-config-analytics">Configuración</button>
+      <button type="button" class="visitas-tab active" data-visitas-tab="resumen">Resumen</button>
+      <button type="button" class="visitas-tab" data-visitas-tab="geografia">Geografía</button>
+      <button type="button" class="visitas-tab" data-visitas-tab="detalle">Detalle</button>
+      <button type="button" class="visitas-tab" data-visitas-tab="legacy">SeeTheStats</button>
+      <button type="button" class="visitas-tab" data-visitas-tab="config">Configuración</button>
     </div>
 
-    <div id="pane-resumen" class="visitas-tab-pane active">
+    <div id="visitas-pane-resumen" class="visitas-tab-pane active">
       <?php include __DIR__ . '/visitas/graficos.php'; ?>
     </div>
 
-    <div id="pane-geografia" class="visitas-tab-pane">
+    <div id="visitas-pane-geografia" class="visitas-tab-pane">
       <div class="crm-card" style="margin-bottom:20px">
         <div class="crm-card-head">
           <h4 class="crm-card-title"><i class="fa-solid fa-earth-americas"></i> Distribución por país</h4>
@@ -144,15 +156,15 @@ $ultima = isset($audit['ultima_fecha']) ? $audit['ultima_fecha'] : null;
       </div>
     </div>
 
-    <div id="pane-detalle" class="visitas-tab-pane">
+    <div id="visitas-pane-detalle" class="visitas-tab-pane">
       <?php include __DIR__ . '/visitas/detalle-tabla.php'; ?>
     </div>
 
-    <div id="pane-legacy" class="visitas-tab-pane">
+    <div id="visitas-pane-legacy" class="visitas-tab-pane">
       <?php include __DIR__ . '/visitas/analytics-legacy.php'; ?>
     </div>
 
-    <div id="pane-config-analytics" class="visitas-tab-pane">
+    <div id="visitas-pane-config" class="visitas-tab-pane">
       <?php include __DIR__ . '/visitas/config-analytics.php'; ?>
     </div>
 

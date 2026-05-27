@@ -38,7 +38,7 @@ class VisitasInsightsHelper
 				"Sin datos de tracking local",
 				"Activa el script de visitas en comercializadoraegs.com o configura GA4 para medir tráfico real.",
 				"Ver guía de analítica",
-				"#tab-config-analytics",
+				"#visitas-config",
 				"contenido"
 			);
 			$focos["contenido"][] = "Implementar medición web (GA4 + tracking propio)";
@@ -49,7 +49,7 @@ class VisitasInsightsHelper
 				"Tracking local inactivo",
 				"La última visita registrada tiene más de 14 días. Reactiva el endpoint de tracking o migra a GA4.",
 				"Configurar analítica",
-				"#tab-config-analytics",
+				"#visitas-config",
 				"contenido"
 			);
 		}
@@ -61,7 +61,7 @@ class VisitasInsightsHelper
 				"GA4 no configurado",
 				"Conecta Google Analytics 4 para ver páginas más visitadas, dispositivos y embudos de conversión.",
 				"Configurar GA4",
-				"#tab-config-analytics",
+				"#visitas-config",
 				"contenido"
 			);
 		}
@@ -73,7 +73,7 @@ class VisitasInsightsHelper
 				"Pico de tráfico reciente",
 				"Tienes {$nuevas} nuevas visitas sin revisar. Identifica qué página o campaña las generó.",
 				"Ver detalle de visitas",
-				"#tab-detalle",
+				"#visitas-detalle",
 				"contenido"
 			);
 		}
@@ -227,7 +227,7 @@ class VisitasInsightsHelper
 				"Panorama estable",
 				"Sin alertas críticas. Sigue monitoreando tendencia semanal y comparando con ventas del mes.",
 				"Ver gráficos",
-				"#tab-resumen",
+				"#visitas-resumen",
 				"contenido"
 			);
 		}

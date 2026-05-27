@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../../config/env.php';
 require_once __DIR__ . '/../../config/Database.php';
+require_once __DIR__ . '/../../modelos/conexion.php';
+require_once __DIR__ . '/../../modelos/visitas.modelo.php';
 
 function trackingResponder($ok, $msg = '')
 {
@@ -26,6 +28,11 @@ try {
 	$pdo = Database::conectar(Database::ECOMMERCE);
 } catch (Exception $e) {
 	trackingResponder(false, 'db');
+}
+
+$inst = ModeloVisitas::mdlCrearTablasVisitas();
+if (empty($inst['ok'])) {
+	trackingResponder(false, 'tables');
 }
 
 $ip = isset($_SERVER['HTTP_X_FORWARDED_FOR'])

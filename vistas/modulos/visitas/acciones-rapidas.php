@@ -36,7 +36,7 @@ if (class_exists('ControladorAnalytics')) {
         <span class="visitas-quick-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)"><i class="fa-solid fa-file-invoice"></i></span>
         <span class="visitas-quick-text"><strong>Facturación web</strong><small>Portal de clientes</small></span>
       </a>
-      <a href="#tab-config-analytics" class="visitas-quick visitas-tab-link" data-tab="config-analytics">
+      <a href="#visitas-config" class="visitas-quick visitas-tab-link" data-visitas-tab="config">
         <span class="visitas-quick-icon" style="background:linear-gradient(135deg,#64748b,#94a3b8)"><i class="fa-solid fa-chart-pie"></i></span>
         <span class="visitas-quick-text"><strong>Configurar analítica</strong><small>GA4, Clarity y tracking</small></span>
       </a>

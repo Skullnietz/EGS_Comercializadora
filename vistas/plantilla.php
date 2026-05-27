@@ -296,7 +296,7 @@ if ($isTabletPublicRoute) {
   <script src="vistas/js/gestorProductosInventario.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorVentas.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorVentasR.js?v=<?= $jsVer ?>"></script>
-  <script src="vistas/js/gestorVisitas.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorVisitas.js?v=<?= $jsVer ?>.visitas2"></script>
   <script src="vistas/js/gestorUsuarios.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorAdministradores.js?v=<?= $jsVer ?>"></script>
   <?php if (!(isset($_GET["ruta"]) && $_GET["ruta"] == "validar-cotizacion")): ?>

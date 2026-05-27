@@ -7,7 +7,7 @@ $gaActivo = !empty($p['ga4']['activo']);
 ?>
 <div class="row">
   <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px">
-    <a href="#tab-detalle" class="visitas-tab-link" data-tab="detalle" style="text-decoration:none;display:block">
+    <a href="#visitas-detalle" class="visitas-tab-link" data-visitas-tab="detalle" style="text-decoration:none;display:block">
       <div class="crm-kpi" style="background:linear-gradient(135deg,#6366f1,#818cf8)">
         <i class="fa-solid fa-globe crm-kpi-icon"></i>
         <div class="crm-kpi-label">Total histórico</div>
@@ -29,7 +29,7 @@ $gaActivo = !empty($p['ga4']['activo']);
   </div>
 
   <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px">
-    <a href="#tab-detalle" class="visitas-tab-link" data-tab="detalle" style="text-decoration:none;display:block">
+    <a href="#visitas-detalle" class="visitas-tab-link" data-visitas-tab="detalle" style="text-decoration:none;display:block">
       <div class="crm-kpi" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)">
         <i class="fa-solid fa-bell crm-kpi-icon"></i>
         <div class="crm-kpi-label">Nuevas visitas</div>

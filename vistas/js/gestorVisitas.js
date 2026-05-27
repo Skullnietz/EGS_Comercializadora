@@ -2,32 +2,53 @@
   'use strict';
 
   function initVisitasTabs() {
-    var $tabs = $('.visitas-tab');
-    var $panes = $('.visitas-tab-pane');
+    var $root = $('.visitas-page');
+    if (!$root.length) return;
 
     function activate(tabId) {
-      $tabs.removeClass('active');
-      $panes.removeClass('active');
-      $tabs.filter('[data-tab="' + tabId + '"]').addClass('active');
-      $('#pane-' + tabId).addClass('active');
+      if (!tabId) return;
+      var pane = document.getElementById('visitas-pane-' + tabId);
+      if (!pane) return;
+
+      $root.find('.visitas-tab').removeClass('active');
+      $root.find('.visitas-tab-pane').removeClass('active');
+
+      $root.find('.visitas-tab[data-visitas-tab="' + tabId + '"]').addClass('active');
+      pane.classList.add('active');
+
+      if (history.replaceState) {
+        history.replaceState(null, '', '#visitas-' + tabId);
+      } else {
+        window.location.hash = 'visitas-' + tabId;
+      }
+
+      pane.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    $tabs.on('click', function () {
-      activate($(this).data('tab'));
+    $root.on('click', '.visitas-tab', function (e) {
+      e.preventDefault();
+      activate($(this).attr('data-visitas-tab'));
     });
 
-    $('.visitas-tab-link').on('click', function (e) {
-      var tab = $(this).data('tab');
+    $root.on('click', 'a.visitas-tab-link', function (e) {
+      var tab = $(this).attr('data-visitas-tab');
       if (!tab) return;
       e.preventDefault();
       activate(tab);
-      var el = document.getElementById('tab-' + tab);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
 
-    var hash = window.location.hash.replace('#', '');
-    if (hash && hash.indexOf('tab-') === 0) {
-      activate(hash.replace('tab-', ''));
+    $(window).on('hashchange.visitasTabs', function () {
+      var hash = (window.location.hash || '').replace(/^#/, '');
+      if (hash.indexOf('visitas-') === 0) {
+        activate(hash.replace('visitas-', ''));
+      }
+    });
+
+    var hash = (window.location.hash || '').replace(/^#/, '');
+    if (hash.indexOf('visitas-') === 0) {
+      activate(hash.replace('visitas-', ''));
+    } else if (hash === 'tab-config-analytics' || hash === 'tab-config') {
+      activate('config');
     }
   }
 

@@ -13,6 +13,79 @@ class ModeloVisitas{
 		}
 	}
 
+	/**
+	 * Verifica si una tabla existe en la BD e-commerce.
+	 */
+	static private function tablaExiste($pdo, $nombreTabla)
+	{
+		try {
+			$nombreTabla = preg_replace('/[^a-zA-Z0-9_]/', '', $nombreTabla);
+			$stmt = $pdo->query("SHOW TABLES LIKE '" . $nombreTabla . "'");
+			return $stmt && $stmt->rowCount() > 0;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Crea visitasPersonas y visitasPaises si no existen (idempotente).
+	 * @return array{ok: bool, creadas: string[], mensaje: string}
+	 */
+	static public function mdlCrearTablasVisitas()
+	{
+		$resultado = array(
+			"ok"       => false,
+			"creadas"  => array(),
+			"mensaje"  => "",
+		);
+
+		try {
+			$pdo = self::conectarSeguro();
+			if (!$pdo) {
+				$resultado["mensaje"] = "Sin conexión a base de datos e-commerce";
+				return $resultado;
+			}
+
+			if (!self::tablaExiste($pdo, "visitasPersonas")) {
+				$pdo->exec("CREATE TABLE IF NOT EXISTS `visitasPersonas` (
+					`id` INT(11) NOT NULL AUTO_INCREMENT,
+					`ip` VARCHAR(45) NOT NULL,
+					`pais` VARCHAR(80) NOT NULL DEFAULT 'Desconocido',
+					`visitas` INT(11) NOT NULL DEFAULT 1,
+					`fecha` DATETIME NOT NULL,
+					PRIMARY KEY (`id`),
+					KEY `idx_visitas_fecha` (`fecha`),
+					KEY `idx_visitas_ip` (`ip`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+				$resultado["creadas"][] = "visitasPersonas";
+			}
+
+			if (!self::tablaExiste($pdo, "visitasPaises")) {
+				$pdo->exec("CREATE TABLE IF NOT EXISTS `visitasPaises` (
+					`id` INT(11) NOT NULL AUTO_INCREMENT,
+					`pais` VARCHAR(80) NOT NULL,
+					`cantidad` INT(11) NOT NULL DEFAULT 0,
+					PRIMARY KEY (`id`),
+					UNIQUE KEY `uk_visitas_pais` (`pais`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+				$resultado["creadas"][] = "visitasPaises";
+			}
+
+			$resultado["ok"] = self::tablaExiste($pdo, "visitasPersonas")
+				&& self::tablaExiste($pdo, "visitasPaises");
+
+			if (!empty($resultado["creadas"])) {
+				$resultado["mensaje"] = "Tablas creadas: " . implode(", ", $resultado["creadas"]);
+			} else {
+				$resultado["mensaje"] = "Tablas de visitas ya existían";
+			}
+		} catch (Exception $e) {
+			$resultado["mensaje"] = $e->getMessage();
+		}
+
+		return $resultado;
+	}
+
 	static public function mdlMostrarTotalVisitas($tabla){
 
 		try {
@@ -66,6 +139,14 @@ class ModeloVisitas{
 			$pdo = self::conectarSeguro();
 			if (!$pdo) {
 				$audit["error"] = "Sin conexión a base de datos e-commerce";
+				return $audit;
+			}
+
+			$instalacion = self::mdlCrearTablasVisitas();
+			$audit["instalacion"] = $instalacion;
+
+			if (!$instalacion["ok"]) {
+				$audit["error"] = isset($instalacion["mensaje"]) ? $instalacion["mensaje"] : "No se pudieron crear las tablas de visitas";
 				return $audit;
 			}
 

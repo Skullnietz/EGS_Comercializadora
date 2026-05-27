@@ -16,6 +16,11 @@ $recs = isset($insights['recomendaciones']) ? $insights['recomendaciones'] : arr
         $icon = isset($rec['icono']) ? $rec['icono'] : 'fa-circle-info';
         $url = isset($rec['accion_url']) ? $rec['accion_url'] : '#';
         $ext = (strpos($url, 'http') === 0);
+        $visitasTab = '';
+        if (!$ext && preg_match('/^#visitas-([a-z0-9-]+)$/i', $url, $m)) {
+          $visitasTab = $m[1];
+        }
+        $linkClass = 'crm-quick crm-quick-primary' . ($visitasTab !== '' ? ' visitas-tab-link' : '');
       ?>
       <div class="visitas-rec visitas-rec-<?php echo htmlspecialchars($pri); ?>">
         <div class="visitas-rec-icon"><i class="fa-solid <?php echo htmlspecialchars($icon); ?>"></i></div>
@@ -23,7 +28,7 @@ $recs = isset($insights['recomendaciones']) ? $insights['recomendaciones'] : arr
           <span class="visitas-rec-badge visitas-badge-<?php echo htmlspecialchars($pri); ?>"><?php echo htmlspecialchars($pri); ?></span>
           <h4 class="visitas-rec-title"><?php echo htmlspecialchars($rec['titulo']); ?></h4>
           <p class="visitas-rec-msg"><?php echo htmlspecialchars($rec['mensaje']); ?></p>
-          <a href="<?php echo htmlspecialchars($url); ?>" class="crm-quick crm-quick-primary"<?php echo $ext ? ' target="_blank" rel="noopener"' : ''; ?>>
+          <a href="<?php echo htmlspecialchars($url); ?>" class="<?php echo $linkClass; ?>"<?php echo $visitasTab !== '' ? ' data-visitas-tab="' . htmlspecialchars($visitasTab) . '"' : ''; ?><?php echo $ext ? ' target="_blank" rel="noopener"' : ''; ?>>
             <span class="crm-quick-icon" style="background:rgba(255,255,255,.25)"><i class="fa-solid fa-arrow-right"></i></span>
             <?php echo htmlspecialchars($rec['accion_label']); ?>
           </a>

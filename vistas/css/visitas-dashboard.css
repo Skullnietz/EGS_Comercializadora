@@ -50,8 +50,13 @@
   color: var(--crm-accent, #6366f1);
   border-bottom-color: var(--crm-accent, #6366f1);
 }
-.visitas-tab-pane { display: none; }
-.visitas-tab-pane.active { display: block; }
+.visitas-tab-pane {
+  display: none !important;
+  min-height: 120px;
+}
+.visitas-tab-pane.active {
+  display: block !important;
+}
 
 .visitas-rec {
   display: flex;

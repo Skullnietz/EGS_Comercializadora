@@ -23,11 +23,17 @@ class ControladorVisitas{
 
 	static public function ctrMostrarVisitas(){
 
+		ModeloVisitas::mdlCrearTablasVisitas();
+
 		$tabla = "visitasPersonas";
 	
 		$respuesta = ModeloVisitas::mdlMostrarVisitas($tabla);
 		
 		return $respuesta;
+	}
+
+	static public function ctrInstalarTablasVisitas(){
+		return ModeloVisitas::mdlCrearTablasVisitas();
 	}
 
 	static private function panoramaVacio()
