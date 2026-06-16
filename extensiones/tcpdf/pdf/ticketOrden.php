@@ -419,6 +419,10 @@ class ImprimirTicketsOrden{
       // QR PARA CONSULTAR EL ESTADO DE LA ORDEN (vista pública del cliente)
       // =============================================
       $tokenOrdenCliente = isset($value["token_cliente"]) ? $value["token_cliente"] : '';
+      // Órdenes anteriores al backfill: generar y guardar el token al vuelo.
+      if (empty($tokenOrdenCliente)) {
+          $tokenOrdenCliente = controladorOrdenes::ctrAsegurarTokenCliente($id);
+      }
       if (!empty($tokenOrdenCliente)) {
           $urlEstadoOrden = 'https://backend.comercializadoraegs.com/?ruta=estado-orden-cliente&token=' . $tokenOrdenCliente;
           $qrUrlEstadoOrden = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . urlencode($urlEstadoOrden);

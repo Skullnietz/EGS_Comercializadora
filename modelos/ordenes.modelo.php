@@ -351,6 +351,38 @@ class ModeloOrdenes{
 	}
 
 	/*=============================================
+	ASEGURAR TOKEN PÚBLICO DE UNA ORDEN
+	Si la orden no tiene token_cliente (órdenes anteriores al backfill), genera
+	uno y lo guarda. Devuelve el token o "" si la columna aún no existe
+	(p.ej. no se ha corrido el ALTER) — en ese caso simplemente no hay QR.
+	=============================================*/
+	static public function mdlAsegurarTokenCliente($tabla, $idOrden){
+
+		try {
+			$pdo = ConexionWP::conectarWP();
+
+			$sel = $pdo->prepare("SELECT token_cliente FROM $tabla WHERE id = :id LIMIT 1");
+			$sel->bindParam(":id", $idOrden, PDO::PARAM_INT);
+			$sel->execute();
+			$actual = $sel->fetchColumn();
+
+			if (!empty($actual)) {
+				return $actual;
+			}
+
+			$token = bin2hex(random_bytes(16));
+			$upd = $pdo->prepare("UPDATE $tabla SET token_cliente = :token WHERE id = :id");
+			$upd->bindParam(":token", $token, PDO::PARAM_STR);
+			$upd->bindParam(":id", $idOrden, PDO::PARAM_INT);
+			$upd->execute();
+
+			return $token;
+		} catch (Exception $e) {
+			return "";
+		}
+	}
+
+	/*=============================================
 
 	MOSTRAR ORDENES POR EMPRESA Y PERFIL
 

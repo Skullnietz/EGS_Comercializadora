@@ -527,6 +527,17 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 		return ModeloOrdenes::mdlMostrarOrdenPorToken("ordenes", $token);
 	}
 
+	/*=============================================
+	ASEGURAR TOKEN PÚBLICO DE UNA ORDEN (genera y guarda si falta)
+	=============================================*/
+	static public function ctrAsegurarTokenCliente($idOrden)
+	{
+		if (empty($idOrden)) {
+			return "";
+		}
+		return ModeloOrdenes::mdlAsegurarTokenCliente("ordenes", intval($idOrden));
+	}
+
 
 
 	/*=============================================
