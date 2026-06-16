@@ -2,6 +2,8 @@
 
 require_once "../controladores/administradores.controlador.php";
 require_once "../modelos/administradores.modelo.php";
+require_once "../modelos/tecnicos.modelo.php";
+require_once "../modelos/modelo.asesores.php";
 
 class AjaxAdministradores{
 
@@ -22,7 +24,27 @@ class AjaxAdministradores{
 		$item2 = "id";
 		$valor2 = $this->activarId;
 
+		$profile = ModeloAdministradores::mdlMostrarAdministradores($tabla, "id", $this->activarId);
+
 		$respuesta = ModeloAdministradores::mdlActualizarPerfil($tabla, $item1, $valor1, $item2, $valor2);
+
+		if($respuesta == "ok" && $profile){
+			$estadoStr = ($valor1 == 1 || $valor1 == "1") ? "Activo" : "Inactivo";
+			$email = $profile["email"];
+			
+			if($profile["perfil"] == "tecnico"){
+				$tec = ModeloTecnicos::mdlMostrarTecnicos("tecnicos", "correo", $email);
+				if($tec){
+					ModeloTecnicos::mdlActualizarTecnico("tecnicos", "estado", $estadoStr, "id", $tec["id"]);
+				}
+			} elseif($profile["perfil"] == "vendedor"){
+				$ase = ModeloAsesores::mdlMostrarAsesoresEleg("asesores", "correo", $email);
+				if($ase){
+					$datosAse = array("id" => $ase["id"], "nombre" => $ase["nombre"], "correo" => $ase["correo"], "numerodeCelular" => $ase["numerodeCelular"], "numeroTelefono" => $ase["numeroTelefono"], "porcentajeComision" => $ase["porcentajeComision"], "estado" => $estadoStr);
+					ModeloAsesores::mdlEditarAsesor("asesores", $datosAse);
+				}
+			}
+		}
 
 		echo $respuesta;
 

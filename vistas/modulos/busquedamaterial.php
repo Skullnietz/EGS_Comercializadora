@@ -359,6 +359,10 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
     margin-top: 14px;
   }
 
+  #tablematerial_wrapper .dataTables_paginate ul.pagination {
+    display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px;
+  }
+
   /* Estructura real en esta vista: ul.pagination > li.paginate_button > a */
   #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
     border-radius: 8px !important;
@@ -396,9 +400,8 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
 
   /* Limpia estilos residuales sobre el <li> para que no tape el boton interno */
   #tablematerial_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
+    padding: 0 !important; margin: 0 !important;
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
   }
 
   #tablematerial_wrapper .dataTables_paginate .pagination > li > a,

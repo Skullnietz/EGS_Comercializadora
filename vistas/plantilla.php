@@ -1,5 +1,5 @@
 <?php
-$jsVer = '1.4.1';
+$jsVer = '1.4.2';
 $rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
 $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
@@ -83,6 +83,9 @@ if ($isTabletPublicRoute) {
   <link rel="stylesheet" href="vistas/dist/css/AdminLTE.css">
   <link rel="stylesheet" href="vistas/dist/css/skins/skin-blue.min.css">
   <link rel="stylesheet" href="vistas/css/custom.css">
+  <?php if ($rutaActual === 'visitas'): ?>
+  <link rel="stylesheet" href="vistas/css/visitas-dashboard.css?v=<?= $jsVer ?>">
+  <?php endif; ?>
   <!-- iCheck -->
   <link rel="stylesheet" href="vistas/plugins/iCheck/square/blue.css">
   <!-- Morris chart -->
@@ -290,9 +293,10 @@ if ($isTabletPublicRoute) {
   <script src="vistas/js/gestorCategorias.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorSubCategorias.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorProductos.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorProductosInventario.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorVentas.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorVentasR.js?v=<?= $jsVer ?>"></script>
-  <script src="vistas/js/gestorVisitas.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorVisitas.js?v=<?= $jsVer ?>.visitas2"></script>
   <script src="vistas/js/gestorUsuarios.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorAdministradores.js?v=<?= $jsVer ?>"></script>
   <?php if (!(isset($_GET["ruta"]) && $_GET["ruta"] == "validar-cotizacion")): ?>
@@ -305,7 +309,11 @@ if ($isTabletPublicRoute) {
   <script src="vistas/js/reporteGrafica.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/CorteTotal.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorClientes.js?v=<?= $jsVer ?>"></script>
+  <?php if (isset($_GET["ruta"]) && $_GET["ruta"] === "creararventa"): ?>
+  <script src="vistas/js/gestorVentasCajero.js?v=<?= $jsVer ?>"></script>
+  <?php else: ?>
   <script src="vistas/js/ventasDinamicas.js?v=<?= $jsVer ?>"></script>
+  <?php endif; ?>
   <script src="vistas/js/gestorStockApuntoDeAgotarse.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorStockAlerta.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/infoOrden.js?v=<?= $jsVer ?>"></script>

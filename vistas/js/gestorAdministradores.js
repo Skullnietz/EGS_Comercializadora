@@ -115,24 +115,120 @@ $(".tablaPerfiles").on("click", ".btnEditarPerfil", function(){
       $("#editarNombre").val(respuesta["nombre"]);
       $("#idPerfil").val(respuesta["id"]);
       $("#editarEmail").val(respuesta["email"]);
-      $("#editarPerfil").html(respuesta["perfil"]);
-      $("#editarPerfil").val(respuesta["perfil"]);
+      $("#editarPerfilOpcion").html(respuesta["perfil"]);
+      $("#editarPerfilOpcion").val(respuesta["perfil"]);
+      $("#editarPerfilSelect").val(respuesta["perfil"]);
+
+      // Auto-fill technician data if available
+      if(respuesta["perfil"] == "tecnico"){
+        $("#editarNumeroUnoTecnico").val(respuesta["telefono_tec"] || "");
+        $("#editarTelefonoDosTecnico").val(respuesta["telefonoDos_tec"] || "");
+        $("#HoraDeComidaEditada").val(respuesta["HoraDeComida_tec"] || "");
+        $("#editarAreratecnico").val(respuesta["areratecnico_tec"] || "");
+      }
+      
+      // Auto-fill advisor data if available
+      if(respuesta["perfil"] == "vendedor"){
+        $("#editarNumeroUnoAsesor").val(respuesta["numeroTelefono_ase"] || "");
+        $("#editarTelefonoDosAsesor").val(respuesta["numerodeCelular_ase"] || "");
+      }
+      
+      // Set department
+      if (respuesta["Departamento"]) {
+        $("#editarDepartamentoOpcion").html(respuesta["Departamento"]);
+        $("#editarDepartamentoOpcion").val(respuesta["Departamento"]);
+        $("#editarDepartamento").val(respuesta["Departamento"]);
+      } else {
+        $("#editarDepartamentoOpcion").html("Seleccionar Departamento");
+        $("#editarDepartamentoOpcion").val("");
+        $("#editarDepartamento").val("");
+      }
+
       $("#fotoActual").val(respuesta["foto"]);
       $("#passwordActual").val(respuesta["password"]);
 
       if(respuesta["foto"] != ""){
-
         $(".previsualizar").attr("src", respuesta["foto"]);
-
       }
+      
+      // Trigger change to display dynamic divs
+      $("#editarPerfilSelect").trigger("change");
 
     }
 
-
   })
 
-
 })
+
+/*=============================================
+MOSTRAR/OCULTAR CAMPOS DINÁMICOS POR ROL Y FILTRAR DEPARTAMENTOS
+=============================================*/
+function filtrarDepartamentos(perfil, selectObj) {
+  var opcionesVendedor = ["Ventas", "Ventas Externas"];
+  var opcionesTecnico = ["Sistemas", "Electronica", "Impresoras", "Desarrollo"];
+  var opcionesAdmin = ["Administracion", "Sistemas", "Desarrollo"];
+  var opcionesSecre = ["Administracion", "Ventas"];
+
+  selectObj.find("option").each(function(){
+    var val = $(this).val();
+    if(val === "") return; // Ignorar la opción por defecto
+
+    var mostrar = false;
+    if(perfil === "vendedor" && opcionesVendedor.indexOf(val) !== -1) mostrar = true;
+    else if(perfil === "tecnico" && opcionesTecnico.indexOf(val) !== -1) mostrar = true;
+    else if(perfil === "secretaria" && opcionesSecre.indexOf(val) !== -1) mostrar = true;
+    else if((perfil === "administrador" || perfil === "Super-Administrador") && opcionesAdmin.indexOf(val) !== -1) mostrar = true;
+    else if(!perfil) mostrar = true; // Si no hay perfil, mostrar todo
+    
+    if(mostrar){
+      $(this).show().prop('disabled', false);
+    } else {
+      $(this).hide().prop('disabled', true);
+    }
+  });
+  
+  if(selectObj.find("option:selected").prop("disabled")){
+    selectObj.val("");
+  }
+}
+
+$("#nuevoPerfil").change(function(){
+  var perfil = $(this).val();
+  
+  // Filtrar el departamento
+  var selectDepto = $(this).closest("form").find("select[name='Departamento']");
+  filtrarDepartamentos(perfil, selectDepto);
+
+  if(perfil == "tecnico"){
+    $("#divAdicionalTecnico").slideDown();
+    $("#divAdicionalAsesor").slideUp();
+  } else if(perfil == "vendedor"){
+    $("#divAdicionalAsesor").slideDown();
+    $("#divAdicionalTecnico").slideUp();
+  } else {
+    $("#divAdicionalTecnico").slideUp();
+    $("#divAdicionalAsesor").slideUp();
+  }
+});
+
+$("#editarPerfilSelect").change(function(){
+  var perfil = $(this).val();
+
+  // Filtrar el departamento
+  var selectDepto = $("#editarDepartamento");
+  filtrarDepartamentos(perfil, selectDepto);
+
+  if(perfil == "tecnico"){
+    $("#divAdicionalTecnicoEdit").slideDown();
+    $("#divAdicionalAsesorEdit").slideUp();
+  } else if(perfil == "vendedor"){
+    $("#divAdicionalAsesorEdit").slideDown();
+    $("#divAdicionalTecnicoEdit").slideUp();
+  } else {
+    $("#divAdicionalTecnicoEdit").slideUp();
+    $("#divAdicionalAsesorEdit").slideUp();
+  }
+});
 
 /*=============================================
 ELIMINAR USUARIO
@@ -198,5 +294,48 @@ function incrementarContador(){
     }
 }
 */
+
+/*=============================================
+VALIDAR CONTRASEÑAS AL CREAR Y EDITAR
+=============================================*/
+$("form").on("submit", function(e){
+  var nuevoPass = $(this).find("#nuevoPassword");
+  var nuevoPassConf = $(this).find("#nuevoPasswordConfirmar");
+
+  if(nuevoPass.length > 0 && nuevoPassConf.length > 0){
+    if(nuevoPass.val() !== nuevoPassConf.val()){
+      e.preventDefault();
+      swal({
+        title: "Error de contraseña",
+        text: "¡Las contraseñas no coinciden!",
+        type: "error",
+        confirmButtonText: "¡Cerrar!"
+      });
+      return false;
+    }
+  }
+
+  var editPass = $(this).find("#editarPassword");
+  var editPassConf = $(this).find("#editarPasswordConfirmar");
+
+  if(editPass.length > 0 && editPassConf.length > 0){
+    if(editPass.val() !== "" && editPass.val() !== editPassConf.val()){
+      e.preventDefault();
+      swal({
+        title: "Error de contraseña",
+        text: "¡Las contraseñas no coinciden!",
+        type: "error",
+        confirmButtonText: "¡Cerrar!"
+      });
+      return false;
+    }
+  }
+});
+
+/* Efecto hover zona de imagen */
+$(".nuevaFoto").hover(
+  function() { $(this).parent().css("border-color", "var(--crm-accent)"); },
+  function() { $(this).parent().css("border-color", "var(--crm-border)"); }
+);
 
 

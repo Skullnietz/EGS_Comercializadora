@@ -304,6 +304,15 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
     box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
   }
 
+  #tablepedidos_wrapper .dataTables_paginate ul.pagination {
+    display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px;
+  }
+
+  #tablepedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+    padding: 0 !important; margin: 0 !important;
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+  }
+
   #tablepedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a {
     border-radius: 8px !important;
     border: 1px solid #dbe3ef !important;
@@ -334,10 +343,13 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
     cursor: not-allowed;
   }
 
-  #tablepedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
+  #table-ml-pedidos_wrapper .dataTables_paginate ul.pagination {
+    display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px;
+  }
+
+  #table-ml-pedidos_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+    padding: 0 !important; margin: 0 !important;
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
   }
 
   @media (max-width: 767px) {

@@ -896,3 +896,43 @@ if(isset($_POST["id"])){
 
 }
 
+/*=============================================
+INVENTARIO — AJUSTAR STOCK
+=============================================*/
+if(isset($_POST["accionInventario"]) && $_POST["accionInventario"] === "ajustarStock"){
+	$activar = new ControladorProductos();
+	$activar->ctrAjustarStock();
+}
+
+/*=============================================
+INVENTARIO — TIPO DE CAMBIO
+=============================================*/
+if(isset($_POST["accionInventario"]) && $_POST["accionInventario"] === "getTipoCambio"){
+	require_once "../config/InventarioHelper.php";
+	echo json_encode(["tipoCambio" => InventarioHelper::getTipoCambioUsd()]);
+}
+
+if(isset($_POST["accionInventario"]) && $_POST["accionInventario"] === "setTipoCambio"){
+	require_once "../config/InventarioHelper.php";
+	$valor = floatval($_POST["tipoCambio"]);
+	if(InventarioHelper::setTipoCambioUsd($valor)){
+		echo json_encode(["ok" => true, "tipoCambio" => $valor]);
+	}else{
+		echo json_encode(["ok" => false]);
+	}
+}
+
+/*=============================================
+INVENTARIO — RESUMEN KPIs
+=============================================*/
+if(isset($_POST["accionInventario"]) && $_POST["accionInventario"] === "resumenInventario"){
+	$idEmpresa = intval($_POST["idEmpresa"]);
+	$resumen = ControladorProductos::ctrResumenInventario($idEmpresa);
+	echo json_encode($resumen ?: [
+		"total_activos" => 0,
+		"stock_bajo" => 0,
+		"sin_stock" => 0,
+		"valor_inventario" => 0
+	]);
+}
+

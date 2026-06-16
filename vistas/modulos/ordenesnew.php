@@ -214,25 +214,19 @@ table.dataTable tbody td {
   vertical-align: middle;
 }
 table.dataTable tbody tr:hover { background: #f8fafc !important; }
-/* Pagination */
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-  border-radius: 8px !important;
-  border: 1px solid var(--crm-border) !important;
-  margin: 0 2px;
-  padding: 5px 12px !important;
-  font-size: 12px;
-  font-weight: 600;
-  transition: all .15s;
-}
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-  background: var(--crm-accent) !important;
-  color: #fff !important;
-  border-color: var(--crm-accent) !important;
-}
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+/* Pagination — accent CRM (base global en custom.css) */
+section.content .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:hover,
+section.content .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button > a:focus {
   background: #eef2ff !important;
   color: var(--crm-accent) !important;
   border-color: var(--crm-accent) !important;
+}
+section.content .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a,
+section.content .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:hover,
+section.content .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:focus {
+  background: var(--crm-accent) !important;
+  border-color: var(--crm-accent) !important;
+  color: #fff !important;
 }
 
 /* ─── Status Badges Modern ─── */

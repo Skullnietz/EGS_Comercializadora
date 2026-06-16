@@ -290,19 +290,7 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
   // ── Productos + Ventas ──
   if ($_SESSION["perfil"] == "Super-Administrador" || $_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "secretaria") {
     echo '
-      <li class="treeview">
-          <a href="#">
-            <i class="fab fa-product-hunt"></i>
-            <span>Productos</span>
-            <span class="pull-right-container">
-                <i class="fas fa-angle-left pull-right"></i>
-            </span>
-          </a>
-          <ul class="treeview-menu">
-            <li><a href="index.php?ruta=productos"><i class="fab fa-product-hunt"></i><span> Gestor Productos</span></a></li>
-            <li><a href="index.php?ruta=almacenes"><i class="fas fa-warehouse"></i><span> Gestor Almacenes</span></a></li>
-          </ul>
-      </li>
+      <li><a href="index.php?ruta=productos"><i class="fab fa-product-hunt"></i><span> Gestor Productos</span></a></li>
 
       <li><a href="index.php?ruta=ventasR"><i class="fas fa-cart-arrow-down"></i><span> Gestor Ventas R</span></a></li>
       <li><a href="index.php?ruta=creararventa" target="_blank"><i class="fa fa-shopping-cart"></i> <span>Gestor Ventas</span></a></li>';
@@ -391,7 +379,7 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
 
   // ── Visitas ──
   if ($_SESSION["perfil"] == "administrador" AND $_SESSION["empresa"] == 1) {
-    echo '<li><a href="index.php?ruta=visitas"><i class="fas fa-map-marker"></i><span> Gestor Visitas</span></a></li>';
+    echo '<li><a href="index.php?ruta=visitas"><i class="fas fa-chart-pie"></i><span> Inteligencia Web</span></a></li>';
   }
 
   // ── Técnico ──

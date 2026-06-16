@@ -194,6 +194,16 @@ foreach ($_hc_cotizaciones as $c) {
 }
 .hc-section table.dataTable tbody tr:hover td { background: #fafaff; }
 
+.hc-section .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button {
+  padding: 0 !important; margin: 0 !important;
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+}
+.hc-section .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a,
+.hc-section .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:hover,
+.hc-section .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active > a:focus {
+  background: var(--crm-accent) !important; border-color: var(--crm-accent) !important; color: #fff !important;
+}
+
 /* ─── Badges ─── */
 .hc-badge {
   display: inline-flex; align-items: center; gap: 5px;

@@ -11,6 +11,13 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor")
   return;
 
 }
+
+require_once __DIR__ . '/../../config/InventarioHelper.php';
+InventarioHelper::ensureConfigTable();
+$resumenInventario = ControladorProductos::ctrResumenInventario($_SESSION["empresa"]);
+$tipoCambioUsd = InventarioHelper::getTipoCambioUsd();
+$esAdminInventario = ($_SESSION["perfil"] === "administrador" || $_SESSION["perfil"] === "Super-Administrador");
+$codigoDeepLink = isset($_GET['codigo']) ? htmlspecialchars($_GET['codigo'], ENT_QUOTES, 'UTF-8') : '';
 ?>
 <style>
   .alta-helper {
@@ -186,144 +193,81 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor")
       transform: translateY(0);
     }
   }
+  #modalAgregarProducto .modal-header,
+  #modalEditarProducto .modal-header {
+    background: linear-gradient(135deg, #6366f1, #818cf8) !important;
+    border-radius: 4px 4px 0 0;
+  }
+  #modalAgregarProducto .alta-helper-compact,
+  #modalEditarProducto .alta-helper-compact {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  #modalAgregarProducto .alta-helper-compact p,
+  #modalEditarProducto .alta-helper-compact p {
+    margin: 0 0 8px; font-size: 12px; color: #64748b;
+  }
+  #modalAgregarProducto .alta-guia-panel,
+  #modalEditarProducto .alta-guia-panel {
+    display: none;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #dbe3ef;
+  }
+  #modalAgregarProducto .alta-guia-panel.open,
+  #modalEditarProducto .alta-guia-panel.open { display: block; }
+  #modalAgregarProducto .alta-field-label,
+  #modalEditarProducto .alta-field-label {
+    display: block; font-size: 12px; font-weight: 700; color: #334155;
+    margin: 0 0 6px;
+  }
+  #modalAgregarProducto .alta-field-hint,
+  #modalEditarProducto .alta-field-hint {
+    display: block; font-size: 11px; color: #94a3b8; margin: -2px 0 8px;
+  }
+  #modalAgregarProducto .alta-step-title,
+  #modalEditarProducto .alta-step-title {
+    font-size: 14px; font-weight: 800; color: #0f172a; margin: 0 0 12px;
+  }
+  #modalAgregarProducto .alta-collapsible,
+  #modalEditarProducto .alta-collapsible { display: none; margin-top: 8px; }
+  #modalAgregarProducto .alta-collapsible.open,
+  #modalEditarProducto .alta-collapsible.open { display: block; }
+  #modalAgregarProducto .btn-alta-toggle,
+  #modalEditarProducto .btn-alta-toggle {
+    border: 0; background: transparent; color: #6366f1;
+    font-size: 12px; font-weight: 700; padding: 0; margin-top: 6px;
+  }
+  #modalAgregarProducto .rutaProducto-wrap,
+  #modalEditarProducto .rutaProducto-wrap { display: none; }
+  #modalAgregarProducto .form-control,
+  #modalEditarProducto .form-control { border-radius: 8px; }
+  #modalAgregarProducto .form-group:has(.rutaProducto),
+  #modalEditarProducto .form-group:has(.rutaProducto),
+  #modalEditarProducto .form-group:has(.empresa) { display: none !important; }
+  #modalAgregarProducto .EntradaCodigo .alta-barcode-tools,
+  #modalEditarProducto .EntradaCodigoEdit .alta-barcode-tools,
+  #modalEditarProducto .EntradaCodigoEdit #qrEditWrap { display: none; }
+  #modalAgregarProducto .EntradaCodigo.alta-barcode-open .alta-barcode-tools,
+  #modalEditarProducto .EntradaCodigoEdit.alta-barcode-open .alta-barcode-tools,
+  #modalEditarProducto .EntradaCodigoEdit.alta-barcode-open #qrEditWrap { display: block; margin-top: 10px; }
+  #modalAgregarProducto .EntradaCodigo.alta-barcode-open .alta-barcode-tools .btn,
+  #modalEditarProducto .EntradaCodigoEdit.alta-barcode-open .alta-barcode-tools .btn { margin-right: 6px; }
+  #modalAgregarProducto .EntradaCodigo.alta-barcode-open #print,
+  #modalEditarProducto .EntradaCodigoEdit.alta-barcode-open #printEdit { display: block; margin-top: 8px; }
+  #modalAgregarProducto .alta-catalogo-opcional,
+  #modalEditarProducto .alta-catalogo-opcional { display: none; margin-top: 8px; padding-top: 10px; border-top: 1px dashed #e2e8f0; }
+  #modalAgregarProducto .alta-catalogo-opcional.open,
+  #modalEditarProducto .alta-catalogo-opcional.open { display: block; }
 </style>
-<div class="content-wrapper">
-
-  <section class="content-header">
-
-     <h1>Gestor Productos</h1>
-
-     <ol class="breadcrumb"> 
-
-      <li><a href="inicio"><i class="fas fa-dashboard"></i> Inicio</a></li>
-
-      <li class="active">Gestor Productos</li> 
-
-    </ol>
-
-  </section>
-
-  <section class="content">
-
-    <div class="box">
-
-      <div class="box-header with-border">
-
-        <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarProducto">Agregar Producto</button>
-        <!-------------
-          AQUI SE VA A AGREGAR EL BOTON DE DESCARGAR REPORTE
-        -->
-
-
-        <?php
-        echo'<a href="vistas/modulos/descargar-reporte-productos.php?reporte=productos">
-            
-            <button class="btn btn-success">Descargar productos</button>
-
-        </a>';
-        
-        ?>
-
-
-      </div>
-
-      <div class="box-body">
-
-        <table class="table table-bordered table-striped dt-responsive tablaProductos" width="100%">
-
-          <thead>
-
-            <tr>
-
-              <th style="width:10px">#</th>
-              <th>Códig de Producto</th>  
-              <th>Empresa</th>
-              <th>Titulo</th>
-              <th>Categoria</th>
-              <th>Subcategoria</th>
-              <th>Ruta</th>
-              <th>Estado</th>
-              <th>Tipo</th>
-              <th>Descripción</th>
-              <th>palabras clave</th>
-              <th>Portada</th>
-              <th>imagen principal</th>
-              <th>Multimedia</th>
-              <th>Detalles</th>
-              <th>Precio</th>
-              <th>Peso</th>
-              <th>Tiempo de Entrega</th>
-              <th>Disponibilidad</th>
-              <th>Proveedor</th>
-              <th>Tipo de Oferta</th>
-              <th>Valor Oferta</th>
-              <th>Imagen Oferta</th>
-              <th>Fin Oferta</th>
-              <th>Acciones</th>
-
-            </tr>
-
-          </thead>
-          <?php
-
-          echo'<input  type="hidden" id="tipoDePerfil" value="'.$_SESSION["perfil"].'"  placeholder="'.$_SESSION["perfil"].'">
-              
-          <input  type="hidden" id="id_empresa" value="'.$_SESSION["empresa"].'">';
-
-          ?>
-        </table>
-
-      </div>
-
-    </div>
-
-  </section>
-
-</div>
-
-
-<?php
-
-  	$item = null;
-  	$valor = null;
-
-  	$productos = ControladorProductos::ctrMostrarProductos($item, $valor);
-
-  		foreach ($productos as $key => $valueP) {
-  		
-  		
-
-  	$item3 = "ruta";
-		$valor3 = $valueP["ruta"];
-
-		$cabeceras = ControladorCabeceras::ctrMostrarCabeceras($item3, $valor3);
-
-    $acciones = "<div class='btn-group'><button class='btn btn-warning btnEditarProducto' idProducto='".$valueP["id"]."' data-toggle='modal' data-target='#modalEditarProducto'><i class='fas fa-pencil'></i></button><button class='btn btn-danger btnEliminarProducto' idProducto='".$valueP["id"]."' imgOferta='".$valueP["imgOferta"]."' rutaCabecera='".$valueP["ruta"]."' imgPortada='".$cabeceras["portada"]."' imgPrincipal='".$valueP["portada"]."'><i class='fas fa-times'></i></button></div>";
-
-}
-?>
-<script type="text/javascript">
-	
-//$(document).ready(function(){
-          // $(".tablaProductos").DataTable({
-             // "processing": true,
-             // "serverSide": true,
-             // "sAjaxSource": "ServerSide/serversideProductos.php",
-             // "columnDefs":[{
-             //     "targets": -1,        
-            //	"defaultContent": "<div class='btn-group'><button class='btn btn-warning  btnEditarProducto'  data-toggle='modal' data-target='#modalEditarProducto'><i class='fas fa-pencil'></i></button></div>"
-   
-           // }]   
-   // }); 
-//});
-</script>
-
-
-
+<?php include __DIR__ . '/partials/productos-inventario-vista.php'; ?>
 <!--=====================================
 MODAL AGREGAR PRODUCTO
 ======================================-->
-<div id="modalAgregarProducto" class="modal fade" role="dialog">
+<div id="modalAgregarProducto" class="modal fade producto-wizard-modal" role="dialog">
 
   <div class="modal-dialog modal-lg">
 
@@ -334,11 +278,12 @@ MODAL AGREGAR PRODUCTO
       <!--=====================================
       CABEZA DEL MODAL
       ======================================-->
-      <div class="modal-header" style="background:#138a1e; color:white">
+      <div class="modal-header" style="background:linear-gradient(135deg,#6366f1,#818cf8); color:white">
 
         <button type="button" class="close" data-dismiss="modal">&times;</button>
 
-        <h4 class="modal-title">Agregar producto</h4>
+        <h4 class="modal-title"><i class="fa-solid fa-box"></i> Nuevo producto</h4>
+        <p style="margin:4px 0 0;font-size:12px;opacity:.92">3 pasos simples · enfoque inventario</p>
 
       </div>
 
@@ -349,36 +294,38 @@ MODAL AGREGAR PRODUCTO
 
         <div class="box-body">
 
-          <div class="alta-helper" id="altaHelperProducto">
-            <h5>Asistente de Alta Inteligente</h5>
-            <p>Usa una plantilla para precargar campos y revisa el avance antes de guardar.</p>
+          <div class="alta-helper alta-helper-compact" id="altaHelperProducto">
+            <p><strong>Inicio rápido:</strong> elija plantilla o complete el paso actual. Use <span class="alta-kbd">Ctrl+Enter</span> para guardar al final.</p>
 
             <div class="alta-templates">
-              <button type="button" class="alta-template-btn" data-template="fisico">Plantilla producto fisico</button>
-              <button type="button" class="alta-template-btn" data-template="servicio">Plantilla servicio</button>
-              <button type="button" class="alta-template-btn" data-template="express">Alta express</button>
+              <button type="button" class="alta-template-btn" data-template="express">Express</button>
+              <button type="button" class="alta-template-btn" data-template="laptop">Laptop</button>
+              <button type="button" class="alta-template-btn" data-template="componente">Componente</button>
+              <button type="button" class="alta-template-btn" data-template="servicio">Servicio</button>
             </div>
 
             <div class="alta-progress">
               <div class="alta-progress-bar" id="altaProgressBar"></div>
             </div>
-            <span class="alta-progress-text" id="altaProgressText">Completitud de campos clave: 0%</span>
+            <span class="alta-progress-text" id="altaProgressText">Progreso: 0%</span>
+            <button type="button" class="btn-alta-toggle btn-toggle-guia">Ver resumen</button>
 
+            <div class="alta-guia-panel" id="altaGuiaPanel">
             <div class="alta-resumen" id="altaResumenProducto">
-              <div class="row"><strong>Titulo:</strong> <span id="resumenTituloProducto">Sin definir</span></div>
-              <div class="row"><strong>Ruta:</strong> <span id="resumenRutaProducto">Sin generar</span></div>
-              <div class="row"><strong>Precio:</strong> <span id="resumenPrecioProducto">0.00</span></div>
-              <div class="row"><strong>Disponibilidad:</strong> <span id="resumenDisponibilidadProducto">0</span></div>
-              <div class="row"><strong>Proveedor:</strong> <span id="resumenProveedorProducto">No definido</span></div>
-              <div class="row"><strong>Atajo:</strong> <span class="alta-kbd">Ctrl + Enter</span> para guardar rapido</div>
+              <div class="row"><strong>Título:</strong> <span class="resumen-titulo-producto">Sin definir</span></div>
+              <span class="resumen-ruta-producto" style="display:none"></span>
+              <div class="row"><strong>Precio:</strong> <span class="resumen-precio-producto">0.00</span> MXN</div>
+              <div class="row"><strong>Stock:</strong> <span class="resumen-disponibilidad-producto">0</span></div>
+              <span class="resumen-proveedor-producto" style="display:none"></span>
+            </div>
             </div>
 
-            <div class="alta-checklist" id="altaChecklist">
+            <div class="alta-checklist" id="altaChecklist" style="display:none">
               <div class="alta-check-group">
                 <h6>Paso 1 Base</h6>
                 <div class="alta-check-item" id="chkPaso1Titulo"><span class="check-icon">...</span><span>Titulo capturado</span></div>
                 <div class="alta-check-item" id="chkPaso1Tipo"><span class="check-icon">...</span><span>Tipo definido</span></div>
-                <div class="alta-check-item" id="chkPaso1Almacen"><span class="check-icon">...</span><span>Almacen asignado</span></div>
+                <div class="alta-check-item" id="chkPaso1Codigo"><span class="check-icon">...</span><span>Código asignado</span></div>
               </div>
               <div class="alta-check-group">
                 <h6>Paso 2 Contenido</h6>
@@ -396,158 +343,66 @@ MODAL AGREGAR PRODUCTO
           </div>
 
           <div class="alta-wizard-nav" id="altaWizardNav">
-            <div class="alta-step-chip active" data-wizard-chip="1">Paso 1: Base</div>
-            <div class="alta-step-chip" data-wizard-chip="2">Paso 2: Contenido</div>
-            <div class="alta-step-chip" data-wizard-chip="3">Paso 3: Precio y oferta</div>
+            <div class="alta-step-chip active" data-wizard-chip="1">1. Identificación</div>
+            <div class="alta-step-chip" data-wizard-chip="2">2. Catálogo</div>
+            <div class="alta-step-chip" data-wizard-chip="3">3. Precio e inventario</div>
           </div>
 
           <div class="alta-step active" data-step="1">
-
-          <!--=====================================
-          ENTRADA PARA LA EMPRESA QUE VENDE EL PRODUCTO
-          ======================================-->
-          <!--<div class="form-group">
-
-            <div class="input-group">
-
-              <span class="input-group-addon"><i class="fas fa-building"></i></span>
-
-              <select class="form-control input-lg empresa">
-
-                <option value="">Seleccionar Empresa</option>
-
-                  <?php
-
-                    //$item = null; 
-                    //$valor = null;
-
-                    //$respuesta = ControladorEmpresas::ctrMostrarEmpresasParaEditar($item, $valor);
-
-                    //foreach ($respuesta as $key => $value) {
-
-                      //echo '<option>'.$value["empresa"].'</option>';
-
-                    //}
-                
-
-                  echo'<input  type="hidden" value="'.$_SESSION["empresa"].'" class="empresa">';
-
-
-
-                  ?>
-
-                </select>
-
-            </div>
-
-          </div>-->
-          <!--=====================================
-          ENTRADA PARA EL TÍTULO 
-          ======================================-->
+          <h5 class="alta-step-title">1. Identificación del producto</h5>
+          <p class="alta-field-hint" style="margin-bottom:12px">Tipo, nombre y código. El código puede generarse automáticamente.</p>
+          <input type="hidden" class="id_empresa" value="<?php echo $_SESSION['empresa']?>">
+          <input type="hidden" class="id_almacen" value="0">
+          <!-- Tipo de producto -->
           <div class="form-group">
-
+            <label class="alta-field-label">Tipo de producto <span style="color:#ef4444">*</span></label>
             <div class="input-group">
-
-              <span class="input-group-addon"><i class="fab fa-product-hunt"></i></span>
-              <input type="text" class="form-control input-lg validarProducto tituloProducto"  placeholder="Ingresar título producto">
-
-            </div>
-
-          </div>
-          <!--=====================================
-          ENTRADA PARA LA RUTA DEL PRODUCTO
-          ======================================-->
-          <div class="form-group">
-
-            <div class="input-group">
-
-              <span class="input-group-addon"><i class="fas fa-link"></i></span>
-              <input type="text" class="form-control input-lg rutaProducto" placeholder="Ruta url del producto" readonly>
-
-            </div>
-
-          </div>
-
-          <!--=====================================
-          CODIGO DE PRODUCTO
-          ======================================-->
-          <div class="form-group EntradaCodigo">
-
-            <div class="input-group">
-
-              <span class="input-group-addon"><i class="fas fa-barcode"></i></span>
-              <input type="text" class="form-control input-lg SubircodigoProducto" id="codigoProducto" placeholder="Ingresa el codigo del producto">
-
-            </div>
-            </br>
-            <button class="btn btn-success botonGenerarCodigo" type="button" onclick="generarbarcode()">Generar</button>
-            <button class="btn btn-info botonImprimirCodigo" type="button" onclick="imprimir()">Imprimir</button> 
-
-            <div id="print">
-
-              <svg id="barcode"></svg>
-
-            </div>
-
-          </div>
-          <!--=====================================
-          ENTRADA PARA EL ALMACEN
-          ======================================-->
-          <input  type="hidden" class="id_empresa" value="<?php echo $_SESSION['empresa']?> ">
-          <!--=====================================
-          ENTRADA PARA EL ALMACEN
-          ======================================-->
-          <div class="form-group">
-
-            <div class="input-group">
-              
-              <span class="input-group-addon"><i class="fas fa-bookmark"></i></span>
-              <select class="form-control input-lg id_almacen">
-
-                <option value="">Selecionar Almacen</option>
-                
-                <?php
-
-                  $item = "id_empresa";
-                  $valor = $_SESSION["empresa"];
-
-                  $respuestaAlmacenes = AlmacenesControlador::ctrlMostrarAlmacenes($item, $valor);
-
-
-
-                  foreach ($respuestaAlmacenes as $key => $valueAlmacenes) {
-                    echo '<option value="'.$valueAlmacenes["id"].'" >'.$valueAlmacenes["nombre"].'</option>';
-
-                  }
-
-                ?>
-
-              </select>
-
-            </div>
-          </div>
-          <!--=====================================
-          ENTRADA PARA LA RUTA DEL PRODUCTO
-          ======================================-->
-          <div class="form-group">
-
-            <div class="input-group">
-              
               <span class="input-group-addon"><i class="fas fa-bookmark"></i></span>
               <select class="form-control input-lg seleccionarTipo">
-
-                <option value="">Selecionar tipo de producto</option>
+                <option value="">Seleccionar tipo</option>
                 <option value="virtual">Servicio</option>
                 <option value="fisico">Físico</option>
-
               </select>
-
+            </div>
+          </div>
+          <!-- Nombre -->
+          <div class="form-group">
+            <label class="alta-field-label">Nombre del producto <span style="color:#ef4444">*</span></label>
+            <div class="input-group">
+              <span class="input-group-addon"><i class="fab fa-product-hunt"></i></span>
+              <input type="text" class="form-control input-lg validarProducto tituloProducto" placeholder="Ej. Laptop Dell Latitude 5420">
+            </div>
+          </div>
+          <!-- Ruta (oculta por CSS) -->
+          <div class="form-group rutaProducto-wrap">
+            <div class="input-group">
+              <span class="input-group-addon"><i class="fas fa-link"></i></span>
+              <input type="text" class="form-control input-lg rutaProducto" placeholder="Ruta url del producto" readonly>
+            </div>
+          </div>
+          <!-- Código -->
+          <div class="form-group EntradaCodigo">
+            <label class="alta-field-label">Código / SKU <span style="color:#ef4444">*</span></label>
+            <div class="input-group">
+              <span class="input-group-addon"><i class="fas fa-barcode"></i></span>
+              <input type="text" class="form-control input-lg SubircodigoProducto" id="codigoProducto" placeholder="Código de barras o SKU interno">
+            </div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+              <button type="button" class="btn btn-default btn-sm" onclick="generarCodigoAuto()">Generar código</button>
+              <button type="button" class="btn-alta-toggle btn-toggle-barcode">Ver código de barras / imprimir</button>
+            </div>
+            <div class="alta-barcode-tools">
+            <button class="btn btn-success btn-sm botonGenerarCodigo" type="button" onclick="generarbarcode()">Generar</button>
+            <button class="btn btn-info btn-sm botonImprimirCodigo" type="button" onclick="imprimir()">Imprimir</button>
+            <div id="print"><svg id="barcode"></svg></div>
             </div>
           </div>
 
           </div>
 
           <div class="alta-step" data-step="2">
+          <h5 class="alta-step-title">2. Catálogo <small style="font-weight:500;color:#94a3b8">— descripción opcional</small></h5>
+          <p class="alta-field-hint" style="margin-bottom:10px">Solo categoría y subcategoría son obligatorias. Si omite descripción, se copia el nombre del producto.</p>
           <!--=====================================
           ENTRADA PARA AGREGAR MULTIMEDIA
           ======================================-->
@@ -696,6 +551,7 @@ MODAL AGREGAR PRODUCTO
             <!--=====================================
             AGREGAR CATEGORÍA
             ======================================--> 
+            <label class="alta-field-label">Categoría <span style="color:#ef4444">*</span></label>
             <div class="form-group">
 
               <div class="input-group">
@@ -725,6 +581,7 @@ MODAL AGREGAR PRODUCTO
             <!--=====================================
             AGREGAR SUBCATEGORÍA
             ======================================-->
+            <label class="alta-field-label entradaSubcategoria-label" style="display:none">Subcategoría <span style="color:#ef4444">*</span></label>
             <div class="form-group  entradaSubcategoria" style="display:none">
 
               <div class="input-group">
@@ -740,6 +597,8 @@ MODAL AGREGAR PRODUCTO
             <!--=====================================
             AGREGAR DESCRIPCIÓN
             ======================================-->
+            <button type="button" class="btn-alta-toggle btn-toggle-catalogo-opcional">+ Descripción, palabras clave e imágenes (opcional)</button>
+            <div class="alta-catalogo-opcional" id="altaCatalogoOpcional">
             <div class="form-group">
 
               <div class="input-group">
@@ -790,10 +649,12 @@ MODAL AGREGAR PRODUCTO
                   <img loading="lazy" src="vistas/img/default/default.png" class="img-thumbnail previsualizarPrincipal" width="200px">
 
               </div>
+            </div>
 
                   </div>
 
                   <div class="alta-step" data-step="3">
+              <h5 class="alta-step-title">3. Precio e inventario</h5>
               <!--=====================================
               AGREGAR PRECIO, PESO Y ENTREGA
               ======================================-->
@@ -802,7 +663,8 @@ MODAL AGREGAR PRODUCTO
                 <!-- PRECIO -->
                 <div class="col-md-4 col-xs-12">
 
-                  <div class="panel">PRECIO</div>
+                  <div class="panel">PRECIO (MXN)</div>
+                  <small class="text-muted" style="display:block;margin-bottom:6px">Referencia USD: <span id="refUsdAlta">—</span></small>
 
                   <div class="input-group">
 
@@ -1049,20 +911,18 @@ MODAL AGREGAR PRODUCTO
                 <!--=====================================
                 MODAL EDITAR PRODUCTO
                 ======================================-->
-                <div id="modalEditarProducto" class="modal fade" role="dialog">
+                <div id="modalEditarProducto" class="modal fade producto-wizard-modal" role="dialog">
 
-                  <div class="modal-dialog"> 
+                  <div class="modal-dialog modal-lg">
 
                     <div class="modal-content">
 
-                      <!--=====================================
-                      CABEZA DEL MODAL
-                      ======================================-->
-                      <div class="modal-header" style="background:#138a1e; color:white">
+                      <div class="modal-header" style="background:linear-gradient(135deg,#6366f1,#818cf8); color:white">
 
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
 
-                          <h4 class="modal-title">Editar producto</h4>
+                          <h4 class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Editar producto</h4>
+                          <p style="margin:4px 0 0;font-size:12px;opacity:.92">3 pasos simples · enfoque inventario</p>
                       </div>        
                       <!--=====================================
                       CUERPO DEL MODAL
@@ -1071,9 +931,31 @@ MODAL AGREGAR PRODUCTO
 
                         <div class="box-body">
 
-                          <!--=====================================
-                          ENTRADA PARA LA EMPRESA QUE VENDE EL PRODUCTO 
-                          ======================================-->
+                          <div class="alta-helper alta-helper-compact">
+                            <p><strong>Edición guiada:</strong> revise identificación, catálogo y precio/stock.</p>
+                            <div class="alta-progress"><div class="alta-progress-bar"></div></div>
+                            <span class="alta-progress-text">Progreso: 0%</span>
+                            <button type="button" class="btn-alta-toggle btn-toggle-guia">Ver resumen</button>
+                            <div class="alta-guia-panel">
+                              <div class="alta-resumen">
+                                <div class="row"><strong>Título:</strong> <span class="resumen-titulo-producto">Sin definir</span></div>
+                                <div class="row"><strong>Precio:</strong> <span class="resumen-precio-producto">0.00</span> MXN</div>
+                                <div class="row"><strong>Stock:</strong> <span class="resumen-disponibilidad-producto">0</span></div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="alta-wizard-nav">
+                            <div class="alta-step-chip active" data-wizard-chip="1">1. Identificación</div>
+                            <div class="alta-step-chip" data-wizard-chip="2">2. Catálogo</div>
+                            <div class="alta-step-chip" data-wizard-chip="3">3. Precio e inventario</div>
+                          </div>
+
+                          <div class="alta-step active" data-step="1">
+                          <h5 class="alta-step-title">1. Identificación del producto</h5>
+                          <p class="alta-field-hint" style="margin-bottom:12px">Nombre y tipo no se modifican. Puede actualizar el código.</p>
+
+                          <!-- Empresa (oculta) -->
                          <div class="form-group"> 
 
                             <div class="input-group">
@@ -1093,7 +975,7 @@ MODAL AGREGAR PRODUCTO
 
                                   //} 
 
-                                 echo'<input  type="text" value="'.$respuesta["empresa"].'" class="form-control input-lg empresa" readonly>';
+                                 echo '<input type="hidden" value="'.$respuesta["empresa"].'" class="empresa">';
                                 ?> 
 
                             </div>
@@ -1102,71 +984,50 @@ MODAL AGREGAR PRODUCTO
                         <!--=====================================
                         ENTRADA PARA EL TÍTULO
                         ======================================-->
+                        <label class="alta-field-label">Tipo</label>
                         <div class="form-group">
-
                           <div class="input-group">
-
-                            <span class="input-group-addon"><i class="fas fa-product-hunt"></i></span>
+                            <span class="input-group-addon"><i class="fas fa-bookmark"></i></span>
+                            <input type="text" class="form-control input-lg seleccionarTipo" readonly>
+                          </div>
+                        </div>
+                        <label class="alta-field-label">Nombre del producto</label>
+                        <div class="form-group">
+                          <div class="input-group">
+                            <span class="input-group-addon"><i class="fab fa-product-hunt"></i></span>
                             <input type="text" class="form-control input-lg validarProducto tituloProducto" readonly>
                             <input type="hidden" class="idProducto">
                             <input type="hidden" class="idCabecera">
-
                           </div>
-
-                        </div> 
-                        <!--=====================================
-                        ENTRADA PARA LA RUTA DEL PRODUCTO
-                        ======================================-->
-                        <div class="form-group">
-
-                          <div class="input-group">
-                            
-                            <span class="input-group-addon"><i class="fas fa-link"></i></span>
-                            <input type="text" class="form-control input-lg rutaProducto" readonly>
-
-                          </div>
-
-                        </div> 
+                        </div>
+                        <div class="form-group rutaProducto-wrap">
+                          <input type="text" class="form-control input-lg rutaProducto" readonly>
+                        </div>
                         <!--=====================================
                         ENTRADA PARA LA EDICION DEL CODIGO DEL PRODUCTO
                         ======================================-->
-                        <div class="form-group">
-
+                        <div class="form-group EntradaCodigoEdit">
+                          <label class="alta-field-label">Código / SKU <span style="color:#ef4444">*</span></label>
                           <div class="input-group">
-
                             <span class="input-group-addon"><i class="fas fa-barcode"></i></span>
-                            <input type="text" class="form-control input-lg codigoEditado" id="codigoProductoEditado" required>
-
+                            <input type="text" class="form-control input-lg codigoEditado campoCodigoProducto" id="codigoProductoEditado" required>
                           </div>
-                          
-                          <br>
-                          
-                          <button class="btn btn-success" type="button" onclick="generarbarcodeEditado()">Generar</button>
-
-                          <button class="btn btn-info " type="button" onclick="imprimirCodigoEditado()">Imprimir</button>               
-                          <!--=====================================
-                          AREAA DE IMPRECIO NDE CODIGO
-                          ======================================-->
-                          <div id="print">
-
-                            <svg id="barcode"></svg>
-
+                          <div style="margin-top:8px">
+                            <button type="button" class="btn-alta-toggle btn-toggle-barcode">Ver código de barras / QR</button>
                           </div>
-
+                          <div class="alta-barcode-tools">
+                            <button class="btn btn-success btn-sm" type="button" onclick="generarbarcodeEditado()">Generar</button>
+                            <button class="btn btn-info btn-sm" type="button" onclick="imprimirCodigoEditado()">Imprimir</button>
+                            <div id="printEdit"><svg id="barcodeEdit"></svg></div>
+                            <div id="qrEditWrap"><small class="text-muted">QR del producto:</small><div id="qrEditProducto" style="margin-top:8px"></div></div>
+                          </div>
                         </div>
-                        <!--=====================================
-                        ENTRADA PARA SELECCIONAR EL TIPO DEL PRODUCTO 
-                        ======================================-->
-                        <div class="form-group">
-
-                          <div class="input-group">
-
-                            <span class="input-group-addon"><i class="fas fa-bookmark-o"></i></span> 
-                            <input type="text" class="form-control input-lg seleccionarTipo" readonly>
 
                           </div>
 
-                        </div>
+                          <div class="alta-step" data-step="2">
+                          <h5 class="alta-step-title">2. Catálogo <small style="font-weight:500;color:#94a3b8">— descripción opcional</small></h5>
+                          <p class="alta-field-hint" style="margin-bottom:10px">Solo categoría y subcategoría son obligatorias.</p>
                         <!--=====================================
                         ENTRADA PARA AGREGAR MULTIMEDIA
                         ======================================-->
@@ -1243,6 +1104,7 @@ MODAL AGREGAR PRODUCTO
                            <!--=====================================
                            AGREGAR CATEGORÍA 
                           ======================================--> 
+                          <label class="alta-field-label">Categoría <span style="color:#ef4444">*</span></label>
                           <div class="form-group">
 
                             <div class="input-group"> 
@@ -1272,6 +1134,7 @@ MODAL AGREGAR PRODUCTO
                           <!--=====================================
                           AGREGAR SUBCATEGORÍA 
                           ======================================-->
+                          <label class="alta-field-label">Subcategoría <span style="color:#ef4444">*</span></label>
                           <div class="form-group entradaSubcategoria">
 
                             <div class="input-group">
@@ -1289,6 +1152,8 @@ MODAL AGREGAR PRODUCTO
                           <!--=====================================
                           AGREGAR DESCRIPCIÓN
                           ======================================-->
+                          <button type="button" class="btn-alta-toggle btn-toggle-catalogo-opcional">+ Descripción, palabras clave e imágenes (opcional)</button>
+                          <div class="alta-catalogo-opcional">
                           <div class="form-group">
 
                             <div class="input-group"> 
@@ -1339,6 +1204,12 @@ MODAL AGREGAR PRODUCTO
                                 <img loading="lazy" src="vistas/img/default/default.png" class="img-thumbnail previsualizarPrincipal" width="200px">
 
                               </div>
+                            </div>
+
+                          </div>
+
+                          <div class="alta-step" data-step="3">
+                          <h5 class="alta-step-title">3. Precio e inventario</h5>
                               <!--=====================================
                               AGREGAR PRECIO, PESO Y ENTREGA
                               ======================================-->
@@ -1346,7 +1217,8 @@ MODAL AGREGAR PRODUCTO
                                 <!-- PRECIO -->
                                 <div class="col-md-4 col-xs-12">
 
-                                  <div class="panel">PRECIO</div>
+                                  <div class="panel">PRECIO (MXN)</div>
+                                  <small class="text-muted" style="display:block;margin-bottom:6px">Referencia USD: <span id="refUsdEdit">—</span></small>
 
                                     <div class="input-group">
 
@@ -1530,8 +1402,9 @@ MODAL AGREGAR PRODUCTO
                                     <div class="preload"></div>
 
                                       <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Salir</button>
-
-                                      <button type="button" class="btn btn-primary guardarCambiosProducto">Guardar cambios</button>
+                                      <button type="button" class="btn btn-info pull-left wizardPrev" style="display:none; margin-left:8px;">Anterior</button>
+                                      <button type="button" class="btn btn-primary wizardNext">Siguiente</button>
+                                      <button type="button" class="btn btn-primary guardarCambiosProducto wizardFinishBtn" style="display:none;">Guardar cambios</button>
                                   
                                     </div>
 

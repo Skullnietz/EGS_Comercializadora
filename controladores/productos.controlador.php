@@ -92,6 +92,51 @@ class ControladorProductos{
 
 	/*=============================================
 
+	RESUMEN INVENTARIO
+
+	=============================================*/
+
+	static public function ctrResumenInventario($idEmpresa){
+
+		$tabla = "productos";
+
+		$respuesta = ModeloProductos::mdlResumenInventario($tabla, $idEmpresa);
+
+		return $respuesta;
+
+	}
+
+
+
+	/*=============================================
+
+	AJUSTAR STOCK
+
+	=============================================*/
+
+	static public function ctrAjustarStock(){
+
+		if(isset($_POST["idProducto"]) && isset($_POST["ajusteStock"])){
+
+			$tabla = "productos";
+
+			$datos = array(
+				"id" => intval($_POST["idProducto"]),
+				"ajuste" => intval($_POST["ajusteStock"])
+			);
+
+			$respuesta = ModeloProductos::mdlAjustarStock($tabla, $datos);
+
+			echo $respuesta;
+
+		}
+
+	}
+
+
+
+	/*=============================================
+
 	SUBIR MULTIMEDIA
 
 	=============================================*/

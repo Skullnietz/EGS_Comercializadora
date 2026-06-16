@@ -791,291 +791,167 @@ class ControladorVentas{
 
 	static public function ctrCrearVentaDinamica(){
 
-
-
-		if(isset($_POST["listaProductos"])){
-
-			
-
-			/*=============================================
-
-			ACTULIZAR LAS COMPRAS DEL CLIENTE Y REDUCIR EL STOCK Y AUMENTAR LA VENTA DE LOS PRODUCTOS
-
-			=============================================*/
-
-			$listaProductos = json_decode($_POST["listaProductos"], true);
-
-
-
-			//var_dump($listaProductos);
-
-
-
-			$totalProductosComprados = array();
-
-
-
-			foreach ($listaProductos as $key => $value) {
-
-
-
-			}
-
-
-
-				//var_dump($value["cantidad"]);
-
-				array_push($totalProductosComprados, $value["cantidad"]);
-
-
-
-				$tablaProductos = "productos";
-
-
-
-				$item = "id";
-
-				$valor = $value["id"];
-
-
-
-				$traerProductos = ModeloProductos::mdlMostrarProductos($tablaProductos,$item,$valor);
-
-
-
-				
-
-				foreach ($traerProductos as $key => $valueVentas) {
-
-					
-
-					 //var_dump($valueVentas["ventas"]);
-
-					 $item1a = "ventas";
-
-					 $valor1a = $value["cantidad"] + $valueVentas["ventas"];
-
-
-
-					 //var_dump("actualizar",$valor1a);
-
-					 $nuevasVentas = ModeloProductos::mdlActualizarProductoVentasDinamicas($tablaProductos, $item1a, $valor1a, $valor);
-
-
-
-					 $item1b = "disponibilidad";
-
-					 $valor1b = $value["stock"];
-
-					 //var_dump($valor1b);
-
-					$nuevoStock = ModeloProductos::mdlActualizarProductoVentasDinamicas($tablaProductos, $item1b, $valor1b, $valor);
-
-				}
-
-
-
-				
-
-
-
-				//TRAER A LOS CLIENTES
-
-				$tablaClientes = "clientesTienda";
-
-				$item="id";
-
-				$valor=$_POST["seleccionarCliente"];
-
-
-
-				$traerCliente = ModeloClientes::mdlMostrarClientes($tablaClientes,$item,$valor);
-
-
-
-				//var_dump($traerCliente);
-
-
-
-
-
-				//ACTUALIZAR LAS COMPRAS DE LOS CLIENTES
-
-				$itemCliente = "compras";
-
-				$valorCliente = array_sum($totalProductosComprados) + $traerCliente["compras"];
-
-
-
-				$actualizacComprasCliente = ModeloClientes::mdlActualizarCantidadDeComprasCliente($tablaClientes, $itemCliente, $valorCliente, $valor);
-
-
-
-				/*=============================================
-
-				GUARDAR LA VENTA
-
-				=============================================*/
-
-				$tablaVentas = "compras";
-
-
-
-				$datos = array("id_usuario" =>$_POST["seleccionarCliente"],
-
-							   "id_Asesor" =>$_POST["asesor"],
-
-							   "productos" =>$_POST["listaProductos"],
-
-							   "inversion" =>$_POST["nversion"],
-
-							   "impuesto" =>$_POST["nuevoImpuestoVenta"],
-
-							   "neto"=>$_POST["precioNeto"],
-
-							   "pago" =>$_POST["totalVenta"],
-
-							   "id_empresa" =>$_POST["empresa"],
-
-							   "metodo" =>$_POST["listaMetodoPago"]);
-
-
-
-				$_egs_idClienteVentaDin  = isset($_POST["id_cliente"]) ? intval($_POST["id_cliente"]) : intval($_POST["seleccionarCliente"]);
-				$_egs_montoCanjeVentaDin = isset($_POST["montoCanjeElectronicoVenta"]) ? floatval($_POST["montoCanjeElectronicoVenta"]) : 0;
-				$_egs_pagoOriginalDin    = floatval($_POST["totalVenta"]);
-
-				if ($_egs_montoCanjeVentaDin > 0) {
-					$datos["total_antes_monedero"]    = $_egs_pagoOriginalDin;
-					$datos["monto_monedero_aplicado"] = $_egs_montoCanjeVentaDin;
-					$datos["pago"]                    = max(0, $_egs_pagoOriginalDin - $_egs_montoCanjeVentaDin);
-				}
-
-				$idVentaDinamicaInsertada = ModeloVentas::mdlIngresarVentaDinamica($tablaVentas, $datos);
-
-				// ── Recompensas: canjear con el ID real de la venta ──
-				if ($idVentaDinamicaInsertada > 0 && $_egs_montoCanjeVentaDin > 0 && $_egs_idClienteVentaDin > 0) {
-					try {
-						require_once "recompensas.controlador.php";
-						require_once __DIR__ . "/../modelos/recompensas.modelo.php";
-						ControladorRecompensas::ctrCanjearEnVenta(
-							$_egs_idClienteVentaDin,
-							$idVentaDinamicaInsertada,
-							$_egs_montoCanjeVentaDin,
-							intval($_POST["empresa"]),
-							null,
-							$_egs_pagoOriginalDin,
-							floatval($datos["pago"])
-						);
-					} catch (Exception $e) {
-						// No bloquear la venta si falla el canje
-					}
-				}
-
-				$respuesta = $idVentaDinamicaInsertada > 0 ? "ok" : "error";
-
-				if ($respuesta == "ok") {
-
-					
-
-						echo '<script>
-
-
-
-					swal({
-
-
-
-						type: "success",
-
-						title: "¡La venta se ha realizado correctamente!",
-
-						showConfirmButton: true,
-
-						confirmButtonText: "Cerrar"
-
-
-
-					}).then(function(result){
-
-
-
-						if(result.value){
-
-						
-
-							window.location = "index.php?ruta=ventasD";
-
-
-
-						}
-
-
-
-					});
-
-				
-
-
-
-					</script>';
-
-				}else{
-
-
-
-						echo '<script>
-
-
-
-					swal({
-
-
-
-						type: "error",
-
-						title: "¡Los campos no pueden ir vacíos o llevar caracteres especiales!",
-
-						showConfirmButton: true,
-
-						confirmButtonText: "Cerrar"
-
-
-
-					}).then(function(result){
-
-
-
-						if(result.value){
-
-						
-
-							window.location = "index.php?ruta=ventasD";
-
-
-
-						}
-
-
-
-					});
-
-				
-
-
-
-				</script>';
-
-
-
-				}
-
-			
-
+		if(!isset($_POST["listaProductos"])){
+			return;
 		}
 
+		$listaProductos = json_decode($_POST["listaProductos"], true);
+		$idCliente = isset($_POST["id_cliente"]) ? intval($_POST["id_cliente"]) : intval($_POST["seleccionarCliente"]);
+		$idEmpresa = isset($_POST["empresa"]) ? intval($_POST["empresa"]) : 0;
+		$idAsesor = isset($_POST["asesor"]) ? intval($_POST["asesor"]) : 0;
 
+		if(!is_array($listaProductos) || count($listaProductos) === 0){
+			self::ctrRespuestaVentaDinamica("error", "El carrito está vacío. Agrega al menos un producto.");
+			return;
+		}
 
+		if($idCliente <= 0){
+			self::ctrRespuestaVentaDinamica("error", "Debes seleccionar un cliente para registrar la venta.");
+			return;
+		}
+
+		if($idAsesor <= 0){
+			self::ctrRespuestaVentaDinamica("error", "Debes seleccionar un asesor para registrar la venta.");
+			return;
+		}
+
+		$tablaProductos = "productos";
+		$totalProductosComprados = array();
+		$productosActualizados = array();
+
+		foreach ($listaProductos as $value) {
+			$idProducto = isset($value["id"]) ? intval($value["id"]) : 0;
+			$cantidad = isset($value["cantidad"]) ? intval($value["cantidad"]) : 0;
+
+			if($idProducto <= 0 || $cantidad <= 0){
+				self::ctrRespuestaVentaDinamica("error", "Hay productos con cantidad inválida en el carrito.");
+				return;
+			}
+
+			$traerProductos = ModeloProductos::mdlMostrarProductos($tablaProductos, "id", $idProducto);
+			if(empty($traerProductos)){
+				self::ctrRespuestaVentaDinamica("error", "Uno de los productos ya no existe en el catálogo.");
+				return;
+			}
+
+			$productoDb = $traerProductos[0];
+			$stockActual = intval($productoDb["disponibilidad"]);
+
+			if($stockActual < $cantidad){
+				$titulo = isset($productoDb["titulo"]) ? $productoDb["titulo"] : "Producto";
+				self::ctrRespuestaVentaDinamica("error", "Stock insuficiente para \"".$titulo."\". Disponible: ".$stockActual.".");
+				return;
+			}
+
+			array_push($totalProductosComprados, $cantidad);
+
+			$nuevoStock = max(0, $stockActual - $cantidad);
+			$nuevasVentas = intval($productoDb["ventas"]) + $cantidad;
+
+			ModeloProductos::mdlActualizarProductoVentasDinamicas($tablaProductos, "ventas", $nuevasVentas, $idProducto);
+			ModeloProductos::mdlActualizarProductoVentasDinamicas($tablaProductos, "disponibilidad", $nuevoStock, $idProducto);
+
+			$productosActualizados[] = array(
+				"id" => $idProducto,
+				"titulo" => isset($value["titulo"]) ? $value["titulo"] : $productoDb["titulo"],
+				"codigo" => isset($value["codigo"]) ? $value["codigo"] : $productoDb["codigo"],
+				"cantidad" => $cantidad,
+				"precio" => isset($value["precio"]) ? $value["precio"] : $productoDb["precio"],
+				"stock" => $nuevoStock,
+				"medida" => isset($value["medida"]) ? $value["medida"] : $productoDb["medida"],
+				"total" => isset($value["total"]) ? $value["total"] : (floatval($value["precio"]) * $cantidad)
+			);
+		}
+
+		$tablaClientes = "clientesTienda";
+		$traerCliente = ModeloClientes::mdlMostrarClientes($tablaClientes, "id", $idCliente);
+		if(empty($traerCliente)){
+			self::ctrRespuestaVentaDinamica("error", "El cliente seleccionado no existe.");
+			return;
+		}
+
+		$valorCliente = array_sum($totalProductosComprados) + intval($traerCliente["compras"]);
+		ModeloClientes::mdlActualizarCantidadDeComprasCliente($tablaClientes, "compras", $valorCliente, $idCliente);
+
+		$tablaVentas = "compras";
+		$listaProductosJson = json_encode($productosActualizados);
+
+		$datos = array(
+			"id_usuario" => $idCliente,
+			"id_Asesor" => $idAsesor,
+			"productos" => $listaProductosJson,
+			"inversion" => isset($_POST["nversion"]) ? $_POST["nversion"] : 0,
+			"impuesto" => isset($_POST["nuevoImpuestoVenta"]) ? $_POST["nuevoImpuestoVenta"] : 0,
+			"neto" => isset($_POST["precioNeto"]) ? $_POST["precioNeto"] : 0,
+			"pago" => $_POST["totalVenta"],
+			"id_empresa" => $idEmpresa,
+			"metodo" => $_POST["listaMetodoPago"]
+		);
+
+		$_egs_montoCanjeVentaDin = isset($_POST["montoCanjeElectronicoVenta"]) ? floatval($_POST["montoCanjeElectronicoVenta"]) : 0;
+		$_egs_pagoOriginalDin = floatval($_POST["totalVenta"]);
+
+		if ($_egs_montoCanjeVentaDin > $_egs_pagoOriginalDin) {
+			$_egs_montoCanjeVentaDin = $_egs_pagoOriginalDin;
+		}
+
+		if ($_egs_montoCanjeVentaDin > 0) {
+			$datos["total_antes_monedero"] = $_egs_pagoOriginalDin;
+			$datos["monto_monedero_aplicado"] = $_egs_montoCanjeVentaDin;
+			$datos["pago"] = max(0, $_egs_pagoOriginalDin - $_egs_montoCanjeVentaDin);
+		}
+
+		$idVentaDinamicaInsertada = ModeloVentas::mdlIngresarVentaDinamica($tablaVentas, $datos);
+
+		if ($idVentaDinamicaInsertada > 0 && $_egs_montoCanjeVentaDin > 0 && $idCliente > 0) {
+			try {
+				require_once "recompensas.controlador.php";
+				require_once __DIR__ . "/../modelos/recompensas.modelo.php";
+				ControladorRecompensas::ctrCanjearEnVenta(
+					$idCliente,
+					$idVentaDinamicaInsertada,
+					$_egs_montoCanjeVentaDin,
+					$idEmpresa,
+					null,
+					$_egs_pagoOriginalDin,
+					floatval($datos["pago"])
+				);
+			} catch (Exception $e) {
+				// No bloquear la venta si falla el canje
+			}
+		}
+
+		if ($idVentaDinamicaInsertada > 0) {
+			self::ctrRespuestaVentaDinamica("ok", "¡La venta se ha realizado correctamente!", $idVentaDinamicaInsertada, $idEmpresa, $idAsesor);
+			return;
+		}
+
+		self::ctrRespuestaVentaDinamica("error", "No se pudo guardar la venta. Verifica los datos e intenta de nuevo.");
+	}
+
+	private static function ctrRespuestaVentaDinamica($tipo, $mensaje, $idVenta = 0, $idEmpresa = 0, $idAsesor = 0){
+		$tipoJs = $tipo === "ok" ? "success" : "error";
+		$idVentaJs = intval($idVenta);
+		$idEmpresaJs = intval($idEmpresa);
+		$idAsesorJs = intval($idAsesor);
+		$mensajeJs = addslashes($mensaje);
+
+		echo '<script>
+		if (typeof window.egsPosVentaCompletada === "function") {
+			window.egsPosVentaCompletada("'.$tipoJs.'", "'.$mensajeJs.'", '.$idVentaJs.', '.$idEmpresaJs.', '.$idAsesorJs.');
+		} else {
+			swal({
+				type: "'.$tipoJs.'",
+				title: "'.$mensajeJs.'",
+				showConfirmButton: true,
+				confirmButtonText: "Cerrar"
+			}).then(function(result){
+				if (result.value && "'.$tipoJs.'" === "success") {
+					window.location = "index.php?ruta=ventasD";
+				}
+			});
+		}
+		</script>';
 	}
 
 

@@ -62,7 +62,8 @@ class TablaProductosDinamicos{
         TRAEMOS LAS ACCIONES
         =============================================*/ 
 
-        $botones =  "<div class='btn-group'><button class='btn btn-primary agregarProducto recuperarBoton' idProducto='".$productos[$i]["id"]."'>Agregar</button></div>"; 
+        $codigoEsc = htmlspecialchars($productos[$i]["codigo"], ENT_QUOTES, "UTF-8");
+        $botones =  "<div class='btn-group'><button type='button' class='btn btn-primary btn-sm agregarProducto recuperarBoton' idProducto='".intval($productos[$i]["id"])."' data-codigo='".$codigoEsc."'>Agregar</button></div>"; 
 
 
 
