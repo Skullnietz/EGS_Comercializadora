@@ -23,6 +23,16 @@ if(isset($_POST["pollInfoOrden"]) && isset($_POST["idOrden"])){
 
 		// Obtener observaciones de la tabla observacionesOrdenes
 		$observaciones = controladorObservaciones::ctrMostrarobservaciones($idOrden);
+
+		// Fotos de las observaciones de la orden, agrupadas por id_observacion
+		$fotosPorObs = array();
+		$fotosOrden = controladorObservaciones::ctrMostrarFotosPorOrden($idOrden);
+		if (is_array($fotosOrden)) {
+			foreach ($fotosOrden as $f) {
+				$fotosPorObs[$f["id_observacion"]][] = $f["ruta"];
+			}
+		}
+
 		$obsEnriquecidas = array();
 		if (is_array($observaciones)) {
 			foreach ($observaciones as $obs) {
@@ -34,7 +44,8 @@ if(isset($_POST["pollInfoOrden"]) && isset($_POST["idOrden"])){
 					"fecha"       => $obs["fecha"],
 					"nombre"      => isset($u["nombre"]) ? $u["nombre"] : "Usuario",
 					"foto"        => isset($u["foto"]) ? $u["foto"] : "",
-					"perfil"      => isset($u["perfil"]) ? $u["perfil"] : ""
+					"perfil"      => isset($u["perfil"]) ? $u["perfil"] : "",
+					"fotos"       => isset($fotosPorObs[$obs["id"]]) ? $fotosPorObs[$obs["id"]] : array()
 				);
 			}
 		}

@@ -236,7 +236,7 @@ class controladorOrdenes
 		return file_exists($rutaFisica);
 	}
 
-	static private function ctrOptimizarImagenSubida($archivo, $config = array())
+	static public function ctrOptimizarImagenSubida($archivo, $config = array())
 	{
 		$validacion = self::ctrValidarArchivoImagen(
 			$archivo,

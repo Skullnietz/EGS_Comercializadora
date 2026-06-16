@@ -1694,6 +1694,15 @@ function _egsEstadoClass($estado) {
 							$itemobs = $_GET["idOrden"];
 							$observacionesnew = controladorObservaciones::ctrMostrarobservaciones($itemobs);
 							$_obs_count = is_array($observacionesnew) ? count($observacionesnew) : 0;
+
+							// Fotos de todas las observaciones de la orden (una sola consulta), agrupadas por id_observacion
+							$_fotosPorObs = array();
+							$_fotosOrden = controladorObservaciones::ctrMostrarFotosPorOrden($itemobs);
+							if (is_array($_fotosOrden)) {
+								foreach ($_fotosOrden as $_f) {
+									$_fotosPorObs[$_f["id_observacion"]][] = $_f["ruta"];
+								}
+							}
 							?>
 
 							<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:10px">
@@ -1749,6 +1758,20 @@ function _egsEstadoClass($estado) {
 											</span>
 										</div>
 										<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5"><?php echo htmlspecialchars($valueobs["observacion"]); ?></p>
+										<?php
+										$_obs_fotos = isset($_fotosPorObs[$valueobs["id"]]) ? $_fotosPorObs[$valueobs["id"]] : array();
+										if (!empty($_obs_fotos)):
+										?>
+										<div class="egs-obs-fotos" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+											<?php foreach ($_obs_fotos as $_ruta): $_rutaEsc = htmlspecialchars($_ruta); ?>
+											<img src="<?php echo $_rutaEsc; ?>" alt="Foto de observación" loading="lazy"
+												 class="egs-obs-foto-thumb" data-full="<?php echo $_rutaEsc; ?>"
+												 style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;transition:transform .12s,box-shadow .12s"
+												 onmouseover="this.style.transform='scale(1.06)';this.style.boxShadow='0 4px 12px rgba(99,102,241,.25)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'"
+												 onerror="this.style.display='none'">
+											<?php endforeach; ?>
+										</div>
+										<?php endif; ?>
 										<?php if ($isAdmin): ?>
 										<button type="button" class="btn btn-xs eliminarObservacion" idObs="<?php echo $valueobs["id"]; ?>"
 												style="margin-top:6px;color:#ef4444;font-size:11px;padding:2px 8px;border:1px solid #fecaca;border-radius:6px;background:#fff"
@@ -1832,10 +1855,22 @@ function _egsEstadoClass($estado) {
 						</button>
 						<h4 class="modal-title" style="font-weight:600"><i class="fa-solid fa-comment-dots" style="margin-right:8px"></i>Nueva observación</h4>
 					</div>
-					<form method="post" class="observacion" id="formObservacion">
+					<form method="post" class="observacion" id="formObservacion" enctype="multipart/form-data">
 						<div class="modal-body" style="padding:20px">
 							<label class="egs-lbl egs-req">Observación</label>
 							<textarea name="observacion" class="form-control text-uppercase" style="font-weight:bold;min-height:100px" placeholder="Escribe tu observación" required></textarea>
+
+							<!-- Adjuntar fotos -->
+							<label class="egs-lbl" style="margin-top:14px"><i class="fa-solid fa-camera" style="margin-right:4px;color:#6366f1"></i>Fotos (opcional · máx. 8)</label>
+							<label for="inputFotosObs" id="dropFotosObs" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px;border:2px dashed #c7d2fe;border-radius:10px;background:#f5f7ff;cursor:pointer;text-align:center;transition:background .12s,border-color .12s"
+								   onmouseover="this.style.background='#eef2ff';this.style.borderColor='#6366f1'" onmouseout="this.style.background='#f5f7ff';this.style.borderColor='#c7d2fe'">
+								<i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#6366f1"></i>
+								<span style="font-size:13px;color:#475569;font-weight:600">Toca para elegir o arrastra imágenes aquí</span>
+								<span style="font-size:11px;color:#94a3b8">JPG, PNG, WEBP o GIF · hasta 10 MB c/u</span>
+							</label>
+							<input type="file" name="fotosObs[]" id="inputFotosObs" accept="image/*" multiple style="display:none">
+							<div id="previewFotosObs" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+
 							<input name="id_orden" type="hidden" value="<?php echo $_GET["idOrden"]; ?>">
 							<input name="id_creador" type="hidden" value="<?php echo $_SESSION["id"]; ?>">
 							<input name="_obs_token" type="hidden" value="<?php echo bin2hex(random_bytes(16)); ?>">
@@ -1856,6 +1891,50 @@ function _egsEstadoClass($estado) {
 								if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Guardando...'; }
 							});
 						}
+
+						// Vista previa de fotos seleccionadas
+						var input = document.getElementById('inputFotosObs');
+						var preview = document.getElementById('previewFotosObs');
+						var drop = document.getElementById('dropFotosObs');
+						var MAX = 8;
+						if (input && preview) {
+							input.addEventListener('change', function(){
+								preview.innerHTML = '';
+								var files = Array.prototype.slice.call(input.files || []);
+								if (files.length > MAX) {
+									swal({ type: "warning", title: "Máximo " + MAX + " fotos", text: "Solo se subirán las primeras " + MAX + ".", showConfirmButton: true, confirmButtonText: "Entendido" });
+									files = files.slice(0, MAX);
+								}
+								files.forEach(function(file){
+									if (!/^image\//.test(file.type)) return;
+									var url = URL.createObjectURL(file);
+									var wrap = document.createElement('div');
+									wrap.style.cssText = 'position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;background:#f8fafc';
+									var img = document.createElement('img');
+									img.src = url;
+									img.style.cssText = 'width:100%;height:100%;object-fit:cover';
+									img.onload = function(){ URL.revokeObjectURL(url); };
+									wrap.appendChild(img);
+									preview.appendChild(wrap);
+								});
+							});
+
+							// Soporte de arrastrar y soltar
+							if (drop) {
+								['dragover','dragenter'].forEach(function(ev){
+									drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.background='#eef2ff'; drop.style.borderColor='#6366f1'; });
+								});
+								['dragleave','drop'].forEach(function(ev){
+									drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.background='#f5f7ff'; drop.style.borderColor='#c7d2fe'; });
+								});
+								drop.addEventListener('drop', function(e){
+									if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+										input.files = e.dataTransfer.files;
+										input.dispatchEvent(new Event('change'));
+									}
+								});
+							}
+						}
 					})();
 					</script>
 				</div>
@@ -1863,6 +1942,70 @@ function _egsEstadoClass($estado) {
 		</div>
 
 	</section>
+
+	<!-- Lightbox para fotos de observaciones -->
+	<div id="egsObsLightbox" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.92);align-items:center;justify-content:center">
+		<button type="button" id="egsLbClose" aria-label="Cerrar" style="position:absolute;top:18px;right:22px;background:rgba(255,255,255,.12);color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer">&times;</button>
+		<button type="button" id="egsLbPrev" aria-label="Anterior" style="position:absolute;left:18px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);color:#fff;border:none;width:48px;height:48px;border-radius:50%;font-size:24px;cursor:pointer">&#8249;</button>
+		<img id="egsLbImg" src="" alt="" style="max-width:90vw;max-height:86vh;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.5);object-fit:contain">
+		<button type="button" id="egsLbNext" aria-label="Siguiente" style="position:absolute;right:18px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);color:#fff;border:none;width:48px;height:48px;border-radius:50%;font-size:24px;cursor:pointer">&#8250;</button>
+		<div id="egsLbCounter" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:#cbd5e1;font-size:13px;font-weight:600;background:rgba(255,255,255,.1);padding:4px 14px;border-radius:20px"></div>
+	</div>
+	<script>
+	(function(){
+		var lb = document.getElementById('egsObsLightbox');
+		if (!lb) return;
+		var img = document.getElementById('egsLbImg');
+		var counter = document.getElementById('egsLbCounter');
+		var btnPrev = document.getElementById('egsLbPrev');
+		var btnNext = document.getElementById('egsLbNext');
+		var btnClose = document.getElementById('egsLbClose');
+		var fotos = [], idx = 0;
+
+		function render(){
+			if (!fotos.length) return;
+			img.src = fotos[idx];
+			counter.textContent = (idx + 1) + ' / ' + fotos.length;
+			var multi = fotos.length > 1;
+			btnPrev.style.display = multi ? 'block' : 'none';
+			btnNext.style.display = multi ? 'block' : 'none';
+		}
+		function open(grupo, start){ fotos = grupo; idx = start; lb.style.display = 'flex'; render(); }
+		function close(){ lb.style.display = 'none'; img.src = ''; fotos = []; }
+		function prev(){ if(fotos.length){ idx = (idx - 1 + fotos.length) % fotos.length; render(); } }
+		function next(){ if(fotos.length){ idx = (idx + 1) % fotos.length; render(); } }
+
+		// Delegación: cualquier miniatura .egs-obs-foto-thumb (incluye las pintadas por polling)
+		document.addEventListener('click', function(e){
+			var t = e.target;
+			if (t && t.classList && t.classList.contains('egs-obs-foto-thumb')) {
+				var cont = t.closest('.egs-obs-fotos');
+				var grupo = [], start = 0;
+				if (cont) {
+					var thumbs = cont.querySelectorAll('.egs-obs-foto-thumb');
+					for (var i = 0; i < thumbs.length; i++) {
+						grupo.push(thumbs[i].getAttribute('data-full'));
+						if (thumbs[i] === t) start = i;
+					}
+				} else {
+					grupo = [t.getAttribute('data-full')];
+				}
+				open(grupo, start);
+			}
+		});
+
+		btnClose.addEventListener('click', close);
+		btnPrev.addEventListener('click', prev);
+		btnNext.addEventListener('click', next);
+		lb.addEventListener('click', function(e){ if (e.target === lb) close(); });
+		document.addEventListener('keydown', function(e){
+			if (lb.style.display !== 'flex') return;
+			if (e.key === 'Escape') close();
+			else if (e.key === 'ArrowLeft') prev();
+			else if (e.key === 'ArrowRight') next();
+		});
+	})();
+	</script>
 
 </div><!-- /content-wrapper -->
 
@@ -1950,6 +2093,14 @@ $(document).ready(function(){
 							html += '<span style="font-size:11px;color:#94a3b8;margin-left:auto;flex-shrink:0"><i class="fa-regular fa-clock" style="font-size:9px"></i> '+fechaStr+'</span>';
 							html += '</div>';
 							html += '<p style="margin:0;color:#334155;text-transform:uppercase;font-weight:500;font-size:13px;line-height:1.5">' + (obs.observacion || '') + '</p>';
+							if(obs.fotos && obs.fotos.length){
+								html += '<div class="egs-obs-fotos" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">';
+								for(var f=0; f<obs.fotos.length; f++){
+									var ruta = obs.fotos[f];
+									html += '<img src="'+ruta+'" alt="Foto de observación" loading="lazy" class="egs-obs-foto-thumb" data-full="'+ruta+'" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer" onerror="this.style.display=\'none\'">';
+								}
+								html += '</div>';
+							}
 							html += '</div></div>';
 							container.append(html);
 						}
@@ -2003,6 +2154,10 @@ function _egsCopiarFallback(texto, cb) {
 <?php
 $insertarobservacion = new controladorObservaciones();
 $insertarobservacion->ctrlCrearObservacion();
+
+// Eliminar observación (y sus fotos) cuando llega ?idobs= desde el botón Eliminar
+$eliminarObservacion = new controladorObservaciones();
+$eliminarObservacion->ctrEliminarObservacion();
 ?>
 
 <script>
