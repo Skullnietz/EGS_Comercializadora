@@ -53,6 +53,8 @@ require_once "controladores/tecnicos.controlador.php";
 
 require_once "controladores/observacionOrdenes.controlador.php";
 
+require_once "controladores/reporteEquipo.controlador.php";
+
 require_once "controladores/pedidos.controlador.php";
 
 require_once "controladores/tickets.controlador.php";
@@ -119,6 +121,8 @@ require_once "modelos/clientes.modelo.php";
 require_once "modelos/tecnicos.modelo.php";
 
 require_once "modelos/observacionOrdenes.modelo.php";
+
+require_once "modelos/reporteEquipo.modelo.php";
 
 require_once "modelos/pedidos.modelo.php";
 

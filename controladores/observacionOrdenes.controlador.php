@@ -138,7 +138,7 @@ class controladorObservaciones{
 
 		$tablaFotos = "observacionesFotos";
 		$nombres    = $_FILES["fotosObs"]["name"];
-		$maxFotos   = 8;
+		$maxFotos   = 1;
 
 		// Normalizar a arreglo (input multiple => arreglos paralelos)
 		if (!is_array($nombres)) {

@@ -423,6 +423,27 @@ $(document).on("click", ".eliminarObservacion", function(){
 			window.location = window.location.pathname + window.location.search + "&idobs=" + idObs;
 		}
 	});
+
+/*=============================================
+ELIMINAR REPORTE DE ESTADO DEL EQUIPO (tabla reporteEstadoEquipo)
+=============================================*/
+$(document).on("click", ".eliminarReporteEquipo", function(){
+	var idReporte = $(this).attr("idReporte");
+	swal({
+		title: "¿Eliminar este reporte?",
+		text: "Se borrarán también sus fotos. Esta acción no se puede deshacer",
+		type: "warning",
+		showCancelButton: true,
+		confirmButtonColor: "#ef4444",
+		confirmButtonText: "Sí, eliminar",
+		cancelButtonText: "Cancelar",
+		closeOnConfirm: false
+	}, function(isConfirm){
+		if(isConfirm){
+			window.location = window.location.pathname + window.location.search + "&idReporteEquipo=" + idReporte;
+		}
+	});
+});
 });
 
 /*=============================================

@@ -1624,6 +1624,138 @@ function _egsEstadoClass($estado) {
 		}
 		?>
 
+		<!-- ==================== REPORTE DE ESTADO DEL EQUIPO (ancho completo) ==================== -->
+		<?php
+		// Helper de color por perfil (compartido con observaciones; se define una sola vez)
+		$_obs_grads = array(
+			'linear-gradient(135deg,#6366f1,#818cf8)',
+			'linear-gradient(135deg,#3b82f6,#60a5fa)',
+			'linear-gradient(135deg,#8b5cf6,#a78bfa)',
+			'linear-gradient(135deg,#06b6d4,#22d3ee)',
+			'linear-gradient(135deg,#22c55e,#4ade80)',
+			'linear-gradient(135deg,#f59e0b,#fbbf24)',
+		);
+		if (!function_exists('_obsColorPerfil')) { function _obsColorPerfil($perfil) {
+			$p = strtolower($perfil);
+			if (strpos($p, 'admin') !== false)    return array('#6366f1', '#eef2ff', 'fa-shield-halved');
+			if (strpos($p, 'vendedor') !== false || strpos($p, 'asesor') !== false) return array('#8b5cf6', '#f5f3ff', 'fa-headset');
+			if (strpos($p, 'tecnico') !== false || strpos($p, 'técnico') !== false) return array('#06b6d4', '#ecfeff', 'fa-wrench');
+			if (strpos($p, 'secretaria') !== false) return array('#f59e0b', '#fffbeb', 'fa-clipboard');
+			return array('#64748b', '#f1f5f9', 'fa-user');
+		} }
+
+		$itemrep = $_GET["idOrden"];
+		$_reportes = controladorReporteEquipo::ctrMostrarReportes($itemrep);
+		$_rep_count = is_array($_reportes) ? count($_reportes) : 0;
+
+		// Fotos de todos los reportes de la orden (una sola consulta), agrupadas por id_reporte
+		$_fotosPorReporte = array();
+		$_fotosRep = controladorReporteEquipo::ctrMostrarFotosPorOrden($itemrep);
+		if (is_array($_fotosRep)) {
+			foreach ($_fotosRep as $_fr) {
+				$_fotosPorReporte[$_fr["id_reporte"]][] = $_fr["ruta"];
+			}
+		}
+		?>
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="egs-section">
+					<div class="egs-title-bar"><i class="fa-solid fa-clipboard-check"></i> Reporte de estado del equipo</div>
+					<div class="egs-body">
+						<p style="margin:0 0 14px;font-size:12px;color:#94a3b8">Evidencia y estado del equipo para comunicar al cliente. Puedes adjuntar varias fotos por entrada.</p>
+
+						<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+							<span style="font-size:13px;font-weight:700;color:#0f172a">
+								<i class="fa-solid fa-clock-rotate-left" style="color:#6366f1;margin-right:6px"></i>Historial de reportes
+							</span>
+							<span style="font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;padding:3px 10px;border-radius:20px">
+								<?php echo $_rep_count; ?> registrado<?php echo $_rep_count !== 1 ? 's' : ''; ?>
+							</span>
+						</div>
+
+						<div class="egs-reportes-list">
+						<?php
+						if (!empty($_reportes)) {
+							foreach ($_reportes as $_ri => $valuerep) {
+								$date = strtotime($valuerep["fecha"]);
+								$fecha = date("d/m/Y H:i", $date);
+								$_rep_nombre = htmlspecialchars(isset($valuerep["creador_nombre"]) ? $valuerep["creador_nombre"] : 'Usuario');
+								$_rep_foto = isset($valuerep["creador_foto"]) ? $valuerep["creador_foto"] : '';
+								$_rep_perfil = isset($valuerep["creador_perfil"]) ? $valuerep["creador_perfil"] : '';
+								$_rep_initial = mb_strtoupper(mb_substr($_rep_nombre, 0, 1));
+								$_rep_grad = $_obs_grads[$_ri % count($_obs_grads)];
+								$_rep_col = _obsColorPerfil($_rep_perfil);
+								$_rep_fotos = isset($_fotosPorReporte[$valuerep["id"]]) ? $_fotosPorReporte[$valuerep["id"]] : array();
+						?>
+							<div class="egs-obs-item" style="display:flex;gap:12px;padding:14px;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:8px;transition:background .12s"
+								 onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+								<?php if (!empty($_rep_foto)): ?>
+									<img src="<?php echo $_rep_foto; ?>" alt=""
+										 onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'"
+										 style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
+									<div style="display:none;width:40px;height:40px;border-radius:50%;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:<?php echo $_rep_grad; ?>">
+										<?php echo $_rep_initial; ?>
+									</div>
+								<?php else: ?>
+									<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;background:<?php echo $_rep_grad; ?>">
+										<?php echo $_rep_initial; ?>
+									</div>
+								<?php endif; ?>
+								<div style="flex:1;min-width:0">
+									<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+										<span style="font-size:13px;font-weight:700;color:#0f172a"><?php echo $_rep_nombre; ?></span>
+										<?php if (!empty($_rep_perfil)): ?>
+										<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:<?php echo $_rep_col[0]; ?>;background:<?php echo $_rep_col[1]; ?>;padding:2px 8px;border-radius:8px">
+											<i class="fa-solid <?php echo $_rep_col[2]; ?>" style="font-size:8px"></i>
+											<?php echo htmlspecialchars(ucfirst($_rep_perfil)); ?>
+										</span>
+										<?php endif; ?>
+										<span style="font-size:11px;color:#94a3b8;margin-left:auto;flex-shrink:0">
+											<i class="fa-regular fa-clock" style="font-size:9px"></i> <?php echo $fecha; ?>
+										</span>
+									</div>
+									<p style="margin:0;color:#334155;font-weight:500;font-size:13px;line-height:1.5"><?php echo nl2br(htmlspecialchars($valuerep["descripcion"])); ?></p>
+									<?php if (!empty($_rep_fotos)): ?>
+									<div class="egs-obs-fotos" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+										<?php foreach ($_rep_fotos as $_ruta): $_rutaEsc = htmlspecialchars($_ruta); ?>
+										<img src="<?php echo $_rutaEsc; ?>" alt="Foto del equipo" loading="lazy"
+											 class="egs-obs-foto-thumb" data-full="<?php echo $_rutaEsc; ?>"
+											 style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;transition:transform .12s,box-shadow .12s"
+											 onmouseover="this.style.transform='scale(1.06)';this.style.boxShadow='0 4px 12px rgba(99,102,241,.25)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'"
+											 onerror="this.style.display='none'">
+										<?php endforeach; ?>
+									</div>
+									<?php endif; ?>
+									<?php if ($isAdmin): ?>
+									<button type="button" class="btn btn-xs eliminarReporteEquipo" idReporte="<?php echo $valuerep["id"]; ?>"
+											style="margin-top:6px;color:#ef4444;font-size:11px;padding:2px 8px;border:1px solid #fecaca;border-radius:6px;background:#fff"
+											onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+										<i class="fas fa-trash" style="margin-right:3px"></i>Eliminar
+									</button>
+									<?php endif; ?>
+								</div>
+							</div>
+						<?php
+							}
+						} else {
+						?>
+							<div style="text-align:center;padding:30px 16px;color:#94a3b8">
+								<i class="fa-solid fa-clipboard" style="font-size:28px;display:block;margin-bottom:10px;opacity:.4"></i>
+								<span style="font-size:13px">Sin reportes de estado del equipo para esta orden</span>
+							</div>
+						<?php } ?>
+						</div>
+
+						<div style="margin-top:16px">
+							<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#modalReporteEquipo">
+								<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar reporte
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div><!-- /reporte estado del equipo -->
+
 		<!-- ==================== FILA 3: OBSERVACIONES (ancho completo) ==================== -->
 		<div class="row">
 			<div class="col-lg-12">
@@ -1860,15 +1992,15 @@ function _egsEstadoClass($estado) {
 							<label class="egs-lbl egs-req">Observación</label>
 							<textarea name="observacion" class="form-control text-uppercase" style="font-weight:bold;min-height:100px" placeholder="Escribe tu observación" required></textarea>
 
-							<!-- Adjuntar fotos -->
-							<label class="egs-lbl" style="margin-top:14px"><i class="fa-solid fa-camera" style="margin-right:4px;color:#6366f1"></i>Fotos (opcional · máx. 8)</label>
+							<!-- Adjuntar foto (1 imagen) -->
+							<label class="egs-lbl" style="margin-top:14px"><i class="fa-solid fa-camera" style="margin-right:4px;color:#6366f1"></i>Foto (opcional · 1 imagen)</label>
 							<label for="inputFotosObs" id="dropFotosObs" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px;border:2px dashed #c7d2fe;border-radius:10px;background:#f5f7ff;cursor:pointer;text-align:center;transition:background .12s,border-color .12s"
 								   onmouseover="this.style.background='#eef2ff';this.style.borderColor='#6366f1'" onmouseout="this.style.background='#f5f7ff';this.style.borderColor='#c7d2fe'">
 								<i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#6366f1"></i>
-								<span style="font-size:13px;color:#475569;font-weight:600">Toca para elegir o arrastra imágenes aquí</span>
-								<span style="font-size:11px;color:#94a3b8">JPG, PNG, WEBP o GIF · hasta 10 MB c/u</span>
+								<span style="font-size:13px;color:#475569;font-weight:600">Toca para elegir o arrastra una imagen aquí</span>
+								<span style="font-size:11px;color:#94a3b8">JPG, PNG, WEBP o GIF · hasta 10 MB</span>
 							</label>
-							<input type="file" name="fotosObs[]" id="inputFotosObs" accept="image/*" multiple style="display:none">
+							<input type="file" name="fotosObs[]" id="inputFotosObs" accept="image/*" style="display:none">
 							<div id="previewFotosObs" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
 
 							<input name="id_orden" type="hidden" value="<?php echo $_GET["idOrden"]; ?>">
@@ -1896,6 +2028,100 @@ function _egsEstadoClass($estado) {
 						var input = document.getElementById('inputFotosObs');
 						var preview = document.getElementById('previewFotosObs');
 						var drop = document.getElementById('dropFotosObs');
+						var MAX = 1;
+						if (input && preview) {
+							input.addEventListener('change', function(){
+								preview.innerHTML = '';
+								var files = Array.prototype.slice.call(input.files || []);
+								if (files.length > MAX) {
+									files = files.slice(0, MAX);
+								}
+								files.forEach(function(file){
+									if (!/^image\//.test(file.type)) return;
+									var url = URL.createObjectURL(file);
+									var wrap = document.createElement('div');
+									wrap.style.cssText = 'position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;background:#f8fafc';
+									var img = document.createElement('img');
+									img.src = url;
+									img.style.cssText = 'width:100%;height:100%;object-fit:cover';
+									img.onload = function(){ URL.revokeObjectURL(url); };
+									wrap.appendChild(img);
+									preview.appendChild(wrap);
+								});
+							});
+
+							// Soporte de arrastrar y soltar
+							if (drop) {
+								['dragover','dragenter'].forEach(function(ev){
+									drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.background='#eef2ff'; drop.style.borderColor='#6366f1'; });
+								});
+								['dragleave','drop'].forEach(function(ev){
+									drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.background='#f5f7ff'; drop.style.borderColor='#c7d2fe'; });
+								});
+								drop.addEventListener('drop', function(e){
+									if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+										input.files = e.dataTransfer.files;
+										input.dispatchEvent(new Event('change'));
+									}
+								});
+							}
+						}
+					})();
+					</script>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modal Reporte de estado del equipo -->
+		<div class="modal fade" id="modalReporteEquipo" tabindex="-1" role="dialog" aria-labelledby="ReporteEquipo" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="border-radius:12px;overflow:hidden">
+					<div class="modal-header" style="background:linear-gradient(135deg,#6366f1 0%,#818cf8 100%);color:#fff;border:none">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:#fff;opacity:.8">
+							<span>&times;</span>
+						</button>
+						<h4 class="modal-title" style="font-weight:600"><i class="fa-solid fa-clipboard-check" style="margin-right:8px"></i>Nuevo reporte de estado del equipo</h4>
+					</div>
+					<form method="post" class="reporteEquipo" id="formReporteEquipo" enctype="multipart/form-data">
+						<div class="modal-body" style="padding:20px">
+							<label class="egs-lbl egs-req">Descripción del estado</label>
+							<textarea name="descripcionReporte" class="form-control" style="min-height:100px" placeholder="Describe el estado del equipo (daños, condiciones, hallazgos…)" required></textarea>
+
+							<!-- Adjuntar fotos -->
+							<label class="egs-lbl" style="margin-top:14px"><i class="fa-solid fa-camera" style="margin-right:4px;color:#6366f1"></i>Fotos (opcional · hasta 8)</label>
+							<label for="inputFotosReporte" id="dropFotosReporte" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px;border:2px dashed #c7d2fe;border-radius:10px;background:#f5f7ff;cursor:pointer;text-align:center;transition:background .12s,border-color .12s"
+								   onmouseover="this.style.background='#eef2ff';this.style.borderColor='#6366f1'" onmouseout="this.style.background='#f5f7ff';this.style.borderColor='#c7d2fe'">
+								<i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#6366f1"></i>
+								<span style="font-size:13px;color:#475569;font-weight:600">Toca para elegir o arrastra imágenes aquí</span>
+								<span style="font-size:11px;color:#94a3b8">JPG, PNG, WEBP o GIF · hasta 10 MB c/u</span>
+							</label>
+							<input type="file" name="fotosReporte[]" id="inputFotosReporte" accept="image/*" multiple style="display:none">
+							<div id="previewFotosReporte" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+
+							<input name="id_orden" type="hidden" value="<?php echo $_GET["idOrden"]; ?>">
+							<input name="id_creador" type="hidden" value="<?php echo $_SESSION["id"]; ?>">
+							<input name="_rep_token" type="hidden" value="<?php echo bin2hex(random_bytes(16)); ?>">
+						</div>
+						<div class="modal-footer" style="border-top:1px solid #f1f5f9">
+							<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+							<button type="submit" class="btn egs-btn-accent" id="btnGuardarReporte">
+								<i class="fa-solid fa-paper-plane" style="margin-right:4px"></i>Guardar reporte
+							</button>
+						</div>
+					</form>
+					<script>
+					(function(){
+						var form = document.getElementById('formReporteEquipo');
+						if (form) {
+							form.addEventListener('submit', function(){
+								var btn = document.getElementById('btnGuardarReporte');
+								if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Guardando...'; }
+							});
+						}
+
+						var input = document.getElementById('inputFotosReporte');
+						var preview = document.getElementById('previewFotosReporte');
+						var drop = document.getElementById('dropFotosReporte');
 						var MAX = 8;
 						if (input && preview) {
 							input.addEventListener('change', function(){
@@ -1919,7 +2145,6 @@ function _egsEstadoClass($estado) {
 								});
 							});
 
-							// Soporte de arrastrar y soltar
 							if (drop) {
 								['dragover','dragenter'].forEach(function(ev){
 									drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.background='#eef2ff'; drop.style.borderColor='#6366f1'; });
@@ -2158,6 +2383,13 @@ $insertarobservacion->ctrlCrearObservacion();
 // Eliminar observación (y sus fotos) cuando llega ?idobs= desde el botón Eliminar
 $eliminarObservacion = new controladorObservaciones();
 $eliminarObservacion->ctrEliminarObservacion();
+
+// Reporte de estado del equipo: crear y eliminar
+$insertarReporte = new controladorReporteEquipo();
+$insertarReporte->ctrlCrearReporte();
+
+$eliminarReporte = new controladorReporteEquipo();
+$eliminarReporte->ctrEliminarReporte();
 ?>
 
 <script>
