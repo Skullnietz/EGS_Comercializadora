@@ -338,6 +338,19 @@ class ModeloOrdenes{
 	}
 
 	/*=============================================
+	MOSTRAR UNA ORDEN POR SU TOKEN PÚBLICO (acceso del cliente por QR)
+	Devuelve la fila de la orden o null si el token no existe.
+	=============================================*/
+	static public function mdlMostrarOrdenPorToken($tabla, $token){
+
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE token_cliente = :token LIMIT 1");
+		$stmt->bindParam(":token", $token, PDO::PARAM_STR);
+		$stmt->execute();
+		$fila = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $fila ? $fila : null;
+	}
+
+	/*=============================================
 
 	MOSTRAR ORDENES POR EMPRESA Y PERFIL
 
@@ -472,9 +485,10 @@ class ModeloOrdenes{
 
 	static public function mdlIngresarOrden($tabla, $datos){
 
+		// Token opaco para el acceso público del cliente por QR (no secuencial).
+		$tokenCliente = bin2hex(random_bytes(16));
 
-
-		$stmt = ConexionWP::conectarWP()->prepare("INSERT INTO $tabla(ruta, titulo, id_empresa, descripcion, multimedia, portada, id_tecnico, id_Asesor, id_usuario, partidaUno, precioUno, partidaDos, precioDos, partidaTres, precioTres, partidaCuatro, precioCuatro, partidaCinco, precioCinco, partidaSeis, precioSeis, partidaSiete, precioSiete, partidaOcho, precioOcho, partidaNueve, precioNueve, partidaDiez, precioDiez, total, estado, fecha_ingreso, marcaDelEquipo, modeloDelEquipo, numeroDeSerieDelEquipo) VALUES (:ruta, :titulo, :id_empresa, :descripcion, :multimedia, :portada, :id_tecnico, :id_Asesor, :id_usuario, :partidaUno, :precioUno, :partidaDos, :precioDos, :partidaTres, :precioTres, :partidaCuatro, :precioCuatro, :partidaCinco, :precioCinco, :partidaSeis, :precioSeis, :partidaSiete, :precioSiete, :partidaOcho, :precioOcho, :partidaNueve, :precioNueve, :partidaDiez, :precioDiez, :total, :estado, :fecha_ingreso, :marcaDelEquipo, :modeloDelEquipo, :numeroDeSerieDelEquipo)");
+		$stmt = ConexionWP::conectarWP()->prepare("INSERT INTO $tabla(ruta, titulo, id_empresa, descripcion, multimedia, portada, id_tecnico, id_Asesor, id_usuario, partidaUno, precioUno, partidaDos, precioDos, partidaTres, precioTres, partidaCuatro, precioCuatro, partidaCinco, precioCinco, partidaSeis, precioSeis, partidaSiete, precioSiete, partidaOcho, precioOcho, partidaNueve, precioNueve, partidaDiez, precioDiez, total, estado, fecha_ingreso, marcaDelEquipo, modeloDelEquipo, numeroDeSerieDelEquipo, token_cliente) VALUES (:ruta, :titulo, :id_empresa, :descripcion, :multimedia, :portada, :id_tecnico, :id_Asesor, :id_usuario, :partidaUno, :precioUno, :partidaDos, :precioDos, :partidaTres, :precioTres, :partidaCuatro, :precioCuatro, :partidaCinco, :precioCinco, :partidaSeis, :precioSeis, :partidaSiete, :precioSiete, :partidaOcho, :precioOcho, :partidaNueve, :precioNueve, :partidaDiez, :precioDiez, :total, :estado, :fecha_ingreso, :marcaDelEquipo, :modeloDelEquipo, :numeroDeSerieDelEquipo, :token_cliente)");
 
 //:marcaDelEquipo, :modeloDelEquipo, :numeroDeSerieDelEquipo
 
@@ -551,6 +565,8 @@ class ModeloOrdenes{
 		$stmt->bindParam(":modeloDelEquipo", $datos["modeloDelEquipo"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":numeroDeSerieDelEquipo", $datos["numeroDeSerieDelEquipo"], PDO::PARAM_STR);
+
+		$stmt->bindParam(":token_cliente", $tokenCliente, PDO::PARAM_STR);
 
 
 

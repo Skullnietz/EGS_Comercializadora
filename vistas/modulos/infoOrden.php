@@ -1624,6 +1624,45 @@ function _egsEstadoClass($estado) {
 		}
 		?>
 
+		<!-- ==================== COMENTARIOS DEL CLIENTE (desde su vista pública por QR) ==================== -->
+		<?php
+		$_idOrdenComent = $_GET["idOrden"];
+		$_comentariosCliente = class_exists("controladorComentarioCliente")
+			? controladorComentarioCliente::ctrMostrar($_idOrdenComent)
+			: array();
+		$_comentCount = is_array($_comentariosCliente) ? count($_comentariosCliente) : 0;
+		?>
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="egs-section" style="border:2px solid #0ea5e9">
+					<div class="egs-title-bar" style="background:linear-gradient(135deg,#0ea5e9 0%,#38bdf8 100%);justify-content:space-between">
+						<span style="display:flex;align-items:center;gap:10px"><i class="fa-solid fa-comments"></i> Comentarios del cliente</span>
+						<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#0c4a6e;background:#fff;padding:3px 10px;border-radius:20px">
+							<i class="fa-solid fa-qrcode"></i> Enviados desde el QR
+						</span>
+					</div>
+					<div class="egs-body">
+						<?php if ($_comentCount > 0): ?>
+							<?php foreach ($_comentariosCliente as $_cc): ?>
+							<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px;margin-bottom:10px">
+								<div style="font-size:11px;color:#0369a1;margin-bottom:4px">
+									<i class="fa-regular fa-clock"></i>
+									<?php echo htmlspecialchars(date("d/m/Y H:i", strtotime($_cc["fecha"]))); ?>
+								</div>
+								<div style="font-size:13.5px;color:#0f172a;line-height:1.5;white-space:pre-line"><?php echo htmlspecialchars($_cc["comentario"]); ?></div>
+							</div>
+							<?php endforeach; ?>
+						<?php else: ?>
+							<div style="text-align:center;color:#94a3b8;font-size:13px;padding:14px 0">
+								<i class="fa-regular fa-comment-dots" style="font-size:22px;display:block;margin-bottom:6px"></i>
+								El cliente aún no ha dejado comentarios desde su vista pública.
+							</div>
+						<?php endif; ?>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- ==================== REPORTE DE ESTADO DEL EQUIPO (ancho completo) ==================== -->
 		<?php
 		// Helper de color por perfil (compartido con observaciones; se define una sola vez)

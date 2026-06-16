@@ -416,6 +416,22 @@ class ImprimirTicketsOrden{
       } // fin if ($mostrarRecompensas)
 
       // =============================================
+      // QR PARA CONSULTAR EL ESTADO DE LA ORDEN (vista pública del cliente)
+      // =============================================
+      $tokenOrdenCliente = isset($value["token_cliente"]) ? $value["token_cliente"] : '';
+      if (!empty($tokenOrdenCliente)) {
+          $urlEstadoOrden = 'https://backend.comercializadoraegs.com/?ruta=estado-orden-cliente&token=' . $tokenOrdenCliente;
+          $qrUrlEstadoOrden = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . urlencode($urlEstadoOrden);
+
+          echo '<hr style="margin:6px 0 3px">
+                <div style="text-align:center">
+                  <div style="font-size:12px;font-weight:700;margin-bottom:3px">Consulta el estado de tu orden:</div>
+                  <img src="'.$qrUrlEstadoOrden.'" alt="QR Estado Orden" style="width:100px;height:100px">
+                  <div style="font-size:11px;margin-top:2px">Escanea para ver avances, cotizacion y dejar tu reseña</div>
+                </div>';
+      }
+
+      // =============================================
       // CIERRE
       // =============================================
       echo '

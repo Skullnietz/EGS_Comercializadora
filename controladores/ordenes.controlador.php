@@ -516,7 +516,16 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 	}
 
-
+	/*=============================================
+	MOSTRAR UNA ORDEN POR SU TOKEN PÚBLICO (acceso del cliente por QR)
+	=============================================*/
+	static public function ctrMostrarOrdenPorToken($token)
+	{
+		if (empty($token)) {
+			return null;
+		}
+		return ModeloOrdenes::mdlMostrarOrdenPorToken("ordenes", $token);
+	}
 
 
 

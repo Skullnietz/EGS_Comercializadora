@@ -3,8 +3,9 @@ $jsVer = '1.4.2';
 $rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
 $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
+$isClientePublicRoute = ($rutaActual === "estado-orden-cliente");
 
-if ($isTabletPublicRoute) {
+if ($isTabletPublicRoute || $isClientePublicRoute) {
   header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
   header("Pragma: no-cache");
   header("X-Robots-Tag: noindex, nofollow", true);
@@ -17,7 +18,7 @@ if ($isTabletPublicRoute) {
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>EGS EQUIPO DE COMPUTO | Panel de Control</title>
-  <?php if ($isTabletPublicRoute): ?>
+  <?php if ($isTabletPublicRoute || $isClientePublicRoute): ?>
   <meta name="robots" content="noindex,nofollow">
   <?php endif; ?>
 
@@ -213,12 +214,12 @@ if ($isTabletPublicRoute) {
 
   <?php
 
-  if ($hasBackendSession || $rutaActual == "validar-cotizacion" || $isTabletPublicRoute) {
+  if ($hasBackendSession || $rutaActual == "validar-cotizacion" || $isTabletPublicRoute || $isClientePublicRoute) {
 
     require_once 'config/Router.php';
     $router = new Router(require 'config/routes.php');
 
-    if ($isTabletPublicRoute) {
+    if ($isTabletPublicRoute || $isClientePublicRoute) {
 
       if ($router->isAllowed($rutaActual)) {
         include_once "modulos/" . $rutaActual . ".php";
@@ -287,7 +288,7 @@ if ($isTabletPublicRoute) {
 
   ?>
 
-  <?php if (!$isTabletPublicRoute): ?>
+  <?php if (!$isTabletPublicRoute && !$isClientePublicRoute): ?>
   <script src="vistas/js/plantilla.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorComercio.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorCategorias.js?v=<?= $jsVer ?>"></script>
