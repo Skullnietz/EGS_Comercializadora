@@ -346,7 +346,28 @@ class ImprimirTicketsOrden{
         </div>';
 
       // =============================================
-      // SECCION DE RECOMPENSAS - MONEDERO ELECTRONICO EGS
+      // SEGUIMIENTO DE LA ORDEN - QR DE LA VISTA PUBLICA DEL CLIENTE
+      // (va antes del monedero; el monedero queda hasta el final)
+      // =============================================
+      $tokenOrdenCliente = isset($value["token_cliente"]) ? $value["token_cliente"] : '';
+      // Órdenes anteriores al backfill: generar y guardar el token al vuelo.
+      if (empty($tokenOrdenCliente)) {
+          $tokenOrdenCliente = controladorOrdenes::ctrAsegurarTokenCliente($id);
+      }
+      if (!empty($tokenOrdenCliente)) {
+          $urlEstadoOrden = 'https://backend.comercializadoraegs.com/?ruta=estado-orden-cliente&token=' . $tokenOrdenCliente;
+          $qrUrlEstadoOrden = 'https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=' . urlencode($urlEstadoOrden);
+
+          echo '<hr style="margin:6px 0 3px">
+                <div style="border:2px solid #000;padding:6px;text-align:center">
+                  <div style="font-size:13px;font-weight:900;margin-bottom:3px">*** SEGUIMIENTO DE TU ORDEN ***</div>
+                  <div style="font-size:12px;line-height:1.3;margin-bottom:5px">Escanea este codigo para ver el avance de tu equipo, la cotizacion, dejar comentarios y calificar nuestro servicio.</div>
+                  <img src="'.$qrUrlEstadoOrden.'" alt="QR Estado Orden" style="width:110px;height:110px">
+                </div>';
+      }
+
+      // =============================================
+      // SECCION DE RECOMPENSAS - MONEDERO ELECTRONICO EGS (hasta el final)
       // =============================================
       $estadoOrden = $value["estado"];
       $mostrarRecompensas = (stripos($estadoOrden, 'cancel') === false
@@ -414,26 +435,6 @@ class ImprimirTicketsOrden{
 
       echo '</div>';
       } // fin if ($mostrarRecompensas)
-
-      // =============================================
-      // QR PARA CONSULTAR EL ESTADO DE LA ORDEN (vista pública del cliente)
-      // =============================================
-      $tokenOrdenCliente = isset($value["token_cliente"]) ? $value["token_cliente"] : '';
-      // Órdenes anteriores al backfill: generar y guardar el token al vuelo.
-      if (empty($tokenOrdenCliente)) {
-          $tokenOrdenCliente = controladorOrdenes::ctrAsegurarTokenCliente($id);
-      }
-      if (!empty($tokenOrdenCliente)) {
-          $urlEstadoOrden = 'https://backend.comercializadoraegs.com/?ruta=estado-orden-cliente&token=' . $tokenOrdenCliente;
-          $qrUrlEstadoOrden = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . urlencode($urlEstadoOrden);
-
-          echo '<hr style="margin:6px 0 3px">
-                <div style="text-align:center">
-                  <div style="font-size:12px;font-weight:700;margin-bottom:3px">Consulta el estado de tu orden:</div>
-                  <img src="'.$qrUrlEstadoOrden.'" alt="QR Estado Orden" style="width:100px;height:100px">
-                  <div style="font-size:11px;margin-top:2px">Escanea para ver avances, cotizacion y dejar tu reseña</div>
-                </div>';
-      }
 
       // =============================================
       // CIERRE
