@@ -1659,16 +1659,27 @@ function _egsEstadoClass($estado) {
 		?>
 		<div class="row">
 			<div class="col-lg-12">
-				<div class="egs-section">
-					<div class="egs-title-bar"><i class="fa-solid fa-clipboard-check"></i> Reporte de estado del equipo</div>
+				<div class="egs-section" style="border:2px solid #f59e0b">
+					<div class="egs-title-bar" style="background:linear-gradient(135deg,#f59e0b 0%,#fbbf24 100%);justify-content:space-between">
+						<span style="display:flex;align-items:center;gap:10px"><i class="fa-solid fa-clipboard-check"></i> Reporte de estado del equipo</span>
+						<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#92400e;background:#fff;padding:3px 10px;border-radius:20px">
+							<i class="fa-solid fa-eye"></i> Visible para el cliente
+						</span>
+					</div>
 					<div class="egs-body">
-						<p style="margin:0 0 14px;font-size:12px;color:#94a3b8">Evidencia y estado del equipo para comunicar al cliente. Puedes adjuntar varias fotos por entrada.</p>
+						<div style="display:flex;align-items:flex-start;gap:10px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;margin-bottom:16px">
+							<i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;font-size:18px;margin-top:1px"></i>
+							<span style="font-size:12.5px;color:#92400e;line-height:1.5">
+								<strong>Atención:</strong> el cliente puede ver esta sección. Escribe pensando en él y revisa la redacción y las fotos antes de guardar.
+								<strong>No la uses para notas internas</strong> — para eso usa «Observaciones y detalles internos».
+							</span>
+						</div>
 
 						<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
 							<span style="font-size:13px;font-weight:700;color:#0f172a">
-								<i class="fa-solid fa-clock-rotate-left" style="color:#6366f1;margin-right:6px"></i>Historial de reportes
+								<i class="fa-solid fa-clock-rotate-left" style="color:#b45309;margin-right:6px"></i>Historial de reportes
 							</span>
-							<span style="font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;padding:3px 10px;border-radius:20px">
+							<span style="font-size:11px;font-weight:600;color:#b45309;background:#fef3c7;padding:3px 10px;border-radius:20px">
 								<?php echo $_rep_count; ?> registrado<?php echo $_rep_count !== 1 ? 's' : ''; ?>
 							</span>
 						</div>
@@ -1747,7 +1758,8 @@ function _egsEstadoClass($estado) {
 						</div>
 
 						<div style="margin-top:16px">
-							<button type="button" class="btn egs-btn-accent" data-toggle="modal" data-target="#modalReporteEquipo">
+							<button type="button" class="btn" data-toggle="modal" data-target="#modalReporteEquipo" style="background:#f59e0b;border-color:#f59e0b;color:#fff;border-radius:8px;font-weight:600"
+									onmouseover="this.style.background='#d97706';this.style.borderColor='#d97706'" onmouseout="this.style.background='#f59e0b';this.style.borderColor='#f59e0b'">
 								<i class="fa-solid fa-plus" style="margin-right:4px"></i>Agregar reporte
 							</button>
 						</div>
@@ -2076,22 +2088,29 @@ function _egsEstadoClass($estado) {
 		<div class="modal fade" id="modalReporteEquipo" tabindex="-1" role="dialog" aria-labelledby="ReporteEquipo" aria-hidden="true">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="border-radius:12px;overflow:hidden">
-					<div class="modal-header" style="background:linear-gradient(135deg,#6366f1 0%,#818cf8 100%);color:#fff;border:none">
+					<div class="modal-header" style="background:linear-gradient(135deg,#f59e0b 0%,#fbbf24 100%);color:#fff;border:none">
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:#fff;opacity:.8">
 							<span>&times;</span>
 						</button>
 						<h4 class="modal-title" style="font-weight:600"><i class="fa-solid fa-clipboard-check" style="margin-right:8px"></i>Nuevo reporte de estado del equipo</h4>
+						<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#92400e;background:#fff;padding:3px 10px;border-radius:20px;margin-top:8px">
+							<i class="fa-solid fa-eye"></i> Visible para el cliente
+						</span>
 					</div>
 					<form method="post" class="reporteEquipo" id="formReporteEquipo" enctype="multipart/form-data">
 						<div class="modal-body" style="padding:20px">
+							<div style="display:flex;align-items:flex-start;gap:9px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin-bottom:14px">
+								<i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;font-size:16px;margin-top:1px"></i>
+								<span style="font-size:12px;color:#92400e;line-height:1.45">El cliente verá esto. Redacta con claridad y sin notas internas.</span>
+							</div>
 							<label class="egs-lbl egs-req">Descripción del estado</label>
 							<textarea name="descripcionReporte" class="form-control" style="min-height:100px" placeholder="Describe el estado del equipo (daños, condiciones, hallazgos…)" required></textarea>
 
 							<!-- Adjuntar fotos -->
-							<label class="egs-lbl" style="margin-top:14px"><i class="fa-solid fa-camera" style="margin-right:4px;color:#6366f1"></i>Fotos (opcional · hasta 8)</label>
-							<label for="inputFotosReporte" id="dropFotosReporte" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px;border:2px dashed #c7d2fe;border-radius:10px;background:#f5f7ff;cursor:pointer;text-align:center;transition:background .12s,border-color .12s"
-								   onmouseover="this.style.background='#eef2ff';this.style.borderColor='#6366f1'" onmouseout="this.style.background='#f5f7ff';this.style.borderColor='#c7d2fe'">
-								<i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#6366f1"></i>
+							<label class="egs-lbl" style="margin-top:14px"><i class="fa-solid fa-camera" style="margin-right:4px;color:#f59e0b"></i>Fotos (opcional · hasta 8)</label>
+							<label for="inputFotosReporte" id="dropFotosReporte" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px;border:2px dashed #fcd34d;border-radius:10px;background:#fffbeb;cursor:pointer;text-align:center;transition:background .12s,border-color .12s"
+								   onmouseover="this.style.background='#fef3c7';this.style.borderColor='#f59e0b'" onmouseout="this.style.background='#fffbeb';this.style.borderColor='#fcd34d'">
+								<i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#f59e0b"></i>
 								<span style="font-size:13px;color:#475569;font-weight:600">Toca para elegir o arrastra imágenes aquí</span>
 								<span style="font-size:11px;color:#94a3b8">JPG, PNG, WEBP o GIF · hasta 10 MB c/u</span>
 							</label>
@@ -2104,7 +2123,8 @@ function _egsEstadoClass($estado) {
 						</div>
 						<div class="modal-footer" style="border-top:1px solid #f1f5f9">
 							<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-							<button type="submit" class="btn egs-btn-accent" id="btnGuardarReporte">
+							<button type="submit" class="btn" id="btnGuardarReporte" style="background:#f59e0b;border-color:#f59e0b;color:#fff;border-radius:8px;font-weight:600"
+									onmouseover="this.style.background='#d97706';this.style.borderColor='#d97706'" onmouseout="this.style.background='#f59e0b';this.style.borderColor='#f59e0b'">
 								<i class="fa-solid fa-paper-plane" style="margin-right:4px"></i>Guardar reporte
 							</button>
 						</div>
@@ -2147,10 +2167,10 @@ function _egsEstadoClass($estado) {
 
 							if (drop) {
 								['dragover','dragenter'].forEach(function(ev){
-									drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.background='#eef2ff'; drop.style.borderColor='#6366f1'; });
+									drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.background='#fef3c7'; drop.style.borderColor='#f59e0b'; });
 								});
 								['dragleave','drop'].forEach(function(ev){
-									drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.background='#f5f7ff'; drop.style.borderColor='#c7d2fe'; });
+									drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.background='#fffbeb'; drop.style.borderColor='#fcd34d'; });
 								});
 								drop.addEventListener('drop', function(e){
 									if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
