@@ -134,7 +134,6 @@ if ($pcOk) {
     if ($pcTab === "ayuda") {
         // Datos de empresa para botones de contacto (primera empresa visible)
         try {
-            // Tomamos la empresa de cualquier orden del cliente; si no, la 1
             $idEmpresa = 1;
             if (!empty($pcOrdenes)) $idEmpresa = intval($pcOrdenes[0]["id_empresa"]);
             $pcEmpresa = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $idEmpresa);
@@ -142,10 +141,13 @@ if ($pcOk) {
         $pcSolicitudes = controladorSolicitudAyuda::ctrListar($pcIdCliente);
     }
 
-    if ($pcTab === "privacidad") {
-        $pcAceptacion = controladorAceptacionPrivacidad::ctrObtener($pcIdCliente);
-    }
+    // SIEMPRE cargamos la aceptación de privacidad para mostrar el banner
+    // recordatorio en cualquier tab si está pendiente.
+    $pcAceptacion = controladorAceptacionPrivacidad::ctrObtener($pcIdCliente);
 }
+
+// Flag: ¿el cliente todavía no ha respondido al aviso?
+$pcPrivacidadPendiente = $pcOk && !is_array($pcAceptacion);
 
 // Nombre corto para el header
 $pcNombre = "";
@@ -316,6 +318,26 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
 .pc-priv-status.pen { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
 .pc-priv-actions { display: flex; gap: 10px; margin-top: 14px; }
 
+/* Banner recordatorio persistente */
+.pc-priv-banner { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 14px; background: linear-gradient(135deg,#fef3c7 0%,#fde68a 100%); border: 1px solid #f59e0b; border-radius: 12px; box-shadow: 0 4px 14px rgba(245,158,11,.18); }
+.pc-priv-banner i { font-size: 20px; color: #b45309; flex-shrink: 0; }
+.pc-priv-banner .txt { flex: 1; font-size: 12px; color: #78350f; line-height: 1.4; }
+.pc-priv-banner .txt b { color: #422006; }
+.pc-priv-banner a { background: #b45309; color: #fff; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.pc-priv-banner a:hover { background: #92400e; color: #fff; text-decoration: none; }
+.pc-tab .pc-tab-dot { display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; vertical-align: top; margin-left: -2px; box-shadow: 0 0 0 2px #fff; animation: pcPulse 1.6s ease-in-out infinite; }
+@keyframes pcPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: .7; } }
+
+/* Canvas de firma */
+.pc-firma-box { border: 2px dashed #cbd5e1; border-radius: 10px; background: #fff; padding: 8px; margin-top: 14px; }
+.pc-firma-lbl { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+.pc-firma-lbl small { font-size: 10px; color: #94a3b8; font-weight: 500; }
+.pc-firma-canvas { display: block; width: 100%; height: 160px; background: #f8fafc; border-radius: 6px; cursor: crosshair; touch-action: none; }
+.pc-firma-actions { display: flex; gap: 8px; margin-top: 8px; }
+.pc-firma-clear { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.pc-firma-clear:hover { background: #e2e8f0; }
+.pc-firma-img { display: block; max-width: 100%; height: auto; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; padding: 8px; margin-top: 10px; }
+
 /* ─ Lightbox ─ */
 #pcLightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 99999; align-items: center; justify-content: center; }
 #pcLightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; }
@@ -375,8 +397,19 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
         <a class="pc-tab <?php echo $pcTab==='monedero'?'active':''; ?>" href="<?php echo pc_url($pcToken,'monedero'); ?>"><i class="fa-solid fa-wallet"></i><span>Monedero</span></a>
         <a class="pc-tab <?php echo $pcTab==='historial'?'active':''; ?>" href="<?php echo pc_url($pcToken,'historial'); ?>"><i class="fa-solid fa-clock-rotate-left"></i><span>Historial</span></a>
         <a class="pc-tab <?php echo $pcTab==='ayuda'?'active':''; ?>" href="<?php echo pc_url($pcToken,'ayuda'); ?>"><i class="fa-solid fa-headset"></i><span>Ayuda</span></a>
-        <a class="pc-tab <?php echo $pcTab==='privacidad'?'active':''; ?>" href="<?php echo pc_url($pcToken,'privacidad'); ?>"><i class="fa-solid fa-shield-halved"></i><span>Privacidad</span></a>
+        <a class="pc-tab <?php echo $pcTab==='privacidad'?'active':''; ?>" href="<?php echo pc_url($pcToken,'privacidad'); ?>"><i class="fa-solid fa-shield-halved"></i><span>Privacidad</span><?php if ($pcPrivacidadPendiente): ?><span class="pc-tab-dot" title="Pendiente de revisar"></span><?php endif; ?></a>
       </div>
+
+      <?php /* Recordatorio persistente — solo si está pendiente y no estamos ya en el tab */ ?>
+      <?php if ($pcPrivacidadPendiente && $pcTab !== 'privacidad'): ?>
+        <div class="pc-priv-banner">
+          <i class="fa-solid fa-shield-halved"></i>
+          <div class="txt">
+            <b>Aviso de privacidad pendiente.</b> Por ley necesitamos tu autorizaci&oacute;n y firma para el manejo de tus datos personales.
+          </div>
+          <a href="<?php echo pc_url($pcToken,'privacidad'); ?>">Revisar ahora</a>
+        </div>
+      <?php endif; ?>
 
       <?php /* ═══ TAB: EQUIPOS ═══ */ ?>
       <?php if ($pcTab === 'equipos'): ?>
@@ -754,6 +787,8 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
               <div class="pc-alert ok"><i class="fa-solid fa-check"></i> Tu decisión fue registrada.</div>
             <?php elseif ($pcMsgPrivacidad === "invalida"): ?>
               <div class="pc-alert warn">Opción no válida.</div>
+            <?php elseif ($pcMsgPrivacidad === "sin_firma"): ?>
+              <div class="pc-alert warn"><i class="fa-solid fa-pen-nib"></i> Para aceptar necesitamos tu firma. Trázala en el recuadro antes de confirmar.</div>
             <?php elseif ($pcMsgPrivacidad === "error"): ?>
               <div class="pc-alert err">No pudimos guardar tu decisión.</div>
             <?php endif; ?>
@@ -782,15 +817,53 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
               <p style="text-align:center;margin-top:14px"><b>COMERCIALIZADORA EGS</b></p>
             </div>
 
-            <?php if (!is_array($pcAceptacion)): ?>
-              <div class="pc-priv-actions">
-                <form method="post" style="flex:1;display:flex"><input type="hidden" name="aceptaPrivacidad" value="1"><button type="submit" class="pc-btn success" style="flex:1;justify-content:center"><i class="fa-solid fa-check"></i> Acepto</button></form>
-                <form method="post" style="flex:1;display:flex"><input type="hidden" name="aceptaPrivacidad" value="0"><button type="submit" class="pc-btn danger" style="flex:1;justify-content:center"><i class="fa-solid fa-xmark"></i> No acepto</button></form>
+            <?php /* Mostrar la firma guardada si existe */ ?>
+            <?php if (is_array($pcAceptacion) && intval($pcAceptacion["aceptado"]) === 1 && !empty($pcAceptacion["firma"])): ?>
+              <div style="margin-top:14px">
+                <div class="pc-firma-lbl"><span><i class="fa-solid fa-pen-nib" style="color:#16a34a;margin-right:6px"></i>Firma registrada</span><small><?php echo pc_fecha($pcAceptacion["fecha"]); ?></small></div>
+                <img class="pc-firma-img" src="<?php echo htmlspecialchars($pcAceptacion["firma"]); ?>" alt="Firma">
               </div>
-            <?php else: ?>
+            <?php endif; ?>
+
+            <?php if (!is_array($pcAceptacion)): /* Pendiente: mostrar formulario con canvas */ ?>
+              <form method="post" id="pcPrivForm" onsubmit="return pcPrivSubmit(this);">
+                <input type="hidden" name="aceptaPrivacidad" id="pcPrivAccion" value="">
+                <input type="hidden" name="firmaPrivacidad" id="pcPrivFirma" value="">
+
+                <div class="pc-firma-box" id="pcFirmaBox">
+                  <div class="pc-firma-lbl">
+                    <span><i class="fa-solid fa-pen-nib" style="color:#0ea5e9;margin-right:6px"></i>Firma aqu&iacute; con tu dedo o el mouse</span>
+                    <small>requerida para aceptar</small>
+                  </div>
+                  <canvas id="pcFirmaCanvas" class="pc-firma-canvas"></canvas>
+                  <div class="pc-firma-actions">
+                    <button type="button" class="pc-firma-clear" onclick="pcFirmaLimpiar()"><i class="fa-solid fa-eraser"></i> Limpiar</button>
+                  </div>
+                </div>
+
+                <div class="pc-priv-actions">
+                  <button type="button" class="pc-btn success" style="flex:1;justify-content:center" onclick="pcPrivConfirmar(1)"><i class="fa-solid fa-check"></i> Acepto y firmo</button>
+                  <button type="button" class="pc-btn danger"  style="flex:1;justify-content:center" onclick="pcPrivConfirmar(0)"><i class="fa-solid fa-xmark"></i> No acepto</button>
+                </div>
+              </form>
+            <?php else: /* Ya hay decisión: botón para cambiarla (vuelve a pedir firma si pasa a aceptado) */ ?>
               <div class="pc-priv-actions">
-                <form method="post" style="flex:1;display:flex"><input type="hidden" name="aceptaPrivacidad" value="<?php echo intval($pcAceptacion["aceptado"])===1?'0':'1'; ?>"><button type="submit" class="pc-btn" style="flex:1;justify-content:center;background:#475569"><i class="fa-solid fa-rotate"></i> Cambiar decisi&oacute;n</button></form>
+                <form method="post" id="pcPrivChangeForm" style="flex:1;display:flex" onsubmit="return pcPrivChangeSubmit(this);">
+                  <input type="hidden" name="aceptaPrivacidad" value="<?php echo intval($pcAceptacion["aceptado"])===1?'0':'1'; ?>">
+                  <?php if (intval($pcAceptacion["aceptado"]) === 0): ?>
+                    <input type="hidden" name="firmaPrivacidad" id="pcPrivFirmaCambio" value="">
+                  <?php endif; ?>
+                  <button type="submit" class="pc-btn" style="flex:1;justify-content:center;background:#475569"><i class="fa-solid fa-rotate"></i> Cambiar decisi&oacute;n</button>
+                </form>
               </div>
+
+              <?php if (intval($pcAceptacion["aceptado"]) === 0): /* Estaba rechazado: si quiere cambiar a aceptar, pedimos firma */ ?>
+                <div class="pc-firma-box" id="pcFirmaBoxCambio" style="display:none">
+                  <div class="pc-firma-lbl"><span><i class="fa-solid fa-pen-nib" style="color:#0ea5e9;margin-right:6px"></i>Firma aqu&iacute; para confirmar</span><small>requerida</small></div>
+                  <canvas id="pcFirmaCanvasCambio" class="pc-firma-canvas"></canvas>
+                  <div class="pc-firma-actions"><button type="button" class="pc-firma-clear" onclick="pcFirmaLimpiarCambio()"><i class="fa-solid fa-eraser"></i> Limpiar</button></div>
+                </div>
+              <?php endif; ?>
             <?php endif; ?>
 
           </div>
@@ -826,6 +899,121 @@ function pcValidarAyuda(form){
   var t = form.mensajeAyuda.value.trim();
   if(!t){ return false; }
   var b = form.querySelector('button[type=submit]'); if(b) b.disabled = true;
+  return true;
+}
+
+/* ──────── Firma digital (canvas) ──────── */
+function pcInitFirma(canvas){
+  if(!canvas) return null;
+  var ctx = canvas.getContext('2d');
+  // Ajuste a alta resolución
+  function resize(){
+    var rect = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(dpr, dpr);
+    ctx.lineWidth = 2.4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#0f172a';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var drawing = false, hasInk = false, lastX = 0, lastY = 0;
+  function pos(e){
+    var r = canvas.getBoundingClientRect();
+    var p = (e.touches && e.touches[0]) ? e.touches[0] : e;
+    return { x: p.clientX - r.left, y: p.clientY - r.top };
+  }
+  function start(e){ e.preventDefault(); drawing = true; var p = pos(e); lastX = p.x; lastY = p.y; }
+  function move(e){
+    if(!drawing) return;
+    e.preventDefault();
+    var p = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    lastX = p.x; lastY = p.y; hasInk = true;
+  }
+  function end(){ drawing = false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end);
+
+  return {
+    hasInk: function(){ return hasInk; },
+    clear: function(){ ctx.clearRect(0,0,canvas.width,canvas.height); hasInk = false; },
+    dataUrl: function(){ return canvas.toDataURL('image/png'); }
+  };
+}
+
+var pcFirma = null;
+var pcFirmaCambio = null;
+
+document.addEventListener('DOMContentLoaded', function(){
+  var c1 = document.getElementById('pcFirmaCanvas');
+  if(c1) pcFirma = pcInitFirma(c1);
+  var c2 = document.getElementById('pcFirmaCanvasCambio');
+  if(c2) pcFirmaCambio = pcInitFirma(c2);
+});
+
+function pcFirmaLimpiar(){ if(pcFirma) pcFirma.clear(); }
+function pcFirmaLimpiarCambio(){ if(pcFirmaCambio) pcFirmaCambio.clear(); }
+
+function pcPrivConfirmar(valor){
+  var form = document.getElementById('pcPrivForm');
+  if(!form) return;
+  document.getElementById('pcPrivAccion').value = String(valor);
+  if(valor === 1){
+    if(!pcFirma || !pcFirma.hasInk()){
+      alert('Por favor traza tu firma antes de aceptar.');
+      return;
+    }
+    document.getElementById('pcPrivFirma').value = pcFirma.dataUrl();
+  } else {
+    document.getElementById('pcPrivFirma').value = '';
+  }
+  form.submit();
+}
+
+function pcPrivSubmit(form){
+  // submit programático ya validó; deshabilita botones
+  form.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+  return true;
+}
+
+function pcPrivChangeSubmit(form){
+  // Si está cambiando de RECHAZO → ACEPTO, exigir firma en el canvas de cambio
+  var hidden = form.querySelector('input[name=aceptaPrivacidad]');
+  if(hidden && hidden.value === '1'){
+    // Mostrar canvas si está oculto
+    var box = document.getElementById('pcFirmaBoxCambio');
+    if(box && box.style.display === 'none'){
+      box.style.display = 'block';
+      // Re-init canvas ahora que es visible
+      if(!pcFirmaCambio){
+        var c2 = document.getElementById('pcFirmaCanvasCambio');
+        if(c2) pcFirmaCambio = pcInitFirma(c2);
+      }
+      alert('Para aceptar el aviso, firma en el recuadro y vuelve a presionar.');
+      return false;
+    }
+    if(!pcFirmaCambio || !pcFirmaCambio.hasInk()){
+      alert('Por favor traza tu firma antes de aceptar.');
+      return false;
+    }
+    var inp = document.getElementById('pcPrivFirmaCambio');
+    if(inp) inp.value = pcFirmaCambio.dataUrl();
+  }
+  form.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
   return true;
 }
 </script>

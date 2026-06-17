@@ -6,9 +6,14 @@ CREATE TABLE IF NOT EXISTS aceptaciones_privacidad (
   id INT AUTO_INCREMENT PRIMARY KEY,
   id_cliente INT NOT NULL,
   aceptado TINYINT(1) NOT NULL,
+  firma MEDIUMTEXT DEFAULT NULL,        -- firma manuscrita en data URL (image/png base64)
   fecha DATETIME NOT NULL,
   ip VARCHAR(45) DEFAULT NULL,
   user_agent VARCHAR(255) DEFAULT NULL,
   UNIQUE KEY uk_cliente (id_cliente),
   INDEX idx_fecha (fecha)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Para instalaciones existentes, agregar la columna firma:
+ALTER TABLE aceptaciones_privacidad
+  ADD COLUMN IF NOT EXISTS firma MEDIUMTEXT DEFAULT NULL AFTER aceptado;
