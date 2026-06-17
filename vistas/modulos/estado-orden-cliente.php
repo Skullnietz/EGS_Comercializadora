@@ -15,28 +15,21 @@
 $token  = isset($_GET["token"]) ? trim((string) $_GET["token"]) : "";
 $orden  = $token !== "" ? controladorOrdenes::ctrMostrarOrdenPorToken($token) : null;
 
-// ── Feedback de envíos (comentario / reseña) ──
+// ── Feedback de envíos (comentario) ──
 $soc_msgComentario = null;   // ok | duplicate | vacio | error
-$soc_msgResena     = null;   // ok | duplicate | invalida | error
 
 if (is_array($orden)) {
 
     $soc_idOrden = intval($orden["id"]);
 
-    // Procesar envíos POST. El id de la orden proviene del token validado,
-    // nunca de un campo POST, para evitar manipulación.
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if (isset($_POST["comentarioCliente"])) {
             $soc_msgComentario = controladorComentarioCliente::ctrlGuardarComentario($soc_idOrden);
-        }
-        if (isset($_POST["calificacionResena"])) {
-            $soc_msgResena = controladorResenaOrden::ctrlGuardarResena($soc_idOrden);
         }
     }
 
     // ── Datos a mostrar ──
     $soc_comentarios = controladorComentarioCliente::ctrMostrar($soc_idOrden);
-    $soc_resena      = controladorResenaOrden::ctrMostrar($soc_idOrden);
     $soc_reportes    = controladorReporteEquipo::ctrMostrarReportes($soc_idOrden);
     $soc_fotos       = controladorReporteEquipo::ctrMostrarFotosPorOrden($soc_idOrden);
 
@@ -237,16 +230,6 @@ body .content-wrapper { margin-left: 0 !important; }
 .soc-alert.ok   { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
 .soc-alert.warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
 .soc-alert.err  { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
-
-/* Estrellas */
-.soc-stars { display: inline-flex; flex-direction: row-reverse; gap: 4px; font-size: 34px; }
-.soc-stars input { display: none; }
-.soc-stars label { color: #cbd5e1; cursor: pointer; transition: color .15s; }
-.soc-stars label:hover,
-.soc-stars label:hover ~ label,
-.soc-stars input:checked ~ label { color: #f59e0b; }
-.soc-stars-static { font-size: 28px; color: #f59e0b; letter-spacing: 2px; }
-.soc-stars-static .off { color: #cbd5e1; }
 
 .soc-empty { text-align: center; color: #94a3b8; font-size: 13px; padding: 8px 0; }
 
@@ -682,71 +665,25 @@ body .content-wrapper { margin-left: 0 !important; }
         </div>
       </div>
 
-      <!-- ═══ 7) Tu experiencia (reseña + calificación) ═══ -->
-      <div class="soc-card">
-        <div class="soc-card-head"><i class="fa-solid fa-star"></i><h3>Tu experiencia</h3></div>
-        <div class="soc-card-body">
-          <?php if ($soc_msgResena === "ok"): ?>
-            <div class="soc-alert ok"><i class="fa-solid fa-check"></i> ¡Gracias por calificar nuestro servicio!</div>
-          <?php elseif ($soc_msgResena === "invalida"): ?>
-            <div class="soc-alert warn">Selecciona una calificación de 1 a 5 estrellas.</div>
-          <?php elseif ($soc_msgResena === "duplicate"): ?>
-            <div class="soc-alert warn">Ya habías enviado tu reseña para esta orden.</div>
-          <?php elseif ($soc_msgResena === "error"): ?>
-            <div class="soc-alert err">No pudimos guardar tu reseña. Inténtalo de nuevo.</div>
-          <?php endif; ?>
-
-          <?php
-            // Reseña ya enviada (la recién creada o una previa) → solo lectura.
-            $resenaMostrar = $soc_resena;
-            if (!$resenaMostrar && $soc_msgResena === "ok") {
-                $resenaMostrar = controladorResenaOrden::ctrMostrar($soc_idOrden);
-            }
-          ?>
-
-          <?php if ($resenaMostrar): $cal = intval($resenaMostrar["calificacion"]); ?>
-            <div style="text-align:center">
-              <div class="soc-stars-static">
-                <?php for ($s = 1; $s <= 5; $s++): ?>
-                  <span class="<?php echo $s <= $cal ? '' : 'off'; ?>">&#9733;</span>
-                <?php endfor; ?>
-              </div>
-              <?php if (!empty($resenaMostrar["comentario"])): ?>
-                <p style="font-size:13px;color:#1e293b;margin-top:10px;font-style:italic">“<?php echo htmlspecialchars($resenaMostrar["comentario"]); ?>”</p>
-              <?php endif; ?>
-              <p style="font-size:11px;color:#94a3b8;margin-top:8px">Enviada el <?php echo soc_fecha($resenaMostrar["fecha"]); ?></p>
+      <!-- ═══ 7) Califícanos en Google ═══ -->
+      <div class=”soc-card”>
+        <div class=”soc-card-head”><i class=”fa-solid fa-star”></i><h3>Califícanos</h3></div>
+        <div class=”soc-card-body”>
+          <div class=”soc-google-cta”>
+            <div class=”soc-google-cta-icon”>
+              <svg viewBox=”0 0 24 24” xmlns=”http://www.w3.org/2000/svg”><path d=”M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z” fill=”#4285F4”/><path d=”M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z” fill=”#34A853”/><path d=”M5.84 14.09a6.87 6.87 0 0 1 0-4.17V7.07H2.18a11.01 11.01 0 0 0 0 9.86l3.66-2.84z” fill=”#FBBC05”/><path d=”M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z” fill=”#EA4335”/></svg>
             </div>
-            <?php if ($cal >= 4): ?>
-            <div class="soc-google-cta">
-              <div class="soc-google-cta-icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09a6.87 6.87 0 0 1 0-4.17V7.07H2.18a11.01 11.01 0 0 0 0 9.86l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              </div>
-              <div class="soc-google-cta-text">
-                <strong>¡Nos alegra tu buena experiencia!</strong><br>
-                ¿Te gustaría compartirla en Google Maps? Tu reseña nos ayuda mucho a seguir mejorando.
-                <div>
-                  <a href="https://www.google.com/maps/place/EGS+EQUIPO+DE+C%C3%93MPUTO+Y+SOFTWARE/@19.2933702,-99.6549282,17z/" target="_blank" rel="noopener" class="soc-google-btn">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09a6.87 6.87 0 0 1 0-4.17V7.07H2.18a11.01 11.01 0 0 0 0 9.86l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                    Dejar reseña en Google
-                  </a>
-                </div>
+            <div class=”soc-google-cta-text”>
+              <strong>¿Cómo fue tu experiencia?</strong><br>
+              Tu opinión en Google Maps nos ayuda mucho a seguir mejorando nuestro servicio.
+              <div>
+                <a href=”https://www.google.com/maps/place/EGS+EQUIPO+DE+C%C3%93MPUTO+Y+SOFTWARE/@19.2933702,-99.6549282,17z/” target=”_blank” rel=”noopener” class=”soc-google-btn”>
+                  <svg viewBox=”0 0 24 24” xmlns=”http://www.w3.org/2000/svg”><path d=”M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z” fill=”#4285F4”/><path d=”M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z” fill=”#34A853”/><path d=”M5.84 14.09a6.87 6.87 0 0 1 0-4.17V7.07H2.18a11.01 11.01 0 0 0 0 9.86l3.66-2.84z” fill=”#FBBC05”/><path d=”M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z” fill=”#EA4335”/></svg>
+                  Dejar reseña en Google
+                </a>
               </div>
             </div>
-            <?php endif; ?>
-          <?php else: ?>
-            <p style="font-size:13px;color:#64748b;margin-bottom:10px;text-align:center">¿Cómo calificarías nuestro servicio?</p>
-            <form method="post" class="soc-form" style="text-align:center" onsubmit="return socValidarResena(this);">
-              <div class="soc-stars">
-                <input type="radio" name="calificacionResena" id="soc-star5" value="5"><label for="soc-star5" title="Excelente">&#9733;</label>
-                <input type="radio" name="calificacionResena" id="soc-star4" value="4"><label for="soc-star4" title="Muy bueno">&#9733;</label>
-                <input type="radio" name="calificacionResena" id="soc-star3" value="3"><label for="soc-star3" title="Bueno">&#9733;</label>
-                <input type="radio" name="calificacionResena" id="soc-star2" value="2"><label for="soc-star2" title="Regular">&#9733;</label>
-                <input type="radio" name="calificacionResena" id="soc-star1" value="1"><label for="soc-star1" title="Malo">&#9733;</label>
-              </div>
-              <textarea name="comentarioResena" maxlength="1000" placeholder="Cuéntanos sobre tu experiencia (opcional)..." style="margin-top:12px"></textarea>
-              <div><button type="submit" class="soc-btn"><i class="fa-solid fa-star"></i> Enviar reseña</button></div>
-            </form>
-          <?php endif; ?>
+          </div>
         </div>
       </div>
 
@@ -777,13 +714,5 @@ function socValidarComentario(form){
   var b = form.querySelector('button[type=submit]'); if(b){ b.disabled = true; }
   return true;
 }
-function socValidarResena(form){
-  var sel = form.querySelector('input[name=calificacionResena]:checked');
-  if(!sel){
-    if (window.swal) { swal({type:'warning', title:'Selecciona una calificación', text:'Toca las estrellas para calificar.'}); }
-    return false;
-  }
-  var b = form.querySelector('button[type=submit]'); if(b){ b.disabled = true; }
-  return true;
-}
+
 </script>
