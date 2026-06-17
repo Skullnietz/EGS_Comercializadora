@@ -336,41 +336,8 @@ body .content-wrapper { margin-left: 0 !important; }
     .soc-monedero-stats { margin: 0 12px 10px; }
     .soc-monedero-info { margin: 0 12px 12px; }
     .soc-mov-section { padding: 0 12px 12px; }
-    .soc-google-btn { width: 100%; justify-content: center; }
 }
 
-/* ═══ CTA Google Maps Review ═══ */
-.soc-google-section { text-align: center; padding: 28px 20px; }
-.soc-google-icon {
-    width: 64px; height: 64px; margin: 0 auto 16px;
-    background: #fff; border-radius: 50%;
-    border: 2px solid #e2e8f0;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,.08);
-}
-.soc-google-icon i { font-size: 30px; color: #4285F4; }
-.soc-google-stars { font-size: 28px; letter-spacing: 4px; margin-bottom: 14px; }
-.soc-google-stars span { display: inline-block; animation: soc-star-pop .4s ease both; }
-.soc-google-stars span:nth-child(1) { color: #EA4335; animation-delay: .1s; }
-.soc-google-stars span:nth-child(2) { color: #FBBC05; animation-delay: .2s; }
-.soc-google-stars span:nth-child(3) { color: #34A853; animation-delay: .3s; }
-.soc-google-stars span:nth-child(4) { color: #4285F4; animation-delay: .4s; }
-.soc-google-stars span:nth-child(5) { color: #EA4335; animation-delay: .5s; }
-@keyframes soc-star-pop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
-.soc-google-title { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
-.soc-google-desc { font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 18px; max-width: 360px; margin-left: auto; margin-right: auto; }
-.soc-google-btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: #4285F4; color: #fff;
-    padding: 13px 28px; border-radius: 12px;
-    font-weight: 700; font-size: 14px;
-    text-decoration: none; white-space: nowrap;
-    box-shadow: 0 4px 14px rgba(66,133,244,.35);
-    transition: all .2s;
-}
-.soc-google-btn:hover { background: #3367d6; box-shadow: 0 6px 20px rgba(66,133,244,.45); transform: translateY(-1px); }
-.soc-google-btn i { font-size: 16px; }
-.soc-google-hint { font-size: 11px; color: #94a3b8; margin-top: 12px; }
 </style>
 
 <div class="content-wrapper soc-wrapper">
@@ -669,22 +636,21 @@ body .content-wrapper { margin-left: 0 !important; }
       </div>
 
       <!-- ═══ 7) Califícanos en Google ═══ -->
-      <div class=”soc-card”>
-        <div class=”soc-card-head”><i class=”fa-solid fa-star”></i><h3>Califícanos</h3></div>
-        <div class=”soc-google-section”>
-          <div class=”soc-google-icon”>
-            <i class=”fa-brands fa-google” style=”font-size:30px;color:#4285F4”></i>
+      <div class=”soc-card” style=”overflow:hidden”>
+        <div style=”background:linear-gradient(135deg,#1a73e8 0%,#4285F4 50%,#669df6 100%);padding:30px 20px;text-align:center”>
+          <div style=”width:72px;height:72px;margin:0 auto 16px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.15)”>
+            <img src=”https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png” alt=”Google” style=”width:36px;height:36px”>
           </div>
-          <div class=”soc-google-stars”>
-            <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+          <div style=”font-size:32px;letter-spacing:6px;margin-bottom:14px”>
+            <span style=”color:#EA4335”>&#9733;</span><span style=”color:#FBBC05”>&#9733;</span><span style=”color:#34A853”>&#9733;</span><span style=”color:#fff”>&#9733;</span><span style=”color:#fff”>&#9733;</span>
           </div>
-          <div class=”soc-google-title”>¿Cómo fue tu experiencia?</div>
-          <div class=”soc-google-desc”>Tu opinión nos ayuda a seguir mejorando. Déjanos una reseña en Google Maps, ¡solo toma un momento!</div>
-          <a href=”https://www.google.com/maps/place/EGS+EQUIPO+DE+C%C3%93MPUTO+Y+SOFTWARE/@19.2933702,-99.6549282,17z/” target=”_blank” rel=”noopener” class=”soc-google-btn”>
-            <i class=”fa-brands fa-google”></i>
+          <div style=”font-size:18px;font-weight:800;color:#fff;margin-bottom:6px”>¿Cómo fue tu experiencia?</div>
+          <div style=”font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;max-width:340px;margin:0 auto 20px”>Tu opinión nos ayuda a seguir mejorando. Déjanos una reseña en Google Maps.</div>
+          <a href=”https://www.google.com/maps/place/EGS+EQUIPO+DE+C%C3%93MPUTO+Y+SOFTWARE/@19.2933702,-99.6549282,17z/” target=”_blank” rel=”noopener” style=”display:inline-flex;align-items:center;gap:10px;background:#fff;color:#1a73e8;padding:14px 32px;border-radius:28px;font-weight:800;font-size:14px;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:all .2s”>
+            <img src=”https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png” alt=”G” style=”width:20px;height:20px”>
             Dejar reseña en Google
           </a>
-          <div class=”soc-google-hint”><i class=”fa-solid fa-arrow-up-right-from-square”></i> Se abrirá Google Maps en una nueva pestaña</div>
+          <div style=”font-size:11px;color:rgba(255,255,255,.5);margin-top:14px”>Se abrirá Google Maps en una nueva pestaña</div>
         </div>
       </div>
 
