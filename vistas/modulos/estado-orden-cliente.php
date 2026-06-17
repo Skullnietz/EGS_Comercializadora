@@ -671,7 +671,7 @@ body .content-wrapper { margin-left: 0 !important; }
           </div>
           <div class="soc-google-h">&iquest;C&oacute;mo fue tu experiencia?</div>
           <div class="soc-google-p">Tu opini&oacute;n nos ayuda a seguir mejorando. D&eacute;janos una rese&ntilde;a en Google Maps.</div>
-          <a class="soc-google-cta" href="https://www.google.com/maps?cid=605836346184727783" target="_blank" rel="noopener">&#9733; Dejar rese&ntilde;a en Google</a>
+          <a class="soc-google-cta" href="https://search.google.com/local/writereview?placeid=ChIJQ2fMEuyJzYUR53xcbvJcaAg" target="_blank" rel="noopener">&#9733; Dejar rese&ntilde;a en Google</a>
           <div class="soc-google-foot">Se abrir&aacute; Google Maps en una nueva pesta&ntilde;a</div>
         </div>
       </div>
