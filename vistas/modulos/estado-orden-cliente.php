@@ -637,20 +637,17 @@ body .content-wrapper { margin-left: 0 !important; }
 
       <!-- ═══ 7) Califícanos en Google ═══ -->
       <div class=”soc-card” style=”overflow:hidden”>
-        <div style=”background:linear-gradient(135deg,#1a73e8 0%,#4285F4 50%,#669df6 100%);padding:30px 20px;text-align:center”>
+        <div style=”background:linear-gradient(135deg,#1a73e8 0%,#4285F4 50%,#669df6 100%);padding:32px 20px;text-align:center”>
           <div style=”width:72px;height:72px;margin:0 auto 16px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.15)”>
-            <img src=”https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png” alt=”Google” style=”width:36px;height:36px”>
+            <span style=”font-size:28px;font-weight:900;line-height:1”><span style=”color:#4285F4”>G</span><span style=”color:#EA4335”>o</span><span style=”color:#FBBC05”>o</span><span style=”color:#4285F4”>g</span><span style=”color:#34A853”>l</span><span style=”color:#EA4335”>e</span></span>
           </div>
-          <div style=”font-size:32px;letter-spacing:6px;margin-bottom:14px”>
-            <span style=”color:#EA4335”>&#9733;</span><span style=”color:#FBBC05”>&#9733;</span><span style=”color:#34A853”>&#9733;</span><span style=”color:#fff”>&#9733;</span><span style=”color:#fff”>&#9733;</span>
+          <div style=”font-size:32px;letter-spacing:6px;margin-bottom:16px”>
+            <span style=”color:#EA4335”>&#9733;</span><span style=”color:#FBBC05”>&#9733;</span><span style=”color:#34A853”>&#9733;</span><span style=”color:rgba(255,255,255,.7)”>&#9733;</span><span style=”color:rgba(255,255,255,.7)”>&#9733;</span>
           </div>
-          <div style=”font-size:18px;font-weight:800;color:#fff;margin-bottom:6px”>¿Cómo fue tu experiencia?</div>
-          <div style=”font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;max-width:340px;margin:0 auto 20px”>Tu opinión nos ayuda a seguir mejorando. Déjanos una reseña en Google Maps.</div>
-          <a href=”https://www.google.com/maps/place/EGS+EQUIPO+DE+C%C3%93MPUTO+Y+SOFTWARE/@19.2933702,-99.6549282,17z/” target=”_blank” rel=”noopener” style=”display:inline-flex;align-items:center;gap:10px;background:#fff;color:#1a73e8;padding:14px 32px;border-radius:28px;font-weight:800;font-size:14px;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:all .2s”>
-            <img src=”https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png” alt=”G” style=”width:20px;height:20px”>
-            Dejar reseña en Google
-          </a>
-          <div style=”font-size:11px;color:rgba(255,255,255,.5);margin-top:14px”>Se abrirá Google Maps en una nueva pestaña</div>
+          <div style=”font-size:18px;font-weight:800;color:#fff;margin-bottom:8px”>¿Cómo fue tu experiencia?</div>
+          <div style=”font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;max-width:320px;margin:0 auto 22px”>Tu opinión nos ayuda a seguir mejorando. Déjanos una reseña en Google Maps.</div>
+          <a href=”https://www.google.com/maps/place/EGS+EQUIPO+DE+C%C3%93MPUTO+Y+SOFTWARE/@19.2933702,-99.6549282,17z/” target=”_blank” rel=”noopener” style=”display:inline-block;background:#fff;color:#1a73e8;padding:14px 36px;border-radius:28px;font-weight:800;font-size:14px;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.2)”>&#9733; Dejar reseña en Google</a>
+          <div style=”font-size:11px;color:rgba(255,255,255,.45);margin-top:14px”>Se abrirá Google Maps en una nueva pestaña</div>
         </div>
       </div>
 
