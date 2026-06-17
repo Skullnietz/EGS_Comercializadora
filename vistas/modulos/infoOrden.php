@@ -399,6 +399,21 @@ $_wa_tecnicoNombre = isset($_wa_tecnico["nombre"]) ? $_wa_tecnico["nombre"] : ""
 $_wa_total = number_format(floatval($value["total"] ?? 0), 2);
 $_wa_btns = array(); // cada elemento: ['label'=>'...','url'=>'...']
 
+// Link del portal del cliente (token del monedero) — botón disponible siempre
+$_portal_link = "";
+if ($_wa_phone !== "" && !empty($_GET["cliente"])) {
+    try {
+        $_portal_info = ControladorRecompensas::ctrObtenerInfoRecompensas(intval($_GET["cliente"]));
+        if (is_array($_portal_info) && !empty($_portal_info["token"])) {
+            $_portal_link = "https://backend.comercializadoraegs.com/?ruta=portal-cliente&token=" . $_portal_info["token"] . "&orden=" . intval($_wa_orden);
+        }
+    } catch (Exception $e) { $_portal_link = ""; }
+}
+if ($_wa_phone !== "" && $_portal_link !== "") {
+    $msg = "Hola, te compartimos el acceso a tu Portal EGS donde puedes ver el estado de tus equipos, tu monedero electrónico, solicitar ayuda y el aviso de privacidad:\n\n" . $_portal_link . "\n\nOrden #" . $_wa_orden;
+    $_wa_btns[] = array('label' => 'WhatsApp — Portal del cliente', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
+}
+
 if ($_wa_phone !== "") {
     if ($estado === 'Pendiente de autorización (AUT') {
         $msg = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416/720-3321271 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN ' . $_wa_orden . ' ASESOR *' . $_wa_asesorNombre . '* ESTE NUMERO ES SOLO PARA MENSAJES';

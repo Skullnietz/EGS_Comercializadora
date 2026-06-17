@@ -346,23 +346,30 @@ class ImprimirTicketsOrden{
         </div>';
 
       // =============================================
-      // SEGUIMIENTO DE LA ORDEN - QR DE LA VISTA PUBLICA DEL CLIENTE
-      // (va antes del monedero; el monedero queda hasta el final)
+      // QR DEL PORTAL DEL CLIENTE
+      // Apunta al portal por cliente (no por orden) usando el token persistente
+      // del monedero, con la orden actual preseleccionada en la URL.
+      // Fallback: si no hay token de cliente, usa el token de orden (los QRs
+      // viejos siguen funcionando — estado-orden-cliente.php redirige al portal).
       // =============================================
-      $tokenOrdenCliente = isset($value["token_cliente"]) ? $value["token_cliente"] : '';
-      // Órdenes anteriores al backfill: generar y guardar el token al vuelo.
-      if (empty($tokenOrdenCliente)) {
-          $tokenOrdenCliente = controladorOrdenes::ctrAsegurarTokenCliente($id);
+      $tokenParaQR = !empty($tokenMonedero) ? $tokenMonedero : (isset($value["token_cliente"]) ? $value["token_cliente"] : '');
+      if (empty($tokenParaQR)) {
+          $tokenParaQR = controladorOrdenes::ctrAsegurarTokenCliente($id);
       }
-      if (!empty($tokenOrdenCliente)) {
-          $urlEstadoOrden = 'https://backend.comercializadoraegs.com/?ruta=estado-orden-cliente&token=' . $tokenOrdenCliente;
-          $qrUrlEstadoOrden = 'https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=' . urlencode($urlEstadoOrden);
+      if (!empty($tokenParaQR)) {
+          if (!empty($tokenMonedero)) {
+              $urlPortal = 'https://backend.comercializadoraegs.com/?ruta=portal-cliente&token=' . $tokenParaQR . '&orden=' . $id;
+          } else {
+              // Fallback con token de orden: estado-orden-cliente lo redirige al portal
+              $urlPortal = 'https://backend.comercializadoraegs.com/?ruta=estado-orden-cliente&token=' . $tokenParaQR;
+          }
+          $qrUrlPortal = 'https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=' . urlencode($urlPortal);
 
           echo '<hr style="margin:6px 0 3px">
                 <div style="border:2px solid #000;padding:6px;text-align:center">
-                  <div style="font-size:13px;font-weight:900;margin-bottom:3px">*** SEGUIMIENTO Y MONEDERO ***</div>
-                  <div style="font-size:12px;line-height:1.3;margin-bottom:5px">Escanea este codigo para ver el avance de tu equipo, cotizacion, tu monedero EGS, dejar comentarios y calificar nuestro servicio.</div>
-                  <img src="'.$qrUrlEstadoOrden.'" alt="QR Estado Orden" style="width:110px;height:110px">
+                  <div style="font-size:13px;font-weight:900;margin-bottom:3px">*** TU PORTAL EGS ***</div>
+                  <div style="font-size:12px;line-height:1.3;margin-bottom:5px">Escanea este codigo para ver tus equipos, monedero, historial, solicitar ayuda y aceptar el aviso de privacidad.</div>
+                  <img src="'.$qrUrlPortal.'" alt="QR Portal Cliente" style="width:110px;height:110px">
                 </div>';
       }
 
@@ -432,48 +439,9 @@ class ImprimirTicketsOrden{
         <div style="text-align:center;font-size:12px;font-weight:700;margin:6px 0 4px">Gracias por su visita!</div>
       </div>';
 
-      // =============================================
-      // AVISO DE PRIVACIDAD PARA REV
-      // =============================================
-      if (stripos($estadoOrden, 'REV') !== false) {
-          echo '
-          <div class="zona_impresion" style="font-family:Arial,Helvetica,sans-serif; page-break-before: always; margin-top:10px;">
-            <div style="border-top:1px dashed #000; margin-bottom:5px;"></div>
-            <div style="font-size:15px; text-align:justify; line-height:1.4;">
-              <div style="text-align:center;font-weight:900;margin-bottom:8px;font-size:17px;">AVISO Y POLÍTICA DE PRIVACIDAD PARA EL MANEJO DE DATOS PERSONALES</div>
-              <div style="text-align:center;font-weight:700;margin-bottom:10px;font-size:16px;">COMERCIALIZADORA EGS (EQUIPO DE CÓMPUTO Y SOFTWARE)</div>
-              <p style="margin:6px 0;"><b>Asunto:</b> Confidencialidad y Autorización de Mensajes Promocionales</p>
-              <p style="margin:6px 0;">ESTIMADO/A CLIENTE: <b>'.$NombreUsuario.'</b></p>
-              <p style="margin:6px 0;">En COMERCIALIZADORA EGS valoramos la confianza que depositas en nosotros. Para proteger tu información, nos comprometemos a mantener la confidencialidad de los datos que compartas con nosotros.</p>
-              <p style="margin:6px 0;">Además, nos gustaría mantenerte al tanto de nuestras ofertas y novedades. Si deseas recibir mensajes promocionales de COMERCIALIZADORA EGS a través de WhatsApp, por favor, responde a este aviso seleccionando "ACEPTO".</p>
-              
-              <div style="text-align:center; font-weight:900; margin:16px 0; font-size:16px;">[ &nbsp;&nbsp; ] ACEPTO &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp;&nbsp; ] NO ACEPTO</div>
-              
-              <p style="margin:6px 0;">Esta carta o acuerdo de confidencialidad de la empresa COMERCIALIZADORA EGS se fundamenta principalmente en la protección de datos personales. Se apega a los siguientes artículos y leyes fundamentales:</p>
-              
-              <div style="margin:6px 0;">
-                <b>1. Constitución Política de los Estados Unidos Mexicanos</b><br>
-                Artículo 16 (Segundo párrafo): Protege el derecho a la protección de datos personales, el acceso, rectificación, cancelación y oposición (derechos ARCO), así como la privacidad de las comunicaciones.
-              </div>
-              <div style="margin:6px 0;">
-                <b>2. Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</b><br>
-                Esta es la ley principal para el manejo de información de clientes.<br>
-                - <b>Artículo 6:</b> Establece que los responsables del tratamiento de datos (la empresa) deben garantizar la confidencialidad.<br>
-                - <b>Artículos 14 y 15:</b> Obligan a que el tratamiento de datos se limite a las finalidades acordadas y se proteja contra el uso indebido.<br>
-                - <b>Artículo 21:</b> Obliga a los terceros que reciban datos a mantener la confidencialidad.
-              </div>
-              
-              <p style="margin:8px 0;">Tu privacidad es importante. Puedes revocar este permiso por escrito en cualquier momento.</p>
-              <p style="text-align:center;margin:16px 0 30px 0;">Atentamente,<br><b>COMERCIALIZADORA EGS</b></p>
-              
-              <div style="margin-top:40px;text-align:center">
-                  <div style="border-bottom:1px solid #000;width:80%;margin:0 auto"></div>
-                  <div style="font-size:15px;font-weight:700;margin-top:6px;text-transform:uppercase">FIRMA DE CONFORMIDAD</div>
-                  <div style="font-size:14px;font-weight:700;margin-top:15px;text-align:left;">FECHA: '.date_format($fecha, 'd/m/Y').'</div>
-              </div>
-            </div>
-          </div>';
-      }
+      // El aviso de privacidad ahora se acepta digitalmente en el portal del
+      // cliente (tab "Privacidad"). Antes se imprimía aquí para firmarse a
+      // mano. La aceptación queda registrada en BD con fecha, IP y user agent.
 
   }
 }

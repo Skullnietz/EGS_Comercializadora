@@ -37,6 +37,7 @@ return [
     'seguimiento',
     'Historialdecliente',
     'estado-orden-cliente',
+    'portal-cliente',
 
     /* ── Ventas ─────────────────────────────────── */
     'ventas',

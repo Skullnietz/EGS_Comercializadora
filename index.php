@@ -59,6 +59,10 @@ require_once "controladores/comentarioClienteOrden.controlador.php";
 
 require_once "controladores/resenaOrden.controlador.php";
 
+require_once "controladores/aceptacionPrivacidad.controlador.php";
+
+require_once "controladores/solicitudAyuda.controlador.php";
+
 require_once "controladores/pedidos.controlador.php";
 
 require_once "controladores/tickets.controlador.php";
@@ -131,6 +135,10 @@ require_once "modelos/reporteEquipo.modelo.php";
 require_once "modelos/comentarioClienteOrden.modelo.php";
 
 require_once "modelos/resenaOrden.modelo.php";
+
+require_once "modelos/aceptacionPrivacidad.modelo.php";
+
+require_once "modelos/solicitudAyuda.modelo.php";
 
 require_once "modelos/pedidos.modelo.php";
 
