@@ -360,8 +360,8 @@ class ImprimirTicketsOrden{
 
           echo '<hr style="margin:6px 0 3px">
                 <div style="border:2px solid #000;padding:6px;text-align:center">
-                  <div style="font-size:13px;font-weight:900;margin-bottom:3px">*** SEGUIMIENTO DE TU ORDEN ***</div>
-                  <div style="font-size:12px;line-height:1.3;margin-bottom:5px">Escanea este codigo para ver el avance de tu equipo, la cotizacion, dejar comentarios y calificar nuestro servicio.</div>
+                  <div style="font-size:13px;font-weight:900;margin-bottom:3px">*** SEGUIMIENTO Y MONEDERO ***</div>
+                  <div style="font-size:12px;line-height:1.3;margin-bottom:5px">Escanea este codigo para ver el avance de tu equipo, cotizacion, tu monedero EGS, dejar comentarios y calificar nuestro servicio.</div>
                   <img src="'.$qrUrlEstadoOrden.'" alt="QR Estado Orden" style="width:110px;height:110px">
                 </div>';
       }
@@ -420,17 +420,6 @@ class ImprimirTicketsOrden{
           }
 
           echo '<div style="font-size:12px;margin-top:3px">Tu dinero electronico vence cada 6 meses. Usalo antes!</div>';
-      }
-
-      // QR para consultar monedero
-      if (!empty($tokenMonedero)) {
-          $urlMonedero = 'https://backend.comercializadoraegs.com/monedero.php?token=' . $tokenMonedero;
-          $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . urlencode($urlMonedero);
-
-          echo '<div style="margin-top:4px;padding-top:4px;border-top:1px dashed #000">
-                  <div style="font-size:12px;font-weight:700;margin-bottom:3px">Escanea para ver tu monedero:</div>
-                  <img src="'.$qrUrl.'" alt="QR Monedero" style="width:100px;height:100px">
-                </div>';
       }
 
       echo '</div>';
