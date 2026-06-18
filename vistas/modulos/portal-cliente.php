@@ -90,7 +90,6 @@ $pcMsgAyuda      = null;
 
 if ($pcOk && $_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST["comentarioCliente"]) && isset($_POST["idOrdenComentario"])) {
-        // El comentario va atado a una orden; validamos que la orden pertenece al cliente
         $idOrdenCom = intval($_POST["idOrdenComentario"]);
         $ordenesCliente = controladorOrdenes::ctrMostrarHistorial("ordenes", $pcIdCliente);
         $pertenece = false;
@@ -111,7 +110,29 @@ if ($pcOk && $_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST["mensajeAyuda"])) {
         $pcMsgAyuda = controladorSolicitudAyuda::ctrlGuardar($pcIdCliente);
     }
+
+    // PRG (Post-Redirect-Get): después de procesar cualquier POST, redirigimos
+    // a la misma URL con GET para que F5 / recarga NO reenvíe el formulario.
+    // El mensaje resultado se pasa por query string y se mapea de vuelta.
+    if ($pcMsgComentario !== null || $pcMsgPrivacidad !== null || $pcMsgAyuda !== null) {
+        $params = array(
+            "ruta"  => "portal-cliente",
+            "token" => $pcToken,
+            "tab"   => $pcTab,
+        );
+        if ($pcOrdenSel > 0) $params["orden"] = $pcOrdenSel;
+        if ($pcMsgComentario !== null) $params["mc"] = $pcMsgComentario;
+        if ($pcMsgPrivacidad !== null) $params["mp"] = $pcMsgPrivacidad;
+        if ($pcMsgAyuda      !== null) $params["ma"] = $pcMsgAyuda;
+        header("Location: ?" . http_build_query($params), true, 303);
+        exit;
+    }
 }
+
+// Mensajes desde query string (después del redirect PRG)
+if ($pcMsgComentario === null && isset($_GET["mc"])) $pcMsgComentario = (string) $_GET["mc"];
+if ($pcMsgPrivacidad === null && isset($_GET["mp"])) $pcMsgPrivacidad = (string) $_GET["mp"];
+if ($pcMsgAyuda      === null && isset($_GET["ma"])) $pcMsgAyuda      = (string) $_GET["ma"];
 
 // ── Datos cargados según el tab para evitar queries innecesarias ──
 $pcOrdenes = array();
@@ -147,7 +168,13 @@ if ($pcOk) {
 }
 
 // Flag: ¿el cliente todavía no ha respondido al aviso?
-$pcPrivacidadPendiente = $pcOk && !is_array($pcAceptacion);
+// También consideramos "pendiente" si hay registro con aceptado=1 pero SIN firma:
+// son aceptaciones que quedaron de antes de la firma digital y deben re-validarse.
+$pcAceptacionIncompleta = false;
+if (is_array($pcAceptacion) && intval($pcAceptacion["aceptado"]) === 1 && empty($pcAceptacion["firma"])) {
+    $pcAceptacionIncompleta = true;
+}
+$pcPrivacidadPendiente = $pcOk && (!is_array($pcAceptacion) || $pcAceptacionIncompleta);
 
 // Nombre corto para el header
 $pcNombre = "";
@@ -793,7 +820,9 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
               <div class="pc-alert err">No pudimos guardar tu decisión.</div>
             <?php endif; ?>
 
-            <?php if (is_array($pcAceptacion)): ?>
+            <?php if ($pcAceptacionIncompleta): ?>
+              <div class="pc-priv-status pen"><i class="fa-solid fa-circle-exclamation"></i> Detectamos una aceptaci&oacute;n previa sin firma. Por favor v&aacute;lidala firmando abajo.</div>
+            <?php elseif (is_array($pcAceptacion)): ?>
               <?php if (intval($pcAceptacion["aceptado"]) === 1): ?>
                 <div class="pc-priv-status ok"><i class="fa-solid fa-circle-check"></i> Aceptaste el aviso el <?php echo pc_fecha($pcAceptacion["fecha"]); ?></div>
               <?php else: ?>
@@ -825,7 +854,7 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
               </div>
             <?php endif; ?>
 
-            <?php if (!is_array($pcAceptacion)): /* Pendiente: mostrar formulario con canvas */ ?>
+            <?php if (!is_array($pcAceptacion) || $pcAceptacionIncompleta): /* Pendiente o aceptación previa sin firma */ ?>
               <form method="post" id="pcPrivForm" onsubmit="return pcPrivSubmit(this);">
                 <input type="hidden" name="aceptaPrivacidad" id="pcPrivAccion" value="">
                 <input type="hidden" name="firmaPrivacidad" id="pcPrivFirma" value="">
@@ -846,7 +875,7 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
                   <button type="button" class="pc-btn danger"  style="flex:1;justify-content:center" onclick="pcPrivConfirmar(0)"><i class="fa-solid fa-xmark"></i> No acepto</button>
                 </div>
               </form>
-            <?php else: /* Ya hay decisión: botón para cambiarla (vuelve a pedir firma si pasa a aceptado) */ ?>
+            <?php else: /* Ya hay decisión válida: botón para cambiarla con confirmación */ ?>
               <div class="pc-priv-actions">
                 <form method="post" id="pcPrivChangeForm" style="flex:1;display:flex" onsubmit="return pcPrivChangeSubmit(this);">
                   <input type="hidden" name="aceptaPrivacidad" value="<?php echo intval($pcAceptacion["aceptado"])===1?'0':'1'; ?>">
@@ -971,14 +1000,21 @@ function pcFirmaLimpiarCambio(){ if(pcFirmaCambio) pcFirmaCambio.clear(); }
 function pcPrivConfirmar(valor){
   var form = document.getElementById('pcPrivForm');
   if(!form) return;
-  document.getElementById('pcPrivAccion').value = String(valor);
   if(valor === 1){
     if(!pcFirma || !pcFirma.hasInk()){
       alert('Por favor traza tu firma antes de aceptar.');
       return;
     }
+    if(!confirm('¿Confirmas que ACEPTAS el aviso de privacidad?')){
+      return;
+    }
+    document.getElementById('pcPrivAccion').value = '1';
     document.getElementById('pcPrivFirma').value = pcFirma.dataUrl();
   } else {
+    if(!confirm('¿Confirmas que NO aceptas el aviso de privacidad?')){
+      return;
+    }
+    document.getElementById('pcPrivAccion').value = '0';
     document.getElementById('pcPrivFirma').value = '';
   }
   form.submit();
@@ -991,14 +1027,14 @@ function pcPrivSubmit(form){
 }
 
 function pcPrivChangeSubmit(form){
-  // Si está cambiando de RECHAZO → ACEPTO, exigir firma en el canvas de cambio
   var hidden = form.querySelector('input[name=aceptaPrivacidad]');
-  if(hidden && hidden.value === '1'){
-    // Mostrar canvas si está oculto
+  var valor = hidden ? hidden.value : '';
+
+  // Cambio a ACEPTAR: pedir firma en canvas de cambio
+  if(valor === '1'){
     var box = document.getElementById('pcFirmaBoxCambio');
     if(box && box.style.display === 'none'){
       box.style.display = 'block';
-      // Re-init canvas ahora que es visible
       if(!pcFirmaCambio){
         var c2 = document.getElementById('pcFirmaCanvasCambio');
         if(c2) pcFirmaCambio = pcInitFirma(c2);
@@ -1010,8 +1046,16 @@ function pcPrivChangeSubmit(form){
       alert('Por favor traza tu firma antes de aceptar.');
       return false;
     }
+    if(!confirm('¿Confirmas que ACEPTAS el aviso de privacidad?')){
+      return false;
+    }
     var inp = document.getElementById('pcPrivFirmaCambio');
     if(inp) inp.value = pcFirmaCambio.dataUrl();
+  } else {
+    // Cambio a RECHAZAR: confirmación explícita
+    if(!confirm('¿Confirmas que NO aceptas el aviso de privacidad? Tu firma anterior se eliminará del registro.')){
+      return false;
+    }
   }
   form.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
   return true;
