@@ -81,3 +81,45 @@ else { $_crm_convGrad = '#dc2626,#ef4444'; }
     </div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════
+     ATAJO: MIS COMISIONES DEL MES (asesor)
+══════════════════════════════════════════ -->
+<?php
+require_once __DIR__ . "/../../../config/comisiones.helper.php";
+
+$_crm_comRes = array("confirmado" => 0.0, "ordenes" => 0, "revision" => 0);
+if ($_crm_idAsesor > 0) {
+    try {
+        $_crm_comFiltro = function($o) use ($_crm_idAsesor) {
+            return intval(isset($o["id_Asesor"]) ? $o["id_Asesor"] : 0) == $_crm_idAsesor;
+        };
+        $_crm_comQ1 = array_values(array_filter((array) controladorOrdenes::ctrMostrarComisionesPrimera(), $_crm_comFiltro));
+        $_crm_comQ2 = array_values(array_filter(_comFiltrarSegundaQuincena(controladorOrdenes::ctrMostrarComisionesSegunda()), $_crm_comFiltro));
+        $_crm_comRes = _comResumenMes($_crm_comQ1, $_crm_comQ2, "asesor", null);
+    } catch (Exception $e) {}
+}
+?>
+<div class="row">
+  <div class="col-xs-12" style="margin-bottom:16px">
+    <a href="index.php?ruta=comisiones" style="text-decoration:none;display:block">
+      <div class="crm-kpi" style="background:linear-gradient(135deg,#059669,#10b981);cursor:pointer">
+        <i class="fa-solid fa-hand-holding-dollar crm-kpi-icon"></i>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="crm-kpi-label">Mis Comisiones del Mes</div>
+            <div class="crm-kpi-value">$<?php echo number_format($_crm_comRes["confirmado"], 2); ?></div>
+            <div class="crm-kpi-sub">
+              <i class="fa-solid fa-receipt"></i>
+              <?php echo $_crm_comRes["ordenes"]; ?> órdenes entregadas
+              &nbsp;·&nbsp; 4% por orden &nbsp;·&nbsp; Aproximado, sujeto a cambios
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:10px 20px;color:#fff;font-weight:700;font-size:13px;white-space:nowrap">
+            Ver detalle <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>

@@ -1498,6 +1498,7 @@ var _tecCortes=<?php echo json_encode($_adm_tecPeriodos); ?>;
       array('ruta'=>'ordenes',   'icon'=>'fa-clipboard-list',  'grad'=>'#ef4444,#f87171',   'label'=>'Órdenes',        'desc'=>'Gestionar órdenes'),
       array('ruta'=>'clientes',  'icon'=>'fa-users',           'grad'=>'#3b82f6,#60a5fa',   'label'=>'Clientes',       'desc'=>'Base de clientes'),
       array('ruta'=>'ventasR',   'icon'=>'fa-chart-bar',       'grad'=>'#22c55e,#4ade80',   'label'=>'Ventas',         'desc'=>'Reportes de ventas'),
+      array('ruta'=>'comisiones','icon'=>'fa-hand-holding-dollar','grad'=>'#059669,#10b981','label'=>'Comisiones',     'desc'=>'Resumen por colaborador'),
       array('ruta'=>'pedidos',   'icon'=>'fa-truck',           'grad'=>'#f59e0b,#fbbf24',   'label'=>'Pedidos',        'desc'=>'Control de pedidos'),
       array('ruta'=>'tecnicos',  'icon'=>'fa-screwdriver-wrench','grad'=>'#8b5cf6,#a78bfa', 'label'=>'Técnicos',       'desc'=>'Equipo técnico'),
       array('ruta'=>'asesores',  'icon'=>'fa-headset',         'grad'=>'#06b6d4,#22d3ee',   'label'=>'Asesores',       'desc'=>'Equipo comercial'),

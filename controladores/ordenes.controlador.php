@@ -359,6 +359,26 @@ class controladorOrdenes
 		return $respuesta;
 
 	}
+	static public function ctrMostrarComisionesPrimera()
+	{
+
+		$tabla = "ordenes";
+
+		$respuesta = ModeloOrdenes::mdlMostrarComisionesPrimera($tabla);
+
+		return $respuesta;
+
+	}
+	static public function ctrMostrarComisionesSegunda()
+	{
+
+		$tabla = "ordenes";
+
+		$respuesta = ModeloOrdenes::mdlMostrarComisionesSegunda($tabla);
+
+		return $respuesta;
+
+	}
 	static public function ctrMostrarOrdenesMaterial()
 	{
 

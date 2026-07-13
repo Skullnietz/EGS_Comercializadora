@@ -221,6 +221,45 @@ $_tec_stages_def = array(
 </div>
 
 <!-- ══════════════════════════════════════════
+     ATAJO: MIS COMISIONES DEL MES
+══════════════════════════════════════════ -->
+<?php
+require_once __DIR__ . "/../../../config/comisiones.helper.php";
+
+$_tec_comRes = array("confirmado" => 0.0, "ordenes" => 0, "revision" => 0);
+if ($_tec_id > 0) {
+    try {
+        $_tec_comQ1 = controladorOrdenes::ctrMostrarComisionesPorPersonaPrimera($_tec_id);
+        $_tec_comQ2 = _comFiltrarSegundaQuincena(controladorOrdenes::ctrMostrarComisionesPorPersonaSegunda($_tec_id));
+        $_tec_comRes = _comResumenMes($_tec_comQ1, $_tec_comQ2, "tecnico", $_tec_data);
+    } catch (Exception $e) {}
+}
+?>
+<div class="row">
+  <div class="col-xs-12" style="margin-bottom:16px">
+    <a href="index.php?ruta=comisiones" style="text-decoration:none;display:block">
+      <div class="crm-kpi" style="background:linear-gradient(135deg,#059669,#10b981);cursor:pointer">
+        <i class="fa-solid fa-hand-holding-dollar crm-kpi-icon"></i>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="crm-kpi-label">Mis Comisiones del Mes</div>
+            <div class="crm-kpi-value">$<?php echo number_format($_tec_comRes["confirmado"], 2); ?></div>
+            <div class="crm-kpi-sub">
+              <i class="fa-solid fa-receipt"></i>
+              <?php echo $_tec_comRes["ordenes"]; ?> órdenes entregadas<?php echo $_tec_comRes["revision"] > 0 ? ' · '.$_tec_comRes["revision"].' por revisar' : ''; ?>
+              &nbsp;·&nbsp; Aproximado, sujeto a cambios
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:10px 20px;color:#fff;font-weight:700;font-size:13px;white-space:nowrap">
+            Ver detalle <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
      PIPELINE con filtro de periodo
 ══════════════════════════════════════════ -->
 <div class="crm-section">
