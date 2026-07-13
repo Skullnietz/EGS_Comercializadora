@@ -88,7 +88,7 @@ else { $_crm_convGrad = '#dc2626,#ef4444'; }
 <?php
 require_once __DIR__ . "/../../../config/comisiones.helper.php";
 
-$_crm_comRes = array("confirmado" => 0.0, "ordenes" => 0, "revision" => 0);
+$_crm_comRes = array("confirmado" => 0.0, "ordenes" => 0, "revision" => 0, "revision_monto" => 0.0);
 if ($_crm_idAsesor > 0) {
     try {
         $_crm_comFiltro = function($o) use ($_crm_idAsesor) {

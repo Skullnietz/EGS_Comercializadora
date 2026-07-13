@@ -229,11 +229,12 @@ if (!function_exists('_comProcesar')) {
     function _comProcesar($lista, $modo, $viewer, $mapaCli, $mapaTec, $mapaAse) {
 
         $out = array(
-            "filas"      => array(),
-            "confirmado" => 0.0,   // comisión de órdenes sin bandera (técnico/asesor) o téc. confirmadas (admin)
-            "asesores"   => 0.0,   // solo admin: total comisiones de asesores
-            "revision"   => 0,     // órdenes marcadas "Necesita Revisión"
-            "ordenes"    => 0
+            "filas"          => array(),
+            "confirmado"     => 0.0,   // comisión de órdenes sin bandera (técnico/asesor) o téc. confirmadas (admin)
+            "asesores"       => 0.0,   // solo admin: total comisiones de asesores
+            "revision"       => 0,     // órdenes marcadas "Necesita Revisión"
+            "revision_monto" => 0.0,   // monto aproximado de las órdenes por revisar (referencia, aparte)
+            "ordenes"        => 0
         );
 
         foreach ($lista as $o) {
@@ -314,6 +315,11 @@ if (!function_exists('_comProcesar')) {
             $out["ordenes"]++;
             if ($fila["revision"]) {
                 $out["revision"]++;
+                if ($modo == "admin") {
+                    foreach ($fila["tecnicos"] as $t) $out["revision_monto"] += $t["calc"]["comision"];
+                } elseif ($modo == "tecnico") {
+                    $out["revision_monto"] += $fila["calc"]["comision"];
+                }
             } else {
                 if ($modo == "admin") {
                     foreach ($fila["tecnicos"] as $t) $out["confirmado"] += $t["calc"]["comision"];
@@ -337,6 +343,7 @@ $_com_r1 = _comProcesar($_com_q1, $_com_modo, $viewer, $_com_clientes, $_com_map
 $_com_r2 = _comProcesar($_com_q2, $_com_modo, $viewer, $_com_clientes, $_com_mapaTec, $_com_mapaAse);
 
 $_com_revTotal = $_com_r1["revision"] + $_com_r2["revision"];
+$_com_revMonto = $_com_r1["revision_monto"] + $_com_r2["revision_monto"];
 $_com_ordTotal = $_com_r1["ordenes"] + $_com_r2["ordenes"];
 $_com_quincenaActual = (intval(date("j")) <= 15) ? 1 : 2;
 
@@ -355,12 +362,14 @@ if ($_com_modo == "admin") {
             if (!isset($_com_personal[$k])) {
                 $_com_personal[$k] = array(
                     "id" => $t["id"], "nombre" => $t["nombre"], "tipo" => "tecnico",
-                    "dep" => $t["dep"], "total" => 0.0, "ordenes" => 0, "revision" => 0
+                    "dep" => $t["dep"], "total" => 0.0, "ordenes" => 0,
+                    "revision" => 0, "revision_monto" => 0.0
                 );
             }
             $_com_personal[$k]["ordenes"]++;
             if ($f["revision"]) {
                 $_com_personal[$k]["revision"]++;
+                $_com_personal[$k]["revision_monto"] += $t["calc"]["comision"];
             } else {
                 $_com_personal[$k]["total"] += $t["calc"]["comision"];
             }
@@ -372,7 +381,8 @@ if ($_com_modo == "admin") {
             if (!isset($_com_personal[$k])) {
                 $_com_personal[$k] = array(
                     "id" => $f["asesor"]["id"], "nombre" => $f["asesor"]["nombre"], "tipo" => "asesor",
-                    "dep" => "", "total" => 0.0, "ordenes" => 0, "revision" => 0
+                    "dep" => "", "total" => 0.0, "ordenes" => 0,
+                    "revision" => 0, "revision_monto" => 0.0
                 );
             }
             $_com_personal[$k]["ordenes"]++;
@@ -626,7 +636,7 @@ if (!function_exists('_comFilaPersonal')) {
         <i class="fas fa-tools crm-kpi-icon"></i>
         <div class="crm-kpi-label">Comisiones Técnicos / Mes</div>
         <div class="crm-kpi-value"><?php echo _comMoney($_com_r1["confirmado"] + $_com_r2["confirmado"]); ?></div>
-        <div class="crm-kpi-sub">Sin incluir órdenes por revisar</div>
+        <div class="crm-kpi-sub"><?php echo $_com_revMonto > 0 ? 'Confirmado · aparte ≈ '._comMoney($_com_revMonto).' por revisar' : 'Monto confirmado del mes'; ?></div>
       </div>
 
       <div class="crm-kpi" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)">
@@ -640,16 +650,16 @@ if (!function_exists('_comFilaPersonal')) {
 
       <div class="crm-kpi" style="background:linear-gradient(135deg,#6366f1,#818cf8)">
         <i class="fas fa-coins crm-kpi-icon"></i>
-        <div class="crm-kpi-label">1ra Quincena</div>
+        <div class="crm-kpi-label">1ra Quincena · Confirmado</div>
         <div class="crm-kpi-value"><?php echo _comMoney($_com_r1["confirmado"]); ?></div>
-        <div class="crm-kpi-sub"><?php echo $_com_r1["ordenes"]; ?> órdenes<?php echo $_com_r1["revision"] > 0 ? ' · '.$_com_r1["revision"].' por revisar' : ''; ?></div>
+        <div class="crm-kpi-sub"><?php echo $_com_r1["ordenes"]; ?> órdenes<?php echo $_com_r1["revision"] > 0 ? ' · aparte ≈ '._comMoney($_com_r1["revision_monto"]).' por revisar' : ''; ?></div>
       </div>
 
       <div class="crm-kpi" style="background:linear-gradient(135deg,#3b82f6,#60a5fa)">
         <i class="fas fa-coins crm-kpi-icon"></i>
-        <div class="crm-kpi-label">2da Quincena</div>
+        <div class="crm-kpi-label">2da Quincena · Confirmado</div>
         <div class="crm-kpi-value"><?php echo _comMoney($_com_r2["confirmado"]); ?></div>
-        <div class="crm-kpi-sub"><?php echo $_com_r2["ordenes"]; ?> órdenes<?php echo $_com_r2["revision"] > 0 ? ' · '.$_com_r2["revision"].' por revisar' : ''; ?></div>
+        <div class="crm-kpi-sub"><?php echo $_com_r2["ordenes"]; ?> órdenes<?php echo $_com_r2["revision"] > 0 ? ' · aparte ≈ '._comMoney($_com_r2["revision_monto"]).' por revisar' : ''; ?></div>
       </div>
 
       <?php endif; ?>
@@ -665,7 +675,7 @@ if (!function_exists('_comFilaPersonal')) {
         <i class="fas fa-exclamation-triangle crm-kpi-icon"></i>
         <div class="crm-kpi-label">Necesitan Revisión</div>
         <div class="crm-kpi-value"><?php echo $_com_revTotal; ?></div>
-        <div class="crm-kpi-sub">Órdenes con 2 técnicos participando</div>
+        <div class="crm-kpi-sub"><?php echo $_com_revMonto > 0 ? '≈ '._comMoney($_com_revMonto).' en juego por confirmar' : 'Órdenes con 2 técnicos participando'; ?></div>
       </div>
 
     </div>
@@ -687,7 +697,7 @@ if (!function_exists('_comFilaPersonal')) {
               <th>Perfil</th>
               <th>Órdenes</th>
               <th>Por revisar</th>
-              <th>Comisión pendiente</th>
+              <th>Comisión confirmada</th>
               <th></th>
             </tr>
           </thead>
@@ -725,7 +735,12 @@ if (!function_exists('_comFilaPersonal')) {
                 <span style="color:var(--crm-muted)">—</span>
                 <?php endif; ?>
               </td>
-              <td><b style="color:<?php echo $p["total"] < 0 ? '#dc2626' : '#15803d'; ?>"><?php echo _comMoney($p["total"]); ?></b></td>
+              <td>
+                <b style="color:<?php echo $p["total"] < 0 ? '#dc2626' : '#15803d'; ?>"><?php echo _comMoney($p["total"]); ?></b>
+                <?php if ($p["revision_monto"] > 0): ?>
+                <br><small style="color:#92400e">+ ≈ <?php echo _comMoney($p["revision_monto"]); ?> por revisar</small>
+                <?php endif; ?>
+              </td>
               <td style="text-align:right">
                 <a href="<?php echo $linkVer; ?>" class="com-ver-btn"><i class="fas fa-eye"></i> Ver detalle</a>
               </td>
@@ -803,7 +818,7 @@ if (!function_exists('_comFilaPersonal')) {
           <tfoot>
             <tr>
               <td colspan="4" style="text-align:right; font-weight:700">Totales:</td>
-              <td><b>Técnicos: <?php echo _comMoney($res["confirmado"]); ?></b><?php echo $res["revision"] > 0 ? '<br><small style="color:#92400e">+ '.$res["revision"].' órden(es) por revisar</small>' : ''; ?></td>
+              <td><b>Técnicos confirmado: <?php echo _comMoney($res["confirmado"]); ?></b><?php echo $res["revision"] > 0 ? '<br><small style="color:#92400e">Aparte, por revisar: ≈ '._comMoney($res["revision_monto"]).' en '.$res["revision"].' órden(es)</small>' : ''; ?></td>
               <td></td>
               <td><b>Asesores: <?php echo _comMoney($res["asesores"]); ?></b></td>
               <td colspan="3"><small style="color:var(--crm-muted)">*Montos aproximados, sujetos a cambios</small></td>
@@ -833,10 +848,10 @@ if (!function_exists('_comFilaPersonal')) {
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="7" style="text-align:right; font-weight:700">Total comisión:</td>
+              <td colspan="7" style="text-align:right; font-weight:700">Total confirmado:</td>
               <td colspan="<?php echo ($_com_modo == "tecnico") ? 3 : 2; ?>">
                 <b style="color:#15803d"><?php echo _comMoney($res["confirmado"]); ?></b>
-                <?php echo $res["revision"] > 0 ? '<br><small style="color:#92400e">+ '.$res["revision"].' órden(es) por revisar (no incluidas)</small>' : ''; ?>
+                <?php echo $res["revision"] > 0 ? '<br><small style="color:#92400e">Aparte, por revisar: ≈ '._comMoney($res["revision_monto"]).' en '.$res["revision"].' órden(es) — no incluido en el total</small>' : ''; ?>
                 <br><small style="color:var(--crm-muted)">*Comisión aproximada, sujeta a cambios</small>
               </td>
             </tr>
@@ -885,7 +900,7 @@ if (!function_exists('_comFilaPersonal')) {
 
         <div class="com-regla">
           <span class="com-chip com-chip-rev"><i class="fas fa-exclamation-triangle"></i> Necesita Revisión</span>
-          <div>Órdenes donde participan <b>2 técnicos</b>: la comisión se marca en amarillo y no se suma a los totales. Más adelante se ajustará según el trabajo realizado por cada técnico. La comisión del asesor no se ve afectada.</div>
+          <div>Órdenes donde participan <b>2 técnicos</b>: la comisión se marca en amarillo y <b>no se suma al total confirmado</b>; su monto aproximado se muestra aparte como referencia de lo que está en juego. Más adelante se ajustará según el trabajo realizado por cada técnico. La comisión del asesor no se ve afectada.</div>
         </div>
 
       </div>

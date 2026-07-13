@@ -61,10 +61,11 @@ if (!function_exists('_comCalcTecnico')) {
 
     /* Resumen del mes para widgets de dashboard.
        $modo: "tecnico" (usa departamento de $viewer y marca dobles) o "asesor".
-       Devuelve: confirmado (sin órdenes por revisar), ordenes, revision. */
+       Devuelve: confirmado (sin órdenes por revisar), ordenes, revision y
+       revision_monto (monto aproximado de las órdenes por revisar, aparte). */
     function _comResumenMes($q1, $q2, $modo, $viewer) {
 
-        $r = array("confirmado" => 0.0, "ordenes" => 0, "revision" => 0);
+        $r = array("confirmado" => 0.0, "ordenes" => 0, "revision" => 0, "revision_monto" => 0.0);
         if (!is_array($q1)) $q1 = array();
         if (!is_array($q2)) $q2 = array();
 
@@ -76,10 +77,15 @@ if (!function_exists('_comCalcTecnico')) {
 
             if ($modo == "tecnico") {
 
-                if (_comEsDoble($o)) { $r["revision"]++; continue; }
-
                 $dep  = (is_array($viewer) && isset($viewer["departamento"])) ? $viewer["departamento"] : "";
                 $calc = _comCalcTecnico($total, $inv, $dep);
+
+                if (_comEsDoble($o)) {
+                    $r["revision"]++;
+                    $r["revision_monto"] += $calc["comision"];
+                    continue;
+                }
+
                 $r["confirmado"] += $calc["comision"];
 
             } else {

@@ -226,7 +226,7 @@ $_tec_stages_def = array(
 <?php
 require_once __DIR__ . "/../../../config/comisiones.helper.php";
 
-$_tec_comRes = array("confirmado" => 0.0, "ordenes" => 0, "revision" => 0);
+$_tec_comRes = array("confirmado" => 0.0, "ordenes" => 0, "revision" => 0, "revision_monto" => 0.0);
 if ($_tec_id > 0) {
     try {
         $_tec_comQ1 = controladorOrdenes::ctrMostrarComisionesPorPersonaPrimera($_tec_id);
@@ -242,11 +242,11 @@ if ($_tec_id > 0) {
         <i class="fa-solid fa-hand-holding-dollar crm-kpi-icon"></i>
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
           <div>
-            <div class="crm-kpi-label">Mis Comisiones del Mes</div>
+            <div class="crm-kpi-label">Mis Comisiones del Mes · Confirmado</div>
             <div class="crm-kpi-value">$<?php echo number_format($_tec_comRes["confirmado"], 2); ?></div>
             <div class="crm-kpi-sub">
               <i class="fa-solid fa-receipt"></i>
-              <?php echo $_tec_comRes["ordenes"]; ?> órdenes entregadas<?php echo $_tec_comRes["revision"] > 0 ? ' · '.$_tec_comRes["revision"].' por revisar' : ''; ?>
+              <?php echo $_tec_comRes["ordenes"]; ?> órdenes entregadas<?php echo $_tec_comRes["revision"] > 0 ? ' · aparte ≈ $'.number_format($_tec_comRes["revision_monto"], 2).' por revisar' : ''; ?>
               &nbsp;·&nbsp; Aproximado, sujeto a cambios
             </div>
           </div>
