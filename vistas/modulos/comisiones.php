@@ -398,6 +398,59 @@ if ($_com_modo == "admin") {
 }
 
 /* ══════════════════════════════════════
+   HISTORIAL MENSUAL (últimos 12 meses)
+   ══════════════════════════════════════ */
+$_com_histMeses   = 12;
+$_com_histOrdenes = array();
+
+try {
+
+    if ($_com_modo == "tecnico" && $_com_tec != null) {
+        $_com_histOrdenes = controladorOrdenes::ctrComisionesHistorial($_com_histMeses, "tecnico", intval($_com_tec["id"]));
+    } elseif ($_com_modo == "asesor" && $_com_asesor != null) {
+        $_com_histOrdenes = controladorOrdenes::ctrComisionesHistorial($_com_histMeses, "asesor", intval($_com_asesor["id"]));
+    } elseif ($_com_modo == "admin") {
+        $_com_histOrdenes = controladorOrdenes::ctrComisionesHistorial($_com_histMeses, "empresa", intval($_SESSION["empresa"]));
+    }
+
+} catch (Exception $e) {}
+
+$_com_hist = _comHistorialMensual($_com_histOrdenes, $_com_modo, $viewer, $_com_mapaTec, $_com_histMeses);
+
+// Totales y escala de la gráfica
+$_com_histTotConf   = 0.0;  // confirmado (técnicos en admin)
+$_com_histTotAse    = 0.0;  // asesores (solo admin)
+$_com_histTotRev    = 0.0;  // por revisar acumulado
+$_com_histTotOrd    = 0;
+$_com_histMax       = 0.0;  // barra más alta (para escalar)
+$_com_histMejorK    = null;
+$_com_histMejorVal  = null;
+$_com_histActivos   = 0;    // meses con actividad
+
+foreach ($_com_hist as $k => $m) {
+
+    $_com_histTotConf += $m["confirmado"];
+    $_com_histTotAse  += $m["asesores"];
+    $_com_histTotRev  += $m["revision_monto"];
+    $_com_histTotOrd  += $m["ordenes"];
+    if ($m["ordenes"] > 0) $_com_histActivos++;
+
+    $barraTec = max(0, $m["confirmado"]) + max(0, $m["revision_monto"]);
+    $barraAse = max(0, $m["asesores"]);
+    if ($barraTec > $_com_histMax) $_com_histMax = $barraTec;
+    if ($barraAse > $_com_histMax) $_com_histMax = $barraAse;
+
+    $medida = $m["confirmado"] + $m["asesores"];
+    if ($_com_histMejorVal === null || $medida > $_com_histMejorVal) {
+        $_com_histMejorVal = $medida;
+        $_com_histMejorK   = $k;
+    }
+}
+
+$_com_histPromedio = $_com_histActivos > 0
+    ? ($_com_histTotConf + $_com_histTotAse) / $_com_histActivos : 0;
+
+/* ══════════════════════════════════════
    RENDER DE FILAS
    ══════════════════════════════════════ */
 if (!function_exists('_comFilaPersonal')) {
@@ -538,6 +591,46 @@ if (!function_exists('_comFilaPersonal')) {
     border-color: var(--crm-accent); background: #eef2ff;
     color: var(--crm-accent); text-decoration: none;
   }
+
+  /* ── Gráfica de historial (CSS puro) ── */
+  .com-dot {
+    display: inline-block; width: 9px; height: 9px;
+    border-radius: 3px; margin-right: 4px; vertical-align: middle;
+  }
+  .com-hist-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .com-hist-chip {
+    background: #f8fafc; border: 1px solid var(--crm-border); border-radius: 12px;
+    padding: 10px 16px; font-size: 12px; color: var(--crm-text2); min-width: 140px;
+  }
+  .com-hist-chip b { display: block; font-size: 17px; color: var(--crm-text); margin-top: 2px; }
+  .com-hist-chart {
+    display: flex; align-items: flex-end; gap: 6px;
+    height: 210px; padding: 4px 2px 0; overflow-x: auto;
+  }
+  .com-hist-col {
+    flex: 1 1 0; min-width: 34px; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  }
+  .com-hist-val { font-size: 10px; font-weight: 700; color: var(--crm-text2); margin-bottom: 3px; white-space: nowrap; }
+  .com-hist-bars { display: flex; align-items: flex-end; gap: 3px; width: 100%; justify-content: center; }
+  .com-hist-stack {
+    width: 100%; max-width: 26px; border-radius: 6px 6px 0 0; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    transition: opacity .15s var(--crm-ease);
+  }
+  .com-hist-col:hover .com-hist-stack, .com-hist-col:hover .com-hist-ase { opacity: .8; }
+  .com-hist-seg-rev  { background: #fbbf24; }
+  .com-hist-seg-conf { background: linear-gradient(180deg, #6366f1, #818cf8); }
+  .com-hist-ase {
+    width: 100%; max-width: 26px; border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, #8b5cf6, #a78bfa);
+    transition: opacity .15s var(--crm-ease);
+  }
+  .com-hist-lbl {
+    font-size: 10px; color: var(--crm-muted); margin-top: 6px;
+    text-align: center; line-height: 1.25; white-space: nowrap;
+  }
+  .com-hist-base { border-top: 2px solid var(--crm-border); margin-top: 0; }
 
   .com-toggle { display: inline-flex; background: #eef2ff; border-radius: 12px; padding: 4px; gap: 4px; }
   .com-toggle button {
@@ -865,6 +958,164 @@ if (!function_exists('_comFilaPersonal')) {
     </div>
 
     <?php endforeach; ?>
+
+    <!-- ═════ HISTORIAL DE MESES + GRÁFICA ═════ -->
+    <div class="crm-card" style="margin-bottom:20px;">
+
+      <div class="crm-card-head">
+        <h3 class="crm-card-title">
+          <i class="fas fa-chart-bar"></i>
+          Historial de comisiones · últimos <?php echo $_com_histMeses; ?> meses
+          <?php if ($_com_drill || $_com_modo != "admin"): ?>
+          <span style="font-weight:400; color:var(--crm-muted); font-size:12px;">(personal)</span>
+          <?php else: ?>
+          <span style="font-weight:400; color:var(--crm-muted); font-size:12px;">(global de la empresa)</span>
+          <?php endif; ?>
+        </h3>
+        <div style="display:flex; gap:14px; font-size:11px; color:var(--crm-text2); flex-wrap:wrap;">
+          <span><span class="com-dot" style="background:#6366f1"></span>Confirmado<?php echo $_com_modo == "admin" ? " técnicos" : ""; ?></span>
+          <?php if ($_com_modo == "admin"): ?>
+          <span><span class="com-dot" style="background:#8b5cf6"></span>Asesores</span>
+          <?php endif; ?>
+          <span><span class="com-dot" style="background:#fbbf24"></span>Por revisar</span>
+        </div>
+      </div>
+
+      <div class="crm-card-body">
+
+        <?php if ($_com_histTotOrd == 0): ?>
+
+        <div style="text-align:center; padding:40px 20px; color:var(--crm-muted)">
+          <i class="fas fa-chart-bar" style="font-size:36px; display:block; margin-bottom:12px; opacity:.4"></i>
+          Sin órdenes entregadas en los últimos <?php echo $_com_histMeses; ?> meses.
+        </div>
+
+        <?php else: ?>
+
+        <!-- Chips de resumen -->
+        <div class="com-hist-chips">
+
+          <?php if ($_com_modo == "admin"): ?>
+          <div class="com-hist-chip">Técnicos · <?php echo $_com_histMeses; ?> meses<b style="color:#4338ca"><?php echo _comMoney($_com_histTotConf); ?></b></div>
+          <div class="com-hist-chip">Asesores · <?php echo $_com_histMeses; ?> meses<b style="color:#6d28d9"><?php echo _comMoney($_com_histTotAse); ?></b></div>
+          <?php else: ?>
+          <div class="com-hist-chip">Total confirmado · <?php echo $_com_histMeses; ?> meses<b style="color:#15803d"><?php echo _comMoney($_com_histTotConf); ?></b></div>
+          <?php endif; ?>
+
+          <div class="com-hist-chip">Promedio mensual<b><?php echo _comMoney($_com_histPromedio); ?></b><small style="color:var(--crm-muted)"><?php echo $_com_histActivos; ?> mes(es) con actividad</small></div>
+
+          <?php if ($_com_histMejorK !== null && $_com_histMejorVal > 0): ?>
+          <div class="com-hist-chip">Mejor mes<b><?php echo $_com_hist[$_com_histMejorK]["label"]; ?> · <?php echo _comMoneyCorto($_com_histMejorVal); ?></b></div>
+          <?php endif; ?>
+
+          <?php if ($_com_histTotRev > 0): ?>
+          <div class="com-hist-chip" style="background:#fffbeb; border-color:#fde68a;">Por revisar acumulado<b style="color:#b45309">≈ <?php echo _comMoney($_com_histTotRev); ?></b></div>
+          <?php endif; ?>
+
+        </div>
+
+        <!-- Gráfica de barras (CSS puro, sin librerías) -->
+        <div class="com-hist-chart">
+          <?php
+          $escala = ($_com_histMax > 0) ? 150 / $_com_histMax : 0;
+
+          foreach ($_com_hist as $k => $m) {
+
+              $hConf = max(0, $m["confirmado"]) * $escala;
+              $hRev  = max(0, $m["revision_monto"]) * $escala;
+              $hAse  = max(0, $m["asesores"]) * $escala;
+              if ($m["confirmado"] > 0 && $hConf < 2) $hConf = 2;
+              if ($m["revision_monto"] > 0 && $hRev < 2) $hRev = 2;
+              if ($m["asesores"] > 0 && $hAse < 2) $hAse = 2;
+
+              $tip = $m["label"] . ": Confirmado " . _comMoney($m["confirmado"]);
+              if ($_com_modo == "admin") $tip .= " · Asesores " . _comMoney($m["asesores"]);
+              if ($m["revision_monto"] > 0) $tip .= " · Por revisar ≈ " . _comMoney($m["revision_monto"]);
+              $tip .= " · " . $m["ordenes"] . " órdenes";
+
+              $valTop = ($_com_modo != "admin" && ($m["confirmado"] + $m["revision_monto"]) != 0)
+                  ? _comMoneyCorto($m["confirmado"] + $m["revision_monto"]) : "&nbsp;";
+
+              echo '<div class="com-hist-col" title="' . htmlspecialchars($tip) . '">
+                      <div class="com-hist-val">' . $valTop . '</div>
+                      <div class="com-hist-bars">
+                        <div class="com-hist-stack">
+                          <div class="com-hist-seg-rev" style="height:' . round($hRev) . 'px"></div>
+                          <div class="com-hist-seg-conf" style="height:' . round($hConf) . 'px"></div>
+                        </div>';
+              if ($_com_modo == "admin") {
+                  echo '  <div class="com-hist-ase" style="height:' . round($hAse) . 'px"></div>';
+              }
+              echo '  </div>
+                      <div class="com-hist-lbl">' . str_replace(" ", "<br>", $m["label"]) . '</div>
+                    </div>';
+          }
+          ?>
+        </div>
+        <div class="com-hist-base"></div>
+
+        <!-- Tabla del historial (mes más reciente primero) -->
+        <div style="overflow-x:auto; margin-top:18px;">
+          <table class="crm-table" style="width:100%">
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Órdenes</th>
+                <?php if ($_com_modo == "admin"): ?>
+                <th>Técnicos (confirmado)</th>
+                <th>Por revisar</th>
+                <th>Asesores</th>
+                <th>Total del mes</th>
+                <?php else: ?>
+                <th>Confirmado</th>
+                <th>Por revisar</th>
+                <?php endif; ?>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+              $mesActualK = date("Y-m");
+
+              foreach (array_reverse($_com_hist, true) as $k => $m) {
+
+                  if ($m["ordenes"] == 0 && $k != $mesActualK) continue;
+
+                  $badgeMes = ($k == $mesActualK) ? ' <span class="com-chip" style="background:#dcfce7;color:#15803d">En curso</span>' : '';
+                  $celRev = $m["revision_monto"] > 0
+                      ? '<span style="color:#b45309">≈ ' . _comMoney($m["revision_monto"]) . ' <small>(' . $m["revision"] . ' órd.)</small></span>'
+                      : '<span style="color:var(--crm-muted)">—</span>';
+
+                  echo '<tr>
+                          <td style="font-weight:600; color:var(--crm-text)">' . $m["label"] . $badgeMes . '</td>
+                          <td>' . $m["ordenes"] . '</td>';
+
+                  if ($_com_modo == "admin") {
+                      echo '<td><b style="color:#4338ca">' . _comMoney($m["confirmado"]) . '</b></td>
+                            <td>' . $celRev . '</td>
+                            <td><b style="color:#6d28d9">' . _comMoney($m["asesores"]) . '</b></td>
+                            <td><b>' . _comMoney($m["confirmado"] + $m["asesores"]) . '</b></td>';
+                  } else {
+                      echo '<td><b style="color:#15803d">' . _comMoney($m["confirmado"]) . '</b></td>
+                            <td>' . $celRev . '</td>';
+                  }
+
+                  echo '</tr>';
+              }
+              ?>
+            </tbody>
+          </table>
+        </div>
+
+        <p style="margin:14px 0 0; font-size:11px; color:var(--crm-muted)">
+          <i class="fas fa-info-circle"></i>
+          Calculado con las reglas vigentes sobre órdenes entregadas de meses anteriores; los montos son de referencia.
+        </p>
+
+        <?php endif; ?>
+
+      </div>
+
+    </div>
 
     <!-- ═════ REGLAS DE CÁLCULO ═════ -->
     <div class="crm-card" style="margin-bottom:20px;">

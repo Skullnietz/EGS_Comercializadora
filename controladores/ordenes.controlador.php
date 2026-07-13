@@ -379,6 +379,16 @@ class controladorOrdenes
 		return $respuesta;
 
 	}
+	static public function ctrComisionesHistorial($meses, $filtro, $id)
+	{
+
+		$tabla = "ordenes";
+
+		$respuesta = ModeloOrdenes::mdlComisionesHistorial($tabla, $meses, $filtro, $id);
+
+		return $respuesta;
+
+	}
 	static public function ctrMostrarOrdenesMaterial()
 	{
 

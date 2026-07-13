@@ -142,9 +142,32 @@ class ModeloOrdenes{
 
 
 	}
-	
-	
-	
+// HISTORIAL DE COMISIONES: órdenes entregadas de los últimos N meses (desde el día 1 del mes más antiguo)
+// $filtro: "tecnico" (id_tecnico o id_tecnicoDos), "asesor" (id_Asesor) o "empresa" (id_empresa)
+	static public function mdlComisionesHistorial($tabla, $meses, $filtro, $id){
+
+		$meses = max(1, intval($meses) - 1);
+		$id = intval($id);
+
+		$condicion = "";
+		if ($filtro == "tecnico") {
+			$condicion = " AND (id_tecnico = $id OR id_tecnicoDos = $id)";
+		} elseif ($filtro == "asesor") {
+			$condicion = " AND id_Asesor = $id";
+		} elseif ($filtro == "empresa") {
+			$condicion = " AND id_empresa = $id";
+		}
+
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT id, total, totalInversion, id_tecnico, id_tecnicoDos, id_Asesor, id_empresa, fecha_Salida FROM $tabla WHERE estado = 'Entregado (Ent)' AND fecha_Salida >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL $meses MONTH), '%Y-%m-01')".$condicion." ORDER BY fecha_Salida ASC");
+
+		$stmt -> execute();
+
+		return $stmt -> fetchAll();
+
+	}
+
+
+
 // Mostrar ordenes campos utilizados
 	static public function mdlMostrarOrdenes($tabla, $campo, $empresa){
 
