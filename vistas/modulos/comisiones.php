@@ -128,6 +128,28 @@ if ($_com_modo == "admin") {
     }
 }
 
+/* ── Mes histórico seleccionado (?mes=YYYY-MM, dentro de los últimos 12 meses) ── */
+$_com_mesSel   = null;
+$_com_mesLabel = "";
+
+if (isset($_GET["mes"]) && preg_match('/^\d{4}-\d{2}$/', $_GET["mes"]) && $_GET["mes"] != date("Y-m")) {
+
+    $mesesValidos = _comMesesUltimos(12);
+    if (isset($mesesValidos[$_GET["mes"]])) {
+        $_com_mesSel   = $_GET["mes"];
+        $_com_mesLabel = $mesesValidos[$_com_mesSel];
+    }
+}
+
+/* Parámetros para conservar el estado (drill + mes) en los enlaces */
+$_com_urlDrillParam = "";
+if ($_com_drill) {
+    $_com_urlDrillParam = ($_com_modo == "tecnico")
+        ? '&verTec=' . intval($_com_tec["id"])
+        : '&verAse=' . intval($_com_asesor["id"]);
+}
+$_com_urlMesParam = ($_com_mesSel != null) ? '&mes=' . $_com_mesSel : '';
+
 /* ══════════════════════════════════════
    CARGAR ÓRDENES DEL MES (POR QUINCENA)
    ══════════════════════════════════════ */
@@ -136,7 +158,33 @@ $_com_q2 = array();
 
 try {
 
-    if ($_com_modo == "tecnico") {
+    if ($_com_mesSel != null) {
+
+        // Mes histórico: una sola query del mes, dividida en quincenas en PHP
+        $anioSel = intval(substr($_com_mesSel, 0, 4));
+        $mesSelN = intval(substr($_com_mesSel, 5, 2));
+
+        $filtroMes = "empresa";
+        $idMes = intval($_SESSION["empresa"]);
+        if ($_com_modo == "tecnico") {
+            $filtroMes = "tecnico";
+            $idMes = ($_com_tec != null) ? intval($_com_tec["id"]) : 0;
+        } elseif ($_com_modo == "asesor") {
+            $filtroMes = "asesor";
+            $idMes = ($_com_asesor != null) ? intval($_com_asesor["id"]) : 0;
+        }
+
+        if ($idMes > 0) {
+            $todasMes = controladorOrdenes::ctrMostrarComisionesDeMes($anioSel, $mesSelN, $filtroMes, $idMes);
+            if (is_array($todasMes)) {
+                foreach ($todasMes as $o) {
+                    $dia = intval(substr($o["fecha_Salida"], 8, 2));
+                    if ($dia <= 15) { $_com_q1[] = $o; } else { $_com_q2[] = $o; }
+                }
+            }
+        }
+
+    } elseif ($_com_modo == "tecnico") {
 
         if ($_com_tec != null) {
             $idTec = intval($_com_tec["id"]);
@@ -345,7 +393,7 @@ $_com_r2 = _comProcesar($_com_q2, $_com_modo, $viewer, $_com_clientes, $_com_map
 $_com_revTotal = $_com_r1["revision"] + $_com_r2["revision"];
 $_com_revMonto = $_com_r1["revision_monto"] + $_com_r2["revision_monto"];
 $_com_ordTotal = $_com_r1["ordenes"] + $_com_r2["ordenes"];
-$_com_quincenaActual = (intval(date("j")) <= 15) ? 1 : 2;
+$_com_quincenaActual = ($_com_mesSel != null) ? 1 : ((intval(date("j")) <= 15) ? 1 : 2);
 
 /* ══════════════════════════════════════
    RESUMEN POR COLABORADOR (solo admin)
@@ -610,7 +658,12 @@ if (!function_exists('_comFilaPersonal')) {
   .com-hist-col {
     flex: 1 1 0; min-width: 34px; height: 100%;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    text-decoration: none; cursor: pointer; border-radius: 8px 8px 0 0;
+    transition: background .15s var(--crm-ease);
   }
+  .com-hist-col:hover, .com-hist-col:focus { text-decoration: none; background: #f1f5f9; }
+  .com-hist-col.sel { background: #eef2ff; }
+  .com-hist-col.sel .com-hist-lbl { color: var(--crm-accent); font-weight: 700; }
   .com-hist-val { font-size: 10px; font-weight: 700; color: var(--crm-text2); margin-bottom: 3px; white-space: nowrap; }
   .com-hist-bars { display: flex; align-items: flex-end; gap: 3px; width: 100%; justify-content: center; }
   .com-hist-stack {
@@ -692,8 +745,23 @@ if (!function_exists('_comFilaPersonal')) {
         <b><?php echo htmlspecialchars($_com_drillNombre); ?></b>
         exactamente como las ve en su pantalla.
       </div>
-      <a href="index.php?ruta=comisiones" class="com-volver">
+      <a href="index.php?ruta=comisiones<?php echo $_com_urlMesParam; ?>" class="com-volver">
         <i class="fas fa-arrow-left"></i> Volver al resumen general
+      </a>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($_com_mesSel != null): ?>
+    <!-- ═════ MES HISTÓRICO SELECCIONADO ═════ -->
+    <div class="com-drill-banner" style="background:#f0f9ff; border-color:#bae6fd; color:#075985;">
+      <div>
+        <i class="fas fa-calendar-alt"></i>
+        <b>Mes histórico:</b> estás viendo el detalle de
+        <b><?php echo htmlspecialchars($_com_mesLabel); ?></b>.
+        Montos de referencia calculados con las reglas vigentes.
+      </div>
+      <a href="index.php?ruta=comisiones<?php echo $_com_urlDrillParam; ?>" class="com-volver" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);">
+        <i class="fas fa-rotate-left fa-undo"></i> Volver al mes actual
       </a>
     </div>
     <?php endif; ?>
@@ -759,9 +827,9 @@ if (!function_exists('_comFilaPersonal')) {
 
       <div class="crm-kpi" style="background:linear-gradient(135deg,#22c55e,#4ade80)">
         <i class="fas fa-clipboard-check crm-kpi-icon"></i>
-        <div class="crm-kpi-label">Órdenes del Mes</div>
+        <div class="crm-kpi-label">Órdenes <?php echo $_com_mesSel != null ? '· '.htmlspecialchars($_com_mesLabel) : 'del Mes'; ?></div>
         <div class="crm-kpi-value"><?php echo $_com_ordTotal; ?></div>
-        <div class="crm-kpi-sub">Entregadas en el mes en curso</div>
+        <div class="crm-kpi-sub"><?php echo $_com_mesSel != null ? 'Entregadas en '.htmlspecialchars($_com_mesLabel) : 'Entregadas en el mes en curso'; ?></div>
       </div>
 
       <div class="crm-kpi" style="background:linear-gradient(135deg,<?php echo $_com_revTotal > 0 ? '#d97706,#f59e0b' : '#64748b,#94a3b8'; ?>)">
@@ -778,7 +846,7 @@ if (!function_exists('_comFilaPersonal')) {
     <div class="crm-card" style="margin-bottom:20px;">
 
       <div class="crm-card-head">
-        <h3 class="crm-card-title"><i class="fas fa-users"></i> Resumen por colaborador · mes en curso</h3>
+        <h3 class="crm-card-title"><i class="fas fa-users"></i> Resumen por colaborador · <?php echo $_com_mesSel != null ? htmlspecialchars($_com_mesLabel) : 'mes en curso'; ?></h3>
         <span style="font-size:12px; color:var(--crm-muted)">Clic en "Ver detalle" para ver lo mismo que ve el colaborador</span>
       </div>
 
@@ -805,11 +873,11 @@ if (!function_exists('_comFilaPersonal')) {
                 if ($p["tipo"] == "tecnico") {
                     $gradAv  = "linear-gradient(135deg,#6366f1,#818cf8)";
                     $badgeP  = _comDepBadge($p["dep"]);
-                    $linkVer = 'index.php?ruta=comisiones&verTec=' . $p["id"];
+                    $linkVer = 'index.php?ruta=comisiones&verTec=' . $p["id"] . $_com_urlMesParam;
                 } else {
                     $gradAv  = "linear-gradient(135deg,#8b5cf6,#a78bfa)";
                     $badgeP  = '<span class="com-chip" style="background:#ede9fe;color:#6d28d9">Asesor</span>';
-                    $linkVer = 'index.php?ruta=comisiones&verAse=' . $p["id"];
+                    $linkVer = 'index.php?ruta=comisiones&verAse=' . $p["id"] . $_com_urlMesParam;
                 }
             ?>
             <tr>
@@ -868,9 +936,10 @@ if (!function_exists('_comFilaPersonal')) {
 
     <!-- ═════ TABLAS POR QUINCENA ═════ -->
     <?php
+    $sufijoMes = ($_com_mesSel != null) ? ' · ' . $_com_mesLabel : '';
     $quincenas = array(
-        1 => array("res" => $_com_r1, "titulo" => "Comisiones · 1ra Quincena"),
-        2 => array("res" => $_com_r2, "titulo" => "Comisiones · 2da Quincena")
+        1 => array("res" => $_com_r1, "titulo" => "Comisiones · 1ra Quincena" . $sufijoMes),
+        2 => array("res" => $_com_r2, "titulo" => "Comisiones · 2da Quincena" . $sufijoMes)
     );
 
     foreach ($quincenas as $numQ => $q):
@@ -1014,10 +1083,12 @@ if (!function_exists('_comFilaPersonal')) {
 
         </div>
 
-        <!-- Gráfica de barras (CSS puro, sin librerías) -->
+        <!-- Gráfica de barras (CSS puro, sin librerías) · clic en un mes para ver su detalle -->
         <div class="com-hist-chart">
           <?php
           $escala = ($_com_histMax > 0) ? 150 / $_com_histMax : 0;
+          $mesEnCursoK = date("Y-m");
+          $mesVistaK = ($_com_mesSel != null) ? $_com_mesSel : $mesEnCursoK;
 
           foreach ($_com_hist as $k => $m) {
 
@@ -1031,12 +1102,15 @@ if (!function_exists('_comFilaPersonal')) {
               $tip = $m["label"] . ": Confirmado " . _comMoney($m["confirmado"]);
               if ($_com_modo == "admin") $tip .= " · Asesores " . _comMoney($m["asesores"]);
               if ($m["revision_monto"] > 0) $tip .= " · Por revisar ≈ " . _comMoney($m["revision_monto"]);
-              $tip .= " · " . $m["ordenes"] . " órdenes";
+              $tip .= " · " . $m["ordenes"] . " órdenes · Clic para ver el detalle";
 
               $valTop = ($_com_modo != "admin" && ($m["confirmado"] + $m["revision_monto"]) != 0)
                   ? _comMoneyCorto($m["confirmado"] + $m["revision_monto"]) : "&nbsp;";
 
-              echo '<div class="com-hist-col" title="' . htmlspecialchars($tip) . '">
+              $linkMes = 'index.php?ruta=comisiones' . $_com_urlDrillParam . ($k == $mesEnCursoK ? '' : '&mes=' . $k);
+              $claseSel = ($k == $mesVistaK) ? ' sel' : '';
+
+              echo '<a class="com-hist-col' . $claseSel . '" href="' . $linkMes . '" title="' . htmlspecialchars($tip) . '">
                       <div class="com-hist-val">' . $valTop . '</div>
                       <div class="com-hist-bars">
                         <div class="com-hist-stack">
@@ -1048,7 +1122,7 @@ if (!function_exists('_comFilaPersonal')) {
               }
               echo '  </div>
                       <div class="com-hist-lbl">' . str_replace(" ", "<br>", $m["label"]) . '</div>
-                    </div>';
+                    </a>';
           }
           ?>
         </div>
@@ -1070,23 +1144,29 @@ if (!function_exists('_comFilaPersonal')) {
                 <th>Confirmado</th>
                 <th>Por revisar</th>
                 <?php endif; ?>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               <?php
               $mesActualK = date("Y-m");
+              $mesVistaK = ($_com_mesSel != null) ? $_com_mesSel : $mesActualK;
 
               foreach (array_reverse($_com_hist, true) as $k => $m) {
 
                   if ($m["ordenes"] == 0 && $k != $mesActualK) continue;
 
                   $badgeMes = ($k == $mesActualK) ? ' <span class="com-chip" style="background:#dcfce7;color:#15803d">En curso</span>' : '';
+                  if ($k == $mesVistaK) $badgeMes .= ' <span class="com-chip" style="background:#eef2ff;color:#4338ca">Viendo</span>';
                   $celRev = $m["revision_monto"] > 0
                       ? '<span style="color:#b45309">≈ ' . _comMoney($m["revision_monto"]) . ' <small>(' . $m["revision"] . ' órd.)</small></span>'
                       : '<span style="color:var(--crm-muted)">—</span>';
 
-                  echo '<tr>
-                          <td style="font-weight:600; color:var(--crm-text)">' . $m["label"] . $badgeMes . '</td>
+                  $linkMes = 'index.php?ruta=comisiones' . $_com_urlDrillParam . ($k == $mesActualK ? '' : '&mes=' . $k);
+                  $estiloSel = ($k == $mesVistaK) ? ' style="background:#f5f7ff"' : '';
+
+                  echo '<tr' . $estiloSel . '>
+                          <td style="font-weight:600; color:var(--crm-text)"><a href="' . $linkMes . '" class="com-orden" title="Ver el detalle de ' . htmlspecialchars($m["label"]) . '">' . $m["label"] . '</a>' . $badgeMes . '</td>
                           <td>' . $m["ordenes"] . '</td>';
 
                   if ($_com_modo == "admin") {
@@ -1099,7 +1179,7 @@ if (!function_exists('_comFilaPersonal')) {
                             <td>' . $celRev . '</td>';
                   }
 
-                  echo '</tr>';
+                  echo '<td style="text-align:right"><a href="' . $linkMes . '" class="com-ver-btn"><i class="fas fa-eye"></i> Ver mes</a></td></tr>';
               }
               ?>
             </tbody>
@@ -1166,6 +1246,8 @@ if (!function_exists('_comFilaPersonal')) {
 
 <script>
 
+var comEsHistorico = <?php echo $_com_mesSel != null ? 'true' : 'false'; ?>;
+
 function comVerQuincena(n) {
 
   $("#panelQ1").toggle(n == 1);
@@ -1173,7 +1255,10 @@ function comVerQuincena(n) {
   $("#btnQ1").toggleClass("activo", n == 1);
   $("#btnQ2").toggleClass("activo", n == 2);
 
-  try { localStorage.setItem("comQuincena", n); } catch (e) {}
+  // La preferencia de quincena solo se recuerda para el mes en curso
+  if (!comEsHistorico) {
+    try { localStorage.setItem("comQuincena", n); } catch (e) {}
+  }
 
   // Recalcular anchos de columnas al mostrar la tabla oculta
   if ($.fn.DataTable) {
@@ -1212,12 +1297,15 @@ $(document).ready(function () {
     });
   });
 
-  // Mostrar por defecto la quincena en curso (o la última elegida)
+  // Mostrar por defecto la quincena en curso (o la última elegida);
+  // en meses históricos siempre se abre la 1ra quincena
   var q = <?php echo $_com_quincenaActual; ?>;
-  try {
-    var guardada = localStorage.getItem("comQuincena");
-    if (guardada == "1" || guardada == "2") q = parseInt(guardada, 10);
-  } catch (e) {}
+  if (!comEsHistorico) {
+    try {
+      var guardada = localStorage.getItem("comQuincena");
+      if (guardada == "1" || guardada == "2") q = parseInt(guardada, 10);
+    } catch (e) {}
+  }
   comVerQuincena(q);
 
 });

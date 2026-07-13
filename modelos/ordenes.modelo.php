@@ -165,6 +165,30 @@ class ModeloOrdenes{
 		return $stmt -> fetchAll();
 
 	}
+// COMISIONES DE UN MES ESPECÍFICO (detalle histórico, mismas columnas que el mes en curso)
+// $filtro: "tecnico" (id_tecnico o id_tecnicoDos), "asesor" (id_Asesor) o "empresa" (id_empresa)
+	static public function mdlMostrarComisionesDeMes($tabla, $anio, $mes, $filtro, $id){
+
+		$anio = intval($anio);
+		$mes = intval($mes);
+		$id = intval($id);
+
+		$condicion = "";
+		if ($filtro == "tecnico") {
+			$condicion = " AND (id_tecnico = $id OR id_tecnicoDos = $id)";
+		} elseif ($filtro == "asesor") {
+			$condicion = " AND id_Asesor = $id";
+		} elseif ($filtro == "empresa") {
+			$condicion = " AND id_empresa = $id";
+		}
+
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE YEAR(fecha_Salida) = $anio AND MONTH(fecha_Salida) = $mes AND estado = 'Entregado (Ent)'".$condicion." ORDER BY fecha_Salida DESC");
+
+		$stmt -> execute();
+
+		return $stmt -> fetchAll();
+
+	}
 
 
 

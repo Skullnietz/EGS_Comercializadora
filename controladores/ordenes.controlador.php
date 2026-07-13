@@ -389,6 +389,16 @@ class controladorOrdenes
 		return $respuesta;
 
 	}
+	static public function ctrMostrarComisionesDeMes($anio, $mes, $filtro, $id)
+	{
+
+		$tabla = "ordenes";
+
+		$respuesta = ModeloOrdenes::mdlMostrarComisionesDeMes($tabla, $anio, $mes, $filtro, $id);
+
+		return $respuesta;
+
+	}
 	static public function ctrMostrarOrdenesMaterial()
 	{
 
