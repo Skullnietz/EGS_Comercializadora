@@ -3,7 +3,7 @@ $jsVer = '1.4.2';
 $rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
 $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
-$isClientePublicRoute = ($rutaActual === "estado-orden-cliente" || $rutaActual === "portal-cliente");
+$isClientePublicRoute = ($rutaActual === "estado-orden-cliente" || $rutaActual === "portal-cliente" || $rutaActual === "validar-garantia");
 
 if ($isTabletPublicRoute || $isClientePublicRoute) {
   header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");

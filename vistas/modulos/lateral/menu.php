@@ -287,6 +287,11 @@ $_fotoSidebar = (!empty($_SESSION["foto"]))
     echo '<li><a href="index.php?ruta=inicio"><i class="fas fa-home"></i><span> Tablero</span></a></li>';
   }
 
+  // ── Etiquetas (acceso prioritario para administración) ──
+  if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador") {
+    echo '<li><a href="index.php?ruta=etiquetas"><i class="fas fa-tags"></i><span> Etiquetas</span></a></li>';
+  }
+
   // ── Productos + Ventas ──
   if ($_SESSION["perfil"] == "Super-Administrador" || $_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "secretaria") {
     echo '

@@ -123,6 +123,7 @@ require_once "modelos/modelo.asesores.php";
 require_once "modelos/empresas.modelo.php";
 
 require_once "modelos/ordenes.modelo.php";
+require_once "modelos/etiquetas.modelo.php";
 
 require_once "modelos/clientes.modelo.php";
 

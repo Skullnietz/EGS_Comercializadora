@@ -18,6 +18,8 @@ return [
     'comentarios-hoy',
     'cambios-estado-hoy',
     'todas-notificaciones',
+    'etiquetas',
+    'validar-garantia',
 
     /* ── Catálogo de productos ──────────────────── */
     'categorias',
