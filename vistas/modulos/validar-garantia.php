@@ -1,5 +1,13 @@
 <?php
-$tokenGarantia = isset($_GET["token"]) ? strtolower(trim((string) $_GET["token"])) : "";
+$tokenEntrada = isset($_GET["g"]) ? trim((string) $_GET["g"]) : (isset($_GET["token"]) ? trim((string) $_GET["token"]) : "");
+$tokenGarantia = strtolower($tokenEntrada);
+if (preg_match('/^[A-Za-z0-9_-]{43}$/', $tokenEntrada)) {
+    $base64 = strtr($tokenEntrada, '-_', '+/') . '=';
+    $binario = base64_decode($base64, true);
+    if ($binario !== false && strlen($binario) === 32) {
+        $tokenGarantia = bin2hex($binario);
+    }
+}
 $garantia = null;
 if (preg_match('/^[a-f0-9]{64}$/', $tokenGarantia)) {
     try {

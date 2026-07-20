@@ -103,7 +103,7 @@ $host = isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "backend.egsequip
 $script = isset($_SERVER["SCRIPT_NAME"]) ? $_SERVER["SCRIPT_NAME"] : "/index.php";
 $directorio = rtrim(str_replace("\\", "/", dirname($script)), "/");
 if ($directorio === "." || $directorio === "/") $directorio = "";
-$urlValidacionBase = $esquema . "://" . $host . $directorio . "/validar-garantia?token=";
+$urlValidacionBase = $esquema . "://" . $host . $directorio . "/validar-garantia?g=";
 
 function egsH($valor) { return htmlspecialchars((string) $valor, ENT_QUOTES, "UTF-8"); }
 function egsSitioVisible($valor) {
@@ -202,7 +202,7 @@ function egsSitioVisible($valor) {
                   <div class="egs-w-row"><b>CLAVE CLIENTE</b><span id="wKey"></span></div>
                   <div class="egs-w-row"><b>CLIENTE</b><span id="wClient"></span></div>
                   <div class="egs-w-row egs-date-row"><b>ENTREGA</b><span id="wDelivery"></span><b>VENCE</b><span id="wExpiry"></span></div>
-                  <div class="egs-validity-strip">SELLO ALTERADO = GARANTÍA INVÁLIDA</div>
+                  <div class="egs-validity-strip">SELLO ALTERADO · SIN GARANTÍA</div>
                   <div class="egs-next-service"><b>PRÓXIMO SERVICIO</b><span id="wService"></span></div>
                   <div id="warrantyQr" class="egs-label-qr is-empty"><div id="warrantyQrCode" class="egs-qr-code"></div><small>VALIDAR</small></div>
                 </div>
@@ -220,6 +220,8 @@ function egsSitioVisible($valor) {
 .egs-print-label{position:relative;background:#fff;color:#080b0a;font-family:Arial,Helvetica,sans-serif;box-sizing:border-box;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}.egs-corner{position:absolute;width:0;height:0;border-style:solid;z-index:4}.egs-corner-tl{top:1.5mm;left:1.5mm;border-width:3.2mm 3.2mm 0 0;border-color:#167533 transparent transparent transparent}.egs-corner-br{right:1.4mm;bottom:1.4mm;border-width:0 0 3.2mm 3.2mm;border-color:transparent transparent #167533 transparent}
 .egs-contact-label{width:4cm;height:2.5cm;display:grid;grid-template-columns:14mm .8mm 1fr;padding:1.4mm}.egs-contact-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-width:0;padding:.5mm}.egs-contact-brand img{width:12.5mm;height:5mm;object-fit:contain;margin-bottom:.4mm}.egs-contact-brand b{font-size:3.6pt;line-height:1.05;text-transform:uppercase;max-width:13mm}.egs-contact-brand small{font-size:2.8pt;line-height:1.12;margin-top:.5mm;max-width:12mm}.egs-green-rule{width:.45mm;background:#18763a;border-radius:1mm;margin:.4mm auto}.egs-contact-info{padding:.8mm .2mm 0 1mm;min-width:0}.egs-contact-info>b{display:block;font-size:5pt;line-height:1;margin-bottom:.35mm;letter-spacing:.05mm}.egs-contact-info p{margin:0 0 .55mm;font-size:3.25pt;font-weight:600;line-height:1.15;overflow:hidden}.egs-contact-info .egs-phone-line{font-size:3.45pt;line-height:1.28}.egs-site-line{position:absolute;left:16.5mm;right:1.7mm;bottom:1.5mm;white-space:nowrap;text-overflow:ellipsis;font-size:3pt!important}.egs-site-line i{color:#16803b;font-style:normal}.egs-contact-label .egs-corner-br{right:1.2mm;bottom:1.2mm}
 .egs-warranty-label{width:6.2cm;height:3.5cm;display:grid;grid-template-columns:20mm .8mm 1fr;padding:1.4mm}.egs-warranty-contact{padding:.6mm .7mm .3mm;display:flex;flex-direction:column;align-items:flex-start;overflow:hidden}.egs-warranty-contact img{width:14mm;height:5mm;object-fit:contain;align-self:center;margin-bottom:.15mm}.egs-warranty-contact .wc-name{align-self:center;font-size:4pt;line-height:1;text-transform:uppercase}.egs-warranty-contact .wc-tagline{align-self:center;font-size:2.6pt;margin:.25mm 0 .65mm;line-height:1.1;text-align:center}.egs-warranty-contact strong{font-size:4.4pt;line-height:1;margin:.4mm 0 .25mm}.egs-warranty-contact p{font-size:3.05pt;font-weight:600;line-height:1.16;margin:0}.egs-warranty-contact .wc-phones{font-size:3.15pt;line-height:1.22}.egs-warranty-contact .wc-site{font-size:2.7pt;font-weight:700;margin-top:.55mm;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.egs-warranty-rule{width:.5mm;background:#18763a;border-radius:1mm;margin:.2mm auto}.egs-warranty-data{position:relative;padding:.7mm .3mm 0 1mm;min-width:0}.egs-w-row{display:grid;grid-template-columns:14mm 1fr;align-items:end;height:4mm;font-size:4.5pt}.egs-w-row b{font-size:4.7pt;white-space:nowrap}.egs-w-row span{display:block;border-bottom:.2mm solid #222;height:3mm;line-height:2.8mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:.5mm}.egs-w-row:first-child{grid-template-columns:7mm 1fr 9mm 1fr;gap:.5mm}.egs-w-row:first-child .fac-label{text-align:right}.egs-date-row{grid-template-columns:7mm 1fr 6mm 1fr;gap:.5mm}.egs-date-row b:nth-of-type(2){text-align:right}.egs-validity-strip{height:3.3mm;background:#18763a;color:#fff;font-size:3.25pt;font-weight:700;line-height:3.3mm;padding:0 .8mm;white-space:nowrap;overflow:hidden;margin-top:.6mm;margin-right:12mm;letter-spacing:.03mm}.egs-next-service{position:absolute;left:1mm;right:12.5mm;bottom:1.4mm;display:grid;grid-template-columns:17mm 1fr;align-items:end;font-size:4.5pt}.egs-next-service span{border-bottom:.2mm solid #222;height:2.8mm;text-align:center}.egs-label-qr{position:absolute;right:.3mm;bottom:.25mm;width:11.2mm;height:11.8mm;background:#fff;border:.3mm solid #18763a;border-radius:.7mm;padding:.45mm;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center}.egs-label-qr.is-empty{display:none}.egs-qr-code{width:9.3mm;height:9.3mm}.egs-qr-code canvas{width:100%!important;height:100%!important;display:block!important}.egs-qr-code img{display:none!important}.egs-qr-code img.egs-qr-print{width:100%!important;height:100%!important;display:block!important}.egs-label-qr small{font-size:2.25pt;font-weight:800;line-height:1;color:#166534;letter-spacing:.12mm;margin-top:.15mm}.egs-warranty-label.has-qr .egs-corner-br{display:none}
+/* Equilibrio visual: bloques centrados y QR físico de 15 mm con zona de seguridad. */
+.egs-contact-info{padding:.5mm .2mm .5mm 1mm;display:flex;flex-direction:column;justify-content:center}.egs-contact-info .egs-site-line{position:static;left:auto;right:auto;bottom:auto;align-self:stretch;margin:.45mm 0 0!important;padding:.45mm .6mm;background:#edf8f0;border-left:.45mm solid #18763a;border-radius:.55mm;color:#124e29}.egs-contact-info .egs-site-line i{color:#18763a}.egs-warranty-contact{justify-content:center}.egs-warranty-contact .wc-site{align-self:stretch;padding:.35mm .45mm;background:#edf8f0;border-radius:.45mm;color:#124e29}.egs-validity-strip{margin-right:0}.egs-next-service{right:1mm}.egs-label-qr{width:18.5mm;height:19.3mm;padding:1.15mm;right:.2mm;bottom:.2mm}.egs-qr-code{width:15mm;height:15mm;flex:none}.egs-label-qr small{font-size:2.4pt;margin-top:.2mm}.egs-warranty-label.has-qr .egs-w-row:not(.egs-date-row){height:2.95mm}.egs-warranty-label.has-qr .egs-w-row:not(.egs-date-row) span{height:2.5mm;line-height:2.3mm}.egs-warranty-label.has-qr .egs-date-row{width:18mm;height:6.5mm;grid-template-columns:7mm 11mm;grid-template-rows:3.25mm 3.25mm;gap:0}.egs-warranty-label.has-qr .egs-date-row b:nth-of-type(2){text-align:left}.egs-warranty-label.has-qr .egs-validity-strip{width:18mm;margin-right:0;padding:0 .45mm;font-size:2.55pt;letter-spacing:0}.egs-warranty-label.has-qr .egs-next-service{right:auto;width:18mm;grid-template-columns:11.5mm 1fr;font-size:3.55pt;bottom:.7mm}
 @media(max-width:991px){.egs-preview-panel{position:static}.egs-label-stage .egs-print-label{zoom:1.8}}@media(max-width:480px){.egs-label-intro>span{display:none}.egs-mode-choice{grid-template-columns:1fr}.egs-label-stage .egs-print-label{zoom:1.4}}
 </style>
 
@@ -236,6 +238,12 @@ function egsSitioVisible($valor) {
   function set(name,value){ var el=document.querySelector('[name="'+name+'"]'); if(el){el.value=value||'';el.dispatchEvent(new Event('input',{bubbles:true}));} }
   function text(id,value){ var el=document.getElementById(id); if(el) el.textContent=value||''; }
   function displaySite(value){ return (value||'').replace(/^https?:\/\//i,'').replace(/\/$/,''); }
+  function compactToken(token){
+    if(!/^[a-f0-9]{64}$/i.test(token||'')) return token||'';
+    var binary='';
+    for(var i=0;i<token.length;i+=2) binary+=String.fromCharCode(parseInt(token.substr(i,2),16));
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
   function prettyDate(value){ if(!value)return ''; var p=value.slice(0,10).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : value; }
   function cleanDate(value){ if(!value || !/^\d{4}-\d{2}-\d{2}/.test(value))return ''; var year=parseInt(value.slice(0,4),10); return year>=2000 ? value.slice(0,10) : ''; }
   function todayLocal(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -255,10 +263,10 @@ function egsSitioVisible($valor) {
 
   function renderQr(token){
     var wrap=document.getElementById('warrantyQr'), box=document.getElementById('warrantyQrCode'), label=document.getElementById('warrantyLabel'); box.innerHTML='';
-    var url=token ? validationBase+encodeURIComponent(token) : '';
+    var url=token ? validationBase+encodeURIComponent(compactToken(token)) : '';
     wrap.classList.toggle('is-empty',!url);
     label.classList.toggle('has-qr',!!url);
-    if(url && typeof QRCode!=='undefined') new QRCode(box,{text:url,width:160,height:160,correctLevel:QRCode.CorrectLevel.L});
+    if(url && typeof QRCode!=='undefined') new QRCode(box,{text:url,width:256,height:256,correctLevel:QRCode.CorrectLevel.L});
     text('qrUrlText',url||'Guarda la garantía vinculada para generar el enlace.');
   }
   function selectOrder(){
