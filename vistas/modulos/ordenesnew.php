@@ -433,6 +433,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
       if (b.r) h += "<span style='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:"+b.r[2]+";margin-left:3px' title='Recoge: ~"+b.r[3]+" días'><i class='fas "+b.r[0]+"' style='font-size:10px;color:"+b.r[1]+"'></i></span>";
       return h;
     }
+	var _puedeImprimirEtiquetaContacto = <?php echo isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "administrador" ? "true" : "false"; ?>;
 
     $('#datatableordenes').DataTable( {
     "order": [[ 0, "desc" ]],
@@ -561,7 +562,14 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
         },
         {data: null,
         "render": function (data, type, row, meta) {
-            return '<a type="button" href="/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='+ data.id +'&empresa='+ data.id_empresa +'&asesor='+ data.id_Asesor +'&cliente='+ data.id_usuario +'&tecnico='+ data.id_tecnico +'" id="ButtonImprimir" class="editar btn btn-primary botonImprimir btnImprimirorden" idOrden="'+data.id+'" empresa="'+data.id_empresa+'" asesor="'+data.id_Asesor+'" cliente="'+data.id_usuario+'" tecnico="'+data.id_tecnico+'" estado="'+String(data.estado || '').replace(/"/g, '&quot;')+'" target="_blank"><span class="fa fa-print"></span><span class="hidden-xs"> Imprimir ticket</span></a>';
+            var estadoOrden = String(data.estado || '');
+            var esEntregada = /\(ent\)|entregado|entregada/i.test(estadoOrden);
+            var esRevision = /\(rev\)|revisión|revision/i.test(estadoOrden);
+            var tituloImpresion = esEntregada ? 'Imprimir ticket y etiqueta de garantía' : 'Imprimir ticket';
+            var botonEtiqueta = _puedeImprimirEtiquetaContacto && esRevision
+                ? ' <a href="index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden='+data.id+'" class="btn btn-success" target="_blank" title="Imprimir etiqueta de identificación"><span class="fa fa-tag"></span></a>'
+                : '';
+            return '<a type="button" href="/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='+ data.id +'&empresa='+ data.id_empresa +'&asesor='+ data.id_Asesor +'&cliente='+ data.id_usuario +'&tecnico='+ data.id_tecnico +'" id="ButtonImprimir" class="editar btn btn-primary botonImprimir btnImprimirorden" idOrden="'+data.id+'" empresa="'+data.id_empresa+'" asesor="'+data.id_Asesor+'" cliente="'+data.id_usuario+'" tecnico="'+data.id_tecnico+'" estado="'+estadoOrden.replace(/"/g, '&quot;')+'" data-etiqueta-garantia="'+(esEntregada ? '1' : '0')+'" title="'+tituloImpresion+'" target="_blank"><span class="fa fa-print"></span><span class="hidden-xs"> Imprimir ticket</span></a>'+botonEtiqueta;
         
         }
         },

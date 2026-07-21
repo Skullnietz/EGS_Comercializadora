@@ -123,13 +123,13 @@ class tablaOrdenes
 
 
 			$InfoOrdenes = "<button class='btn btn-warning btnVerInfoOrden' idOrden='" . $ordenes[$i]["id"] . "' cliente='" . $ordenes[$i]["id_usuario"] . "'  tecnico='" . $ordenes[$i]["id_tecnico"] . "' asesor='" . $ordenes[$i]["id_Asesor"] . "' empresa='" . $ordenes[$i]["id_empresa"] . "' pedido='" . $ordenes[$i]["id_pedido"] . "' data-toggle='modal'><i class='fa fa-pencil'></button>";
-			if (isset($_GET["perfil"]) && $_GET["perfil"] === "administrador" && stripos((string) $ordenes[$i]["estado"], "(REV)") !== false) {
-				$InfoOrdenes .= " <a class='btn btn-success' href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($ordenes[$i]["id"]) . "' target='_blank' title='Imprimir etiqueta de identificación'><i class='fa fa-tag'></i></a>";
-			}
 
 			$eliminarOrden = "<button class='btn btn-danger btnEliminarorden' idOrden='" . $ordenes[$i]["id"] . "'><i class='fa fa-times'></i></button>";
 
 			$ticket = "<button class='btn btn-warning btnImprimirorden' idOrden='" . $ordenes[$i]["id"] . "' cliente='" . $ordenes[$i]["id_usuario"] . "'  tecnico='" . $ordenes[$i]["id_tecnico"] . "' asesor='" . $ordenes[$i]["id_Asesor"] . "' empresa='" . $ordenes[$i]["id_empresa"] . "' estado='" . htmlspecialchars($ordenes[$i]["estado"], ENT_QUOTES, "UTF-8") . "' data-toggle='modal'><i class='fa fa-ticket'></i></button>";
+			if (isset($_GET["perfil"]) && $_GET["perfil"] === "administrador" && stripos((string) $ordenes[$i]["estado"], "(REV)") !== false) {
+				$ticket .= " <a class='btn btn-success' href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($ordenes[$i]["id"]) . "' target='_blank' title='Imprimir etiqueta de identificación'><i class='fa fa-tag'></i></a>";
+			}
 
 			$pedido = "<button class='btn btn-info' data-toggle='modal' data-target='#modalAsignarPedido'><i class='fa fa-sort'></i></button>";
 
