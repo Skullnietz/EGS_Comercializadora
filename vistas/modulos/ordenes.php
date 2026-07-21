@@ -827,9 +827,6 @@ function _ordGetBadgeClass($estadoText) {
                   /*LINK DE IMPRESION DE EDITAR ORDEN https://backend.comercializadoraegs.com/index.php?ruta=infoOrden&idOrden=5240&empresa=1&asesor=9&cliente=2726&tecnico=4&pedido=0*/
 
                   $InfoOrdenes = "<a href='index.php?ruta=infoOrden&idOrden=" . $valueOrdenes["id"] . "&empresa=" . $valueOrdenes["id_empresa"] . "&asesor=" . $valueOrdenes["id_Asesor"] . "&cliente=" . $valueOrdenes["id_usuario"] . "&tecnico=" . $valueOrdenes["id_tecnico"] . "&tecnicodos=" . $valueOrdenes["id_tecnicoDos"] . "&pedido=" . $valueOrdenes["id_pedido"] . "' class='btn btn-warning' target='_blank'><i class='fas fa-eye' ></i></a>";
-				  if ($_SESSION["perfil"] === "administrador" && stripos((string) $valueOrdenes["estado"], "(REV)") !== false) {
-					$InfoOrdenes .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success' target='_blank' title='Imprimir etiqueta de identificación'><i class='fas fa-tag'></i></a>";
-				  }
 
 
 
@@ -838,6 +835,9 @@ function _ordGetBadgeClass($estadoText) {
                   /*LINK DE IMPRESION DE TICKET: extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=5242&empresa=1&asesor=9&cliente=2727&tecnico=2*/
 
                   $ticket = "<a href='extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=" . $valueOrdenes["id"] . "&empresa=" . $valueOrdenes["id_empresa"] . "&asesor=" . $valueOrdenes["id_Asesor"] . "&cliente=" . $valueOrdenes["id_usuario"] . "&tecnico=" . $valueOrdenes["id_tecnico"] . "' class='btn btn-warning btnImprimirorden' idOrden='" . $valueOrdenes["id"] . "' cliente='" . $valueOrdenes["id_usuario"] . "'  tecnico='" . $valueOrdenes["id_tecnico"] . "' asesor='" . $valueOrdenes["id_Asesor"] . "' empresa='" . $valueOrdenes["id_empresa"] . "' estado='" . htmlspecialchars($valueOrdenes["estado"], ENT_QUOTES, "UTF-8") . "' data-toggle='modal' target='_blank'><i class='fas fa-ticket-alt' ></i></a>";
+				  if ($_SESSION["perfil"] === "administrador" && stripos((string) $valueOrdenes["estado"], "(REV)") !== false) {
+					$ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success' target='_blank' title='Imprimir etiqueta de identificación'><i class='fas fa-tag'></i></a>";
+				  }
 
 
 
@@ -1085,9 +1085,6 @@ function _ordGetBadgeClass($estadoText) {
                     /*LINK DE IMPRESION DE EDITAR ORDEN https://backend.comercializadoraegs.com/index.php?ruta=infoOrden&idOrden=5240&empresa=1&asesor=9&cliente=2726&tecnico=4&pedido=0*/
 
                     $InfoOrdenes = "<a href='index.php?ruta=infoOrden&idOrden=" . $valueOrdenes["id"] . "&empresa=" . $valueOrdenes["id_empresa"] . "&asesor=" . $valueOrdenes["id_Asesor"] . "&cliente=" . $valueOrdenes["id_usuario"] . "&tecnico=" . $valueOrdenes["id_tecnico"] . "&tecnicodos=" . $valueOrdenes["id_tecnicoDos"] . "&pedido=" . $valueOrdenes["id_pedido"] . "' class='btn btn-warning' data-toggle='modal'><i class='fas fa-eye'></i></a>";
-					if ($_SESSION["perfil"] === "administrador" && stripos((string) $valueOrdenes["estado"], "(REV)") !== false) {
-					  $InfoOrdenes .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success' target='_blank' title='Imprimir etiqueta de identificación'><i class='fas fa-tag'></i></a>";
-					}
 
 
 
@@ -1098,6 +1095,9 @@ function _ordGetBadgeClass($estadoText) {
                     /*LINK DE IMPRESION DE TICKET: extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=5242&empresa=1&asesor=9&cliente=2727&tecnico=2*/
 
                     $ticket = "<a href='extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=" . $valueOrdenes["id"] . "&empresa=" . $valueOrdenes["id_empresa"] . "&asesor=" . $valueOrdenes["id_Asesor"] . "&cliente=" . $valueOrdenes["id_usuario"] . "&tecnico=" . $valueOrdenes["id_tecnico"] . "' class='btn btn-warning btnImprimirorden' idOrden='" . $valueOrdenes["id"] . "' cliente='" . $valueOrdenes["id_usuario"] . "'  tecnico='" . $valueOrdenes["id_tecnico"] . "' asesor='" . $valueOrdenes["id_Asesor"] . "' empresa='" . $valueOrdenes["id_empresa"] . "' estado='" . htmlspecialchars($valueOrdenes["estado"], ENT_QUOTES, "UTF-8") . "' data-toggle='modal' target='_blank'><i class='fas fa-ticket-alt'></i></a>";
+					if ($_SESSION["perfil"] === "administrador" && stripos((string) $valueOrdenes["estado"], "(REV)") !== false) {
+					  $ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success' target='_blank' title='Imprimir etiqueta de identificación'><i class='fas fa-tag'></i></a>";
+					}
 
 
 
