@@ -103,7 +103,7 @@ $host = isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "backend.egsequip
 $script = isset($_SERVER["SCRIPT_NAME"]) ? $_SERVER["SCRIPT_NAME"] : "/index.php";
 $directorio = rtrim(str_replace("\\", "/", dirname($script)), "/");
 if ($directorio === "." || $directorio === "/") $directorio = "";
-$urlValidacionBase = $esquema . "://" . $host . $directorio . "/validar-garantia?g=";
+$urlOrdenQrBase = $esquema . "://" . $host . $directorio . "/infoOrden?idOrden=";
 
 function egsH($valor) { return htmlspecialchars((string) $valor, ENT_QUOTES, "UTF-8"); }
 function egsSitioVisible($valor) {
@@ -234,7 +234,7 @@ function egsSitioVisible($valor) {
 <script>
 (function(){
   var orders = <?= json_encode($ordenesEtiqueta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
-  var validationBase = <?= json_encode($urlValidacionBase, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+  var orderQrBase = <?= json_encode($urlOrdenQrBase, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var generatedToken = <?= json_encode($tokenGenerado, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var byId = {};
   orders.forEach(function(order){ byId[String(order.id)] = order; });
@@ -267,14 +267,14 @@ function egsSitioVisible($valor) {
   document.querySelectorAll('.egs-warranty-live').forEach(function(el){el.addEventListener('input',function(){text(el.dataset.target,el.type==='date'?prettyDate(el.value):el.value);});});
 
   function renderQr(token){
-    var url=token ? validationBase+encodeURIComponent(compactToken(token)) : '';
+    var orderId=document.getElementById('idOrdenEtiqueta').value;
+    var url=token && orderId ? orderQrBase+encodeURIComponent(orderId)+'&g='+encodeURIComponent(compactToken(token)) : '';
     var targets=[['warrantyQr','warrantyQrCode','warrantyLabel'],['contactQr','contactQrCode','contactLabel']];
     targets.forEach(function(ids){
       var wrap=document.getElementById(ids[0]),box=document.getElementById(ids[1]),label=document.getElementById(ids[2]);
       box.innerHTML=''; wrap.classList.toggle('is-empty',!url); label.classList.toggle('has-qr',!!url);
       if(url && typeof QRCode!=='undefined') new QRCode(box,{text:url,width:256,height:256,correctLevel:QRCode.CorrectLevel.L});
     });
-    var orderId=document.getElementById('idOrdenEtiqueta').value;
     text('contactOrder',url && orderId ? '#'+orderId : '');
     text('qrUrlText',url||'Guarda la garantía vinculada para generar el enlace.');
   }
