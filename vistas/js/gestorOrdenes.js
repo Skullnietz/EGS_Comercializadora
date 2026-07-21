@@ -1325,12 +1325,13 @@ $(document).on("click", ".btnImprimirorden", function(){
 	var cliente = $(this).attr("cliente");
 	var tecnico = $(this).attr("tecnico");
 	var estadoOrden = $(this).attr("estado") || "";
+	var generaGarantia = $(this).attr("data-etiqueta-garantia") === "1" || /\(ent\)|entregado|entregada/i.test(estadoOrden);
 	var esEnlaceTicket = this.tagName && this.tagName.toLowerCase() === "a" && $(this).attr("href");
 	var urlTicket = "extensiones/tcpdf/pdf/ticketOrden.php/?idOrden="+idOrden+"&empresa="+empresa+"&asesor="+asesor+"&cliente="+cliente+"&tecnico="+tecnico;
 
 	// El enlace conserva su apertura normal para que el ticket siempre salga.
 	// La etiqueta de garantia se abre aparte como popup de impresion.
-	if (estadoOrden.toLowerCase().indexOf("(ent)") !== -1) {
+	if (generaGarantia) {
 		var anchoEtiqueta = 560;
 		var altoEtiqueta = 480;
 		var izquierdaEtiqueta = Math.max(0, Math.round(window.screenX + (window.outerWidth - anchoEtiqueta) / 2));
