@@ -298,6 +298,7 @@ $_bingCopy     = $_bingData['copyright'];
             </div>
 
             <form method="post">
+                <input type="hidden" name="redirigirOrden" value="<?= isset($_GET['orden']) ? intval($_GET['orden']) : 0 ?>">
                 <div class="form-group">
                     <i class="fas fa-envelope"></i>
                     <input type="email" class="form-control" placeholder="Correo Electr&oacute;nico" name="ingEmail" required>

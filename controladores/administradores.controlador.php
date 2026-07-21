@@ -40,11 +40,12 @@ class ControladorAdministradores{
 						$_SESSION["perfil"] = $respuesta["perfil"];
 						$_SESSION["empresa"] = $respuesta["id_empresa"];
 
-						echo '<script>
+						$idOrdenDestino = isset($_POST["redirigirOrden"]) ? intval($_POST["redirigirOrden"]) : 0;
+						$destinoLogin = $idOrdenDestino > 0
+							? "index.php?ruta=infoOrden&idOrden=" . $idOrdenDestino
+							: "index.php?ruta=inicio";
 
-							window.location = "index.php?ruta=inicio";
-
-						</script>';
+						echo '<script>window.location = ' . json_encode($destinoLogin) . ';</script>';
 
 						$tabla="administradores";
 						$sesionActiva=1;
