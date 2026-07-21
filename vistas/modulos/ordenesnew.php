@@ -570,7 +570,10 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
             var botonEtiqueta = _puedeImprimirEtiquetaContacto && esRevision
                 ? ' <a href="index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden='+data.id+'" class="btn btn-success" target="_blank" title="Imprimir etiqueta de identificación"><span class="fa fa-tag"></span></a>'
                 : '';
-            return '<a type="button" href="/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='+ data.id +'&empresa='+ data.id_empresa +'&asesor='+ data.id_Asesor +'&cliente='+ data.id_usuario +'&tecnico='+ data.id_tecnico +'" id="ButtonImprimir" class="editar btn btn-primary botonImprimir btnImprimirorden" idOrden="'+data.id+'" empresa="'+data.id_empresa+'" asesor="'+data.id_Asesor+'" cliente="'+data.id_usuario+'" tecnico="'+data.id_tecnico+'" estado="'+estadoOrden.replace(/"/g, '&quot;')+'" data-etiqueta-garantia="'+(esEntregada ? '1' : '0')+'" title="'+tituloImpresion+'" target="'+destinoTicket+'"><span class="fa fa-print"></span><span class="hidden-xs"> Imprimir ticket</span></a>'+botonEtiqueta;
+            var botonGarantia = esEntregada
+                ? ' <a href="index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden='+data.id+'" class="btn btn-success btnImprimirEtiquetaGarantia" idOrden="'+data.id+'" title="Imprimir etiqueta de garantía"><span class="fa fa-shield-halved"></span><span class="hidden-xs"> Garantía</span></a>'
+                : '';
+            return '<a type="button" href="/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='+ data.id +'&empresa='+ data.id_empresa +'&asesor='+ data.id_Asesor +'&cliente='+ data.id_usuario +'&tecnico='+ data.id_tecnico +'" id="ButtonImprimir" class="editar btn btn-primary botonImprimir btnImprimirorden" idOrden="'+data.id+'" empresa="'+data.id_empresa+'" asesor="'+data.id_Asesor+'" cliente="'+data.id_usuario+'" tecnico="'+data.id_tecnico+'" estado="'+estadoOrden.replace(/"/g, '&quot;')+'" data-etiqueta-garantia="'+(esEntregada ? '1' : '0')+'" title="'+tituloImpresion+'" target="'+destinoTicket+'"><span class="fa fa-print"></span><span class="hidden-xs"> Imprimir ticket</span></a>'+botonEtiqueta+botonGarantia;
         
         }
         },
