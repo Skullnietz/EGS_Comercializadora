@@ -1,5 +1,5 @@
 <?php
-$jsVer = '1.4.5';
+$jsVer = '1.4.6';
 $rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
 $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
@@ -345,6 +345,7 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
       var ticketSelectors = [
         '.btnImprimirTicketPedido',
         '.btnImprimirorden',
+		'.btnImprimirEtiquetaGarantia',
         '.imprimirTicketVentaDinamica',
         '.btnImprimirTiket',
         '.btnImprimirComprovanteDeVentaR',

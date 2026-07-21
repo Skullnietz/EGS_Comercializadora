@@ -1316,6 +1316,24 @@ $(".tablaOrdenes").on("click", ".btnVerInfoOrden", function(){
 /*=============================================
 IMPRIMIR TICKET DE ORDEN
 =============================================*/
+function egsAbrirPopupEtiquetaGarantia(idOrden) {
+	var anchoEtiqueta = 560;
+	var altoEtiqueta = 480;
+	var izquierdaEtiqueta = Math.max(0, Math.round(window.screenX + (window.outerWidth - anchoEtiqueta) / 2));
+	var arribaEtiqueta = Math.max(0, Math.round(window.screenY + (window.outerHeight - altoEtiqueta) / 2));
+	return window.open(
+		"index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden="+idOrden,
+		"egsGarantiaOrden"+idOrden,
+		"popup=yes,width="+anchoEtiqueta+",height="+altoEtiqueta+",left="+izquierdaEtiqueta+",top="+arribaEtiqueta+",resizable=yes,scrollbars=yes"
+	);
+}
+
+$(document).on("click", ".btnImprimirEtiquetaGarantia", function(event){
+	event.preventDefault();
+	event.stopPropagation();
+	egsAbrirPopupEtiquetaGarantia($(this).attr("idOrden"));
+});
+
 $(document).on("click", ".btnImprimirorden", function(){
 		//console.log("Editar");
 	var idOrden = $(this).attr("idOrden");
@@ -1332,15 +1350,7 @@ $(document).on("click", ".btnImprimirorden", function(){
 	// El enlace conserva su apertura normal para que el ticket siempre salga.
 	// La etiqueta de garantia se abre aparte como popup de impresion.
 	if (generaGarantia) {
-		var anchoEtiqueta = 560;
-		var altoEtiqueta = 480;
-		var izquierdaEtiqueta = Math.max(0, Math.round(window.screenX + (window.outerWidth - anchoEtiqueta) / 2));
-		var arribaEtiqueta = Math.max(0, Math.round(window.screenY + (window.outerHeight - altoEtiqueta) / 2));
-		window.open(
-			"index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden="+idOrden,
-			"egsGarantiaOrden"+idOrden,
-			"popup=yes,width="+anchoEtiqueta+",height="+altoEtiqueta+",left="+izquierdaEtiqueta+",top="+arribaEtiqueta+",resizable=yes,scrollbars=yes"
-		);
+		egsAbrirPopupEtiquetaGarantia(idOrden);
 	}
 	if (!esEnlaceTicket) {
 		window.open(urlTicket, "_blank");

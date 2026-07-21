@@ -838,6 +838,9 @@ function _ordGetBadgeClass($estadoText) {
 				  if ($_SESSION["perfil"] === "administrador" && stripos((string) $valueOrdenes["estado"], "(REV)") !== false) {
 					$ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success' target='_blank' title='Imprimir etiqueta de identificación'><i class='fas fa-tag'></i></a>";
 				  }
+				  if (stripos((string) $valueOrdenes["estado"], "(Ent)") !== false || stripos((string) $valueOrdenes["estado"], "Entregado") !== false || stripos((string) $valueOrdenes["estado"], "Entregada") !== false) {
+					$ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success btnImprimirEtiquetaGarantia' idOrden='" . intval($valueOrdenes["id"]) . "' title='Imprimir etiqueta de garantía'><i class='fas fa-shield-alt'></i><span class='hidden-xs'> Garantía</span></a>";
+				  }
 
 
 
@@ -1097,6 +1100,9 @@ function _ordGetBadgeClass($estadoText) {
                     $ticket = "<a href='extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=" . $valueOrdenes["id"] . "&empresa=" . $valueOrdenes["id_empresa"] . "&asesor=" . $valueOrdenes["id_Asesor"] . "&cliente=" . $valueOrdenes["id_usuario"] . "&tecnico=" . $valueOrdenes["id_tecnico"] . "' class='btn btn-warning btnImprimirorden' idOrden='" . $valueOrdenes["id"] . "' cliente='" . $valueOrdenes["id_usuario"] . "'  tecnico='" . $valueOrdenes["id_tecnico"] . "' asesor='" . $valueOrdenes["id_Asesor"] . "' empresa='" . $valueOrdenes["id_empresa"] . "' estado='" . htmlspecialchars($valueOrdenes["estado"], ENT_QUOTES, "UTF-8") . "' data-toggle='modal' target='_blank'><i class='fas fa-ticket-alt'></i></a>";
 					if ($_SESSION["perfil"] === "administrador" && stripos((string) $valueOrdenes["estado"], "(REV)") !== false) {
 					  $ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success' target='_blank' title='Imprimir etiqueta de identificación'><i class='fas fa-tag'></i></a>";
+					}
+					if (stripos((string) $valueOrdenes["estado"], "(Ent)") !== false || stripos((string) $valueOrdenes["estado"], "Entregado") !== false || stripos((string) $valueOrdenes["estado"], "Entregada") !== false) {
+					  $ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success btnImprimirEtiquetaGarantia' idOrden='" . intval($valueOrdenes["id"]) . "' title='Imprimir etiqueta de garantía'><i class='fas fa-shield-alt'></i><span class='hidden-xs'> Garantía</span></a>";
 					}
 
 
