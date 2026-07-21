@@ -188,6 +188,7 @@ function egsSitioVisible($valor) {
                 <i class="egs-corner egs-corner-tl"></i><i class="egs-corner egs-corner-br"></i>
                 <div class="egs-contact-brand"><img src="vistas/img/plantilla/logo-etiquetas.svg" alt="EGS"><b id="contactName"><?= egsH($config["nombre_comercial"]) ?></b><small id="contactTagline"><?= egsH($config["lema"]) ?></small></div>
                 <div class="egs-green-rule"></div><div class="egs-contact-info"><b>DIRECCIÓN</b><p id="contactAddress"><?= egsH($config["direccion"]) ?></p><b>CONTACTO</b><p class="egs-phone-line" id="contactPhones"></p><p class="egs-site-line"><i>●</i> <span id="contactWebsite"><?= egsH(egsSitioVisible($config["sitio_web"])) ?></span></p></div>
+                <div id="contactQr" class="egs-contact-qr is-empty"><span>ORDEN <b id="contactOrder"></b></span><div id="contactQrCode" class="egs-qr-code egs-contact-qr-code"></div><small>IDENTIFICAR</small></div>
               </div>
             </div></div>
 
@@ -224,6 +225,8 @@ function egsSitioVisible($valor) {
 .egs-contact-info{padding:.5mm .2mm .5mm 1mm;display:flex;flex-direction:column;justify-content:center}.egs-contact-info .egs-site-line{position:static;left:auto;right:auto;bottom:auto;align-self:stretch;margin:.45mm 0 0!important;padding:.45mm .6mm;background:#edf8f0;border-left:.45mm solid #18763a;border-radius:.55mm;color:#124e29}.egs-contact-info .egs-site-line i{color:#18763a}.egs-warranty-contact{justify-content:center}.egs-warranty-contact .wc-site{align-self:stretch;padding:.35mm .45mm;background:#edf8f0;border-radius:.45mm;color:#124e29}.egs-validity-strip{margin-right:0}.egs-next-service{right:1mm}.egs-label-qr{width:18.5mm;height:19.3mm;padding:1.15mm;right:.2mm;bottom:.2mm}.egs-qr-code{width:15mm;height:15mm;flex:none}.egs-label-qr small{font-size:2.4pt;margin-top:.2mm}.egs-warranty-label.has-qr .egs-w-row:not(.egs-date-row){height:2.95mm}.egs-warranty-label.has-qr .egs-w-row:not(.egs-date-row) span{height:2.5mm;line-height:2.3mm}.egs-warranty-label.has-qr .egs-date-row{width:18mm;height:6.5mm;grid-template-columns:7mm 11mm;grid-template-rows:3.25mm 3.25mm;gap:0}.egs-warranty-label.has-qr .egs-date-row b:nth-of-type(2){text-align:left}.egs-warranty-label.has-qr .egs-validity-strip{width:18mm;margin-right:0;padding:0 .45mm;font-size:2.55pt;letter-spacing:0}.egs-warranty-label.has-qr .egs-next-service{right:auto;width:18mm;grid-template-columns:11.5mm 1fr;font-size:3.55pt;bottom:.7mm}
 /* Legibilidad a tamaño de impresión. */
 .egs-contact-info>b{font-size:5.25pt}.egs-contact-info p{font-size:3.6pt;line-height:1.18}.egs-contact-info .egs-phone-line{font-size:3.8pt;line-height:1.25}.egs-contact-info .egs-site-line{font-size:3.15pt!important}.egs-warranty-contact .wc-tagline{font-size:2.8pt}.egs-warranty-contact strong{font-size:4.75pt}.egs-warranty-contact .wc-address,.egs-warranty-contact .wc-phones{font-size:3.4pt;line-height:1.18}.egs-warranty-contact .wc-site{font-size:3pt;letter-spacing:-.03mm}.egs-validity-strip{display:flex;align-items:center;justify-content:center;gap:.7mm;white-space:normal}.egs-validity-strip b,.egs-validity-strip span{font:inherit}.egs-warranty-label.has-qr .egs-date-row{grid-template-columns:8mm 10mm}.egs-warranty-label.has-qr .egs-date-row b{font-size:4.2pt}.egs-warranty-label.has-qr .egs-date-row span{font-size:4pt;padding-left:.25mm;text-align:right}.egs-warranty-label.has-qr .egs-validity-strip{height:7mm;flex-direction:column;gap:.2mm;line-height:1.05;margin-top:.45mm}.egs-warranty-label.has-qr .egs-validity-strip b{font-size:3.8pt}.egs-warranty-label.has-qr .egs-validity-strip span{font-size:3.4pt;letter-spacing:.08mm}
+/* Contacto con orden: identificación compacta y QR físico de 12 mm. */
+.egs-contact-qr{display:none}.egs-contact-label.has-qr{grid-template-columns:minmax(0,1fr) 14.2mm;grid-template-rows:5.6mm 1fr;column-gap:.8mm;padding:1.2mm}.egs-contact-label.has-qr .egs-corner{display:none}.egs-contact-label.has-qr .egs-contact-brand{grid-column:1;grid-row:1;flex-direction:row;justify-content:flex-start;gap:.6mm;padding:0;text-align:left}.egs-contact-label.has-qr .egs-contact-brand img{width:8.5mm;height:3.8mm;margin:0;flex:none}.egs-contact-label.has-qr .egs-contact-brand b{font-size:3.25pt;max-width:11mm}.egs-contact-label.has-qr .egs-contact-brand small,.egs-contact-label.has-qr .egs-green-rule{display:none}.egs-contact-label.has-qr .egs-contact-info{grid-column:1;grid-row:2;padding:.15mm 0 0;justify-content:flex-start}.egs-contact-label.has-qr .egs-contact-info>b{font-size:4.2pt;margin-bottom:.2mm}.egs-contact-label.has-qr .egs-contact-info>b:nth-of-type(2){margin-top:.25mm}.egs-contact-label.has-qr .egs-contact-info p{font-size:3.15pt;line-height:1.12;margin-bottom:.25mm}.egs-contact-label.has-qr .egs-contact-info .egs-phone-line{font-size:3.2pt;line-height:1.16}.egs-contact-label.has-qr .egs-contact-info .egs-site-line{font-size:2.7pt!important;margin-top:.15mm!important;padding:.25mm .35mm}.egs-contact-label.has-qr .egs-contact-qr:not(.is-empty){grid-column:2;grid-row:1/3;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;border:.28mm solid #18763a;border-radius:.7mm;padding:.55mm;box-sizing:border-box;background:#fff}.egs-contact-qr>span{font-size:3.45pt;font-weight:700;line-height:1;color:#111;margin-bottom:.35mm;white-space:nowrap}.egs-contact-qr>span b{font-size:4.1pt}.egs-contact-qr-code{width:12mm;height:12mm;flex:none}.egs-contact-qr small{font-size:2.15pt;font-weight:800;line-height:1;color:#166534;letter-spacing:.08mm;margin-top:.25mm}
 @media(max-width:991px){.egs-preview-panel{position:static}.egs-label-stage .egs-print-label{zoom:1.8}}@media(max-width:480px){.egs-label-intro>span{display:none}.egs-mode-choice{grid-template-columns:1fr}.egs-label-stage .egs-print-label{zoom:1.4}}
 </style>
 
@@ -264,11 +267,15 @@ function egsSitioVisible($valor) {
   document.querySelectorAll('.egs-warranty-live').forEach(function(el){el.addEventListener('input',function(){text(el.dataset.target,el.type==='date'?prettyDate(el.value):el.value);});});
 
   function renderQr(token){
-    var wrap=document.getElementById('warrantyQr'), box=document.getElementById('warrantyQrCode'), label=document.getElementById('warrantyLabel'); box.innerHTML='';
     var url=token ? validationBase+encodeURIComponent(compactToken(token)) : '';
-    wrap.classList.toggle('is-empty',!url);
-    label.classList.toggle('has-qr',!!url);
-    if(url && typeof QRCode!=='undefined') new QRCode(box,{text:url,width:256,height:256,correctLevel:QRCode.CorrectLevel.L});
+    var targets=[['warrantyQr','warrantyQrCode','warrantyLabel'],['contactQr','contactQrCode','contactLabel']];
+    targets.forEach(function(ids){
+      var wrap=document.getElementById(ids[0]),box=document.getElementById(ids[1]),label=document.getElementById(ids[2]);
+      box.innerHTML=''; wrap.classList.toggle('is-empty',!url); label.classList.toggle('has-qr',!!url);
+      if(url && typeof QRCode!=='undefined') new QRCode(box,{text:url,width:256,height:256,correctLevel:QRCode.CorrectLevel.L});
+    });
+    var orderId=document.getElementById('idOrdenEtiqueta').value;
+    text('contactOrder',url && orderId ? '#'+orderId : '');
     text('qrUrlText',url||'Guarda la garantía vinculada para generar el enlace.');
   }
   function selectOrder(){
@@ -311,7 +318,7 @@ function egsSitioVisible($valor) {
     if(type==='warranty' && document.querySelector('[name="modo_etiqueta"]:checked').value==='orden' && !document.querySelector('#warrantyQrCode canvas')){
       Swal.fire({icon:'info',title:'Primero genera el QR',text:'Guarda la garantía vinculada antes de imprimirla.'}); return;
     }
-    var clone=source.cloneNode(true), canvas=source.querySelector('#warrantyQrCode canvas'), cloneQr=clone.querySelector('#warrantyQrCode');
+    var clone=source.cloneNode(true), canvas=source.querySelector('.egs-qr-code canvas'), cloneQr=clone.querySelector('.egs-qr-code');
     if(canvas&&cloneQr) cloneQr.innerHTML='<img class="egs-qr-print" src="'+canvas.toDataURL('image/png')+'" alt="QR">';
     var size=type==='contact'?'4cm 2.5cm':'6.2cm 3.5cm';
     var win=window.open('','_blank','width=520,height=420');
