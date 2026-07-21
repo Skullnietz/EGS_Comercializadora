@@ -77,6 +77,7 @@ class ModeloEtiquetas
         $config = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($config) {
+            $config["sitio_web"] = str_ireplace("comercializadoraegs.shop", "comercializadoraegs.com", (string) $config["sitio_web"]);
             return $config;
         }
 
@@ -88,13 +89,14 @@ class ModeloEtiquetas
             "telefono_1" => "722-283-1159",
             "telefono_2" => "722-214-4416",
             "telefono_3" => "722-167-1684",
-            "sitio_web" => "https://comercializadoraegs.shop"
+            "sitio_web" => "https://comercializadoraegs.com"
         );
     }
 
     public static function mdlGuardarConfiguracion($datos)
     {
         self::asegurarTablas();
+        $datos["sitio_web"] = str_ireplace("comercializadoraegs.shop", "comercializadoraegs.com", (string) $datos["sitio_web"]);
         $sql = "INSERT INTO egs_etiquetas_config
                     (id_empresa, nombre_comercial, lema, direccion, whatsapp, telefono_1, telefono_2, telefono_3, sitio_web, actualizado_por)
                 VALUES

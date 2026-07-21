@@ -134,7 +134,7 @@ $telefonosEtiqueta = array_filter(array($configEtiqueta["whatsapp"], $configEtiq
       <small class="web"><?= egsPrintH(preg_replace('#^https?://#i', '', $configEtiqueta["sitio_web"])) ?></small>
     </section>
     <section class="egs-warranty-fields">
-      <div><b>ORDEN</b><span>#<?= intval($idOrdenEtiqueta) ?></span><b>FAC./REM.</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["fac_rem"])) ?></span></div>
+      <div><b>ORDEN</b><span>#<?= intval($idOrdenEtiqueta) ?></span></div>
       <div><b>TÉCNICO</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["tecnico"])) ?></span></div>
       <div><b>CLIENTE</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["nombre_cliente"])) ?></span></div>
       <div><b>EQUIPO</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["equipo"])) ?></span></div>
@@ -171,6 +171,7 @@ $telefonosEtiqueta = array_filter(array($configEtiqueta["whatsapp"], $configEtiq
 .egs-warranty-brand>b,.egs-warranty-brand small,.egs-warranty-brand strong,.egs-warranty-brand p{max-width:100%;overflow:hidden;overflow-wrap:anywhere}
 .egs-warranty-fields>div{min-width:0;overflow:hidden}
 .egs-warranty-fields>div>b,.egs-warranty-fields>div>span{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.egs-warranty-fields>div:first-child{grid-template-columns:7mm minmax(0,1fr)}
 .egs-warranty-fields .dates{grid-template-columns:10mm minmax(0,1fr);grid-template-rows:repeat(2,3.15mm);min-height:6.55mm;align-items:center;column-gap:.7mm}
 .egs-warranty-fields .dates b{font-size:1.35mm;line-height:1;white-space:nowrap;overflow:visible;text-overflow:clip}
 .egs-warranty-fields .dates span{font-size:1.55mm;line-height:1;font-weight:800;white-space:nowrap;overflow:visible;text-overflow:clip}
