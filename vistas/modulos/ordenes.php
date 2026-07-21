@@ -839,7 +839,7 @@ function _ordGetBadgeClass($estadoText) {
 					$ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success' target='_blank' title='Imprimir etiqueta de identificación'><i class='fas fa-tag'></i></a>";
 				  }
 				  if (stripos((string) $valueOrdenes["estado"], "(Ent)") !== false || stripos((string) $valueOrdenes["estado"], "Entregado") !== false || stripos((string) $valueOrdenes["estado"], "Entregada") !== false) {
-					$ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success btnImprimirEtiquetaGarantia' idOrden='" . intval($valueOrdenes["id"]) . "' title='Imprimir etiqueta de garantía'><i class='fas fa-shield-alt'></i><span class='hidden-xs'> Garantía</span></a>";
+					$ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success btnImprimirEtiquetaGarantia' idOrden='" . intval($valueOrdenes["id"]) . "' title='Imprimir etiqueta de garantía' aria-label='Imprimir etiqueta de garantía'><i class='fas fa-shield-alt'></i></a>";
 				  }
 
 
@@ -1102,7 +1102,7 @@ function _ordGetBadgeClass($estadoText) {
 					  $ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success' target='_blank' title='Imprimir etiqueta de identificación'><i class='fas fa-tag'></i></a>";
 					}
 					if (stripos((string) $valueOrdenes["estado"], "(Ent)") !== false || stripos((string) $valueOrdenes["estado"], "Entregado") !== false || stripos((string) $valueOrdenes["estado"], "Entregada") !== false) {
-					  $ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success btnImprimirEtiquetaGarantia' idOrden='" . intval($valueOrdenes["id"]) . "' title='Imprimir etiqueta de garantía'><i class='fas fa-shield-alt'></i><span class='hidden-xs'> Garantía</span></a>";
+					  $ticket .= " <a href='index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden=" . intval($valueOrdenes["id"]) . "' class='btn btn-success btnImprimirEtiquetaGarantia' idOrden='" . intval($valueOrdenes["id"]) . "' title='Imprimir etiqueta de garantía' aria-label='Imprimir etiqueta de garantía'><i class='fas fa-shield-alt'></i></a>";
 					}
 
 

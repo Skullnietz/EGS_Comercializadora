@@ -131,7 +131,7 @@ class tablaOrdenes
 				$ticket .= " <a class='btn btn-success' href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($ordenes[$i]["id"]) . "' target='_blank' title='Imprimir etiqueta de identificación'><i class='fa fa-tag'></i></a>";
 			}
 			if (stripos((string) $ordenes[$i]["estado"], "(Ent)") !== false || stripos((string) $ordenes[$i]["estado"], "Entregado") !== false || stripos((string) $ordenes[$i]["estado"], "Entregada") !== false) {
-				$ticket .= " <a class='btn btn-success btnImprimirEtiquetaGarantia' href='index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden=" . intval($ordenes[$i]["id"]) . "' idOrden='" . intval($ordenes[$i]["id"]) . "' title='Imprimir etiqueta de garantía'><i class='fa fa-shield'></i><span class='hidden-xs'> Garantía</span></a>";
+				$ticket .= " <a class='btn btn-success btnImprimirEtiquetaGarantia' href='index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden=" . intval($ordenes[$i]["id"]) . "' idOrden='" . intval($ordenes[$i]["id"]) . "' title='Imprimir etiqueta de garantía' aria-label='Imprimir etiqueta de garantía'><i class='fa fa-shield'></i></a>";
 			}
 
 			$pedido = "<button class='btn btn-info' data-toggle='modal' data-target='#modalAsignarPedido'><i class='fa fa-sort'></i></button>";
