@@ -103,7 +103,6 @@ function egsGarantiaFecha($valor) {
         <div><small>Fecha de entrega</small><b><?= egsGarantiaFecha($garantia["fecha_entrega"]) ?></b></div>
         <div><small>Vencimiento</small><b><?= egsGarantiaFecha($garantia["fecha_vencimiento"]) ?></b></div>
         <div><small>Técnico</small><b><?= egsGarantiaH($garantia["tecnico"] !== "" ? $garantia["tecnico"] : "—") ?></b></div>
-        <div><small>Factura / remisión</small><b><?= egsGarantiaH($garantia["fac_rem"] !== "" ? $garantia["fac_rem"] : "—") ?></b></div>
         <div class="wide"><small>Estado actual de la orden</small><b><?= egsGarantiaH($garantia["estado_orden"] !== "" ? $garantia["estado_orden"] : "—") ?></b></div>
         <?php if (!empty($garantia["proximo_servicio"])): ?><div class="wide service"><small>Próximo servicio recomendado</small><b><?= egsGarantiaFecha($garantia["proximo_servicio"]) ?></b></div><?php endif; ?>
       </div>
