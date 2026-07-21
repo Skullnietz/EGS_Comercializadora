@@ -561,7 +561,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
         },
         {data: null,
         "render": function (data, type, row, meta) {
-            return '<a type="button" href="/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='+ data.id +'&empresa='+ data.id_empresa +'&asesor='+ data.id_Asesor +'&cliente='+ data.id_usuario +'&tecnico='+ data.id_tecnico +'" id="ButtonImprimir" class="editar btn btn-primary botonImprimir btnImprimirorden" idOrden="'+data.id+'" empresa="'+data.id_empresa+'" asesor="'+data.id_Asesor+'" cliente="'+data.id_usuario+'" tecnico="'+data.id_tecnico+'" estado="'+String(data.estado || '').replace(/"/g, '&quot;')+'" target="_blank"><span class="fa fa-print"></span><span class="hidden-xs"> Imprimir</span></a>';
+            return '<a type="button" href="/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='+ data.id +'&empresa='+ data.id_empresa +'&asesor='+ data.id_Asesor +'&cliente='+ data.id_usuario +'&tecnico='+ data.id_tecnico +'" id="ButtonImprimir" class="editar btn btn-primary botonImprimir btnImprimirorden" idOrden="'+data.id+'" empresa="'+data.id_empresa+'" asesor="'+data.id_Asesor+'" cliente="'+data.id_usuario+'" tecnico="'+data.id_tecnico+'" estado="'+String(data.estado || '').replace(/"/g, '&quot;')+'" target="_blank"><span class="fa fa-print"></span><span class="hidden-xs"> Imprimir ticket</span></a>';
         
         }
         },
@@ -635,7 +635,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 	                echo '<span style="font-size:12px;font-weight:700;color:#1e40af"><i class="fa-solid fa-truck-fast" style="margin-right:5px"></i> ÚLTIMA ENTREGA</span>';
 	                echo '<span style="font-size:13px;font-weight:800;color:#0f172a">ORDEN: ' . $ultima["id"] . '</span>';
 	                if ($_SESSION["perfil"] == "administrador") {
-                  echo '<a href="extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=' . $ultima["id"] . '&empresa=' . $ultima["id_empresa"] . '&asesor=' . $ultima["id_Asesor"] . '&cliente=' . $ultima["id_usuario"] . '&tecnico=' . $ultima["id_tecnico"] . '" class="btn btn-success btn-sm btnImprimirorden" idOrden="' . $ultima["id"] . '" empresa="' . $ultima["id_empresa"] . '" asesor="' . $ultima["id_Asesor"] . '" cliente="' . $ultima["id_usuario"] . '" tecnico="' . $ultima["id_tecnico"] . '" estado="Entregado (Ent)" target="_blank" style="padding:4px 10px;font-size:11px"><i class="fa-solid fa-ticket" style="margin-right:4px"></i> Ticket + garantía</a>';
+                  echo '<a href="extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=' . $ultima["id"] . '&empresa=' . $ultima["id_empresa"] . '&asesor=' . $ultima["id_Asesor"] . '&cliente=' . $ultima["id_usuario"] . '&tecnico=' . $ultima["id_tecnico"] . '" class="btn btn-success btn-sm btnImprimirorden" idOrden="' . $ultima["id"] . '" empresa="' . $ultima["id_empresa"] . '" asesor="' . $ultima["id_Asesor"] . '" cliente="' . $ultima["id_usuario"] . '" tecnico="' . $ultima["id_tecnico"] . '" estado="Entregado (Ent)" target="_blank" style="padding:4px 10px;font-size:11px"><i class="fa-solid fa-ticket" style="margin-right:4px"></i> Imprimir ticket</a>';
 	                }
 	                echo '</div>';
 	              }
@@ -701,7 +701,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 
                  <th>Editar</th>
 
-                <th>Imprimir Ticket</th>
+                <th>Imprimir</th>
 
                 
 

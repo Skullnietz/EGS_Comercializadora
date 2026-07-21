@@ -1328,10 +1328,18 @@ $(document).on("click", ".btnImprimirorden", function(){
 	var esEnlaceTicket = this.tagName && this.tagName.toLowerCase() === "a" && $(this).attr("href");
 	var urlTicket = "extensiones/tcpdf/pdf/ticketOrden.php/?idOrden="+idOrden+"&empresa="+empresa+"&asesor="+asesor+"&cliente="+cliente+"&tecnico="+tecnico;
 
-	// En la salida, el mismo gesto de impresiÃ³n abre la etiqueta de garantÃ­a.
-	// El servidor vuelve a validar perfil, empresa y estado antes de generarla.
+	// El enlace conserva su apertura normal para que el ticket siempre salga.
+	// La etiqueta de garantia se abre aparte como popup de impresion.
 	if (estadoOrden.toLowerCase().indexOf("(ent)") !== -1) {
-		window.open("index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden="+idOrden, "_blank");
+		var anchoEtiqueta = 560;
+		var altoEtiqueta = 480;
+		var izquierdaEtiqueta = Math.max(0, Math.round(window.screenX + (window.outerWidth - anchoEtiqueta) / 2));
+		var arribaEtiqueta = Math.max(0, Math.round(window.screenY + (window.outerHeight - altoEtiqueta) / 2));
+		window.open(
+			"index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden="+idOrden,
+			"egsGarantiaOrden"+idOrden,
+			"popup=yes,width="+anchoEtiqueta+",height="+altoEtiqueta+",left="+izquierdaEtiqueta+",top="+arribaEtiqueta+",resizable=yes,scrollbars=yes"
+		);
 	}
 	if (!esEnlaceTicket) {
 		window.open(urlTicket, "_blank");
