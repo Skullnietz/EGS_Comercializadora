@@ -189,7 +189,7 @@ $telefonosEtiqueta = array_filter(array($configEtiqueta["whatsapp"], $configEtiq
   var url=<?= json_encode($urlQrEtiqueta) ?>;
   if(box && url && typeof QRCode!=='undefined'){
     new QRCode(box,{text:url,width:256,height:256,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.L});
-    window.setTimeout(function(){ window.print(); },500);
+    window.setTimeout(function(){ window.focus(); window.print(); },500);
   }
 })();
 </script>
