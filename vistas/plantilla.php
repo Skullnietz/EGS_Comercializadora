@@ -5,6 +5,20 @@ $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["vali
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
 $isClientePublicRoute = ($rutaActual === "estado-orden-cliente" || $rutaActual === "portal-cliente" || $rutaActual === "validar-garantia");
 
+// Los QR nuevos apuntan primero a infoOrden. Sin sesión, conservar el token y
+// enviar al visitante a la validación pública; un QR inválido no salta el login.
+$tokenQrInfoOrden = isset($_GET["g"]) ? trim((string) $_GET["g"]) : (isset($_GET["token"]) ? trim((string) $_GET["token"]) : "");
+$tokenQrValido = preg_match('/^[A-Za-z0-9_-]{43}$/', $tokenQrInfoOrden) || preg_match('/^[a-f0-9]{64}$/i', $tokenQrInfoOrden);
+if (!$hasBackendSession && $rutaActual === "infoOrden" && $tokenQrValido) {
+  $scriptQr = isset($_SERVER["SCRIPT_NAME"]) ? $_SERVER["SCRIPT_NAME"] : "/index.php";
+  $directorioQr = rtrim(str_replace("\\", "/", dirname($scriptQr)), "/");
+  if ($directorioQr === "." || $directorioQr === "/") $directorioQr = "";
+  header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+  header("Pragma: no-cache");
+  header("Location: " . $directorioQr . "/validar-garantia?g=" . rawurlencode($tokenQrInfoOrden), true, 302);
+  exit;
+}
+
 if ($isTabletPublicRoute || $isClientePublicRoute) {
   header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
   header("Pragma: no-cache");
