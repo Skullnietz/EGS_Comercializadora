@@ -566,10 +566,11 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
             var esEntregada = /\(ent\)|entregado|entregada/i.test(estadoOrden);
             var esRevision = /\(rev\)|revisión|revision/i.test(estadoOrden);
             var tituloImpresion = esEntregada ? 'Imprimir ticket y etiqueta de garantía' : 'Imprimir ticket';
+            var destinoTicket = esEntregada ? '_self' : '_blank';
             var botonEtiqueta = _puedeImprimirEtiquetaContacto && esRevision
                 ? ' <a href="index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden='+data.id+'" class="btn btn-success" target="_blank" title="Imprimir etiqueta de identificación"><span class="fa fa-tag"></span></a>'
                 : '';
-            return '<a type="button" href="/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='+ data.id +'&empresa='+ data.id_empresa +'&asesor='+ data.id_Asesor +'&cliente='+ data.id_usuario +'&tecnico='+ data.id_tecnico +'" id="ButtonImprimir" class="editar btn btn-primary botonImprimir btnImprimirorden" idOrden="'+data.id+'" empresa="'+data.id_empresa+'" asesor="'+data.id_Asesor+'" cliente="'+data.id_usuario+'" tecnico="'+data.id_tecnico+'" estado="'+estadoOrden.replace(/"/g, '&quot;')+'" data-etiqueta-garantia="'+(esEntregada ? '1' : '0')+'" title="'+tituloImpresion+'" target="_blank"><span class="fa fa-print"></span><span class="hidden-xs"> Imprimir ticket</span></a>'+botonEtiqueta;
+            return '<a type="button" href="/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden='+ data.id +'&empresa='+ data.id_empresa +'&asesor='+ data.id_Asesor +'&cliente='+ data.id_usuario +'&tecnico='+ data.id_tecnico +'" id="ButtonImprimir" class="editar btn btn-primary botonImprimir btnImprimirorden" idOrden="'+data.id+'" empresa="'+data.id_empresa+'" asesor="'+data.id_Asesor+'" cliente="'+data.id_usuario+'" tecnico="'+data.id_tecnico+'" estado="'+estadoOrden.replace(/"/g, '&quot;')+'" data-etiqueta-garantia="'+(esEntregada ? '1' : '0')+'" title="'+tituloImpresion+'" target="'+destinoTicket+'"><span class="fa fa-print"></span><span class="hidden-xs"> Imprimir ticket</span></a>'+botonEtiqueta;
         
         }
         },
@@ -643,7 +644,7 @@ table.dataTable thead .sorting::after { content: ' ⇅'; font-size: 8px; color: 
 	                echo '<span style="font-size:12px;font-weight:700;color:#1e40af"><i class="fa-solid fa-truck-fast" style="margin-right:5px"></i> ÚLTIMA ENTREGA</span>';
 	                echo '<span style="font-size:13px;font-weight:800;color:#0f172a">ORDEN: ' . $ultima["id"] . '</span>';
 	                if ($_SESSION["perfil"] == "administrador") {
-                  echo '<a href="extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=' . $ultima["id"] . '&empresa=' . $ultima["id_empresa"] . '&asesor=' . $ultima["id_Asesor"] . '&cliente=' . $ultima["id_usuario"] . '&tecnico=' . $ultima["id_tecnico"] . '" class="btn btn-success btn-sm btnImprimirorden" idOrden="' . $ultima["id"] . '" empresa="' . $ultima["id_empresa"] . '" asesor="' . $ultima["id_Asesor"] . '" cliente="' . $ultima["id_usuario"] . '" tecnico="' . $ultima["id_tecnico"] . '" estado="Entregado (Ent)" target="_blank" style="padding:4px 10px;font-size:11px"><i class="fa-solid fa-ticket" style="margin-right:4px"></i> Imprimir ticket</a>';
+                  echo '<a href="extensiones/tcpdf/pdf/ticketOrden.php/?idOrden=' . $ultima["id"] . '&empresa=' . $ultima["id_empresa"] . '&asesor=' . $ultima["id_Asesor"] . '&cliente=' . $ultima["id_usuario"] . '&tecnico=' . $ultima["id_tecnico"] . '" class="btn btn-success btn-sm btnImprimirorden" idOrden="' . $ultima["id"] . '" empresa="' . $ultima["id_empresa"] . '" asesor="' . $ultima["id_Asesor"] . '" cliente="' . $ultima["id_usuario"] . '" tecnico="' . $ultima["id_tecnico"] . '" estado="Entregado (Ent)" data-etiqueta-garantia="1" target="_self" style="padding:4px 10px;font-size:11px"><i class="fa-solid fa-ticket" style="margin-right:4px"></i> Imprimir ticket</a>';
 	                }
 	                echo '</div>';
 	              }
