@@ -113,7 +113,7 @@ $telefonosEtiqueta = array_filter(array($configEtiqueta["whatsapp"], $configEtiq
     <i class="egs-triangle top"></i><i class="egs-triangle bottom"></i>
     <section class="egs-contact-copy">
       <img src="vistas/img/plantilla/logo-etiquetas.svg" alt="EGS">
-      <div class="egs-order-chip">ORDEN #<?= intval($ordenEtiqueta["id"]) ?> · IDENTIFICACIÓN</div>
+      <div class="egs-order-chip">ORDEN #<?= intval($ordenEtiqueta["id"]) ?></div>
       <b class="egs-client-name"><?= egsPrintH(egsPrintValor(isset($clienteContacto["nombre"]) ? $clienteContacto["nombre"] : "", "CLIENTE")) ?></b>
       <p class="egs-equipment"><?= egsPrintH(egsPrintValor($equipoContacto, "EQUIPO")) ?><?= trim((string) $ordenEtiqueta["numeroDeSerieDelEquipo"]) !== "" ? " · S/N " . egsPrintH($ordenEtiqueta["numeroDeSerieDelEquipo"]) : "" ?></p>
       <b class="egs-contact-title">CONTACTO</b>
@@ -153,6 +153,29 @@ $telefonosEtiqueta = array_filter(array($configEtiqueta["whatsapp"], $configEtiq
 .egs-contact-print{grid-template-columns:minmax(0,1fr) 16mm}.egs-warranty-print{grid-template-columns:15mm minmax(0,1fr) 17mm}.egs-warranty-brand img{margin-left:.4mm}.egs-contact-code #egsPrintQr{width:14mm!important;height:14mm!important;padding:1mm;box-sizing:content-box!important;background:#fff}.egs-contact-code #egsPrintQr img,.egs-contact-code #egsPrintQr canvas{width:14mm!important;height:14mm!important}.egs-warranty-code #egsPrintQr{width:15mm!important;height:15mm!important;padding:1mm;box-sizing:content-box!important;background:#fff}.egs-warranty-code #egsPrintQr img,.egs-warranty-code #egsPrintQr canvas{width:15mm!important;height:15mm!important}
 .egs-contact-print{grid-template-columns:minmax(0,1fr) 17mm}
 <?php if ($tipoEtiqueta === "contacto"): ?>@page{size:40mm 25mm;margin:0}<?php else: ?>@page{size:62mm 35mm;margin:0}<?php endif; ?>
+</style>
+
+<style id="egsLabelSafeAreas">
+/* Zonas seguras: ningún texto puede invadir el QR ni salir de la etiqueta. */
+.egs-contact-copy,.egs-contact-code,.egs-warranty-brand,.egs-warranty-fields,.egs-warranty-code{min-width:0;overflow:hidden}
+.egs-contact-copy>*{max-width:100%}
+.egs-contact-copy img{width:13.5mm;height:4.4mm;margin-left:3.8mm}
+.egs-order-chip{font-size:1.45mm;overflow:hidden;text-overflow:ellipsis}
+.egs-client-name{font-size:2mm;overflow:hidden;text-overflow:ellipsis}
+.egs-equipment{font-size:1.42mm;overflow:hidden;overflow-wrap:anywhere}
+.egs-phones{font-size:1.34mm;line-height:1.16;max-height:4.1mm;overflow:hidden;overflow-wrap:anywhere}
+.egs-site{font-size:1.15mm;overflow:hidden;text-overflow:ellipsis}
+.egs-contact-code{padding-left:.55mm}
+.egs-contact-code b{max-width:14mm;font-size:1.15mm;overflow:hidden}
+.egs-warranty-brand img{width:11mm;height:4.5mm;margin-left:3.5mm}
+.egs-warranty-brand>b,.egs-warranty-brand small,.egs-warranty-brand strong,.egs-warranty-brand p{max-width:100%;overflow:hidden;overflow-wrap:anywhere}
+.egs-warranty-fields>div{min-width:0;overflow:hidden}
+.egs-warranty-fields>div>b,.egs-warranty-fields>div>span{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.egs-warranty-fields .seal{flex-direction:column;justify-content:center;gap:.15mm;text-align:center;padding:.45mm .7mm}
+.egs-warranty-fields .seal b{font-size:1.5mm;line-height:1}
+.egs-warranty-fields .seal span{font-size:2.2mm;line-height:1;font-weight:900}
+.egs-warranty-code{padding-bottom:2mm}
+.egs-warranty-code b{max-width:15mm;overflow:hidden}
 </style>
 
 <?php if ($errorEtiqueta === ""): ?>
