@@ -139,7 +139,7 @@ $telefonosEtiqueta = array_filter(array($configEtiqueta["whatsapp"], $configEtiq
       <div><b>CLIENTE</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["nombre_cliente"])) ?></span></div>
       <div><b>EQUIPO</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["equipo"])) ?></span></div>
       <div><b>S/N</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["numero_serie"])) ?></span></div>
-      <div class="dates"><b>ENTREGA</b><span><?= egsPrintH(egsPrintFecha($garantiaEtiqueta["fecha_entrega"])) ?></span><b>VENCE</b><span><?= egsPrintH(egsPrintFecha($garantiaEtiqueta["fecha_vencimiento"])) ?></span></div>
+      <div class="dates"><b>INICIO</b><span><?= egsPrintH(egsPrintFecha($garantiaEtiqueta["fecha_entrega"])) ?></span><b>VENCIMIENTO</b><span><?= egsPrintH(egsPrintFecha($garantiaEtiqueta["fecha_vencimiento"])) ?></span></div>
       <div class="seal"><b>SELLO ALTERADO</b><span>SIN GARANTÍA</span></div>
     </section>
     <section class="egs-warranty-code"><div id="egsPrintQr"></div><b>VALIDAR<br>GARANTÍA</b></section>
@@ -171,6 +171,9 @@ $telefonosEtiqueta = array_filter(array($configEtiqueta["whatsapp"], $configEtiq
 .egs-warranty-brand>b,.egs-warranty-brand small,.egs-warranty-brand strong,.egs-warranty-brand p{max-width:100%;overflow:hidden;overflow-wrap:anywhere}
 .egs-warranty-fields>div{min-width:0;overflow:hidden}
 .egs-warranty-fields>div>b,.egs-warranty-fields>div>span{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.egs-warranty-fields .dates{grid-template-columns:10mm minmax(0,1fr);grid-template-rows:repeat(2,3.15mm);min-height:6.55mm;align-items:center;column-gap:.7mm}
+.egs-warranty-fields .dates b{font-size:1.35mm;line-height:1;white-space:nowrap;overflow:visible;text-overflow:clip}
+.egs-warranty-fields .dates span{font-size:1.55mm;line-height:1;font-weight:800;white-space:nowrap;overflow:visible;text-overflow:clip}
 .egs-warranty-fields .seal{flex-direction:column;justify-content:center;gap:.15mm;text-align:center;padding:.45mm .7mm}
 .egs-warranty-fields .seal b{font-size:1.5mm;line-height:1}
 .egs-warranty-fields .seal span{font-size:2.2mm;line-height:1;font-weight:900}
