@@ -1,7 +1,13 @@
 <?php
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+	session_start();
+}
+
 require_once "../controladores/ordenes.controlador.php";
 require_once "../modelos/ordenes.modelo.php";
+require_once "../controladores/notificaciones.controlador.php";
+require_once "../modelos/notificaciones.modelo.php";
 
 class AjaxOrdenes{
 	

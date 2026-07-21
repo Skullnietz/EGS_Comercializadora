@@ -1324,6 +1324,18 @@ $(document).on("click", ".btnImprimirorden", function(){
 	var asesor = $(this).attr("asesor");
 	var cliente = $(this).attr("cliente");
 	var tecnico = $(this).attr("tecnico");
+	var estadoOrden = $(this).attr("estado") || "";
+	var esEnlaceTicket = this.tagName && this.tagName.toLowerCase() === "a" && $(this).attr("href");
+	var urlTicket = "extensiones/tcpdf/pdf/ticketOrden.php/?idOrden="+idOrden+"&empresa="+empresa+"&asesor="+asesor+"&cliente="+cliente+"&tecnico="+tecnico;
+
+	// En la salida, el mismo gesto de impresiÃ³n abre la etiqueta de garantÃ­a.
+	// El servidor vuelve a validar perfil, empresa y estado antes de generarla.
+	if (estadoOrden.toLowerCase().indexOf("(ent)") !== -1) {
+		window.open("index.php?ruta=imprimir-etiqueta-orden&tipo=garantia&idOrden="+idOrden, "_blank");
+	}
+	if (!esEnlaceTicket) {
+		window.open(urlTicket, "_blank");
+	}
 	var datos = new FormData();
 	datos.append("idOrden", idOrden);
 	datos.append("empresa", empresa);
@@ -1357,9 +1369,6 @@ $(document).on("click", ".btnImprimirorden", function(){
 		}
 
 	})
-	window.open("https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/ticketOrden.php/?idOrden="+idOrden+"&empresa="+empresa+"&asesor="+asesor+"&cliente="+cliente+"&tecnico="+tecnico+"", "_blank");
-
-
 })
 
 /*=============================================

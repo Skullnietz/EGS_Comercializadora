@@ -177,7 +177,7 @@ class ModeloNotificaciones{
 
 			$stmt = $pdo->prepare(
 				"SELECT * FROM notificaciones_estado
-				 WHERE id_asesor = :asesor AND leido_vendedor = 0
+				 WHERE id_asesor = :asesor AND leido_vendedor = 0 AND tipo <> 'etiqueta'
 				 ORDER BY fecha DESC
 				 LIMIT :limite"
 			);
@@ -231,7 +231,7 @@ class ModeloNotificaciones{
 
 			$stmt = $pdo->prepare(
 				"SELECT * FROM notificaciones_estado
-				 WHERE id_asesor = :asesor
+				 WHERE id_asesor = :asesor AND tipo <> 'etiqueta'
 				 ORDER BY fecha DESC
 				 LIMIT :limite OFFSET :offset"
 			);

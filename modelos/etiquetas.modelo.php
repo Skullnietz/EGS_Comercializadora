@@ -237,4 +237,15 @@ class ModeloEtiquetas
         $fila = $stmt->fetch(PDO::FETCH_ASSOC);
         return $fila ? $fila : null;
     }
+
+    public static function mdlGarantiaPorOrden($idOrden)
+    {
+        self::asegurarTablas();
+        $stmt = ConexionWP::conectarWP()->prepare(
+            "SELECT * FROM egs_etiquetas_garantia WHERE id_orden = :orden LIMIT 1"
+        );
+        $stmt->execute(array(":orden" => intval($idOrden)));
+        $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $fila ? $fila : null;
+    }
 }

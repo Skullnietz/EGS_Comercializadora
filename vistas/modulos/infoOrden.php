@@ -513,6 +513,14 @@ function _egsEstadoClass($estado) {
 			   title="Ver seguimiento de la orden">
 				<i class="fas fa-route" style="margin-right:4px"></i> Seguimiento
 			</a>
+			<?php if ($isAdmin && stripos((string) $estado, "(REV)") !== false): ?>
+			<a href="index.php?ruta=imprimir-etiqueta-orden&amp;tipo=contacto&amp;idOrden=<?php echo intval($idOrdenActual); ?>"
+			   class="btn btn-sm btn-success" target="_blank"
+			   style="margin-left:7px;border-radius:6px;font-size:13px;vertical-align:middle"
+			   title="Imprimir etiqueta de identificación con QR">
+				<i class="fas fa-tag" style="margin-right:4px"></i> Etiqueta de identificación
+			</a>
+			<?php endif; ?>
 		</h2>
 		<ol class="breadcrumb">
 			<li><a href="index.php?ruta=inicio"><i class="fas fa-dashboard"></i> Inicio</a></li>
