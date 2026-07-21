@@ -26,6 +26,38 @@ class ModeloComentarioCliente
 	}
 
 	/*=============================================
+	COMENTARIOS DE HOY PARA NOTIFICACION
+	=============================================*/
+	static public function mdlComentariosRecientesNotif($tabla, $limite = 15, $ordenIds = null)
+	{
+		try {
+			if (is_array($ordenIds) && empty($ordenIds)) {
+				return array();
+			}
+
+			$filtroOrden = "";
+			if (is_array($ordenIds)) {
+				$ids = array_values(array_unique(array_map('intval', $ordenIds)));
+				$filtroOrden = " AND id_orden IN (" . implode(',', $ids) . ")";
+			}
+
+			$stmt = Conexion::conectar()->prepare(
+				"SELECT id, id_orden, comentario, fecha
+				 FROM $tabla
+				 WHERE DATE(fecha) = CURDATE()
+				 $filtroOrden
+				 ORDER BY fecha DESC
+				 LIMIT :limite"
+			);
+			$stmt->bindValue(":limite", max(1, intval($limite)), PDO::PARAM_INT);
+			$stmt->execute();
+			return $stmt->fetchAll();
+		} catch (Exception $e) {
+			return array();
+		}
+	}
+
+	/*=============================================
 	CREAR COMENTARIO (con protección anti-duplicado)
 	Devuelve el id insertado, "duplicate" o "error".
 	=============================================*/

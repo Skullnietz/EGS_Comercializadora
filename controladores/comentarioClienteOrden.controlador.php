@@ -13,6 +13,18 @@ class controladorComentarioCliente
 	}
 
 	/*=============================================
+	COMENTARIOS RECIENTES PARA NOTIFICACION
+	=============================================*/
+	static public function ctrComentariosRecientesNotif($limite = 15, $ordenIds = null)
+	{
+		return ModeloComentarioCliente::mdlComentariosRecientesNotif(
+			"comentariosClienteOrden",
+			$limite,
+			$ordenIds
+		);
+	}
+
+	/*=============================================
 	GUARDAR COMENTARIO DEL CLIENTE (acceso público sin sesión)
 
 	El $idOrden lo provee la vista (ya validado contra el token del QR),

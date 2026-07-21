@@ -109,6 +109,43 @@ class ModeloReporteEquipo
 	}
 
 	/*=============================================
+	REPORTES DE HOY PARA NOTIFICACION
+	(No incluye los creados por el usuario actual)
+	=============================================*/
+	static public function mdlReportesRecientesNotif($tabla, $idUsuario, $limite = 15, $ordenIds = null)
+	{
+		try {
+			if (is_array($ordenIds) && empty($ordenIds)) {
+				return array();
+			}
+
+			$filtroOrden = "";
+			if (is_array($ordenIds)) {
+				$ids = array_values(array_unique(array_map('intval', $ordenIds)));
+				$filtroOrden = " AND r.id_orden IN (" . implode(',', $ids) . ")";
+			}
+
+			$stmt = Conexion::conectar()->prepare(
+				"SELECT r.id, r.id_creador, r.id_orden, r.descripcion, r.fecha,
+				        a.nombre AS creador_nombre, a.foto AS creador_foto, a.perfil AS creador_perfil
+				 FROM $tabla r
+				 LEFT JOIN administradores a ON a.id = r.id_creador
+				 WHERE DATE(r.fecha) = CURDATE()
+				   AND r.id_creador != :idUsuario
+				   $filtroOrden
+				 ORDER BY r.fecha DESC
+				 LIMIT :limite"
+			);
+			$stmt->bindValue(":idUsuario", intval($idUsuario), PDO::PARAM_INT);
+			$stmt->bindValue(":limite", max(1, intval($limite)), PDO::PARAM_INT);
+			$stmt->execute();
+			return $stmt->fetchAll();
+		} catch (Exception $e) {
+			return array();
+		}
+	}
+
+	/*=============================================
 	ELIMINAR FOTOS DE UN REPORTE
 	(devuelve las rutas eliminadas para borrar los archivos físicos)
 	=============================================*/

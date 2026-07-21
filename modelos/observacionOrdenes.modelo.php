@@ -272,6 +272,10 @@ class ModeloObservaciones
 	=============================================*/
 	static public function mdlObservacionesRecientesNotif($tabla, $idUsuario, $limite = 15, $ordenIds = null)
 	{
+		// Un tecnico sin ordenes asignadas no debe recibir actividad global.
+		if (is_array($ordenIds) && empty($ordenIds)) {
+			return array();
+		}
 
 		$filtroOrden = "";
 		if (is_array($ordenIds) && !empty($ordenIds)) {

@@ -5,6 +5,9 @@
     Combina:
     1. Notificaciones de ATRASO (órdenes con +5 días)
     2. Notificaciones de CAMBIO DE ESTADO (nuevas)
+    3. OBSERVACIONES internas
+    4. COMENTARIOS DEL CLIENTE
+    5. REPORTES DE ESTADO DEL EQUIPO
     ═══════════════════════════════════════════════════ */
 
 date_default_timezone_set("America/Mexico_City");
@@ -182,8 +185,35 @@ try {
   $_noti_obs = array();
 }
 
+// 4. NOTIFICACIONES DE COMENTARIOS DEL CLIENTE
+$_noti_cliente = array();
+$_noti_totalCliente = 0;
+try {
+  $_noti_cliente = controladorComentarioCliente::ctrComentariosRecientesNotif(10, $_noti_tecOrdenIds);
+  if (!is_array($_noti_cliente)) $_noti_cliente = array();
+  $_noti_totalCliente = count($_noti_cliente);
+} catch (Exception $e) {
+  $_noti_cliente = array();
+}
+
+// 5. NOTIFICACIONES DE REPORTES DE ESTADO DEL EQUIPO
+$_noti_reportes = array();
+$_noti_totalReportes = 0;
+try {
+  $_noti_reportes = controladorReporteEquipo::ctrReportesRecientesNotif(
+    isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
+    10,
+    $_noti_tecOrdenIds
+  );
+  if (!is_array($_noti_reportes)) $_noti_reportes = array();
+  $_noti_totalReportes = count($_noti_reportes);
+} catch (Exception $e) {
+  $_noti_reportes = array();
+}
+
 // ── Total combinado ──
-$_noti_total = $_noti_totalAtraso + $_noti_totalEstado + $_noti_totalObs;
+$_noti_total = $_noti_totalAtraso + $_noti_totalEstado + $_noti_totalObs
+  + $_noti_totalCliente + $_noti_totalReportes;
 
 // ══════════════════════════════════════
 // UNIFICAR NOTIFICACIONES EN ORDEN CRONOLÓGICO
@@ -205,6 +235,24 @@ foreach (array_slice($_noti_obs, 0, 8) as $nob) {
     '_type'  => 'obs',
     '_fecha' => $nob['fecha'],
     '_data'  => $nob
+  );
+}
+
+// Agregar comentarios del cliente
+foreach (array_slice($_noti_cliente, 0, 8) as $ncl) {
+  $_noti_unified[] = array(
+    '_type'  => 'cliente',
+    '_fecha' => $ncl['fecha'],
+    '_data'  => $ncl
+  );
+}
+
+// Agregar reportes de estado del equipo
+foreach (array_slice($_noti_reportes, 0, 8) as $nre) {
+  $_noti_unified[] = array(
+    '_type'  => 'reporte',
+    '_fecha' => $nre['fecha'],
+    '_data'  => $nre
   );
 }
 
@@ -328,7 +376,7 @@ if (!function_exists('_notiTiempoRel')) {
               // ── Traspaso de técnico ──
               $neTiempo = _notiTiempoRel($nuData['fecha']);
               ?>
-              <li>
+              <li data-noti-estado="1">
                 <a href="index.php?ruta=infoOrden&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
                   style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal">
                   <div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
@@ -357,7 +405,7 @@ if (!function_exists('_notiTiempoRel')) {
               $neTiempo = _notiTiempoRel($nuData['fecha']);
               $neColor = _notiEstadoColor($nuData['estado_nuevo']);
               ?>
-              <li>
+              <li data-noti-estado="1">
                 <a href="index.php?ruta=infoOrden&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
                   style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid <?php echo $neColor[0]; ?>;white-space:normal">
                   <div style="width:32px;height:32px;border-radius:50%;background:<?php echo $neColor[1]; ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
@@ -400,6 +448,59 @@ if (!function_exists('_notiTiempoRel')) {
                     <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
                       <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($nobCreador); ?></span>
                       <span style="margin-left:auto"><?php echo $nobTiempo; ?></span>
+                    </div>
+                  </div>
+                </a>
+              </li>
+
+            <?php elseif ($nuType === 'cliente'):
+              $nclTiempo = _notiTiempoRel($nuData['fecha']);
+              $nclTexto = mb_strlen($nuData['comentario']) > 60 ? mb_substr($nuData['comentario'], 0, 60) . '…' : $nuData['comentario'];
+              ?>
+              <li>
+                <a href="index.php?ruta=infoOrden&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
+                  style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #0ea5e9;white-space:normal">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#f0f9ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+                    <i class="fa-solid fa-user-pen" style="font-size:12px;color:#0ea5e9"></i>
+                  </div>
+                  <div style="flex:1;min-width:0;line-height:1.4">
+                    <div style="font-size:12px;color:#0f172a">
+                      <strong style="color:#0ea5e9">#<?php echo htmlspecialchars($nuData['id_orden']); ?></strong>
+                      comentario del cliente
+                    </div>
+                    <div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis">
+                      <?php echo htmlspecialchars($nclTexto); ?>
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
+                      <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>Cliente</span>
+                      <span style="margin-left:auto"><?php echo $nclTiempo; ?></span>
+                    </div>
+                  </div>
+                </a>
+              </li>
+
+            <?php elseif ($nuType === 'reporte'):
+              $nreTiempo = _notiTiempoRel($nuData['fecha']);
+              $nreTexto = mb_strlen($nuData['descripcion']) > 60 ? mb_substr($nuData['descripcion'], 0, 60) . '…' : $nuData['descripcion'];
+              $nreCreador = isset($nuData['creador_nombre']) ? $nuData['creador_nombre'] : 'Usuario';
+              ?>
+              <li>
+                <a href="index.php?ruta=infoOrden&idOrden=<?php echo htmlspecialchars($nuData['id_orden']); ?>"
+                  style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #10b981;white-space:normal">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#ecfdf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+                    <i class="fa-solid fa-clipboard-check" style="font-size:12px;color:#10b981"></i>
+                  </div>
+                  <div style="flex:1;min-width:0;line-height:1.4">
+                    <div style="font-size:12px;color:#0f172a">
+                      <strong style="color:#10b981">#<?php echo htmlspecialchars($nuData['id_orden']); ?></strong>
+                      reporte del equipo
+                    </div>
+                    <div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis">
+                      <?php echo htmlspecialchars($nreTexto); ?>
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;align-items:center;gap:6px">
+                      <span><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i><?php echo htmlspecialchars($nreCreador); ?></span>
+                      <span style="margin-left:auto"><?php echo $nreTiempo; ?></span>
                     </div>
                   </div>
                 </a>
@@ -456,7 +557,7 @@ if (!function_exists('_notiTiempoRel')) {
         $.post('ajax/notificaciones.ajax.php', { marcarLeidasEstado: 1 }, function () {
           // Quitar badge y notificaciones de estado del dropdown
           var $badge = $('#egsNotiBell .label');
-          var nuevoTotal = <?php echo $_noti_totalAtraso; ?>;
+          var nuevoTotal = <?php echo $_noti_totalAtraso + $_noti_totalObs + $_noti_totalCliente + $_noti_totalReportes; ?>;
           if (nuevoTotal > 0) {
             $badge.text(nuevoTotal > 99 ? '99+' : nuevoTotal);
           } else {
@@ -467,8 +568,8 @@ if (!function_exists('_notiTiempoRel')) {
             nuevoTotal > 0 ? nuevoTotal + ' notificaci' + (nuevoTotal > 1 ? 'ones' : 'ón') : 'Sin notificaciones'
           );
           $btn.fadeOut();
-          // Remover items de estado (los que tienen border-left)
-          $('.notifications-menu .menu li a[style*="border-left"]').closest('li').slideUp(200);
+          // Remover solamente cambios de estado y traspasos.
+          $('.notifications-menu .menu li[data-noti-estado="1"]').slideUp(200);
         });
       });
     });
@@ -892,9 +993,29 @@ if (!function_exists('_notiTiempoRel')) {
     // Usar el mayor entre lo que hay en PHP y lo guardado en localStorage (por si otra pestaña ya actualizó)
     var serverEstadoId = <?php echo (!empty($_noti_estado) && isset($_noti_estado[0]['id'])) ? intval($_noti_estado[0]['id']) : 0; ?>;
     var serverObsId = <?php echo (!empty($_noti_obs) && isset($_noti_obs[0]['id'])) ? intval($_noti_obs[0]['id']) : 0; ?>;
+    var serverClienteId = <?php echo (!empty($_noti_cliente) && isset($_noti_cliente[0]['id'])) ? intval($_noti_cliente[0]['id']) : 0; ?>;
+    var serverReporteId = <?php echo (!empty($_noti_reportes) && isset($_noti_reportes[0]['id'])) ? intval($_noti_reportes[0]['id']) : 0; ?>;
     var lastEstadoId = Math.max(serverEstadoId, parseInt(localStorage.getItem('egs_toast_estado_lastId') || '0', 10));
     var lastObsId = Math.max(serverObsId, parseInt(localStorage.getItem('egs_toast_obs_lastId') || '0', 10));
+    var storedClienteId = parseInt(localStorage.getItem('egs_toast_cliente_lastId') || '0', 10);
+    var storedReporteId = parseInt(localStorage.getItem('egs_toast_reporte_lastId') || '0', 10);
+    var lastClienteId = Math.max(serverClienteId, storedClienteId);
+    var lastReporteId = Math.max(serverReporteId, storedReporteId);
     var currentAtraso = <?php echo $_noti_totalAtraso; ?>;
+
+    var initialCliente = <?php echo !empty($_noti_cliente) ? json_encode(array(
+      'type' => 'cliente',
+      'id' => intval($_noti_cliente[0]['id']),
+      'idOrden' => intval($_noti_cliente[0]['id_orden']),
+      'texto' => mb_strlen($_noti_cliente[0]['comentario']) > 80 ? mb_substr($_noti_cliente[0]['comentario'], 0, 80) . '…' : $_noti_cliente[0]['comentario']
+    ), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) : 'null'; ?>;
+    var initialReporte = <?php echo !empty($_noti_reportes) ? json_encode(array(
+      'type' => 'reporte',
+      'id' => intval($_noti_reportes[0]['id']),
+      'idOrden' => intval($_noti_reportes[0]['id_orden']),
+      'texto' => mb_strlen($_noti_reportes[0]['descripcion']) > 80 ? mb_substr($_noti_reportes[0]['descripcion'], 0, 80) . '…' : $_noti_reportes[0]['descripcion'],
+      'creador' => isset($_noti_reportes[0]['creador_nombre']) ? $_noti_reportes[0]['creador_nombre'] : 'Usuario'
+    ), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) : 'null'; ?>;
 
     function egsPlayNotifSound(type) {
       try {
@@ -908,12 +1029,18 @@ if (!function_exists('_notiTiempoRel')) {
           osc1.frequency.setValueAtTime(880, ctx.currentTime + .1);
           gain1.gain.setValueAtTime(0.12, ctx.currentTime);
           gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .4);
-        } else if (type === 'obs') {
+        } else if (type === 'obs' || type === 'cliente') {
           osc1.type = 'triangle';
           osc1.frequency.setValueAtTime(587.3, ctx.currentTime);
           osc1.frequency.setValueAtTime(740, ctx.currentTime + .08);
           gain1.gain.setValueAtTime(0.11, ctx.currentTime);
           gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .35);
+        } else if (type === 'reporte') {
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(523.3, ctx.currentTime);
+          osc1.frequency.setValueAtTime(784, ctx.currentTime + .1);
+          gain1.gain.setValueAtTime(0.11, ctx.currentTime);
+          gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .4);
         } else {
           osc1.type = 'sine';
           osc1.frequency.setValueAtTime(880, ctx.currentTime);
@@ -929,7 +1056,7 @@ if (!function_exists('_notiTiempoRel')) {
         var osc2 = ctx.createOscillator();
         var gain2 = ctx.createGain();
         osc2.type = osc1.type;
-        osc2.frequency.setValueAtTime(type === 'obs' ? 880 : 1318.5, ctx.currentTime + .12);
+        osc2.frequency.setValueAtTime((type === 'obs' || type === 'cliente') ? 880 : 1318.5, ctx.currentTime + .12);
         gain2.gain.setValueAtTime(0, ctx.currentTime);
         gain2.gain.setValueAtTime(0.09, ctx.currentTime + .12);
         gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + .5);
@@ -940,10 +1067,20 @@ if (!function_exists('_notiTiempoRel')) {
       } catch (e) { }
     }
 
+    function egsEscapeHtml(value) {
+      return $('<div>').text(value == null ? '' : String(value)).html();
+    }
+
     function egsShowLiveToast(data) {
       // Remover toast anterior si existe
       var old = document.getElementById('egsLiveToast');
       if (old) old.remove();
+
+      data = $.extend({}, data);
+      data.idOrden = parseInt(data.idOrden, 10) || 0;
+      ['anterior', 'nuevo', 'usuario', 'texto', 'creador'].forEach(function (key) {
+        data[key] = egsEscapeHtml(data[key]);
+      });
 
       var icon, color, bg, title, body;
 
@@ -956,6 +1093,15 @@ if (!function_exists('_notiTiempoRel')) {
         icon = 'fa-comment-dots'; color = '#f59e0b'; bg = '#fffbeb';
         title = 'Nueva observación';
         body = '<strong style="color:#f59e0b">#' + data.idOrden + '</strong> — ' + data.texto +
+          '<br><span style="color:#94a3b8;font-size:11px"><i class="fa-solid fa-user" style="font-size:8px"></i> ' + data.creador + '</span>';
+      } else if (data.type === 'cliente') {
+        icon = 'fa-user-pen'; color = '#0ea5e9'; bg = '#f0f9ff';
+        title = 'Nuevo comentario del cliente';
+        body = '<strong style="color:#0ea5e9">#' + data.idOrden + '</strong> — ' + data.texto;
+      } else if (data.type === 'reporte') {
+        icon = 'fa-clipboard-check'; color = '#10b981'; bg = '#ecfdf5';
+        title = 'Nuevo reporte del equipo';
+        body = '<strong style="color:#10b981">#' + data.idOrden + '</strong> — ' + data.texto +
           '<br><span style="color:#94a3b8;font-size:11px"><i class="fa-solid fa-user" style="font-size:8px"></i> ' + data.creador + '</span>';
       } else {
         icon = 'fa-arrow-right-arrow-left'; color = '#3b82f6'; bg = '#eff6ff';
@@ -990,9 +1136,14 @@ if (!function_exists('_notiTiempoRel')) {
 
     // Genera el HTML de un item del dropdown según el tipo
     function egsBuildDropdownItem(data) {
+      data = $.extend({}, data);
+      data.idOrden = parseInt(data.idOrden, 10) || 0;
+      ['anterior', 'nuevo', 'usuario', 'texto', 'creador'].forEach(function (key) {
+        data[key] = egsEscapeHtml(data[key]);
+      });
       var link = 'index.php?ruta=infoOrden&idOrden=' + data.idOrden;
       if (data.type === 'traspaso') {
-        return '<li><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal">' +
+        return '<li data-noti-estado="1"><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal">' +
           '<div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
           '<i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i></div>' +
           '<div style="flex:1;min-width:0;line-height:1.4">' +
@@ -1011,9 +1162,27 @@ if (!function_exists('_notiTiempoRel')) {
           '<div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis">' + (data.texto || '') + '</div>' +
           '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>' + (data.creador || '') + ' <span style="margin-left:auto">Ahora</span></div>' +
           '</div></a></li>';
+      } else if (data.type === 'cliente') {
+        return '<li><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #0ea5e9;white-space:normal">' +
+          '<div style="width:32px;height:32px;border-radius:50%;background:#f0f9ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
+          '<i class="fa-solid fa-user-pen" style="font-size:12px;color:#0ea5e9"></i></div>' +
+          '<div style="flex:1;min-width:0;line-height:1.4">' +
+          '<div style="font-size:12px;color:#0f172a"><strong style="color:#0ea5e9">#' + data.idOrden + '</strong> comentario del cliente</div>' +
+          '<div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis">' + (data.texto || '') + '</div>' +
+          '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>Cliente <span style="margin-left:auto">Ahora</span></div>' +
+          '</div></a></li>';
+      } else if (data.type === 'reporte') {
+        return '<li><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #10b981;white-space:normal">' +
+          '<div style="width:32px;height:32px;border-radius:50%;background:#ecfdf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
+          '<i class="fa-solid fa-clipboard-check" style="font-size:12px;color:#10b981"></i></div>' +
+          '<div style="flex:1;min-width:0;line-height:1.4">' +
+          '<div style="font-size:12px;color:#0f172a"><strong style="color:#10b981">#' + data.idOrden + '</strong> reporte del equipo</div>' +
+          '<div style="font-size:11px;color:#64748b;margin-top:1px;overflow:hidden;text-overflow:ellipsis">' + (data.texto || '') + '</div>' +
+          '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>' + (data.creador || '') + ' <span style="margin-left:auto">Ahora</span></div>' +
+          '</div></a></li>';
       } else {
         // estado
-        return '<li><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #3b82f6;white-space:normal">' +
+        return '<li data-noti-estado="1"><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #3b82f6;white-space:normal">' +
           '<div style="width:32px;height:32px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
           '<i class="fa-solid fa-arrow-right-arrow-left" style="font-size:12px;color:#3b82f6"></i></div>' +
           '<div style="flex:1;min-width:0;line-height:1.4">' +
@@ -1021,6 +1190,18 @@ if (!function_exists('_notiTiempoRel')) {
           '<div style="font-size:11px;color:#94a3b8;margin-top:2px"><i class="fa-solid fa-user" style="font-size:8px;margin-right:2px"></i>' + (data.usuario || '') + ' <span style="margin-left:auto">Ahora</span></div>' +
           '</div></a></li>';
       }
+    }
+
+    function egsPrependDropdownItem(data) {
+      var $menu = $('.notifications-menu .menu');
+      if (!$menu.length) {
+        var $dropdownUl = $('.notifications-menu .dropdown-menu');
+        $('<li><ul class="menu" style="max-height:400px;overflow-y:auto"></ul></li>')
+          .insertBefore($dropdownUl.find('li.footer'));
+        $menu = $dropdownUl.find('.menu');
+      }
+      $menu.prepend(egsBuildDropdownItem(data));
+      $menu.find('> li').slice(20).remove();
     }
 
     function egsPollNotificaciones() {
@@ -1047,9 +1228,9 @@ if (!function_exists('_notiTiempoRel')) {
         }
 
         // Detectar nueva notificación de estado/traspaso
-        var hayNuevoEstado = false;
+        var toastSlot = 0;
         if (r.ultimaNotif && r.ultimaNotif.id && r.ultimaNotif.id > lastEstadoId) {
-          hayNuevoEstado = true;
+          toastSlot = 1;
           lastEstadoId = r.ultimaNotif.id;
           // Sincronizar con localStorage para evitar re-mostrar en otras pestañas/navegaciones
           localStorage.setItem('egs_toast_estado_lastId', r.ultimaNotif.id);
@@ -1096,8 +1277,9 @@ if (!function_exists('_notiTiempoRel')) {
           lastObsId = r.ultimaObs.id;
           localStorage.setItem('egs_toast_obs_lastId', r.ultimaObs.id);
 
-          // Si hubo toast de estado, esperar 7s para no sobreponerlo
-          var obsDelay = hayNuevoEstado ? 7000 : 0;
+          // Espaciar los avisos para no sobreponerlos.
+          var obsDelay = toastSlot * 7000;
+          toastSlot++;
           setTimeout(function () {
             egsPlayNotifSound('obs');
             egsShowLiveToast({
@@ -1122,7 +1304,76 @@ if (!function_exists('_notiTiempoRel')) {
           }
         }
 
+        // Detectar nuevo comentario del cliente.
+        if (r.ultimoCliente && r.ultimoCliente.id && r.ultimoCliente.id > lastClienteId) {
+          lastClienteId = r.ultimoCliente.id;
+          localStorage.setItem('egs_toast_cliente_lastId', r.ultimoCliente.id);
+          var clienteDelay = toastSlot * 7000;
+          toastSlot++;
+
+          setTimeout(function () {
+            egsPlayNotifSound('cliente');
+            egsShowLiveToast({
+              type: 'cliente',
+              idOrden: r.ultimoCliente.idOrden,
+              texto: r.ultimoCliente.texto
+            });
+          }, clienteDelay);
+
+          egsPrependDropdownItem({
+            type: 'cliente',
+            idOrden: r.ultimoCliente.idOrden,
+            texto: r.ultimoCliente.texto
+          });
+        }
+
+        // Detectar nuevo reporte de estado del equipo.
+        if (r.ultimoReporte && r.ultimoReporte.id && r.ultimoReporte.id > lastReporteId) {
+          lastReporteId = r.ultimoReporte.id;
+          localStorage.setItem('egs_toast_reporte_lastId', r.ultimoReporte.id);
+          var reporteDelay = toastSlot * 7000;
+
+          setTimeout(function () {
+            egsPlayNotifSound('reporte');
+            egsShowLiveToast({
+              type: 'reporte',
+              idOrden: r.ultimoReporte.idOrden,
+              texto: r.ultimoReporte.texto,
+              creador: r.ultimoReporte.creador
+            });
+          }, reporteDelay);
+
+          egsPrependDropdownItem({
+            type: 'reporte',
+            idOrden: r.ultimoReporte.idOrden,
+            texto: r.ultimoReporte.texto,
+            creador: r.ultimoReporte.creador
+          });
+        }
+
       }, 'json');
+    }
+
+    // Mostrar una vez los eventos que ya existían al cargar la página.
+    var initialDelay = 1500;
+    if (<?php echo $_noti_totalEstado > 0 ? 'true' : 'false'; ?>) initialDelay += 7000;
+    if (<?php echo $_noti_totalObs > 0 ? 'true' : 'false'; ?>) initialDelay += 7000;
+
+    if (initialCliente && initialCliente.id > storedClienteId) {
+      localStorage.setItem('egs_toast_cliente_lastId', initialCliente.id);
+      setTimeout(function () {
+        egsPlayNotifSound('cliente');
+        egsShowLiveToast(initialCliente);
+      }, initialDelay);
+      initialDelay += 7000;
+    }
+
+    if (initialReporte && initialReporte.id > storedReporteId) {
+      localStorage.setItem('egs_toast_reporte_lastId', initialReporte.id);
+      setTimeout(function () {
+        egsPlayNotifSound('reporte');
+        egsShowLiveToast(initialReporte);
+      }, initialDelay);
     }
 
     // Iniciar polling después de 10 seg (dejar que la página cargue)
@@ -1131,4 +1382,4 @@ if (!function_exists('_notiTiempoRel')) {
     }, 10000);
 
   })();
-</script>
+</script>

@@ -78,6 +78,8 @@ if(isset($_POST["pollNotificaciones"])){
 
 	require_once "../modelos/conexion.php";
 	require_once "../modelos/observacionOrdenes.modelo.php";
+	require_once "../modelos/comentarioClienteOrden.modelo.php";
+	require_once "../modelos/reporteEquipo.modelo.php";
 
 	$perfil    = isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "";
 	$idEmpresa = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
@@ -128,6 +130,20 @@ if(isset($_POST["pollNotificaciones"])){
 	if (!is_array($obsNotifs)) $obsNotifs = array();
 	$totalObs = count($obsNotifs);
 
+	// Contar comentarios del cliente y reportes del equipo de hoy.
+	// Para tecnicos se reutiliza el filtro de sus ordenes asignadas.
+	$clienteNotifs = ModeloComentarioCliente::mdlComentariosRecientesNotif(
+		"comentariosClienteOrden", 5, $_poll_tecOrdenIds
+	);
+	if (!is_array($clienteNotifs)) $clienteNotifs = array();
+	$totalCliente = count($clienteNotifs);
+
+	$reporteNotifs = ModeloReporteEquipo::mdlReportesRecientesNotif(
+		"reporteEstadoEquipo", $idUsuario, 5, $_poll_tecOrdenIds
+	);
+	if (!is_array($reporteNotifs)) $reporteNotifs = array();
+	$totalReporte = count($reporteNotifs);
+
 	// Preparar datos de la última notificación (para toast en tiempo real)
 	$ultimaNotif = null;
 	if (!empty($estadoNotifs)) {
@@ -155,13 +171,40 @@ if(isset($_POST["pollNotificaciones"])){
 		);
 	}
 
+	$ultimoCliente = null;
+	if (!empty($clienteNotifs)) {
+		$c = $clienteNotifs[0];
+		$ultimoCliente = array(
+			"idOrden" => $c["id_orden"],
+			"texto"   => mb_strlen($c["comentario"]) > 80 ? mb_substr($c["comentario"], 0, 80) . "..." : $c["comentario"],
+			"fecha"   => $c["fecha"],
+			"id"      => $c["id"]
+		);
+	}
+
+	$ultimoReporte = null;
+	if (!empty($reporteNotifs)) {
+		$rep = $reporteNotifs[0];
+		$ultimoReporte = array(
+			"idOrden" => $rep["id_orden"],
+			"texto"   => mb_strlen($rep["descripcion"]) > 80 ? mb_substr($rep["descripcion"], 0, 80) . "..." : $rep["descripcion"],
+			"creador" => isset($rep["creador_nombre"]) ? $rep["creador_nombre"] : "Usuario",
+			"fecha"   => $rep["fecha"],
+			"id"      => $rep["id"]
+		);
+	}
+
 	header("Content-Type: application/json");
 	echo json_encode(array(
 		"totalEstado" => $totalEstado,
 		"totalObs"    => $totalObs,
-		"total"       => $totalEstado + $totalObs,
+		"totalCliente" => $totalCliente,
+		"totalReporte" => $totalReporte,
+		"total"       => $totalEstado + $totalObs + $totalCliente + $totalReporte,
 		"ultimaNotif" => $ultimaNotif,
-		"ultimaObs"   => $ultimaObs
+		"ultimaObs"   => $ultimaObs,
+		"ultimoCliente" => $ultimoCliente,
+		"ultimoReporte" => $ultimoReporte
 	));
 	exit;
 

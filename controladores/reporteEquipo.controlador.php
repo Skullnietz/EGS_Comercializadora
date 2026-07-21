@@ -24,6 +24,19 @@ class controladorReporteEquipo
 	}
 
 	/*=============================================
+	REPORTES RECIENTES PARA NOTIFICACION
+	=============================================*/
+	static public function ctrReportesRecientesNotif($idUsuario, $limite = 15, $ordenIds = null)
+	{
+		return ModeloReporteEquipo::mdlReportesRecientesNotif(
+			"reporteEstadoEquipo",
+			$idUsuario,
+			$limite,
+			$ordenIds
+		);
+	}
+
+	/*=============================================
 	CREAR REPORTE (con token anti-duplicado)
 	=============================================*/
 	static public function ctrlCrearReporte()
