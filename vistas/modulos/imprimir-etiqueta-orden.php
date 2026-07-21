@@ -1,0 +1,170 @@
+<?php
+function egsPrintH($valor) { return htmlspecialchars((string) $valor, ENT_QUOTES, "UTF-8"); }
+function egsPrintValor($valor, $vacio = "—") {
+    $valor = trim((string) $valor);
+    return $valor !== "" ? $valor : $vacio;
+}
+function egsPrintFecha($valor) {
+    $valor = substr(trim((string) $valor), 0, 10);
+    $fecha = DateTime::createFromFormat("Y-m-d", $valor);
+    return $fecha ? $fecha->format("d/m/Y") : "—";
+}
+function egsPrintUrlBase() {
+    $https = !empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off";
+    $host = isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "backend.comercializadoraegs.com";
+    $script = isset($_SERVER["SCRIPT_NAME"]) ? $_SERVER["SCRIPT_NAME"] : "/index.php";
+    $dir = rtrim(str_replace("\\", "/", dirname($script)), "/");
+    if ($dir === "." || $dir === "/") $dir = "";
+    return ($https ? "https" : "http") . "://" . $host . $dir;
+}
+function egsPrintTokenCompacto($tokenHex) {
+    $bin = @hex2bin((string) $tokenHex);
+    return $bin === false ? "" : rtrim(strtr(base64_encode($bin), "+/", "-_"), "=");
+}
+
+$tipoEtiqueta = isset($_GET["tipo"]) ? strtolower(trim((string) $_GET["tipo"])) : "";
+$idOrdenEtiqueta = isset($_GET["idOrden"]) ? intval($_GET["idOrden"]) : 0;
+$perfilEtiqueta = isset($_SESSION["perfil"]) ? (string) $_SESSION["perfil"] : "";
+$empresaSesionEtiqueta = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
+$errorEtiqueta = "";
+$ordenEtiqueta = null;
+$garantiaEtiqueta = null;
+$urlQrEtiqueta = "";
+
+if (!in_array($tipoEtiqueta, array("contacto", "garantia"), true) || $idOrdenEtiqueta < 1) {
+    $errorEtiqueta = "La solicitud de impresión está incompleta.";
+} else {
+    $filasEtiqueta = controladorOrdenes::ctrMostrarordenesParaValidar("id", $idOrdenEtiqueta);
+    $ordenEtiqueta = is_array($filasEtiqueta) && !empty($filasEtiqueta) ? $filasEtiqueta[0] : null;
+    if (!is_array($ordenEtiqueta)) {
+        $errorEtiqueta = "La orden indicada no existe.";
+    } elseif (intval($ordenEtiqueta["id_empresa"]) !== $empresaSesionEtiqueta) {
+        $errorEtiqueta = "La orden pertenece a otra empresa.";
+    }
+}
+
+if ($errorEtiqueta === "" && $tipoEtiqueta === "contacto") {
+    if ($perfilEtiqueta !== "administrador") {
+        $errorEtiqueta = "Solo un administrador puede generar la etiqueta de identificación.";
+    } elseif (stripos((string) $ordenEtiqueta["estado"], "(REV)") === false) {
+        $errorEtiqueta = "La etiqueta de identificación solo está disponible mientras la orden está en revisión.";
+    } else {
+        $tokenOrden = controladorOrdenes::ctrAsegurarTokenCliente($idOrdenEtiqueta);
+        if (!preg_match('/^[a-f0-9]{32}$/i', (string) $tokenOrden)) {
+            $errorEtiqueta = "No fue posible generar el QR de identificación de la orden.";
+        } else {
+            $urlQrEtiqueta = egsPrintUrlBase() . "/infoOrden?idOrden=" . $idOrdenEtiqueta . "&g=" . rawurlencode($tokenOrden);
+        }
+    }
+}
+
+if ($errorEtiqueta === "" && $tipoEtiqueta === "garantia") {
+    $perfilesSalida = array("administrador", "vendedor", "secretaria");
+    if (!in_array($perfilEtiqueta, $perfilesSalida, true)) {
+        $errorEtiqueta = "Tu perfil no puede generar etiquetas de garantía.";
+    } elseif (stripos((string) $ordenEtiqueta["estado"], "(Ent)") === false) {
+        $errorEtiqueta = "La garantía se genera al imprimir el ticket de una orden entregada.";
+    } else {
+        try {
+            $existente = ModeloEtiquetas::mdlGarantiaPorOrden($idOrdenEtiqueta);
+            $clienteEtiqueta = ControladorClientes::ctrMostrarClientesOrdenes("id", intval($ordenEtiqueta["id_usuario"]));
+            $tecnicoEtiqueta = ControladorTecnicos::ctrMostrarTecnicos("id", intval($ordenEtiqueta["id_tecnico"]));
+            $fechaEntrega = !empty($existente["fecha_entrega"]) ? $existente["fecha_entrega"] : substr((string) $ordenEtiqueta["fecha_Salida"], 0, 10);
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaEntrega)) $fechaEntrega = date("Y-m-d");
+            $fechaVencimiento = !empty($existente["fecha_vencimiento"]) ? $existente["fecha_vencimiento"] : date("Y-m-d", strtotime($fechaEntrega . " +3 months"));
+            $equipoOrden = trim((string) $ordenEtiqueta["marcaDelEquipo"] . " " . (string) $ordenEtiqueta["modeloDelEquipo"]);
+            $datosGarantia = array(
+                "id_orden" => $idOrdenEtiqueta,
+                "id_empresa" => intval($ordenEtiqueta["id_empresa"]),
+                "fac_rem" => !empty($existente["fac_rem"]) ? $existente["fac_rem"] : "",
+                "tecnico" => !empty($existente["tecnico"]) ? $existente["tecnico"] : (isset($tecnicoEtiqueta["nombre"]) ? $tecnicoEtiqueta["nombre"] : ""),
+                "clave_cliente" => !empty($existente["clave_cliente"]) ? $existente["clave_cliente"] : (string) intval($ordenEtiqueta["id_usuario"]),
+                "nombre_cliente" => !empty($existente["nombre_cliente"]) ? $existente["nombre_cliente"] : (isset($clienteEtiqueta["nombre"]) ? $clienteEtiqueta["nombre"] : ""),
+                "equipo" => !empty($existente["equipo"]) ? $existente["equipo"] : $equipoOrden,
+                "numero_serie" => !empty($existente["numero_serie"]) ? $existente["numero_serie"] : $ordenEtiqueta["numeroDeSerieDelEquipo"],
+                "fecha_entrega" => $fechaEntrega,
+                "fecha_vencimiento" => $fechaVencimiento,
+                "proximo_servicio" => !empty($existente["proximo_servicio"]) ? $existente["proximo_servicio"] : "",
+                "creado_por" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0
+            );
+            $tokenGarantia = ModeloEtiquetas::mdlGuardarGarantia($datosGarantia);
+            $garantiaEtiqueta = array_merge($datosGarantia, array("token" => $tokenGarantia));
+            $urlQrEtiqueta = egsPrintUrlBase() . "/infoOrden?idOrden=" . $idOrdenEtiqueta . "&g=" . rawurlencode(egsPrintTokenCompacto($tokenGarantia));
+        } catch (Exception $e) {
+            $errorEtiqueta = "No fue posible preparar la garantía: " . $e->getMessage();
+        }
+    }
+}
+
+$configEtiqueta = ModeloEtiquetas::mdlObtenerConfiguracion(is_array($ordenEtiqueta) ? intval($ordenEtiqueta["id_empresa"]) : $empresaSesionEtiqueta);
+$clienteContacto = is_array($ordenEtiqueta) ? ControladorClientes::ctrMostrarClientesOrdenes("id", intval($ordenEtiqueta["id_usuario"])) : array();
+$equipoContacto = is_array($ordenEtiqueta) ? trim((string) $ordenEtiqueta["marcaDelEquipo"] . " " . (string) $ordenEtiqueta["modeloDelEquipo"]) : "";
+$telefonosEtiqueta = array_filter(array($configEtiqueta["whatsapp"], $configEtiqueta["telefono_1"], $configEtiqueta["telefono_2"], $configEtiqueta["telefono_3"]));
+?>
+
+<div class="egs-print-overlay">
+<?php if ($errorEtiqueta !== ""): ?>
+  <div class="egs-print-error"><i class="fa-solid fa-triangle-exclamation"></i><h2>No se puede imprimir</h2><p><?= egsPrintH($errorEtiqueta) ?></p><button onclick="window.close()">Cerrar</button></div>
+<?php else: ?>
+  <div class="egs-print-toolbar"><b><?= $tipoEtiqueta === "contacto" ? "Identificación 4 × 2.5 cm" : "Garantía 6.2 × 3.5 cm" ?></b><span>Escala 100% · sin márgenes</span><button type="button" onclick="window.print()"><i class="fa fa-print"></i> Imprimir</button></div>
+
+  <?php if ($tipoEtiqueta === "contacto"): ?>
+  <article class="egs-order-label egs-contact-print">
+    <i class="egs-triangle top"></i><i class="egs-triangle bottom"></i>
+    <section class="egs-contact-copy">
+      <img src="vistas/img/plantilla/logo-etiquetas.svg" alt="EGS">
+      <div class="egs-order-chip">ORDEN #<?= intval($ordenEtiqueta["id"]) ?> · IDENTIFICACIÓN</div>
+      <b class="egs-client-name"><?= egsPrintH(egsPrintValor(isset($clienteContacto["nombre"]) ? $clienteContacto["nombre"] : "", "CLIENTE")) ?></b>
+      <p class="egs-equipment"><?= egsPrintH(egsPrintValor($equipoContacto, "EQUIPO")) ?><?= trim((string) $ordenEtiqueta["numeroDeSerieDelEquipo"]) !== "" ? " · S/N " . egsPrintH($ordenEtiqueta["numeroDeSerieDelEquipo"]) : "" ?></p>
+      <b class="egs-contact-title">CONTACTO</b>
+      <p class="egs-phones"><?= egsPrintH(implode(" · ", $telefonosEtiqueta)) ?></p>
+      <p class="egs-site"><?= egsPrintH(preg_replace('#^https?://#i', '', $configEtiqueta["sitio_web"])) ?></p>
+    </section>
+    <section class="egs-contact-code"><div id="egsPrintQr"></div><b>ESCANEAR PARA<br>ABRIR ORDEN</b></section>
+  </article>
+  <?php else: ?>
+  <article class="egs-order-label egs-warranty-print">
+    <i class="egs-triangle top"></i><i class="egs-triangle bottom"></i>
+    <section class="egs-warranty-brand">
+      <img src="vistas/img/plantilla/logo-etiquetas.svg" alt="EGS">
+      <b><?= egsPrintH($configEtiqueta["nombre_comercial"]) ?></b>
+      <small><?= egsPrintH($configEtiqueta["lema"]) ?></small>
+      <strong>CONTACTO</strong>
+      <p><?= egsPrintH(implode(" · ", $telefonosEtiqueta)) ?></p>
+      <small class="web"><?= egsPrintH(preg_replace('#^https?://#i', '', $configEtiqueta["sitio_web"])) ?></small>
+    </section>
+    <section class="egs-warranty-fields">
+      <div><b>ORDEN</b><span>#<?= intval($idOrdenEtiqueta) ?></span><b>FAC./REM.</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["fac_rem"])) ?></span></div>
+      <div><b>TÉCNICO</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["tecnico"])) ?></span></div>
+      <div><b>CLIENTE</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["nombre_cliente"])) ?></span></div>
+      <div><b>EQUIPO</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["equipo"])) ?></span></div>
+      <div><b>S/N</b><span><?= egsPrintH(egsPrintValor($garantiaEtiqueta["numero_serie"])) ?></span></div>
+      <div class="dates"><b>ENTREGA</b><span><?= egsPrintH(egsPrintFecha($garantiaEtiqueta["fecha_entrega"])) ?></span><b>VENCE</b><span><?= egsPrintH(egsPrintFecha($garantiaEtiqueta["fecha_vencimiento"])) ?></span></div>
+      <div class="seal"><b>SELLO ALTERADO</b><span>SIN GARANTÍA</span></div>
+    </section>
+    <section class="egs-warranty-code"><div id="egsPrintQr"></div><b>VALIDAR<br>GARANTÍA</b></section>
+  </article>
+  <?php endif; ?>
+<?php endif; ?>
+</div>
+
+<style>
+.egs-print-overlay{position:fixed;inset:0;z-index:100000;background:#eef2f7;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;color:#050505}.egs-print-toolbar{position:fixed;top:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;padding:9px 12px;background:#fff;border:1px solid #dbe3ec;border-radius:10px;box-shadow:0 5px 18px rgba(15,23,42,.12);font-size:12px}.egs-print-toolbar span{color:#64748b}.egs-print-toolbar button,.egs-print-error button{border:0;border-radius:7px;background:#166534;color:#fff;padding:7px 12px;font-weight:700}.egs-print-error{max-width:430px;padding:30px;text-align:center;background:#fff;border-radius:16px;box-shadow:0 10px 35px rgba(15,23,42,.12)}.egs-print-error i{font-size:32px;color:#dc2626}.egs-order-label{position:relative;box-sizing:border-box;background:#fff;overflow:hidden;box-shadow:0 8px 28px rgba(15,23,42,.2)}.egs-order-label *{box-sizing:border-box}.egs-order-label .egs-triangle{position:absolute;width:0;height:0;z-index:4}.egs-order-label .egs-triangle.top{left:0;top:0;border-top:5mm solid #15803d;border-right:5mm solid transparent}.egs-order-label .egs-triangle.bottom{right:0;bottom:0;border-bottom:5mm solid #15803d;border-left:5mm solid transparent}.egs-order-label img{display:block;object-fit:contain;object-position:left center}.egs-contact-print{width:40mm;height:25mm;padding:1.8mm;display:grid;grid-template-columns:22mm 14mm;gap:1mm}.egs-contact-copy{min-width:0;padding-left:.3mm}.egs-contact-copy img{width:14mm;height:4.5mm;margin-left:4.2mm;margin-bottom:.4mm}.egs-order-chip{font-size:1.45mm;line-height:1.2;font-weight:900;color:#166534;letter-spacing:.08mm;white-space:nowrap}.egs-client-name{display:block;font-size:2.15mm;line-height:1.05;margin-top:.6mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.egs-equipment{font-size:1.55mm;line-height:1.15;height:3.5mm;margin:.4mm 0 .5mm;overflow:hidden}.egs-contact-title{display:block;font-size:1.8mm;line-height:1}.egs-phones{font-size:1.5mm;line-height:1.18;font-weight:800;margin:.35mm 0;max-height:3.7mm;overflow:hidden}.egs-site{font-size:1.35mm;line-height:1.1;font-weight:700;margin:0;white-space:nowrap;overflow:hidden}.egs-contact-code{border-left:.45mm solid #15803d;padding-left:1mm;display:flex;flex-direction:column;align-items:center;justify-content:center}.egs-contact-code #egsPrintQr,.egs-contact-code #egsPrintQr img,.egs-contact-code #egsPrintQr canvas{width:13.2mm!important;height:13.2mm!important}.egs-contact-code b,.egs-warranty-code b{text-align:center;font-size:1.3mm;line-height:1.05;color:#166534;margin-top:.4mm}.egs-warranty-print{width:62mm;height:35mm;padding:2mm;display:grid;grid-template-columns:17mm 25mm 16mm;gap:1mm}.egs-warranty-brand{border-right:.55mm solid #15803d;padding-right:1mm;min-width:0}.egs-warranty-brand img{width:13.5mm;height:5mm;margin:0 0 .4mm 1.8mm}.egs-warranty-brand>b{display:block;font-size:1.75mm;line-height:1.05}.egs-warranty-brand small{display:block;font-size:1.2mm;line-height:1.15;margin:.35mm 0 1.2mm}.egs-warranty-brand strong{display:block;font-size:1.8mm;line-height:1}.egs-warranty-brand p{font-size:1.35mm;line-height:1.22;font-weight:800;margin:.5mm 0;max-height:5mm;overflow:hidden}.egs-warranty-brand .web{font-size:1.1mm;font-weight:700;white-space:nowrap;overflow:hidden}.egs-warranty-fields{padding-top:.4mm;min-width:0}.egs-warranty-fields>div{display:grid;grid-template-columns:7mm 1fr;align-items:end;min-height:3.3mm;border-bottom:.25mm solid #555;gap:.5mm}.egs-warranty-fields>div b{font-size:1.55mm;line-height:1.1}.egs-warranty-fields>div span{font-size:1.45mm;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.egs-warranty-fields>div:first-child{grid-template-columns:5mm 6mm 6mm 1fr}.egs-warranty-fields .dates{grid-template-columns:6mm 7mm 5mm 1fr}.egs-warranty-fields .seal{display:flex;align-items:center;justify-content:space-between;border:0;background:#15803d;color:#fff;min-height:5.4mm;margin-top:1mm;padding:.7mm 1mm}.egs-warranty-fields .seal b{font-size:1.8mm}.egs-warranty-fields .seal span{font-size:2.1mm;font-weight:900}.egs-warranty-code{display:flex;flex-direction:column;align-items:center;justify-content:center}.egs-warranty-code #egsPrintQr,.egs-warranty-code #egsPrintQr img,.egs-warranty-code #egsPrintQr canvas{width:15.5mm!important;height:15.5mm!important}.egs-warranty-code b{font-size:1.6mm;margin-top:.8mm}.egs-print-error{display:block}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}.wrapper,.main-header,.main-sidebar,.content-wrapper,.main-footer{visibility:hidden!important}.egs-print-overlay,.egs-print-overlay *{visibility:visible!important}.egs-print-overlay{position:fixed;inset:0;background:#fff;display:block}.egs-print-toolbar{display:none}.egs-order-label{position:absolute;left:0;top:0;box-shadow:none}}
+.egs-contact-print{grid-template-columns:minmax(0,1fr) 16mm}.egs-warranty-print{grid-template-columns:15mm minmax(0,1fr) 17mm}.egs-warranty-brand img{margin-left:.4mm}.egs-contact-code #egsPrintQr{width:14mm!important;height:14mm!important;padding:1mm;box-sizing:content-box!important;background:#fff}.egs-contact-code #egsPrintQr img,.egs-contact-code #egsPrintQr canvas{width:14mm!important;height:14mm!important}.egs-warranty-code #egsPrintQr{width:15mm!important;height:15mm!important;padding:1mm;box-sizing:content-box!important;background:#fff}.egs-warranty-code #egsPrintQr img,.egs-warranty-code #egsPrintQr canvas{width:15mm!important;height:15mm!important}
+.egs-contact-print{grid-template-columns:minmax(0,1fr) 17mm}
+<?php if ($tipoEtiqueta === "contacto"): ?>@page{size:40mm 25mm;margin:0}<?php else: ?>@page{size:62mm 35mm;margin:0}<?php endif; ?>
+</style>
+
+<?php if ($errorEtiqueta === ""): ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  var box=document.getElementById('egsPrintQr');
+  var url=<?= json_encode($urlQrEtiqueta) ?>;
+  if(box && url && typeof QRCode!=='undefined'){
+    new QRCode(box,{text:url,width:256,height:256,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.L});
+    window.setTimeout(function(){ window.print(); },500);
+  }
+})();
+</script>
+<?php endif; ?>

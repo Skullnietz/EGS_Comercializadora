@@ -566,8 +566,9 @@ class ModeloOrdenes{
 
 		// Token opaco para el acceso público del cliente por QR (no secuencial).
 		$tokenCliente = bin2hex(random_bytes(16));
+		$pdo = ConexionWP::conectarWP();
 
-		$stmt = ConexionWP::conectarWP()->prepare("INSERT INTO $tabla(ruta, titulo, id_empresa, descripcion, multimedia, portada, id_tecnico, id_Asesor, id_usuario, partidaUno, precioUno, partidaDos, precioDos, partidaTres, precioTres, partidaCuatro, precioCuatro, partidaCinco, precioCinco, partidaSeis, precioSeis, partidaSiete, precioSiete, partidaOcho, precioOcho, partidaNueve, precioNueve, partidaDiez, precioDiez, total, estado, fecha_ingreso, marcaDelEquipo, modeloDelEquipo, numeroDeSerieDelEquipo, token_cliente) VALUES (:ruta, :titulo, :id_empresa, :descripcion, :multimedia, :portada, :id_tecnico, :id_Asesor, :id_usuario, :partidaUno, :precioUno, :partidaDos, :precioDos, :partidaTres, :precioTres, :partidaCuatro, :precioCuatro, :partidaCinco, :precioCinco, :partidaSeis, :precioSeis, :partidaSiete, :precioSiete, :partidaOcho, :precioOcho, :partidaNueve, :precioNueve, :partidaDiez, :precioDiez, :total, :estado, :fecha_ingreso, :marcaDelEquipo, :modeloDelEquipo, :numeroDeSerieDelEquipo, :token_cliente)");
+		$stmt = $pdo->prepare("INSERT INTO $tabla(ruta, titulo, id_empresa, descripcion, multimedia, portada, id_tecnico, id_Asesor, id_usuario, partidaUno, precioUno, partidaDos, precioDos, partidaTres, precioTres, partidaCuatro, precioCuatro, partidaCinco, precioCinco, partidaSeis, precioSeis, partidaSiete, precioSiete, partidaOcho, precioOcho, partidaNueve, precioNueve, partidaDiez, precioDiez, total, estado, fecha_ingreso, marcaDelEquipo, modeloDelEquipo, numeroDeSerieDelEquipo, token_cliente) VALUES (:ruta, :titulo, :id_empresa, :descripcion, :multimedia, :portada, :id_tecnico, :id_Asesor, :id_usuario, :partidaUno, :precioUno, :partidaDos, :precioDos, :partidaTres, :precioTres, :partidaCuatro, :precioCuatro, :partidaCinco, :precioCinco, :partidaSeis, :precioSeis, :partidaSiete, :precioSiete, :partidaOcho, :precioOcho, :partidaNueve, :precioNueve, :partidaDiez, :precioDiez, :total, :estado, :fecha_ingreso, :marcaDelEquipo, :modeloDelEquipo, :numeroDeSerieDelEquipo, :token_cliente)");
 
 //:marcaDelEquipo, :modeloDelEquipo, :numeroDeSerieDelEquipo
 
@@ -653,7 +654,11 @@ class ModeloOrdenes{
 
 
 
-			return "ok";
+			return array(
+				"estado" => "ok",
+				"id" => intval($pdo->lastInsertId()),
+				"token_cliente" => $tokenCliente
+			);
 
 
 

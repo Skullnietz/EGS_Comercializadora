@@ -493,7 +493,22 @@ $_tn_countAtraso = count($_tn_atraso);
       <li class="tn-date-sep"><?php echo $itemDateLabel; ?></li>
     <?php endif; ?>
 
-    <?php if ($itemSource === 'traspaso'):
+    <?php if ($itemSource === 'etiqueta'):
+        $_tn_etiquetaUrl = 'index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=' . intval($itemData['id_orden']);
+    ?>
+      <li class="tn-item" data-ntype="estado">
+        <div class="tn-item-icon" style="background:#f0fdf4"><i class="fa-solid fa-tag" style="color:#15803d"></i></div>
+        <div class="tn-item-body">
+          <div class="tn-item-title"><strong>#<?php echo intval($itemData['id_orden']); ?></strong> — Orden lista para identificar</div>
+          <div style="font-size:12px;color:#64748b;margin-top:3px">Imprime la etiqueta de contacto con su QR antes de iniciar la revisión.</div>
+          <div class="tn-item-meta">
+            <a href="<?php echo $_tn_etiquetaUrl; ?>" target="_blank" class="tn-badge-tipo" style="background:#15803d;color:#fff;text-decoration:none"><i class="fa-solid fa-print"></i> Generar etiqueta</a>
+            <span><i class="fa-regular fa-clock" style="font-size:8px;margin-right:3px"></i><?php echo _tnTiempoRel($itemFecha); ?></span>
+          </div>
+        </div>
+      </li>
+
+    <?php elseif ($itemSource === 'traspaso'):
         $_tn_equipoTxt = '';
         if (!empty($itemOi['marca']) || !empty($itemOi['modelo'])) {
             $_tn_equipoTxt = trim($itemOi['marca'] . ' ' . $itemOi['modelo']);

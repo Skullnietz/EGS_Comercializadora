@@ -1,5 +1,5 @@
 <?php
-$jsVer = '1.4.2';
+$jsVer = '1.4.3';
 $rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
 $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
@@ -8,7 +8,7 @@ $isClientePublicRoute = ($rutaActual === "estado-orden-cliente" || $rutaActual =
 // Los QR nuevos apuntan primero a infoOrden. Sin sesión, conservar el token y
 // enviar al visitante a la validación pública; un QR inválido no salta el login.
 $tokenQrInfoOrden = isset($_GET["g"]) ? trim((string) $_GET["g"]) : (isset($_GET["token"]) ? trim((string) $_GET["token"]) : "");
-$tokenQrValido = preg_match('/^[A-Za-z0-9_-]{43}$/', $tokenQrInfoOrden) || preg_match('/^[a-f0-9]{64}$/i', $tokenQrInfoOrden);
+$tokenQrValido = preg_match('/^[A-Za-z0-9_-]{43}$/', $tokenQrInfoOrden) || preg_match('/^[a-f0-9]{64}$/i', $tokenQrInfoOrden) || preg_match('/^[a-f0-9]{32}$/i', $tokenQrInfoOrden);
 if (!$hasBackendSession && $rutaActual === "infoOrden" && $tokenQrValido) {
   $scriptQr = isset($_SERVER["SCRIPT_NAME"]) ? $_SERVER["SCRIPT_NAME"] : "/index.php";
   $directorioQr = rtrim(str_replace("\\", "/", dirname($scriptQr)), "/");

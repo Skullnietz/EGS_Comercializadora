@@ -400,6 +400,23 @@ if (!function_exists('_notiTiempoRel')) {
                 </a>
               </li>
 
+            <?php elseif ($nuType === 'etiqueta'):
+              $neTiempo = _notiTiempoRel($nuData['fecha']);
+              ?>
+              <li data-noti-estado="1">
+                <a href="index.php?ruta=imprimir-etiqueta-orden&amp;tipo=contacto&amp;idOrden=<?php echo intval($nuData['id_orden']); ?>" target="_blank"
+                  style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #15803d;white-space:normal">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+                    <i class="fa-solid fa-tag" style="font-size:12px;color:#15803d"></i>
+                  </div>
+                  <div style="flex:1;min-width:0;line-height:1.4">
+                    <div style="font-size:12px;color:#0f172a"><strong>#<?php echo intval($nuData['id_orden']); ?></strong> lista para identificar</div>
+                    <div style="font-size:11px;color:#15803d;font-weight:700;margin-top:2px"><i class="fa-solid fa-print" style="font-size:9px"></i> Generar etiqueta de contacto</div>
+                    <div style="font-size:10px;color:#94a3b8;margin-top:2px;text-align:right"><?php echo $neTiempo; ?></div>
+                  </div>
+                </a>
+              </li>
+
             <?php elseif ($nuType === 'estado'):
               // ── Cambio de estado ──
               $neTiempo = _notiTiempoRel($nuData['fecha']);
@@ -629,7 +646,7 @@ if (!function_exists('_notiTiempoRel')) {
   // Datos para el toast
   $_toast_first = $_noti_estado[0];
   $_toast_tipo = isset($_toast_first['tipo']) ? $_toast_first['tipo'] : 'estado';
-  $_toast_color = ($_toast_tipo === 'traspaso') ? array('#8b5cf6', '#f5f3ff', 'fa-people-arrows') : _notiEstadoColor($_toast_first['estado_nuevo']);
+  $_toast_color = ($_toast_tipo === 'etiqueta') ? array('#15803d', '#f0fdf4', 'fa-tag') : (($_toast_tipo === 'traspaso') ? array('#8b5cf6', '#f5f3ff', 'fa-people-arrows') : _notiEstadoColor($_toast_first['estado_nuevo']));
   $_toast_extras = $_noti_totalEstado - 1;
   ?>
   <!-- ══════════════════════════════════════════
@@ -730,7 +747,9 @@ if (!function_exists('_notiTiempoRel')) {
       <!-- Texto -->
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:3px">
-          <?php if ($_toast_tipo === 'traspaso'): ?>
+          <?php if ($_toast_tipo === 'etiqueta'): ?>
+            Orden lista para identificar
+          <?php elseif ($_toast_tipo === 'traspaso'): ?>
             Traspaso de equipo
           <?php elseif ($_noti_perfil === 'tecnico'): ?>
             Orden lista para trabajar
@@ -739,7 +758,10 @@ if (!function_exists('_notiTiempoRel')) {
           <?php endif; ?>
         </div>
         <div style="font-size:12px;color:#475569;line-height:1.5">
-          <?php if ($_toast_tipo === 'traspaso'): ?>
+          <?php if ($_toast_tipo === 'etiqueta'): ?>
+            <strong style="color:#15803d">#<?php echo intval($_toast_first['id_orden']); ?></strong>
+            — Genera su etiqueta de contacto con QR desde la campana.
+          <?php elseif ($_toast_tipo === 'traspaso'): ?>
             <strong
               style="color:<?php echo $_toast_color[0]; ?>">#<?php echo htmlspecialchars($_toast_first['id_orden']); ?></strong>
             — <?php echo htmlspecialchars($_toast_first['estado_anterior']); ?>
@@ -1084,7 +1106,11 @@ if (!function_exists('_notiTiempoRel')) {
 
       var icon, color, bg, title, body;
 
-      if (data.type === 'traspaso') {
+      if (data.type === 'etiqueta') {
+        icon = 'fa-tag'; color = '#15803d'; bg = '#f0fdf4';
+        title = 'Orden lista para identificar';
+        body = '<strong style="color:#15803d">#' + data.idOrden + '</strong> — Genera su etiqueta de contacto con QR desde la campana.';
+      } else if (data.type === 'traspaso') {
         icon = 'fa-people-arrows'; color = '#8b5cf6'; bg = '#f5f3ff';
         title = 'Traspaso de equipo';
         body = '<strong style="color:#8b5cf6">#' + data.idOrden + '</strong> — ' +
@@ -1142,7 +1168,14 @@ if (!function_exists('_notiTiempoRel')) {
         data[key] = egsEscapeHtml(data[key]);
       });
       var link = 'index.php?ruta=infoOrden&idOrden=' + data.idOrden;
-      if (data.type === 'traspaso') {
+      if (data.type === 'etiqueta') {
+        link = 'index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=' + data.idOrden;
+        return '<li data-noti-estado="1"><a href="' + link + '" target="_blank" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #15803d;white-space:normal">' +
+          '<div style="width:32px;height:32px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
+          '<i class="fa-solid fa-tag" style="font-size:12px;color:#15803d"></i></div>' +
+          '<div style="flex:1;min-width:0;line-height:1.4"><div style="font-size:12px;color:#0f172a"><strong>#' + data.idOrden + '</strong> lista para identificar</div>' +
+          '<div style="font-size:11px;color:#15803d;font-weight:700;margin-top:2px"><i class="fa-solid fa-print"></i> Generar etiqueta de contacto</div></div></a></li>';
+      } else if (data.type === 'traspaso') {
         return '<li data-noti-estado="1"><a href="' + link + '" style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-left:3px solid #8b5cf6;white-space:normal">' +
           '<div style="width:32px;height:32px;border-radius:50%;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">' +
           '<i class="fa-solid fa-people-arrows" style="font-size:12px;color:#8b5cf6"></i></div>' +

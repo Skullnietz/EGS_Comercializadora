@@ -817,7 +817,31 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 				$respuesta = ModeloOrdenes::mdlIngresarOrden("ordenes", $datosOrden);
 
-
+				if (is_array($respuesta) && isset($respuesta["estado"]) && $respuesta["estado"] === "ok") {
+					// Al registrar una orden en revisiÃ³n se crea una tarea de calidad
+					// exclusiva para administradores: imprimir su identificaciÃ³n.
+					if (stripos((string) $datosOrden["status"], "(REV)") !== false) {
+						try {
+							ControladorNotificaciones::ctrCrearTablaEstado();
+							ControladorNotificaciones::ctrRegistrarCambioEstado(array(
+								"id_orden" => intval($respuesta["id"]),
+								"estado_anterior" => "Orden registrada",
+								"estado_nuevo" => $datosOrden["status"],
+								"id_usuario_accion" => isset($_SESSION["id"]) ? intval($_SESSION["id"]) : 0,
+								"nombre_usuario" => isset($_SESSION["nombre"]) ? (string) $_SESSION["nombre"] : "Sistema EGS",
+								"titulo_orden" => $datosOrden["titulo"],
+								"id_empresa" => intval($datosOrden["empresa"]),
+								"id_asesor" => intval($datosOrden["asesor"]),
+								"id_tecnico" => intval($datosOrden["tecnico"]),
+								"id_tecnicoDos" => 0,
+								"tipo" => "etiqueta"
+							));
+						} catch (Exception $e) {
+							// La notificaciÃ³n no debe impedir el alta de la orden.
+						}
+					}
+					return "ok";
+				}
 
 				return $respuesta;
 

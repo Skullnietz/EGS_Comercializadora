@@ -19,6 +19,7 @@ return [
     'cambios-estado-hoy',
     'todas-notificaciones',
     'etiquetas',
+    'imprimir-etiqueta-orden',
     'validar-garantia',
 
     /* ── Catálogo de productos ──────────────────── */

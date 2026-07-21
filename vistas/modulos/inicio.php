@@ -59,23 +59,6 @@ PÁGINA DE INICIO
   <!-- content -->
   <section class="content">
 
-    <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "Super-Administrador"): ?>
-      <a href="index.php?ruta=etiquetas" class="egs-label-shortcut">
-        <span class="egs-label-shortcut-icon"><i class="fa-solid fa-tags"></i></span>
-        <span><strong>Generar etiquetas</strong><small>Contacto y garantía · opción vacía o vinculada a orden con QR</small></span>
-        <span class="egs-label-shortcut-badge">Recomendado: con orden</span>
-        <i class="fa-solid fa-chevron-right egs-label-shortcut-arrow"></i>
-      </a>
-      <style>
-        .egs-label-shortcut{display:flex;align-items:center;gap:14px;margin:0 0 18px;padding:14px 18px;background:linear-gradient(110deg,#f0fdf4,#fff);border:1px solid #bbf7d0;border-left:5px solid #15803d;border-radius:12px;color:#0f172a;box-shadow:0 2px 10px rgba(21,128,61,.08);text-decoration:none;transition:.18s ease}
-        .egs-label-shortcut:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(21,128,61,.13);color:#0f172a;text-decoration:none}
-        .egs-label-shortcut-icon{width:42px;height:42px;border-radius:10px;background:#15803d;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
-        .egs-label-shortcut strong{display:block;font-size:15px}.egs-label-shortcut small{display:block;color:#64748b;margin-top:2px}
-        .egs-label-shortcut-badge{margin-left:auto;background:#dcfce7;color:#166534;border-radius:999px;padding:5px 11px;font-size:11px;font-weight:700;white-space:nowrap}
-        .egs-label-shortcut-arrow{color:#16a34a}@media(max-width:640px){.egs-label-shortcut-badge{display:none}}
-      </style>
-    <?php endif; ?>
-
     <?php if ($_SESSION["perfil"] == "administrador" || $_SESSION["perfil"] == "vendedor" || $_SESSION["perfil"] == "tecnico"): ?>
       <!-- ══════════════════════════════════════════════════════
            CRM DESIGN SYSTEM — Compartido entre Admin, Vendedor y Técnico
