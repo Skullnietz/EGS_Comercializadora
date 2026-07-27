@@ -193,8 +193,9 @@ $telefonosEtiqueta = array_values(array_filter(array($configEtiqueta["whatsapp"]
 .egs-site{margin:0!important;padding-top:.6mm!important;border-top:.3mm solid #000!important;font-size:5.7pt!important;line-height:1.1!important;font-weight:800!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
 .egs-contact-code,.egs-warranty-code{display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;padding:0!important;border:0!important;color:#000!important}
 .egs-qr-safe{display:flex;flex:0 0 21mm;width:21mm;height:21mm;align-items:center;justify-content:center;background:#fff}
-.egs-contact-code #egsPrintQr,.egs-warranty-code #egsPrintQr{width:17.5mm!important;height:17.5mm!important;padding:0!important;background:#fff!important;box-sizing:border-box!important}
-.egs-contact-code #egsPrintQr canvas,.egs-warranty-code #egsPrintQr canvas{display:block!important;width:17.5mm!important;height:17.5mm!important;image-rendering:pixelated}
+.egs-contact-code #egsPrintQr,.egs-warranty-code #egsPrintQr{width:21mm!important;height:21mm!important;padding:0!important;background:#fff!important;box-sizing:border-box!important}
+.egs-contact-code #egsPrintQr svg,.egs-warranty-code #egsPrintQr svg{display:block!important;width:21mm!important;height:21mm!important;shape-rendering:crispEdges}
+.egs-contact-code #egsPrintQr canvas,.egs-warranty-code #egsPrintQr canvas{display:block!important;width:17.5mm!important;height:17.5mm!important;margin:1.75mm!important;image-rendering:pixelated}
 .egs-contact-code #egsPrintQr img,.egs-warranty-code #egsPrintQr img{display:none!important}
 .egs-contact-code b,.egs-warranty-code b{max-width:21mm!important;margin:.8mm 0 0!important;overflow:visible!important;text-overflow:clip!important;color:#000!important;font-size:4.8pt!important;line-height:1.08!important;font-weight:900!important;text-align:center!important;white-space:normal!important}
 .egs-warranty-print{display:grid!important;grid-template-columns:minmax(0,1fr) 21mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:1.2mm!important}
@@ -222,7 +223,31 @@ $telefonosEtiqueta = array_values(array_filter(array($configEtiqueta["whatsapp"]
   var box=document.getElementById('egsPrintQr');
   var url=<?= json_encode($urlQrEtiqueta) ?>;
   if(box && url && typeof QRCode!=='undefined'){
-    new QRCode(box,{text:url,width:320,height:320,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    var qr=new QRCode(box,{text:url,width:320,height:320,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    try{
+      var model=qr._oQRCode, count=model&&model.getModuleCount?model.getModuleCount():0;
+      if(count){
+        var quiet=4,total=count+(quiet*2),commands=[];
+        for(var row=0;row<count;row++){
+          for(var column=0;column<count;column++){
+            if(model.isDark(row,column))commands.push('M'+(column+quiet)+' '+(row+quiet)+'h1v1h-1z');
+          }
+        }
+        var ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
+        svg.setAttribute('viewBox','0 0 '+total+' '+total);
+        svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+        svg.setAttribute('shape-rendering','crispEdges');
+        svg.setAttribute('aria-label','Código QR');
+        var background=document.createElementNS(ns,'rect');
+        background.setAttribute('width',total);background.setAttribute('height',total);background.setAttribute('fill','#fff');
+        var modules=document.createElementNS(ns,'path');
+        modules.setAttribute('d',commands.join(''));modules.setAttribute('fill','#000');
+        svg.appendChild(background);svg.appendChild(modules);
+        box.innerHTML='';box.appendChild(svg);
+      }
+    }catch(error){
+      /* Conserva el canvas de qrcodejs como respaldo. */
+    }
     window.setTimeout(function(){ window.focus(); window.print(); },650);
   }
 })();

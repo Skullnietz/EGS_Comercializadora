@@ -247,8 +247,9 @@ function egsSitioVisible($valor) {
 .egs-contact-qr>span,.egs-label-qr>span{font-size:6pt!important;line-height:1!important;font-weight:900!important;margin:0 0 .6mm!important;color:#000!important;white-space:nowrap}
 .egs-contact-qr>span b,.egs-label-qr>span b{font-size:6.5pt!important}
 .egs-qr-safe{display:flex;flex:0 0 21mm;width:21mm;height:21mm;align-items:center;justify-content:center;background:#fff}
-.egs-qr-code,.egs-contact-qr-code{width:17.5mm!important;height:17.5mm!important;flex:none!important}
-.egs-qr-code canvas,.egs-qr-code img.egs-qr-print{display:block!important;width:17.5mm!important;height:17.5mm!important;image-rendering:pixelated}
+.egs-qr-code,.egs-contact-qr-code{width:21mm!important;height:21mm!important;flex:none!important}
+.egs-qr-code svg{display:block!important;width:21mm!important;height:21mm!important;shape-rendering:crispEdges}
+.egs-qr-code canvas,.egs-qr-code img.egs-qr-print{display:block!important;width:17.5mm!important;height:17.5mm!important;margin:1.75mm!important;image-rendering:pixelated}
 .egs-contact-qr small,.egs-label-qr small{max-width:21mm!important;overflow:visible!important;font-size:4.8pt!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important;margin:.7mm 0 0!important;color:#000!important;text-align:center!important;white-space:normal!important}
 .egs-warranty-label{display:grid!important;grid-template-columns:minmax(0,1fr) 21mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:1.2mm!important;padding:2mm!important}
 .egs-warranty-label:not(.has-qr){grid-template-columns:1fr!important}
@@ -299,6 +300,33 @@ function egsSitioVisible($valor) {
     document.querySelectorAll('.wc-phones').forEach(function(e){e.textContent=phones[0]||''});
     document.querySelectorAll('.wc-site').forEach(function(e){e.textContent=displaySite(val('sitio_web'))});
   }
+  function renderThermalQr(box,url){
+    box.innerHTML='';
+    var qr=new QRCode(box,{text:url,width:320,height:320,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    try{
+      var model=qr._oQRCode, count=model&&model.getModuleCount?model.getModuleCount():0;
+      if(!count)return;
+      var quiet=4,total=count+(quiet*2),commands=[];
+      for(var row=0;row<count;row++){
+        for(var column=0;column<count;column++){
+          if(model.isDark(row,column))commands.push('M'+(column+quiet)+' '+(row+quiet)+'h1v1h-1z');
+        }
+      }
+      var ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
+      svg.setAttribute('viewBox','0 0 '+total+' '+total);
+      svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+      svg.setAttribute('shape-rendering','crispEdges');
+      svg.setAttribute('aria-label','Código QR');
+      var background=document.createElementNS(ns,'rect');
+      background.setAttribute('width',total);background.setAttribute('height',total);background.setAttribute('fill','#fff');
+      var modules=document.createElementNS(ns,'path');
+      modules.setAttribute('d',commands.join(''));modules.setAttribute('fill','#000');
+      svg.appendChild(background);svg.appendChild(modules);
+      box.innerHTML='';box.appendChild(svg);
+    }catch(error){
+      /* Conserva el canvas de qrcodejs como respaldo. */
+    }
+  }
   document.querySelectorAll('.egs-live').forEach(function(el){el.addEventListener('input',function(){text(el.dataset.target,el.value);syncContact();});});
   document.querySelectorAll('.egs-phone').forEach(function(el){el.addEventListener('input',syncContact);});
   document.querySelectorAll('.egs-warranty-live').forEach(function(el){el.addEventListener('input',function(){text(el.dataset.target,el.type==='date'?prettyDate(el.value):el.value);});});
@@ -310,7 +338,7 @@ function egsSitioVisible($valor) {
     targets.forEach(function(ids){
       var wrap=document.getElementById(ids[0]),box=document.getElementById(ids[1]),label=document.getElementById(ids[2]);
       box.innerHTML=''; wrap.classList.toggle('is-empty',!url); label.classList.toggle('has-qr',!!url);
-      if(url && typeof QRCode!=='undefined') new QRCode(box,{text:url,width:320,height:320,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+      if(url && typeof QRCode!=='undefined') renderThermalQr(box,url);
     });
     text('contactOrder',url && orderId ? '#'+orderId : '');
     text('wWarrantyOrder',url && orderId ? '#'+orderId : '');
