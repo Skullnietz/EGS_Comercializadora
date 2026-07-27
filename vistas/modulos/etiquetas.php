@@ -205,7 +205,7 @@ function egsSitioVisible($valor) {
                   <div class="egs-w-row egs-date-row"><b>ENTREGA</b><span id="wDelivery"></span><b>VENCE</b><span id="wExpiry"></span></div>
                   <div class="egs-validity-strip"><b>SELLO ALTERADO</b><span>SIN GARANTÍA</span></div>
                 </div>
-                <div id="warrantyQr" class="egs-label-qr is-empty"><span>ORDEN <b id="wWarrantyOrder"></b></span><div class="egs-qr-safe"><div id="warrantyQrCode" class="egs-qr-code"></div></div><small>VALIDAR GARANTÍA</small></div>
+                <div id="warrantyQr" class="egs-label-qr is-empty"><span>ORDEN <b id="wWarrantyOrder"></b></span><div class="egs-qr-safe"><div id="warrantyQrCode" class="egs-qr-code"></div></div><small>VALIDAR<br>GARANTÍA</small></div>
               </div>
             </div></div>
           </div>
@@ -230,13 +230,13 @@ function egsSitioVisible($valor) {
 /* Etiqueta térmica real: 58 × 40 mm, monocromática y legible a 203 dpi. */
 .egs-print-label{width:58mm!important;height:40mm!important;color:#000!important;background:#fff!important;font-family:Arial,Helvetica,sans-serif!important;font-synthesis:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}
 .egs-print-label .egs-corner,.egs-green-rule,.egs-warranty-rule{display:none!important}
-.egs-brand-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:9mm;height:5.5mm;border:.45mm solid #000;border-radius:.6mm;font-size:9pt;line-height:1;font-weight:900;letter-spacing:.15mm;color:#000;background:#fff}
+.egs-brand-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:8mm;height:5.5mm;border:.45mm solid #000;border-radius:.6mm;font-size:8pt;line-height:1;font-weight:900;letter-spacing:.1mm;color:#000;background:#fff}
 .egs-brand-copy{display:flex;flex-direction:column;min-width:0}
-.egs-brand-copy b{font-size:6.5pt!important;line-height:1.05!important;font-weight:900!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.egs-brand-copy small{font-size:5.5pt!important;line-height:1.1!important;font-weight:700!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.egs-brand-copy b{font-size:5pt!important;line-height:1.05!important;font-weight:900!important;letter-spacing:-.07mm;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.egs-brand-copy small{font-size:5pt!important;line-height:1.1!important;font-weight:700!important;white-space:nowrap;overflow:hidden;text-overflow:clip}
 .egs-contact-label,.egs-contact-label.has-qr{display:grid!important;grid-template-columns:minmax(0,1fr) 21mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:1.2mm!important;padding:2mm!important}
 .egs-contact-label:not(.has-qr){grid-template-columns:1fr!important}
-.egs-contact-brand,.egs-contact-label.has-qr .egs-contact-brand{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:1.2mm!important;padding:0!important;text-align:left!important;border-bottom:.35mm solid #000}
+.egs-contact-brand,.egs-contact-label.has-qr .egs-contact-brand{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:.6mm!important;padding:0!important;text-align:left!important;border-bottom:.35mm solid #000}
 .egs-contact-info,.egs-contact-label.has-qr .egs-contact-info{grid-column:1!important;grid-row:2!important;display:grid!important;grid-template-columns:10mm minmax(0,1fr)!important;align-content:start!important;gap:.55mm .8mm!important;padding:1.1mm 0 0!important;min-width:0!important}
 .egs-contact-info>b,.egs-contact-label.has-qr .egs-contact-info>b{font-size:6pt!important;line-height:1.15!important;font-weight:900!important;margin:0!important}
 .egs-contact-info p,.egs-contact-label.has-qr .egs-contact-info p{font-size:6pt!important;line-height:1.16!important;font-weight:700!important;margin:0!important;max-height:7.2mm!important;overflow:hidden!important;overflow-wrap:anywhere}
@@ -246,21 +246,22 @@ function egsSitioVisible($valor) {
 .egs-contact-qr.is-empty,.egs-label-qr.is-empty{display:none!important}
 .egs-contact-qr>span,.egs-label-qr>span{font-size:6pt!important;line-height:1!important;font-weight:900!important;margin:0 0 .6mm!important;color:#000!important;white-space:nowrap}
 .egs-contact-qr>span b,.egs-label-qr>span b{font-size:6.5pt!important}
-.egs-qr-safe{display:flex;width:21mm;height:21mm;align-items:center;justify-content:center;background:#fff}
+.egs-qr-safe{display:flex;flex:0 0 21mm;width:21mm;height:21mm;align-items:center;justify-content:center;background:#fff}
 .egs-qr-code,.egs-contact-qr-code{width:17.5mm!important;height:17.5mm!important;flex:none!important}
 .egs-qr-code canvas,.egs-qr-code img.egs-qr-print{display:block!important;width:17.5mm!important;height:17.5mm!important;image-rendering:pixelated}
-.egs-contact-qr small,.egs-label-qr small{font-size:5.2pt!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important;margin:.7mm 0 0!important;color:#000!important;text-align:center!important}
+.egs-contact-qr small,.egs-label-qr small{max-width:21mm!important;overflow:visible!important;font-size:4.8pt!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important;margin:.7mm 0 0!important;color:#000!important;text-align:center!important;white-space:normal!important}
 .egs-warranty-label{display:grid!important;grid-template-columns:minmax(0,1fr) 21mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:1.2mm!important;padding:2mm!important}
 .egs-warranty-label:not(.has-qr){grid-template-columns:1fr!important}
-.egs-warranty-contact{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:1.2mm!important;padding:0!important;border-bottom:.35mm solid #000!important;overflow:hidden!important}
+.egs-warranty-contact{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:.6mm!important;padding:0!important;border-bottom:.35mm solid #000!important;overflow:hidden!important}
 .egs-warranty-data{grid-column:1!important;grid-row:2!important;position:static!important;padding:.7mm 0 0!important;min-width:0!important;overflow:hidden!important}
-.egs-w-row,.egs-warranty-label.has-qr .egs-w-row:not(.egs-date-row){display:grid!important;grid-template-columns:9mm minmax(0,1fr)!important;align-items:center!important;height:3.2mm!important;min-height:3.2mm!important;gap:.5mm!important;border-bottom:.25mm solid #000!important}
-.egs-w-row b,.egs-warranty-label.has-qr .egs-w-row b{font-size:5.6pt!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important}
-.egs-w-row span,.egs-warranty-label.has-qr .egs-w-row span{height:auto!important;line-height:1.05!important;border:0!important;padding:0!important;font-size:5.6pt!important;font-weight:700!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-.egs-date-row,.egs-warranty-label.has-qr .egs-date-row{display:grid!important;width:auto!important;height:5.8mm!important;grid-template-columns:9mm minmax(0,1fr)!important;grid-template-rows:2.9mm 2.9mm!important;gap:0 .5mm!important}
+.egs-w-row,.egs-warranty-label.has-qr .egs-w-row:not(.egs-date-row){display:grid!important;grid-template-columns:9mm minmax(0,1fr)!important;align-items:center!important;height:3.2mm!important;min-height:3.2mm!important;gap:1mm!important;border-bottom:.25mm solid #000!important}
+.egs-w-row b,.egs-warranty-label.has-qr .egs-w-row b{font-size:5.1pt!important;line-height:1!important;font-weight:900!important;letter-spacing:-.04mm!important;white-space:nowrap!important}
+.egs-w-row span,.egs-warranty-label.has-qr .egs-w-row span{height:auto!important;line-height:1.05!important;border:0!important;padding:0!important;font-size:5.4pt!important;font-weight:700!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.egs-date-row,.egs-warranty-label.has-qr .egs-date-row{display:grid!important;width:auto!important;height:5.8mm!important;grid-template-columns:9mm minmax(0,1fr)!important;grid-template-rows:2.9mm 2.9mm!important;gap:0 1mm!important}
+.egs-date-row span,.egs-warranty-label.has-qr .egs-date-row span{padding-left:.4mm!important}
 .egs-date-row b:nth-of-type(2){text-align:left!important}
 .egs-validity-strip,.egs-warranty-label.has-qr .egs-validity-strip{display:flex!important;height:4.3mm!important;width:auto!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:.7mm!important;margin:.45mm 0 0!important;padding:.35mm .6mm!important;background:#000!important;color:#fff!important;white-space:nowrap!important}
-.egs-validity-strip b,.egs-validity-strip span,.egs-warranty-label.has-qr .egs-validity-strip b,.egs-warranty-label.has-qr .egs-validity-strip span{font-size:5.3pt!important;line-height:1!important;font-weight:900!important;letter-spacing:0!important;color:#fff!important}
+.egs-validity-strip b,.egs-validity-strip span,.egs-warranty-label.has-qr .egs-validity-strip b,.egs-warranty-label.has-qr .egs-validity-strip span{max-width:none!important;overflow:visible!important;text-overflow:clip!important;font-size:4.8pt!important;line-height:1!important;font-weight:900!important;letter-spacing:-.03mm!important;color:#fff!important;white-space:nowrap!important}
 .egs-next-service{display:none!important}
 @media(max-width:991px){.egs-preview-panel{position:static}.egs-label-stage .egs-print-label{zoom:1.8}}@media(max-width:480px){.egs-label-intro>span{display:none}.egs-mode-choice{grid-template-columns:1fr}.egs-label-stage .egs-print-label{zoom:1.4}}
 </style>
@@ -289,12 +290,13 @@ function egsSitioVisible($valor) {
   function todayLocal(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
   function addMonths(dateValue,months){ if(!dateValue)return ''; var p=dateValue.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]); var day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+parseInt(months||0,10)); var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(day,last)); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
   function syncContact(){
-    text('contactPhones',[val('whatsapp'),val('telefono_1'),val('telefono_2'),val('telefono_3')].filter(Boolean).join(' · '));
+    var phones=[val('whatsapp'),val('telefono_1'),val('telefono_2'),val('telefono_3')].filter(Boolean);
+    text('contactPhones',phones.join(' · '));
     text('contactWebsite',displaySite(val('sitio_web')));
     document.querySelectorAll('.wc-name').forEach(function(e){e.textContent=val('nombre_comercial')});
     document.querySelectorAll('.wc-tagline').forEach(function(e){e.textContent=val('lema')});
     document.querySelectorAll('.wc-address').forEach(function(e){e.textContent=val('direccion')});
-    document.querySelectorAll('.wc-phones').forEach(function(e){e.textContent=[val('whatsapp'),val('telefono_1'),val('telefono_2'),val('telefono_3')].filter(Boolean).join(' · ')});
+    document.querySelectorAll('.wc-phones').forEach(function(e){e.textContent=phones[0]||''});
     document.querySelectorAll('.wc-site').forEach(function(e){e.textContent=displaySite(val('sitio_web'))});
   }
   document.querySelectorAll('.egs-live').forEach(function(el){el.addEventListener('input',function(){text(el.dataset.target,el.value);syncContact();});});
