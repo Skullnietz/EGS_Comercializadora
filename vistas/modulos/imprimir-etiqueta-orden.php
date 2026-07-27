@@ -116,7 +116,7 @@ $telefonosEtiqueta = array_values(array_filter(array($configEtiqueta["whatsapp"]
       <b class="egs-client-name"><?= egsPrintH(egsPrintValor(isset($clienteContacto["nombre"]) ? $clienteContacto["nombre"] : "", "CLIENTE")) ?></b>
       <p class="egs-equipment"><?= egsPrintH(egsPrintValor($equipoContacto, "EQUIPO")) ?><?= trim((string) $ordenEtiqueta["numeroDeSerieDelEquipo"]) !== "" ? " · S/N " . egsPrintH($ordenEtiqueta["numeroDeSerieDelEquipo"]) : "" ?></p>
       <b class="egs-contact-title">CONTACTO</b>
-      <p class="egs-phones"><?= egsPrintH(implode(" · ", $telefonosEtiqueta)) ?></p>
+      <p class="egs-phones"><?= egsPrintH(implode(" · ", array_slice($telefonosEtiqueta, 0, 2))) ?></p>
       <p class="egs-site"><?= egsPrintH(preg_replace('#^https?://#i', '', $configEtiqueta["sitio_web"])) ?></p>
     </section>
     <section class="egs-contact-code"><div class="egs-qr-safe"><div id="egsPrintQr"></div></div><b>ESCANEAR PARA<br>ABRIR ORDEN</b></section>
@@ -182,7 +182,7 @@ $telefonosEtiqueta = array_values(array_filter(array($configEtiqueta["whatsapp"]
 .egs-order-label{width:58mm!important;height:40mm!important;padding:2mm!important;color:#000!important;background:#fff!important;font-family:Arial,Helvetica,sans-serif!important;font-synthesis:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}
 .egs-order-label .egs-triangle{display:none!important}
 .egs-brand-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:8mm;height:5.5mm;border:.45mm solid #000;border-radius:.6mm;font-size:8pt;line-height:1;font-weight:900;letter-spacing:.1mm;color:#000;background:#fff}
-.egs-contact-print{display:grid!important;grid-template-columns:minmax(0,1fr) 22.2mm!important;gap:0!important}
+.egs-contact-print{display:grid!important;grid-template-columns:minmax(0,1fr) 23mm!important;gap:0!important}
 .egs-contact-copy{min-width:0!important;padding:0 1.3mm 0 0!important;border-right:.35mm solid #000!important;overflow:hidden!important}
 .egs-contact-header{display:flex;align-items:center;gap:1.1mm;height:7mm;border-bottom:.35mm solid #000}
 .egs-order-chip{font-size:6.4pt!important;line-height:1.05!important;font-weight:900!important;color:#000!important;letter-spacing:0!important;white-space:normal!important}
@@ -198,6 +198,10 @@ $telefonosEtiqueta = array_values(array_filter(array($configEtiqueta["whatsapp"]
 .egs-contact-code #egsPrintQr canvas,.egs-warranty-code #egsPrintQr canvas{display:block!important;width:18.8mm!important;height:18.8mm!important;margin:1.7mm!important;image-rendering:pixelated}
 .egs-contact-code #egsPrintQr img,.egs-warranty-code #egsPrintQr img{display:none!important}
 .egs-contact-code b,.egs-warranty-code b{max-width:22.2mm!important;margin:.8mm 0 0!important;overflow:visible!important;text-overflow:clip!important;color:#000!important;font-size:4.8pt!important;line-height:1.08!important;font-weight:900!important;text-align:center!important;white-space:normal!important}
+.egs-contact-code .egs-qr-safe,.egs-contact-code #egsPrintQr,.egs-contact-code #egsPrintQr svg{width:23mm!important;height:23mm!important}
+.egs-contact-code .egs-qr-safe{flex-basis:23mm}
+.egs-contact-code #egsPrintQr canvas{width:19.4mm!important;height:19.4mm!important;margin:1.8mm!important}
+.egs-contact-code b{max-width:23mm!important}
 .egs-warranty-print{display:grid!important;grid-template-columns:minmax(0,1fr) 22.2mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:0!important}
 .egs-warranty-brand{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:.6mm!important;min-width:0!important;padding:0!important;border:0!important;border-bottom:.35mm solid #000!important;overflow:hidden!important}
 .egs-brand-copy{display:flex;flex-direction:column;min-width:0}

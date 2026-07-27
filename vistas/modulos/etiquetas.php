@@ -234,7 +234,7 @@ function egsSitioVisible($valor) {
 .egs-brand-copy{display:flex;flex-direction:column;min-width:0}
 .egs-brand-copy b{font-size:5pt!important;line-height:1.05!important;font-weight:900!important;letter-spacing:-.07mm;white-space:nowrap;overflow:hidden;text-overflow:clip}
 .egs-brand-copy small{font-size:5pt!important;line-height:1.1!important;font-weight:700!important;white-space:nowrap;overflow:hidden;text-overflow:clip}
-.egs-contact-label,.egs-contact-label.has-qr{display:grid!important;grid-template-columns:minmax(0,1fr) 22.2mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:0!important;padding:2mm!important}
+.egs-contact-label,.egs-contact-label.has-qr{display:grid!important;grid-template-columns:minmax(0,1fr) 23mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:0!important;padding:2mm!important}
 .egs-contact-label:not(.has-qr){grid-template-columns:1fr!important}
 .egs-contact-brand,.egs-contact-label.has-qr .egs-contact-brand{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:.6mm!important;padding:0!important;text-align:left!important;border-bottom:.35mm solid #000}
 .egs-contact-info,.egs-contact-label.has-qr .egs-contact-info{grid-column:1!important;grid-row:2!important;display:grid!important;grid-template-columns:10mm minmax(0,1fr)!important;align-content:start!important;gap:.55mm .8mm!important;padding:1.1mm 0 0!important;min-width:0!important}
@@ -242,7 +242,8 @@ function egsSitioVisible($valor) {
 .egs-contact-info p,.egs-contact-label.has-qr .egs-contact-info p{font-size:6pt!important;line-height:1.16!important;font-weight:700!important;margin:0!important;max-height:7.2mm!important;overflow:hidden!important;overflow-wrap:anywhere}
 .egs-contact-info .egs-phone-line,.egs-contact-label.has-qr .egs-contact-info .egs-phone-line{font-size:6.4pt!important;line-height:1.15!important;font-weight:900!important}
 .egs-contact-info .egs-site-line,.egs-contact-label.has-qr .egs-contact-info .egs-site-line{grid-column:1/3!important;position:static!important;margin:.5mm 0 0!important;padding:.6mm .8mm!important;border:0!important;border-top:.35mm solid #000!important;border-radius:0!important;background:#fff!important;color:#000!important;font-size:5.8pt!important;line-height:1.1!important;font-weight:800!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-.egs-contact-qr,.egs-contact-label.has-qr .egs-contact-qr:not(.is-empty),.egs-label-qr{grid-column:2!important;grid-row:1/3!important;display:flex!important;position:static!important;width:22.2mm!important;height:auto!important;min-width:22.2mm!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;padding:0!important;border:0!important;border-radius:0!important;background:#fff!important;color:#000!important}
+.egs-contact-qr,.egs-contact-label.has-qr .egs-contact-qr:not(.is-empty){grid-column:2!important;grid-row:1/3!important;display:flex!important;position:static!important;width:23mm!important;height:auto!important;min-width:23mm!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;padding:0!important;border:0!important;border-radius:0!important;background:#fff!important;color:#000!important}
+.egs-label-qr{grid-column:2!important;grid-row:1/3!important;display:flex!important;position:static!important;width:22.2mm!important;height:auto!important;min-width:22.2mm!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;padding:0!important;border:0!important;border-radius:0!important;background:#fff!important;color:#000!important}
 .egs-contact-qr.is-empty,.egs-label-qr.is-empty{display:none!important}
 .egs-contact-qr>span,.egs-label-qr>span{font-size:6pt!important;line-height:1!important;font-weight:900!important;margin:0 0 .6mm!important;color:#000!important;white-space:nowrap}
 .egs-contact-qr>span b,.egs-label-qr>span b{font-size:6.5pt!important}
@@ -251,6 +252,11 @@ function egsSitioVisible($valor) {
 .egs-qr-code svg{display:block!important;width:22.2mm!important;height:22.2mm!important;shape-rendering:crispEdges}
 .egs-qr-code canvas,.egs-qr-code img.egs-qr-print{display:block!important;width:18.8mm!important;height:18.8mm!important;margin:1.7mm!important;image-rendering:pixelated}
 .egs-contact-qr small,.egs-label-qr small{max-width:22.2mm!important;overflow:visible!important;font-size:4.8pt!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important;margin:.7mm 0 0!important;color:#000!important;text-align:center!important;white-space:normal!important}
+.egs-contact-qr .egs-qr-safe{flex-basis:23mm;width:23mm;height:23mm}
+.egs-contact-qr-code{width:23mm!important;height:23mm!important}
+.egs-contact-qr-code svg{width:23mm!important;height:23mm!important}
+.egs-contact-qr-code canvas,.egs-contact-qr-code img.egs-qr-print{width:19.4mm!important;height:19.4mm!important;margin:1.8mm!important}
+.egs-contact-qr small{max-width:23mm!important}
 .egs-warranty-label{display:grid!important;grid-template-columns:minmax(0,1fr) 22.2mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:0!important;padding:2mm!important}
 .egs-warranty-label:not(.has-qr){grid-template-columns:1fr!important}
 .egs-warranty-contact{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:.6mm!important;padding:0!important;border-bottom:.35mm solid #000!important;overflow:hidden!important}
@@ -292,7 +298,7 @@ function egsSitioVisible($valor) {
   function addMonths(dateValue,months){ if(!dateValue)return ''; var p=dateValue.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]); var day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+parseInt(months||0,10)); var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(day,last)); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
   function syncContact(){
     var phones=[val('whatsapp'),val('telefono_1'),val('telefono_2'),val('telefono_3')].filter(Boolean);
-    text('contactPhones',phones.join(' · '));
+    text('contactPhones',phones.slice(0,2).join(' · '));
     text('contactWebsite',displaySite(val('sitio_web')));
     document.querySelectorAll('.wc-name').forEach(function(e){e.textContent=val('nombre_comercial')});
     document.querySelectorAll('.wc-tagline').forEach(function(e){e.textContent=val('lema')});
