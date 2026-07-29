@@ -13,7 +13,8 @@
     ── Asesor:
        (Total ÷ 1.16 − Inversión) × 4%
     ── Órdenes con 2 técnicos → "Necesita Revisión"
-       (no se suman a totales hasta revisarse)
+       Se asigna cada partida cobrada y se prorratean total e inversión.
+       Antes de resolver se contabiliza una sola comisión total de referencia.
     ═══════════════════════════════════════════════════ */
 
 if (!function_exists('_comCalcTecnico')) {
@@ -46,7 +47,194 @@ if (!function_exists('_comCalcTecnico')) {
     function _comEsDoble($o) {
         $t1 = intval(isset($o["id_tecnico"]) ? $o["id_tecnico"] : 0);
         $t2 = intval(isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : 0);
-        return ($t2 > 0 && $t2 != $t1);
+        return ($t1 > 0 && $t2 > 0 && $t2 != $t1);
+    }
+
+    /*
+     * Devuelve todas las partidas cobrables de una orden con una llave estable.
+     * Las partidas en cero se conservan para mostrarlas como referencia en el
+     * modal, pero no requieren asignación y no participan en el reparto.
+     */
+    function _comPartidasOrden($o) {
+
+        $partidas = array();
+        $nombres = array(
+            "Uno", "Dos", "Tres", "Cuatro", "Cinco",
+            "Seis", "Siete", "Ocho", "Nueve", "Diez"
+        );
+
+        foreach ($nombres as $indice => $nombre) {
+            $descripcion = trim((string) (isset($o["partida".$nombre]) ? $o["partida".$nombre] : ""));
+            $monto = floatval(isset($o["precio".$nombre]) ? $o["precio".$nombre] : 0);
+            if ($descripcion === "" && abs($monto) < 0.00001) continue;
+
+            $partidas[] = array(
+                "key" => "fija-".($indice + 1),
+                "descripcion" => $descripcion !== "" ? $descripcion : "Partida ".($indice + 1),
+                "monto" => $monto,
+                "origen" => "Partida ".($indice + 1)
+            );
+        }
+
+        $adicionales = json_decode(isset($o["partidas"]) ? $o["partidas"] : "", true);
+        if (is_array($adicionales)) {
+            foreach ($adicionales as $indice => $partida) {
+                if (!is_array($partida)) continue;
+                $descripcion = trim((string) (isset($partida["descripcion"]) ? $partida["descripcion"] : ""));
+                $monto = floatval(isset($partida["precioPartida"]) ? $partida["precioPartida"] : 0);
+                if ($descripcion === "" && abs($monto) < 0.00001) continue;
+
+                $partidas[] = array(
+                    "key" => "adicional-".$indice,
+                    "descripcion" => $descripcion !== "" ? $descripcion : "Partida adicional",
+                    "monto" => $monto,
+                    "origen" => "Partida adicional"
+                );
+            }
+        }
+
+        $descripcionRecarga = trim((string) (isset($o["recargaCartucho"]) ? $o["recargaCartucho"] : ""));
+        $montoRecarga = floatval(isset($o["totalRecargaDeCartucho"]) ? $o["totalRecargaDeCartucho"] : 0);
+        if ($descripcionRecarga !== "" || abs($montoRecarga) >= 0.00001) {
+            $partidas[] = array(
+                "key" => "recarga",
+                "descripcion" => $descripcionRecarga !== "" ? $descripcionRecarga : "Recarga de cartucho",
+                "monto" => $montoRecarga,
+                "origen" => "Recarga de cartucho"
+            );
+        }
+
+        // Se incluyen las partidas históricas capturadas específicamente para
+        // el segundo técnico, pues también forman parte del total de la orden.
+        $partidasTecDos = json_decode(isset($o["partidasTecnicoDos"]) ? $o["partidasTecnicoDos"] : "", true);
+        if (is_array($partidasTecDos)) {
+            foreach ($partidasTecDos as $indice => $partida) {
+                if (!is_array($partida)) continue;
+                $descripcion = trim((string) (isset($partida["descripcion"]) ? $partida["descripcion"] : ""));
+                $monto = floatval(isset($partida["precioPartida"]) ? $partida["precioPartida"] : 0);
+                if ($descripcion === "" && abs($monto) < 0.00001) continue;
+
+                $partidas[] = array(
+                    "key" => "tecnico-dos-".$indice,
+                    "descripcion" => $descripcion !== "" ? $descripcion : "Partida 2do técnico",
+                    "monto" => $monto,
+                    "origen" => "Partida 2do técnico"
+                );
+            }
+        }
+
+        usort($partidas, function($a, $b) {
+            $aPositiva = floatval($a["monto"]) > 0 ? 1 : 0;
+            $bPositiva = floatval($b["monto"]) > 0 ? 1 : 0;
+            if ($aPositiva !== $bPositiva) return $bPositiva - $aPositiva;
+            return 0;
+        });
+
+        return $partidas;
+    }
+
+    /*
+     * La huella detecta cambios que invalidan el reparto: técnicos, concepto o
+     * monto de una partida. El total y la inversión pueden ajustarse sin perder
+     * la asignación; se prorratean de nuevo al calcular.
+     */
+    function _comHuellaAsignacion($o) {
+
+        $datos = array(
+            "tecnico1" => intval(isset($o["id_tecnico"]) ? $o["id_tecnico"] : 0),
+            "tecnico2" => intval(isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : 0),
+            "partidas" => array()
+        );
+
+        foreach (_comPartidasOrden($o) as $partida) {
+            $datos["partidas"][] = array(
+                "key" => $partida["key"],
+                "descripcion" => trim((string) $partida["descripcion"]),
+                "monto" => round(floatval($partida["monto"]), 4)
+            );
+        }
+
+        return hash("sha256", json_encode($datos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    function _comLeerAsignacion($o) {
+        $json = isset($o["asignacionComisionTecnicos"]) ? $o["asignacionComisionTecnicos"] : "";
+        $datos = is_array($json) ? $json : json_decode((string) $json, true);
+        return is_array($datos) ? $datos : array();
+    }
+
+    /*
+     * Resuelve el reparto de total e inversión de la orden en proporción al
+     * monto de las partidas asignadas. Esto conserva exactamente el total
+     * cobrado aun cuando exista descuento, monedero o una diferencia de
+     * redondeo entre la suma de partidas y el total final.
+     */
+    function _comDistribucionTecnicos($o) {
+
+        $resultado = array(
+            "resuelta" => false,
+            "partidas" => _comPartidasOrden($o),
+            "asignaciones" => array(),
+            "tecnicos" => array(),
+            "total_partidas" => 0.0,
+            "huella" => _comHuellaAsignacion($o)
+        );
+
+        if (!_comEsDoble($o)) return $resultado;
+
+        $t1 = intval(isset($o["id_tecnico"]) ? $o["id_tecnico"] : 0);
+        $t2 = intval(isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : 0);
+        $permitidos = array($t1, $t2);
+        $guardada = _comLeerAsignacion($o);
+        $asignaciones = isset($guardada["asignaciones"]) && is_array($guardada["asignaciones"])
+            ? $guardada["asignaciones"] : array();
+
+        if (
+            !isset($guardada["huella"]) ||
+            !hash_equals($resultado["huella"], (string) $guardada["huella"])
+        ) {
+            return $resultado;
+        }
+
+        $montos = array($t1 => 0.0, $t2 => 0.0);
+        $positivas = 0;
+
+        foreach ($resultado["partidas"] as $partida) {
+            $monto = floatval($partida["monto"]);
+            if ($monto <= 0) continue;
+            $positivas++;
+
+            $idAsignado = isset($asignaciones[$partida["key"]])
+                ? intval($asignaciones[$partida["key"]]) : 0;
+            if (!in_array($idAsignado, $permitidos, true)) return $resultado;
+
+            $resultado["asignaciones"][$partida["key"]] = $idAsignado;
+            $montos[$idAsignado] += $monto;
+            $resultado["total_partidas"] += $monto;
+        }
+
+        if ($positivas === 0 || $resultado["total_partidas"] <= 0) return $resultado;
+
+        $totalOrden = floatval(isset($o["total"]) ? $o["total"] : 0);
+        $inversionOrden = floatval(isset($o["totalInversion"]) ? $o["totalInversion"] : 0);
+
+        foreach ($permitidos as $idTecnico) {
+            $proporcion = $montos[$idTecnico] / $resultado["total_partidas"];
+            $resultado["tecnicos"][$idTecnico] = array(
+                "monto_partidas" => $montos[$idTecnico],
+                "proporcion" => $proporcion,
+                "total" => $totalOrden * $proporcion,
+                "inversion" => $inversionOrden * $proporcion
+            );
+        }
+
+        $resultado["resuelta"] = true;
+        return $resultado;
+    }
+
+    function _comAsignacionResuelta($o) {
+        $distribucion = _comDistribucionTecnicos($o);
+        return !empty($distribucion["resuelta"]);
     }
 
     /* La query de 2da quincena del modelo usa DAY >= 15; este filtro deja
@@ -103,17 +291,26 @@ if (!function_exists('_comCalcTecnico')) {
             $total = floatval(isset($o["total"]) ? $o["total"] : 0);
             $inv   = floatval(isset($o["totalInversion"]) ? $o["totalInversion"] : 0);
             $doble = _comEsDoble($o);
+            $distribucion = $doble ? _comDistribucionTecnicos($o) : array("resuelta" => false, "tecnicos" => array());
             $hist[$k]["ordenes"]++;
 
             if ($modo == "tecnico") {
 
                 $dep  = (is_array($viewer) && isset($viewer["departamento"])) ? $viewer["departamento"] : "";
-                $calc = _comCalcTecnico($total, $inv, $dep);
+                $idViewer = (is_array($viewer) && isset($viewer["id"])) ? intval($viewer["id"]) : 0;
 
-                if ($doble) {
+                if ($doble && empty($distribucion["resuelta"])) {
+                    $calc = _comCalcTecnico($total, $inv, $dep);
                     $hist[$k]["revision"]++;
                     $hist[$k]["revision_monto"] += $calc["comision"];
                 } else {
+                    $totalTec = $total;
+                    $invTec = $inv;
+                    if ($doble && isset($distribucion["tecnicos"][$idViewer])) {
+                        $totalTec = $distribucion["tecnicos"][$idViewer]["total"];
+                        $invTec = $distribucion["tecnicos"][$idViewer]["inversion"];
+                    }
+                    $calc = _comCalcTecnico($totalTec, $invTec, $dep);
                     $hist[$k]["confirmado"] += $calc["comision"];
                 }
 
@@ -136,11 +333,26 @@ if (!function_exists('_comCalcTecnico')) {
                 foreach ($ids as $idT) {
                     $dep = (is_array($mapaTec) && isset($mapaTec[$idT]["departamento"])) ? $mapaTec[$idT]["departamento"] : "";
                     if (!in_array(strtolower(trim($dep)), array("electronica", "impresoras", "sistemas"))) $depDesconocido = true;
-                    $calcT = _comCalcTecnico($total, $inv, $dep);
+                    $totalTec = $total;
+                    $invTec = $inv;
+                    if ($doble && !empty($distribucion["resuelta"]) && isset($distribucion["tecnicos"][$idT])) {
+                        $totalTec = $distribucion["tecnicos"][$idT]["total"];
+                        $invTec = $distribucion["tecnicos"][$idT]["inversion"];
+                    }
+                    $calcT = _comCalcTecnico($totalTec, $invTec, $dep);
                     $sumaTec += $calcT["comision"];
                 }
 
-                if ($doble || $depDesconocido) {
+                // Mientras no exista reparto se contabiliza una sola comisión
+                // total de la orden (regla del técnico principal), no una por
+                // cada técnico participante.
+                if ($doble && empty($distribucion["resuelta"])) {
+                    $depPrincipal = (is_array($mapaTec) && isset($mapaTec[$t1]["departamento"]))
+                        ? $mapaTec[$t1]["departamento"] : "";
+                    $sumaTec = _comCalcTecnico($total, $inv, $depPrincipal)["comision"];
+                }
+
+                if (($doble && empty($distribucion["resuelta"])) || $depDesconocido) {
                     $hist[$k]["revision"]++;
                     $hist[$k]["revision_monto"] += $sumaTec;
                 } else {
@@ -174,14 +386,22 @@ if (!function_exists('_comCalcTecnico')) {
             if ($modo == "tecnico") {
 
                 $dep  = (is_array($viewer) && isset($viewer["departamento"])) ? $viewer["departamento"] : "";
-                $calc = _comCalcTecnico($total, $inv, $dep);
+                $idViewer = (is_array($viewer) && isset($viewer["id"])) ? intval($viewer["id"]) : 0;
+                $doble = _comEsDoble($o);
+                $distribucion = $doble ? _comDistribucionTecnicos($o) : array("resuelta" => false, "tecnicos" => array());
 
-                if (_comEsDoble($o)) {
+                if ($doble && empty($distribucion["resuelta"])) {
+                    $calc = _comCalcTecnico($total, $inv, $dep);
                     $r["revision"]++;
                     $r["revision_monto"] += $calc["comision"];
                     continue;
                 }
 
+                if ($doble && isset($distribucion["tecnicos"][$idViewer])) {
+                    $total = $distribucion["tecnicos"][$idViewer]["total"];
+                    $inv = $distribucion["tecnicos"][$idViewer]["inversion"];
+                }
+                $calc = _comCalcTecnico($total, $inv, $dep);
                 $r["confirmado"] += $calc["comision"];
 
             } else {

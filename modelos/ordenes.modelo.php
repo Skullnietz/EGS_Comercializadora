@@ -7,6 +7,8 @@ require_once "conexionWordpress.php";
 
 
 class ModeloOrdenes{
+	private static $schemaAsignacionComisionesListo = null;
+
      // Historial de Cliente
     static public function mdlMostrarHistorial($tabla, $valor){
         
@@ -158,7 +160,18 @@ class ModeloOrdenes{
 			$condicion = " AND id_empresa = $id";
 		}
 
-		$stmt = ConexionWP::conectarWP()->prepare("SELECT id, total, totalInversion, id_tecnico, id_tecnicoDos, id_Asesor, id_empresa, fecha_Salida FROM $tabla WHERE estado = 'Entregado (Ent)' AND fecha_Salida >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL $meses MONTH), '%Y-%m-01')".$condicion." ORDER BY fecha_Salida ASC");
+		$campos = "id, total, totalInversion, id_tecnico, id_tecnicoDos, id_Asesor, id_empresa, fecha_Salida,
+			partidaUno, precioUno, partidaDos, precioDos, partidaTres, precioTres,
+			partidaCuatro, precioCuatro, partidaCinco, precioCinco, partidaSeis, precioSeis,
+			partidaSiete, precioSiete, partidaOcho, precioOcho, partidaNueve, precioNueve,
+			partidaDiez, precioDiez, partidas, recargaCartucho, totalRecargaDeCartucho,
+			partidasTecnicoDos";
+
+		if (self::mdlAsegurarAsignacionComisionesSchema($tabla)) {
+			$campos .= ", asignacionComisionTecnicos";
+		}
+
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT $campos FROM $tabla WHERE estado = 'Entregado (Ent)' AND fecha_Salida >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL $meses MONTH), '%Y-%m-01')".$condicion." ORDER BY fecha_Salida ASC");
 
 		$stmt -> execute();
 
@@ -188,6 +201,60 @@ class ModeloOrdenes{
 
 		return $stmt -> fetchAll();
 
+	}
+
+	/*=============================================
+	ASIGNACIÓN DE PARTIDAS PARA COMISIONES COMPARTIDAS
+	=============================================*/
+	static public function mdlAsegurarAsignacionComisionesSchema($tabla = "ordenes"){
+
+		if (self::$schemaAsignacionComisionesListo !== null) {
+			return self::$schemaAsignacionComisionesListo;
+		}
+
+		try {
+			$pdo = ConexionWP::conectarWP();
+			$columna = $pdo->query("SHOW COLUMNS FROM `$tabla` LIKE 'asignacionComisionTecnicos'");
+
+			if (!$columna || !$columna->fetch(PDO::FETCH_ASSOC)) {
+				$pdo->exec("ALTER TABLE `$tabla` ADD COLUMN `asignacionComisionTecnicos` LONGTEXT NULL AFTER `TotalTecnicoDos`");
+			}
+
+			self::$schemaAsignacionComisionesListo = true;
+		} catch (Exception $e) {
+			self::$schemaAsignacionComisionesListo = false;
+		}
+
+		return self::$schemaAsignacionComisionesListo;
+	}
+
+	static public function mdlMostrarOrdenComisionPorId($tabla, $idOrden){
+
+		self::mdlAsegurarAsignacionComisionesSchema($tabla);
+
+		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM `$tabla` WHERE id = :id LIMIT 1");
+		$stmt->bindValue(":id", intval($idOrden), PDO::PARAM_INT);
+		$stmt->execute();
+
+		$fila = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $fila ? $fila : null;
+	}
+
+	static public function mdlGuardarAsignacionComision($tabla, $idOrden, $asignacionJson){
+
+		if (!self::mdlAsegurarAsignacionComisionesSchema($tabla)) {
+			return "schema_error";
+		}
+
+		$stmt = ConexionWP::conectarWP()->prepare(
+			"UPDATE `$tabla`
+			 SET asignacionComisionTecnicos = :asignacion
+			 WHERE id = :id"
+		);
+		$stmt->bindValue(":asignacion", $asignacionJson, PDO::PARAM_STR);
+		$stmt->bindValue(":id", intval($idOrden), PDO::PARAM_INT);
+
+		return $stmt->execute() ? "ok" : "error";
 	}
 
 

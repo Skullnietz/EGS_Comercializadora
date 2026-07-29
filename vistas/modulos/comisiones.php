@@ -12,7 +12,8 @@
     ── Asesor:
        (Total ÷ 1.16 − Inversión) × 4%
     ── Órdenes con 2 técnicos → fila amarilla "Necesita Revisión"
-       (más adelante se ajustará según lo que hace cada técnico)
+       Cada partida cobrada se asigna al técnico que la realizó.
+       La comisión total de la orden se reparte sin duplicarse.
     ═══════════════════════════════════════════════════ */
 
 if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor" AND $_SESSION["perfil"] != "tecnico" AND $_SESSION["perfil"] != "secretaria" AND $_SESSION["perfil"] != "Super-Administrador"){
@@ -25,6 +26,12 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor" 
 
   return;
 }
+
+$_com_puedeResolver = in_array(
+    $_SESSION["perfil"],
+    array("administrador", "secretaria", "Super-Administrador"),
+    true
+);
 
 $crmStyles = __DIR__ . '/partials/crm-styles.php';
 if (file_exists($crmStyles)) { include $crmStyles; }
@@ -290,13 +297,20 @@ if (!function_exists('_comProcesar')) {
             $total     = floatval(isset($o["total"]) ? $o["total"] : 0);
             $inversion = floatval(isset($o["totalInversion"]) ? $o["totalInversion"] : 0);
             $doble     = _comEsDoble($o);
+            $distribucion = $doble
+                ? _comDistribucionTecnicos($o)
+                : array("resuelta" => false, "tecnicos" => array(), "partidas" => array(), "asignaciones" => array());
 
             $fila = array(
                 "orden"     => $o,
                 "cliente"   => _comNombreCliente($o, $mapaCli),
                 "total"     => $total,
                 "inversion" => $inversion,
+                "totalOrden" => $total,
+                "inversionOrden" => $inversion,
                 "doble"     => $doble,
+                "asignacion_resuelta" => $doble && !empty($distribucion["resuelta"]),
+                "distribucion" => $distribucion,
                 "revision"  => false,
                 "tecnicos"  => array(),
                 "asesor"    => null
@@ -305,12 +319,19 @@ if (!function_exists('_comProcesar')) {
             if ($modo == "tecnico") {
 
                 $dep  = isset($viewer["departamento"]) ? $viewer["departamento"] : "";
-                $calc = _comCalcTecnico($total, $inversion, $dep);
+                $idYo = intval(isset($viewer["id"]) ? $viewer["id"] : 0);
+
+                if ($fila["asignacion_resuelta"] && isset($distribucion["tecnicos"][$idYo])) {
+                    $fila["total"] = $distribucion["tecnicos"][$idYo]["total"];
+                    $fila["inversion"] = $distribucion["tecnicos"][$idYo]["inversion"];
+                    $fila["monto_partidas"] = $distribucion["tecnicos"][$idYo]["monto_partidas"];
+                }
+
+                $calc = _comCalcTecnico($fila["total"], $fila["inversion"], $dep);
 
                 // Nombre del otro técnico (para órdenes compartidas)
                 $otro = "";
                 if ($doble) {
-                    $idYo = intval($viewer["id"]);
                     $t1 = intval(isset($o["id_tecnico"]) ? $o["id_tecnico"] : 0);
                     $t2 = intval(isset($o["id_tecnicoDos"]) ? $o["id_tecnicoDos"] : 0);
                     $idOtro = ($t1 == $idYo) ? $t2 : $t1;
@@ -320,7 +341,7 @@ if (!function_exists('_comProcesar')) {
                 $fila["calc"] = $calc;
                 $fila["dep"]  = $dep;
                 $fila["otro"] = $otro;
-                $fila["revision"] = $doble;
+                $fila["revision"] = ($doble && !$fila["asignacion_resuelta"]);
 
             } elseif ($modo == "asesor") {
 
@@ -340,12 +361,41 @@ if (!function_exists('_comProcesar')) {
                     $nom = isset($mapaTec[$idT]["nombre"]) ? $mapaTec[$idT]["nombre"] : "Técnico #".$idT;
                     $dep = isset($mapaTec[$idT]["departamento"]) ? $mapaTec[$idT]["departamento"] : "";
                     if (!in_array(strtolower(trim($dep)), array("electronica", "impresoras", "sistemas"))) $depDesconocido = true;
+
+                    $totalTec = $total;
+                    $inversionTec = $inversion;
+                    $montoPartidas = null;
+                    if ($fila["asignacion_resuelta"] && isset($distribucion["tecnicos"][$idT])) {
+                        $totalTec = $distribucion["tecnicos"][$idT]["total"];
+                        $inversionTec = $distribucion["tecnicos"][$idT]["inversion"];
+                        $montoPartidas = $distribucion["tecnicos"][$idT]["monto_partidas"];
+                    }
+
                     $fila["tecnicos"][] = array(
                         "id"     => $idT,
                         "nombre" => $nom,
                         "dep"    => $dep,
-                        "calc"   => _comCalcTecnico($total, $inversion, $dep)
+                        "total"  => $totalTec,
+                        "inversion" => $inversionTec,
+                        "monto_partidas" => $montoPartidas,
+                        "calc"   => _comCalcTecnico($totalTec, $inversionTec, $dep)
                     );
+                }
+
+                /*
+                 * Para el total de la tabla se contabiliza una sola comisión
+                 * por orden. Antes de resolver una orden doble se usa la regla
+                 * del técnico principal como referencia; una vez resuelta, la
+                 * comisión de la orden es la suma de sus porciones asignadas.
+                 */
+                $fila["comision_orden"] = 0.0;
+                if ($doble && !$fila["asignacion_resuelta"]) {
+                    $depPrincipal = isset($mapaTec[$t1]["departamento"]) ? $mapaTec[$t1]["departamento"] : "";
+                    $fila["comision_orden"] = _comCalcTecnico($total, $inversion, $depPrincipal)["comision"];
+                } else {
+                    foreach ($fila["tecnicos"] as $tecnicoCalculado) {
+                        $fila["comision_orden"] += $tecnicoCalculado["calc"]["comision"];
+                    }
                 }
 
                 $idA = intval(isset($o["id_Asesor"]) ? $o["id_Asesor"] : 0);
@@ -355,8 +405,11 @@ if (!function_exists('_comProcesar')) {
                     "calc"   => _comCalcAsesor($total, $inversion)
                 );
 
-                // Necesita revisión: 2 técnicos, o técnico sin departamento reconocido
-                $fila["revision"] = ($doble || $depDesconocido);
+                // Una orden doble deja de estar pendiente al asignar todas sus
+                // partidas cobradas. Un departamento desconocido sigue siendo
+                // una incidencia independiente que requiere atención.
+                $fila["revision"] = (($doble && !$fila["asignacion_resuelta"]) || $depDesconocido);
+                $fila["departamento_desconocido"] = $depDesconocido;
             }
 
             // Totales
@@ -364,13 +417,13 @@ if (!function_exists('_comProcesar')) {
             if ($fila["revision"]) {
                 $out["revision"]++;
                 if ($modo == "admin") {
-                    foreach ($fila["tecnicos"] as $t) $out["revision_monto"] += $t["calc"]["comision"];
+                    $out["revision_monto"] += isset($fila["comision_orden"]) ? $fila["comision_orden"] : 0;
                 } elseif ($modo == "tecnico") {
                     $out["revision_monto"] += $fila["calc"]["comision"];
                 }
             } else {
                 if ($modo == "admin") {
-                    foreach ($fila["tecnicos"] as $t) $out["confirmado"] += $t["calc"]["comision"];
+                    $out["confirmado"] += isset($fila["comision_orden"]) ? $fila["comision_orden"] : 0;
                 } else {
                     $out["confirmado"] += $fila["calc"]["comision"];
                 }
@@ -417,7 +470,11 @@ if ($_com_modo == "admin") {
             $_com_personal[$k]["ordenes"]++;
             if ($f["revision"]) {
                 $_com_personal[$k]["revision"]++;
-                $_com_personal[$k]["revision_monto"] += $t["calc"]["comision"];
+                // Sin reparto todavía no se atribuye el monto completo a cada
+                // técnico; hacerlo duplicaría visualmente la comisión.
+                if (!$f["doble"] || !empty($f["asignacion_resuelta"])) {
+                    $_com_personal[$k]["revision_monto"] += $t["calc"]["comision"];
+                }
             } else {
                 $_com_personal[$k]["total"] += $t["calc"]["comision"];
             }
@@ -501,6 +558,52 @@ $_com_histPromedio = $_com_histActivos > 0
 /* ══════════════════════════════════════
    RENDER DE FILAS
    ══════════════════════════════════════ */
+if (!function_exists('_comBotonAsignacion')) {
+
+    function _comBotonAsignacion($f) {
+
+        global $_com_puedeResolver;
+
+        if (empty($f["doble"])) return "";
+
+        $tecnicos = array();
+        foreach ($f["tecnicos"] as $tecnico) {
+            $tecnicos[] = array(
+                "id" => intval($tecnico["id"]),
+                "nombre" => $tecnico["nombre"],
+                "departamento" => $tecnico["dep"]
+            );
+        }
+
+        $payload = array(
+            "idOrden" => intval($f["orden"]["id"]),
+            "cliente" => $f["cliente"],
+            "tecnicos" => $tecnicos,
+            "partidas" => _comPartidasOrden($f["orden"]),
+            "asignaciones" => !empty($f["asignacion_resuelta"])
+                ? $f["distribucion"]["asignaciones"] : array(),
+            "resuelta" => !empty($f["asignacion_resuelta"]),
+            "editable" => !empty($_com_puedeResolver)
+        );
+
+        $json = htmlspecialchars(
+            json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            ENT_QUOTES,
+            "UTF-8"
+        );
+
+        if (!empty($f["asignacion_resuelta"])) {
+            return '<button type="button" class="com-chip com-chip-ok btnRevisionComision" data-comision="'.$json.'">
+                        <i class="fas fa-check-circle"></i> Asignación revisada
+                    </button>';
+        }
+
+        return '<button type="button" class="com-chip com-chip-rev btnRevisionComision" data-comision="'.$json.'">
+                    <i class="fas fa-exclamation-triangle"></i> Necesita Revisión
+                </button>';
+    }
+}
+
 if (!function_exists('_comFilaPersonal')) {
 
     // Tabla para técnico y asesor (vista personal)
@@ -513,7 +616,7 @@ if (!function_exists('_comFilaPersonal')) {
             $clase = $f["revision"] ? ' class="com-rev"' : '';
             $fecha = isset($o["fecha_Salida"]) ? substr($o["fecha_Salida"], 0, 10) : "—";
 
-            echo '<tr'.$clase.'>
+            echo '<tr'.$clase.' data-atencion="'.($f["revision"] ? "1" : "0").'">
                     <td>'.($key + 1).'</td>
                     <td><a href="'._comLinkOrden($o).'" class="com-orden">#'.$o["id"].'</a></td>
                     <td style="font-weight:600;color:var(--crm-text)">'.htmlspecialchars($f["cliente"]).'</td>
@@ -537,6 +640,8 @@ if (!function_exists('_comFilaPersonal')) {
             if ($modo == "tecnico") {
                 if ($f["revision"]) {
                     echo '<td><span class="com-chip com-chip-rev"><i class="fas fa-exclamation-triangle"></i> Necesita Revisión</span><br><small style="color:#92400e">Con: '.htmlspecialchars($f["otro"]).'</small></td>';
+                } elseif (!empty($f["asignacion_resuelta"])) {
+                    echo '<td><span class="com-chip com-chip-ok"><i class="fas fa-check-circle"></i> Asignación revisada</span><br><small style="color:#166534">Solo incluye sus partidas asignadas</small></td>';
                 } else {
                     echo '<td><span class="com-chip com-chip-ok"><i class="fas fa-check"></i> Correcta</span></td>';
                 }
@@ -564,17 +669,28 @@ if (!function_exists('_comFilaPersonal')) {
                 $montos  = array();
                 foreach ($f["tecnicos"] as $t) {
                     $nombres[] = '<div style="margin:2px 0">'.htmlspecialchars($t["nombre"]).' '._comDepBadge($t["dep"]).'</div>';
-                    $montos[]  = '<div style="margin:2px 0"><b style="color:'.($t["calc"]["base"] < 0 ? '#dc2626' : '#15803d').'">'._comMoney($t["calc"]["comision"]).'</b> <span class="com-chip com-chip-pct">'.$t["calc"]["pct"].'%</span></div>';
+                    if (!$f["doble"] || !empty($f["asignacion_resuelta"])) {
+                        $detalleAsignado = ($f["doble"] && $t["monto_partidas"] !== null)
+                            ? '<br><small style="color:var(--crm-muted)">Partidas: '._comMoney($t["monto_partidas"]).'</small>'
+                            : '';
+                        $montos[]  = '<div style="margin:2px 0"><b style="color:'.($t["calc"]["base"] < 0 ? '#dc2626' : '#15803d').'">'._comMoney($t["calc"]["comision"]).'</b> <span class="com-chip com-chip-pct">'.$t["calc"]["pct"].'%</span>'.$detalleAsignado.'</div>';
+                    }
                 }
                 $celTec = implode('', $nombres);
-                $celCom = implode('', $montos);
+                if ($f["doble"] && empty($f["asignacion_resuelta"])) {
+                    $celCom = '<div><small style="color:var(--crm-muted)">Comisión total de la orden</small><br><b style="color:#b45309">≈ '._comMoney($f["comision_orden"]).'</b></div>';
+                } else {
+                    $celCom = implode('', $montos);
+                }
             }
 
-            if ($f["revision"]) {
-                $celCom .= '<div style="margin-top:4px"><span class="com-chip com-chip-rev"><i class="fas fa-exclamation-triangle"></i> Necesita Revisión</span></div>';
+            if ($f["doble"]) {
+                $celCom .= '<div style="margin-top:6px">'._comBotonAsignacion($f).'</div>';
+            } elseif ($f["revision"]) {
+                $celCom .= '<div style="margin-top:4px"><span class="com-chip com-chip-rev"><i class="fas fa-exclamation-triangle"></i> Revisar departamento</span></div>';
             }
 
-            echo '<tr'.$clase.'>
+            echo '<tr'.$clase.' data-atencion="'.($f["revision"] ? "1" : "0").'">
                     <td>'.($key + 1).'</td>
                     <td><a href="'._comLinkOrden($o).'" class="com-orden">#'.$o["id"].'</a></td>
                     <td style="font-weight:600;color:var(--crm-text)">'.htmlspecialchars($f["cliente"]).'</td>
@@ -599,6 +715,10 @@ if (!function_exists('_comFilaPersonal')) {
   .com-chip-pct { background: #eef2ff; color: var(--crm-accent); }
   .com-chip-ok  { background: #dcfce7; color: #15803d; }
   .com-chip-rev { background: #fde68a; color: #92400e; }
+  button.com-chip {
+    border: 0; cursor: pointer; font-family: inherit; line-height: 1.6;
+  }
+  button.com-chip:hover, button.com-chip:focus { filter: brightness(.96); outline: 2px solid rgba(99,102,241,.18); }
   tr.com-rev, tr.com-rev:hover, .crm-table tbody tr.com-rev:hover { background: #fef9c3 !important; }
   .com-orden { font-weight: 700; color: var(--crm-accent); }
   .com-orden:hover { text-decoration: underline; color: var(--crm-accent); }
@@ -703,6 +823,59 @@ if (!function_exists('_comFilaPersonal')) {
   .com-regla code {
     background: #f1f5f9; color: var(--crm-text); border-radius: 6px;
     padding: 2px 8px; font-size: 12px; white-space: nowrap;
+  }
+
+  .com-filtro-atencion {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #fff; border: 1px solid var(--crm-border); border-radius: 10px;
+    padding: 6px 10px; color: var(--crm-text2); font-size: 12px; font-weight: 700;
+  }
+  .com-filtro-atencion select {
+    border: 0; background: transparent; color: var(--crm-text); font-weight: 700;
+    min-width: 190px; outline: none;
+  }
+
+  #modalAsignacionComision .modal-dialog { max-width: 880px; width: calc(100% - 30px); }
+  #modalAsignacionComision .modal-content { border: 0; border-radius: 16px; overflow: hidden; }
+  #modalAsignacionComision .modal-header {
+    background: linear-gradient(135deg,#4338ca,#6366f1); color:#fff; border:0; padding:18px 22px;
+  }
+  #modalAsignacionComision .modal-title { font-weight: 800; }
+  #modalAsignacionComision .close { color:#fff; opacity:.9; text-shadow:none; }
+  .com-modal-ayuda {
+    background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe;
+    border-radius:10px; padding:10px 12px; font-size:12px; margin-bottom:14px;
+  }
+  .com-partida-asignacion {
+    display:grid; grid-template-columns:minmax(210px,1fr) 115px minmax(280px,1.1fr);
+    gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid #eef2f7;
+  }
+  .com-partida-desc { font-weight:700; color:var(--crm-text); line-height:1.35; }
+  .com-partida-desc small { display:block; color:var(--crm-muted); font-weight:500; margin-top:2px; }
+  .com-partida-monto { text-align:right; font-weight:800; color:#15803d; }
+  .com-tecnico-opciones { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+  .com-tecnico-opcion {
+    display:flex; align-items:center; justify-content:center; gap:6px; margin:0;
+    border:1px solid #cbd5e1; border-radius:9px; padding:8px 9px;
+    cursor:pointer; color:#475569; font-size:11px; font-weight:700; text-align:center;
+  }
+  .com-tecnico-opcion:has(input:checked) { border-color:#6366f1; background:#eef2ff; color:#4338ca; }
+  .com-tecnico-opcion input { margin:0; }
+  .com-resumen-reparto {
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;
+  }
+  .com-resumen-tecnico {
+    border:1px solid #dbeafe; background:#f8fafc; border-radius:10px; padding:10px 12px;
+    color:var(--crm-text2); font-size:12px;
+  }
+  .com-resumen-tecnico b { display:block; color:var(--crm-text); font-size:15px; margin-top:2px; }
+  .com-partidas-cero-wrap { margin-top:14px; border-top:1px dashed #cbd5e1; padding-top:12px; }
+  .com-partida-cero { opacity:.68; }
+  .com-partida-cero .com-partida-monto { color:var(--crm-muted); }
+  @media (max-width: 700px) {
+    .com-partida-asignacion { grid-template-columns:1fr 90px; }
+    .com-tecnico-opciones { grid-column:1 / -1; }
+    .com-resumen-reparto { grid-template-columns:1fr; }
   }
   .crm-table tfoot td {
     padding: 14px; background: #f8fafc; border-top: 2px solid var(--crm-border);
@@ -922,6 +1095,15 @@ if (!function_exists('_comFilaPersonal')) {
         <button type="button" id="btnQ2" onclick="comVerQuincena(2)"><i class="far fa-calendar"></i> 2da Quincena (16–fin)</button>
       </div>
 
+      <label class="com-filtro-atencion" for="filtroAtencionComisiones">
+        <i class="fas fa-filter"></i>
+        <select id="filtroAtencionComisiones">
+          <option value="todas">Todas las órdenes</option>
+          <option value="atencion">Necesitan atención (<?php echo $_com_revTotal; ?>)</option>
+          <option value="resueltas">Sin atención pendiente</option>
+        </select>
+      </label>
+
       <?php if ($_com_modo == "tecnico" && $_com_tec != null): ?>
       <div style="font-size:13px; color:var(--crm-text2)">
         <?php echo htmlspecialchars($_com_tec["nombre"]); ?> &nbsp;<?php echo _comDepBadge(isset($_com_tec["departamento"]) ? $_com_tec["departamento"] : ""); ?>
@@ -980,7 +1162,7 @@ if (!function_exists('_comFilaPersonal')) {
           <tfoot>
             <tr>
               <td colspan="4" style="text-align:right; font-weight:700">Totales:</td>
-              <td><b>Técnicos confirmado: <?php echo _comMoney($res["confirmado"]); ?></b><?php echo $res["revision"] > 0 ? '<br><small style="color:#92400e">Aparte, por revisar: ≈ '._comMoney($res["revision_monto"]).' en '.$res["revision"].' órden(es)</small>' : ''; ?></td>
+              <td><b>Comisión de órdenes confirmada: <?php echo _comMoney($res["confirmado"]); ?></b><?php echo $res["revision"] > 0 ? '<br><small style="color:#92400e">Aparte, por revisar: ≈ '._comMoney($res["revision_monto"]).' en '.$res["revision"].' órden(es)</small>' : ''; ?><br><small style="color:var(--crm-muted)">Cada orden compartida se contabiliza una sola vez.</small></td>
               <td></td>
               <td><b>Asesores: <?php echo _comMoney($res["asesores"]); ?></b></td>
               <td colspan="3"><small style="color:var(--crm-muted)">*Montos aproximados, sujetos a cambios</small></td>
@@ -1231,7 +1413,7 @@ if (!function_exists('_comFilaPersonal')) {
 
         <div class="com-regla">
           <span class="com-chip com-chip-rev"><i class="fas fa-exclamation-triangle"></i> Necesita Revisión</span>
-          <div>Órdenes donde participan <b>2 técnicos</b>: la comisión se marca en amarillo y <b>no se suma al total confirmado</b>; su monto aproximado se muestra aparte como referencia de lo que está en juego. Más adelante se ajustará según el trabajo realizado por cada técnico. La comisión del asesor no se ve afectada.</div>
+          <div>Órdenes donde participan <b>2 técnicos</b>: la comisión se marca en amarillo y <b>no se suma al total confirmado</b> hasta asignar cada partida cobrada. Mientras está pendiente se muestra <b>una sola comisión total de la orden</b>, sin duplicarla por técnico. Al resolverla, el total y la inversión se distribuyen proporcionalmente entre ambos según sus partidas. La comisión del asesor no se ve afectada.</div>
         </div>
 
       </div>
@@ -1244,9 +1426,156 @@ if (!function_exists('_comFilaPersonal')) {
 
 </div>
 
+<!-- Modal único para resolver la asignación de partidas en órdenes compartidas -->
+<div class="modal fade" id="modalAsignacionComision" tabindex="-1" role="dialog" aria-labelledby="tituloModalAsignacionComision">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="tituloModalAsignacionComision">
+          <i class="fas fa-people-arrows"></i> Asignar partidas de la orden
+        </h4>
+        <div id="subtituloModalAsignacionComision" style="font-size:12px;opacity:.86;margin-top:4px"></div>
+      </div>
+      <div class="modal-body" style="padding:20px 22px">
+        <div class="com-modal-ayuda">
+          <i class="fas fa-info-circle"></i>
+          Elige quién realizó cada partida con monto mayor a $0. Las partidas sin monto quedan solo como referencia y no bloquean el guardado.
+        </div>
+
+        <div id="comListaPartidasPositivas"></div>
+
+        <div class="com-partidas-cero-wrap" id="comPartidasCeroWrap" style="display:none">
+          <button type="button" class="btn btn-default btn-xs" id="comTogglePartidasCero">
+            <i class="fas fa-eye"></i> Ver partidas en $0 (<span id="comCantidadPartidasCero">0</span>)
+          </button>
+          <div id="comListaPartidasCero" style="display:none;margin-top:8px"></div>
+        </div>
+
+        <div class="com-resumen-reparto" id="comResumenReparto"></div>
+        <div id="comAsignacionPendiente" style="margin-top:10px;color:#b45309;font-size:12px;font-weight:700"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnGuardarAsignacionComision" disabled>
+          <i class="fas fa-save"></i> Guardar asignación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 
 var comEsHistorico = <?php echo $_com_mesSel != null ? 'true' : 'false'; ?>;
+var comAsignacionActual = null;
+
+function comEscapar(texto) {
+  return $("<div>").text(texto == null ? "" : String(texto)).html();
+}
+
+function comMoneyJs(monto) {
+  return "$ " + Number(monto || 0).toLocaleString("es-MX", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function comActualizarResumenAsignacion() {
+
+  if (!comAsignacionActual) return;
+
+  var totales = {};
+  var pendientes = 0;
+  $.each(comAsignacionActual.tecnicos, function (_, tecnico) {
+    totales[String(tecnico.id)] = 0;
+  });
+
+  $("#comListaPartidasPositivas .com-partida-asignacion").each(function () {
+    var monto = Number($(this).attr("data-monto")) || 0;
+    var elegido = $(this).find("input[type=radio]:checked").val();
+    if (!elegido) {
+      pendientes++;
+    } else {
+      totales[String(elegido)] = (totales[String(elegido)] || 0) + monto;
+    }
+  });
+
+  var resumen = "";
+  $.each(comAsignacionActual.tecnicos, function (_, tecnico) {
+    resumen += '<div class="com-resumen-tecnico">' +
+      comEscapar(tecnico.nombre) +
+      '<b>' + comMoneyJs(totales[String(tecnico.id)] || 0) + ' en partidas</b>' +
+      '</div>';
+  });
+  $("#comResumenReparto").html(resumen);
+
+  if (pendientes > 0) {
+    $("#comAsignacionPendiente").html('<i class="fas fa-exclamation-circle"></i> Faltan ' + pendientes + ' partida(s) por asignar.');
+  } else {
+    $("#comAsignacionPendiente").html('<span style="color:#15803d"><i class="fas fa-check-circle"></i> Todas las partidas cobradas están asignadas.</span>');
+  }
+
+  $("#btnGuardarAsignacionComision").prop("disabled", pendientes > 0 || !comAsignacionActual.editable);
+}
+
+function comAbrirModalAsignacion(datos) {
+
+  comAsignacionActual = datos;
+  $("#subtituloModalAsignacionComision").text(
+    "Orden #" + datos.idOrden + (datos.cliente ? " · " + datos.cliente : "")
+  );
+
+  var positivas = "";
+  var ceros = "";
+  var cantidadCeros = 0;
+
+  $.each(datos.partidas || [], function (indice, partida) {
+
+    var monto = Number(partida.monto) || 0;
+    if (monto <= 0) {
+      cantidadCeros++;
+      ceros += '<div class="com-partida-asignacion com-partida-cero">' +
+        '<div class="com-partida-desc">' + comEscapar(partida.descripcion) +
+          '<small>' + comEscapar(partida.origen) + '</small></div>' +
+        '<div class="com-partida-monto">' + comMoneyJs(monto) + '</div>' +
+        '<div style="font-size:11px;color:var(--crm-muted)">No requiere asignación</div>' +
+      '</div>';
+      return;
+    }
+
+    var opciones = "";
+    $.each(datos.tecnicos || [], function (iTec, tecnico) {
+      var seleccionada = String((datos.asignaciones || {})[partida.key] || "") === String(tecnico.id);
+      opciones += '<label class="com-tecnico-opcion">' +
+        '<input type="radio" name="comPartida' + indice + '" data-partida="' + comEscapar(partida.key) + '" value="' + Number(tecnico.id) + '"' + (seleccionada ? " checked" : "") + '>' +
+        '<span>' + comEscapar(tecnico.nombre) + '</span>' +
+      '</label>';
+    });
+
+    positivas += '<div class="com-partida-asignacion" data-monto="' + monto + '">' +
+      '<div class="com-partida-desc">' + comEscapar(partida.descripcion) +
+        '<small>' + comEscapar(partida.origen) + '</small></div>' +
+      '<div class="com-partida-monto">' + comMoneyJs(monto) + '</div>' +
+      '<div class="com-tecnico-opciones">' + opciones + '</div>' +
+    '</div>';
+  });
+
+  if (!positivas) {
+    positivas = '<div style="padding:25px;text-align:center;color:var(--crm-muted)">La orden no tiene partidas con monto mayor a cero.</div>';
+  }
+
+  $("#comListaPartidasPositivas").html(positivas);
+  $("#comListaPartidasCero").html(ceros).hide();
+  $("#comCantidadPartidasCero").text(cantidadCeros);
+  $("#comPartidasCeroWrap").toggle(cantidadCeros > 0);
+  $("#comTogglePartidasCero").html('<i class="fas fa-eye"></i> Ver partidas en $0 (<span id="comCantidadPartidasCero">' + cantidadCeros + '</span>)');
+  $("#btnGuardarAsignacionComision").toggle(!!datos.editable);
+  $("#modalAsignacionComision .modal-footer .btn-default").text(datos.editable ? "Cancelar" : "Cerrar");
+
+  comActualizarResumenAsignacion();
+  $("#modalAsignacionComision").modal("show");
+}
 
 function comVerQuincena(n) {
 
@@ -1272,6 +1601,19 @@ function comVerQuincena(n) {
 
 $(document).ready(function () {
 
+  if ($.fn.dataTable && $.fn.dataTable.ext && $.fn.dataTable.ext.search) {
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      if (!$(settings.nTable).hasClass("dtComisiones")) return true;
+
+      var filtro = $("#filtroAtencionComisiones").val() || "todas";
+      if (filtro === "todas") return true;
+
+      var fila = settings.aoData[dataIndex] ? settings.aoData[dataIndex].nTr : null;
+      var necesitaAtencion = fila && $(fila).attr("data-atencion") === "1";
+      return filtro === "atencion" ? necesitaAtencion : !necesitaAtencion;
+    });
+  }
+
   var idiomaDT = {
     "decimal": ",",
     "thousands": ".",
@@ -1294,6 +1636,90 @@ $(document).ready(function () {
       "pageLength": 25,
       "order": [],
       "columnDefs": [{ "orderable": false, "targets": "no-sort" }]
+    });
+  });
+
+  try {
+    var filtroGuardado = localStorage.getItem("comFiltroAtencion");
+    if (filtroGuardado === "atencion" || filtroGuardado === "resueltas") {
+      $("#filtroAtencionComisiones").val(filtroGuardado);
+      $(".dtComisiones").DataTable().draw();
+    }
+  } catch (e) {}
+
+  $("#filtroAtencionComisiones").on("change", function () {
+    try { localStorage.setItem("comFiltroAtencion", this.value); } catch (e) {}
+    $(".dtComisiones").each(function () {
+      if ($.fn.DataTable.isDataTable(this)) $(this).DataTable().draw();
+    });
+  });
+
+  $(document).on("click", ".btnRevisionComision", function () {
+    try {
+      var datos = JSON.parse($(this).attr("data-comision"));
+      comAbrirModalAsignacion(datos);
+    } catch (e) {
+      if (window.swal) {
+        swal({ type: "error", title: "No fue posible abrir la asignación", text: "Recarga la página e inténtalo de nuevo." });
+      }
+    }
+  });
+
+  $(document).on("change", "#comListaPartidasPositivas input[type=radio]", comActualizarResumenAsignacion);
+
+  $("#comTogglePartidasCero").on("click", function () {
+    var lista = $("#comListaPartidasCero");
+    var mostrar = !lista.is(":visible");
+    lista.toggle(mostrar);
+    $(this).find("i").toggleClass("fa-eye", !mostrar).toggleClass("fa-eye-slash", mostrar);
+  });
+
+  $("#btnGuardarAsignacionComision").on("click", function () {
+
+    if (!comAsignacionActual || !comAsignacionActual.editable) return;
+
+    var asignaciones = {};
+    var incompletas = 0;
+    $("#comListaPartidasPositivas input[type=radio]:checked").each(function () {
+      asignaciones[$(this).attr("data-partida")] = Number($(this).val());
+    });
+    $("#comListaPartidasPositivas .com-partida-asignacion").each(function () {
+      if (!$(this).find("input[type=radio]:checked").length) incompletas++;
+    });
+    if (incompletas > 0) {
+      comActualizarResumenAsignacion();
+      return;
+    }
+
+    var boton = $(this);
+    boton.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+
+    $.ajax({
+      url: "ajax/comisiones.ajax.php",
+      method: "POST",
+      dataType: "json",
+      data: {
+        accion: "guardarAsignacionPartidas",
+        idOrden: comAsignacionActual.idOrden,
+        asignaciones: JSON.stringify(asignaciones)
+      }
+    }).done(function (respuesta) {
+      if (!respuesta || !respuesta.ok) {
+        var mensaje = respuesta && respuesta.mensaje ? respuesta.mensaje : "No fue posible guardar la asignación.";
+        if (window.swal) swal({ type: "error", title: "Asignación no guardada", text: mensaje });
+        boton.prop("disabled", false).html('<i class="fas fa-save"></i> Guardar asignación');
+        return;
+      }
+
+      if (window.swal) {
+        swal({ type: "success", title: "Asignación guardada", text: respuesta.mensaje, showConfirmButton: false, timer: 900 });
+      }
+      setTimeout(function () { window.location.reload(); }, 950);
+    }).fail(function (xhr) {
+      var mensaje = "No fue posible guardar la asignación.";
+      if (xhr.responseJSON && xhr.responseJSON.mensaje) mensaje = xhr.responseJSON.mensaje;
+      if (window.swal) swal({ type: "error", title: "Asignación no guardada", text: mensaje });
+      boton.prop("disabled", false).html('<i class="fas fa-save"></i> Guardar asignación');
     });
   });
 
