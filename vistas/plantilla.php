@@ -1,5 +1,5 @@
 <?php
-$jsVer = '1.4.6';
+$jsVer = '1.4.7';
 $rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
 $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
@@ -98,6 +98,9 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
   <link rel="stylesheet" href="vistas/dist/css/AdminLTE.css">
   <link rel="stylesheet" href="vistas/dist/css/skins/skin-blue.min.css">
   <link rel="stylesheet" href="vistas/css/custom.css">
+  <?php if (in_array($rutaActual, array('perfiles', 'asesores', 'empresas'), true)): ?>
+  <link rel="stylesheet" href="vistas/css/admin-catalogs.css?v=<?= $jsVer ?>">
+  <?php endif; ?>
   <?php if ($rutaActual === 'visitas'): ?>
   <link rel="stylesheet" href="vistas/css/visitas-dashboard.css?v=<?= $jsVer ?>">
   <?php endif; ?>

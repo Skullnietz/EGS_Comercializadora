@@ -4,6 +4,29 @@ require_once __DIR__ . '/../modelos/modelo.asesores.php';
 
 class ControladorAdministradores{
 
+	private static function resolverEmpresaAsignada($empresaSolicitada){
+
+		if (isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "Super-Administrador") {
+			return intval($empresaSolicitada);
+		}
+
+		return isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
+	}
+
+	private static function puedeGestionarPerfil($perfil){
+
+		if (!$perfil || !isset($_SESSION["perfil"])) {
+			return false;
+		}
+
+		if ($_SESSION["perfil"] === "Super-Administrador") {
+			return true;
+		}
+
+		return $_SESSION["perfil"] === "administrador"
+			&& isset($perfil["id_empresa"], $_SESSION["empresa"])
+			&& intval($perfil["id_empresa"]) === intval($_SESSION["empresa"]);
+	}
 
 	/*=============================================
 	INGRESO DE ADMINISTRADOR
@@ -217,13 +240,14 @@ class ControladorAdministradores{
 				}else{
 
 					$encriptar = crypt($_POST["nuevoPassword"], '$2a$07$asxx54ahjppf45sd87a5a4dDDGsystemdev$');
+					$empresaAsignada = self::resolverEmpresaAsignada(isset($_POST["empresa"]) ? $_POST["empresa"] : 0);
 
 					$datos = array("nombre" => $_POST["nuevoNombre"],
 					           "Departamento" => $_POST["Departamento"],
 					           "email" => $_POST["nuevoEmail"],
 					           "password" => $encriptar,
 					           "perfil" => $_POST["nuevoPerfil"],	
-					           "empresa"=>$_POST["empresa"],		       
+					           "empresa"=>$empresaAsignada,
 					           "foto"=>$ruta,
 					           "estado" => 1);
 
@@ -243,7 +267,7 @@ class ControladorAdministradores{
 							"telefonoDos" => isset($_POST["numeroTelDosTecnico"]) ? $_POST["numeroTelDosTecnico"] : "", 
 							"HoraDeComida" => isset($_POST["HoraDeComida"]) ? $_POST["HoraDeComida"] : "",
 							"areratecnico" => isset($_POST["areratecnico"]) ? $_POST["areratecnico"] : "",
-							"empresa" => $_POST["empresa"],
+							"empresa" => $empresaAsignada,
 							"estado" => "Activo"
 						);
 						ModeloTecnicos::mdlCrearTecnico("tecnicos", $datosTec);
@@ -253,7 +277,7 @@ class ControladorAdministradores{
 							"correo" => $_POST["nuevoEmail"], 
 							"numeroTelefono" => isset($_POST["nuevoNumeroUno"]) ? $_POST["nuevoNumeroUno"] : "", 
 							"numerodeCelular" => isset($_POST["nuevoNumeroDos"]) ? $_POST["nuevoNumeroDos"] : "", 
-							"empresa" => $_POST["empresa"],
+							"empresa" => $empresaAsignada,
 							"estado" => "Activo"
 						);
 						ModeloAsesores::mdlIngresarAsesores("asesores", $datosAse);
@@ -324,6 +348,22 @@ class ControladorAdministradores{
 	static public function ctrEditarPerfil(){
 
 		if(isset($_POST["idPerfil"])){
+
+			$tabla = "administradores";
+			$oldProfile = ModeloAdministradores::mdlMostrarAdministradores($tabla, "id", $_POST["idPerfil"]);
+
+			if (!self::puedeGestionarPerfil($oldProfile)) {
+				echo '<script>
+					swal({
+						type: "error",
+						title: "No tienes permisos para editar este perfil",
+						confirmButtonText: "Cerrar"
+					}).then(function(){ window.location = "index.php?ruta=perfiles"; });
+				</script>';
+				return;
+			}
+
+			$empresaAsignada = self::resolverEmpresaAsignada(isset($_POST["empresa"]) ? $_POST["empresa"] : 0);
 
 			if(preg_match('/^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $_POST["editarNombre"])){
 
@@ -402,8 +442,6 @@ class ControladorAdministradores{
 
 				}
 
-				$tabla = "administradores";
-
 				if($_POST["editarPassword"] != ""){
 
 					if(preg_match('/^[a-zA-Z0-9]+$/', $_POST["editarPassword"])){
@@ -458,10 +496,8 @@ class ControladorAdministradores{
 							   "password" => $encriptar,
 							   "perfil" => $_POST["editarPerfil"],
 							   "foto" => $ruta,
-							   "id_empresa" =>$_POST["empresa"]
+							   "id_empresa" =>$empresaAsignada
 				);
-
-				$oldProfile = ModeloAdministradores::mdlMostrarAdministradores($tabla, "id", $_POST["idPerfil"]);
 
 				$respuesta = ModeloAdministradores::mdlEditarPerfil($tabla, $datos);
 
@@ -480,7 +516,7 @@ class ControladorAdministradores{
 					} else if($oldRole == "vendedor" && $newRole != "vendedor"){
 						$ase = ModeloAsesores::mdlMostrarAsesoresEleg("asesores", "correo", $oldEmail);
 						if($ase){
-							$datosAse = array("id" => $ase["id"], "nombre" => $ase["nombre"], "correo" => $ase["correo"], "numerodeCelular" => $ase["numerodeCelular"], "numeroTelefono" => $ase["numeroTelefono"], "porcentajeComision" => $ase["porcentajeComision"], "estado" => "Inactivo");
+							$datosAse = array("id" => $ase["id"], "nombre" => $ase["nombre"], "correo" => $ase["correo"], "numerodeCelular" => $ase["numerodeCelular"], "numeroTelefono" => $ase["numeroTelefono"], "porcentajeComision" => $ase["porcentajeComision"], "id_empresa" => $oldProfile["id_empresa"], "estado" => "Inactivo");
 							ModeloAsesores::mdlEditarAsesor("asesores", $datosAse);
 						}
 					}
@@ -493,6 +529,8 @@ class ControladorAdministradores{
 							"telefono" => isset($_POST["editarNumeroUnoTecnico"]) ? $_POST["editarNumeroUnoTecnico"] : "", 
 							"telefonoDos" => isset($_POST["editarTelefonoDosTecnico"]) ? $_POST["editarTelefonoDosTecnico"] : "", 
 							"HoraDeComidaEditada" => isset($_POST["HoraDeComidaEditada"]) ? $_POST["HoraDeComidaEditada"] : "",
+							"departamento" => isset($_POST["editarAreratecnico"]) ? $_POST["editarAreratecnico"] : "",
+							"id_empresa" => $empresaAsignada,
 							"estado" => "Activo"
 						);
 						if($tec){
@@ -501,7 +539,7 @@ class ControladorAdministradores{
 						} else {
 							$datosTec["HoraDeComida"] = $datosTec["HoraDeComidaEditada"];
 							$datosTec["areratecnico"] = isset($_POST["editarAreratecnico"]) ? $_POST["editarAreratecnico"] : "";
-							$datosTec["empresa"] = $_POST["empresa"];
+							$datosTec["empresa"] = $empresaAsignada;
 							ModeloTecnicos::mdlCrearTecnico("tecnicos", $datosTec);
 						}
 					} else if($newRole == "vendedor"){
@@ -514,6 +552,7 @@ class ControladorAdministradores{
 								"numerodeCelular" => isset($_POST["editarTelefonoDosAsesor"]) ? $_POST["editarTelefonoDosAsesor"] : "",
 								"numeroTelefono" => isset($_POST["editarNumeroUnoAsesor"]) ? $_POST["editarNumeroUnoAsesor"] : "",
 								"porcentajeComision" => $ase["porcentajeComision"],
+								"id_empresa" => $empresaAsignada,
 								"estado" => "Activo"
 							);
 							ModeloAsesores::mdlEditarAsesor("asesores", $datosAse);
@@ -523,7 +562,7 @@ class ControladorAdministradores{
 								"correo" => $newEmail, 
 								"numeroTelefono" => isset($_POST["editarNumeroUnoAsesor"]) ? $_POST["editarNumeroUnoAsesor"] : "", 
 								"numerodeCelular" => isset($_POST["editarTelefonoDosAsesor"]) ? $_POST["editarTelefonoDosAsesor"] : "", 
-								"empresa" => $_POST["empresa"],
+								"empresa" => $empresaAsignada,
 								"estado" => "Activo"
 							);
 							ModeloAsesores::mdlIngresarAsesores("asesores", $datosAse);
@@ -587,6 +626,18 @@ class ControladorAdministradores{
 			$datos = $_GET["idPerfil"];
 
 			$profile = ModeloAdministradores::mdlMostrarAdministradores($tabla, "id", $datos);
+
+			if (!self::puedeGestionarPerfil($profile)) {
+				echo '<script>
+					swal({
+						type: "error",
+						title: "No tienes permisos para eliminar este perfil",
+						confirmButtonText: "Cerrar"
+					}).then(function(){ window.location = "index.php?ruta=perfiles"; });
+				</script>';
+				return;
+			}
+
 			if($profile){
 				$email = $profile["email"];
 				if($profile["perfil"] == "tecnico"){
