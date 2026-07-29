@@ -842,6 +842,16 @@ if (!function_exists('_comFilaPersonal')) {
   }
   #modalAsignacionComision .modal-title { font-weight: 800; }
   #modalAsignacionComision .close { color:#fff; opacity:.9; text-shadow:none; }
+  #modalAsignacionComision .modal-body {
+    max-height: calc(100vh - 215px); overflow-y: auto;
+  }
+  #modalAsignacionComision .modal-footer {
+    position: sticky; bottom: 0; z-index: 5; background: #fff;
+    border-top: 1px solid #e2e8f0; box-shadow: 0 -8px 20px rgba(15,23,42,.08);
+  }
+  #btnGuardarAsignacionComision {
+    min-width: 190px; font-weight: 800; border-radius: 9px;
+  }
   .com-modal-ayuda {
     background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe;
     border-radius:10px; padding:10px 12px; font-size:12px; margin-bottom:14px;
@@ -872,6 +882,11 @@ if (!function_exists('_comFilaPersonal')) {
   .com-partidas-cero-wrap { margin-top:14px; border-top:1px dashed #cbd5e1; padding-top:12px; }
   .com-partida-cero { opacity:.68; }
   .com-partida-cero .com-partida-monto { color:var(--crm-muted); }
+  .com-error-guardado {
+    display:none; margin-top:12px; padding:10px 12px; border-radius:9px;
+    border:1px solid #fecaca; background:#fef2f2; color:#b91c1c;
+    font-size:12px; font-weight:700;
+  }
   @media (max-width: 700px) {
     .com-partida-asignacion { grid-template-columns:1fr 90px; }
     .com-tecnico-opciones { grid-column:1 / -1; }
@@ -1427,11 +1442,11 @@ if (!function_exists('_comFilaPersonal')) {
 </div>
 
 <!-- Modal único para resolver la asignación de partidas en órdenes compartidas -->
-<div class="modal fade" id="modalAsignacionComision" tabindex="-1" role="dialog" aria-labelledby="tituloModalAsignacionComision">
+<div class="modal fade" id="modalAsignacionComision" tabindex="-1" role="dialog" aria-labelledby="tituloModalAsignacionComision" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close btnCerrarAsignacionComision" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="tituloModalAsignacionComision">
           <i class="fas fa-people-arrows"></i> Asignar partidas de la orden
         </h4>
@@ -1440,7 +1455,7 @@ if (!function_exists('_comFilaPersonal')) {
       <div class="modal-body" style="padding:20px 22px">
         <div class="com-modal-ayuda">
           <i class="fas fa-info-circle"></i>
-          Elige quién realizó cada partida con monto mayor a $0. Las partidas sin monto quedan solo como referencia y no bloquean el guardado.
+          Elige quién realizó cada partida con monto mayor a $0. Al terminar, pulsa <b>Guardar y cerrar</b>; cerrar o cancelar no guarda los cambios. Las partidas sin monto quedan solo como referencia.
         </div>
 
         <div id="comListaPartidasPositivas"></div>
@@ -1454,11 +1469,12 @@ if (!function_exists('_comFilaPersonal')) {
 
         <div class="com-resumen-reparto" id="comResumenReparto"></div>
         <div id="comAsignacionPendiente" style="margin-top:10px;color:#b45309;font-size:12px;font-weight:700"></div>
+        <div class="com-error-guardado" id="comErrorGuardado"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btnGuardarAsignacionComision" disabled>
-          <i class="fas fa-save"></i> Guardar asignación
+        <button type="button" class="btn btn-default btnCerrarAsignacionComision">Cancelar</button>
+        <button type="button" class="btn btn-success" id="btnGuardarAsignacionComision" disabled>
+          <i class="fas fa-save"></i> Guardar y cerrar
         </button>
       </div>
     </div>
@@ -1469,6 +1485,9 @@ if (!function_exists('_comFilaPersonal')) {
 
 var comEsHistorico = <?php echo $_com_mesSel != null ? 'true' : 'false'; ?>;
 var comAsignacionActual = null;
+var comAsignacionSucia = false;
+var comAsignacionGuardando = false;
+var comPermitirCerrarAsignacion = false;
 
 function comEscapar(texto) {
   return $("<div>").text(texto == null ? "" : String(texto)).html();
@@ -1487,6 +1506,7 @@ function comActualizarResumenAsignacion() {
 
   var totales = {};
   var pendientes = 0;
+  var totalPartidasCobradas = $("#comListaPartidasPositivas .com-partida-asignacion").length;
   $.each(comAsignacionActual.tecnicos, function (_, tecnico) {
     totales[String(tecnico.id)] = 0;
   });
@@ -1516,12 +1536,22 @@ function comActualizarResumenAsignacion() {
     $("#comAsignacionPendiente").html('<span style="color:#15803d"><i class="fas fa-check-circle"></i> Todas las partidas cobradas están asignadas.</span>');
   }
 
-  $("#btnGuardarAsignacionComision").prop("disabled", pendientes > 0 || !comAsignacionActual.editable);
+  $("#btnGuardarAsignacionComision").prop(
+    "disabled",
+    pendientes > 0 ||
+    totalPartidasCobradas === 0 ||
+    !comAsignacionActual.editable ||
+    !comAsignacionSucia ||
+    comAsignacionGuardando
+  );
 }
 
 function comAbrirModalAsignacion(datos) {
 
   comAsignacionActual = datos;
+  comAsignacionSucia = false;
+  comAsignacionGuardando = false;
+  comPermitirCerrarAsignacion = false;
   $("#subtituloModalAsignacionComision").text(
     "Orden #" + datos.idOrden + (datos.cliente ? " · " + datos.cliente : "")
   );
@@ -1572,6 +1602,8 @@ function comAbrirModalAsignacion(datos) {
   $("#comTogglePartidasCero").html('<i class="fas fa-eye"></i> Ver partidas en $0 (<span id="comCantidadPartidasCero">' + cantidadCeros + '</span>)');
   $("#btnGuardarAsignacionComision").toggle(!!datos.editable);
   $("#modalAsignacionComision .modal-footer .btn-default").text(datos.editable ? "Cancelar" : "Cerrar");
+  $("#btnGuardarAsignacionComision").html('<i class="fas fa-save"></i> Guardar y cerrar');
+  $("#comErrorGuardado").hide().empty();
 
   comActualizarResumenAsignacion();
   $("#modalAsignacionComision").modal("show");
@@ -1665,7 +1697,42 @@ $(document).ready(function () {
     }
   });
 
-  $(document).on("change", "#comListaPartidasPositivas input[type=radio]", comActualizarResumenAsignacion);
+  $(document).on("change", "#comListaPartidasPositivas input[type=radio]", function () {
+    comAsignacionSucia = true;
+    $("#comErrorGuardado").hide().empty();
+    comActualizarResumenAsignacion();
+  });
+
+  $(document).on("click", ".btnCerrarAsignacionComision", function () {
+    if (comAsignacionGuardando) return;
+
+    if (
+      comAsignacionSucia &&
+      !window.confirm("Hay asignaciones sin guardar. ¿Deseas salir y descartarlas?")
+    ) {
+      return;
+    }
+
+    comPermitirCerrarAsignacion = true;
+    $("#modalAsignacionComision").modal("hide");
+  });
+
+  $("#modalAsignacionComision").on("hide.bs.modal", function (evento) {
+    if (!comPermitirCerrarAsignacion && (comAsignacionSucia || comAsignacionGuardando)) {
+      evento.preventDefault();
+    }
+  }).on("hidden.bs.modal", function () {
+    comAsignacionActual = null;
+    comAsignacionSucia = false;
+    comAsignacionGuardando = false;
+    comPermitirCerrarAsignacion = false;
+  });
+
+  $(window).on("beforeunload", function () {
+    if (comAsignacionSucia && !comAsignacionGuardando) {
+      return "Hay asignaciones de comisión sin guardar.";
+    }
+  });
 
   $("#comTogglePartidasCero").on("click", function () {
     var lista = $("#comListaPartidasCero");
@@ -1676,7 +1743,7 @@ $(document).ready(function () {
 
   $("#btnGuardarAsignacionComision").on("click", function () {
 
-    if (!comAsignacionActual || !comAsignacionActual.editable) return;
+    if (!comAsignacionActual || !comAsignacionActual.editable || comAsignacionGuardando) return;
 
     var asignaciones = {};
     var incompletas = 0;
@@ -1692,6 +1759,8 @@ $(document).ready(function () {
     }
 
     var boton = $(this);
+    comAsignacionGuardando = true;
+    $("#comErrorGuardado").hide().empty();
     boton.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
 
     $.ajax({
@@ -1706,11 +1775,18 @@ $(document).ready(function () {
     }).done(function (respuesta) {
       if (!respuesta || !respuesta.ok) {
         var mensaje = respuesta && respuesta.mensaje ? respuesta.mensaje : "No fue posible guardar la asignación.";
+        comAsignacionGuardando = false;
+        $("#comErrorGuardado").html('<i class="fas fa-exclamation-triangle"></i> ' + comEscapar(mensaje)).show();
         if (window.swal) swal({ type: "error", title: "Asignación no guardada", text: mensaje });
-        boton.prop("disabled", false).html('<i class="fas fa-save"></i> Guardar asignación');
+        boton.html('<i class="fas fa-save"></i> Guardar y cerrar');
+        comActualizarResumenAsignacion();
         return;
       }
 
+      comAsignacionSucia = false;
+      comAsignacionGuardando = false;
+      comPermitirCerrarAsignacion = true;
+      $("#modalAsignacionComision").modal("hide");
       if (window.swal) {
         swal({ type: "success", title: "Asignación guardada", text: respuesta.mensaje, showConfirmButton: false, timer: 900 });
       }
@@ -1718,8 +1794,11 @@ $(document).ready(function () {
     }).fail(function (xhr) {
       var mensaje = "No fue posible guardar la asignación.";
       if (xhr.responseJSON && xhr.responseJSON.mensaje) mensaje = xhr.responseJSON.mensaje;
+      comAsignacionGuardando = false;
+      $("#comErrorGuardado").html('<i class="fas fa-exclamation-triangle"></i> ' + comEscapar(mensaje)).show();
       if (window.swal) swal({ type: "error", title: "Asignación no guardada", text: mensaje });
-      boton.prop("disabled", false).html('<i class="fas fa-save"></i> Guardar asignación');
+      boton.html('<i class="fas fa-save"></i> Guardar y cerrar');
+      comActualizarResumenAsignacion();
     });
   });
 

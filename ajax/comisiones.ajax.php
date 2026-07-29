@@ -40,6 +40,7 @@ if ($idOrden <= 0) {
 try {
 	$orden = ModeloOrdenes::mdlMostrarOrdenComisionPorId("ordenes", $idOrden);
 } catch (Throwable $e) {
+	error_log("[comisiones] Error consultando orden ".$idOrden.": ".$e->getMessage());
 	_comAjaxResponder(false, "No fue posible consultar la orden.", array(), 500);
 }
 
@@ -115,6 +116,7 @@ if ($json === false) {
 try {
 	$resultado = ModeloOrdenes::mdlGuardarAsignacionComision("ordenes", $idOrden, $json);
 } catch (Throwable $e) {
+	error_log("[comisiones] Error guardando asignación de orden ".$idOrden.": ".$e->getMessage());
 	$resultado = "error";
 }
 
@@ -129,6 +131,29 @@ if ($resultado === "schema_error") {
 
 if ($resultado !== "ok") {
 	_comAjaxResponder(false, "No fue posible guardar la asignación.", array(), 500);
+}
+
+// Confirmar que la base de datos devolvió exactamente una asignación vigente.
+// Así la interfaz nunca muestra éxito si el UPDATE no quedó persistido.
+try {
+	$ordenVerificada = ModeloOrdenes::mdlMostrarOrdenComisionPorId("ordenes", $idOrden);
+	if (!is_array($ordenVerificada) || !_comAsignacionResuelta($ordenVerificada)) {
+		error_log("[comisiones] La asignación de la orden ".$idOrden." no pudo verificarse después del UPDATE.");
+		_comAjaxResponder(
+			false,
+			"La asignación se envió, pero no quedó confirmada en la base de datos. Inténtalo nuevamente.",
+			array("codigo" => "persistencia_no_confirmada"),
+			500
+		);
+	}
+} catch (Throwable $e) {
+	error_log("[comisiones] Error verificando asignación de orden ".$idOrden.": ".$e->getMessage());
+	_comAjaxResponder(
+		false,
+		"No fue posible confirmar el guardado en la base de datos.",
+		array("codigo" => "verificacion_error"),
+		500
+	);
 }
 
 _comAjaxResponder(
