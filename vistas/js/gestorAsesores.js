@@ -54,12 +54,20 @@ function asegurarEmpresaAsesor($select, idEmpresa) {
   $select.val(String(idEmpresa));
 }
 
-$(".tablaAsesores").on("click", ".btnEditarDatosAsesor", function () {
+$(document).on("click", ".btnEditarDatosAsesor", function (evento) {
+  evento.preventDefault();
+
   var $boton = $(this);
   var contenidoOriginal = $boton.html();
+  var idAsesor = $boton.attr("data-id-asesor") || $boton.attr("idAsesor");
   var datos = new FormData();
 
-  datos.append("idAsesor", $boton.attr("idAsesor"));
+  if (!idAsesor) {
+    mostrarErrorAsesor("No se pudo editar el asesor", "El registro no tiene un identificador válido.");
+    return;
+  }
+
+  datos.append("idAsesor", idAsesor);
   $boton.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i>');
 
   $.ajax({
@@ -73,7 +81,6 @@ $(".tablaAsesores").on("click", ".btnEditarDatosAsesor", function () {
   })
     .done(function (respuesta) {
       if (!respuesta || respuesta.error) {
-        $("#modalAgregarAsesorEditado").modal("hide");
         mostrarErrorAsesor("No se pudo cargar el asesor", respuesta && respuesta.error ? respuesta.error : "El registro ya no está disponible.");
         return;
       }
@@ -89,9 +96,10 @@ $(".tablaAsesores").on("click", ".btnEditarDatosAsesor", function () {
       asegurarEmpresaAsesor($("#editarEmpresaAsesor").filter("select"), respuesta.id_empresa);
       $("#editarEmpresaAsesor").filter("input").val(respuesta.id_empresa || "");
       $("#editarEmpresaAsesorVista").val(String(respuesta.id_empresa || ""));
+
+      $("#modalAgregarAsesorEditado").modal("show");
     })
     .fail(function (xhr) {
-      $("#modalAgregarAsesorEditado").modal("hide");
       var mensaje = xhr.status === 403
         ? "No tienes permisos para editar este asesor."
         : "Verifica tu conexión e inténtalo nuevamente.";
