@@ -560,9 +560,7 @@ $_com_histPromedio = $_com_histActivos > 0
    ══════════════════════════════════════ */
 if (!function_exists('_comBotonAsignacion')) {
 
-    function _comBotonAsignacion($f) {
-
-        global $_com_puedeResolver;
+    function _comBotonAsignacion($f, $puedeResolver) {
 
         if (empty($f["doble"])) return "";
 
@@ -583,7 +581,7 @@ if (!function_exists('_comBotonAsignacion')) {
             "asignaciones" => !empty($f["asignacion_resuelta"])
                 ? $f["distribucion"]["asignaciones"] : array(),
             "resuelta" => !empty($f["asignacion_resuelta"]),
-            "editable" => !empty($_com_puedeResolver)
+            "editable" => !empty($puedeResolver)
         );
 
         $json = htmlspecialchars(
@@ -653,7 +651,7 @@ if (!function_exists('_comFilaPersonal')) {
     }
 
     // Tabla global para administrador / secretaria
-    function _comFilaAdmin($res) {
+    function _comFilaAdmin($res, $puedeResolver) {
 
         foreach ($res["filas"] as $key => $f) {
 
@@ -685,7 +683,7 @@ if (!function_exists('_comFilaPersonal')) {
             }
 
             if ($f["doble"]) {
-                $celCom .= '<div style="margin-top:6px">'._comBotonAsignacion($f).'</div>';
+                $celCom .= '<div style="margin-top:6px">'._comBotonAsignacion($f, $puedeResolver).'</div>';
             } elseif ($f["revision"]) {
                 $celCom .= '<div style="margin-top:4px"><span class="com-chip com-chip-rev"><i class="fas fa-exclamation-triangle"></i> Revisar departamento</span></div>';
             }
@@ -1172,7 +1170,7 @@ if (!function_exists('_comFilaPersonal')) {
             </tr>
           </thead>
           <tbody>
-            <?php _comFilaAdmin($res); ?>
+            <?php _comFilaAdmin($res, $_com_puedeResolver); ?>
           </tbody>
           <tfoot>
             <tr>
@@ -1453,7 +1451,7 @@ if (!function_exists('_comFilaPersonal')) {
         <div id="subtituloModalAsignacionComision" style="font-size:12px;opacity:.86;margin-top:4px"></div>
       </div>
       <div class="modal-body" style="padding:20px 22px">
-        <div class="com-modal-ayuda">
+        <div class="com-modal-ayuda" id="comAyudaAsignacion">
           <i class="fas fa-info-circle"></i>
           Elige quién realizó cada partida con monto mayor a $0. Al terminar, pulsa <b>Guardar y cerrar</b>; cerrar o cancelar no guarda los cambios. Las partidas sin monto quedan solo como referencia.
         </div>
@@ -1578,7 +1576,7 @@ function comAbrirModalAsignacion(datos) {
     $.each(datos.tecnicos || [], function (iTec, tecnico) {
       var seleccionada = String((datos.asignaciones || {})[partida.key] || "") === String(tecnico.id);
       opciones += '<label class="com-tecnico-opcion">' +
-        '<input type="radio" name="comPartida' + indice + '" data-partida="' + comEscapar(partida.key) + '" value="' + Number(tecnico.id) + '"' + (seleccionada ? " checked" : "") + '>' +
+        '<input type="radio" name="comPartida' + indice + '" data-partida="' + comEscapar(partida.key) + '" value="' + Number(tecnico.id) + '"' + (seleccionada ? " checked" : "") + (datos.editable ? "" : " disabled") + '>' +
         '<span>' + comEscapar(tecnico.nombre) + '</span>' +
       '</label>';
     });
@@ -1602,6 +1600,11 @@ function comAbrirModalAsignacion(datos) {
   $("#comTogglePartidasCero").html('<i class="fas fa-eye"></i> Ver partidas en $0 (<span id="comCantidadPartidasCero">' + cantidadCeros + '</span>)');
   $("#btnGuardarAsignacionComision").toggle(!!datos.editable);
   $("#modalAsignacionComision .modal-footer .btn-default").text(datos.editable ? "Cancelar" : "Cerrar");
+  $("#comAyudaAsignacion").html(
+    datos.editable
+      ? '<i class="fas fa-info-circle"></i> Elige quién realizó cada partida con monto mayor a $0. Al terminar, pulsa <b>Guardar y cerrar</b>; cerrar o cancelar no guarda los cambios. Las partidas sin monto quedan solo como referencia.'
+      : '<i class="fas fa-eye"></i> Esta asignación se muestra en modo de solo lectura.'
+  );
   $("#btnGuardarAsignacionComision").html('<i class="fas fa-save"></i> Guardar y cerrar');
   $("#comErrorGuardado").hide().empty();
 
@@ -1698,6 +1701,7 @@ $(document).ready(function () {
   });
 
   $(document).on("change", "#comListaPartidasPositivas input[type=radio]", function () {
+    if (!comAsignacionActual || !comAsignacionActual.editable) return;
     comAsignacionSucia = true;
     $("#comErrorGuardado").hide().empty();
     comActualizarResumenAsignacion();
