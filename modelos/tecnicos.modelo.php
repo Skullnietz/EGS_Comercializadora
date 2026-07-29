@@ -34,11 +34,13 @@ class ModeloTecnicos{
 	/*=================================
 	MOSTRAR TECNICOS DE CADA EMPRESA
 	=================================*/
-	static public function mdlMostrarTecnicosDeEmpresa($tabla, $item, $valor){
+	static public function mdlMostrarTecnicosDeEmpresa($tabla, $item, $valor, $soloActivos = true){
 		
 		if($item != null){
 
-			$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE $item = :$item AND estado = 'Activo'");
+			$filtroEstado = $soloActivos ? " AND estado = 'Activo'" : "";
+
+			$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE $item = :$item$filtroEstado ORDER BY id DESC");
 
 			$stmt -> bindParam(":".$item, $valor, PDO::PARAM_STR);
 
@@ -69,8 +71,8 @@ class ModeloTecnicos{
 
 		$stmt->bindParam(":nombre", $datos["nombre"], PDO::PARAM_STR);
 		$stmt->bindParam(":correo", $datos["correo"], PDO::PARAM_STR);
-		$stmt->bindParam(":telefono", $datos["telefono"], PDO::PARAM_INT);
-		$stmt->bindParam(":telefonoDos", $datos["telefonoDos"], PDO::PARAM_INT);
+		$stmt->bindParam(":telefono", $datos["telefono"], PDO::PARAM_STR);
+		$stmt->bindParam(":telefonoDos", $datos["telefonoDos"], PDO::PARAM_STR);
 		$stmt->bindParam(":HoraDeComida", $datos["HoraDeComida"], PDO::PARAM_STR);
 		$stmt->bindParam(":departamento", $datos["areratecnico"], PDO::PARAM_STR);
 		$stmt->bindParam(":estado", $datos["estado"], PDO::PARAM_STR);
@@ -95,13 +97,29 @@ class ModeloTecnicos{
 	=================================*/
 	public function mdlEditarTecnico($tabla, $datos){
 		
-		$stmt = Conexion::conectar()->prepare("UPDATE $tabla SET nombre = :nombre, correo = :correo, telefono = :telefono, telefonoDos = :telefonoDos, HoraDeComida = :HoraDeComida, estado = :estado WHERE id = :id");
+		$departamento = isset($datos["departamento"]) ? $datos["departamento"] : null;
+		$idEmpresa = isset($datos["id_empresa"]) && intval($datos["id_empresa"]) > 0
+			? intval($datos["id_empresa"])
+			: null;
+
+		$stmt = Conexion::conectar()->prepare("UPDATE $tabla
+			SET nombre = :nombre,
+				correo = :correo,
+				telefono = :telefono,
+				telefonoDos = :telefonoDos,
+				HoraDeComida = :HoraDeComida,
+				departamento = COALESCE(:departamento, departamento),
+				id_empresa = COALESCE(:id_empresa, id_empresa),
+				estado = :estado
+			WHERE id = :id");
 
 		$stmt -> bindParam(":nombre", $datos["nombre"], PDO::PARAM_STR);
 		$stmt -> bindParam(":correo", $datos["correo"], PDO::PARAM_STR);
 		$stmt -> bindParam(":telefono", $datos["telefono"], PDO::PARAM_STR);
 		$stmt -> bindParam(":telefonoDos", $datos["telefonoDos"], PDO::PARAM_STR);
 		$stmt -> bindParam(":HoraDeComida", $datos["HoraDeComidaEditada"], PDO::PARAM_STR);
+		$stmt -> bindValue(":departamento", $departamento, $departamento === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+		$stmt -> bindValue(":id_empresa", $idEmpresa, $idEmpresa === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
 		$stmt -> bindParam(":estado", $datos["estado"], PDO::PARAM_STR);
 		$stmt -> bindParam(":id", $datos["id"], PDO::PARAM_INT);
 

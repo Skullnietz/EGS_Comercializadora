@@ -1,114 +1,168 @@
-$(".tablaTecnicos").on("click", ".btnEditarDatosTecnico", function(){
+(function ($) {
+  "use strict";
 
-	//console.log("Editar");
-	var idTecnico = $(this).attr("idTecnico");
-	
-	var datos = new FormData();
-	datos.append("idTecnico", idTecnico);
-	//console.log(idUsuario);
-	
-	$.ajax({
+  if (
+    $.fn.DataTable &&
+    $(".tablaTecnicos").length &&
+    !$.fn.DataTable.isDataTable(".tablaTecnicos")
+  ) {
+    $(".tablaTecnicos").DataTable({
+      responsive: true,
+      pageLength: 25,
+      order: [[7, "desc"]],
+      columnDefs: [
+        { orderable: false, targets: [8] }
+      ],
+      language: {
+        sProcessing: "Procesando...",
+        sLengthMenu: "Mostrar _MENU_ registros",
+        sZeroRecords: "No se encontraron técnicos",
+        sEmptyTable: "Aún no hay técnicos registrados",
+        sInfo: "Mostrando _START_ a _END_ de _TOTAL_ técnicos",
+        sInfoEmpty: "Mostrando 0 técnicos",
+        sInfoFiltered: "(filtrado de _MAX_ registros)",
+        sSearch: "Buscar:",
+        oPaginate: {
+          sFirst: "Primero",
+          sLast: "Último",
+          sNext: "Siguiente",
+          sPrevious: "Anterior"
+        }
+      }
+    });
+  }
 
+  $(".tablaTecnicos").on("click", ".btnEditarDatosTecnico", function () {
+    var idTecnico = $(this).attr("idTecnico");
+    var $modal = $("#modalAgregarTecnicoEditado");
+    var $botonGuardar = $modal.find('button[type="submit"]');
+    var datos = new FormData();
 
-		url:"ajax/Tecnicos.ajax.php",
-		method: "POST",
-		data: datos,
-		cache: false,
-		contentType: false,
-		processData: false,
-		dataType: "json",
-		success: function(respuesta){ 
+    datos.append("idTecnico", idTecnico);
+    $botonGuardar.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i> Cargando...');
 
-		 $("#idTecnico").val(respuesta["id"]);
-		 $("#editarNombreTecnico").val(respuesta["nombre"]);
-      	 $("#editarEmailTecnico").val(respuesta["correo"]);
-      	 $("#editarNumeroUnoTecnico").val(respuesta["telefono"]);
-      	 $("#editarTelefonoDosTecnico").val(respuesta["telefonoDos"]);
-      	 $("#HoraDeComidaEditada").val(respuesta["HoraDeComida"]);
-				
-        $(".estado").val(respuesta["estado"]);
-        $(".estadoDelTecnico").html(respuesta["estado"]);
-    
-				console.log("Datos usuario:", respuesta);
+    $.ajax({
+      url: "ajax/Tecnicos.ajax.php",
+      method: "POST",
+      data: datos,
+      cache: false,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function (respuesta) {
+        if (!respuesta || respuesta.error) {
+          mostrarErrorTecnico(respuesta && respuesta.error ? respuesta.error : "No fue posible cargar el técnico.");
+          $modal.modal("hide");
+          return;
+        }
 
-		}
+        $("#idTecnico").val(respuesta.id);
+        $("#editarNombreTecnico").val(respuesta.nombre || "");
+        $("#editarEmailTecnico").val(respuesta.correo || "");
+        $("#editarNumeroUnoTecnico").val(respuesta.telefono || "");
+        $("#editarTelefonoDosTecnico").val(respuesta.telefonoDos || "");
+        $("#HoraDeComidaEditada").val(respuesta.HoraDeComida || "");
+        $("#editarEstadoTecnico").val(respuesta.estado || "Activo");
 
-	})
+        asignarOpcionDisponible(
+          $("#editarAreaTecnico"),
+          respuesta.departamento || "",
+          respuesta.departamento || "Departamento actual"
+        );
 
+        var idEmpresa = respuesta.id_empresa ? String(respuesta.id_empresa) : "";
+        var $empresaEditable = $("#editarEmpresaTecnico");
+        var $empresaVisible = $("#editarEmpresaTecnicoVista");
 
-})
+        if ($empresaEditable.is("select")) {
+          asignarOpcionDisponible(
+            $empresaEditable,
+            idEmpresa,
+            idEmpresa ? "Empresa #" + idEmpresa : "Empresa actual"
+          );
+        } else {
+          $empresaEditable.val(idEmpresa);
+        }
 
-/*=============================================
-ELIMINAR USUARIO
-=============================================*/
-$(".tablaTecnicos").on("click", ".btnEliminarTecnico", function(){
+        if ($empresaVisible.length) {
+          $empresaVisible.val(idEmpresa);
+        }
+      },
+      error: function (xhr) {
+        var mensaje = "No fue posible cargar los datos del técnico.";
 
-  var idtecnico = $(this).attr("idtecnico");
+        if (xhr.responseJSON && xhr.responseJSON.error) {
+          mensaje = xhr.responseJSON.error;
+        }
 
+        $modal.modal("hide");
+        mostrarErrorTecnico(mensaje);
+      },
+      complete: function () {
+        $botonGuardar
+          .prop("disabled", false)
+          .html('<i class="fas fa-save"></i> Guardar cambios');
+      }
+    });
+  });
 
-  swal({
-    title: '¿Está seguro de borrar el Técnico?',
-    text: "¡Si no lo está puede cancelar la accíón!",
-    type: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      cancelButtonText: 'Cancelar',
-      confirmButtonText: 'Si, borrar Técnico!'
-  }).then(function(result){
+  $(".tablaTecnicos").on("click", ".btnEliminarTecnico", function () {
+    var idTecnico = $(this).attr("idTecnico");
+    var nombreTecnico = $(this).attr("nombreTecnico") || "este técnico";
 
-    if(result.value){
+    swal({
+      title: "¿Eliminar a " + nombreTecnico + "?",
+      text: "El registro se eliminará del catálogo de técnicos.",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#be123c",
+      cancelButtonColor: "#64748b",
+      cancelButtonText: "Cancelar",
+      confirmButtonText: "Sí, eliminar"
+    }).then(function (result) {
+      if (result.value) {
+        window.location = "index.php?ruta=tecnicos&idtecnico=" + encodeURIComponent(idTecnico);
+      }
+    });
+  });
 
-      window.location = "index.php?ruta=tecnicos&idtecnico="+idtecnico;
+  $("#modalAgregarTecnicoEditado").on("hidden.bs.modal", function () {
+    var formulario = $(this).find("form").get(0);
 
+    if (formulario) {
+      formulario.reset();
     }
 
-  })
+    $(this).find('option[data-temporal="1"]').remove();
+    $("#idTecnico").val("");
+  });
 
-})
-/*=============================================
-ACTIVAR TECNICO
-=============================================*/
+  function asignarOpcionDisponible($select, valor, etiqueta) {
+    if (!$select.length) {
+      return;
+    }
 
-$(".tablaTecnicos tbody").on("click", ".btnActivarTecnico", function(){
+    valor = valor === null || typeof valor === "undefined" ? "" : String(valor);
 
-	var idTecnico = $(this).attr("idTecnico");
-	var estadoPerfilTecnico = $(this).attr("estadoPerfilTecnico");
+    if (valor && !$select.find("option").filter(function () {
+      return String($(this).val()) === valor;
+    }).length) {
+      $("<option>", {
+        value: valor,
+        text: etiqueta,
+        "data-temporal": "1"
+      }).appendTo($select);
+    }
 
-	var datos = new FormData();
- 	datos.append("activarId", idTecnico);
-  	datos.append("activarTecnico", estadoPerfilTecnico);
+    $select.val(valor);
+  }
 
-  	$.ajax({
-
-  		 url:"ajax/tecnico.ajax.php",
-  		 method: "POST",
-	  	data: datos,
-	  	cache: false,
-      	contentType: false,
-      	processData: false,
-      	success: function(respuesta){ 
-      	    
-      	    console.log("respuesta", respuesta);
-
-      	} 	 
-
-  	});
-
-  	if(estadoPerfilTecnico == 1){
-
-  		$(this).removeClass('btn-success');
-  		$(this).addClass('btn-danger');
-  		$(this).html('Desactivado');
-  		$(this).attr('estadoPerfilTecnico',0);
-  	
-  	}else{
-
-  		$(this).addClass('btn-success');
-  		$(this).removeClass('btn-danger');
-  		$(this).html('Activado');
-  		$(this).attr('estadoPerfilTecnico',1);
-
-  	}
-
-})
+  function mostrarErrorTecnico(mensaje) {
+    swal({
+      type: "error",
+      title: mensaje,
+      showConfirmButton: true,
+      confirmButtonText: "Cerrar"
+    });
+  }
+})(jQuery);
