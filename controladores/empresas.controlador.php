@@ -1,220 +1,142 @@
 <?php
+
 class ControladorEmpresas{
-	
 
-	/*=============================================
-  	MOSTRAR EMPRESAS
-  	=============================================*/	
+	private static function telefonoValido($telefono, $obligatorio = true){
+		$telefono = trim((string)$telefono);
 
-  	function ctrMostrarEmpresas($item, $valor){
-  		
-  		$tabla = "empresa";
+		if ($telefono === "") {
+			return !$obligatorio;
+		}
 
-  		$respuesta = ModeloEmpresas::mdlMostrarEmpresas($tabla, $item, $valor);
+		return preg_match('/^[0-9+() .-]{7,25}$/', $telefono);
+	}
 
-  		return $respuesta;
-  	}
+	private static function mostrarAlerta($tipo, $titulo){
+		echo '<script>
+			swal({
+				type: ' . json_encode($tipo) . ',
+				title: ' . json_encode($titulo) . ',
+				showConfirmButton: true,
+				confirmButtonText: "Cerrar"
+			}).then(function(){ window.location = "index.php?ruta=empresas"; });
+		</script>';
+	}
 
-  	/*=============================================
-  	MOSTRAR DATOS DE EMPRESA PARA EDITAR
-  	=============================================*/	
+	/* Mostrar empresas */
+	public static function ctrMostrarEmpresas($item, $valor){
+		return ModeloEmpresas::mdlMostrarEmpresas("empresa", $item, $valor);
+	}
 
-  	static public function ctrMostrarEmpresasParaEditar($item, $valor){
-  		
-  		$tabla = "empresa";
+	/* Mostrar datos de empresa para editar */
+	public static function ctrMostrarEmpresasParaEditar($item, $valor){
+		return ModeloEmpresas::mdlMostrarEmpresasParaEditar("empresa", $item, $valor);
+	}
 
-  		$respuesta = ModeloEmpresas::mdlMostrarEmpresasParaEditar($tabla, $item, $valor);
+	/* Mostrar datos de empresa para reportes */
+	public static function ctrMostrarEmpresasParaReportes($item, $valor){
+		return ModeloEmpresas::mdlMostrarEmpresasParaReportes("empresa", $item, $valor);
+	}
 
-  		return $respuesta;
-  	}
+	/* Crear empresa */
+	public function ctrCrearEmpresa(){
+		if (!isset($_POST["empresa"])) {
+			return;
+		}
 
-  	/*=============================================
-  	MOSTRAR DATOS DE EMPRESA PARA REPORTE
-  	=============================================*/	
+		$nombre = trim($_POST["empresa"]);
+		$correo = trim($_POST["correo"]);
+		$telefonoUno = trim($_POST["telefonoDeEmpresa"]);
+		$telefonoDos = isset($_POST["telefonoDosDeEmpresa"]) ? trim($_POST["telefonoDosDeEmpresa"]) : "";
+		$direccion = trim($_POST["direccion"]);
+		$horario = trim($_POST["Horario"]);
 
-  	static public function ctrMostrarEmpresasParaReportes($item3, $valor3){
-  		
-  		$tabla = "empresa";
+		if ($nombre === ""
+			|| !filter_var($correo, FILTER_VALIDATE_EMAIL)
+			|| !self::telefonoValido($telefonoUno)
+			|| !self::telefonoValido($telefonoDos, false)
+			|| $direccion === ""
+			|| $horario === "") {
+			self::mostrarAlerta("error", "Revisa los datos de la empresa antes de guardar.");
+			return;
+		}
 
-  		$respuesta = ModeloEmpresas::mdlMostrarEmpresasParaReportes($tabla, $item3, $valor3);
+		$datos = array(
+			"empresa" => $nombre,
+			"correo" => $correo,
+			"telefonoDeEmpresa" => $telefonoUno,
+			"telefonoDosDeEmpresa" => $telefonoDos,
+			"direccion" => $direccion,
+			"Horario" => $horario,
+			"Facebook" => isset($_POST["Facebook"]) ? trim($_POST["Facebook"]) : "",
+			"Sitio" => isset($_POST["Sitio"]) ? trim($_POST["Sitio"]) : ""
+		);
 
-  		return $respuesta;
-  	}
+		$respuesta = ModeloEmpresas::mdlcrearEmpresas("empresa", $datos);
 
-
-	/*=============================================
-  	AGREGAR EMPRESA
-  	=============================================*/	
-	function ctrCrearEmpresa(){
-		
-		if (isset($_POST["empresa"])){
-			
-			$tabla = "empresa";
-
-			$datos = array("empresa" =>$_POST["empresa"],
-					  	   "correo" =>$_POST["correo"],
-					       "telefonoDeEmpresa" => $_POST["telefonoDeEmpresa"],
-					       "telefonoDosDeEmpresa" => $_POST["telefonoDosDeEmpresa"],
-					       "direccion" => $_POST["direccion"],
-					       "Horario" => $_POST["Horario"], 
-					       "Facebook" => $_POST["Facebook"],
-					       "Sitio" => $_POST["Sitio"]
-					);
-
-			$respuesta = ModeloEmpresas::mdlcrearEmpresas($tabla,$datos);
-
-			if ($respuesta == "ok") {
-				echo '<script>
-
-					swal({
-
-						type: "success",
-						title: "¡La empresa ha sido guardado correctamente!",
-						showConfirmButton: true,
-						confirmButtonText: "Cerrar"
-
-					}).then(function(result){
-
-						if(result.value){
-						
-							window.location = "index.php?ruta=empresas";
-
-						}
-
-					});
-
-				</script>';
-
-			}else{
-
-				echo '<script>
-
-				swal({
-
-						type: "error",
-						title: "¡La empresa no puede ir vacío o llevar caracteres especiales!",
-						showConfirmButton: true,
-						confirmButtonText: "Cerrar"
-
-					}).then(function(result){
-
-						if(result.value){
-						
-							window.location = "index.php?ruta=empresa";
-
-						}
-
-					});
-
-				</script>';
-
-			}
+		if ($respuesta === "ok") {
+			self::mostrarAlerta("success", "La empresa se guardó correctamente.");
+		} else {
+			self::mostrarAlerta("error", "No fue posible guardar la empresa.");
 		}
 	}
 
-	static public function ctrEditarEmpresa(){
-
-		if(isset($_POST["idEmpresa"])){
-
-
-				$tabla = "empresa";
-
-				$datos = array("id" => $_POST["idEmpresa"],
-							   "empresa" => $_POST["editarNombreEmpresa"],
-							   "correo" => $_POST["editarCorreoEmpresa"],
-							   "editarNumeroUnoDeEmpresa" => $_POST["editarNumeroUnoDeEmpresa"],
-							   "telefonoDosDeEmpresaEditado" => $_POST["telefonoDosDeEmpresaEditado"],
-							   "direccion" => $_POST["EditarDireccion"],
-							   "HoraEditada" => $_POST["HoraEditada"],
-							   "FacebookEditado" => $_POST["FacebookEditado"],
-							   "SitioEditado" => $_POST["SitioEditado"]
-							   );
-
-				$respuesta = ModeloEmpresas::mdlEditarEmpresa($tabla,$datos);
-
-				if($respuesta == "ok"){
-
-					echo'<script>
-
-					swal({
-						  type: "success",
-						  title: "El asesor ha sido editado correctamente",
-						  showConfirmButton: true,
-						  confirmButtonText: "Cerrar"
-						  }).then(function(result) {
-									if (result.value) {
-
-									window.location = "index.php?ruta=empresas";
-
-									}
-								})
-
-					</script>';
-
-
-
-			}else{
-
-				echo'<script>
-
-					swal({
-						  type: "error",
-						  title: "¡El nombre no puede ir vacío o llevar caracteres especiales!",
-						  showConfirmButton: true,
-						  confirmButtonText: "Cerrar"
-						  }).then(function(result) {
-							if (result.value) {
-
-							window.location = "index.php?ruta=empresas";
-
-							}
-						})
-
-			  	</script>';
-
-			}
-
+	/* Editar empresa */
+	public static function ctrEditarEmpresa(){
+		if (!isset($_POST["idEmpresa"])) {
+			return;
 		}
 
-	}
+		$nombre = trim($_POST["editarNombreEmpresa"]);
+		$correo = trim($_POST["editarCorreoEmpresa"]);
+		$telefonoUno = trim($_POST["editarNumeroUnoDeEmpresa"]);
+		$telefonoDos = isset($_POST["telefonoDosDeEmpresaEditado"]) ? trim($_POST["telefonoDosDeEmpresaEditado"]) : "";
+		$direccion = trim($_POST["EditarDireccion"]);
+		$horario = trim($_POST["HoraEditada"]);
 
-	/*=============================================
-	ELIMINAR EMPRESA
-	=============================================*/
-
-	static public function ctrEliminarEmpresa(){
-
-		if(isset($_GET["idEmpresa"])){
-
-			$tabla ="empresa";
-			$datos = $_GET["idEmpresa"];
-
-			$respuesta = ModeloEmpresas::mdlEliminarEmpresa($tabla, $datos);
-
-			if($respuesta == "ok"){
-
-				echo'<script>
-
-				swal({
-					  type: "success",
-					  title: "El perfil ha sido borrado correctamente",
-					  showConfirmButton: true,
-					  confirmButtonText: "Cerrar",
-					  closeOnConfirm: false
-					  }).then(function(result) {
-								if (result.value) {
-
-								window.location = "index.php?ruta=empresas";
-
-								}
-							})
-
-				</script>';
-
-			}		
-
+		if ($nombre === ""
+			|| !filter_var($correo, FILTER_VALIDATE_EMAIL)
+			|| !self::telefonoValido($telefonoUno)
+			|| !self::telefonoValido($telefonoDos, false)
+			|| $direccion === ""
+			|| $horario === "") {
+			self::mostrarAlerta("error", "Revisa los datos de la empresa antes de guardar.");
+			return;
 		}
 
+		$datos = array(
+			"id" => intval($_POST["idEmpresa"]),
+			"empresa" => $nombre,
+			"correo" => $correo,
+			"editarNumeroUnoDeEmpresa" => $telefonoUno,
+			"telefonoDosDeEmpresaEditado" => $telefonoDos,
+			"direccion" => $direccion,
+			"HoraEditada" => $horario,
+			"FacebookEditado" => isset($_POST["FacebookEditado"]) ? trim($_POST["FacebookEditado"]) : "",
+			"SitioEditado" => isset($_POST["SitioEditado"]) ? trim($_POST["SitioEditado"]) : ""
+		);
+
+		$respuesta = ModeloEmpresas::mdlEditarEmpresa("empresa", $datos);
+
+		if ($respuesta === "ok") {
+			self::mostrarAlerta("success", "La empresa se actualizó correctamente.");
+		} else {
+			self::mostrarAlerta("error", "No fue posible actualizar la empresa.");
+		}
 	}
 
+	/* Eliminar empresa */
+	public static function ctrEliminarEmpresa(){
+		if (!isset($_GET["idEmpresa"])) {
+			return;
+		}
+
+		$respuesta = ModeloEmpresas::mdlEliminarEmpresa("empresa", intval($_GET["idEmpresa"]));
+
+		if ($respuesta === "ok") {
+			self::mostrarAlerta("success", "La empresa se eliminó correctamente.");
+		} else {
+			self::mostrarAlerta("error", "No fue posible eliminar la empresa; verifica que no tenga registros asignados.");
+		}
+	}
 }

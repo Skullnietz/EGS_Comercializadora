@@ -1,341 +1,279 @@
-/*=============================================
-ACTIVAR PERFIL
-=============================================*/
-$(".tablaPerfiles").on("click", ".btnActivar", function(){
+$(function () {
+  var $tablaPerfiles = $(".tablaPerfiles");
 
-  var idPerfil = $(this).attr("idPerfil");
-  var estadoPerfil = $(this).attr("estadoPerfil");
+  if ($tablaPerfiles.length && $.fn.DataTable && !$.fn.DataTable.isDataTable($tablaPerfiles[0])) {
+    $tablaPerfiles.DataTable({
+      responsive: true,
+      pageLength: 25,
+      order: [[1, "asc"]],
+      columnDefs: [
+        { targets: [0, 7], orderable: false, searchable: false }
+      ],
+      language: {
+        decimal: "",
+        emptyTable: "No hay perfiles registrados",
+        info: "Mostrando _START_ a _END_ de _TOTAL_ perfiles",
+        infoEmpty: "Mostrando 0 perfiles",
+        infoFiltered: "(filtrado de _MAX_ perfiles)",
+        lengthMenu: "Mostrar _MENU_",
+        loadingRecords: "Cargando...",
+        processing: "Procesando...",
+        search: "Buscar:",
+        zeroRecords: "No se encontraron perfiles",
+        paginate: {
+          first: "Primero",
+          last: "Último",
+          next: "Siguiente",
+          previous: "Anterior"
+        }
+      }
+    });
+  }
+});
 
+function mostrarErrorPerfil(titulo, mensaje) {
+  swal({
+    title: titulo,
+    text: mensaje,
+    type: "error",
+    confirmButtonText: "Cerrar"
+  });
+}
+
+function actualizarEstadoVisualPerfil($boton, estadoDestino) {
+  var activo = String(estadoDestino) === "1";
+
+  $boton
+    .toggleClass("is-active", activo)
+    .toggleClass("is-inactive", !activo)
+    .attr("estadoPerfil", activo ? "0" : "1")
+    .html(
+      '<i class="fa ' +
+        (activo ? "fa-check-circle" : "fa-pause-circle") +
+        '"></i><span>' +
+        (activo ? "Activo" : "Inactivo") +
+        "</span>"
+    );
+}
+
+/* Activar o desactivar un perfil */
+$(".tablaPerfiles").on("click", ".btnActivar", function () {
+  var $boton = $(this);
+  var estadoAnterior = $boton.hasClass("is-active") ? "1" : "0";
+  var estadoDestino = String($boton.attr("estadoPerfil"));
   var datos = new FormData();
-  datos.append("activarId", idPerfil);
-    datos.append("activarPerfil", estadoPerfil);
 
-    $.ajax({
+  datos.append("activarId", $boton.attr("idPerfil"));
+  datos.append("activarPerfil", estadoDestino);
+  $boton.prop("disabled", true);
 
-    url:"ajax/administradores.ajax.php",
+  $.ajax({
+    url: "ajax/administradores.ajax.php",
     method: "POST",
     data: datos,
     cache: false,
-      contentType: false,
-      processData: false,
-      success: function(respuesta){
-        //console.log("respuesta", respuesta);
+    contentType: false,
+    processData: false
+  })
+    .done(function (respuesta) {
+      if ($.trim(String(respuesta)) !== "ok") {
+        mostrarErrorPerfil("No se pudo cambiar el estado", "Actualiza la página e inténtalo nuevamente.");
+        actualizarEstadoVisualPerfil($boton, estadoAnterior);
+        return;
       }
 
+      actualizarEstadoVisualPerfil($boton, estadoDestino);
     })
+    .fail(function () {
+      mostrarErrorPerfil("No se pudo cambiar el estado", "Verifica tu conexión e inténtalo nuevamente.");
+      actualizarEstadoVisualPerfil($boton, estadoAnterior);
+    })
+    .always(function () {
+      $boton.prop("disabled", false);
+    });
+});
 
-    if(estadoPerfil == 0){
+/* Previsualización de fotografía */
+$(".nuevaFoto").on("change", function () {
+  var input = this;
+  var imagen = input.files && input.files[0];
 
-      $(this).removeClass('btn-success');
-      $(this).addClass('btn-danger');
-      $(this).html('Desactivado');
-      $(this).attr('estadoPerfil',1);
+  if (!imagen) {
+    return;
+  }
 
-    }else{
+  if (["image/jpeg", "image/png"].indexOf(imagen.type) === -1) {
+    $(input).val("");
+    mostrarErrorPerfil("Error al subir la imagen", "La imagen debe estar en formato JPG o PNG.");
+    return;
+  }
 
-      $(this).addClass('btn-success');
-      $(this).removeClass('btn-danger');
-      $(this).html('Activado');
-      $(this).attr('estadoPerfil',0);
+  if (imagen.size > 2000000) {
+    $(input).val("");
+    mostrarErrorPerfil("Error al subir la imagen", "La imagen no debe pesar más de 2 MB.");
+    return;
+  }
 
-    }
+  var lector = new FileReader();
+  lector.onload = function (evento) {
+    $(input).closest("form").find(".previsualizar").attr("src", evento.target.result);
+  };
+  lector.readAsDataURL(imagen);
+});
 
-})
+function asegurarOpcionEmpresa($select, idEmpresa, nombreEmpresa) {
+  if (!$select.length || !idEmpresa) {
+    return;
+  }
 
-/*=============================================
-SUBIENDO LA FOTO DEL PERFIL
-=============================================*/
-$(".nuevaFoto").change(function(){
+  if (!$select.find('option[value="' + idEmpresa + '"]').length) {
+    $("<option>", {
+      value: idEmpresa,
+      text: nombreEmpresa || "Empresa asignada"
+    }).appendTo($select);
+  }
 
-  var imagen = this.files[0];
-  
-  /*=============================================
-    VALIDAMOS EL FORMATO DE LA IMAGEN SEA JPG O PNG
-    =============================================*/
+  $select.val(String(idEmpresa));
+}
 
-    if(imagen["type"] != "image/jpeg" && imagen["type"] != "image/png"){
-
-      $(".nuevaFoto").val("");
-
-       swal({
-          title: "Error al subir la imagen",
-          text: "¡La imagen debe estar en formato JPG o PNG!",
-          type: "error",
-          confirmButtonText: "¡Cerrar!"
-        });
-
-    }else if(imagen["size"] > 2000000){
-
-      $(".nuevaFoto").val("");
-
-       swal({
-          title: "Error al subir la imagen",
-          text: "¡La imagen no debe pesar más de 2MB!",
-          type: "error",
-          confirmButtonText: "¡Cerrar!"
-        });
-
-    }else{
-
-      var datosImagen = new FileReader;
-      datosImagen.readAsDataURL(imagen);
-
-      $(datosImagen).on("load", function(event){
-
-        var rutaImagen = event.target.result;
-
-        $(".previsualizar").attr("src", rutaImagen);
-
-      })
-
-    }
-})
-
-/*=============================================
-EDITAR PERFIL
-=============================================*/
-$(".tablaPerfiles").on("click", ".btnEditarPerfil", function(){
-
-  var idPerfil = $(this).attr("idPerfil");
-  
+/* Cargar información para edición */
+$(".tablaPerfiles").on("click", ".btnEditarPerfil", function () {
+  var $boton = $(this);
+  var textoOriginal = $boton.html();
   var datos = new FormData();
-  datos.append("idPerfil", idPerfil);
 
-  $.ajax({ 
+  datos.append("idPerfil", $boton.attr("idPerfil"));
+  $boton.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i>');
 
-    url:"ajax/administradores.ajax.php",
+  $.ajax({
+    url: "ajax/administradores.ajax.php",
     method: "POST",
     data: datos,
     cache: false,
     contentType: false,
     processData: false,
-    dataType: "json",
-    success: function(respuesta){ 
-
-      $("#editarNombre").val(respuesta["nombre"]);
-      $("#idPerfil").val(respuesta["id"]);
-      $("#editarEmail").val(respuesta["email"]);
-      $("#editarPerfilOpcion").html(respuesta["perfil"]);
-      $("#editarPerfilOpcion").val(respuesta["perfil"]);
-      $("#editarPerfilSelect").val(respuesta["perfil"]);
-
-      // Auto-fill technician data if available
-      if(respuesta["perfil"] == "tecnico"){
-        $("#editarNumeroUnoTecnico").val(respuesta["telefono_tec"] || "");
-        $("#editarTelefonoDosTecnico").val(respuesta["telefonoDos_tec"] || "");
-        $("#HoraDeComidaEditada").val(respuesta["HoraDeComida_tec"] || "");
-        $("#editarAreratecnico").val(respuesta["areratecnico_tec"] || "");
-      }
-      
-      // Auto-fill advisor data if available
-      if(respuesta["perfil"] == "vendedor"){
-        $("#editarNumeroUnoAsesor").val(respuesta["numeroTelefono_ase"] || "");
-        $("#editarTelefonoDosAsesor").val(respuesta["numerodeCelular_ase"] || "");
-      }
-      
-      // Set department
-      if (respuesta["Departamento"]) {
-        $("#editarDepartamentoOpcion").html(respuesta["Departamento"]);
-        $("#editarDepartamentoOpcion").val(respuesta["Departamento"]);
-        $("#editarDepartamento").val(respuesta["Departamento"]);
-      } else {
-        $("#editarDepartamentoOpcion").html("Seleccionar Departamento");
-        $("#editarDepartamentoOpcion").val("");
-        $("#editarDepartamento").val("");
-      }
-
-      $("#fotoActual").val(respuesta["foto"]);
-      $("#passwordActual").val(respuesta["password"]);
-
-      if(respuesta["foto"] != ""){
-        $(".previsualizar").attr("src", respuesta["foto"]);
-      }
-      
-      // Trigger change to display dynamic divs
-      $("#editarPerfilSelect").trigger("change");
-
-    }
-
+    dataType: "json"
   })
+    .done(function (respuesta) {
+      if (!respuesta || respuesta.error) {
+        $("#modalEditarPerfil").modal("hide");
+        mostrarErrorPerfil("No se pudo cargar el perfil", respuesta && respuesta.error ? respuesta.error : "El perfil ya no está disponible.");
+        return;
+      }
 
-})
+      $("#editarNombre").val(respuesta.nombre || "");
+      $("#idPerfil").val(respuesta.id || "");
+      $("#editarEmail").val(respuesta.email || "");
+      $("#editarPerfilSelect").val(respuesta.perfil || "");
+      $("#editarDepartamento").val(respuesta.Departamento || "");
+      $("#fotoActual").val(respuesta.foto || "");
+      $("#passwordActual").val(respuesta.password || "");
 
-/*=============================================
-MOSTRAR/OCULTAR CAMPOS DINÁMICOS POR ROL Y FILTRAR DEPARTAMENTOS
-=============================================*/
-function filtrarDepartamentos(perfil, selectObj) {
-  var opcionesVendedor = ["Ventas", "Ventas Externas"];
-  var opcionesTecnico = ["Sistemas", "Electronica", "Impresoras", "Desarrollo"];
-  var opcionesAdmin = ["Administracion", "Sistemas", "Desarrollo"];
-  var opcionesSecre = ["Administracion", "Ventas"];
+      asegurarOpcionEmpresa(
+        $("#editarEmpresaPerfil").filter("select"),
+        respuesta.id_empresa,
+        respuesta.nombre_empresa
+      );
+      $("#editarEmpresaPerfil").filter("input").val(respuesta.id_empresa || "");
+      $("#editarEmpresaPerfilVista").val(String(respuesta.id_empresa || ""));
 
-  selectObj.find("option").each(function(){
-    var val = $(this).val();
-    if(val === "") return; // Ignorar la opción por defecto
+      $("#editarNumeroUnoTecnico").val(respuesta.telefono_tec || "");
+      $("#editarTelefonoDosTecnico").val(respuesta.telefonoDos_tec || "");
+      $("#HoraDeComidaEditada").val(respuesta.HoraDeComida_tec || "");
+      $("#editarAreratecnico").val(respuesta.areratecnico_tec || "");
+      $("#editarNumeroUnoAsesor").val(respuesta.numeroTelefono_ase || "");
+      $("#editarTelefonoDosAsesor").val(respuesta.numerodeCelular_ase || "");
 
-    var mostrar = false;
-    if(perfil === "vendedor" && opcionesVendedor.indexOf(val) !== -1) mostrar = true;
-    else if(perfil === "tecnico" && opcionesTecnico.indexOf(val) !== -1) mostrar = true;
-    else if(perfil === "secretaria" && opcionesSecre.indexOf(val) !== -1) mostrar = true;
-    else if((perfil === "administrador" || perfil === "Super-Administrador") && opcionesAdmin.indexOf(val) !== -1) mostrar = true;
-    else if(!perfil) mostrar = true; // Si no hay perfil, mostrar todo
-    
-    if(mostrar){
-      $(this).show().prop('disabled', false);
-    } else {
-      $(this).hide().prop('disabled', true);
-    }
+      var foto = respuesta.foto || "vistas/img/perfiles/default/anonymous.png";
+      $("#modalEditarPerfil .previsualizar").attr("src", foto);
+
+      $("#editarPerfilSelect").trigger("change");
+      $("#editarDepartamento").val(respuesta.Departamento || "");
+    })
+    .fail(function () {
+      $("#modalEditarPerfil").modal("hide");
+      mostrarErrorPerfil("No se pudo cargar el perfil", "Verifica tu conexión e inténtalo nuevamente.");
+    })
+    .always(function () {
+      $boton.prop("disabled", false).html(textoOriginal);
+    });
+});
+
+function filtrarDepartamentos(perfil, $select) {
+  var grupos = {
+    vendedor: ["Ventas", "Ventas Externas"],
+    tecnico: ["Sistemas", "Electronica", "Impresoras", "Desarrollo"],
+    administrador: ["Administracion", "Sistemas", "Desarrollo"],
+    "Super-Administrador": ["Administracion", "Sistemas", "Desarrollo"],
+    secretaria: ["Administracion", "Ventas"]
+  };
+  var permitidos = grupos[perfil] || [];
+  var valorActual = $select.val();
+
+  $select.find("option").each(function () {
+    var valor = $(this).val();
+    var mostrar = !valor || !perfil || valor === valorActual || permitidos.indexOf(valor) !== -1;
+    $(this).prop("disabled", !mostrar).toggle(mostrar);
   });
-  
-  if(selectObj.find("option:selected").prop("disabled")){
-    selectObj.val("");
+
+  if (valorActual && !$select.find('option[value="' + valorActual + '"]').prop("disabled")) {
+    $select.val(valorActual);
+  } else if ($select.find("option:selected").prop("disabled")) {
+    $select.val("");
   }
 }
 
-$("#nuevoPerfil").change(function(){
+$("#nuevoPerfil").on("change", function () {
   var perfil = $(this).val();
-  
-  // Filtrar el departamento
-  var selectDepto = $(this).closest("form").find("select[name='Departamento']");
-  filtrarDepartamentos(perfil, selectDepto);
+  filtrarDepartamentos(perfil, $("#nuevoDepartamento"));
 
-  if(perfil == "tecnico"){
-    $("#divAdicionalTecnico").slideDown();
-    $("#divAdicionalAsesor").slideUp();
-  } else if(perfil == "vendedor"){
-    $("#divAdicionalAsesor").slideDown();
-    $("#divAdicionalTecnico").slideUp();
-  } else {
-    $("#divAdicionalTecnico").slideUp();
-    $("#divAdicionalAsesor").slideUp();
-  }
+  $("#divAdicionalTecnico").stop(true, true).slideToggle(perfil === "tecnico");
+  $("#divAdicionalAsesor").stop(true, true).slideToggle(perfil === "vendedor");
 });
 
-$("#editarPerfilSelect").change(function(){
+$("#editarPerfilSelect").on("change", function () {
   var perfil = $(this).val();
+  filtrarDepartamentos(perfil, $("#editarDepartamento"));
 
-  // Filtrar el departamento
-  var selectDepto = $("#editarDepartamento");
-  filtrarDepartamentos(perfil, selectDepto);
-
-  if(perfil == "tecnico"){
-    $("#divAdicionalTecnicoEdit").slideDown();
-    $("#divAdicionalAsesorEdit").slideUp();
-  } else if(perfil == "vendedor"){
-    $("#divAdicionalAsesorEdit").slideDown();
-    $("#divAdicionalTecnicoEdit").slideUp();
-  } else {
-    $("#divAdicionalTecnicoEdit").slideUp();
-    $("#divAdicionalAsesorEdit").slideUp();
-  }
+  $("#divAdicionalTecnicoEdit").stop(true, true).slideToggle(perfil === "tecnico");
+  $("#divAdicionalAsesorEdit").stop(true, true).slideToggle(perfil === "vendedor");
 });
 
-/*=============================================
-ELIMINAR USUARIO
-=============================================*/
-$(".tablaPerfiles").on("click", ".btnEliminarPerfil", function(){
-
+/* Eliminar perfil */
+$(".tablaPerfiles").on("click", ".btnEliminarPerfil", function () {
   var idPerfil = $(this).attr("idPerfil");
-  var fotoPerfil = $(this).attr("fotoPerfil");
-
+  var fotoPerfil = $(this).attr("fotoPerfil") || "";
+  var nombrePerfil = $(this).attr("nombrePerfil") || "este perfil";
 
   swal({
-    title: '¿Está seguro de borrar el perfil?',
-    text: "¡Si no lo está puede cancelar la accíón!",
-    type: 'warning',
+    title: "¿Eliminar " + nombrePerfil + "?",
+    text: "El perfil y su registro relacionado dejarán de estar disponibles.",
+    type: "warning",
     showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      cancelButtonText: 'Cancelar',
-      confirmButtonText: 'Si, borrar perfil!'
-  }).then(function(result){
-
-    if(result.value){
-
-      window.location = "index.php?ruta=perfiles&idPerfil="+idPerfil+"&fotoPerfil="+fotoPerfil;
-
+    confirmButtonColor: "#dc2626",
+    cancelButtonColor: "#64748b",
+    cancelButtonText: "Cancelar",
+    confirmButtonText: "Sí, eliminar"
+  }).then(function (resultado) {
+    if (resultado.value) {
+      window.location =
+        "index.php?ruta=perfiles&idPerfil=" +
+        encodeURIComponent(idPerfil) +
+        "&fotoPerfil=" +
+        encodeURIComponent(fotoPerfil);
     }
-
-  })
-
-})
-
-/*=============================================
-CERRAR SESION DESPUES DE 20 MINUTOS DE INACTIVIDAD
-=============================================
-$(document).ready(function(){
-incrementarContador()
+  });
 });
 
-var ContadorTiempoEnSesion = 0;
-$(document).ready(function () {
-    //Increment the contador un minuto.
-    var idleInterval = setInterval(incrementarContador, 60000); // 1 minute
+/* Validar confirmación de contraseña solo en los formularios de perfiles */
+$("#modalAgregarPerfil form, #modalEditarPerfil form").on("submit", function (evento) {
+  var $formulario = $(this);
+  var $password = $formulario.find("#nuevoPassword, #editarPassword");
+  var $confirmacion = $formulario.find("#nuevoPasswordConfirmar, #editarPasswordConfirmar");
 
-    //Colocar el contador en cero cuadno exita un evento de mouse o de tecla.
-    $(this).mousemove(function (e) {
-
-        ContadorTiempoEnSesion = 0;
-    });
-    
-    $(this).keypress(function (e) {
-
-        ContadorTiempoEnSesion = 0;
-    });
-
-});
-function incrementarContador(){
-
-    ContadorTiempoEnSesion = ContadorTiempoEnSesion + 1;
-
-    if (ContadorTiempoEnSesion > 19) { // 20 minutos
-
-        window.location="salir";
-    }
-}
-*/
-
-/*=============================================
-VALIDAR CONTRASEÑAS AL CREAR Y EDITAR
-=============================================*/
-$("form").on("submit", function(e){
-  var nuevoPass = $(this).find("#nuevoPassword");
-  var nuevoPassConf = $(this).find("#nuevoPasswordConfirmar");
-
-  if(nuevoPass.length > 0 && nuevoPassConf.length > 0){
-    if(nuevoPass.val() !== nuevoPassConf.val()){
-      e.preventDefault();
-      swal({
-        title: "Error de contraseña",
-        text: "¡Las contraseñas no coinciden!",
-        type: "error",
-        confirmButtonText: "¡Cerrar!"
-      });
-      return false;
-    }
-  }
-
-  var editPass = $(this).find("#editarPassword");
-  var editPassConf = $(this).find("#editarPasswordConfirmar");
-
-  if(editPass.length > 0 && editPassConf.length > 0){
-    if(editPass.val() !== "" && editPass.val() !== editPassConf.val()){
-      e.preventDefault();
-      swal({
-        title: "Error de contraseña",
-        text: "¡Las contraseñas no coinciden!",
-        type: "error",
-        confirmButtonText: "¡Cerrar!"
-      });
-      return false;
-    }
+  if ($password.length && $confirmacion.length && $password.val() !== $confirmacion.val()) {
+    evento.preventDefault();
+    mostrarErrorPerfil("Las contraseñas no coinciden", "Revisa ambos campos antes de guardar.");
+    return false;
   }
 });
-
-/* Efecto hover zona de imagen */
-$(".nuevaFoto").hover(
-  function() { $(this).parent().css("border-color", "var(--crm-accent)"); },
-  function() { $(this).parent().css("border-color", "var(--crm-border)"); }
-);
-
-

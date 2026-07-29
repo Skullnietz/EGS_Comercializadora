@@ -68,11 +68,11 @@ class ModeloEmpresas{
   	=============================================*/
   	static public function mdlMostrarEmpresasParaReportes($tabla, $item3, $valor3){
   		
-  		if($item != null){
+		if($item3 != null){
 
-			$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE $item = :$item");
+			$stmt = Conexion::conectar()->prepare("SELECT * FROM $tabla WHERE $item3 = :$item3");
 
-			$stmt -> bindParam(":".$item, $valor, PDO::PARAM_STR);
+			$stmt -> bindParam(":".$item3, $valor3, PDO::PARAM_STR);
 
 			$stmt -> execute();
 
@@ -97,14 +97,14 @@ class ModeloEmpresas{
 	/*=============================================
   	AGREGAR EMPRESA
   	=============================================*/	
-	function mdlcrearEmpresas($tabla,$datos){
+	static public function mdlcrearEmpresas($tabla,$datos){
 		
 		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(empresa, correo, telefono, telefonoDos, direccion, Horario, Facebook, Sitio) VALUES (:empresa, :correo, :telefono, :telefonoDos, :direccion, :Horario, :Facebook, :Sitio)");
 
 		$stmt->bindParam(":empresa", $datos["empresa"], PDO::PARAM_STR);
 		$stmt->bindParam(":correo", $datos["correo"], PDO::PARAM_STR);
-		$stmt->bindParam(":telefono", $datos["telefonoDeEmpresa"], PDO::PARAM_INT);
-		$stmt->bindParam(":telefonoDos", $datos["telefonoDosDeEmpresa"], PDO::PARAM_INT);
+		$stmt->bindParam(":telefono", $datos["telefonoDeEmpresa"], PDO::PARAM_STR);
+		$stmt->bindParam(":telefonoDos", $datos["telefonoDosDeEmpresa"], PDO::PARAM_STR);
 		$stmt->bindParam(":direccion", $datos["direccion"], PDO::PARAM_STR);
 		$stmt->bindParam(":Horario", $datos["Horario"], PDO::PARAM_STR);
 		$stmt->bindParam(":Facebook", $datos["Facebook"], PDO::PARAM_STR);
@@ -128,7 +128,7 @@ class ModeloEmpresas{
 	EDITAR EMPRESA
 	=============================================*/	
 
-	public function mdlEditarEmpresa($tabla,$datos){
+	static public function mdlEditarEmpresa($tabla,$datos){
 		
 		$stmt = Conexion::conectar()->prepare("UPDATE $tabla SET empresa = :empresa, correo = :correo, telefono = :telefono, telefonoDos = :telefonoDos, direccion = :direccion, Horario = :Horario, Facebook = :Facebook, Sitio = :Sitio WHERE id = :id");
 

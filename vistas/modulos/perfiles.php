@@ -1,572 +1,682 @@
 <?php
 
-if($_SESSION["perfil"] != "Super-Administrador" AND $_SESSION["perfil"] != "administrador"){
-
-  echo '<script>
-
-  window.location = "inicio";
-
-  </script>';
-
+if ($_SESSION["perfil"] != "Super-Administrador" && $_SESSION["perfil"] != "administrador") {
+  echo '<script>window.location = "inicio";</script>';
   return;
-
 }
+
+$esSuperAdminPerfiles = $_SESSION["perfil"] === "Super-Administrador";
+$empresaSesionPerfiles = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
+
+if ($esSuperAdminPerfiles) {
+  $perfiles = ControladorAdministradores::ctrMostrarAdministradores(null, null);
+  $empresasPerfiles = ControladorEmpresas::ctrMostrarEmpresasParaEditar(null, null);
+} else {
+  $perfiles = ControladorAdministradores::ctrlMostrarAdministradoresPorEmpresa("id_empresa", $empresaSesionPerfiles);
+  $empresaActualPerfiles = ControladorEmpresas::ctrMostrarEmpresasParaEditar("id", $empresaSesionPerfiles);
+  $empresasPerfiles = $empresaActualPerfiles ? array($empresaActualPerfiles) : array();
+}
+
+if (!is_array($perfiles)) {
+  $perfiles = array();
+}
+
+if (!is_array($empresasPerfiles)) {
+  $empresasPerfiles = array();
+}
+
+$empresasPerfilPorId = array();
+
+foreach ($empresasPerfiles as $empresaPerfil) {
+  if (isset($empresaPerfil["id"])) {
+    $empresasPerfilPorId[intval($empresaPerfil["id"])] = isset($empresaPerfil["empresa"])
+      ? $empresaPerfil["empresa"]
+      : "Empresa #" . intval($empresaPerfil["id"]);
+  }
+}
+
+$rolesPerfil = array(
+  "Super-Administrador" => "Superadministración",
+  "administrador" => "Administración",
+  "vendedor" => "Asesor de ventas",
+  "tecnico" => "Técnico",
+  "secretaria" => "Secretaría"
+);
+
+$totalPerfiles = count($perfiles);
+$perfilesActivos = 0;
+$rolesPresentes = array();
+
+foreach ($perfiles as $perfilConteo) {
+  if (!empty($perfilConteo["estado"])) {
+    $perfilesActivos++;
+  }
+
+  if (!empty($perfilConteo["perfil"])) {
+    $rolesPresentes[$perfilConteo["perfil"]] = true;
+  }
+}
+
+$perfilesInactivos = $totalPerfiles - $perfilesActivos;
+$escPerfil = function ($valor) {
+  return htmlspecialchars((string) $valor, ENT_QUOTES, "UTF-8");
+};
 
 ?>
-<style>
-/* ─── CRM Design System Tokens ─── */
-:root {
-  --crm-bg:       #f8fafc;
-  --crm-surface:  #ffffff;
-  --crm-border:   #e2e8f0;
-  --crm-text:     #0f172a;
-  --crm-text2:    #475569;
-  --crm-muted:    #94a3b8;
-  --crm-accent:   #6366f1;
-  --crm-radius:   14px;
-  --crm-radius-sm:10px;
-  --crm-shadow:   0 1px 3px rgba(15,23,42,.06), 0 4px 14px rgba(15,23,42,.04);
-  --crm-shadow-lg:0 4px 24px rgba(15,23,42,.10);
-  --crm-ease:     cubic-bezier(.4,0,.2,1);
-}
 
-.crm-card {
-  background: var(--crm-surface);
-  border: 1px solid var(--crm-border);
-  border-radius: var(--crm-radius);
-  box-shadow: var(--crm-shadow);
-  overflow: hidden;
-  transition: box-shadow .2s var(--crm-ease), transform .2s var(--crm-ease);
-}
-.crm-card:hover { box-shadow: var(--crm-shadow-lg); }
-.crm-btn { border-radius: var(--crm-radius-sm); font-weight: 600; transition: all .15s var(--crm-ease); }
-.modal-content.crm-modal { border-radius: var(--crm-radius); border: none; box-shadow: var(--crm-shadow-lg); }
-.modal-header.crm-modal-header { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-top-left-radius: var(--crm-radius); border-top-right-radius: var(--crm-radius); }
-.modal-header.crm-modal-header .close { color: white; opacity: 0.8; }
-.form-group .input-group-addon { border-top-left-radius: 8px; border-bottom-left-radius: 8px; background: #f8fafc; color: var(--crm-muted); border-color: var(--crm-border); }
-.form-group .form-control { border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-color: var(--crm-border); box-shadow: none; }
-.form-group .form-control:focus { border-color: var(--crm-accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
-</style>
-
-<div class="content-wrapper">
+<div
+  class="content-wrapper admin-catalog-page"
+  style="--catalog-accent:#6366f1;--catalog-accent-dark:#4f46e5;--catalog-accent-soft:#eef2ff;--catalog-accent-rgb:99,102,241;">
 
   <section class="content-header">
-   <h1>
-      Administrador de perfiles
-    </h1>
+    <h1>Perfiles y accesos</h1>
+    <p class="catalog-subtitle">Administra cuentas, roles, departamentos y la empresa asignada a cada integrante.</p>
+
     <ol class="breadcrumb">
       <li><a href="inicio"><i class="fas fa-dashboard"></i> Inicio</a></li>
-      <li class="active">Administrar perfiles</li>
+      <li class="active">Perfiles</li>
     </ol>
   </section>
 
   <section class="content">
-
-    <div class="box crm-card">
-       
-      <div class="box-header with-border" style="padding: 20px;">
-         
-        <button class="btn btn-primary crm-btn" data-toggle="modal" data-target="#modalAgregarPerfil" style="background:#6366f1; border:none;">
-          <i class="fas fa-user-plus"></i> Agregar Perfil
-        </button>
-
+    <div class="catalog-summary">
+      <div class="catalog-summary-card">
+        <span class="catalog-summary-icon"><i class="fas fa-id-badge"></i></span>
+        <span>
+          <strong class="catalog-summary-value"><?php echo $totalPerfiles; ?></strong>
+          <span class="catalog-summary-label">Perfiles registrados</span>
+        </span>
       </div>
 
-      <div class="box-body" style="padding: 20px;">
-
-        <table class="table table-striped dt-responsive tablaPerfiles" width="100%">
-        
-          <thead>
-            <tr>
-               <th style="width:10px">#</th>
-               <th>Nombre</th>
-               <th>Correo</th>
-               <th>Foto</th>
-               <th>Departamento</th>
-               <th>Estado</th>
-               <th>Acciones</th>
-            </tr> 
-          </thead>  
-
-          <tbody>
-            
-            <?php
-
-            if ($_SESSION["perfil"] == "Super-Administrador") {
-              
-              $item = null;
-              $valor = null;
-
-              $perfiles = ControladorAdministradores::ctrMostrarAdministradores($item, $valor);
-
-            }else{
-
-              $item = "id_empresa";
-              $valor = $_SESSION["empresa"];
-
-              $perfiles = ControladorAdministradores::ctrlMostrarAdministradoresPorEmpresa($item, $valor);
-            }
-              
-              foreach ($perfiles as $key => $value){
-
-                echo ' <tr>
-                          <td>'.($key+1).'</td>
-                          <td style="font-weight:600;">'.$value["nombre"].'<br><small style="color:var(--crm-muted);font-weight:400;text-transform:uppercase;">'.$value["perfil"].'</small></td>
-                          <td>'.$value["email"].'</td>';
-
-               if($value["foto"] != ""){
-                          echo '<td><img loading="lazy" src="'.$value["foto"].'" class="img-thumbnail" width="40px" style="border-radius:50%"></td>';
-                         }else{
-                            echo '<td><img loading="lazy" src="vistas/img/perfiles/default/anonymous.png" class="img-thumbnail" width="40px" style="border-radius:50%"></td>';
-                        }
-
-                        echo '<td><span class="label label-default" style="border-radius:10px;padding:4px 10px;background:#e2e8f0;color:#475569;">'.$value["Departamento"].'</span></td>';
-
-                         if($value["estado"] != 0){
-                          echo '<td><button class="btn btn-success btn-xs btnActivar crm-btn" idPerfil="'.$value["id"].'" estadoPerfil="0" style="border-radius:20px;padding:3px 12px;">Activado</button></td>';
-                        }else{
-                          echo '<td><button class="btn btn-danger btn-xs btnActivar crm-btn" idPerfil="'.$value["id"].'" estadoPerfil="1" style="border-radius:20px;padding:3px 12px;">Desactivado</button></td>';
-                        } 
-
-                         echo '<td>
-                          <div class="btn-group">
-                            <button class="btn btn-warning btnEditarPerfil crm-btn" idPerfil="'.$value["id"].'" data-toggle="modal" data-target="#modalEditarPerfil" style="margin-right:5px;"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-danger btnEliminarPerfil crm-btn" idPerfil="'.$value["id"].'" fotoPerfil="'.$value["foto"].'"><i class="fas fa-times"></i></button>
-                          </div>  
-                        </td>
-                      </tr>';            
-             }
-
-            ?>
-      
-          </tbody> 
-     
-        </table>
-          
+      <div class="catalog-summary-card is-success">
+        <span class="catalog-summary-icon"><i class="fas fa-user-check"></i></span>
+        <span>
+          <strong class="catalog-summary-value"><?php echo $perfilesActivos; ?></strong>
+          <span class="catalog-summary-label">Accesos activos</span>
+        </span>
       </div>
 
+      <div class="catalog-summary-card is-danger">
+        <span class="catalog-summary-icon"><i class="fas fa-user-lock"></i></span>
+        <span>
+          <strong class="catalog-summary-value"><?php echo $perfilesInactivos; ?></strong>
+          <span class="catalog-summary-label">Accesos inactivos</span>
+        </span>
+      </div>
+
+      <div class="catalog-summary-card is-info">
+        <span class="catalog-summary-icon"><i class="fas fa-users-cog"></i></span>
+        <span>
+          <strong class="catalog-summary-value"><?php echo count($rolesPresentes); ?></strong>
+          <span class="catalog-summary-label">Roles en uso</span>
+        </span>
+      </div>
     </div>
 
-  </section>
-
-</div>
-
-<!--=====================================
-MODAL AGREGAR PERFIL
-======================================-->
-
-<div id="modalAgregarPerfil" class="modal fade" role="dialog">
-  
-  <div class="modal-dialog">
-
-    <div class="modal-content crm-modal">
-
-      <form role="form" method="post" enctype="multipart/form-data">
-
-        <!--=====================================
-        CABEZA DEL MODAL
-        ======================================-->
-
-        <div class="modal-header crm-modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title"><i class="fas fa-user-plus"></i> Agregar Perfil</h4>
+    <div class="box catalog-box">
+      <div class="box-header with-border catalog-box-header">
+        <div class="catalog-box-title">
+          <h3>Directorio de accesos</h3>
+          <p>Edita la cuenta, el rol y los datos operativos asociados.</p>
         </div>
 
-        <!--=====================================
-        CUERPO DEL MODAL
-        ======================================-->
+        <div class="catalog-header-actions">
+          <button class="btn catalog-primary-button" data-toggle="modal" data-target="#modalAgregarPerfil">
+            <i class="fas fa-user-plus"></i> Nuevo perfil
+          </button>
+        </div>
+      </div>
 
-        <div class="modal-body" style="padding: 24px;">
+      <div class="box-body">
+        <table class="table table-hover dt-responsive tablaPerfiles catalog-table" width="100%">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>Integrante</th>
+              <th>Contacto</th>
+              <th>Rol</th>
+              <th>Empresa</th>
+              <th>Departamento</th>
+              <th>Estado</th>
+              <th style="width:90px">Acciones</th>
+            </tr>
+          </thead>
 
-          <div class="box-body">
+          <tbody>
+            <?php foreach ($perfiles as $key => $value) {
+              $idPerfilVista = isset($value["id"]) ? intval($value["id"]) : 0;
+              $nombrePerfil = isset($value["nombre"]) ? $value["nombre"] : "Sin nombre";
+              $correoPerfil = isset($value["email"]) ? $value["email"] : "";
+              $rolPerfil = isset($value["perfil"]) ? $value["perfil"] : "";
+              $rolEtiqueta = isset($rolesPerfil[$rolPerfil]) ? $rolesPerfil[$rolPerfil] : ($rolPerfil ?: "Sin rol");
+              $departamentoPerfil = !empty($value["Departamento"]) ? $value["Departamento"] : "Sin departamento";
+              $idEmpresaPerfil = isset($value["id_empresa"]) ? intval($value["id_empresa"]) : 0;
+              $nombreEmpresaPerfil = isset($empresasPerfilPorId[$idEmpresaPerfil])
+                ? $empresasPerfilPorId[$idEmpresaPerfil]
+                : ($idEmpresaPerfil > 0 ? "Empresa #" . $idEmpresaPerfil : "Sin empresa");
+              $perfilActivo = !empty($value["estado"]);
+              $fotoPerfil = !empty($value["foto"]) ? $value["foto"] : "vistas/img/perfiles/default/anonymous.png";
+            ?>
+              <tr>
+                <td><?php echo $key + 1; ?></td>
+                <td>
+                  <div class="catalog-entity">
+                    <img loading="lazy" src="<?php echo $escPerfil($fotoPerfil); ?>" class="catalog-avatar" alt="">
+                    <span>
+                      <span class="catalog-entity-name"><?php echo $escPerfil($nombrePerfil); ?></span>
+                      <span class="catalog-entity-meta">ID <?php echo $idPerfilVista; ?></span>
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <span class="catalog-contact-line"><i class="fas fa-envelope"></i><?php echo $escPerfil($correoPerfil ?: "Sin correo"); ?></span>
+                </td>
+                <td><span class="catalog-chip is-role"><?php echo $escPerfil($rolEtiqueta); ?></span></td>
+                <td><span class="catalog-chip is-company"><i class="fas fa-building"></i> <?php echo $escPerfil($nombreEmpresaPerfil); ?></span></td>
+                <td><span class="catalog-chip"><?php echo $escPerfil($departamentoPerfil); ?></span></td>
+                <td>
+                  <button
+                    type="button"
+                    class="catalog-status <?php echo $perfilActivo ? "is-active" : "is-inactive"; ?> btnActivar"
+                    idPerfil="<?php echo $idPerfilVista; ?>"
+                    estadoPerfil="<?php echo $perfilActivo ? "0" : "1"; ?>">
+                    <i class="fas <?php echo $perfilActivo ? "fa-check-circle" : "fa-pause-circle"; ?>"></i>
+                    <?php echo $perfilActivo ? "Activo" : "Inactivo"; ?>
+                  </button>
+                </td>
+                <td>
+                  <div class="btn-group">
+                    <button
+                      type="button"
+                      class="btn catalog-action is-edit btnEditarPerfil"
+                      idPerfil="<?php echo $idPerfilVista; ?>"
+                      data-toggle="modal"
+                      data-target="#modalEditarPerfil"
+                      title="Editar perfil"
+                      aria-label="Editar a <?php echo $escPerfil($nombrePerfil); ?>">
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="btn catalog-action is-delete btnEliminarPerfil"
+                      idPerfil="<?php echo $idPerfilVista; ?>"
+                      nombrePerfil="<?php echo $escPerfil($nombrePerfil); ?>"
+                      fotoPerfil="<?php echo $escPerfil(isset($value["foto"]) ? $value["foto"] : ""); ?>"
+                      title="Eliminar perfil"
+                      aria-label="Eliminar a <?php echo $escPerfil($nombrePerfil); ?>">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <?php } ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
 
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-user"></i></span> 
-                <input type="text" class="form-control input-lg" name="nuevoNombre" placeholder="Ingresar nombre" required>
-              </div>
-            </div>
+<!-- Modal: crear perfil -->
+<div
+  id="modalAgregarPerfil"
+  class="modal fade admin-catalog-page"
+  role="dialog"
+  aria-labelledby="tituloAgregarPerfil"
+  style="--catalog-accent:#6366f1;--catalog-accent-dark:#4f46e5;--catalog-accent-soft:#eef2ff;--catalog-accent-rgb:99,102,241;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content catalog-modal">
+      <form role="form" method="post" enctype="multipart/form-data">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">&times;</button>
+          <h4 class="modal-title" id="tituloAgregarPerfil"><i class="fas fa-user-plus"></i> Crear perfil</h4>
+        </div>
 
-             <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-envelope"></i></span> 
-                <input type="email" class="form-control input-lg" name="nuevoEmail" placeholder="Ingresar Email" id="nuevoEmail" required>
-              </div>
-            </div>
+        <div class="modal-body">
+          <div class="catalog-form-section">
+            <h5 class="catalog-form-title"><i class="fas fa-address-card"></i> Cuenta de acceso</h5>
 
-             <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-lock"></i></span> 
-                <input type="password" class="form-control input-lg" id="nuevoPassword" name="nuevoPassword" placeholder="Ingresar contraseña" required>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-lock"></i></span> 
-                <input type="password" class="form-control input-lg" id="nuevoPasswordConfirmar" name="nuevoPasswordConfirmar" placeholder="Confirmar contraseña" required>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-users"></i></span> 
-                <select class="form-control input-lg" name="nuevoPerfil" id="nuevoPerfil">
-                  <option value="">Seleccionar perfil</option>
-                  <?php
-                  if ($_SESSION["perfil"] == "Super-Administrador") {
-                    echo'<option value="Super-Administrador">Super Administrador</option>';
-                  }
-                  ?>
-                  <option value="administrador">Administrador</option>
-                  <option value="vendedor">Vendedor</option>
-                  <option value="tecnico">Técnico</option>
-                  <option value="secretaria">Secretaria</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- CONTENEDORES ADICIONALES (Se muestran por JS) -->
-            <div id="divAdicionalTecnico" style="display:none; padding:15px; margin-bottom:15px; border-left:4px solid #0ea5e9; background:#f0f9ff; border-radius:4px;">
-                <h5 style="color:#0284c7; font-weight:700; margin-top:0;"><i class="fas fa-wrench"></i> Datos Adicionales de Técnico</h5>
-                
+            <div class="row">
+              <div class="col-md-6">
                 <div class="form-group">
+                  <label class="control-label" for="nuevoNombre">Nombre completo <span class="catalog-required">*</span></label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-phone"></i></span> 
-                    <input type="tel" class="form-control" name="numeroTelTecnico" id="numeroTelTecnico" placeholder="Teléfono Principal">
+                    <span class="input-group-addon"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" id="nuevoNombre" name="nuevoNombre" maxlength="120" placeholder="Ej. Daniela López" required>
                   </div>
                 </div>
+              </div>
 
+              <div class="col-md-6">
                 <div class="form-group">
+                  <label class="control-label" for="nuevoEmail">Correo electrónico <span class="catalog-required">*</span></label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-mobile-alt"></i></span> 
-                    <input type="tel" class="form-control" name="numeroTelDosTecnico" id="numeroTelDosTecnico" placeholder="Teléfono Secundario">
+                    <span class="input-group-addon"><i class="fas fa-envelope"></i></span>
+                    <input type="email" class="form-control" id="nuevoEmail" name="nuevoEmail" maxlength="150" placeholder="persona@empresa.com" required>
                   </div>
                 </div>
+              </div>
+            </div>
 
+            <div class="row">
+              <div class="col-md-6">
                 <div class="form-group">
+                  <label class="control-label" for="nuevoPassword">Contraseña <span class="catalog-required">*</span></label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-clock"></i></span> 
-                    <input type="text" class="form-control" name="HoraDeComida" id="HoraDeComida" placeholder="Horario de Comida">
+                    <span class="input-group-addon"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="nuevoPassword" name="nuevoPassword" placeholder="Ingresar contraseña" required>
                   </div>
                 </div>
+              </div>
 
+              <div class="col-md-6">
                 <div class="form-group">
+                  <label class="control-label" for="nuevoPasswordConfirmar">Confirmar contraseña <span class="catalog-required">*</span></label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-cogs"></i></span> 
-                    <select class="form-control" name="areratecnico" id="areratecnico">
-                      <option value="">Seleccionar área de técnico</option>
-                      <option value="electronica">Electrónica</option>
-                      <option value="impresoras">Impresoras</option>
-                      <option value="sistemas">Sistemas</option>
+                    <span class="input-group-addon"><i class="fas fa-shield-alt"></i></span>
+                    <input type="password" class="form-control" id="nuevoPasswordConfirmar" name="nuevoPasswordConfirmar" placeholder="Repetir contraseña" required>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="catalog-form-section">
+            <h5 class="catalog-form-title"><i class="fas fa-sitemap"></i> Rol y asignación</h5>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="control-label" for="nuevoPerfil">Rol <span class="catalog-required">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fas fa-users-cog"></i></span>
+                    <select class="form-control" name="nuevoPerfil" id="nuevoPerfil" required>
+                      <option value="">Seleccionar rol</option>
+                      <?php if ($esSuperAdminPerfiles) { ?>
+                        <option value="Super-Administrador">Superadministración</option>
+                      <?php } ?>
+                      <option value="administrador">Administración</option>
+                      <option value="vendedor">Asesor de ventas</option>
+                      <option value="tecnico">Técnico</option>
+                      <option value="secretaria">Secretaría</option>
                     </select>
                   </div>
                 </div>
-            </div>
+              </div>
 
-            <div id="divAdicionalAsesor" style="display:none; padding:15px; margin-bottom:15px; border-left:4px solid #8b5cf6; background:#f5f3ff; border-radius:4px;">
-                <h5 style="color:#6d28d9; font-weight:700; margin-top:0;"><i class="fas fa-handshake"></i> Datos Adicionales de Asesor</h5>
-                
+              <div class="col-md-4">
                 <div class="form-group">
+                  <label class="control-label" for="nuevoDepartamento">Departamento</label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-phone"></i></span> 
-                    <input type="tel" class="form-control" name="nuevoNumeroUno" id="nuevoNumeroUno" placeholder="Teléfono Asesor">
+                    <span class="input-group-addon"><i class="fas fa-user-tag"></i></span>
+                    <select class="form-control" name="Departamento" id="nuevoDepartamento">
+                      <option value="">Sin departamento</option>
+                      <option value="Ventas">Ventas</option>
+                      <option value="Administracion">Administración</option>
+                      <option value="Ventas Externas">Ventas externas</option>
+                      <option value="Sistemas">Sistemas</option>
+                      <option value="Electronica">Electrónica</option>
+                      <option value="Impresoras">Impresoras</option>
+                      <option value="Desarrollo">Desarrollo</option>
+                    </select>
                   </div>
                 </div>
+              </div>
 
+              <div class="col-md-4">
                 <div class="form-group">
+                  <label class="control-label" for="empresaPerfil">Empresa <span class="catalog-required">*</span></label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-mobile-alt"></i></span> 
-                    <input type="tel" class="form-control" name="nuevoNumeroDos" id="nuevoNumeroDos" placeholder="Celular Asesor">
+                    <span class="input-group-addon"><i class="fas fa-building"></i></span>
+                    <?php if ($esSuperAdminPerfiles) { ?>
+                      <select class="form-control" id="empresaPerfil" name="empresa" required>
+                        <option value="">Seleccionar empresa</option>
+                        <?php foreach ($empresasPerfiles as $empresaOpcion) { ?>
+                          <option value="<?php echo intval($empresaOpcion["id"]); ?>"><?php echo $escPerfil($empresaOpcion["empresa"]); ?></option>
+                        <?php } ?>
+                      </select>
+                    <?php } else { ?>
+                      <select class="form-control" id="empresaPerfilVista" disabled>
+                        <option value="<?php echo $empresaSesionPerfiles; ?>"><?php echo $escPerfil(isset($empresasPerfilPorId[$empresaSesionPerfiles]) ? $empresasPerfilPorId[$empresaSesionPerfiles] : "Empresa actual"); ?></option>
+                      </select>
+                      <input type="hidden" name="empresa" value="<?php echo $empresaSesionPerfiles; ?>">
+                    <?php } ?>
                   </div>
                 </div>
-            </div>
-
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-user-tag"></i></span> 
-                <select class="form-control input-lg" name="Departamento">
-                  <option value="">Seleccionar Departamento</option>
-                  <option value="Ventas">Ventas</option>
-                  <option value="Administracion">Administracion</option>
-                  <option value="Ventas Externas">Ventas Externas</option>
-                  <option value="Sistemas">Sistemas</option>
-                  <option value="Electronica">Electronica</option>
-                  <option value="Impresoras">Impresoras</option>
-                  <option value="Desarrollo">Desarrollo</option>
-                  <option value="">Sin departamento</option>
-                </select>
               </div>
             </div>
 
-            <div class="form-group">
-              <div class="input-group">
-                <?php
-                 if ($_SESSION["perfil"] == "Super-Administrador") {
-                  $item = null;
-                  $valor = null;
-                   $empresa = ControladorEmpresas::ctrMostrarEmpresasParaEditar($item, $valor);
-                  echo'
-                    <div class="form-group">
-                      <div class="input-group">
-                        <span class="input-group-addon"><i class="fas fa-building"></i></span>
-                          <select class="form-control input-lg" name="empresa">';
-                          foreach ($empresa as $key => $valueEmpresa) {
-                              echo '<option value='.$valueEmpresa["id"].'>'.$valueEmpresa["empresa"].'</option>';
-                          }
-                          echo'</select>
-                        </div>
-                      </div>';
-                 }else{
-                  echo'<input type="hidden" value="'.$_SESSION["empresa"].'" name="empresa">';
-                  }
-                ?>
+            <div id="divAdicionalTecnico" class="catalog-dynamic-panel" style="display:none;">
+              <h5 class="catalog-form-title"><i class="fas fa-tools"></i> Datos del técnico</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="numeroTelTecnico">Teléfono principal</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-phone"></i></span>
+                      <input type="tel" class="form-control" name="numeroTelTecnico" id="numeroTelTecnico" maxlength="25">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="numeroTelDosTecnico">Teléfono alterno</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-mobile-alt"></i></span>
+                      <input type="tel" class="form-control" name="numeroTelDosTecnico" id="numeroTelDosTecnico" maxlength="25">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="HoraDeComida">Horario de comida</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-utensils"></i></span>
+                      <input type="text" class="form-control" name="HoraDeComida" id="HoraDeComida" maxlength="50" placeholder="Ej. 14:00 - 15:00">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="areratecnico">Área técnica</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-tools"></i></span>
+                      <select class="form-control" name="areratecnico" id="areratecnico">
+                        <option value="">Seleccionar área</option>
+                        <option value="electronica">Electrónica</option>
+                        <option value="impresoras">Impresoras</option>
+                        <option value="sistemas">Sistemas</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-             <div class="form-group" style="border: 2px dashed var(--crm-border); padding: 20px; border-radius: var(--crm-radius); text-align: center; background: #f8fafc; position: relative; transition: all .2s var(--crm-ease);">
-              <h5 style="color: var(--crm-text2); font-weight: 600; margin-top: 0;"><i class="fas fa-cloud-upload-alt" style="font-size:24px; color:var(--crm-accent); display:block; margin-bottom:10px;"></i> Subir Foto de Perfil</h5>
-              <input type="file" class="nuevaFoto" name="nuevaFoto" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
-              <p class="help-block" style="font-size: 12px;">Peso máximo de la foto 2MB (Formatos JPG, PNG)</p>
-              <img loading="lazy" src="vistas/img/perfiles/default/anonymous.png" class="img-thumbnail previsualizar" width="100px" style="border-radius:50%; margin-top: 10px; box-shadow: var(--crm-shadow);">
+            <div id="divAdicionalAsesor" class="catalog-dynamic-panel" style="display:none;">
+              <h5 class="catalog-form-title"><i class="fas fa-handshake"></i> Datos del asesor</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="nuevoNumeroUno">Teléfono principal</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-phone"></i></span>
+                      <input type="tel" class="form-control" name="nuevoNumeroUno" id="nuevoNumeroUno" maxlength="25">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="nuevoNumeroDos">Teléfono alterno</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-mobile-alt"></i></span>
+                      <input type="tel" class="form-control" name="nuevoNumeroDos" id="nuevoNumeroDos" maxlength="25">
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-
           </div>
 
+          <div class="catalog-form-section">
+            <h5 class="catalog-form-title"><i class="fas fa-camera"></i> Fotografía</h5>
+            <div class="catalog-upload">
+              <input type="file" class="nuevaFoto" name="nuevaFoto" accept="image/jpeg,image/png">
+              <i class="fas fa-cloud-upload-alt catalog-upload-icon"></i>
+              <strong>Seleccionar foto de perfil</strong>
+              <p class="catalog-field-help">JPG o PNG, máximo 2 MB.</p>
+              <img loading="lazy" src="vistas/img/perfiles/default/anonymous.png" class="img-thumbnail previsualizar catalog-upload-preview" alt="">
+            </div>
+          </div>
         </div>
 
-        <!--=====================================
-        PIE DEL MODAL
-        ======================================-->
-
-        <div class="modal-footer" style="border-top: 1px solid var(--crm-border);">
-          <button type="button" class="btn btn-default pull-left crm-btn" data-dismiss="modal">Salir</button>
-          <button type="submit" class="btn btn-primary crm-btn" style="background:#6366f1; border:none;">Guardar Perfil</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary catalog-save-button"><i class="fas fa-save"></i> Guardar perfil</button>
         </div>
 
         <?php
-          $crearPerfil = new ControladorAdministradores();
-          $crearPerfil -> ctrCrearPerfil();
+        $crearPerfil = new ControladorAdministradores();
+        $crearPerfil->ctrCrearPerfil();
         ?>
-
       </form>
-
     </div>
-
   </div>
-
 </div>
 
-<!--=====================================
-MODAL EDITAR PERFIL
-======================================-->
-
-<div id="modalEditarPerfil" class="modal fade" role="dialog">
-  
-  <div class="modal-dialog">
-
-    <div class="modal-content crm-modal">
-
+<!-- Modal: editar perfil -->
+<div
+  id="modalEditarPerfil"
+  class="modal fade admin-catalog-page"
+  role="dialog"
+  aria-labelledby="tituloEditarPerfil"
+  style="--catalog-accent:#6366f1;--catalog-accent-dark:#4f46e5;--catalog-accent-soft:#eef2ff;--catalog-accent-rgb:99,102,241;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content catalog-modal">
       <form role="form" method="post" enctype="multipart/form-data">
-
-        <!--=====================================
-        CABEZA DEL MODAL
-        ======================================-->
-
-        <div class="modal-header crm-modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title"><i class="fas fa-user-edit"></i> Editar Perfil</h4>
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">&times;</button>
+          <h4 class="modal-title" id="tituloEditarPerfil"><i class="fas fa-user-edit"></i> Editar perfil</h4>
         </div>
 
-        <!--=====================================
-        CUERPO DEL MODAL
-        ======================================-->
+        <div class="modal-body">
+          <input type="hidden" id="idPerfil" name="idPerfil">
+          <input type="hidden" id="passwordActual" name="passwordActual">
 
-        <div class="modal-body" style="padding: 24px;">
-
-          <div class="box-body">
-            
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-user"></i></span> 
-                <input type="text" class="form-control input-lg" id="editarNombre" name="editarNombre" value="" required>
-                <input type="hidden" id="idPerfil" name="idPerfil">
-              </div>
-            </div>
-
-             <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-envelope"></i></span> 
-                <input type="email" class="form-control input-lg" id="editarEmail" name="editarEmail" value="" required>
-              </div>
-            </div>
-
-             <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-lock"></i></span> 
-                <input type="password" class="form-control input-lg" id="editarPassword" name="editarPassword" placeholder="Escriba la nueva contraseña">
-                <input type="hidden" id="passwordActual" name="passwordActual">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-lock"></i></span> 
-                <input type="password" class="form-control input-lg" id="editarPasswordConfirmar" name="editarPasswordConfirmar" placeholder="Confirmar nueva contraseña">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-users"></i></span> 
-                <select class="form-control input-lg" name="editarPerfil" id="editarPerfilSelect">
-                  <option value="" id="editarPerfilOpcion"></option>
-                  <?php
-                  if ($_SESSION["perfil"] == "Super-Administrador") {
-                    echo'<option value="Super-Administrador">Super Administrador</option>';
-                  }
-                  ?>
-                  <option value="administrador">Administrador</option>
-                  <option value="vendedor">Vendedor</option>
-                  <option value="tecnico">Técnico</option>
-                  <option value="secretaria">Secretaria</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- CONTENEDORES ADICIONALES (Se muestran por JS al editar) -->
-            <div id="divAdicionalTecnicoEdit" style="display:none; padding:15px; margin-bottom:15px; border-left:4px solid #0ea5e9; background:#f0f9ff; border-radius:4px;">
-                <h5 style="color:#0284c7; font-weight:700; margin-top:0;"><i class="fas fa-wrench"></i> Datos Adicionales de Técnico</h5>
-                
+          <div class="catalog-form-section">
+            <h5 class="catalog-form-title"><i class="fas fa-address-card"></i> Cuenta de acceso</h5>
+            <div class="row">
+              <div class="col-md-6">
                 <div class="form-group">
+                  <label class="control-label" for="editarNombre">Nombre completo <span class="catalog-required">*</span></label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-phone"></i></span> 
-                    <input type="tel" class="form-control" name="editarNumeroUnoTecnico" id="editarNumeroUnoTecnico" placeholder="Teléfono Principal">
+                    <span class="input-group-addon"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" id="editarNombre" name="editarNombre" maxlength="120" required>
                   </div>
                 </div>
-
+              </div>
+              <div class="col-md-6">
                 <div class="form-group">
+                  <label class="control-label" for="editarEmail">Correo electrónico <span class="catalog-required">*</span></label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-mobile-alt"></i></span> 
-                    <input type="tel" class="form-control" name="editarTelefonoDosTecnico" id="editarTelefonoDosTecnico" placeholder="Teléfono Secundario">
+                    <span class="input-group-addon"><i class="fas fa-envelope"></i></span>
+                    <input type="email" class="form-control" id="editarEmail" name="editarEmail" maxlength="150" required>
                   </div>
                 </div>
+              </div>
+            </div>
 
+            <div class="row">
+              <div class="col-md-6">
                 <div class="form-group">
+                  <label class="control-label" for="editarPassword">Nueva contraseña</label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-clock"></i></span> 
-                    <input type="text" class="form-control" name="HoraDeComidaEditada" id="HoraDeComidaEditada" placeholder="Horario de Comida">
+                    <span class="input-group-addon"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="editarPassword" name="editarPassword" placeholder="Dejar vacío para conservarla">
                   </div>
                 </div>
-
+              </div>
+              <div class="col-md-6">
                 <div class="form-group">
+                  <label class="control-label" for="editarPasswordConfirmar">Confirmar nueva contraseña</label>
                   <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-cogs"></i></span> 
-                    <select class="form-control" name="editarAreratecnico" id="editarAreratecnico">
-                      <option value="">Seleccionar área de técnico</option>
-                      <option value="electronica">Electrónica</option>
-                      <option value="impresoras">Impresoras</option>
-                      <option value="sistemas">Sistemas</option>
+                    <span class="input-group-addon"><i class="fas fa-shield-alt"></i></span>
+                    <input type="password" class="form-control" id="editarPasswordConfirmar" name="editarPasswordConfirmar">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="catalog-form-section">
+            <h5 class="catalog-form-title"><i class="fas fa-sitemap"></i> Rol y asignación</h5>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="control-label" for="editarPerfilSelect">Rol <span class="catalog-required">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fas fa-users-cog"></i></span>
+                    <select class="form-control" name="editarPerfil" id="editarPerfilSelect" required>
+                      <option value="">Seleccionar rol</option>
+                      <?php if ($esSuperAdminPerfiles) { ?>
+                        <option value="Super-Administrador">Superadministración</option>
+                      <?php } ?>
+                      <option value="administrador">Administración</option>
+                      <option value="vendedor">Asesor de ventas</option>
+                      <option value="tecnico">Técnico</option>
+                      <option value="secretaria">Secretaría</option>
                     </select>
                   </div>
                 </div>
-            </div>
-
-            <div id="divAdicionalAsesorEdit" style="display:none; padding:15px; margin-bottom:15px; border-left:4px solid #8b5cf6; background:#f5f3ff; border-radius:4px;">
-                <h5 style="color:#6d28d9; font-weight:700; margin-top:0;"><i class="fas fa-handshake"></i> Datos Adicionales de Asesor</h5>
-                
-                <div class="form-group">
-                  <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-phone"></i></span> 
-                    <input type="tel" class="form-control" name="editarNumeroUnoAsesor" id="editarNumeroUnoAsesor" placeholder="Teléfono Asesor">
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <div class="input-group">
-                    <span class="input-group-addon"><i class="fas fa-mobile-alt"></i></span> 
-                    <input type="tel" class="form-control" name="editarTelefonoDosAsesor" id="editarTelefonoDosAsesor" placeholder="Celular Asesor">
-                  </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fas fa-user-tag"></i></span> 
-                <select class="form-control input-lg" name="Departamento" id="editarDepartamento">
-                  <option value="" id="editarDepartamentoOpcion"></option>
-                  <option value="Ventas">Ventas</option>
-                  <option value="Administracion">Administracion</option>
-                  <option value="Ventas Externas">Ventas Externas</option>
-                  <option value="Sistemas">Sistemas</option>
-                  <option value="Electronica">Electronica</option>
-                  <option value="Impresoras">Impresoras</option>
-                  <option value="Desarrollo">Desarrollo</option>
-                  <option value="">Sin departamento</option>
-                </select>
               </div>
-            </div>
-            
-            <div class="form-group">
-              <div class="input-group">
-                <?php
-                 if ($_SESSION["perfil"] == "Super-Administrador") {
-                  $item = "id";
-                  $valor = $_SESSION["empresa"];
-                   $empresa = ControladorEmpresas::ctrMostrarEmpresasParaReportes($item, $valor);
-                  echo'
-                    <div class="form-group">
-                      <div class="input-group">
-                        <span class="input-group-addon"><i class="fas fa-building"></i></span>
-                          <select class="form-control input-lg" name="empresa">';
-                          foreach ($empresa as $key => $valueEmpresa) {
-                              echo '<option value='.$valueEmpresa["id"].'>'.$valueEmpresa["empresa"].'</option>';
-                          }
-                          echo'</select>
-                        </div>
-                      </div>';
-                 }else{
-                  echo'<input type="hidden" value="'.$_SESSION["empresa"].'" name="empresa">';
-                  }
-                ?>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="control-label" for="editarDepartamento">Departamento</label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fas fa-user-tag"></i></span>
+                    <select class="form-control" name="Departamento" id="editarDepartamento">
+                      <option value="">Sin departamento</option>
+                      <option value="Ventas">Ventas</option>
+                      <option value="Administracion">Administración</option>
+                      <option value="Ventas Externas">Ventas externas</option>
+                      <option value="Sistemas">Sistemas</option>
+                      <option value="Electronica">Electrónica</option>
+                      <option value="Impresoras">Impresoras</option>
+                      <option value="Desarrollo">Desarrollo</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="control-label" for="<?php echo $esSuperAdminPerfiles ? "editarEmpresaPerfil" : "editarEmpresaPerfilVista"; ?>">Empresa <span class="catalog-required">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fas fa-building"></i></span>
+                    <?php if ($esSuperAdminPerfiles) { ?>
+                      <select class="form-control" id="editarEmpresaPerfil" name="empresa" required>
+                        <option value="">Seleccionar empresa</option>
+                        <?php foreach ($empresasPerfiles as $empresaOpcion) { ?>
+                          <option value="<?php echo intval($empresaOpcion["id"]); ?>"><?php echo $escPerfil($empresaOpcion["empresa"]); ?></option>
+                        <?php } ?>
+                      </select>
+                    <?php } else { ?>
+                      <select class="form-control" id="editarEmpresaPerfilVista" disabled>
+                        <option value="<?php echo $empresaSesionPerfiles; ?>"><?php echo $escPerfil(isset($empresasPerfilPorId[$empresaSesionPerfiles]) ? $empresasPerfilPorId[$empresaSesionPerfiles] : "Empresa actual"); ?></option>
+                      </select>
+                      <input type="hidden" id="editarEmpresaPerfil" name="empresa" value="<?php echo $empresaSesionPerfiles; ?>">
+                    <?php } ?>
+                  </div>
+                </div>
               </div>
             </div>
 
-             <div class="form-group" style="border: 2px dashed var(--crm-border); padding: 20px; border-radius: var(--crm-radius); text-align: center; background: #f8fafc; position: relative; transition: all .2s var(--crm-ease);">
-              <h5 style="color: var(--crm-text2); font-weight: 600; margin-top: 0;"><i class="fas fa-cloud-upload-alt" style="font-size:24px; color:var(--crm-accent); display:block; margin-bottom:10px;"></i> Cambiar Foto de Perfil</h5>
-              <input type="file" class="nuevaFoto" name="editarFoto" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
-              <p class="help-block" style="font-size: 12px;">Peso máximo de la foto 2MB (Formatos JPG, PNG)</p>
-              <img loading="lazy" src="vistas/img/perfiles/default/anonymous.png" class="img-thumbnail previsualizar" width="100px" style="border-radius:50%; margin-top: 10px; box-shadow: var(--crm-shadow);">
-              <input type="hidden" name="fotoActual" id="fotoActual">
+            <div id="divAdicionalTecnicoEdit" class="catalog-dynamic-panel" style="display:none;">
+              <h5 class="catalog-form-title"><i class="fas fa-tools"></i> Datos del técnico</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="editarNumeroUnoTecnico">Teléfono principal</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-phone"></i></span>
+                      <input type="tel" class="form-control" name="editarNumeroUnoTecnico" id="editarNumeroUnoTecnico" maxlength="25">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="editarTelefonoDosTecnico">Teléfono alterno</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-mobile-alt"></i></span>
+                      <input type="tel" class="form-control" name="editarTelefonoDosTecnico" id="editarTelefonoDosTecnico" maxlength="25">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="HoraDeComidaEditada">Horario de comida</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-utensils"></i></span>
+                      <input type="text" class="form-control" name="HoraDeComidaEditada" id="HoraDeComidaEditada" maxlength="50">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="editarAreratecnico">Área técnica</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-tools"></i></span>
+                      <select class="form-control" name="editarAreratecnico" id="editarAreratecnico">
+                        <option value="">Seleccionar área</option>
+                        <option value="electronica">Electrónica</option>
+                        <option value="impresoras">Impresoras</option>
+                        <option value="sistemas">Sistemas</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
+            <div id="divAdicionalAsesorEdit" class="catalog-dynamic-panel" style="display:none;">
+              <h5 class="catalog-form-title"><i class="fas fa-handshake"></i> Datos del asesor</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="editarNumeroUnoAsesor">Teléfono principal</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-phone"></i></span>
+                      <input type="tel" class="form-control" name="editarNumeroUnoAsesor" id="editarNumeroUnoAsesor" maxlength="25">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label" for="editarTelefonoDosAsesor">Teléfono alterno</label>
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="fas fa-mobile-alt"></i></span>
+                      <input type="tel" class="form-control" name="editarTelefonoDosAsesor" id="editarTelefonoDosAsesor" maxlength="25">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
+          <div class="catalog-form-section">
+            <h5 class="catalog-form-title"><i class="fas fa-camera"></i> Fotografía</h5>
+            <div class="catalog-upload">
+              <input type="file" class="nuevaFoto" name="editarFoto" accept="image/jpeg,image/png">
+              <i class="fas fa-cloud-upload-alt catalog-upload-icon"></i>
+              <strong>Cambiar foto de perfil</strong>
+              <p class="catalog-field-help">JPG o PNG, máximo 2 MB.</p>
+              <img loading="lazy" src="vistas/img/perfiles/default/anonymous.png" class="img-thumbnail previsualizar catalog-upload-preview" alt="">
+              <input type="hidden" name="fotoActual" id="fotoActual">
+            </div>
+          </div>
         </div>
 
-        <!--=====================================
-        PIE DEL MODAL
-        ======================================-->
-  
-        <div class="modal-footer" style="border-top: 1px solid var(--crm-border);">
-          <button type="button" class="btn btn-default pull-left crm-btn" data-dismiss="modal">Salir</button>
-          <button type="submit" class="btn btn-primary crm-btn" style="background:#6366f1; border:none;">Modificar Perfil</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary catalog-save-button"><i class="fas fa-save"></i> Guardar cambios</button>
         </div>
 
-     <?php
-          $editarPerfil = new ControladorAdministradores();
-          $editarPerfil -> ctrEditarPerfil();
-        ?> 
-
+        <?php
+        $editarPerfil = new ControladorAdministradores();
+        $editarPerfil->ctrEditarPerfil();
+        ?>
       </form>
-
     </div>
-
   </div>
-
 </div>
 
 <?php
-  $eliminarPerfil = new ControladorAdministradores();
-  $eliminarPerfil -> ctrEliminarPerfil();
-?> 
+$eliminarPerfil = new ControladorAdministradores();
+$eliminarPerfil->ctrEliminarPerfil();
+?>
