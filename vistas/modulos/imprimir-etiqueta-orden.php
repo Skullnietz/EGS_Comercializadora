@@ -201,11 +201,11 @@ $telefonosEtiqueta = array_values(array_filter(array($configEtiqueta["whatsapp"]
 .egs-contact-code #egsPrintQr canvas,.egs-warranty-code #egsPrintQr canvas{display:block!important;width:18.8mm!important;height:18.8mm!important;margin:1.7mm!important;image-rendering:pixelated}
 .egs-contact-code #egsPrintQr img,.egs-warranty-code #egsPrintQr img{display:none!important}
 .egs-contact-code b,.egs-warranty-code b{max-width:22.2mm!important;margin:.8mm 0 0!important;overflow:visible!important;text-overflow:clip!important;color:#000!important;font-size:4.8pt!important;line-height:1.08!important;font-weight:900!important;text-align:center!important;white-space:normal!important}
-.egs-contact-code .egs-qr-safe,.egs-contact-code #egsPrintQr,.egs-contact-code #egsPrintQr svg{width:24.5mm!important;height:24.5mm!important}
-.egs-contact-code .egs-qr-safe{flex-basis:24.5mm}
-.egs-contact-code #egsPrintQr canvas{width:20.8mm!important;height:20.8mm!important;margin:1.85mm!important}
-.egs-contact-code b{max-width:24.5mm!important}
-.egs-warranty-print{display:grid!important;grid-template-columns:minmax(0,1fr) 22.2mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:0!important}
+.egs-contact-code .egs-qr-safe,.egs-warranty-code .egs-qr-safe,.egs-contact-code #egsPrintQr,.egs-warranty-code #egsPrintQr,.egs-contact-code #egsPrintQr svg,.egs-warranty-code #egsPrintQr svg{width:24.5mm!important;height:24.5mm!important}
+.egs-contact-code .egs-qr-safe,.egs-warranty-code .egs-qr-safe{flex-basis:24.5mm}
+.egs-contact-code #egsPrintQr canvas,.egs-warranty-code #egsPrintQr canvas{width:20.8mm!important;height:20.8mm!important;margin:1.85mm!important}
+.egs-contact-code b,.egs-warranty-code b{max-width:24.5mm!important}
+.egs-warranty-print{display:grid!important;grid-template-columns:minmax(0,1fr) 24.5mm!important;grid-template-rows:7mm minmax(0,1fr)!important;column-gap:0!important;padding:2mm 0 2mm 1.7mm!important}
 .egs-warranty-brand{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:.6mm!important;min-width:0!important;padding:0!important;border:0!important;border-bottom:.35mm solid #000!important;overflow:hidden!important}
 .egs-brand-copy{display:flex;flex-direction:column;min-width:0}
 .egs-brand-copy b{font-size:5pt!important;line-height:1.05!important;font-weight:900!important;letter-spacing:-.07mm!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important}
