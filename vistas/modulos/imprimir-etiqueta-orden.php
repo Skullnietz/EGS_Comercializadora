@@ -71,7 +71,7 @@ if ($errorEtiqueta === "" && $tipoEtiqueta === "garantia") {
             $tecnicoEtiqueta = ControladorTecnicos::ctrMostrarTecnicos("id", intval($ordenEtiqueta["id_tecnico"]));
             $fechaEntrega = !empty($existente["fecha_entrega"]) ? $existente["fecha_entrega"] : substr((string) $ordenEtiqueta["fecha_Salida"], 0, 10);
             if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaEntrega)) $fechaEntrega = date("Y-m-d");
-            $fechaVencimiento = !empty($existente["fecha_vencimiento"]) ? $existente["fecha_vencimiento"] : date("Y-m-d", strtotime($fechaEntrega . " +3 months"));
+            $fechaVencimiento = (new DateTimeImmutable($fechaEntrega))->modify("+30 days")->format("Y-m-d");
             $equipoOrden = trim((string) $ordenEtiqueta["marcaDelEquipo"] . " " . (string) $ordenEtiqueta["modeloDelEquipo"]);
             $datosGarantia = array(
                 "id_orden" => $idOrdenEtiqueta,

@@ -62,14 +62,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if ($accion === "guardar_garantia") {
             $entrega = egsEtiquetaFecha($_POST["fecha_entrega"], true);
-            $vencimiento = egsEtiquetaFecha($_POST["fecha_vencimiento"], true);
             $servicio = egsEtiquetaFecha($_POST["proximo_servicio"], false);
-            if ($entrega === "" || $vencimiento === "") {
-                throw new RuntimeException("Indica fechas válidas de entrega y vencimiento.");
+            if ($entrega === "") {
+                throw new RuntimeException("Indica una fecha de entrega válida.");
             }
-            if ($vencimiento < $entrega) {
-                throw new RuntimeException("El vencimiento no puede ser anterior a la entrega.");
-            }
+            $vencimiento = (new DateTimeImmutable($entrega))->modify("+30 days")->format("Y-m-d");
             $datosGarantia = array(
                 "id_orden" => intval($_POST["id_orden"]),
                 "id_empresa" => intval($_SESSION["empresa"]),
@@ -169,8 +166,8 @@ function egsSitioVisible($valor) {
                 <div class="col-sm-7 form-group"><label>Equipo</label><input class="form-control egs-warranty-live" name="equipo" data-target="wEquipment" maxlength="220"></div>
                 <div class="col-sm-5 form-group"><label>Núm. de serie</label><input class="form-control egs-warranty-live" name="numero_serie" data-target="wSerial" maxlength="160"></div>
                 <div class="col-sm-5 form-group"><label>Fecha de entrega</label><input type="date" class="form-control egs-warranty-live" name="fecha_entrega" data-target="wDelivery" required></div>
-                <div class="col-sm-2 form-group"><label>Meses</label><input type="number" class="form-control" id="mesesGarantia" value="3" min="1" max="60"></div>
-                <div class="col-sm-5 form-group"><label>Vencimiento</label><input type="date" class="form-control egs-warranty-live" name="fecha_vencimiento" data-target="wExpiry" required></div>
+                <div class="col-sm-2 form-group"><label>Días</label><input type="number" class="form-control" id="diasGarantia" value="30" readonly></div>
+                <div class="col-sm-5 form-group"><label>Vencimiento</label><input type="date" class="form-control egs-warranty-live" name="fecha_vencimiento" data-target="wExpiry" readonly required></div>
                 <div class="col-sm-6 form-group"><label>Próximo servicio</label><input type="date" class="form-control egs-warranty-live" name="proximo_servicio" data-target="wService"></div>
               </div>
               <div class="egs-qr-url" id="qrUrlBox"><i class="fa-solid fa-link"></i><span id="qrUrlText">El enlace aparecerá al guardar la orden.</span></div>
@@ -300,7 +297,7 @@ function egsSitioVisible($valor) {
   function prettyDate(value){ if(!value)return ''; var p=value.slice(0,10).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : value; }
   function cleanDate(value){ if(!value || !/^\d{4}-\d{2}-\d{2}/.test(value))return ''; var year=parseInt(value.slice(0,4),10); return year>=2000 ? value.slice(0,10) : ''; }
   function todayLocal(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-  function addMonths(dateValue,months){ if(!dateValue)return ''; var p=dateValue.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]); var day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+parseInt(months||0,10)); var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(day,last)); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function addDays(dateValue,days){ if(!dateValue)return ''; var p=dateValue.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]); d.setDate(d.getDate()+parseInt(days||0,10)); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
   function syncContact(){
     var phones=[val('whatsapp'),val('telefono_1'),val('telefono_2'),val('telefono_3')].filter(Boolean);
     text('contactPhones',phones.slice(0,2).join(' · '));
@@ -370,13 +367,12 @@ function egsSitioVisible($valor) {
     set('numero_serie',saved?o.garantia_numero_serie:o.numeroDeSerieDelEquipo);
     var delivery=saved?o.garantia_fecha_entrega:(cleanDate(o.fecha_Salida)||todayLocal());
     set('fecha_entrega',delivery);
-    set('fecha_vencimiento',saved?o.garantia_fecha_vencimiento:addMonths(delivery,document.getElementById('mesesGarantia').value));
+    set('fecha_vencimiento',addDays(delivery,document.getElementById('diasGarantia').value));
     set('proximo_servicio',saved?o.garantia_proximo_servicio:'');
     renderQr(saved?o.garantia_token:'');
   }
   document.getElementById('idOrdenEtiqueta').addEventListener('change',selectOrder);
-  document.getElementById('mesesGarantia').addEventListener('input',function(){set('fecha_vencimiento',addMonths(val('fecha_entrega'),this.value));});
-  document.querySelector('[name="fecha_entrega"]').addEventListener('change',function(){set('fecha_vencimiento',addMonths(this.value,document.getElementById('mesesGarantia').value));});
+  document.querySelector('[name="fecha_entrega"]').addEventListener('change',function(){set('fecha_vencimiento',addDays(this.value,document.getElementById('diasGarantia').value));});
   document.querySelectorAll('[name="modo_etiqueta"]').forEach(function(radio){radio.addEventListener('change',function(){
     document.querySelectorAll('.egs-mode-choice label').forEach(function(label){label.classList.toggle('active',label.querySelector('input').checked);});
     var empty=this.value==='vacia' && this.checked;

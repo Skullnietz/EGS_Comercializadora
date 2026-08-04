@@ -621,12 +621,7 @@ Las etiquetas están diseñadas para impresión térmica monocromática de 58 ×
 
 ### Vigencia de garantía
 
-Actualmente conviven dos criterios en la documentación entregada al cliente:
-
-- El ticket indica una garantía de servicio de **30 días** desde la entrega.
-- La etiqueta de garantía calcula un vencimiento de **tres meses** desde la entrega.
-
-EGS debe definir una sola regla comercial y reflejarla de forma idéntica en ticket, etiqueta, validación y comunicación al cliente.
+La garantía de servicio tiene una vigencia de **30 días** desde la entrega. El ticket y la etiqueta de garantía aplican este mismo criterio.
 
 ### Nombre de autorización
 

@@ -45,6 +45,7 @@ $iconoGarantia = "fa-circle-xmark";
 $diasGarantia = null;
 
 if (is_array($garantia)) {
+    $garantia["fecha_vencimiento"] = (new DateTimeImmutable($garantia["fecha_entrega"]))->modify("+30 days")->format("Y-m-d");
     $hoyGarantia = new DateTime("today");
     $inicioGarantia = new DateTime($garantia["fecha_entrega"]);
     $finGarantia = new DateTime($garantia["fecha_vencimiento"]);
