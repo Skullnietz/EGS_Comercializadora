@@ -187,7 +187,7 @@ $telefonosEtiqueta = array_values(array_filter(array($configEtiqueta["whatsapp"]
 .egs-contact-header{display:flex;align-items:center;gap:1.1mm;height:7mm;border-bottom:.35mm solid #000}
 .egs-order-chip{display:flex!important;min-width:0!important;flex:1 1 auto!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:.25mm!important;color:#000!important;white-space:nowrap!important;overflow:hidden!important}
 .egs-order-chip span{min-width:0!important;font-size:5.2pt!important;line-height:1!important;font-weight:900!important;letter-spacing:-.04mm!important;overflow:hidden!important;text-overflow:clip!important}
-.egs-order-chip strong{display:block!important;max-width:100%!important;flex:none!important;font-size:8pt!important;line-height:1!important;font-weight:900!important;letter-spacing:-.08mm!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.egs-order-chip strong{display:block!important;max-width:100%!important;flex:none!important;font-size:11pt!important;line-height:1!important;font-weight:900!important;letter-spacing:-.12mm!important;overflow:hidden!important;text-overflow:ellipsis!important}
 .egs-client-name{display:flex!important;align-items:baseline!important;margin:1.2mm 0 .6mm!important;font-size:8pt!important;line-height:1.08!important;font-weight:900!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important}
 .egs-client-name>span{min-width:0;flex:1 1 auto;overflow:hidden;white-space:nowrap;text-overflow:clip}
 .egs-client-name>i{display:none;flex:none;margin-left:0;font-size:4.4pt;line-height:1;font-style:normal;font-weight:900;letter-spacing:-.18mm}
@@ -213,13 +213,13 @@ $telefonosEtiqueta = array_values(array_filter(array($configEtiqueta["whatsapp"]
 .egs-brand-copy b{font-size:5pt!important;line-height:1.05!important;font-weight:900!important;letter-spacing:-.07mm!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important}
 .egs-brand-copy small{font-size:5pt!important;line-height:1.1!important;font-weight:700!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important}
 .egs-warranty-fields{grid-column:1!important;grid-row:2!important;min-width:0!important;padding:.7mm 0 0!important;overflow:hidden!important}
-.egs-warranty-fields>div{display:grid!important;grid-template-columns:9mm minmax(0,1fr)!important;align-items:center!important;min-height:3.2mm!important;height:3.2mm!important;gap:1mm!important;border-bottom:.25mm solid #000!important}
+.egs-warranty-fields>div{display:grid!important;grid-template-columns:9mm minmax(0,1fr)!important;align-items:center!important;min-height:3.05mm!important;height:3.05mm!important;gap:1mm!important;border-bottom:.25mm solid #000!important}
 .egs-warranty-fields>div:first-child{grid-template-columns:9mm minmax(0,1fr)!important}
 .egs-warranty-fields>div b{font-size:5.1pt!important;line-height:1!important;font-weight:900!important;letter-spacing:-.04mm!important;white-space:nowrap!important}
 .egs-warranty-fields>div span{font-size:5.4pt!important;line-height:1.05!important;font-weight:700!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-.egs-warranty-fields>div.egs-order-row{height:4.6mm!important;min-height:4.6mm!important;align-items:center!important}
+.egs-warranty-fields>div.egs-order-row{height:5.2mm!important;min-height:5.2mm!important;align-items:center!important}
 .egs-warranty-fields>div.egs-order-row b{font-size:5.8pt!important}
-.egs-warranty-fields>div.egs-order-row span{font-size:8pt!important;line-height:1!important;font-weight:900!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.egs-warranty-fields>div.egs-order-row span{font-size:11pt!important;line-height:1!important;font-weight:900!important;letter-spacing:-.08mm!important;overflow:hidden!important;text-overflow:ellipsis!important}
 .egs-warranty-fields .dates{display:grid!important;grid-template-columns:9mm minmax(0,1fr)!important;grid-template-rows:2.9mm 2.9mm!important;height:5.8mm!important;min-height:5.8mm!important;gap:0 1mm!important}
 .egs-warranty-fields .dates span{padding-left:.4mm!important}
 .egs-warranty-fields .seal{display:flex!important;height:4.3mm!important;min-height:4.3mm!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:.7mm!important;margin:.45mm 0 0!important;padding:.35mm .6mm!important;border:0!important;background:#000!important;color:#fff!important;text-align:center!important}

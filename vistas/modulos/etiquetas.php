@@ -243,7 +243,7 @@ function egsSitioVisible($valor) {
 .egs-label-qr{grid-column:2!important;grid-row:1/3!important;display:flex!important;position:static!important;width:24.5mm!important;height:auto!important;min-width:24.5mm!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;padding:0!important;border:0!important;border-radius:0!important;background:#fff!important;color:#000!important}
 .egs-contact-qr.is-empty,.egs-label-qr.is-empty{display:none!important}
 .egs-contact-qr>span,.egs-label-qr>span{font-size:6pt!important;line-height:1!important;font-weight:900!important;margin:0 0 .6mm!important;color:#000!important;white-space:nowrap}
-.egs-contact-qr>span b,.egs-label-qr>span b{display:inline-block;font-size:9pt!important;line-height:.9!important;margin-left:.35mm;vertical-align:baseline}
+.egs-contact-qr>span b,.egs-label-qr>span b{display:block;font-size:12pt!important;line-height:1!important;margin:.35mm 0 0!important;text-align:center}
 .egs-qr-safe{display:flex;flex:0 0 22.2mm;width:22.2mm;height:22.2mm;align-items:center;justify-content:center;background:#fff}
 .egs-qr-code,.egs-contact-qr-code{width:22.2mm!important;height:22.2mm!important;flex:none!important}
 .egs-qr-code svg{display:block!important;width:22.2mm!important;height:22.2mm!important;shape-rendering:crispEdges}
@@ -263,12 +263,12 @@ function egsSitioVisible($valor) {
 .egs-warranty-label:not(.has-qr){grid-template-columns:1fr!important;padding:2mm!important}
 .egs-warranty-contact{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:.6mm!important;padding:0!important;border-bottom:.35mm solid #000!important;overflow:hidden!important}
 .egs-warranty-data{grid-column:1!important;grid-row:2!important;position:static!important;padding:.7mm 0 0!important;min-width:0!important;overflow:hidden!important}
-.egs-w-row,.egs-warranty-label.has-qr .egs-w-row:not(.egs-date-row){display:grid!important;grid-template-columns:9mm minmax(0,1fr)!important;align-items:center!important;height:3.2mm!important;min-height:3.2mm!important;gap:1mm!important;border-bottom:.25mm solid #000!important}
+.egs-w-row,.egs-warranty-label.has-qr .egs-w-row:not(.egs-date-row){display:grid!important;grid-template-columns:9mm minmax(0,1fr)!important;align-items:center!important;height:3.05mm!important;min-height:3.05mm!important;gap:1mm!important;border-bottom:.25mm solid #000!important}
 .egs-w-row b,.egs-warranty-label.has-qr .egs-w-row b{font-size:5.1pt!important;line-height:1!important;font-weight:900!important;letter-spacing:-.04mm!important;white-space:nowrap!important}
 .egs-w-row span,.egs-warranty-label.has-qr .egs-w-row span{height:auto!important;line-height:1.05!important;border:0!important;padding:0!important;font-size:5.4pt!important;font-weight:700!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-.egs-w-row.egs-order-row,.egs-warranty-label.has-qr .egs-w-row.egs-order-row{height:4.6mm!important;min-height:4.6mm!important;grid-template-columns:9mm minmax(0,1fr)!important;align-items:center!important}
+.egs-w-row.egs-order-row,.egs-warranty-label.has-qr .egs-w-row.egs-order-row{height:5.2mm!important;min-height:5.2mm!important;grid-template-columns:9mm minmax(0,1fr)!important;align-items:center!important}
 .egs-w-row.egs-order-row b{font-size:5.8pt!important}
-.egs-w-row.egs-order-row span{font-size:8pt!important;line-height:1!important;font-weight:900!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.egs-w-row.egs-order-row span{font-size:11pt!important;line-height:1!important;font-weight:900!important;letter-spacing:-.08mm!important;overflow:hidden!important;text-overflow:ellipsis!important}
 .egs-date-row,.egs-warranty-label.has-qr .egs-date-row{display:grid!important;width:auto!important;height:5.8mm!important;grid-template-columns:9mm minmax(0,1fr)!important;grid-template-rows:2.9mm 2.9mm!important;gap:0 1mm!important}
 .egs-date-row span,.egs-warranty-label.has-qr .egs-date-row span{padding-left:.4mm!important}
 .egs-date-row b:nth-of-type(2){text-align:left!important}
