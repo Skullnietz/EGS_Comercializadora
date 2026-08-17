@@ -58,6 +58,17 @@ class ModeloNotificaciones{
 
 		$pdo = ConexionWP::conectarWP();
 
+		// Operación normal: una lectura vacía valida tabla y columnas sin ejecutar DDL.
+		try {
+			$pdo->query(
+				"SELECT id, tipo, leido_tecnico, id_tecnicoDos
+				 FROM notificaciones_estado LIMIT 0"
+			);
+			return true;
+		} catch (Exception $e) {
+			// Instalación o esquema antiguo: continuar con la reparación idempotente.
+		}
+
 		$pdo->exec("CREATE TABLE IF NOT EXISTS `notificaciones_estado` (
 			`id` INT(11) NOT NULL AUTO_INCREMENT,
 			`id_orden` INT(11) NOT NULL,
@@ -69,6 +80,8 @@ class ModeloNotificaciones{
 			`id_empresa` INT(11) DEFAULT NULL,
 			`id_asesor` INT(11) DEFAULT NULL,
 			`id_tecnico` INT(11) DEFAULT NULL,
+			`id_tecnicoDos` INT(11) DEFAULT NULL,
+			`tipo` VARCHAR(20) NOT NULL DEFAULT 'estado',
 			`leido_admin` TINYINT(1) NOT NULL DEFAULT 0,
 			`leido_vendedor` TINYINT(1) NOT NULL DEFAULT 0,
 			`leido_tecnico` TINYINT(1) NOT NULL DEFAULT 0,
@@ -80,20 +93,19 @@ class ModeloNotificaciones{
 			KEY `idx_fecha` (`fecha`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-		// Agregar columna leido_tecnico si la tabla ya existía sin ella
-		try {
+		$columnas = $pdo->query("SHOW COLUMNS FROM `notificaciones_estado`")->fetchAll(PDO::FETCH_COLUMN);
+
+		if (!in_array("leido_tecnico", $columnas, true)) {
 			$pdo->exec("ALTER TABLE `notificaciones_estado` ADD COLUMN `leido_tecnico` TINYINT(1) NOT NULL DEFAULT 0 AFTER `leido_vendedor`");
-		} catch (Exception $e) { /* columna ya existe, ignorar */ }
-
-		// Agregar columna tipo para distinguir estado vs traspaso
-		try {
+		}
+		if (!in_array("tipo", $columnas, true)) {
 			$pdo->exec("ALTER TABLE `notificaciones_estado` ADD COLUMN `tipo` VARCHAR(20) NOT NULL DEFAULT 'estado' AFTER `id_tecnico`");
-		} catch (Exception $e) { /* columna ya existe, ignorar */ }
-
-		// Agregar columna id_tecnicoDos para técnico de participación
-		try {
+		}
+		if (!in_array("id_tecnicoDos", $columnas, true)) {
 			$pdo->exec("ALTER TABLE `notificaciones_estado` ADD COLUMN `id_tecnicoDos` INT(11) DEFAULT NULL AFTER `id_tecnico`");
-		} catch (Exception $e) { /* columna ya existe, ignorar */ }
+		}
+
+		return true;
 
 	}
 

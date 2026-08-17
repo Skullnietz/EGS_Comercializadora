@@ -9,7 +9,9 @@
 
 session_start();
 
-if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] != "administrador") {
+if (!isset($_SESSION["validarSesionBackend"]) || $_SESSION["validarSesionBackend"] !== "ok"
+	|| !isset($_SESSION["perfil"])
+	|| !in_array($_SESSION["perfil"], array("administrador", "Super-Administrador"), true)) {
 	http_response_code(403);
 	echo "Acceso restringido. Inicia sesión como administrador.";
 	exit;

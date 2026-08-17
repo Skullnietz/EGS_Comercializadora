@@ -1,5 +1,19 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+	session_start();
+}
+
+if (!isset($_SESSION["validarSesionBackend"]) || $_SESSION["validarSesionBackend"] !== "ok") {
+	http_response_code(401);
+	header("Content-Type: application/json; charset=utf-8");
+	echo json_encode(array("ok" => false, "error" => "Sesión no válida"));
+	exit;
+}
+
+// El endpoint no modifica la sesión; liberar el bloqueo para no serializar el resto de AJAX.
+session_write_close();
+
 require_once "../modelos/notificaciones.modelo.php";
 require_once "../modelos/conexionWordpress.php";
 
@@ -38,8 +52,6 @@ MARCAR NOTIFICACIONES DE ESTADO COMO LEÍDAS
 
 if(isset($_POST["marcarLeidasEstado"])){
 
-	session_start();
-
 	$perfil    = isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "";
 	$idEmpresa = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
 	$idRol     = null;
@@ -73,8 +85,6 @@ POLLING: CONTAR NOTIFICACIONES NUEVAS (liviano)
 =============================================*/
 
 if(isset($_POST["pollNotificaciones"])){
-
-	session_start();
 
 	require_once "../modelos/conexion.php";
 	require_once "../modelos/observacionOrdenes.modelo.php";

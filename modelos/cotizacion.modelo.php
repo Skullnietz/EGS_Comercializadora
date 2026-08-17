@@ -9,12 +9,13 @@ class CotizacionModelo
 	=============================================*/
 	static public function mdlIngresarCotizacion($tabla, $datos)
 	{
-		// Log input data for debugging
-		$logMsg = "DEBUG MODELO (mdlIngresarCotizacion):\n";
-		$logMsg .= "Tabla: " . $tabla . "\n";
-		$logMsg .= "Datos: " . print_r($datos, true) . "\n";
-		$logMsg .= "-----------------------------------\n";
-		file_put_contents("debug_log.txt", $logMsg, FILE_APPEND);
+		if (getenv("APP_ENV") === "development") {
+			$logMsg = "DEBUG MODELO (mdlIngresarCotizacion):\n";
+			$logMsg .= "Tabla: " . $tabla . "\n";
+			$logMsg .= "Datos: " . print_r($datos, true) . "\n";
+			$logMsg .= "-----------------------------------\n";
+			file_put_contents("debug_log.txt", $logMsg, FILE_APPEND | LOCK_EX);
+		}
 
 		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(id_cliente, nombre_cliente, id_vendedor, empresa, productos, impuesto, neto, total, asunto, vigencia, observaciones, descuento_porcentaje, codigo_qr, fecha) VALUES (:id_cliente, :nombre_cliente, :id_vendedor, :empresa, :productos, :impuesto, :neto, :total, :asunto, :vigencia, :observaciones, :descuento_porcentaje, :codigo_qr, NOW())");
 
@@ -53,12 +54,14 @@ class CotizacionModelo
 	=============================================*/
 	static public function mdlMostrarCotizacion($tabla, $item, $valor)
 	{
-		$logMsg = "DEBUG MODELO (mdlMostrarCotizacion):\n";
-		$logMsg .= "Tabla: " . $tabla . "\n";
-		$logMsg .= "Item: " . $item . "\n";
-		$logMsg .= "Valor: " . $valor . "\n";
-		$logMsg .= "-----------------------------------\n";
-		file_put_contents("debug_log.txt", $logMsg, FILE_APPEND);
+		if (getenv("APP_ENV") === "development") {
+			$logMsg = "DEBUG MODELO (mdlMostrarCotizacion):\n";
+			$logMsg .= "Tabla: " . $tabla . "\n";
+			$logMsg .= "Item: " . $item . "\n";
+			$logMsg .= "Valor: " . $valor . "\n";
+			$logMsg .= "-----------------------------------\n";
+			file_put_contents("debug_log.txt", $logMsg, FILE_APPEND | LOCK_EX);
+		}
 
 		if ($item == "codigo_qr") {
 

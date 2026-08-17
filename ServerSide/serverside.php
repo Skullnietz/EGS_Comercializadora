@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../config/backend-session-guard.php';
+
 include 'serversideConexion.php';
 class TableData {
  	private $_db;

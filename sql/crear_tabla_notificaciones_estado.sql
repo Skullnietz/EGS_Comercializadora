@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `notificaciones_estado` (
   `id_empresa` INT(11) DEFAULT NULL,
   `id_asesor` INT(11) DEFAULT NULL,
   `id_tecnico` INT(11) DEFAULT NULL,
+  `id_tecnicoDos` INT(11) DEFAULT NULL COMMENT 'Técnico de participación',
   `tipo` VARCHAR(20) NOT NULL DEFAULT 'estado' COMMENT 'estado | traspaso',
   `leido_admin` TINYINT(1) NOT NULL DEFAULT 0,
   `leido_vendedor` TINYINT(1) NOT NULL DEFAULT 0,

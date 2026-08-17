@@ -1006,12 +1006,13 @@ if (!function_exists('_notiTiempoRel')) {
 <?php endif; ?>
 
 <!-- ══════════════════════════════════════════════════
-     POLLING EN TIEMPO REAL (cada 45 seg)
+     POLLING EN TIEMPO REAL (cada 90 seg)
      Actualiza badge + muestra toast si hay nuevas
 ══════════════════════════════════════════════════ -->
 <script>
   (function () {
-    var POLL_INTERVAL = 45000; // 45 segundos
+    var POLL_INTERVAL = 90000; // 90 segundos
+    var pollInFlight = false;
     // Usar el mayor entre lo que hay en PHP y lo guardado en localStorage (por si otra pestaña ya actualizó)
     var serverEstadoId = <?php echo (!empty($_noti_estado) && isset($_noti_estado[0]['id'])) ? intval($_noti_estado[0]['id']) : 0; ?>;
     var serverObsId = <?php echo (!empty($_noti_obs) && isset($_noti_obs[0]['id'])) ? intval($_noti_obs[0]['id']) : 0; ?>;
@@ -1238,6 +1239,9 @@ if (!function_exists('_notiTiempoRel')) {
     }
 
     function egsPollNotificaciones() {
+      if (document.hidden || pollInFlight) return;
+      pollInFlight = true;
+
       $.post('ajax/notificaciones.ajax.php', { pollNotificaciones: 1 }, function (r) {
         if (!r || typeof r !== 'object') return;
 
@@ -1384,7 +1388,9 @@ if (!function_exists('_notiTiempoRel')) {
           });
         }
 
-      }, 'json');
+      }, 'json').always(function () {
+        pollInFlight = false;
+      });
     }
 
     // Mostrar una vez los eventos que ya existían al cargar la página.
@@ -1413,6 +1419,10 @@ if (!function_exists('_notiTiempoRel')) {
     setTimeout(function () {
       setInterval(egsPollNotificaciones, POLL_INTERVAL);
     }, 10000);
+
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) egsPollNotificaciones();
+    });
 
   })();
 </script>

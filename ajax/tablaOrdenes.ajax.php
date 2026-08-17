@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . "/../config/backend-session-guard.php";
+
 require_once "../controladores/ordenes.controlador.php";
 require_once "../modelos/ordenes.modelo.php";
 
@@ -25,8 +27,14 @@ class tablaOrdenes
 	public function mostrarTablaOrdenes()
 	{
 
-		$item = null;
-		$valor = null;
+		$perfilActual = isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "";
+		if ($perfilActual === "Super-Administrador") {
+			$item = null;
+			$valor = null;
+		} else {
+			$item = "id_empresa";
+			$valor = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
+		}
 		$ordenes = controladorOrdenes::ctrMostrarordenesParaValidar($item, $valor);
 
 		// Bulk: calificación y recogida de clientes
@@ -34,6 +42,12 @@ class tablaOrdenes
 		try { $_bo_ordenesMap = ControladorClientes::ctrContarOrdenesClientesBulk(); } catch(Exception $e) {}
 		try { $_bo_estadoMap = ControladorClientes::ctrContarOrdenesEstadoBulk(); } catch(Exception $e) {}
 		try { $_bo_recogidaMap = ControladorClientes::ctrPromedioRecogidaBulk(); } catch(Exception $e) {}
+
+		// Evitar repetir las mismas consultas de catálogo por cada orden.
+		$empresasCache = array();
+		$tecnicosCache = array();
+		$asesoresCache = array();
+		$clientesCache = array();
 
 
 		$datosJson = '{
@@ -51,38 +65,42 @@ class tablaOrdenes
 
 			//TRAER EMPRESA
 
-			$item = "id";
-			$valor = $ordenes[$i]["id_empresa"];
-
-			$respuesta = ControladorVentas::ctrMostrarEmpresasParaTiketimp($item, $valor);
-
-			$NombreEmpresa = $respuesta["empresa"];
+			$idEmpresa = intval($ordenes[$i]["id_empresa"]);
+			if (!array_key_exists($idEmpresa, $empresasCache)) {
+				$respuesta = ControladorVentas::ctrMostrarEmpresasParaTiketimp("id", $idEmpresa);
+				$empresasCache[$idEmpresa] = is_array($respuesta) && isset($respuesta["empresa"])
+					? $respuesta["empresa"] : "";
+			}
+			$NombreEmpresa = $empresasCache[$idEmpresa];
 
 			//TRAER TECNICO
-			$item = "id";
-			$valor = $ordenes[$i]["id_tecnico"];
-
-			$tecnico = ControladorTecnicos::ctrMostrarTecnicos($item, $valor);
-
-			$NombreTecnico = $tecnico["nombre"];
+			$idTecnico = intval($ordenes[$i]["id_tecnico"]);
+			if (!array_key_exists($idTecnico, $tecnicosCache)) {
+				$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $idTecnico);
+				$tecnicosCache[$idTecnico] = is_array($tecnico) && isset($tecnico["nombre"])
+					? $tecnico["nombre"] : "";
+			}
+			$NombreTecnico = $tecnicosCache[$idTecnico];
 
 			//TRAER ASESOR
 
-			$item = "id";
-			$valor = $ordenes[$i]["id_Asesor"];
-
-			$asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
-
-			$NombreAsesor = $asesor["nombre"];
+			$idAsesor = intval($ordenes[$i]["id_Asesor"]);
+			if (!array_key_exists($idAsesor, $asesoresCache)) {
+				$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $idAsesor);
+				$asesoresCache[$idAsesor] = is_array($asesor) && isset($asesor["nombre"])
+					? $asesor["nombre"] : "";
+			}
+			$NombreAsesor = $asesoresCache[$idAsesor];
 
 			//TRAER CLIENTE (USUARIO)
 
-			$item = "id";
-			$valor = $ordenes[$i]["id_usuario"];
-
-			$usuario = ControladorClientes::ctrMostrarClientes($item, $valor);
-
-			$NombreUsuario = $usuario["nombre"];
+			$idCliente = intval($ordenes[$i]["id_usuario"]);
+			if (!array_key_exists($idCliente, $clientesCache)) {
+				$usuario = ControladorClientes::ctrMostrarClientes("id", $idCliente);
+				$clientesCache[$idCliente] = is_array($usuario) && isset($usuario["nombre"])
+					? $usuario["nombre"] : "";
+			}
+			$NombreUsuario = $clientesCache[$idCliente];
 
 			// ── Etiquetas de calificación y recogida ──
 			$_cliId = intval($ordenes[$i]["id_usuario"]);
@@ -127,7 +145,7 @@ class tablaOrdenes
 			$eliminarOrden = "<button class='btn btn-danger btnEliminarorden' idOrden='" . $ordenes[$i]["id"] . "'><i class='fa fa-times'></i></button>";
 
 			$ticket = "<button class='btn btn-warning btnImprimirorden' idOrden='" . $ordenes[$i]["id"] . "' cliente='" . $ordenes[$i]["id_usuario"] . "'  tecnico='" . $ordenes[$i]["id_tecnico"] . "' asesor='" . $ordenes[$i]["id_Asesor"] . "' empresa='" . $ordenes[$i]["id_empresa"] . "' estado='" . htmlspecialchars($ordenes[$i]["estado"], ENT_QUOTES, "UTF-8") . "' data-toggle='modal'><i class='fa fa-ticket'></i></button>";
-			if (isset($_GET["perfil"]) && $_GET["perfil"] === "administrador" && stripos((string) $ordenes[$i]["estado"], "(REV)") !== false) {
+			if ($perfilActual === "administrador" && stripos((string) $ordenes[$i]["estado"], "(REV)") !== false) {
 				$ticket .= " <a class='btn btn-success' href='index.php?ruta=imprimir-etiqueta-orden&tipo=contacto&idOrden=" . intval($ordenes[$i]["id"]) . "' target='_blank' title='Imprimir etiqueta de identificación'><i class='fa fa-tag'></i></a>";
 			}
 			if (stripos((string) $ordenes[$i]["estado"], "(Ent)") !== false || stripos((string) $ordenes[$i]["estado"], "Entregado") !== false || stripos((string) $ordenes[$i]["estado"], "Entregada") !== false) {

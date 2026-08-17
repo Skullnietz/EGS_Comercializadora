@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . "/../config/backend-session-guard.php";
 
 if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] == "tecnico") {
 	echo '{"data":[]}';
@@ -28,14 +28,15 @@ class TablaOrdenes{
   =============================================*/
   public function mostrarTabla(){	
 
-	if (!isset($_GET["perfil"]) || $_GET["perfil"] == "tecnico") {
+	$perfilActual = isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "";
+	if ($perfilActual == "tecnico") {
 		echo '{"data":[]}';
 		return;
 	}
 
 	
 
-  	if ($_GET["perfil"] == "Super-Administrador") {
+	if ($perfilActual == "Super-Administrador") {
   		
 		$item = null;
  		$valor = null;
@@ -43,7 +44,7 @@ class TablaOrdenes{
   		$pedidos = ControladorPedidos::ctrMostrarPedido($item,$valor);
   	}else{
 
-  		$empresaDelPerfil = $_GET["empresa"];
+		$empresaDelPerfil = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
 		$item = "id_empresa";
  		$valor = $empresaDelPerfil;
 

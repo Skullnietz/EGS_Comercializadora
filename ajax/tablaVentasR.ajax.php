@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . "/../config/backend-session-guard.php";
+
 require_once "../controladores/ventas.controlador.php";
 require_once "../modelos/ventas.modelo.php";
 require_once "../controladores/productos.controlador.php";
@@ -13,12 +15,13 @@ class TablaVentas{
     MOSTRAR LA TABLA DE VENTAS
     =============================================*/
     public function mostrarTabla(){    
-        if ($_GET["perfil"] == "Super-Administrador") {
+        $perfilActual = isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "";
+        if ($perfilActual == "Super-Administrador") {
             $itemUno = null;
             $valorUno = null;
             $ventas = ControladorVentas::ctrMostrarVentasParaTiket($itemUno, $valorUno);
         } else {
-            $empresa = $_GET["empresa"];
+            $empresa = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
             $item = "id_empresa";
             $valor = $empresa;
             $ventas = ControladorVentas::ctrMostrarVentasParaEmpresa($item, $valor);
@@ -61,7 +64,7 @@ class TablaVentas{
             $ticket = "<button class='btn btn-warning btnImprimirComprovanteDeVentaR' idventa='".$ventas[$i]["id"]."' empresa='".$ventas[$i]["empresa"]."' data-toggle='modal'><i class='fas fa-ticket-alt'></i></button>";
 
             $eliminarVenta = "";
-            if ($_GET["perfil"] == "administrador") {
+            if ($perfilActual == "administrador") {
                 $eliminarVenta = "<button class='btn btn-danger btnEliminarVenta' idventa='".$ventas[$i]["id"]."'><i class='fa fa-times'></i></button>";
             }
 

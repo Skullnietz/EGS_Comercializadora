@@ -46,6 +46,17 @@ class ModeloVisitas{
 				return $resultado;
 			}
 
+			// Ruta normal: validar con lecturas livianas y evitar DDL/SHOW TABLES en cada carga.
+			try {
+				$pdo->query("SELECT 1 FROM visitasPersonas LIMIT 0");
+				$pdo->query("SELECT 1 FROM visitasPaises LIMIT 0");
+				$resultado["ok"] = true;
+				$resultado["mensaje"] = "Tablas de visitas disponibles";
+				return $resultado;
+			} catch (Exception $e) {
+				// Instalación inicial: continuar con la creación idempotente de las tablas.
+			}
+
 			if (!self::tablaExiste($pdo, "visitasPersonas")) {
 				$pdo->exec("CREATE TABLE IF NOT EXISTS `visitasPersonas` (
 					`id` INT(11) NOT NULL AUTO_INCREMENT,

@@ -15,6 +15,10 @@
 Options +FollowSymLinks
 RewriteEngine On
 
+# Bloquear herramientas de diagnóstico/despliegue antes de permitir PHP directo.
+RewriteRule ^(?:check_db\.php|debug_ordenes\.php|ajax/debug\.php|sql/add_oculto_column\.php)$ - [F,L,NC]
+RewriteRule ^(?:unzipper-master|\.git|\.claude)(?:/|$) - [F,L,NC]
+
 # Permitir acceso directo a archivos PHP que existen (monedero.php, etc.)
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule \.(php|html?)$ - [L]
@@ -37,7 +41,7 @@ RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 Options -Indexes
 
 # ── Proteger archivos sensibles ────────────────────────────────────────────────
-<FilesMatch "(^\.env$|debug_log\.txt|composer\.(json|lock)|\.gitignore)$">
+<FilesMatch "(^\.env(?:\..*)?$|debug_log\.txt|composer\.(json|lock)|\.gitignore|^\.user\.ini$|^php\.ini$|\.(?:sql|log|md)$)">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>

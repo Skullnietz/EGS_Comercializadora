@@ -3,16 +3,6 @@ CARGAR LA TABLA DINÁMICA DE LAS ORDENES
 =============================================**/
 
 var tipoDePerfil = $("#tipoDePerfil").val();
-$.ajax({
-
- 	url:"ajax/tablaOrdenes.ajax.php?perfil="+$("#tipoDePerfil").val(),
- 	success:function(respuesta){
-		
- 		//console.log("Tabla Ordenes", respuesta);
-
- 	}
-
-})
 
 $(".tablaOrdenes").DataTable({
 	 "ajax": "ajax/tablaOrdenes.ajax.php?perfil="+$("#tipoDePerfil").val(),

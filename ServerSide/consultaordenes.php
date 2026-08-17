@@ -1,12 +1,21 @@
 <?php
+require_once __DIR__ . '/../config/backend-session-guard.php';
+
 include_once '../ServerSide/serversideConexion.php';
 require_once __DIR__ . '/../config/global.php';
 
 $objeto = new ConexionO();
 $conexiono = $objeto->Conectar();
 
-$consulta = "SELECT * FROM ordenes ORDER BY id DESC";
+$esSuperAdministrador = isset($_SESSION["perfil"]) && $_SESSION["perfil"] === "Super-Administrador";
+$consulta = $esSuperAdministrador
+    ? "SELECT * FROM ordenes ORDER BY id DESC"
+    : "SELECT * FROM ordenes WHERE id_empresa = :id_empresa ORDER BY id DESC";
 $resultado = $conexiono->prepare($consulta);
+if (!$esSuperAdministrador) {
+    $idEmpresa = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
+    $resultado->bindValue(":id_empresa", $idEmpresa, PDO::PARAM_INT);
+}
 $resultado->execute();
 $data=$resultado->fetchAll(PDO::FETCH_ASSOC);
 
