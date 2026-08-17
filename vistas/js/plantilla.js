@@ -14,19 +14,15 @@ $(document).ajaxStop(function () {
 });
 
 /* =====================================================
-   MANEJO GLOBAL DE ERRORES AJAX
-   Muestra alerta SweetAlert en errores de red/servidor.
-   Las llamadas con error handlers propios los siguen
-   ejecutando sin interferencia.
+   REGISTRO GLOBAL DE ERRORES AJAX
+   No interrumpe la interfaz con alertas globales; cada
+   módulo conserva su propio manejo visual cuando aplica.
    ===================================================== */
-$(document).ajaxError(function (event, xhr) {
+$(document).ajaxError(function (event, xhr, settings, error) {
   $('#ajax-loading-bar').removeClass('active');
   /* Ignorar peticiones abortadas (ej. al navegar) */
   if (xhr.status === 0 || xhr.statusText === 'abort') return;
-  swal({
-    type: 'error',
-    title: 'Error de conexión',
-    text: 'No se pudo completar la solicitud (HTTP ' + xhr.status + '). Verifica tu conexión e intenta de nuevo.',
-    confirmButtonText: 'Cerrar'
-  });
+  if (window.console && console.warn) {
+    console.warn('[AJAX]', xhr.status, settings && settings.url, error || xhr.statusText);
+  }
 });

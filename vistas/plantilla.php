@@ -1,5 +1,6 @@
 <?php
 $jsVer = '1.4.8';
+$plantillaJsVer = '1.4.9';
 $rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
 $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
@@ -309,7 +310,7 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
   ?>
 
   <?php if (($hasBackendSession || $rutaActual === "validar-cotizacion") && !$isTabletPublicRoute && !$isClientePublicRoute): ?>
-  <script src="vistas/js/plantilla.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/plantilla.js?v=<?= $plantillaJsVer ?>"></script>
   <script src="vistas/js/gestorComercio.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorCategorias.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorSubCategorias.js?v=<?= $jsVer ?>"></script>
