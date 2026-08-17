@@ -16,6 +16,7 @@ storage/cache/*.json
 
 # ── Logs y debug ──────────────────────────────────────────────────────────────
 debug_log.txt
+test_db_log.txt
 *.log
 /logs/
 

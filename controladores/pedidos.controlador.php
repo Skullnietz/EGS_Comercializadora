@@ -1064,11 +1064,11 @@ class ControladorPedidos{
 								);
 
 			if (getenv("APP_ENV") === "development") {
-				error_log(print_r($datosPedido, true), 3, dirname(__FILE__).'/../test_db_log.txt');
+				error_log("[pedidos] Editando pedido ID " . $idPedido);
 			}
 			$respuesta = ModeloPedidos::mdlEditarPedidoDinamico($tabla, $datosPedido);
 			if (getenv("APP_ENV") === "development") {
-				error_log("DB RESPUESTA: " . $respuesta . "\n", 3, dirname(__FILE__).'/../test_db_log.txt');
+				error_log("[pedidos] Resultado de edición para ID " . $idPedido . ": " . $respuesta);
 			}
 
 			if ($respuesta == "ok") {
