@@ -104,6 +104,30 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 		user-select: none; -webkit-user-drag: none;
 	}
 	.egs-gallery-main:hover img { transform: scale(1.03); }
+	.egs-gallery-status,
+	.lb-image-status {
+		position: absolute; inset: 0; z-index: 4;
+		display: flex; flex-direction: column; align-items: center; justify-content: center;
+		gap: 9px; padding: 24px; text-align: center;
+		background: rgba(15,23,42,.82); color: #e2e8f0;
+		font-size: 13px; font-weight: 600;
+		transition: opacity .2s ease, visibility .2s ease;
+	}
+	.egs-gallery-status.is-hidden,
+	.lb-image-status.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+	.egs-gallery-status i,
+	.lb-image-status i { font-size: 24px; color: #c7d2fe; }
+	.egs-gallery-status.is-error,
+	.lb-image-status.is-error { background: rgba(15,23,42,.92); }
+	.egs-gallery-status.is-error i,
+	.lb-image-status.is-error i { color: #fbbf24; }
+	.egs-image-retry {
+		border: 1px solid rgba(255,255,255,.35); border-radius: 8px;
+		background: rgba(255,255,255,.12); color: #fff;
+		padding: 7px 13px; font-size: 12px; font-weight: 700;
+		cursor: pointer; transition: background .2s ease, transform .2s ease;
+	}
+	.egs-image-retry:hover { background: rgba(255,255,255,.24); transform: translateY(-1px); }
 
 	/* ── Zoom hint overlay ── */
 	.egs-gallery-main::after {
@@ -191,6 +215,7 @@ $isReadonly = ($isTecnico || $isVendedor || $isSecretaria);
 		transition: transform .3s cubic-bezier(.4,0,.2,1);
 		user-select: none; -webkit-user-drag: none;
 	}
+	#egsLightbox .lb-image-status { z-index: 9; }
 	#egsLightbox .lb-image:active { cursor: grabbing; }
 
 	/* ── Lightbox toolbar ── */
@@ -850,7 +875,12 @@ function _egsEstadoClass($estado) {
 
 							<!-- Main image -->
 							<div class="egs-gallery-main">
-								<img src="<?php echo htmlspecialchars($_gal_imgs[0]); ?>" alt="Imagen de la orden" loading="lazy">
+								<div class="egs-gallery-status" role="status" aria-live="polite">
+									<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+									<span>Cargando imagen...</span>
+									<button type="button" class="egs-image-retry egs-gallery-retry" style="display:none">Reintentar</button>
+								</div>
+								<img src="<?php echo htmlspecialchars($_gal_imgs[0]); ?>" alt="Imagen de la orden" loading="eager" fetchpriority="high" decoding="async">
 							</div>
 
 							<?php if ($_gal_total > 1): ?>
@@ -862,7 +892,7 @@ function _egsEstadoClass($estado) {
 							<div class="egs-gallery-thumbs">
 								<?php foreach ($_gal_imgs as $_gi_idx => $_gi_src): ?>
 								<div class="egs-gallery-thumb <?php echo $_gi_idx === 0 ? 'active' : ''; ?>" data-src="<?php echo htmlspecialchars($_gi_src); ?>">
-									<img src="<?php echo htmlspecialchars($_gi_src); ?>" alt="Miniatura" loading="lazy">
+									<img src="<?php echo htmlspecialchars($_gi_src); ?>" alt="Miniatura" loading="lazy" fetchpriority="low" decoding="async">
 								</div>
 								<?php endforeach; ?>
 							</div>
@@ -954,6 +984,11 @@ function _egsEstadoClass($estado) {
 						<?php endif; ?>
 
 						<!-- Image -->
+						<div class="lb-image-status is-hidden" role="status" aria-live="polite">
+							<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+							<span>Cargando imagen...</span>
+							<button type="button" class="egs-image-retry lb-image-retry" style="display:none">Reintentar</button>
+						</div>
 						<img src="" class="lb-image" alt="Vista previa">
 
 						<!-- Toolbar -->
@@ -979,20 +1014,103 @@ function _egsEstadoClass($estado) {
 				idx: 0, scale: 1, dragging: false,
 				startX: 0, startY: 0, tx: 0, ty: 0
 			};
+			var _mainLoad = { seq: 0, loader: null, timeoutTimer: null, retryTimer: null };
+			var _lbLoad = { seq: 0, loader: null, timeoutTimer: null, retryTimer: null };
+			var IMAGE_TIMEOUT_MS = 10000;
+			var IMAGE_MAX_RETRIES = 2;
 
 			if (!_gal.imgs || _gal.imgs.length === 0) return;
 
-			function galUpdate(animate) {
-				var $main = $('.egs-gallery-main img');
-				if (animate) {
-					$main.css({opacity: 0, transform: 'scale(.96)'});
-					setTimeout(function(){
-						$main.attr('src', _gal.imgs[_gal.idx]);
-						$main.css({opacity: 1, transform: 'scale(1)'});
-					}, 200);
-				} else {
-					$main.attr('src', _gal.imgs[_gal.idx]);
+			function clearImageAttempt(channel, abort) {
+				if (channel.timeoutTimer) clearTimeout(channel.timeoutTimer);
+				channel.timeoutTimer = null;
+				if (channel.loader) {
+					channel.loader.onload = null;
+					channel.loader.onerror = null;
+					if (abort) channel.loader.src = '';
 				}
+				channel.loader = null;
+			}
+
+			function stopImageRequest(channel) {
+				channel.seq++;
+				if (channel.retryTimer) clearTimeout(channel.retryTimer);
+				channel.retryTimer = null;
+				clearImageAttempt(channel, true);
+			}
+
+			function requestImage(channel, url, callbacks) {
+				stopImageRequest(channel);
+				var requestSeq = channel.seq;
+				var attempt = 0;
+
+				function startAttempt() {
+					if (requestSeq !== channel.seq) return;
+					channel.retryTimer = null;
+					clearImageAttempt(channel, true);
+
+					var loader = new Image();
+					var settled = false;
+					channel.loader = loader;
+					loader.decoding = 'async';
+					if ('fetchPriority' in loader) loader.fetchPriority = callbacks.priority || 'auto';
+
+					function failAttempt() {
+						if (settled || requestSeq !== channel.seq) return;
+						settled = true;
+						clearImageAttempt(channel, true);
+
+						if (attempt < IMAGE_MAX_RETRIES) {
+							attempt++;
+							if (callbacks.onRetry) callbacks.onRetry(attempt, IMAGE_MAX_RETRIES);
+							channel.retryTimer = setTimeout(startAttempt, attempt === 1 ? 800 : 1800);
+						} else if (callbacks.onError) {
+							callbacks.onError();
+						}
+					}
+
+					loader.onload = function() {
+						if (settled || requestSeq !== channel.seq) return;
+						settled = true;
+						clearImageAttempt(channel, false);
+						if (callbacks.onLoad) callbacks.onLoad(url);
+					};
+					loader.onerror = failAttempt;
+					channel.timeoutTimer = setTimeout(failAttempt, IMAGE_TIMEOUT_MS);
+					loader.src = url;
+				}
+
+				startAttempt();
+			}
+
+			function setImageStatus($status, mode, text) {
+				var $icon = $status.find('i').first();
+				var $retry = $status.find('.egs-image-retry').first();
+				$status.removeClass('is-hidden is-error');
+
+				if (mode === 'hidden') {
+					$status.addClass('is-hidden');
+					$retry.hide();
+					return;
+				}
+
+				$status.find('span').first().text(text || 'Cargando imagen...');
+				if (mode === 'error') {
+					$status.addClass('is-error');
+					$icon.attr('class', 'fa-solid fa-triangle-exclamation');
+					$retry.show();
+				} else {
+					$icon.attr('class', 'fa-solid fa-spinner fa-spin');
+					$retry.hide();
+				}
+			}
+
+			function galUpdate(animate, forceReload) {
+				var $main = $('.egs-gallery-main > img');
+				var $status = $('.egs-gallery-status');
+				var mainEl = $main[0];
+				var targetUrl = _gal.imgs[_gal.idx];
+
 				$('.egs-gallery-counter').text((_gal.idx + 1) + ' / ' + _gal.imgs.length);
 				$('.egs-gallery-thumb').removeClass('active').eq(_gal.idx).addClass('active');
 				var $strip = $('.egs-gallery-thumbs'), $active = $('.egs-gallery-thumb.active');
@@ -1000,6 +1118,28 @@ function _egsEstadoClass($estado) {
 					var sl = $active[0].offsetLeft - $strip.width()/2 + $active.outerWidth()/2;
 					$strip.animate({scrollLeft: sl}, 200);
 				}
+
+				if (!forceReload && !animate && mainEl && mainEl.complete && mainEl.naturalWidth > 0) {
+					setImageStatus($status, 'hidden');
+					return;
+				}
+
+				$main.css({opacity: mainEl && mainEl.naturalWidth > 0 ? .28 : 0, transform: 'scale(.96)'});
+				setImageStatus($status, 'loading', 'Cargando imagen...');
+				requestImage(_mainLoad, targetUrl, {
+					priority: 'high',
+					onRetry: function(attempt, max) {
+						setImageStatus($status, 'loading', 'Reintentando imagen (' + attempt + '/' + max + ')...');
+					},
+					onLoad: function(loadedUrl) {
+						$main.attr('src', loadedUrl).css({opacity: 1, transform: 'scale(1)'});
+						setImageStatus($status, 'hidden');
+					},
+					onError: function() {
+						$main.css({opacity: mainEl && mainEl.naturalWidth > 0 ? .2 : 0, transform: 'scale(1)'});
+						setImageStatus($status, 'error', 'No fue posible cargar la imagen.');
+					}
+				});
 			}
 
 			function galGo(dir) {
@@ -1014,6 +1154,11 @@ function _egsEstadoClass($estado) {
 				e.preventDefault();
 				_gal.idx = $(this).index();
 				galUpdate(true);
+			});
+			$(document).on('click', '.egs-gallery-retry', function(e){
+				e.preventDefault();
+				e.stopImmediatePropagation();
+				galUpdate(false, true);
 			});
 
 			// Keyboard
@@ -1037,25 +1182,44 @@ function _egsEstadoClass($estado) {
 			function lbReset() { _gal.scale = 1; _gal.tx = 0; _gal.ty = 0; }
 			function lbUpdate(animate) {
 				var $img = $('.lb-image');
-				if (animate) {
-					$img.css({opacity: 0, transform: 'scale(.92)'});
-					setTimeout(function(){
-						lbReset(); $img.attr('src', _gal.imgs[_gal.idx]);
-						$img.css({opacity: 1}); lbTransform(true);
-					}, 200);
-				} else {
-					lbReset(); $img.attr('src', _gal.imgs[_gal.idx]); lbTransform(false);
-				}
+				var $status = $('.lb-image-status');
+				var imgEl = $img[0];
+				$img.css({opacity: imgEl && imgEl.naturalWidth > 0 ? .2 : 0, transform: 'scale(.92)'});
+				setImageStatus($status, 'loading', 'Cargando imagen...');
+				requestImage(_lbLoad, _gal.imgs[_gal.idx], {
+					priority: 'high',
+					onRetry: function(attempt, max) {
+						setImageStatus($status, 'loading', 'Reintentando imagen (' + attempt + '/' + max + ')...');
+					},
+					onLoad: function(loadedUrl) {
+						lbReset();
+						$img.attr('src', loadedUrl).css({opacity: 1});
+						lbTransform(!!animate);
+						setImageStatus($status, 'hidden');
+					},
+					onError: function() {
+						$img.css({opacity: imgEl && imgEl.naturalWidth > 0 ? .15 : 0});
+						setImageStatus($status, 'error', 'No fue posible cargar la imagen ampliada.');
+					}
+				});
 				$('.lb-counter').text((_gal.idx + 1) + ' / ' + _gal.imgs.length);
 			}
 
 			// Open lightbox
-			$(document).on('click', '.egs-gallery-main', function(){
-				lbReset();
-				$('.lb-image').attr('src', _gal.imgs[_gal.idx]);
-				lbTransform(false);
-				$('.lb-counter').text((_gal.idx + 1) + ' / ' + _gal.imgs.length);
+			$(document).on('click', '.egs-gallery-main', function(e){
+				if ($(e.target).closest('.egs-image-retry').length || $('.egs-gallery-status').hasClass('is-error')) return;
 				$('#egsLightbox').modal('show');
+				lbUpdate(false);
+			});
+			$(document).on('click', '.lb-image-retry', function(e){
+				e.preventDefault();
+				e.stopImmediatePropagation();
+				lbUpdate(false);
+			});
+			$('#egsLightbox').on('hidden.bs.modal', function(){
+				stopImageRequest(_lbLoad);
+				$('.lb-image').attr('src', '').css({opacity: 1});
+				setImageStatus($('.lb-image-status'), 'hidden');
 			});
 
 			// Lightbox nav
@@ -1106,6 +1270,9 @@ function _egsEstadoClass($estado) {
 				var diff = e.originalEvent.changedTouches[0].clientX - _swipeX;
 				if (Math.abs(diff) > 50) { galGo(diff < 0 ? 1 : -1); }
 			});
+
+			// Vigilar también la primera solicitud que el navegador inició desde el HTML.
+			galUpdate(false);
 		})();
 		</script>
 
