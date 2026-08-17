@@ -4,26 +4,6 @@ CARGAR LA TABLA DINÁMICA DE PRODUCTOS
 
 =============================================*/
 
- $.ajax({
-
-
-
-	url:"ajax/tablaProductos.ajax.php",
-
-	success:function(respuesta){
-
-		
-
- 		//console.log("respuesta", respuesta);
-
-
-
-	}
-
-
-
- })
-
 if ($(".tablaProductos").length) {
 $(".tablaProductos").DataTable({
 	 "ajax": "ajax/tablaProductos.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),

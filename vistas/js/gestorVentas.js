@@ -2,16 +2,7 @@
 CARGAR LA TABLA DINÁMICA DE VENTAS
 =============================================*/
 
- $.ajax({
-
- 	url:"ajax/tablaVentas.ajax.php",
- 	success:function(respuesta){
-		
- 		//console.log("respuesta", respuesta);
-
- 	}
- })
-
+if ($(".tablaVentas").length) {
 $(".tablaVentas").DataTable({
 	 "ajax": "ajax/tablaVentas.ajax.php",
 	 "deferRender": true,
@@ -45,6 +36,7 @@ $(".tablaVentas").DataTable({
 	 }
 
 });
+}
 
 /*=============================================
 PROCESO DE ENVÍO

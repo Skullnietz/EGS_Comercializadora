@@ -2,17 +2,7 @@
 CARGAR LA TABLA DINÁMICA DE USUARIOS
 =============================================*/
 var Empresa_del_perfil = $("#Empresa_del_perfil").val();
- $.ajax({
-
- 	url:"ajax/tablaUsuarios.ajax.php?empresa="+$("#Empresa_del_perfil").val(),
- 	success:function(respuesta){
-		var url = "ajax/tablaUsuarios.ajax.php?empresa="+$("#Empresa_del_perfil").val();
- 		//console.log("respuesta", respuesta);
- 		//console.log("url", url);
- 	}
-
- })
-
+if ($(".tablaUsuarios").length) {
 $(".tablaUsuarios").DataTable({
 	 "ajax": "ajax/tablaUsuarios.ajax.php?empresa="+$("#Empresa_del_perfil").val(),
 	 "deferRender": true,
@@ -46,6 +36,7 @@ $(".tablaUsuarios").DataTable({
 	 }
 
 });
+}
 
 /*=============================================
 ACTIVAR USUARIO

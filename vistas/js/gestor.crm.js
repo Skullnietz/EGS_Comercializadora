@@ -4,17 +4,6 @@ CARGAR LA TABLA DINÁMICA DE USUARIOS
 /* Guard: solo ejecutar en la página CRM donde existe .tablaClientesCRM */
 if ($(".tablaClientesCRM").length) {
 
-$.ajax({
-
-    url:"ajax/tablaCRM.ajax.php",
-    success:function(respuesta){
-
-        //console.log("respuesta del CRM", respuesta);
-
-    }
-
-})
-
 $(".tablaClientesCRM").DataTable({
     "ajax": "ajax/tablaCRM.ajax.php",
     "deferRender": true,

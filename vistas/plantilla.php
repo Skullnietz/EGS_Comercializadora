@@ -4,6 +4,7 @@ $rutaActual = isset($_GET["ruta"]) ? (string) $_GET["ruta"] : "";
 $hasBackendSession = isset($_SESSION["validarSesionBackend"]) && $_SESSION["validarSesionBackend"] === "ok";
 $isTabletPublicRoute = ($rutaActual === "formularios-tablet");
 $isClientePublicRoute = ($rutaActual === "estado-orden-cliente" || $rutaActual === "portal-cliente" || $rutaActual === "validar-garantia");
+$needsPanelAssets = $hasBackendSession || $rutaActual === "validar-cotizacion" || $isTabletPublicRoute || $isClientePublicRoute;
 
 // Los QR nuevos apuntan primero a infoOrden. Sin sesión, conservar el token y
 // enviar al visitante a la validación pública; un QR inválido no salta el login.
@@ -41,6 +42,7 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
   <!-- Viewport para responsividad móvil -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
+  <?php if ($needsPanelAssets): ?>
   <!-- Estilos globales + indicador de carga AJAX -->
   <style>
     .choices__list--dropdown { z-index: 9999 !important; }
@@ -219,6 +221,7 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
   <script src="vistas/plugins/printArea/jquery.PrintArea.js"></script>
   <!-- Push notifications del navegador desactivadas -->
   <!-- <script src="vistas/plugins/push/push.min.js"></script> -->
+  <?php endif; ?>
 
 
 
@@ -305,7 +308,7 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
 
   ?>
 
-  <?php if (!$isTabletPublicRoute && !$isClientePublicRoute): ?>
+  <?php if (($hasBackendSession || $rutaActual === "validar-cotizacion") && !$isTabletPublicRoute && !$isClientePublicRoute): ?>
   <script src="vistas/js/plantilla.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorComercio.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorCategorias.js?v=<?= $jsVer ?>"></script>

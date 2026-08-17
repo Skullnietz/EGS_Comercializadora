@@ -1,17 +1,7 @@
 /*=============================================
 CARGAR LA TABLA DINÁMICA DE LOS PRODUCTOS A VENDER
 =============================================*/
-//var Perfil = $("#Perfil").val();
-$.ajax({
-	//url:"ajax/tablapedidos.ajax.php?perfil="+$("#Perfil").val(),
- 	url:"ajax/tablaProductosTciket.ajax.php",
- 	success:function(respuesta){
-		
- 		//console.log("respuesta", respuesta);
-
- 	}
- })
-
+if ($(".tablaProductosTicket").length) {
 $(".tablaProductosTicket").DataTable({
 	"ajax":"ajax/tablaProductosTciket.ajax.php",
 	 "deferRender": true,
@@ -45,6 +35,7 @@ $(".tablaProductosTicket").DataTable({
 	 }
 
 });
+}
 
 
 

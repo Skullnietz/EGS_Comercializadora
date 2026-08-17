@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . "/../config/backend-session-guard.php";
+
 require_once "../controladores/categorias.controlador.php";
 require_once "../modelos/categorias.modelo.php";
 

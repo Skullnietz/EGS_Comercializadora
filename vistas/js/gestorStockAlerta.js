@@ -1,17 +1,7 @@
 /*=============================================
 CARGAR LA TABLA DINÁMICA DE LAS ORDENES
 =============================================*/
-$.ajax({
-
- 	url:"ajax/tablaStockAlerta.ajax.php",
- 	success:function(respuesta){
-		
- 		//console.log("respuesta", respuesta);
-
- 	}
-
-})
-
+if ($(".tablaStockAlerta").length) {
 $(".tablaStockAlerta").DataTable({
 	 "ajax": "ajax/tablaStockAlerta.ajax.php",
 	 "deferRender": true,
@@ -45,6 +35,7 @@ $(".tablaStockAlerta").DataTable({
 	 }
 
 });
+}
 
 /*=============================================
 editar stock con alerta

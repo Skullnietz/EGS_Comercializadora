@@ -1,17 +1,7 @@
 /*=============================================
 CARGAR LA TABLA DINÁMICA DE LOS PRODUCTOS A VENDER
 =============================================*/
-//var Perfil = $("#Perfil").val();
-$.ajax({
-	//url:"ajax/tablapedidos.ajax.php?perfil="+$("#Perfil").val(),
- 	url:"ajax/tablaVentasDinamicas.ajax.php",
- 	success:function(respuesta){
-		
- 		//console.log("productos venta", respuesta);
-
- 	}
- })
-
+if ($(".tablaProductosDinamicas").length) {
 $(".tablaProductosDinamicas").DataTable({
 	"ajax":"ajax/tablaVentasDinamicas.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
 	 "deferRender": true,
@@ -45,20 +35,11 @@ $(".tablaProductosDinamicas").DataTable({
 	 }
 
 });
+}
 /*=============================================
 CARGAR LA TABLA DINÁMICA DE VENTAS REALIZADAS
 =============================================*/
-//var Perfil = $("#Perfil").val();
-$.ajax({
-	//url:"ajax/tablapedidos.ajax.php?perfil="+$("#Perfil").val(),
- 	url:"ajax/tablaVentasRelizadas.ajax.php",
- 	success:function(respuesta){
-		
- 		//console.log("respuesta", respuesta);
-
- 	}
- })
-
+if ($(".tablaVentasDinamicasRealizadas").length) {
 $(".tablaVentasDinamicasRealizadas").DataTable({
 	"ajax":"ajax/tablaVentasRelizadas.ajax.php",
 	 "deferRender": true,
@@ -92,6 +73,7 @@ $(".tablaVentasDinamicasRealizadas").DataTable({
 	 }
 
 });
+}
 /*=================================
 CLICK EVENT ENTER PARA PASAR PRODUCTOS
 EN TABLA

@@ -1,17 +1,7 @@
 /*=============================================
 CARGAR LA TABLA DINÁMICA DE VENTAS
 =============================================*/
-//var Perfil = $("#Perfil").val();
-$.ajax({
-	//url:"ajax/tablapedidos.ajax.php?perfil="+$("#Perfil").val(),
-  url:"ajax/tablapedidos.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
- 	success:function(respuesta){
-		
- 		//console.log("respuesta", respuesta);
-
- 	}
- })
-
+if ($(".tablaPedidos").length) {
 $(".tablaPedidos").DataTable({
   "ajax": "ajax/tablapedidos.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
 	 "deferRender": true,
@@ -45,6 +35,7 @@ $(".tablaPedidos").DataTable({
 	 }
 
 });
+}
 /*=============================================
 AGREGAR CAMPOS DINAMICAMENTE OBSERVACION
 =============================================*/

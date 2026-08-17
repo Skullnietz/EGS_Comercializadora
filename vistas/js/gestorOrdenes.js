@@ -4,6 +4,7 @@ CARGAR LA TABLA DINÁMICA DE LAS ORDENES
 
 var tipoDePerfil = $("#tipoDePerfil").val();
 
+if ($(".tablaOrdenes").length) {
 $(".tablaOrdenes").DataTable({
 	 "ajax": "ajax/tablaOrdenes.ajax.php?perfil="+$("#tipoDePerfil").val(),
 	 "deferRender": true,
@@ -37,6 +38,7 @@ $(".tablaOrdenes").DataTable({
 	 }
 
 });
+}
 
 
 

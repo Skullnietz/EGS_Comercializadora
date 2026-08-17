@@ -2,14 +2,7 @@
 CARGAR LA TABLA DINÁMICA DE ALMACENES
 =============================================*/
 
- $.ajax({
-
-	url:"ajax/tablaAlmacenes.php",
-	success:function(respuesta){
- 		console.log("respuesta", respuesta);
-	}
- })
-
+if ($(".tablaAlmacenes").length) {
 $(".tablaAlmacenes").DataTable({
 	 "ajax": "ajax/tablaAlmacenes.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
 	 "deferRender": true,
@@ -43,3 +36,4 @@ $(".tablaAlmacenes").DataTable({
 	 }
 
 });
+}

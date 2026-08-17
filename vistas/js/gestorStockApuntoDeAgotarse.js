@@ -1,17 +1,7 @@
 /*=============================================
 CARGAR LA TABLA DINÁMICA DE LAS ORDENES
 =============================================*/
-$.ajax({
-
- 	url:"ajax/tablaStockApuntoDeAgotarse.ajax.php",
- 	success:function(respuesta){
-		
- 		//console.log("respuesta", respuesta);
-
- 	}
-
-})
-
+if ($(".tablaStockApuntoAgotarse").length) {
 $(".tablaStockApuntoAgotarse").DataTable({
 	 "ajax": "ajax/tablaStockApuntoDeAgotarse.ajax.php",
 	 "deferRender": true,
@@ -45,6 +35,7 @@ $(".tablaStockApuntoAgotarse").DataTable({
 	 }
 
 });
+}
 /*=============================================
 EDITAR STOCK
 =============================================*/

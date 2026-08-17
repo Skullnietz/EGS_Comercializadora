@@ -13,6 +13,7 @@ CARGAR LA TABLA DINÁMICA DE BANNER
 
 // })
 
+if ($(".tablaBanner").length) {
 $(".tablaBanner").DataTable({
 	 "ajax": "ajax/tablaBanner.ajax.php",
 	 "deferRender": true,
@@ -46,6 +47,7 @@ $(".tablaBanner").DataTable({
 	 }
 
 });
+}
 
 
 /*=============================================
