@@ -36,15 +36,13 @@ if(isset($_POST["pollInfoOrden"]) && isset($_POST["idOrden"])){
 		$obsEnriquecidas = array();
 		if (is_array($observaciones)) {
 			foreach ($observaciones as $obs) {
-				$infoUser = controladorObservaciones::ctrMostrarInfoUser($obs["id_creador"]);
-				$u = is_array($infoUser) && !empty($infoUser) ? $infoUser[0] : array();
 				$obsEnriquecidas[] = array(
 					"id"          => $obs["id"],
 					"observacion" => $obs["observacion"],
 					"fecha"       => $obs["fecha"],
-					"nombre"      => isset($u["nombre"]) ? $u["nombre"] : "Usuario",
-					"foto"        => isset($u["foto"]) ? $u["foto"] : "",
-					"perfil"      => isset($u["perfil"]) ? $u["perfil"] : "",
+					"nombre"      => isset($obs["creador_nombre"]) ? $obs["creador_nombre"] : "Usuario",
+					"foto"        => isset($obs["creador_foto"]) ? $obs["creador_foto"] : "",
+					"perfil"      => isset($obs["creador_perfil"]) ? $obs["creador_perfil"] : "",
 					"fotos"       => isset($fotosPorObs[$obs["id"]]) ? $fotosPorObs[$obs["id"]] : array()
 				);
 			}

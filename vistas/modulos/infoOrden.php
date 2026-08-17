@@ -1365,7 +1365,7 @@ function _egsEstadoClass($estado) {
 						<div class="egs-field-row">
 							<label class="egs-lbl">Asesor</label>
 							<?php
-							$asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $_GET["asesor"]);
+							$asesor = $_wa_asesor;
 							if ($isReadonly) {
 								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-user-tie"></i></span>';
 								echo '<input type="text" class="form-control" value="'.htmlspecialchars($asesor["nombre"]).'" readonly></div>';
@@ -1387,7 +1387,7 @@ function _egsEstadoClass($estado) {
 						<div class="egs-field-row">
 							<label class="egs-lbl">Técnico (En posesión)</label>
 							<?php
-							$tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $_GET["tecnico"]);
+							$tecnico = $_wa_tecnico;
 							if ($isTecnico || $isSecretaria) {
 								echo '<div class="input-group"><span class="input-group-addon"><i class="fas fa-screwdriver-wrench"></i></span>';
 								echo '<input type="text" class="form-control" value="'.htmlspecialchars($tecnico["nombre"]).'" readonly></div>';
@@ -1429,7 +1429,7 @@ function _egsEstadoClass($estado) {
 								} else {
 									echo '<option value="">Sin asignar</option>';
 								}
-								$tecnico2List = ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
+								$tecnico2List = isset($tecnicoList) ? $tecnicoList : ControladorTecnicos::ctrMostrarTecnicosDeEmpresas("id_empresa", $_SESSION["empresa"]);
 								foreach ($tecnico2List as $vt2) {
 									if ($vt2["id"] != $_tec2IdVal) {
 										echo '<option value="'.$vt2["id"].'" class="text-uppercase">'.htmlspecialchars($vt2["nombre"]).'</option>';
@@ -1924,14 +1924,11 @@ function _egsEstadoClass($estado) {
 							<?php
 							if (!empty($observacionesnew)) {
 								foreach ($observacionesnew as $_oi => $valueobs) {
-									$idadmin = $valueobs["id_creador"];
-									$infouser = controladorObservaciones::ctrMostrarInfoUser($idadmin);
-									$infoiduser = $infouser[0];
 									$date = strtotime($valueobs["fecha"]);
 									$fecha = date("d/m/Y H:i", $date);
-									$_obs_nombre = htmlspecialchars($infoiduser["nombre"]);
-									$_obs_foto = $infoiduser["foto"];
-									$_obs_perfil = isset($infoiduser["perfil"]) ? $infoiduser["perfil"] : '';
+									$_obs_nombre = htmlspecialchars(isset($valueobs["creador_nombre"]) ? $valueobs["creador_nombre"] : "Usuario");
+									$_obs_foto = isset($valueobs["creador_foto"]) ? $valueobs["creador_foto"] : '';
+									$_obs_perfil = isset($valueobs["creador_perfil"]) ? $valueobs["creador_perfil"] : '';
 									$_obs_initial = mb_strtoupper(mb_substr($_obs_nombre, 0, 1));
 									$_obs_grad = $_obs_grads[$_oi % count($_obs_grads)];
 									$_obs_col = _obsColorPerfil($_obs_perfil);
@@ -2325,14 +2322,27 @@ $(document).ready(function () {
 });
 </script>
 
-<!-- AJAX Polling: actualización en tiempo real cada 45s -->
+<!-- AJAX Polling: actualización ligera; se pausa en pestañas no visibles -->
 <script>
 $(document).ready(function(){
 	var ordenId = <?php echo json_encode($_GET["idOrden"]); ?>;
 	var lastEstado = null;
 	var lastObsCount = <?php echo isset($_obs_count) ? intval($_obs_count) : 0; ?>;
+	var pollEnCurso = false;
+	var pollTimer = null;
+	var pollIntervaloMs = 90000;
+
+	function programarPollInfoOrden(delay){
+		if(pollTimer) clearTimeout(pollTimer);
+		pollTimer = setTimeout(pollInfoOrden, delay || pollIntervaloMs);
+	}
 
 	function pollInfoOrden(){
+		if(document.hidden || pollEnCurso){
+			programarPollInfoOrden();
+			return;
+		}
+		pollEnCurso = true;
 		$.ajax({
 			url: "ajax/infoOrden.ajax.php",
 			method: "POST",
@@ -2414,11 +2424,24 @@ $(document).ready(function(){
 					}
 					lastObsCount = res.observaciones.length;
 				}
+			},
+			complete: function(){
+				pollEnCurso = false;
+				programarPollInfoOrden();
 			}
 		});
 	}
-	setInterval(pollInfoOrden, 45000);
-	pollInfoOrden();
+
+	document.addEventListener("visibilitychange", function(){
+		if(document.hidden){
+			if(pollTimer) clearTimeout(pollTimer);
+			return;
+		}
+		programarPollInfoOrden(5000);
+	});
+
+	// La vista acaba de renderizar datos actuales; evitar una consulta duplicada inmediata.
+	programarPollInfoOrden();
 });
 </script>
 
