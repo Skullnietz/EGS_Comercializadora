@@ -29,12 +29,24 @@ class ModeloOrdenes{
 	}
 
 // Mostrar Material Disponible de Equipo dejado hace -1 MONTH
-	static public function mdlMostrarOrdenesMaterial($tabla){
+	static public function mdlMostrarOrdenesMaterial($tabla, $idEmpresa = null){
 
 
 
 		
-		$stmt = ConexionWP::conectarWP()->prepare("SELECT * FROM $tabla WHERE estado IN('Aceptado (ok)','Pendiente de autorización (AUT','	Terminada (ter)','Producto para venta') AND fecha_ingreso <= NOW() - INTERVAL 1 MONTH  ORDER BY `ordenes`.`fecha_ingreso`  DESC");
+		$sql = "SELECT * FROM $tabla WHERE estado IN('Aceptado (ok)','Pendiente de autorización (AUT','Terminada (ter)','Producto para venta') AND fecha_ingreso <= NOW() - INTERVAL 1 MONTH";
+
+		if ($idEmpresa !== null) {
+			$sql .= " AND id_empresa = :id_empresa";
+		}
+
+		$sql .= " ORDER BY `ordenes`.`fecha_ingreso` DESC";
+
+		$stmt = ConexionWP::conectarWP()->prepare($sql);
+
+		if ($idEmpresa !== null) {
+			$stmt->bindValue(":id_empresa", intval($idEmpresa), PDO::PARAM_INT);
+		}
 
 
 

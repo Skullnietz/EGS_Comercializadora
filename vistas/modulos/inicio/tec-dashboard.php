@@ -62,16 +62,15 @@ function _tecFiltrarFecha($arr, $limite) {
     });
 }
 
-// Filtrar órdenes activas (REV/OK) a máximo 3 meses — las más antiguas están congeladas
+// Las órdenes en revisión se mantienen a tres meses; las aceptadas se muestran completas.
 $_tec_REV = array_values(_tecFiltrarFecha($_tec_REV, $_tec_limite3m));
-$_tec_OK  = array_values(_tecFiltrarFecha($_tec_OK, $_tec_limite3m));
 
 $_tec_REV_mes = _tecFiltrarFecha($_tec_REV, $_tec_limite);
 $_tec_OK_mes  = _tecFiltrarFecha($_tec_OK, $_tec_limite);
 $_tec_TER_mes = _tecFiltrarFecha($_tec_TER, $_tec_limite);
 $_tec_ENT_mes = _tecFiltrarFecha($_tec_ENT, $_tec_limite);
 
-// ── Totales (ya filtrados a 3 meses) ──
+// ── Totales de órdenes activas ──
 $_tec_totalActivas = count($_tec_REV) + count($_tec_OK);
 $_tec_totalMes = count($_tec_REV_mes) + count($_tec_OK_mes) + count($_tec_TER_mes) + count($_tec_ENT_mes);
 
@@ -598,13 +597,13 @@ if ($_tec_id > 0) {
         <strong>Sin órdenes en proceso</strong>
       </div>
     <?php else: ?>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:16px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:16px;max-height:720px;overflow-y:auto">
         <?php
         usort($_tec_OK, function($a, $b) {
-            return strtotime(isset($a["fecha_ingreso"]) ? $a["fecha_ingreso"] : "now")
-                 - strtotime(isset($b["fecha_ingreso"]) ? $b["fecha_ingreso"] : "now");
+            return strtotime(isset($b["fecha_ingreso"]) ? $b["fecha_ingreso"] : "now")
+                 - strtotime(isset($a["fecha_ingreso"]) ? $a["fecha_ingreso"] : "now");
         });
-        foreach (array_slice($_tec_OK, 0, 12) as $o):
+        foreach ($_tec_OK as $o):
           $img = _tecGetImg($o);
           $dias = _tecDias(isset($o["fecha_ingreso"]) ? $o["fecha_ingreso"] : "");
           $marca = isset($o["marcaDelEquipo"]) ? $o["marcaDelEquipo"] : "";
@@ -648,13 +647,11 @@ if ($_tec_id > 0) {
           </a>
         <?php endforeach; ?>
       </div>
-      <?php if (count($_tec_OK) > 12): ?>
-        <div style="text-align:center;padding:12px;border-top:1px solid #f1f5f9">
-          <a href="index.php?ruta=ordenes" style="color:#6366f1;font-size:12px;font-weight:600;text-decoration:none">
-            Ver las <?php echo count($_tec_OK); ?> aceptadas <i class="fa-solid fa-arrow-right" style="font-size:10px"></i>
-          </a>
-        </div>
-      <?php endif; ?>
+      <div style="text-align:center;padding:12px;border-top:1px solid #f1f5f9">
+        <a href="index.php?ruta=ordenes" style="color:#6366f1;font-size:12px;font-weight:600;text-decoration:none">
+          Abrir tabla completa de órdenes <i class="fa-solid fa-arrow-right" style="font-size:10px"></i>
+        </a>
+      </div>
     <?php endif; ?>
   </div>
 </div>

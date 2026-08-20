@@ -399,7 +399,7 @@ class controladorOrdenes
 		return $respuesta;
 
 	}
-	static public function ctrMostrarOrdenesMaterial()
+	static public function ctrMostrarOrdenesMaterial($idEmpresa = null)
 	{
 
 
@@ -408,7 +408,7 @@ class controladorOrdenes
 
 
 
-		$respuesta = ModeloOrdenes::mdlMostrarOrdenesMaterial($tabla);
+		$respuesta = ModeloOrdenes::mdlMostrarOrdenesMaterial($tabla, $idEmpresa);
 
 
 

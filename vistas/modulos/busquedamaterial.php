@@ -1,5 +1,5 @@
 <?php
-if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor") {
+if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor" AND $_SESSION["perfil"] != "tecnico") {
   echo '<script>window.location = "index.php?ruta=ordenes";</script>';
   return;
 }
@@ -620,7 +620,8 @@ if ($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"] != "vendedor"
                 </thead>
                 <tbody>
                   <?php
-                  $ordenes = ControladorOrdenes::ctrMostrarOrdenesMaterial();
+                  $idEmpresaMaterial = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : 0;
+                  $ordenes = ControladorOrdenes::ctrMostrarOrdenesMaterial($idEmpresaMaterial);
                   foreach ($ordenes as $key => $value) {
 
                     // Técnico
