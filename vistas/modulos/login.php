@@ -223,9 +223,154 @@ $_bingCopy     = $_bingData['copyright'];
         .hora-grande { font-size: 3em; font-weight: 800; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.4); }
         .fecha-texto { font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; font-weight: 600; margin-bottom: 5px;}
 
+        /* --- Cargador EGS: ligero, sin GIF ni dependencias externas --- */
         .loader {
-            position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 9999;
-            background: #1B2030 url('vistas/img/plantilla/ajax-loader.gif') 50% 50% no-repeat;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 43%, rgba(54, 139, 194, .18), transparent 34%),
+                linear-gradient(145deg, #07111c 0%, #0b1d2c 52%, #103250 100%);
+            opacity: 1;
+            visibility: visible;
+            transition: opacity .45s ease, visibility .45s ease;
+            isolation: isolate;
+        }
+        .loader::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+            background-size: 48px 48px;
+            -webkit-mask-image: radial-gradient(circle at center, #000 0%, transparent 66%);
+            mask-image: radial-gradient(circle at center, #000 0%, transparent 66%);
+        }
+        .loader.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .egs-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+            text-align: center;
+        }
+        .egs-loader-visual {
+            position: relative;
+            width: 104px;
+            height: 104px;
+            margin-bottom: 24px;
+        }
+        .egs-loader-orbit {
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(125, 211, 252, .2);
+            border-radius: 50%;
+            animation: egsLoaderOrbit 2.4s linear infinite;
+        }
+        .egs-loader-orbit::before {
+            content: "";
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #7dd3fc;
+            box-shadow: 0 0 18px rgba(125, 211, 252, .9);
+            transform: translateX(-50%);
+        }
+        .egs-loader-device {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            display: grid;
+            width: 64px;
+            height: 48px;
+            place-items: center;
+            border: 1px solid rgba(255,255,255,.8);
+            border-radius: 13px;
+            background: linear-gradient(145deg, #ffffff, #dbeafe);
+            box-shadow: 0 14px 36px rgba(0,0,0,.28), 0 0 0 7px rgba(255,255,255,.045);
+            transform: translate(-50%, -55%);
+            animation: egsLoaderDevice 1.8s ease-in-out infinite;
+        }
+        .egs-loader-device::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -9px;
+            width: 24px;
+            height: 7px;
+            border-bottom: 2px solid rgba(219,234,254,.8);
+            transform: translateX(-50%);
+        }
+        .egs-loader-device span {
+            color: var(--egs-azul-oscuro);
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        .egs-loader-device i {
+            position: absolute;
+            right: 7px;
+            bottom: 6px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 8px rgba(34,197,94,.85);
+        }
+        .egs-loader-brand {
+            margin: 0;
+            color: #f8fafc;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: .12em;
+        }
+        .egs-loader-caption {
+            margin-top: 7px;
+            color: rgba(226,232,240,.68);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+        }
+        .egs-loader-progress {
+            width: 148px;
+            height: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(255,255,255,.1);
+        }
+        .egs-loader-progress span {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, transparent, #7dd3fc, #fff, transparent);
+            transform: translateX(-100%);
+            animation: egsLoaderProgress 1.65s ease-in-out infinite;
+        }
+        @keyframes egsLoaderOrbit {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes egsLoaderDevice {
+            0%, 100% { transform: translate(-50%, -55%) scale(1); }
+            50% { transform: translate(-50%, -55%) scale(1.035); }
+        }
+        @keyframes egsLoaderProgress {
+            0% { transform: translateX(-100%); }
+            55%, 100% { transform: translateX(100%); }
         }
 
         /* --- Crédito Bing Image of the Day --- */
@@ -256,6 +401,17 @@ $_bingCopy     = $_bingData['copyright'];
 
         @media (max-width: 576px) {
             .bing-credit { max-width: 260px; font-size: 10px; bottom: 8px; right: 8px; }
+            .egs-loader-visual { width: 92px; height: 92px; margin-bottom: 21px; }
+            .egs-loader-device { width: 58px; height: 44px; }
+            .egs-loader-brand { font-size: 14px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .egs-loader-orbit,
+            .egs-loader-device,
+            .egs-loader-progress span { animation: none; }
+            .egs-loader-progress span { transform: translateX(0); opacity: .65; }
+            .loader { transition-duration: .15s; }
         }
     </style>
     
@@ -264,7 +420,44 @@ $_bingCopy     = $_bingData['copyright'];
 </head>
 <body>
 
-    <div class="loader"></div>
+    <div class="loader" id="egsPageLoader" role="status" aria-live="polite" aria-label="Cargando Comercializadora EGS">
+        <div class="egs-loader" aria-hidden="true">
+            <div class="egs-loader-visual">
+                <div class="egs-loader-orbit"></div>
+                <div class="egs-loader-device"><span>EGS</span><i></i></div>
+            </div>
+            <p class="egs-loader-brand">COMERCIALIZADORA EGS</p>
+            <span class="egs-loader-caption">Equipo de c&oacute;mputo y software</span>
+            <div class="egs-loader-progress"><span></span></div>
+        </div>
+    </div>
+    <noscript><style>#egsPageLoader{display:none}</style></noscript>
+    <script>
+        (function () {
+            var loader = document.getElementById('egsPageLoader');
+            var oculto = false;
+
+            function ocultarLoader() {
+                if (!loader || oculto) return;
+                oculto = true;
+                window.setTimeout(function () {
+                    loader.classList.add('is-hidden');
+                }, 160);
+                window.setTimeout(function () {
+                    if (loader.parentNode) loader.parentNode.removeChild(loader);
+                }, 760);
+            }
+
+            if (document.readyState === 'complete') {
+                ocultarLoader();
+            } else {
+                window.addEventListener('load', ocultarLoader, { once: true });
+            }
+
+            // Evita que una imagen de fondo o CDN lento bloquee el acceso.
+            window.setTimeout(ocultarLoader, 4500);
+        })();
+    </script>
 
     <div class="fondo-animado" style="background-image: url('<?php echo $imagen_fondo; ?>');"></div>
 
@@ -319,8 +512,6 @@ $_bingCopy     = $_bingData['copyright'];
     </div>
 
     <script>
-        $(window).on('load', function() { $(".loader").fadeOut("slow"); });
-        
         $(document).ready(function(){
             $('#contra').keypress(function(e){ if(e.keyCode==13) $('#entrar').click(); });
             actualizarReloj(); setInterval(actualizarReloj, 1000);
