@@ -82,6 +82,51 @@ if (!function_exists("pc_preciosVisibles")) {
         );
     }
 }
+if (!function_exists("pc_rutaImagenEquipoValida")) {
+    function pc_rutaImagenEquipoValida($ruta)
+    {
+        $ruta = trim((string) $ruta);
+        if ($ruta === "" || (preg_match('/^[a-z][a-z0-9+.-]*:/i', $ruta) && !preg_match('#^https?://#i', $ruta))) {
+            return false;
+        }
+
+        $rutaSinQuery = parse_url($ruta, PHP_URL_PATH);
+        if ($rutaSinQuery === false || $rutaSinQuery === null) $rutaSinQuery = $ruta;
+        $rutaSinQuery = strtolower(str_replace('\\', '/', $rutaSinQuery));
+
+        return !preg_match('#(?:^|/)default/default\.(?:png|jpe?g|webp|gif)$#i', $rutaSinQuery);
+    }
+}
+if (!function_exists("pc_imagenesEquipo")) {
+    function pc_imagenesEquipo($orden)
+    {
+        if (!is_array($orden)) return array();
+
+        $imagenes = array();
+        $vistas = array();
+        $albumCrudo = isset($orden["multimedia"]) ? $orden["multimedia"] : "";
+        $album = is_array($albumCrudo) ? $albumCrudo : json_decode((string) $albumCrudo, true);
+
+        if (is_array($album)) {
+            foreach ($album as $elemento) {
+                $ruta = is_array($elemento) && isset($elemento["foto"])
+                    ? trim((string) $elemento["foto"])
+                    : "";
+                if (!pc_rutaImagenEquipoValida($ruta) || isset($vistas[$ruta])) continue;
+                $vistas[$ruta] = true;
+                $imagenes[] = $ruta;
+            }
+        }
+
+        // Igual que infoOrden: la portada se usa solo si el álbum está vacío.
+        if (empty($imagenes)) {
+            $portada = isset($orden["portada"]) ? trim((string) $orden["portada"]) : "";
+            if (pc_rutaImagenEquipoValida($portada)) $imagenes[] = $portada;
+        }
+
+        return $imagenes;
+    }
+}
 
 // ── POSTs (todos requieren $pcOk y usan $pcIdCliente del token) ──
 $pcMsgComentario = null;
@@ -256,6 +301,33 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
 .pc-estado h2 { margin: 0 0 4px; font-size: 18px; font-weight: 800; }
 .pc-estado p  { margin: 0; font-size: 12px; opacity: .92; line-height: 1.5; }
 
+/* ─ Carrusel público de fotografías del equipo ─ */
+.pc-gallery-count { margin-left: auto; padding: 4px 9px; border-radius: 999px; background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 800; }
+.pc-gallery { position: relative; }
+.pc-gallery-stage { position: relative; aspect-ratio: 16 / 10; min-height: 260px; max-height: 430px; overflow: hidden; border: 1px solid #dbe4ee; border-radius: 12px; background: #0f172a; }
+.pc-gallery-open { display: block; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+.pc-gallery-open:focus-visible { outline: 3px solid #38bdf8; outline-offset: -3px; }
+.pc-gallery-main { display: block; width: 100%; height: 100%; object-fit: contain; opacity: 1; transform: scale(1); transition: opacity .18s ease, transform .18s ease; }
+.pc-gallery-main.is-changing { opacity: .2; transform: scale(.985); }
+.pc-gallery-zoom { position: absolute; right: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 999px; background: rgba(15,23,42,.78); color: #fff; font-size: 10px; font-weight: 700; pointer-events: none; }
+.pc-gallery-nav { position: absolute; z-index: 3; top: 50%; width: 42px; height: 42px; margin: 0; padding: 0; transform: translateY(-50%); border: 1px solid rgba(255,255,255,.35); border-radius: 50%; background: rgba(15,23,42,.78); color: #fff; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.pc-gallery-nav:hover, .pc-gallery-nav:focus-visible { background: #fff; color: #0f172a; outline: none; }
+.pc-gallery-nav.prev { left: 12px; }
+.pc-gallery-nav.next { right: 12px; }
+.pc-gallery-status { position: absolute; z-index: 2; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; padding: 20px; background: rgba(15,23,42,.82); color: #fff; text-align: center; font-size: 12px; }
+.pc-gallery-status[hidden] { display: none; }
+.pc-gallery-status .fa-spinner { font-size: 22px; }
+.pc-gallery-status.loading { background: rgba(15,23,42,.36); pointer-events: none; }
+.pc-gallery-status.error { background: rgba(15,23,42,.88); pointer-events: none; }
+.pc-gallery-retry { margin: 2px 0 0; padding: 7px 12px; border: 1px solid rgba(255,255,255,.45); border-radius: 8px; background: #fff; color: #0f172a; font-size: 11px; font-weight: 800; cursor: pointer; pointer-events: auto; }
+.pc-gallery-thumbs { display: flex; gap: 8px; margin-top: 10px; padding: 2px 1px 6px; overflow-x: auto; scrollbar-width: thin; scroll-snap-type: x proximity; }
+.pc-gallery-thumb { flex: 0 0 74px; width: 74px; height: 56px; margin: 0; padding: 2px; overflow: hidden; border: 2px solid transparent; border-radius: 9px; background: #e2e8f0; opacity: .7; cursor: pointer; scroll-snap-align: center; }
+.pc-gallery-thumb:hover, .pc-gallery-thumb.active, .pc-gallery-thumb[aria-current="true"] { border-color: #0ea5e9; opacity: 1; }
+.pc-gallery-thumb:focus-visible { outline: 3px solid #38bdf8; outline-offset: 1px; }
+.pc-gallery-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
+.pc-gallery-empty { display: flex; min-height: 180px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; border: 1px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; color: #64748b; text-align: center; font-size: 12px; }
+.pc-gallery-empty i { color: #94a3b8; font-size: 30px; }
+
 /* ─ Tabla cotización ─ */
 .pc-table { width: 100%; font-size: 13px; }
 .pc-table th { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
@@ -367,8 +439,15 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
 
 /* ─ Lightbox ─ */
 #pcLightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 99999; align-items: center; justify-content: center; }
-#pcLightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; }
-#pcLightbox .x { position: absolute; top: 16px; right: 20px; color: #fff; font-size: 32px; cursor: pointer; }
+#pcLightbox.open { display: flex; }
+#pcLightbox img { display: block; max-width: 92vw; max-height: 88vh; border-radius: 8px; object-fit: contain; }
+#pcLightbox .x { position: absolute; z-index: 3; top: 14px; right: 16px; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: rgba(15,23,42,.75); color: #fff; font-size: 30px; line-height: 1; cursor: pointer; }
+.pc-lightbox-nav { position: absolute; z-index: 3; top: 50%; width: 46px; height: 46px; padding: 0; transform: translateY(-50%); border: 1px solid rgba(255,255,255,.35); border-radius: 50%; background: rgba(15,23,42,.75); color: #fff; cursor: pointer; }
+.pc-lightbox-nav.prev { left: 14px; }
+.pc-lightbox-nav.next { right: 14px; }
+.pc-lightbox-nav[hidden] { display: none; }
+.pc-lightbox-counter { position: absolute; z-index: 3; bottom: 16px; left: 50%; padding: 6px 12px; transform: translateX(-50%); border-radius: 999px; background: rgba(15,23,42,.75); color: #fff; font-size: 12px; font-weight: 800; }
+.pc-lightbox-counter[hidden] { display: none; }
 
 /* ─ Google CTA (mantenida) ─ */
 .pc-google-box { background: linear-gradient(135deg,#1a73e8 0%,#4285F4 55%,#669df6 100%); padding: 28px 20px; text-align: center; border-radius: 14px; margin-top: 14px; }
@@ -390,6 +469,17 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
     .pc-mon-stats { margin: 0 12px 10px; }
     .pc-mon-info { margin: 0 12px 12px; }
     .pc-mov { padding: 0 12px 12px; }
+    .pc-gallery-stage { min-height: 230px; aspect-ratio: 4 / 3; }
+    .pc-gallery-nav { width: 38px; height: 38px; }
+    .pc-gallery-nav.prev { left: 8px; }
+    .pc-gallery-nav.next { right: 8px; }
+    .pc-gallery-zoom { right: 8px; bottom: 8px; }
+    .pc-lightbox-nav { width: 40px; height: 40px; }
+    .pc-lightbox-nav.prev { left: 8px; }
+    .pc-lightbox-nav.next { right: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .pc-gallery-main { transition: none; }
 }
 </style>
 
@@ -445,6 +535,13 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
           list($eC,$eI,$eL,$eD) = pc_estadoInfo($pcOrdenDetalle["estado"]);
           $verPrecios = pc_preciosVisibles($pcOrdenDetalle["estado"]);
           $totalOrd = isset($pcOrdenDetalle["total"]) ? floatval($pcOrdenDetalle["total"]) : 0;
+          $pcImagenesEquipo = pc_imagenesEquipo($pcOrdenDetalle);
+          $pcTotalImagenes = count($pcImagenesEquipo);
+          $pcNombreEquipoGaleria = trim(
+              (isset($pcOrdenDetalle["marcaDelEquipo"]) ? $pcOrdenDetalle["marcaDelEquipo"] : "") . " " .
+              (isset($pcOrdenDetalle["modeloDelEquipo"]) ? $pcOrdenDetalle["modeloDelEquipo"] : "")
+          );
+          if ($pcNombreEquipoGaleria === "") $pcNombreEquipoGaleria = "equipo de la orden #" . intval($pcOrdenDetalle["id"]);
           // Líneas de cotización
           $lineas = array();
           $nombresFijos = array("partidaUno","partidaDos","partidaTres","partidaCuatro","partidaCinco","partidaSeis","partidaSiete","partidaOcho","partidaNueve","partidaDiez");
@@ -486,6 +583,72 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
             </div>
           </div>
 
+          <div class="pc-card">
+            <div class="pc-card-head">
+              <i class="fa-solid fa-images"></i><h3>Fotos del equipo</h3>
+              <?php if ($pcTotalImagenes > 0): ?>
+                <span class="pc-gallery-count" id="pcGalleryCounter" aria-live="polite">1 / <?php echo $pcTotalImagenes; ?></span>
+              <?php endif; ?>
+            </div>
+            <div class="pc-card-body">
+              <?php if ($pcTotalImagenes > 0): ?>
+                <div class="pc-gallery" id="pcEquipoGaleria" aria-label="Carrusel de fotos del equipo" data-equipo="<?php echo htmlspecialchars($pcNombreEquipoGaleria, ENT_QUOTES, 'UTF-8'); ?>">
+                  <div class="pc-gallery-stage">
+                    <button type="button" class="pc-gallery-open" id="pcGalleryOpen" aria-haspopup="dialog" aria-label="Ampliar foto 1 de <?php echo $pcTotalImagenes; ?>">
+                      <img
+                        class="pc-gallery-main"
+                        id="pcGalleryMain"
+                        src="<?php echo htmlspecialchars($pcImagenesEquipo[0], ENT_QUOTES, 'UTF-8'); ?>"
+                        alt="Foto 1 de <?php echo $pcTotalImagenes; ?>: <?php echo htmlspecialchars($pcNombreEquipoGaleria, ENT_QUOTES, 'UTF-8'); ?>"
+                        loading="eager"
+                        fetchpriority="high"
+                        decoding="async"
+                        referrerpolicy="no-referrer">
+                      <span class="pc-gallery-zoom"><i class="fa-solid fa-expand"></i> Ampliar</span>
+                    </button>
+
+                    <?php if ($pcTotalImagenes > 1): ?>
+                      <button type="button" class="pc-gallery-nav prev" id="pcGalleryPrev" aria-label="Foto anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                      <button type="button" class="pc-gallery-nav next" id="pcGalleryNext" aria-label="Foto siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+                    <?php endif; ?>
+
+                    <div class="pc-gallery-status" id="pcGalleryStatus" role="status" aria-live="polite" hidden>
+                      <i class="fa-solid fa-spinner fa-spin" id="pcGalleryStatusIcon"></i>
+                      <span id="pcGalleryStatusText">Cargando foto&hellip;</span>
+                      <button type="button" class="pc-gallery-retry" id="pcGalleryRetry" hidden>Reintentar</button>
+                    </div>
+                  </div>
+
+                  <?php if ($pcTotalImagenes > 1): ?>
+                    <div class="pc-gallery-thumbs" id="pcGalleryThumbs" aria-label="Seleccionar foto">
+                      <?php foreach ($pcImagenesEquipo as $pcIndiceImagen => $pcRutaImagen): ?>
+                        <button
+                          type="button"
+                          class="pc-gallery-thumb <?php echo $pcIndiceImagen === 0 ? 'active' : ''; ?>"
+                          data-index="<?php echo $pcIndiceImagen; ?>"
+                          aria-label="Ver foto <?php echo $pcIndiceImagen + 1; ?> de <?php echo $pcTotalImagenes; ?>"
+                          aria-current="<?php echo $pcIndiceImagen === 0 ? 'true' : 'false'; ?>">
+                          <img
+                            src="<?php echo htmlspecialchars($pcRutaImagen, ENT_QUOTES, 'UTF-8'); ?>"
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            referrerpolicy="no-referrer">
+                        </button>
+                      <?php endforeach; ?>
+                    </div>
+                  <?php endif; ?>
+                </div>
+                <script type="application/json" id="pcEquipoImagenes"><?php echo json_encode(array_values($pcImagenesEquipo), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES); ?></script>
+              <?php else: ?>
+                <div class="pc-gallery-empty">
+                  <i class="fa-regular fa-image"></i>
+                  <span>A&uacute;n no hay fotos disponibles para este equipo.</span>
+                </div>
+              <?php endif; ?>
+            </div>
+          </div>
+
           <?php if ($verPrecios): ?>
           <div class="pc-card">
             <div class="pc-card-head"><i class="fa-solid fa-file-invoice-dollar"></i><h3>Cotización</h3></div>
@@ -523,7 +686,7 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
                     <?php if (!empty($rf)): ?>
                       <div class="pc-rep-fotos">
                         <?php foreach ($rf as $u): ?>
-                          <img src="<?php echo htmlspecialchars($u); ?>" loading="lazy" onclick="pcAbrirFoto(this.src)" alt="">
+                          <img src="<?php echo htmlspecialchars($u, ENT_QUOTES, 'UTF-8'); ?>" loading="lazy" decoding="async" referrerpolicy="no-referrer" onclick="pcAbrirFoto(this.src, 'Foto del reporte')" alt="Foto del reporte">
                         <?php endforeach; ?>
                       </div>
                     <?php endif; ?>
@@ -908,16 +1071,255 @@ body.sidebar-mini .content-wrapper, body .content-wrapper { margin-left: 0 !impo
   </div>
 </div>
 
-<div id="pcLightbox" onclick="this.style.display='none'">
-  <span class="x">&times;</span>
-  <img id="pcLightboxImg" src="" alt="">
+<div id="pcLightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada" aria-hidden="true" onclick="if(event.target===this) pcCerrarFoto()">
+  <button type="button" class="x" aria-label="Cerrar foto" onclick="pcCerrarFoto()">&times;</button>
+  <button type="button" class="pc-lightbox-nav prev" id="pcLightboxPrev" aria-label="Foto anterior" onclick="pcMoverFotoAmpliada(-1)" hidden><i class="fa-solid fa-chevron-left"></i></button>
+  <img id="pcLightboxImg" src="" alt="" referrerpolicy="no-referrer">
+  <button type="button" class="pc-lightbox-nav next" id="pcLightboxNext" aria-label="Foto siguiente" onclick="pcMoverFotoAmpliada(1)" hidden><i class="fa-solid fa-chevron-right"></i></button>
+  <span class="pc-lightbox-counter" id="pcLightboxCounter" aria-live="polite" hidden></span>
 </div>
 
 <script>
-function pcAbrirFoto(src){
-  document.getElementById('pcLightboxImg').src = src;
-  document.getElementById('pcLightbox').style.display = 'flex';
+var pcLightboxEsGaleriaEquipo = false;
+var pcLightboxOrigen = null;
+var pcBodyOverflowAnterior = '';
+
+function pcMostrarLightbox(src, alt, esGaleriaEquipo){
+  var caja = document.getElementById('pcLightbox');
+  var imagen = document.getElementById('pcLightboxImg');
+  var anterior = document.getElementById('pcLightboxPrev');
+  var siguiente = document.getElementById('pcLightboxNext');
+  var contador = document.getElementById('pcLightboxCounter');
+  if(!caja || !imagen || !src) return;
+
+  pcLightboxOrigen = document.activeElement;
+  pcLightboxEsGaleriaEquipo = !!esGaleriaEquipo;
+  imagen.src = src;
+  imagen.alt = alt || 'Foto ampliada';
+
+  var hayVarias = pcLightboxEsGaleriaEquipo && window.pcEquipoGaleria && window.pcEquipoGaleria.total > 1;
+  if(anterior) anterior.hidden = !hayVarias;
+  if(siguiente) siguiente.hidden = !hayVarias;
+  if(contador){
+    contador.hidden = !pcLightboxEsGaleriaEquipo;
+    if(pcLightboxEsGaleriaEquipo) contador.textContent = window.pcEquipoGaleria.current().position;
+  }
+
+  caja.classList.add('open');
+  caja.setAttribute('aria-hidden', 'false');
+  pcBodyOverflowAnterior = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+  var cerrar = caja.querySelector('.x');
+  if(cerrar) cerrar.focus();
 }
+function pcAbrirFoto(src, alt){
+  pcMostrarLightbox(src, alt, false);
+}
+function pcAbrirFotoEquipo(){
+  if(!window.pcEquipoGaleria) return;
+  var actual = window.pcEquipoGaleria.current();
+  pcMostrarLightbox(actual.src, actual.alt, true);
+}
+function pcCerrarFoto(){
+  var caja = document.getElementById('pcLightbox');
+  if(!caja) return;
+  caja.classList.remove('open');
+  caja.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = pcBodyOverflowAnterior;
+  pcLightboxEsGaleriaEquipo = false;
+  if(pcLightboxOrigen && typeof pcLightboxOrigen.focus === 'function') pcLightboxOrigen.focus();
+}
+function pcSincronizarFotoAmpliada(){
+  if(!pcLightboxEsGaleriaEquipo || !window.pcEquipoGaleria) return;
+  var actual = window.pcEquipoGaleria.current();
+  var imagen = document.getElementById('pcLightboxImg');
+  var contador = document.getElementById('pcLightboxCounter');
+  if(imagen){ imagen.src = actual.src; imagen.alt = actual.alt; }
+  if(contador) contador.textContent = actual.position;
+}
+function pcMoverFotoAmpliada(direccion){
+  if(!pcLightboxEsGaleriaEquipo || !window.pcEquipoGaleria) return;
+  window.pcEquipoGaleria.go(direccion);
+  pcSincronizarFotoAmpliada();
+}
+
+(function pcInitGaleriaEquipo(){
+  var raiz = document.getElementById('pcEquipoGaleria');
+  var datos = document.getElementById('pcEquipoImagenes');
+  var principal = document.getElementById('pcGalleryMain');
+  if(!raiz || !datos || !principal) return;
+
+  var imagenes = [];
+  try { imagenes = JSON.parse(datos.textContent || '[]'); } catch(e) { imagenes = []; }
+  if(!Array.isArray(imagenes) || imagenes.length === 0) return;
+
+  var indice = 0;
+  var nombreEquipo = raiz.getAttribute('data-equipo') || 'equipo';
+  var contador = document.getElementById('pcGalleryCounter');
+  var abrir = document.getElementById('pcGalleryOpen');
+  var anterior = document.getElementById('pcGalleryPrev');
+  var siguiente = document.getElementById('pcGalleryNext');
+  var tira = document.getElementById('pcGalleryThumbs');
+  var miniaturas = raiz.querySelectorAll('.pc-gallery-thumb');
+  var estado = document.getElementById('pcGalleryStatus');
+  var estadoIcono = document.getElementById('pcGalleryStatusIcon');
+  var estadoTexto = document.getElementById('pcGalleryStatusText');
+  var reintentar = document.getElementById('pcGalleryRetry');
+  var intentos = {};
+  var inicioDeslizamiento = 0;
+
+  function altActual(){
+    return 'Foto ' + (indice + 1) + ' de ' + imagenes.length + ': ' + nombreEquipo;
+  }
+  function mostrarEstado(tipo, texto){
+    if(!estado) return;
+    estado.hidden = false;
+    estado.className = 'pc-gallery-status ' + tipo;
+    if(estadoTexto) estadoTexto.textContent = texto;
+    if(estadoIcono){
+      estadoIcono.className = tipo === 'error'
+        ? 'fa-solid fa-triangle-exclamation'
+        : 'fa-solid fa-spinner fa-spin';
+    }
+    if(reintentar) reintentar.hidden = tipo !== 'error';
+  }
+  function ocultarEstado(){
+    if(estado) estado.hidden = true;
+    if(reintentar) reintentar.hidden = true;
+  }
+  function urlReintento(src, marca){
+    try {
+      var url = new URL(src, document.baseURI);
+      url.searchParams.set('_pc_img_retry', marca);
+      return url.href;
+    } catch(e) {
+      return src + (src.indexOf('?') === -1 ? '?' : '&') + '_pc_img_retry=' + encodeURIComponent(marca);
+    }
+  }
+  function actualizarControles(){
+    var posicion = (indice + 1) + ' / ' + imagenes.length;
+    if(contador) contador.textContent = posicion;
+    principal.alt = altActual();
+    if(abrir) abrir.setAttribute('aria-label', 'Ampliar foto ' + (indice + 1) + ' de ' + imagenes.length);
+
+    Array.prototype.forEach.call(miniaturas, function(boton, i){
+      var activa = i === indice;
+      boton.classList.toggle('active', activa);
+      boton.setAttribute('aria-current', activa ? 'true' : 'false');
+    });
+
+    if(tira && miniaturas[indice]){
+      var activa = miniaturas[indice];
+      tira.scrollLeft = activa.offsetLeft - (tira.clientWidth / 2) + (activa.offsetWidth / 2);
+    }
+  }
+  function precargarSiguiente(){
+    if(imagenes.length < 2) return;
+    var precarga = new Image();
+    precarga.referrerPolicy = 'no-referrer';
+    precarga.src = imagenes[(indice + 1) % imagenes.length];
+  }
+  function imagenCargada(){
+    principal.classList.remove('is-changing');
+    intentos[principal.getAttribute('data-base-src') || imagenes[indice]] = 0;
+    ocultarEstado();
+    precargarSiguiente();
+  }
+  function imagenConError(){
+    var srcBase = principal.getAttribute('data-base-src') || imagenes[indice];
+    if(srcBase !== imagenes[indice]) return;
+
+    var intento = (intentos[srcBase] || 0) + 1;
+    intentos[srcBase] = intento;
+    if(intento <= 2){
+      mostrarEstado('loading', 'La foto tardó en cargar. Reintentando…');
+      window.setTimeout(function(){
+        if((principal.getAttribute('data-base-src') || '') !== srcBase) return;
+        principal.src = urlReintento(srcBase, intento + '-' + Date.now());
+      }, intento * 700);
+      return;
+    }
+
+    principal.classList.remove('is-changing');
+    mostrarEstado('error', 'No pudimos cargar esta foto.');
+  }
+  function mostrar(indiceNuevo, animar){
+    indice = (indiceNuevo + imagenes.length) % imagenes.length;
+    var src = imagenes[indice];
+    principal.setAttribute('data-base-src', src);
+    if(animar) principal.classList.add('is-changing');
+    mostrarEstado('loading', 'Cargando foto…');
+    actualizarControles();
+    principal.src = src;
+  }
+  function avanzar(direccion){
+    if(imagenes.length < 2) return;
+    mostrar(indice + direccion, true);
+  }
+
+  principal.setAttribute('data-base-src', imagenes[0]);
+  principal.addEventListener('load', imagenCargada);
+  principal.addEventListener('error', imagenConError);
+  if(principal.complete){
+    if(principal.naturalWidth > 0) imagenCargada(); else imagenConError();
+  } else {
+    mostrarEstado('loading', 'Cargando foto…');
+  }
+
+  if(anterior) anterior.addEventListener('click', function(){ avanzar(-1); });
+  if(siguiente) siguiente.addEventListener('click', function(){ avanzar(1); });
+  if(abrir) abrir.addEventListener('click', pcAbrirFotoEquipo);
+  if(reintentar) reintentar.addEventListener('click', function(e){
+    e.stopPropagation();
+    var src = imagenes[indice];
+    intentos[src] = 0;
+    principal.classList.add('is-changing');
+    mostrarEstado('loading', 'Reintentando foto…');
+    principal.src = urlReintento(src, 'manual-' + Date.now());
+  });
+  Array.prototype.forEach.call(miniaturas, function(boton){
+    boton.addEventListener('click', function(){
+      var nuevoIndice = parseInt(boton.getAttribute('data-index'), 10);
+      if(!isNaN(nuevoIndice) && nuevoIndice !== indice) mostrar(nuevoIndice, true);
+    });
+  });
+  raiz.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); avanzar(-1); }
+    if(e.key === 'ArrowRight'){ e.preventDefault(); avanzar(1); }
+  });
+  if(abrir){
+    abrir.addEventListener('touchstart', function(e){
+      if(e.touches && e.touches[0]) inicioDeslizamiento = e.touches[0].clientX;
+    }, {passive:true});
+    abrir.addEventListener('touchend', function(e){
+      if(!e.changedTouches || !e.changedTouches[0]) return;
+      var diferencia = e.changedTouches[0].clientX - inicioDeslizamiento;
+      if(Math.abs(diferencia) > 50){ e.preventDefault(); avanzar(diferencia < 0 ? 1 : -1); }
+    }, {passive:false});
+  }
+
+  actualizarControles();
+  window.pcEquipoGaleria = {
+    total: imagenes.length,
+    go: avanzar,
+    current: function(){
+      return {
+        src: principal.src || imagenes[indice],
+        alt: altActual(),
+        position: (indice + 1) + ' / ' + imagenes.length
+      };
+    }
+  };
+})();
+
+document.addEventListener('keydown', function(e){
+  var caja = document.getElementById('pcLightbox');
+  if(!caja || !caja.classList.contains('open')) return;
+  if(e.key === 'Escape'){ e.preventDefault(); pcCerrarFoto(); }
+  if(pcLightboxEsGaleriaEquipo && e.key === 'ArrowLeft'){ e.preventDefault(); pcMoverFotoAmpliada(-1); }
+  if(pcLightboxEsGaleriaEquipo && e.key === 'ArrowRight'){ e.preventDefault(); pcMoverFotoAmpliada(1); }
+});
+
 function pcValidarComentario(form){
   var t = form.comentarioCliente.value.trim();
   if(!t){ return false; }
