@@ -1177,7 +1177,11 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				if ($datos["estado"] == "Entregado (Ent)") {
+				if (
+					$datos["estado"] == "Entregado (Ent)"
+					&& $_egs_estadoAnterior !== ''
+					&& $_egs_estadoAnterior !== "Entregado (Ent)"
+				) {
 
 
 
@@ -1193,16 +1197,11 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-					$datosOrdenSalida = array(
-						"id" => $datos["idOrden"],
-
-						"fecha_Salida" => $fechaActual
-
+					$respuesta = ModeloOrdenes::mdlActualizarFechaSalida(
+						"ordenes",
+						intval($datos["idOrden"]),
+						$fechaActual
 					);
-
-
-
-					$respuesta = ModeloOrdenes::mdlEditarFechaSalida("ordenes", $datosOrdenSalida);
 
 					// ── Recompensas: canjear monedero si se solicitó ──
 					$_egs_montoCanjeOrden  = isset($_POST["montoCanjeMonederoOrden"]) ? floatval($_POST["montoCanjeMonederoOrden"]) : 0;
@@ -3931,7 +3930,11 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			if ($datosOrdenDinamica["estado"] == "Entregado (Ent)") {
+			if (
+				$datosOrdenDinamica["estado"] == "Entregado (Ent)"
+				&& $_egs_dyn_estadoAnt !== ''
+				&& $_egs_dyn_estadoAnt !== "Entregado (Ent)"
+			) {
 
 
 
@@ -4027,7 +4030,11 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-				$respuestaUno = ModeloOrdenes::mdlEditarFechaSalida($tabla, $datosOrdenDinamicaFecha);
+				$respuestaUno = ModeloOrdenes::mdlActualizarFechaSalida(
+					$tabla,
+					intval($_POST["idOrden"]),
+					$fechaActual
+				);
 
 
 

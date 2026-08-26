@@ -910,6 +910,17 @@ class ModeloOrdenes{
 
 
 	static public function mdlEditarFechaSalida($tabla, $datos){
+		// Compatibilidad con llamadas antiguas: este método ya no debe modificar
+		// ningún otro dato de la orden además de su fecha real de salida.
+		if (!isset($datos["id"]) || !isset($datos["fecha_Salida"])) {
+			return "error";
+		}
+
+		return self::mdlActualizarFechaSalida(
+			$tabla,
+			intval($datos["id"]),
+			$datos["fecha_Salida"]
+		);
 
 
 
@@ -1015,6 +1026,19 @@ class ModeloOrdenes{
 
 
 
+
+	}
+
+	/*=============================================
+	ACTUALIZAR SOLAMENTE LA FECHA REAL DE SALIDA
+	=============================================*/
+	static public function mdlActualizarFechaSalida($tabla, $idOrden, $fechaSalida){
+
+		$stmt = ConexionWP::conectarWP()->prepare("UPDATE $tabla SET fecha_Salida = :fecha_Salida WHERE id = :id");
+		$stmt->bindParam(":fecha_Salida", $fechaSalida, PDO::PARAM_STR);
+		$stmt->bindParam(":id", $idOrden, PDO::PARAM_INT);
+
+		return $stmt->execute() ? "ok" : "error";
 
 	}
 
@@ -1363,6 +1387,59 @@ class ModeloOrdenes{
 		}
 
 
+
+	}
+
+	/*=============================================
+	RANGO DE ENTREGADAS POR FECHA REAL DE SALIDA
+	=============================================*/
+	static public function mdlRangoFechasOrdenesEntregadasPorSalida($tabla, $fechaInicial, $fechaFinal, $valorEmpresa){
+
+		$pdo = ConexionWP::conectarWP();
+		$usarHistorial = false;
+
+		try {
+			$consultaTabla = $pdo->query("SHOW TABLES LIKE 'notificaciones_estado'");
+			$usarHistorial = (bool) $consultaTabla->fetchColumn();
+		} catch (Exception $e) {
+			$usarHistorial = false;
+		}
+
+		if ($usarHistorial) {
+			$fechaCorte = "COALESCE(historial.fecha_entrega, ordenes.fecha_Salida)";
+			$sql = "SELECT ordenes.*, $fechaCorte AS fecha_Salida_corte
+				FROM $tabla AS ordenes
+				LEFT JOIN (
+					SELECT id_orden, MAX(fecha) AS fecha_entrega
+					FROM notificaciones_estado
+					WHERE tipo = 'estado' AND estado_nuevo = 'Entregado (Ent)'
+					GROUP BY id_orden
+				) AS historial ON historial.id_orden = ordenes.id
+				WHERE ordenes.estado = 'Entregado (Ent)' AND ordenes.id_empresa = :empresa";
+		} else {
+			$fechaCorte = "ordenes.fecha_Salida";
+			$sql = "SELECT ordenes.*, ordenes.fecha_Salida AS fecha_Salida_corte
+				FROM $tabla AS ordenes
+				WHERE ordenes.estado = 'Entregado (Ent)' AND ordenes.id_empresa = :empresa";
+		}
+
+		$parametros = array(":empresa" => intval($valorEmpresa));
+
+		if ($fechaInicial !== null && $fechaFinal !== null) {
+			$fechaFinalExclusiva = new DateTime($fechaFinal);
+			$fechaFinalExclusiva->add(new DateInterval("P1D"));
+
+			$sql .= " AND $fechaCorte >= :fecha_inicial AND $fechaCorte < :fecha_final";
+			$parametros[":fecha_inicial"] = $fechaInicial;
+			$parametros[":fecha_final"] = $fechaFinalExclusiva->format("Y-m-d");
+		}
+
+		$sql .= " ORDER BY fecha_Salida_corte DESC, ordenes.id DESC";
+
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute($parametros);
+
+		return $stmt->fetchAll();
 
 	}
 

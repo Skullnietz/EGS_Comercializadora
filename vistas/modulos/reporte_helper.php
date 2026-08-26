@@ -4,17 +4,34 @@ if (!class_exists('ReporteHelper')) {
 
     class ReporteHelper {
         public static function generarReporteExcel($statusFilter, $empresaId, $filename) {
+			$isReporteAceptados  = ($statusFilter === 'Aceptado (ok)');
+			$isReporteTerminados = ($statusFilter === 'Terminada (ter)');
+			$isReporteEntregados = ($statusFilter === 'Entregado (Ent)');
+			$isReporteIngresos   = ($statusFilter === 'En revisión (REV)');
+			$isReportePendiente  = ($statusFilter === 'Pendiente de autorización (AUT');
+			$isEstiloAceptados   = ($isReporteAceptados || $isReporteTerminados || $isReporteEntregados || $isReporteIngresos || $isReportePendiente);
 
             if (isset($_GET['fechaInicial']) && isset($_GET['fechaFinal'])) {
-                $ordenes = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa(
-                    'ordenes',
-                    $_GET['fechaInicial'],
-                    $_GET['fechaFinal'],
-                    'id_empresa',
-                    $empresaId
-                );
+				if ($isReporteEntregados) {
+					$ordenes = ModeloOrdenes::mdlRangoFechasOrdenesEntregadasPorSalida(
+						'ordenes',
+						$_GET['fechaInicial'],
+						$_GET['fechaFinal'],
+						$empresaId
+					);
+				} else {
+					$ordenes = ModeloOrdenes::mdlRangoFechasOrdenesPorEmpresa(
+						'ordenes',
+						$_GET['fechaInicial'],
+						$_GET['fechaFinal'],
+						'id_empresa',
+						$empresaId
+					);
+				}
             } else {
-                $ordenes = ModeloOrdenes::mdlMostrarordenesParaValidar('ordenes', 'id_empresa', $empresaId);
+				$ordenes = $isReporteEntregados
+					? ModeloOrdenes::mdlRangoFechasOrdenesEntregadasPorSalida('ordenes', null, null, $empresaId)
+					: ModeloOrdenes::mdlMostrarordenesParaValidar('ordenes', 'id_empresa', $empresaId);
             }
 
             if (!is_array($ordenes)) {
@@ -42,17 +59,12 @@ if (!class_exists('ReporteHelper')) {
                     : $_GET['fechaInicial'] . ' a ' . $_GET['fechaFinal'])
                 : 'Todas las ordenes';
 
-            $isReporteAceptados  = ($statusFilter === 'Aceptado (ok)');
-            $isReporteTerminados = ($statusFilter === 'Terminada (ter)');
-            $isReporteEntregados = ($statusFilter === 'Entregado (Ent)');
-            $isReporteIngresos   = ($statusFilter === 'En revisión (REV)');
-            $isReportePendiente  = ($statusFilter === 'Pendiente de autorización (AUT');
-            $isEstiloAceptados   = ($isReporteAceptados || $isReporteTerminados || $isReporteEntregados || $isReporteIngresos || $isReportePendiente);
-
             if ($isReporteTerminados) {
                 $headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje 1', 'Mensaje 2', 'fecha', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
             } elseif ($isReportePendiente) {
                 $headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'fecha', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
+			} elseif ($isReporteEntregados) {
+				$headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'FECHA SALIDA', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
             } elseif ($isEstiloAceptados) {
                 $headers = array('Orden', 'EQUIPO', 'Asesor', 'Tecnico principal', 'Cliente', 'Telefono', 'Mensaje', 'fecha', 'Estado', 'CANTIDAD', 'FECHA INGRESO');
             } else {
@@ -92,9 +104,12 @@ if (!class_exists('ReporteHelper')) {
                 $asesor = Controladorasesores::ctrMostrarAsesoresEleg("id", $value["id_Asesor"]);
                 $tecnico = ControladorTecnicos::ctrMostrarTecnicos("id", $value["id_tecnico"]);
 
-                if ($isEstiloAceptados) {
+				if ($isEstiloAceptados) {
                     $equipo = trim((string)($value["marcaDelEquipo"] ?? '') . ' ' . (string)($value["modeloDelEquipo"] ?? ''));
                     $mensaje = ($phoneParaWA !== "") ? "Enviar Msj" : "";
+					$fechaReporte = $isReporteEntregados
+						? ($value["fecha_Salida_corte"] ?? ($value["fecha_Salida"] ?? ""))
+						: ($value["fecha"] ?? "");
 
                     if ($isReporteTerminados) {
                         $rows[] = array(
@@ -106,7 +121,7 @@ if (!class_exists('ReporteHelper')) {
                             $telefono,
                             $mensaje,
                             $mensaje,
-                            $value["fecha"] ?? "",
+							$fechaReporte,
                             $value["estado"] ?? "",
                             floatval($value["total"]),
                             $value["fecha_ingreso"] ?? ""
@@ -120,7 +135,7 @@ if (!class_exists('ReporteHelper')) {
                             $nombreCliente,
                             $telefono,
                             $mensaje,
-                            $value["fecha"] ?? "",
+							$fechaReporte,
                             $value["estado"] ?? "",
                             floatval($value["total"]),
                             $value["fecha_ingreso"] ?? ""
