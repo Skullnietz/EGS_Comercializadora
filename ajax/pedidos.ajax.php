@@ -9,6 +9,26 @@ if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] == "tecnico") {
 require_once "../controladores/pedidos.controlador.php";
 require_once "../modelos/pedidos.modelo.php";
 
+/*=============================================
+GUARDAR DETALLE DEL PEDIDO (AJAX)
+Va antes del despachador: el formulario también envía "idPedido".
+=============================================*/
+if (isset($_POST['guardarPedidoDetalle'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        $entrada = ['observaciones' => $_POST['listarObservacionesPedidos'] ?? ''];
+        if (in_array($_SESSION['perfil'], ['administrador', 'Super-Administrador'], true)) {
+            $entrada += ['productos' => $_POST['ListarPreciosActualizados'] ?? '', 'pagos' => $_POST['PagosListados'] ?? '', 'estado' => $_POST['EstadoPedidoDinamico'] ?? ''];
+        }
+        $pedido = PedidosPersistencia::guardar($_POST['idPedido'] ?? 0, $entrada, $_POST['versionPedido'] ?? '', $_POST['versionObservaciones'] ?? '');
+        echo json_encode(['ok' => true, 'version' => PedidosPersistencia::version($pedido), 'versionObservaciones' => PedidosPersistencia::version($pedido, true)]);
+    } catch (Throwable $e) {
+        http_response_code($e instanceof PDOException ? 500 : 409);
+        echo json_encode(['ok' => false, 'mensaje' => $e instanceof PDOException ? 'No se pudo guardar en la base de datos.' : $e->getMessage()]);
+    }
+    exit;
+}
+
 class AjaxPedidos{
 	
 		public $empresaPedido;
@@ -152,28 +172,15 @@ class AjaxPedidos{
 	public $observacionesDinamicoAjax;
 
 	public function ajaxEditarObservacionesDinamico(){
-		$item = "id";
-		$valor = $this->idPedidoDinamicoAjax;
-		$pedidoActual = ControladorPedidos::ctrMostrarorpedidosParaValidar($item, $valor);
-		if (!empty($pedidoActual)) {
-            $pedidoBase = is_array($pedidoActual[0]) ? $pedidoActual[0] : $pedidoActual;
-            
-            $datosPedido = array(
-                "id" => $this->idPedidoDinamicoAjax,
-                "estado" => $pedidoBase["estado"],
-                "pago" => $pedidoBase["pagos"],
-                "adeudo" => $pedidoBase["adeudo"],
-                "observaciones" => $this->observacionesDinamicoAjax,
-                "productos"=> $pedidoBase["productos"],
-                "total" => $pedidoBase["total"]
-            );
-            $respuesta = ModeloPedidos::mdlEditarPedidoDinamico("pedidos", $datosPedido);
-            echo $respuesta;
-		} else {
-            echo "error";
+        header('Content-Type: application/json; charset=utf-8');
+        try {
+            $pedido = PedidosPersistencia::guardar($this->idPedidoDinamicoAjax, ['observaciones' => $this->observacionesDinamicoAjax], null, $_POST['versionObservaciones'] ?? '');
+            echo json_encode(['ok' => true, 'version' => PedidosPersistencia::version($pedido, true)]);
+        } catch (Throwable $e) {
+            http_response_code($e instanceof PDOException ? 500 : 409);
+            echo json_encode(['ok' => false, 'mensaje' => $e instanceof PDOException ? 'No se pudo guardar. Inténtalo de nuevo.' : $e->getMessage()]);
         }
-	}
-
+    }
 }
 #CREAR PEDIDO
 #-----------------------------------------------------------

@@ -1780,7 +1780,7 @@ $('.AgregarProductos').click(function() {
 
                   '<div class="col-xs-3">'+
                     
-                     '<input type="number" class="form-control nuevaCantidadProductoPedido"  min="1" value="1"  required>'+
+                     '<input type="number" class="form-control nuevaCantidadProductoPedido"  min="1" step="any" value="1"  required>'+
 
                   '</div> '+
 
@@ -1792,7 +1792,7 @@ $('.AgregarProductos').click(function() {
 
                       '<span class="input-group-addon"><i class="ion ion-social-usd"></i></span>'+
                          
-                      '<input type="text" class="form-control nuevoPrecioProductoPedido" required>'+
+                      '<input type="number" class="form-control nuevoPrecioProductoPedido" min="0" step="any" placeholder="Precio unitario" required>'+
          
                     '</div>'+
                      
@@ -1816,57 +1816,28 @@ VALIDAR SELECTS DE FORMULARIO
 =============================================*/
 
 /*=============================================
-MODIFICAR LA CANTIDAD
+MODIFICAR CANTIDAD O PRECIO
+El precio capturado es unitario; el subtotal se calcula al listar.
 =============================================*/
-$(document).on("change", "input.nuevaCantidadProductoPedido", function(){
-
-
-	var precio = $(this).parent().parent().children(".ingresoPrecio").children().children(".nuevoPrecioProductoPedido")
-
-	
-	var precioFinal = $(this).val() * precio.val();
-
-	precio.val(precioFinal);
-
-	//console.log(precioFinal);
-	sumarTotalPreciosPedido()
-
-
-})
-$(document).on("change", "input.nuevoPrecioProductoPedido", function(){
+$(document).on("input change", "input.nuevaCantidadProductoPedido, input.nuevoPrecioProductoPedido", function(){
 
 	sumarTotalPreciosPedido()
-	listarProductosPedidos()
+
 })
 /*=============================================
 SUMAR TODOS LOS PRECIOS
 =============================================*/
 function sumarTotalPreciosPedido(){
 
-	var precioItemPedido = $(".nuevoPrecioProductoPedido");
+	var productos = listarProductosPedidos();
 
-	var arraySumarPrecioPedido = [];
+	var total = productos.reduce(function(suma, producto){ return suma + producto.precio; }, 0);
 
-	for (var i = 0; i < precioItemPedido.length; i++) {
-		
-		arraySumarPrecioPedido.push(Number($(precioItemPedido[i]).val()));
-	}
+	$(".TotalPedidoEnOrden").val(Math.round(total * 100) / 100);
 
-	//console.log("arraySumarPrecioPedido:", arraySumarPrecioPedido);
-	function sumaArrayPreciosPedido(total, numero){
+	var pago = Number($(".PagoClientePedidoDinamico").val()) || 0;
+	$(".PrimerAdeudo").val(Math.max(0, Math.round((total - pago) * 100) / 100));
 
-		return total + numero;
-
-	}
-
-	var sumaTotalPrecioPedido = arraySumarPrecioPedido.reduce(sumaArrayPreciosPedido);
-	//console.log("SumaTotalDelPrecio:", sumaTotalPrecioPedido);
-
-	//$("#nuevoTotalVenta").val(sumaTotalPrecioPedido);
-	$(".TotalPedidoEnOrden").val(sumaTotalPrecioPedido);
-	//$("#nuevoTotalVenta").attr("total",sumaTotalPrecioPedido);
-	
-	listarProductosPedidos()
 }
 
 
@@ -1883,13 +1854,20 @@ function listarProductosPedidos(){
 
 	for (var i =0; i < descripcion.length; i++) {
 
+		var cantidadProducto = Number($(cantidad[i]).val()) || 0;
+		var precioUnitario = Number($(precio[i]).val()) || 0;
+
+		// "precio" conserva el formato histórico: subtotal de la línea.
 		listarProductosPedido.push({"Descripcion" : $(descripcion[i]).val(),
-								    "cantidad" : $(cantidad[i]).val(),
-									"precio" : $(precio[i]).val()})
+								    "cantidad" : cantidadProducto,
+								    "precioUnitario" : precioUnitario,
+									"precio" : Math.round(cantidadProducto * precioUnitario * 100) / 100})
 
 	}
 
 	$("#ProductosPedidoListados").val(JSON.stringify(listarProductosPedido));
+
+	return listarProductosPedido;
 }
 
 /*=============================================
@@ -1904,6 +1882,7 @@ $(".formularioPedidosDinamicos").on("click", "button.quitarProducto", function()
 
 	$(this).parent().parent().parent().parent().remove();
 
+	sumarTotalPreciosPedido()
 
 });
 

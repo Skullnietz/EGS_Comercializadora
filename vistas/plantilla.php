@@ -341,7 +341,9 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
   <script src="vistas/js/infoOrden.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorBanner.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestor.ticket.stock.js?v=<?= $jsVer ?>"></script>
+  <?php if ($rutaActual !== "infopedido"): /* el detalle usa pedidos.detalle.js; este registraría cálculos duplicados */ ?>
   <script src="vistas/js/gestor.pedidos.js?v=<?= $jsVer ?>"></script>
+  <?php endif; ?>
   <script src="vistas/js/gestor.comisiones.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestor.crm.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/almacenes.js?v=<?= $jsVer ?>"></script>

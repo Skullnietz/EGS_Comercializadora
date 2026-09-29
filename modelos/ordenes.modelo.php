@@ -2,7 +2,8 @@
 
 
 
-require_once "conexionWordpress.php";
+require_once __DIR__ . "/conexionWordpress.php";
+require_once __DIR__ . "/pedidos.persistencia.php";
 
 
 
@@ -2277,45 +2278,15 @@ class ModeloOrdenes{
 
 
 	static public function mdlEditarPedidoEnOrden($tabla, $datos){
-
-
-
-		$stmt = ConexionWP::conectarWP()->prepare("UPDATE $tabla SET estado = :estado WHERE id = :id");
-
-
-
-		$stmt->bindParam(":estado", $datos["EstadoDelPedido"], PDO::PARAM_STR);
-
-		$stmt -> bindParam(":id", $datos["idPedido"], PDO::PARAM_INT);
-
-
-
-		if($stmt->execute()){
-
-
-
-			return "ok";
-
-
-
-		}else{
-
-
-
-			return "error";
-
-		
-
-		}
-
-
-
-
-
-
-
-	}
-
+        if (empty($datos['idPedido']) || empty($datos['EstadoDelPedido'])) return 'ok';
+        // La edición de la orden tiene sus propios permisos; un fallo aquí no debe impedir guardarla.
+        try {
+            return PedidosPersistencia::cambiarEstado($datos['idPedido'], $datos['EstadoDelPedido'], false);
+        } catch (Throwable $e) {
+            error_log('[pedidos] No se actualizó el estado del pedido ' . $datos['idPedido'] . ' desde la orden: ' . $e->getMessage());
+            return 'error';
+        }
+    }
 
 
 
@@ -2591,60 +2562,8 @@ class ModeloOrdenes{
 
 
 	static public function mdlIngresarPedidoDinamico($tabla, $datos){
-
-		
-
-		$stmt = Conexion::conectar()->prepare("INSERT INTO $tabla(id_empresa, id_Asesor, id_cliente, productos, total, estado, pagos, adeudo, id_orden) VALUES (:id_empresa, :id_Asesor, :id_cliente, :productos, :total, :estado, :pagos, :adeudo, :id_orden)");
-
-
-
-		$stmt->bindParam(":id_empresa", $datos["empresa"], PDO::PARAM_INT);
-
-		$stmt->bindParam(":estado", $datos["estado"], PDO::PARAM_STR);
-
-		$stmt->bindParam(":pagos", $datos["pago"], PDO::PARAM_STR);
-
-		$stmt->bindParam(":adeudo", $datos["adeudo"], PDO::PARAM_STR);
-
-		$stmt->bindParam(":id_Asesor", $datos["asesor"], PDO::PARAM_INT);
-
-		$stmt->bindParam(":id_cliente", $datos["cliente"], PDO::PARAM_INT);
-
-		$stmt->bindParam(":productos", $datos["productos"], PDO::PARAM_STR);
-
-		$stmt->bindParam(":total", $datos["total"], PDO::PARAM_STR);
-
-		$stmt->bindParam(":id_orden", $datos["id_orden"], PDO::PARAM_INT);
-
-		
-
-
-
-		if($stmt->execute()){
-
-
-
-			return "ok";	
-
-
-
-		}else{
-
-
-
-			return "error";
-
-		
-
-		}
-
-
-
-
-		
-
-
-	}	
+        return PedidosPersistencia::crear($datos);
+    }
 
 
 

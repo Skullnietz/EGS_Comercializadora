@@ -1,6 +1,7 @@
 <?php
 
-require_once "conexion.php";
+require_once __DIR__ . "/conexion.php";
+require_once __DIR__ . "/pedidos.persistencia.php";
 
 class ModeloPedidos{
    /*=============================================
@@ -125,36 +126,36 @@ class ModeloPedidos{
 
 
 		$stmt->bindParam(":productoUno", $datos["Producto1"], PDO::PARAM_STR);
-		$stmt->bindParam(":precioProductoUno", $datos["precioProducto1"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioProductoUno", $datos["precioProducto1"], PDO::PARAM_STR);
 		$stmt->bindParam(":cantidaProductoUno", $datos["cantidadProducto1"], PDO::PARAM_INT);
-		$stmt->bindParam(":totalPedidoUno", $datos["totalPedidoUno"], PDO::PARAM_INT);
+		$stmt->bindParam(":totalPedidoUno", $datos["totalPedidoUno"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":ProductoDos", $datos["Producto2"], PDO::PARAM_STR);
-		$stmt->bindParam(":precioProductoDos", $datos["precioProducto2"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioProductoDos", $datos["precioProducto2"], PDO::PARAM_STR);
 		$stmt->bindParam(":cantidadProductoDos", $datos["cantidadProducto2"], PDO::PARAM_INT);
-		$stmt->bindParam(":totalPedidoDos", $datos["totalPedidoDos"], PDO::PARAM_INT);
+		$stmt->bindParam(":totalPedidoDos", $datos["totalPedidoDos"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":ProductoTres", $datos["Producto3"], PDO::PARAM_STR);
-		$stmt->bindParam(":precioProductoTres", $datos["precioProducto3"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioProductoTres", $datos["precioProducto3"], PDO::PARAM_STR);
 		$stmt->bindParam(":cantidadProductoTres", $datos["cantidadProducto3"], PDO::PARAM_INT);
-		$stmt->bindParam(":totalPedidoTres", $datos["totalPedidoTres"], PDO::PARAM_INT);
+		$stmt->bindParam(":totalPedidoTres", $datos["totalPedidoTres"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":ProductoCuatro", $datos["Producto4"], PDO::PARAM_STR);
-		$stmt->bindParam(":precioProductoCuatro", $datos["precioProducto4"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioProductoCuatro", $datos["precioProducto4"], PDO::PARAM_STR);
 		$stmt->bindParam(":cantidadProductoCuatro", $datos["cantidadProducto4"], PDO::PARAM_INT);
-		$stmt->bindParam(":totalPedidoCuatro", $datos["totalPedidoCuatro"], PDO::PARAM_INT);
+		$stmt->bindParam(":totalPedidoCuatro", $datos["totalPedidoCuatro"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":ProductoCinco", $datos["Producto5"], PDO::PARAM_STR);
-		$stmt->bindParam(":precioProductoCinco", $datos["precioProducto5"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioProductoCinco", $datos["precioProducto5"], PDO::PARAM_STR);
 		$stmt->bindParam(":cantidadProductoCinco", $datos["cantidadProducto5"], PDO::PARAM_INT);
-		$stmt->bindParam(":totalPedidoCinco", $datos["totalPedidoCinco"], PDO::PARAM_INT);
+		$stmt->bindParam(":totalPedidoCinco", $datos["totalPedidoCinco"], PDO::PARAM_STR);
 		$stmt->bindParam(":cantidadProductoCinco", $datos["cantidadProducto5"], PDO::PARAM_INT);
 		
 		$stmt->bindParam(":metodo", $datos["metodo"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":pagoPedido", $datos["pagoClientePedido"], PDO::PARAM_INT);
-		$stmt->bindParam(":total", $datos["pagoPedido"], PDO::PARAM_INT);
-		$stmt->bindParam(":adeudo", $datos["adeudo"], PDO::PARAM_INT);
+		$stmt->bindParam(":pagoPedido", $datos["pagoClientePedido"], PDO::PARAM_STR);
+		$stmt->bindParam(":total", $datos["pagoPedido"], PDO::PARAM_STR);
+		$stmt->bindParam(":adeudo", $datos["adeudo"], PDO::PARAM_STR);
 
 		if($stmt->execute()){
 
@@ -318,7 +319,7 @@ class ModeloPedidos{
 
 	}
 
-	public function mdlEliminarPedido($tabla, $datos)
+	static public function mdlEliminarPedido($tabla, $datos)
 	{
 		
 		$stmt = Conexion::conectar()->prepare("DELETE FROM $tabla WHERE id = :id");
@@ -377,54 +378,14 @@ class ModeloPedidos{
 	=============================================*/
 
 	static public function mdlAsignarPedidoDinamico($tabla, $datos){
-
-		$stmt = ConexionWP::conectarWP()->prepare("UPDATE $tabla SET id_pedido = :id_pedido WHERE id = :id");
-
-		
-		$stmt->bindParam(":id_pedido", $datos["id_pedido"], PDO::PARAM_INT);
-		$stmt->bindParam(":id", $datos["id"], PDO::PARAM_INT);
-
-		if($stmt->execute()){
-
-			return "ok";
-
-		}else{
-
-			return "error";
-		
-		}
-
-		$stmt->close();
-		$stmt = null;
-
-	}
-
+        return PedidosPersistencia::asignar($datos['id_pedido'], $datos['id']);
+    }
 	/*=============================================
 	ASIGANR PEDIDO
 	=============================================*/
-	static public function mdlAsignarNuevoEstadoPedido($tabla,$datosEstadoPeido){
-
-		$stmt = Conexion::conectar()->prepare("UPDATE $tabla SET estado = :estado WHERE id = :id");
-
-		
-		$stmt->bindParam(":estado", $datosEstadoPeido["estado"], PDO::PARAM_STR);
-		$stmt->bindParam(":id", $datosEstadoPeido["id"], PDO::PARAM_INT);
-
-		if($stmt->execute()){
-
-			return "ok";
-
-		}else{
-
-			return "error";
-		
-		}
-
-		$stmt->close();
-		$stmt = null;
-
-	}
-
+	static public function mdlAsignarNuevoEstadoPedido($tabla, $datosEstadoPeido){
+        return PedidosPersistencia::cambiarEstado($datosEstadoPeido['id'], $datosEstadoPeido['estado']);
+    }
 	
 	/*=============================================
 	MOSTRAR TOTAL PEDIDOS

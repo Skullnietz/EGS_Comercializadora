@@ -58,7 +58,7 @@ class ControladorPedidos{
 
 	}
 
-	public function ctrCrearPedido($datos){
+	static public function ctrCrearPedido($datos){
 		
 		if (isset($datos["empresaPedido"])){
 			
@@ -1011,96 +1011,16 @@ class ControladorPedidos{
 	=============================================*/
 
 	public function ctrEditarOrdenDinamica(){
-		
-		if (isset($_POST["idPedido"])) {
-			
-			$tabla = "pedidos";
-			$idPedido = intval($_POST["idPedido"]);
-			$perfilActual = isset($_SESSION["perfil"]) ? $_SESSION["perfil"] : "";
-			$puedeEditarPedidoCompleto = ($perfilActual == "administrador" || $perfilActual == "Super-Administrador");
-			$puedeAgregarObservaciones = ($puedeEditarPedidoCompleto || $perfilActual == "vendedor");
-
-			$pedidoActual = self::ctrMostrarorpedidosParaValidar("id", $idPedido);
-			$pedidoBase = array();
-
-			if (is_array($pedidoActual)) {
-				if (isset($pedidoActual[0]) && is_array($pedidoActual[0])) {
-					$pedidoBase = $pedidoActual[0];
-				} else {
-					$pedidoBase = $pedidoActual;
-				}
-			}
-
-			if (empty($pedidoBase) || !$puedeAgregarObservaciones) {
-				return;
-			}
-
-			$estado = isset($pedidoBase["estado"]) ? $pedidoBase["estado"] : "";
-			$pagos = isset($pedidoBase["pagos"]) ? $pedidoBase["pagos"] : "";
-			$adeudo = isset($pedidoBase["adeudo"]) ? $pedidoBase["adeudo"] : "";
-			$observaciones = isset($pedidoBase["observaciones"]) ? $pedidoBase["observaciones"] : "[]";
-			$productos = isset($pedidoBase["productos"]) ? $pedidoBase["productos"] : "";
-			$total = isset($pedidoBase["total"]) ? $pedidoBase["total"] : "";
-
-			if ($puedeEditarPedidoCompleto) {
-				$estado = isset($_POST["EstadoPedidoDinamico"]) ? $_POST["EstadoPedidoDinamico"] : $estado;
-				$pagos = isset($_POST["PagosListados"]) ? $_POST["PagosListados"] : $pagos;
-				$adeudo = isset($_POST["adeudoPedidoDinamico"]) ? $_POST["adeudoPedidoDinamico"] : $adeudo;
-				$productos = isset($_POST["ListarPreciosActualizados"]) ? $_POST["ListarPreciosActualizados"] : $productos;
-				$total = isset($_POST["totalPagarPedidoDinamico"]) ? $_POST["totalPagarPedidoDinamico"] : $total;
-			}
-
-			if (isset($_POST["listarObservacionesPedidos"]) && $_POST["listarObservacionesPedidos"] != "") {
-				$observaciones = $_POST["listarObservacionesPedidos"];
-			}
-
-			$datosPedido = array("id" => $idPedido,
-								 "estado" => $estado,
-								 "pago" => $pagos,
-								 "adeudo" => $adeudo,
-								 "observaciones" => $observaciones,
-								 "productos"=> $productos,
-								 "total" => $total
-								);
-
-			if (getenv("APP_ENV") === "development") {
-				error_log("[pedidos] Editando pedido ID " . $idPedido);
-			}
-			$respuesta = ModeloPedidos::mdlEditarPedidoDinamico($tabla, $datosPedido);
-			if (getenv("APP_ENV") === "development") {
-				error_log("[pedidos] Resultado de edición para ID " . $idPedido . ": " . $respuesta);
-			}
-
-			if ($respuesta == "ok") {
-
-					echo '<script>
-					swal({
-						type: "success",
-						title: "¡El pedido se ha guardado correctamente!",
-						showConfirmButton: true,
-						confirmButtonText: "Cerrar"
-					}).then(function(result){
-						if(result.value){
-							window.location = "'.$_SERVER["REQUEST_URI"].'";
-						}
-					});
-					</script>';
-
-			} else {
-
-					echo '<script>
-					swal({
-						type: "error",
-						title: "Error al guardar",
-						text: "No se pudo guardar el pedido. Verifica que la base de datos tenga las columnas necesarias (pagos, observaciones, productos) o contacta al administrador.",
-						showConfirmButton: true,
-						confirmButtonText: "Cerrar"
-					});
-					</script>';
-			}
-		}
-	}
-
+        if (!isset($_POST['idPedido'])) return;
+        try {
+            $entrada = ['observaciones' => $_POST['listarObservacionesPedidos'] ?? ''];
+            if (in_array($_SESSION['perfil'] ?? '', ['administrador', 'Super-Administrador'], true)) {
+                $entrada += ['productos' => $_POST['ListarPreciosActualizados'] ?? '', 'pagos' => $_POST['PagosListados'] ?? '', 'estado' => $_POST['EstadoPedidoDinamico'] ?? ''];
+            }
+            PedidosPersistencia::guardar($_POST['idPedido'], $entrada, $_POST['versionPedido'] ?? '', $_POST['versionObservaciones'] ?? '');
+            self::ctrAvisoPedido('success', '¡El pedido se ha guardado correctamente!', '', $_SERVER['REQUEST_URI']);
+        } catch (Throwable $e) { self::ctrErrorPedido($e); }
+    }
 
 
 	/*=============================================
@@ -1108,97 +1028,34 @@ class ControladorPedidos{
 	=============================================*/
 
 	public function ctrAsignarPedidoEnOrden(){
-		
-		if (isset($_POST["AsignarPedidoDinamico"])) {
-			
-			$tabla = "ordenes";
-
-			$datosPedidoAsignado = array("id" => $_POST["AsignarOrdenDinamico"],
-								         "id_pedido" => $_POST["AsignarPedidoDinamico"]
-								);
-
-			$respuesta = ModeloPedidos::mdlAsignarPedidoDinamico($tabla, $datosPedidoAsignado);
-
-			if ($respuesta == "ok") {
-
-
-					echo '<script>
-
-
-
-					swal({
-
-						type: "success",
-						title: "¡El pedido se ha guardado correctamente!",
-						showConfirmButton: true,
-						confirmButtonText: "Cerrar"
-
-					}).then(function(result){
-
-						if(result.value){
-							
-							window.location = "index.php?ruta=ordenes";
-
-					
-
-						}
-
-					});
-				
-
-					</script>';
-				}
-		}
-	}
-	
+        if (!isset($_POST['AsignarPedidoDinamico'])) return;
+        try {
+            ModeloPedidos::mdlAsignarPedidoDinamico('ordenes', ['id' => $_POST['AsignarOrdenDinamico'] ?? 0, 'id_pedido' => $_POST['AsignarPedidoDinamico']]);
+            self::ctrAvisoPedido('success', '¡El pedido se ha asignado correctamente!', '', $_SERVER['REQUEST_URI']);
+        } catch (Throwable $e) { self::ctrErrorPedido($e); }
+    }	
 	/*=============================================
 	AGREGAR NUEVO ESTADO A PEDIDO
 	=============================================*/
 	static public function ctrEditarPedidoEnEstado(){
-		
-		if (isset($_POST["EdicionUnicaDeEstadoDePedidoEnOrden"])) {
-			
-			$tabla = "pedidos";
+        if (!isset($_POST['EdicionUnicaDeEstadoDePedidoEnOrden'])) return;
+        try {
+            ModeloPedidos::mdlAsignarNuevoEstadoPedido('pedidos', ['id' => $_POST['idPeido'] ?? 0, 'estado' => $_POST['EdicionUnicaDeEstadoDePedidoEnOrden']]);
+            self::ctrAvisoPedido('success', '¡El estado se ha guardado correctamente!', '', $_SERVER['REQUEST_URI']);
+        } catch (Throwable $e) { self::ctrErrorPedido($e); }
+    }
 
-			$datosEstadoPeido = array( "id"=> $_POST["idPeido"],
-									   "estado" => $_POST["EdicionUnicaDeEstadoDePedidoEnOrden"]);
+    public static function ctrAvisoPedido($tipo, $titulo, $texto = '', $destino = null){
+        $opciones = ['type' => $tipo, 'title' => $titulo, 'text' => $texto, 'confirmButtonText' => 'Cerrar'];
+        echo '<script>swal(' . json_encode($opciones, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) . ')';
+        if ($destino !== null) echo '.then(function(){window.location.href=' . json_encode($destino, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) . ';})';
+        echo ';</script>';
+    }
 
-
-			$respuesta = ModeloPedidos::mdlAsignarNuevoEstadoPedido($tabla, $datosEstadoPeido);
-
-			if ($respuesta == "ok") {
-
-
-					echo '<script>
-
-
-
-					swal({
-
-						type: "success",
-						title: "¡El pedido se ha guardado correctamente!",
-						showConfirmButton: true,
-						confirmButtonText: "Cerrar"
-
-					}).then(function(result){
-
-						if(result.value){
-							
-							window.location = "index.php?ruta=ordenes";
-
-					
-
-						}
-
-					});
-				
-
-					</script>';
-				}
-
-		}
-	}
-
+    public static function ctrErrorPedido($error){
+        $mensaje = $error instanceof PDOException ? 'No se pudo guardar en la base de datos. Inténtalo de nuevo o contacta al administrador.' : $error->getMessage();
+        self::ctrAvisoPedido('error', 'No se guardaron los cambios', $mensaje);
+    }
 	/*=============================================
 	MOSTRAR TOTAL PEDIDOS
 	=============================================*/

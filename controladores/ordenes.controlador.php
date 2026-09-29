@@ -2739,94 +2739,21 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 	=============================================*/
 
-	public function ctrAgregarPedidoEnOrden()
-	{
-
-
-
-		if (isset($_POST["ProductosPedidoListados"])) {
-
-
-
-			$datosPedidoEnOrden = array(
-				"empresa" => $_POST["empresaPedioDinamico"],
-
-				"asesor" => $_POST["asesorPedidoDinamico"],
-
-				"cliente" => $_POST["clientePedidoDinamico"],
-
-				"productos" => $_POST["ProductosPedidoListados"],
-
-				"total" => $_POST["TotalPedidoEnOrden"],
-
-				"estado" => $_POST["EstadoPedidoDinamico"],
-
-				"pago" => $_POST["PrimerPagolistado"],
-
-				"adeudo" => $_POST["PrimerAdeudo"],
-
-				"id_orden" => $_POST["seleccionarOrdenPedidoDinamico"]
-
-			);
-
-
-
-			$respuesta = ModeloOrdenes::mdlIngresarPedidoDinamico("pedidos", $datosPedidoEnOrden);
-
-
-
-			if ($respuesta == "ok") {
-
-
-
-				echo '<script>
-
-
-
-					swal({
-
-
-
-						type: "success",
-
-						title: "¡El Pedido ha sido guardado correctamente!",
-
-						showConfirmButton: true,
-
-						confirmButtonText: "Cerrar"
-
-
-
-					}).then(function(result){
-
-
-
-						if(result.value){
-
-						
-
-							window.location = "index.php?ruta=pedidos";
-
-
-
-						}
-
-
-
-					});
-
-				
-
-
-
-					</script>';
-
-			}
-
-		}
-
-	}
-
+	public function ctrAgregarPedidoEnOrden(){
+        if (!isset($_POST['ProductosPedidoListados'])) return;
+        try {
+            ModeloOrdenes::mdlIngresarPedidoDinamico('pedidos', [
+                'empresa' => ($_SESSION['perfil'] ?? '') === 'Super-Administrador' ? ($_POST['empresaPedioDinamico'] ?? 0) : ($_SESSION['empresa'] ?? 0),
+                'asesor' => $_POST['asesorPedidoDinamico'] ?? 0,
+                'cliente' => $_POST['clientePedidoDinamico'] ?? 0,
+                'productos' => $_POST['ProductosPedidoListados'],
+                'estado' => $_POST['EstadoPedidoDinamico'] ?? '',
+                'pago' => $_POST['PrimerPagolistado'] ?? '[]',
+                'id_orden' => $_POST['seleccionarOrdenPedidoDinamico'] ?? 0
+            ]);
+            ControladorPedidos::ctrAvisoPedido('success', '¡El pedido se ha guardado correctamente!', '', 'index.php?ruta=pedidos');
+        } catch (Throwable $e) { ControladorPedidos::ctrErrorPedido($e); }
+    }
 
 
 	/*=============================================
