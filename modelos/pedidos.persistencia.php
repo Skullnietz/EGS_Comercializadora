@@ -2,7 +2,11 @@
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/conexionWordpress.php';
 
-/** Escrituras de pedidos con validación, bloqueo y detección de formularios antiguos. */
+/**
+ * Escrituras de pedidos con validación, bloqueo de fila y comprobación de lo guardado.
+ * Abonos y observaciones solo se agregan: lo ya guardado nunca se reenvía desde el navegador,
+ * así los datos antiguos (fechas, importes con formato, textos) no pasan por inputs que los alteren.
+ */
 class PedidosPersistencia
 {
     public static function estados()
@@ -17,14 +21,32 @@ class PedidosPersistencia
         return $estado;
     }
 
+    /** Importes y cantidades capturados en pantalla. */
     public static function numero($valor, $decimales = 2)
     {
         if (!is_numeric($valor) || !is_finite((float)$valor) || (float)$valor < 0) {
-            throw new InvalidArgumentException('Los importes y cantidades deben ser números positivos o cero.');
+            throw new InvalidArgumentException('Los importes y cantidades deben ser números positivos o cero, sin comas ni signos.');
         }
         return round((float)$valor, $decimales);
     }
 
+    /** Importes guardados por versiones anteriores ("1,500", "$800.00", ""): se leen sin rechazarlos. */
+    public static function importe($valor)
+    {
+        if (is_int($valor) || is_float($valor)) return is_finite($valor) ? (float)$valor : 0.0;
+        $limpio = preg_replace('/[^0-9.\-]/', '', (string)$valor);
+        return is_numeric($limpio) ? (float)$limpio : 0.0;
+    }
+
+    /** JSON en ASCII (\uXXXX): la conexión utf8 de 3 bytes rechaza o corta los emojis. */
+    public static function json($valor)
+    {
+        $json = json_encode($valor);
+        if ($json === false) throw new InvalidArgumentException('El texto contiene caracteres no válidos.');
+        return $json;
+    }
+
+    /** Lista JSON enviada por el navegador. */
     public static function lista($json)
     {
         if ($json === null || $json === '') return [];
@@ -34,6 +56,35 @@ class PedidosPersistencia
         }
         foreach ($lista as $fila) if (!is_array($fila)) throw new InvalidArgumentException('La lista contiene datos no válidos.');
         return $lista;
+    }
+
+    /** Lista JSON guardada en el pedido; vacía si nunca se capturó. */
+    public static function guardada($json, $nombre)
+    {
+        if ($json === null || trim($json) === '' || trim($json) === 'null') return [];
+        $lista = json_decode($json, true);
+        if (!is_array($lista)) throw new RuntimeException("Los $nombre guardados en este pedido están dañados y no se modificaron. Avisa a soporte.");
+        return array_values($lista);
+    }
+
+    /** Si el JSON quedó cortado (versiones anteriores con emojis), su texto se conserva como una observación. */
+    public static function observacionesGuardadas($json)
+    {
+        try {
+            $lista = self::guardada($json, 'observaciones');
+        } catch (RuntimeException $e) {
+            $lista = ['Texto recuperado de observaciones anteriores: ' . mb_convert_encoding($json, 'UTF-8', 'UTF-8')];
+        }
+        foreach ($lista as $i => $obs) {
+            if (!is_array($obs)) $lista[$i] = ['observacion' => is_scalar($obs) ? (string)$obs : '', 'creador' => 'Sistema', 'fecha' => ''];
+        }
+        return $lista;
+    }
+
+    /** Identificador que genera el navegador para no duplicar abonos u observaciones al reintentar. */
+    private static function ref($ref)
+    {
+        return is_string($ref) && preg_match('/^[a-z0-9]{8,40}$/', $ref) ? $ref : null;
     }
 
     public static function productos($json)
@@ -50,6 +101,21 @@ class PedidosPersistencia
         return $resultado;
     }
 
+    /** Solo las filas que el usuario editó; las demás se guardan tal como estaban. */
+    private static function productosEditados(array $editados, array $productos)
+    {
+        foreach ($editados as $fila) {
+            $i = isset($fila['indice']) ? filter_var($fila['indice'], FILTER_VALIDATE_INT) : false;
+            if ($i === false || !isset($productos[$i]) || !is_array($productos[$i])) throw new InvalidArgumentException('Uno de los productos ya no existe. Recarga el pedido.');
+            $cantidad = self::numero($fila['cantidad'] ?? '', 6);
+            if ($cantidad <= 0) throw new InvalidArgumentException('Cada producto necesita una cantidad mayor a cero.');
+            $unitario = self::numero($fila['precioUnitario'] ?? '', 6);
+            $productos[$i] = array_merge($productos[$i], ['Descripcion' => trim((string)($fila['Descripcion'] ?? '')), 'cantidad' => $cantidad, 'precioUnitario' => $unitario, 'precio' => round($unitario * $cantidad, 2)]);
+        }
+        return $productos;
+    }
+
+    /** Pagos del alta de pedidos: se ignoran filas vacías. */
     public static function pagos($json)
     {
         $resultado = [];
@@ -58,8 +124,22 @@ class PedidosPersistencia
             $fecha = trim((string)($fila['fecha'] ?? ''));
             if (($monto === '' || $monto === null || (is_numeric($monto) && (float)$monto == 0)) && $fecha === '') continue;
             $monto = self::numero($monto);
-            // Abonos anteriores pueden tener fechas vacías o en otro formato; se conservan tal cual.
             if ($monto > 0) $resultado[] = ['pago' => $monto, 'fecha' => $fecha];
+        }
+        return $resultado;
+    }
+
+    /** Abonos nuevos capturados en el detalle. */
+    public static function pagosNuevos($json)
+    {
+        $resultado = [];
+        foreach (self::lista($json) as $fila) {
+            $monto = self::numero($fila['pago'] ?? '');
+            $fecha = trim((string)($fila['fecha'] ?? ''));
+            if ($monto <= 0 || $fecha === '') throw new InvalidArgumentException('Cada abono necesita un monto mayor a cero y una fecha.');
+            $pago = ['pago' => $monto, 'fecha' => substr($fecha, 0, 20)];
+            if ($ref = self::ref($fila['ref'] ?? null)) $pago['ref'] = $ref;
+            $resultado[] = $pago;
         }
         return $resultado;
     }
@@ -68,27 +148,24 @@ class PedidosPersistencia
     {
         $pagos = [];
         foreach (['pagoPedido' => null, 'abonoUno' => 'fechaAbonoUno', 'abonoDos' => 'fechaAbonoDos', 'abonoTres' => 'fechaAbonoTres', 'abonoCuatro' => 'fechaAbonoCuatro', 'abonoCinco' => 'fechaAbonoCinco'] as $campo => $fecha) {
-            if ((float)($pedido[$campo] ?? 0) > 0) $pagos[] = ['pago' => (float)$pedido[$campo], 'fecha' => $fecha ? ($pedido[$fecha] ?? '') : '', 'campo' => $campo];
+            $monto = self::importe($pedido[$campo] ?? 0);
+            if ($monto > 0) $pagos[] = ['pago' => $monto, 'fecha' => $fecha ? (string)($pedido[$fecha] ?? '') : '', 'campo' => $campo];
         }
         return $pagos;
     }
 
-    public static function totalAnterior($pedido)
+    /** Lo pagado: columnas antiguas más los abonos en JSON. */
+    public static function pagado($pedido, array $pagos)
     {
-        $total = 0;
-        foreach ([['productoUno', 'cantidaProductoUno', 'precioProductoUno'], ['ProductoDos', 'cantidadProductoDos', 'precioProductoDos'], ['ProductoTres', 'cantidadProductoTres', 'precioProductoTres'], ['ProductoCuatro', 'cantidadProductoCuatro', 'precioProductoCuatro'], ['ProductoCinco', 'cantidadProductoCinco', 'precioProductoCinco']] as $campos) {
-            if (!empty($pedido[$campos[0]]) && $pedido[$campos[0]] !== 'undefined') $total += (float)($pedido[$campos[1]] ?? 0) * (float)($pedido[$campos[2]] ?? 0);
-        }
+        $total = array_sum(array_column(self::pagosAnteriores($pedido), 'pago'));
+        foreach ($pagos as $pago) $total += is_array($pago) ? self::importe($pago['pago'] ?? 0) : 0;
         return round($total, 2);
     }
 
-    public static function version($pedido, $observaciones = false)
+    /** Campos que el detalle reescribe; abonos y observaciones se agregan sin conflicto. */
+    public static function version($pedido)
     {
-        if ($observaciones) return hash('sha256', (string)($pedido['observaciones'] ?? ''));
-        $campos = ['estado', 'productos', 'pagos', 'total', 'adeudo', 'pagoPedido', 'abonoUno', 'abonoDos', 'abonoTres', 'abonoCuatro', 'abonoCinco'];
-        $datos = [];
-        foreach ($campos as $campo) $datos[$campo] = (string)($pedido[$campo] ?? '');
-        return hash('sha256', json_encode($datos));
+        return hash('sha256', implode("\x1F", [(string)($pedido['estado'] ?? ''), (string)($pedido['productos'] ?? ''), (string)($pedido['total'] ?? '')]));
     }
 
     public static function autorizar($pedido, $finanzas = false)
@@ -111,57 +188,118 @@ class PedidosPersistencia
         return $fila;
     }
 
-    private static function comprobarVersion($pedido, $version, $observaciones = false)
+    private static function comprobarVersion($pedido, $version)
     {
-        if (!is_string($version) || !hash_equals(self::version($pedido, $observaciones), $version)) {
-            throw new RuntimeException('El pedido cambió desde que abriste la página. Copia tus cambios y recarga antes de guardar.');
+        if (!is_string($version) || !hash_equals(self::version($pedido), $version)) {
+            throw new RuntimeException('Alguien más modificó este pedido mientras lo tenías abierto. Recarga la página y vuelve a capturar tus cambios.');
         }
     }
 
-    private static function actualizar($db, $id, $datos)
+    /** $anterior es la fila leída con bloqueo: define la fecha de entrega y permite restaurarla. */
+    private static function actualizar($db, $anterior, $datos)
     {
         $sets = [];
-        // Va antes de "estado": MySQL evalúa las asignaciones en orden y aquí se necesita el estado anterior.
-        if (isset($datos['estado']) && strpos($datos['estado'], 'Entregado') === 0) {
-            $sets[] = "fechaEntrega = CASE WHEN fechaEntrega IS NULL OR estado IS NULL OR estado NOT LIKE 'Entregado%' THEN CURRENT_TIMESTAMP ELSE fechaEntrega END";
-        }
         foreach ($datos as $campo => $valor) $sets[] = "$campo = :$campo";
-        $stmt = $db->prepare('UPDATE pedidos SET ' . implode(', ', $sets) . ' WHERE id = :id');
-        $datos['id'] = (int)$id;
-        if (!$stmt->execute($datos)) throw new RuntimeException('No se pudo guardar el pedido.');
+        $restaurar = implode(', ', $sets);
+        $fechaEntrega = (string)($anterior['fechaEntrega'] ?? '');
+        if (isset($datos['estado']) && strpos($datos['estado'], 'Entregado') === 0
+            && (strpos((string)$anterior['estado'], 'Entregado') !== 0 || $fechaEntrega === '' || strpos($fechaEntrega, '0000') === 0)) {
+            $sets[] = 'fechaEntrega = NOW()';
+        }
+        $id = ['id' => (int)$anterior['id']];
+        $db->prepare('UPDATE pedidos SET ' . implode(', ', $sets) . ' WHERE id = :id')->execute($datos + $id);
+        // Sin modo estricto, MySQL recorta los textos largos sin avisar: se compara lo guardado y, si difiere, se restaura.
+        $actual = self::leer($db, $anterior['id']);
+        foreach (array_intersect_key($datos, array_flip(['productos', 'pagos', 'observaciones'])) as $campo => $valor) {
+            if ((string)$actual[$campo] !== $valor) {
+                $db->prepare("UPDATE pedidos SET $restaurar WHERE id = :id")->execute(array_intersect_key($anterior, $datos) + $id);
+                throw new RuntimeException('La base de datos no aceptó el texto completo, así que no se guardó ningún cambio. Avisa a soporte.');
+            }
+        }
+        return $actual;
     }
 
-    public static function guardar($id, $entrada, $version, $versionObservaciones)
+    /** Guarda estado, total, productos editados y abonos nuevos (solo administradores). */
+    public static function guardar($id, $entrada, $version)
     {
         $db = Conexion::conectar();
         $db->beginTransaction();
         try {
             $pedido = self::leer($db, $id);
-            $finanzas = isset($entrada['productos']);
-            self::autorizar($pedido, $finanzas);
+            self::autorizar($pedido, true);
+            self::comprobarVersion($pedido, $version);
             $datos = [];
-            if ($finanzas) {
-                self::comprobarVersion($pedido, $version);
-                $productos = self::productos($entrada['productos']);
-                $pagos = self::pagos($entrada['pagos']);
-                $total = self::totalAnterior($pedido) + array_sum(array_column($productos, 'precio'));
-                if (!$productos && self::totalAnterior($pedido) <= 0) throw new InvalidArgumentException('El pedido debe tener productos.');
-                $pagado = array_sum(array_column($pagos, 'pago')) + array_sum(array_column(self::pagosAnteriores($pedido), 'pago'));
-                $datos = ['estado' => self::estado($entrada['estado']), 'productos' => json_encode($productos, JSON_UNESCAPED_UNICODE), 'pagos' => json_encode($pagos), 'total' => round($total, 2), 'adeudo' => round(max(0, $total - $pagado), 2)];
-            }
-            if (array_key_exists('observaciones', $entrada)) {
-                self::comprobarVersion($pedido, $versionObservaciones, true);
-                $observaciones = self::lista($entrada['observaciones']);
-                foreach ($observaciones as $obs) {
-                    if (!isset($obs['observacion'], $obs['creador'], $obs['fecha']) || !is_string($obs['observacion']) || trim($obs['observacion']) === '') throw new InvalidArgumentException('La observación está incompleta.');
-                }
-                $datos['observaciones'] = json_encode($observaciones, JSON_UNESCAPED_UNICODE);
-            }
-            if (!$datos) throw new InvalidArgumentException('No hay cambios para guardar.');
-            self::actualizar($db, $id, $datos);
-            $actual = self::leer($db, $id);
+            $estado = trim((string)($entrada['estado'] ?? ''));
+            if ($estado !== '' && $estado !== (string)$pedido['estado']) $datos['estado'] = self::estado($estado);
+            $editados = self::lista($entrada['productos'] ?? '');
+            if ($editados) $datos['productos'] = self::json(self::productosEditados($editados, self::guardada($pedido['productos'], 'productos')));
+            $pagos = self::guardada($pedido['pagos'], 'pagos');
+            // Un reintento tras perder la respuesta no vuelve a agregar los mismos abonos.
+            $refs = array_column(array_filter($pagos, 'is_array'), 'ref');
+            $nuevos = array_values(array_filter(self::pagosNuevos($entrada['pagos'] ?? ''), function ($pago) use ($refs) {
+                return !isset($pago['ref']) || !in_array($pago['ref'], $refs, true);
+            }));
+            if ($nuevos) $datos['pagos'] = self::json(array_merge($pagos, $nuevos));
+            $total = trim((string)($entrada['total'] ?? '')) === '' ? self::importe($pedido['total']) : self::numero($entrada['total']);
+            $datos['total'] = $total;
+            $datos['adeudo'] = round(max(0, $total - self::pagado($pedido, array_merge($pagos, $nuevos))), 2);
+            $actual = self::actualizar($db, $pedido, $datos);
             $db->commit();
             return $actual;
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) $db->rollBack();
+            throw $e;
+        }
+    }
+
+    /** Agrega una observación al inicio (más reciente primero) con el usuario de la sesión. */
+    public static function agregarObservacion($id, $texto, $ref = null)
+    {
+        $texto = trim(str_replace("\r\n", "\n", (string)$texto));
+        if ($texto === '') throw new InvalidArgumentException('Escribe la observación antes de agregarla.');
+        if (strlen($texto) > 5000) throw new InvalidArgumentException('La observación es demasiado larga.');
+        $db = Conexion::conectar();
+        $db->beginTransaction();
+        try {
+            $pedido = self::leer($db, $id);
+            self::autorizar($pedido);
+            $lista = self::observacionesGuardadas($pedido['observaciones']);
+            $ref = self::ref($ref);
+            foreach ($lista as $obs) {
+                if ($ref !== null && ($obs['ref'] ?? null) === $ref) { $db->commit(); return $obs; }
+            }
+            $observacion = ['observacion' => $texto, 'creador' => (string)($_SESSION['nombre'] ?? 'Usuario'), 'fecha' => date('n/j/Y')];
+            if ($ref !== null) $observacion['ref'] = $ref;
+            array_unshift($lista, $observacion);
+            self::actualizar($db, $pedido, ['observaciones' => self::json($lista)]);
+            $db->commit();
+            return $observacion;
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) $db->rollBack();
+            throw $e;
+        }
+    }
+
+    /** Quita una observación propia recién agregada, identificada por su contenido exacto. */
+    public static function quitarObservacion($id, $observacion)
+    {
+        if (!is_array($observacion) || !isset($observacion['observacion'], $observacion['creador'], $observacion['fecha'])) throw new InvalidArgumentException('La observación no es válida.');
+        if ($observacion['creador'] !== (string)($_SESSION['nombre'] ?? '')) throw new RuntimeException('Solo puedes quitar tus propias observaciones.');
+        $db = Conexion::conectar();
+        $db->beginTransaction();
+        try {
+            $pedido = self::leer($db, $id);
+            self::autorizar($pedido);
+            $lista = self::observacionesGuardadas($pedido['observaciones']);
+            foreach ($lista as $i => $obs) {
+                if (($obs['observacion'] ?? null) === $observacion['observacion'] && ($obs['creador'] ?? null) === $observacion['creador'] && ($obs['fecha'] ?? null) === $observacion['fecha']) {
+                    array_splice($lista, $i, 1);
+                    self::actualizar($db, $pedido, ['observaciones' => self::json($lista)]);
+                    $db->commit();
+                    return;
+                }
+            }
+            throw new RuntimeException('La observación ya no existe. Recarga el pedido.');
         } catch (Throwable $e) {
             if ($db->inTransaction()) $db->rollBack();
             throw $e;
@@ -175,7 +313,8 @@ class PedidosPersistencia
         try {
             $pedido = self::leer($db, $id);
             if ($validarPerfil) self::autorizar($pedido);
-            self::actualizar($db, $id, ['estado' => self::estado($estado)]);
+            $estado = self::estado($estado);
+            if ($estado !== (string)$pedido['estado']) self::actualizar($db, $pedido, ['estado' => $estado]);
             $db->commit();
             return 'ok';
         } catch (Throwable $e) { if ($db->inTransaction()) $db->rollBack(); throw $e; }
@@ -192,7 +331,7 @@ class PedidosPersistencia
         if ($stmt->fetch()) throw new RuntimeException('La orden ya tiene otro pedido asignado.');
         $wp->prepare('UPDATE ordenes SET id_pedido = 0 WHERE id_pedido = :pedido')->execute(['pedido' => $pedido['id']]);
         $wp->prepare('UPDATE ordenes SET id_pedido = :pedido WHERE id = :orden')->execute(['pedido' => $pedido['id'], 'orden' => $idOrden]);
-        self::actualizar($db, $pedido['id'], ['id_orden' => (int)$idOrden]);
+        self::actualizar($db, $pedido, ['id_orden' => (int)$idOrden]);
     }
 
     public static function asignar($idPedido, $idOrden)
@@ -223,13 +362,14 @@ class PedidosPersistencia
         $pagos = self::pagos($entrada['pago']);
         $total = array_sum(array_column($productos, 'precio'));
         $estado = self::estado($entrada['estado']);
-        $datos = ['id_empresa' => (int)$entrada['empresa'], 'id_cliente' => (int)$entrada['cliente'], 'id_Asesor' => (int)$entrada['asesor'], 'productos' => json_encode($productos, JSON_UNESCAPED_UNICODE), 'pagos' => json_encode($pagos), 'observaciones' => '[]', 'estado' => $estado, 'total' => $total, 'adeudo' => max(0, round($total - array_sum(array_column($pagos, 'pago')), 2)), 'id_orden' => 0];
+        $datos = ['id_empresa' => (int)$entrada['empresa'], 'id_cliente' => (int)$entrada['cliente'], 'id_Asesor' => (int)$entrada['asesor'], 'productos' => self::json($productos), 'pagos' => self::json($pagos), 'observaciones' => '[]', 'estado' => $estado, 'total' => $total, 'adeudo' => max(0, round($total - array_sum(array_column($pagos, 'pago')), 2)), 'id_orden' => 0];
+        // La fecha de entrega solo se escribe si nace entregado; si no, conserva el valor por omisión de la columna.
+        $entrega = strpos($estado, 'Entregado') === 0;
         $db = Conexion::conectar(); $wp = null;
         $db->beginTransaction();
         try {
-            $db->prepare('INSERT INTO pedidos (id_empresa, id_cliente, id_Asesor, productos, pagos, observaciones, estado, total, adeudo, id_orden, fechaDePedido) VALUES (:id_empresa, :id_cliente, :id_Asesor, :productos, :pagos, :observaciones, :estado, :total, :adeudo, :id_orden, CURRENT_TIMESTAMP)')->execute($datos);
+            $db->prepare('INSERT INTO pedidos (id_empresa, id_cliente, id_Asesor, productos, pagos, observaciones, estado, total, adeudo, id_orden, fechaDePedido' . ($entrega ? ', fechaEntrega' : '') . ') VALUES (:id_empresa, :id_cliente, :id_Asesor, :productos, :pagos, :observaciones, :estado, :total, :adeudo, :id_orden, CURRENT_TIMESTAMP' . ($entrega ? ', NOW()' : '') . ')')->execute($datos);
             $id = $db->lastInsertId();
-            if (strpos($estado, 'Entregado') === 0) self::actualizar($db, $id, ['estado' => $estado]);
             if ((int)$entrada['id_orden'] > 0) {
                 $wp = ConexionWP::conectarWP();
                 if ($wp !== $db) $wp->beginTransaction();

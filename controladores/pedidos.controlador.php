@@ -1012,14 +1012,9 @@ class ControladorPedidos{
 
 	public function ctrEditarOrdenDinamica(){
         if (!isset($_POST['idPedido'])) return;
-        try {
-            $entrada = ['observaciones' => $_POST['listarObservacionesPedidos'] ?? ''];
-            if (in_array($_SESSION['perfil'] ?? '', ['administrador', 'Super-Administrador'], true)) {
-                $entrada += ['productos' => $_POST['ListarPreciosActualizados'] ?? '', 'pagos' => $_POST['PagosListados'] ?? '', 'estado' => $_POST['EstadoPedidoDinamico'] ?? ''];
-            }
-            PedidosPersistencia::guardar($_POST['idPedido'], $entrada, $_POST['versionPedido'] ?? '', $_POST['versionObservaciones'] ?? '');
-            self::ctrAvisoPedido('success', '¡El pedido se ha guardado correctamente!', '', $_SERVER['REQUEST_URI']);
-        } catch (Throwable $e) { self::ctrErrorPedido($e); }
+        // El detalle guarda por AJAX (pedidos.detalle.js). Un envío normal significa que el script no cargó
+        // o que la página es de una versión anterior: se avisa en lugar de guardar solo una parte.
+        self::ctrAvisoPedido('error', 'No se guardaron los cambios', 'La página no terminó de cargar o es de una versión anterior. Recarga (F5) y vuelve a capturar tus cambios.');
     }
 
 

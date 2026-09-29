@@ -1,7 +1,9 @@
 /*=============================================
 DETALLE DEL PEDIDO (infopedido)
-Único script de la pantalla: calcula totales, guarda observaciones y el
-pedido completo por AJAX, y solo confirma éxito con respuesta del servidor.
+Único script de la pantalla. Guarda por AJAX y solo confirma éxito con
+respuesta del servidor. Abonos y observaciones solo se agregan: lo ya
+guardado nunca se reenvía, así los datos antiguos no pasan por inputs
+que los alteren.
 =============================================*/
 (function ($) {
   'use strict';
@@ -9,192 +11,235 @@ pedido completo por AJAX, y solo confirma éxito con respuesta del servidor.
     var $form = $('#pedidoDetalleForm');
     if (!$form.length) return;
 
-    var pending = Promise.resolve();
-    var obsSaving = 0;
-    var obsFailed = false;
+    var idPedido = $form.find('[name=idPedido]').val();
+    var finanzas = $form.attr('data-finanzas') === '1';
+    var pagadoGuardado = Number($form.attr('data-pagado')) || 0;
+    var $total = $form.find('[name=total]');
+    var nuevosPagos = [];
+    var obsRef = null;
+    var busy = 0;
     var saving = false;
     var dirty = false;
-    var GRADS = [
-      'linear-gradient(135deg,#6366f1,#818cf8)', 'linear-gradient(135deg,#3b82f6,#60a5fa)',
-      'linear-gradient(135deg,#06b6d4,#22d3ee)', 'linear-gradient(135deg,#22c55e,#4ade80)',
-      'linear-gradient(135deg,#f59e0b,#fbbf24)', 'linear-gradient(135deg,#ef4444,#f87171)',
-      'linear-gradient(135deg,#8b5cf6,#a78bfa)', 'linear-gradient(135deg,#ec4899,#f472b6)'
-    ];
 
     function money(n) { return Math.round((Number(n) + Number.EPSILON) * 100) / 100; }
-    function error(message) { return swal({type: 'error', title: 'No se guardaron los cambios', text: message, confirmButtonText: 'Cerrar'}); }
+    function currency(n) { return '$' + money(n).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+    function ref() { return (Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(0, 24); }
+    function badInput(input) { return !!(input && input.validity && input.validity.badInput); }
+    function error(message, title) {
+      return swal({type: 'error', title: title || 'No se guardaron los cambios', text: message, confirmButtonText: 'Cerrar'});
+    }
     function request(data) {
+      data.idPedido = idPedido;
+      busy++;
       return new Promise(function (resolve, reject) {
-        $.ajax({url: 'ajax/pedidos.ajax.php', method: 'POST', data: data, dataType: 'json'})
-          .done(function (r) { if (r && r.ok) resolve(r); else reject(new Error((r && r.mensaje) || 'No se pudo guardar.')); })
-          .fail(function (xhr) { reject(new Error((xhr.responseJSON || {}).mensaje || 'No se pudo confirmar el guardado. Comprueba la conexión y vuelve a intentar.')); });
+        $.ajax({url: 'ajax/pedidos.ajax.php', method: 'POST', data: data, dataType: 'json', cache: false})
+          .done(function (r) {
+            if (r && r.ok) resolve(r);
+            else reject(new Error((r && r.mensaje) || 'El servidor no confirmó el guardado.'));
+          })
+          .fail(function (xhr) {
+            var r = xhr.responseJSON;
+            if (r && r.mensaje) reject(new Error(r.mensaje));
+            else if (!xhr.status) reject(new Error('No hubo respuesta del servidor. Revisa tu conexión y vuelve a intentar; lo capturado sigue en la página.'));
+            else reject(new Error('El servidor respondió con un error (HTTP ' + xhr.status + ') y no confirmó el guardado. Vuelve a intentar; si se repite, avisa a soporte con este código.'));
+          })
+          .always(function () { busy--; });
       });
     }
 
-    /* ---------- Observaciones ---------- */
-    function observations() {
-      var values = [];
-      $form.find('textarea.nuevaObservacion').each(function () {
-        values.push({observacion: $(this).val(), creador: $(this).attr('data-creador') || 'Usuario', fecha: $(this).attr('fecha') || ''});
-      });
-      var json = JSON.stringify(values);
-      $form.find('[name=listarObservacionesPedidos]').val(json);
-      return json;
+    /* ---------- Totales ---------- */
+    function summary() {
+      var paid = pagadoGuardado;
+      nuevosPagos.forEach(function (pago) { paid += pago.pago; });
+      $form.find('.ped-pagado').text(currency(paid));
+      $form.find('.ped-adeudo').text(currency(Math.max(0, (Number($total.val()) || 0) - paid)));
     }
+
+    /* ---------- Productos: cada cambio ajusta el total con la diferencia de su línea ---------- */
+    $form.find('.ped-dynamic-product').each(function () { $(this).attr('data-actual', $(this).attr('data-subtotal')); });
+    $form.on('input change', '.ped-dynamic-product input', function () {
+      if (!finanzas) return;
+      var $row = $(this).closest('.ped-dynamic-product');
+      var quantity = Number($row.find('.ped-prod-cantidad').val()) || 0;
+      var unit = Number($row.find('.ped-prod-precio').val()) || 0;
+      var subtotal = money(Math.max(0, quantity) * Math.max(0, unit));
+      var delta = subtotal - Number($row.attr('data-actual'));
+      $row.attr({'data-editado': '1', 'data-actual': subtotal});
+      $row.find('.ped-line-subtotal').text(currency(subtotal));
+      if (delta) $total.val(money((Number($total.val()) || 0) + delta));
+      dirty = true;
+      summary();
+    });
+    $total.on('input change', function () { dirty = true; summary(); });
+    $form.on('change', '[name=estado]', function () { dirty = true; });
+
+    /* ---------- Abonos nuevos ---------- */
+    function addPayment() {
+      var $amount = $('#pedNuevoAbonoMonto');
+      var $date = $('#pedNuevoAbonoFecha');
+      if (!$amount.length) return false;
+      if (badInput($amount[0])) throw new Error('El monto del abono no es un número válido. Escríbelo sin comas ni signos.');
+      if ($amount.val() === '') return false;
+      var amount = money($amount.val());
+      if (!(amount > 0)) throw new Error('El monto del abono debe ser mayor a cero.');
+      if (!$date.val()) throw new Error('Indica la fecha del abono.');
+      var pago = {pago: amount, fecha: $date.val(), ref: ref()};
+      var $row = $('<div class="ped-payment-item ped-payment-new"><div class="ped-payment-icon"><i class="fa-solid fa-money-bill-wave"></i></div>' +
+        '<div style="flex:1;"><div class="ped-info-label"></div><div class="ped-payment-amount"></div></div>' +
+        '<div class="ped-payment-date"></div>' +
+        '<button type="button" class="ped-btn-danger ped-remove-payment" title="Quitar"><i class="fa-solid fa-times"></i></button></div>');
+      $row.find('.ped-info-label').text('Nuevo abono ').append('<span style="color:#f59e0b;font-weight:600;">• sin guardar</span>');
+      $row.find('.ped-payment-amount').text(currency(amount));
+      $row.find('.ped-payment-date').text(pago.fecha);
+      $row.data('pago', pago);
+      $form.find('.ped-payments').append($row);
+      nuevosPagos.push(pago);
+      $amount.val('');
+      dirty = true;
+      summary();
+      return true;
+    }
+    $form.on('click', '.btnToggleNewPayment', function () { $('#pedNewPaymentForm').toggleClass('active'); });
+    $form.on('click', '.btnAgregarAbono', function () {
+      try { addPayment(); } catch (e) { error(e.message, 'Revisa el abono'); }
+    });
+    $form.on('keydown', '#pedNewPaymentForm input', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); $form.find('.btnAgregarAbono').trigger('click'); }
+    });
+    $form.on('click', '.ped-remove-payment', function () {
+      var $row = $(this).closest('.ped-payment-new');
+      var index = nuevosPagos.indexOf($row.data('pago'));
+      if (index >= 0) nuevosPagos.splice(index, 1);
+      $row.remove();
+      summary();
+    });
+
+    /* ---------- Observaciones: se guardan al agregarlas ---------- */
     function status(text) { $form.find('.ped-observation-status').text(text); }
-    function saveObservations() {
-      var json = observations();
-      obsSaving++;
-      status('Guardando observaciones…');
-      pending = pending.catch(function () {}).then(function () {
-        return request({idPedidoDinamicoAjax: $form.find('[name=idPedido]').val(), observacionesDinamicoAjax: json, versionObservaciones: $form.find('[name=versionObservaciones]').val()});
-      }).then(function (r) {
-        $form.find('[name=versionObservaciones]').val(r.version);
-        obsFailed = false;
-        if (observations() === json) status('Observaciones guardadas');
-      }, function (e) {
-        obsFailed = true;
-        status('Observaciones pendientes de guardar');
-        error(e.message);
-        throw e;
-      }).then(function () { obsSaving--; }, function (e) { obsSaving--; throw e; });
-      return pending;
-    }
-    function today() { var d = new Date(); return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear(); }
-    function initials(name) {
-      var parts = name.trim().split(/\s+/);
-      return (parts.length >= 2 ? parts[0][0] + parts[1][0] : name.substring(0, 2)).toUpperCase();
-    }
-    function gradient(name) {
-      var hash = 0;
-      for (var i = 0; i < name.length; i++) hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
-      return GRADS[Math.abs(hash) % GRADS.length];
-    }
     function updateCount() {
       var count = $form.find('.ped-obs-item').length;
-      $form.find('.ped-card-head span').filter(function () { return /comentario/.test($(this).text()); })
-        .text(count + (count === 1 ? ' comentario' : ' comentarios'));
+      $form.find('.ped-obs-count').text(count + (count === 1 ? ' comentario' : ' comentarios'));
+    }
+    function renderObservation(obs) {
+      var $item = $('<div class="ped-obs-item ped-obs-new" style="animation:pedSlideIn .25s var(--crm-ease);">' +
+        '<div class="ped-obs-body"><div class="ped-obs-header"><span class="ped-obs-name"></span><span class="ped-obs-date"></span></div>' +
+        '<div class="ped-obs-content"></div></div>' +
+        '<button type="button" class="ped-btn-danger ped-remove-observation" style="align-self:flex-start;margin-top:2px;" title="Quitar"><i class="fa-solid fa-times"></i></button></div>');
+      $item.prepend($('#pedObsCompose .ped-obs-avatar').clone());
+      $item.find('.ped-obs-name').text(obs.creador);
+      $item.find('.ped-obs-date').text(obs.fecha);
+      $item.find('.ped-obs-content').text(obs.observacion);
+      $item.data('observacion', obs);
+      $form.find('.ped-obs-list').prepend($item);
+      $('#pedObsEmpty').remove();
+      updateCount();
     }
     function addObservation() {
       var $input = $('#pedNewObsText');
-      var text = ($input.val() || '').trim();
-      if (!text) return false;
-      var name = $('.usuarioActualPedido').val() || 'Usuario';
-      var date = today();
-      if (!$form.find('.ped-obs-list').length) $('#pedObsCompose').after('<div class="ped-obs-list"></div>');
-      var $item = $('<div class="ped-obs-item" style="animation:pedSlideIn .25s var(--crm-ease);">' +
-        '<div class="ped-obs-avatar"></div><div class="ped-obs-body"><div class="ped-obs-header">' +
-        '<span class="ped-obs-name"></span><span class="ped-obs-date"></span></div><div class="ped-obs-content"></div></div>' +
-        '<button type="button" class="ped-btn-danger ped-remove-observation" style="align-self:flex-start;margin-top:2px;" title="Quitar"><i class="fa-solid fa-times"></i></button></div>');
-      $item.find('.ped-obs-avatar').css('background', gradient(name)).text(initials(name));
-      $item.find('.ped-obs-name').text(name);
-      $item.find('.ped-obs-date').text(date + ' ').append('<span style="color:#22c55e;font-weight:600;">• Nueva</span>');
-      $item.find('.ped-obs-content').text(text)
-        .append($('<textarea class="nuevaObservacion" style="display:none;">').val(text).attr({'data-creador': name, fecha: date}));
-      $form.find('.ped-obs-list').prepend($item);
-      $('#pedObsEmpty').remove();
-      $input.val('');
-      updateCount();
-      return true;
+      var text = $.trim($input.val() || '');
+      if (!text) return Promise.resolve(false);
+      var $button = $form.find('.btnAgregarObservacionInfoPedido');
+      obsRef = obsRef || ref();
+      $input.prop('readonly', true);
+      $button.prop('disabled', true);
+      status('Guardando observación…');
+      return request({accionPedido: 'agregarObservacion', observacion: text, ref: obsRef}).then(function (r) {
+        renderObservation(r.observacion);
+        $input.val('');
+        obsRef = null;
+        status('Observación guardada');
+        return true;
+      }, function (e) {
+        status('La observación no se guardó');
+        throw e;
+      }).then(function (added) {
+        $input.prop('readonly', false);
+        $button.prop('disabled', false);
+        return added;
+      }, function (e) {
+        $input.prop('readonly', false);
+        $button.prop('disabled', false);
+        throw e;
+      });
     }
-    $form.on('click', '.btnAgregarObservacionInfoPedido', function () { if (addObservation()) saveObservations().catch(function () {}); });
+    $('#pedNewObsText').on('input', function () { obsRef = null; });
+    $form.on('click', '.btnAgregarObservacionInfoPedido', function () {
+      if (!$.trim($('#pedNewObsText').val() || '')) return;
+      addObservation().catch(function (e) { error(e.message, 'No se guardó la observación'); });
+    });
     $form.on('click', '.ped-remove-observation', function () {
-      $(this).closest('.ped-obs-item').remove();
-      updateCount();
-      saveObservations().catch(function () {});
-    });
-
-    /* ---------- Productos y pagos ---------- */
-    function confirmPayment() {
-      var $new = $('#pedNewPaymentForm');
-      if (!$new.length) return;
-      var amount = $new.find('.pagoAbonado').val();
-      var date = $new.find('.fechaAbono').val();
-      if (!amount && !date) return;
-      if (!(Number(amount) > 0) || !date) throw new Error('Completa el monto y la fecha del nuevo abono.');
-      var number = $('.agregarCamposPago .ped-payment-item').length + 1;
-      var $row = $('<div class="ped-payment-item"><div class="ped-payment-icon"><i class="fa-solid fa-money-bill-wave"></i></div>' +
-        '<div style="flex:1;"><div class="ped-info-label"></div></div><div class="ped-payment-date"></div></div>');
-      $row.find('.ped-info-label').text('Abono #' + number).after(
-        $('<input type="number" step="any" class="form-control pagoAbonado" readonly style="border:none;background:transparent;font-size:14px;font-weight:700;padding:0;height:auto;color:var(--crm-text);box-shadow:none;">').val(amount));
-      $row.find('.ped-payment-date').append(
-        $('<input type="date" class="form-control fechaAbono" readonly style="border:none;background:transparent;font-size:12px;color:var(--crm-muted);box-shadow:none;text-align:right;">').val(date));
-      $('.agregarCamposPago').append($row);
-      $new.find('input').val('');
-      $new.removeClass('active');
-    }
-    function calculate() {
-      var products = [], payments = [];
-      var total = Number($form.attr('data-total-anterior')) || 0;
-      $form.find('.ped-dynamic-product').each(function () {
-        var $row = $(this);
-        var quantity = Number($row.find('.cantidadProductoParaListar').val());
-        var unit = Number($row.find('.precioProductoParaListar').val());
-        var subtotal = money(quantity * unit);
-        products.push({Descripcion: $row.find('.descripcioParaListar').val(), cantidad: quantity, precioUnitario: unit, precio: subtotal});
-        total += subtotal;
-        $row.find('.ped-line-subtotal').text('$' + subtotal.toFixed(2));
+      var $button = $(this).prop('disabled', true);
+      var $item = $button.closest('.ped-obs-item');
+      request({accionPedido: 'quitarObservacion', observacion: JSON.stringify($item.data('observacion'))}).then(function () {
+        $item.remove();
+        updateCount();
+        status('Observación quitada');
+      }, function (e) {
+        $button.prop('disabled', false);
+        error(e.message, 'No se quitó la observación');
       });
-      var paid = Number($form.attr('data-pagado-anterior')) || 0;
-      $form.find('.agregarCamposPago .ped-payment-item').each(function () {
-        var amount = $(this).find('.pagoAbonado').val();
-        payments.push({pago: amount, fecha: $(this).find('.fechaAbono').val()});
-        paid += Number(amount) || 0;
-      });
-      $form.find('[name=ListarPreciosActualizados]').val(JSON.stringify(products));
-      $form.find('[name=PagosListados]').val(JSON.stringify(payments));
-      $form.find('.totalPagarPedidoDinamico').val(money(total));
-      $form.find('.totalPagosPeiddoDinamico').val(money(paid));
-      $form.find('.adeudoPedidoDinamico').val(money(Math.max(0, total - paid)));
-    }
-    $form.on('input change', '.ped-dynamic-product input', function () { dirty = true; calculate(); });
-    $form.on('click', '.btnToggleNewPayment', function () { $('#pedNewPaymentForm').toggleClass('active'); });
-    $form.on('change', '#pedNewPaymentForm input', function () {
-      dirty = true;
-      if ($('#pedNewPaymentForm .pagoAbonado').val() && $('#pedNewPaymentForm .fechaAbono').val()) {
-        try { confirmPayment(); calculate(); } catch (e) { error(e.message); }
-      }
     });
-    $form.on('change', '[name=EstadoPedidoDinamico]', function () { dirty = true; });
 
     /* ---------- Guardar ---------- */
+    function collect() {
+      var productos = [];
+      $form.find('.ped-dynamic-product[data-editado]').each(function () {
+        var $row = $(this);
+        var $quantity = $row.find('.ped-prod-cantidad');
+        var $unit = $row.find('.ped-prod-precio');
+        var name = $.trim($row.find('.ped-prod-descripcion').val()) || 'sin descripción';
+        if (badInput($quantity[0]) || !(Number($quantity.val()) > 0)) throw new Error('La cantidad de «' + name + '» debe ser un número mayor a cero.');
+        if (badInput($unit[0]) || $unit.val() === '' || !(Number($unit.val()) >= 0)) throw new Error('El precio de «' + name + '» debe ser un número, sin comas ni signos.');
+        productos.push({indice: Number($row.attr('data-indice')), Descripcion: $row.find('.ped-prod-descripcion').val(), cantidad: $quantity.val(), precioUnitario: $unit.val()});
+      });
+      if (badInput($total[0]) || $total.val() === '' || !(Number($total.val()) >= 0)) throw new Error('El total del pedido debe ser un número, sin comas ni signos.');
+      return {
+        accionPedido: 'guardar',
+        versionPedido: $form.find('[name=versionPedido]').val(),
+        estado: $form.find('[name=estado]').val() || '',
+        total: $total.val(),
+        productos: JSON.stringify(productos),
+        pagos: JSON.stringify(nuevosPagos)
+      };
+    }
     $form.on('submit', function (event) {
       event.preventDefault();
       if (saving) return;
+      var data = null;
       try {
-        confirmPayment();
-        calculate();
-        if (addObservation()) saveObservations().catch(function () {});
+        if (finanzas) {
+          addPayment();
+          data = collect();
+        }
       } catch (e) { error(e.message); return; }
       saving = true;
-      var $buttons = $form.find('button');
-      $buttons.prop('disabled', true);
-      pending.catch(function () {}).then(function () {
-        observations();
-        var data = $form.serializeArray();
-        data.push({name: 'guardarPedidoDetalle', value: '1'});
-        return request(data);
-      }).then(function () {
-        dirty = false;
-        obsFailed = false;
-        return swal({type: 'success', title: '¡El pedido se ha guardado correctamente!', confirmButtonText: 'Cerrar'})
-          .then(function () { window.location.reload(); });
+      var $buttons = $form.find('button').prop('disabled', true);
+      addObservation().then(function (added) {
+        if (!data) {
+          return swal(added
+            ? {type: 'success', title: '¡Observación guardada!', confirmButtonText: 'Cerrar'}
+            : {type: 'info', title: 'No hay observaciones pendientes', text: 'Escribe una observación; se guarda al presionar «Agregar».', confirmButtonText: 'Cerrar'});
+        }
+        return request(data).then(function () {
+          dirty = false;
+          nuevosPagos = [];
+          return swal({type: 'success', title: '¡El pedido se ha guardado correctamente!', confirmButtonText: 'Cerrar'})
+            .then(function () { window.location.reload(); });
+        });
       }).catch(function (e) { error(e.message); }).then(function () {
         saving = false;
         $buttons.prop('disabled', false);
       });
     });
     window.addEventListener('beforeunload', function (e) {
-      if (dirty || obsSaving > 0 || obsFailed || ($('#pedNewObsText').val() || '').trim()) { e.preventDefault(); e.returnValue = ''; }
+      if (dirty || busy > 0 || nuevosPagos.length || $('#pedNuevoAbonoMonto').val() || $.trim($('#pedNewObsText').val() || '')) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
     });
 
     /* ---------- Inicio ---------- */
-    $form.find('.ped-obs-content textarea.nuevaObservacion[readonly]').each(function () {
-      this.style.height = 'auto';
-      this.style.height = this.scrollHeight + 'px';
-    });
-    calculate();
-    observations();
+    summary();
 
     var ordenChoices = null;
     $('#modalAsignarPedido').on('shown.bs.modal', function () {

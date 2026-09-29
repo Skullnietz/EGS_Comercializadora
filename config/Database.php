@@ -13,6 +13,10 @@
  *
  * Los wrappers backward-compatible (Conexion, ConexionWP) delegan aquí.
  */
+
+// Los endpoints de ajax/ no pasan por index.php: cargar aquí el .env garantiza que usen la misma base.
+require_once __DIR__ . '/env.php';
+
 class Database
 {
     /* ── Identificadores de conexión ── */

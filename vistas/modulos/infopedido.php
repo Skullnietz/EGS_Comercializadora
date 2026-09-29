@@ -221,13 +221,6 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
   font-size: 13px; color: var(--crm-text2); line-height: 1.55;
   white-space: pre-wrap; word-break: break-word;
 }
-.ped-obs-content textarea.nuevaObservacion {
-  width: 100%; border: none; background: transparent;
-  padding: 0; font-size: 13px; font-weight: 400;
-  color: var(--crm-text2); resize: none; min-height: 20px;
-  font-family: inherit; line-height: 1.55;
-  overflow: hidden;
-}
 
 /* ─── Compose observation ─── */
 .ped-obs-compose {
@@ -248,19 +241,6 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
 }
 .ped-obs-compose-actions {
   display: flex; align-items: center; justify-content: flex-end; gap: 8px;
-}
-
-/* Legacy classes kept for JS compatibility */
-.agregarcampoobervacionesPedidos { display: none; }
-
-/* ─── Dynamic payment inputs ─── */
-.agregarCamposPago .input-group,
-.nuevoCampoPagoPedido .input-group {
-  margin-bottom: 8px;
-}
-.agregarCamposPago input.pagoAbonado,
-.nuevoCampoPagoPedido input.fechaAbono {
-  border-radius: 8px;
 }
 
 /* ─── Buttons ─── */
@@ -503,6 +483,17 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
   $puedeEditarPedidoCompleto = ($perfilActual == "administrador" || $perfilActual == "Super-Administrador");
   $puedeAgregarObservaciones = ($puedeEditarPedidoCompleto || $perfilActual == "vendedor");
   $puedeAsignarPedido = $puedeAgregarObservaciones;
+
+  // Lo guardado se lee con tolerancia: los datos de versiones anteriores no deben impedir capturar cambios.
+  $avisosPedido = [];
+  try { $productosPedido = PedidosPersistencia::guardada($valuePedidos["productos"], 'productos'); } catch (RuntimeException $e) { $productosPedido = []; $avisosPedido[] = $e->getMessage(); }
+  try { $pagosPedido = PedidosPersistencia::guardada($valuePedidos["pagos"], 'pagos'); } catch (RuntimeException $e) { $pagosPedido = []; $avisosPedido[] = $e->getMessage(); }
+  $observaciones = PedidosPersistencia::observacionesGuardadas($valuePedidos["observaciones"]);
+  $totalPedido = round(PedidosPersistencia::importe($valuePedidos["total"]), 2);
+  $pagadoPedido = PedidosPersistencia::pagado($valuePedidos, $pagosPedido);
+  function pedTexto($valor) {
+    return is_scalar($valor) ? htmlspecialchars((string)$valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : '';
+  }
   $historialClienteLink = 'index.php?ruta=Historialdecliente&idCliente='.(isset($_GET["cliente"]) ? intval($_GET["cliente"]) : 0)
     .'&nombreCliente='.(isset($usuario["nombre"]) ? urlencode($usuario["nombre"]) : 'Cliente');
 ?>
@@ -536,13 +527,13 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
       </div>
     </div>
 
-    <form role="form" method="post" id="pedidoDetalleForm" data-total-anterior="<?php echo PedidosPersistencia::totalAnterior($valuePedidos); ?>" data-pagado-anterior="<?php echo array_sum(array_column(PedidosPersistencia::pagosAnteriores($valuePedidos), 'pago')); ?>">
-      <input type="hidden" value="<?php echo htmlspecialchars($_GET["idPedido"]); ?>" name="idPedido">
+    <form role="form" method="post" id="pedidoDetalleForm" novalidate data-pagado="<?php echo $pagadoPedido; ?>"<?php echo $puedeEditarPedidoCompleto ? ' data-finanzas="1"' : ''; ?>>
+      <input type="hidden" name="idPedido" value="<?php echo (int)$valuePedidos["id"]; ?>">
       <input type="hidden" name="versionPedido" value="<?php echo PedidosPersistencia::version($valuePedidos); ?>">
-      <input type="hidden" name="versionObservaciones" value="<?php echo PedidosPersistencia::version($valuePedidos, true); ?>">
-      <input type="hidden" class="PagosListados" name="PagosListados">
-      <input type="hidden" id="ListarPreciosActualizados" name="ListarPreciosActualizados">
-      <input type="hidden" id="listarObservacionesPedidos" name="listarObservacionesPedidos">
+
+    <?php foreach ($avisosPedido as $aviso): ?>
+      <div class="alert alert-warning" style="border-radius:10px;"><?php echo pedTexto($aviso); ?></div>
+    <?php endforeach; ?>
 
     <div class="row">
 
@@ -625,8 +616,8 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 <div style="flex:1; min-width:160px;">
                   <div class="ped-info-label">Estado del Pedido</div>
                   <?php if ($puedeEditarPedidoCompleto): ?>
-                    <select class="ped-select" name="EstadoPedidoDinamico" style="margin-top:6px;">
-                      <option value="<?php echo htmlspecialchars($valuePedidos["estado"]); ?>"><?php echo htmlspecialchars($valuePedidos["estado"]); ?></option>
+                    <select class="ped-select" name="estado" style="margin-top:6px;">
+                      <option value="<?php echo pedTexto($valuePedidos["estado"]); ?>"><?php echo pedTexto($valuePedidos["estado"]); ?></option>
                       <option value="Pedido Pendiente">Pedido Pendiente</option>
                       <option value="Pedido Adquirido">Pedido Adquirido</option>
                       <option value="Producto en Almacen">Producto en Almacén</option>
@@ -693,67 +684,41 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
               </thead>
               <tbody>
                 <?php
-                  // Legacy products (productoUno ... ProductoCinco)
-                  if ($valuePedidos["productoUno"] != "undefined" && $valuePedidos["productoUno"] != null) {
-                    $sub = (float)$valuePedidos["cantidaProductoUno"] * (float)$valuePedidos["precioProductoUno"];
+                  // Productos del formato antiguo (productoUno…ProductoCinco): solo lectura.
+                  $productosAnteriores = [
+                    ['productoUno', 'cantidaProductoUno', 'precioProductoUno'],
+                    ['ProductoDos', 'cantidadProductoDos', 'precioProductoDos'],
+                    ['ProductoTres', 'cantidadProductoTres', 'precioProductoTres'],
+                    ['ProductoCuatro', 'cantidadProductoCuatro', 'precioProductoCuatro'],
+                    ['ProductoCinco', 'cantidadProductoCinco', 'precioProductoCinco'],
+                  ];
+                  foreach ($productosAnteriores as list($campoProducto, $campoCantidad, $campoPrecio)) {
+                    $nombreProducto = isset($valuePedidos[$campoProducto]) ? $valuePedidos[$campoProducto] : null;
+                    if ($nombreProducto === null || $nombreProducto === '' || $nombreProducto === 'undefined') continue;
+                    $precioAnterior = PedidosPersistencia::importe($valuePedidos[$campoPrecio]);
+                    $sub = PedidosPersistencia::importe($valuePedidos[$campoCantidad]) * $precioAnterior;
                     echo '<tr>
-                      <td>'.htmlspecialchars($valuePedidos["productoUno"]).'</td>
-                      <td>'.htmlspecialchars($valuePedidos["cantidaProductoUno"]).'</td>
-                      <td class="ped-input-cell"><input type="number" value="'.htmlspecialchars($valuePedidos["precioProductoUno"]).'" readonly></td>
-                      <td>$'.number_format($sub, 2).'</td>
-                    </tr>';
-                  }
-                  if ($valuePedidos["ProductoDos"] != "undefined" && $valuePedidos["ProductoDos"] != null) {
-                    $sub = (float)$valuePedidos["cantidadProductoDos"] * (float)$valuePedidos["precioProductoDos"];
-                    echo '<tr>
-                      <td>'.htmlspecialchars($valuePedidos["ProductoDos"]).'</td>
-                      <td>'.htmlspecialchars($valuePedidos["cantidadProductoDos"]).'</td>
-                      <td>$'.number_format((float)$valuePedidos["precioProductoDos"], 2).'</td>
-                      <td>$'.number_format($sub, 2).'</td>
-                    </tr>';
-                  }
-                  if ($valuePedidos["ProductoTres"] != "undefined" && $valuePedidos["ProductoTres"] != null) {
-                    $sub = (float)$valuePedidos["cantidadProductoTres"] * (float)$valuePedidos["precioProductoTres"];
-                    echo '<tr>
-                      <td>'.htmlspecialchars($valuePedidos["ProductoTres"]).'</td>
-                      <td>'.htmlspecialchars($valuePedidos["cantidadProductoTres"]).'</td>
-                      <td>$'.number_format((float)$valuePedidos["precioProductoTres"], 2).'</td>
-                      <td>$'.number_format($sub, 2).'</td>
-                    </tr>';
-                  }
-                  if ($valuePedidos["ProductoCuatro"] != "undefined" && $valuePedidos["ProductoCuatro"] != null) {
-                    $sub = (float)$valuePedidos["cantidadProductoCuatro"] * (float)$valuePedidos["precioProductoCuatro"];
-                    echo '<tr>
-                      <td>'.htmlspecialchars($valuePedidos["ProductoCuatro"]).'</td>
-                      <td>'.htmlspecialchars($valuePedidos["cantidadProductoCuatro"]).'</td>
-                      <td>$'.number_format((float)$valuePedidos["precioProductoCuatro"], 2).'</td>
-                      <td>$'.number_format($sub, 2).'</td>
-                    </tr>';
-                  }
-                  if ($valuePedidos["ProductoCinco"] != "undefined" && $valuePedidos["ProductoCinco"] != null) {
-                    $sub = (float)$valuePedidos["cantidadProductoCinco"] * (float)$valuePedidos["precioProductoCinco"];
-                    echo '<tr>
-                      <td>'.htmlspecialchars($valuePedidos["ProductoCinco"]).'</td>
-                      <td>'.htmlspecialchars($valuePedidos["cantidadProductoCinco"]).'</td>
-                      <td>$'.number_format((float)$valuePedidos["precioProductoCinco"], 2).'</td>
+                      <td>'.pedTexto($nombreProducto).'</td>
+                      <td>'.pedTexto($valuePedidos[$campoCantidad]).'</td>
+                      <td>$'.number_format($precioAnterior, 2).'</td>
                       <td>$'.number_format($sub, 2).'</td>
                     </tr>';
                   }
 
-                  // Dynamic JSON products
-                  $productos = json_decode($valuePedidos["productos"], true);
-                  if (is_array($productos)) {
-                    foreach ($productos as $key => $valueProductos) {
-                      $ro = $puedeEditarPedidoCompleto ? '' : ' readonly';
-                      // "precio" guarda el subtotal de la línea (así lo imprime el ticket); aquí se edita el unitario.
-                      $precioUnitario = isset($valueProductos["precioUnitario"]) ? (float)$valueProductos["precioUnitario"] : (float)$valueProductos["precio"] / max(1, (float)$valueProductos["cantidad"]);
-                      echo '<tr class="ped-dynamic-product">
-                        <td class="ped-input-cell"><input type="text" value="'.htmlspecialchars($valueProductos["Descripcion"]).'" class="descripcioParaListar"'.$ro.'></td>
-                        <td class="ped-input-cell"><input type="number" min="0.000001" step="any" value="'.htmlspecialchars($valueProductos["cantidad"]).'" class="cantidadProductoParaListar"'.$ro.'></td>
-                        <td class="ped-input-cell"><input type="number" min="0" step="any" value="'.htmlspecialchars((string)round($precioUnitario, 6)).'" class="precioProductoParaListar"'.$ro.'></td>
-                        <td class="ped-line-subtotal">$'.number_format((float)$valueProductos["precio"], 2).'</td>
-                      </tr>';
-                    }
+                  // Productos en JSON: "precio" guarda el subtotal de la línea (así lo imprime el ticket); aquí se edita el unitario.
+                  // Solo se envían las filas modificadas, identificadas por su posición.
+                  $ro = $puedeEditarPedidoCompleto ? '' : ' readonly';
+                  foreach ($productosPedido as $indice => $producto) {
+                    if (!is_array($producto)) continue;
+                    $cantidad = PedidosPersistencia::importe(isset($producto["cantidad"]) ? $producto["cantidad"] : 0);
+                    $subtotal = round(PedidosPersistencia::importe(isset($producto["precio"]) ? $producto["precio"] : 0), 2);
+                    $unitario = isset($producto["precioUnitario"]) ? PedidosPersistencia::importe($producto["precioUnitario"]) : $subtotal / ($cantidad > 0 ? $cantidad : 1);
+                    echo '<tr class="ped-dynamic-product" data-indice="'.(int)$indice.'" data-subtotal="'.$subtotal.'">
+                      <td class="ped-input-cell"><input type="text" value="'.pedTexto(isset($producto["Descripcion"]) ? $producto["Descripcion"] : '').'" class="ped-prod-descripcion"'.$ro.'></td>
+                      <td class="ped-input-cell"><input type="number" min="0" step="any" value="'.($cantidad > 0 ? $cantidad : '').'" class="ped-prod-cantidad"'.$ro.'></td>
+                      <td class="ped-input-cell"><input type="number" min="0" step="any" value="'.round($unitario, 6).'" class="ped-prod-precio"'.$ro.'></td>
+                      <td class="ped-line-subtotal">$'.number_format($subtotal, 2).'</td>
+                    </tr>';
                   }
                 ?>
 
@@ -765,7 +730,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                   <td class="ped-input-cell">
                     <div style="display:flex;align-items:center;gap:6px;">
                       <span style="font-weight:800;color:var(--crm-accent);font-size:16px;">$</span>
-                      <input type="number" step="any" class="form-control totalPagarPedidoDinamico" name="totalPagarPedidoDinamico" value="<?php echo htmlspecialchars($valuePedidos["total"]); ?>" readonly title="Se calcula con los productos"
+                      <input type="number" step="any" min="0" class="form-control ped-total" name="total" value="<?php echo $totalPedido; ?>"<?php echo $puedeEditarPedidoCompleto ? ' title="Se ajusta al editar productos; también puedes corregirlo"' : ' readonly'; ?>
                         style="border:1px solid var(--crm-border);border-radius:8px;font-weight:800;font-size:16px;color:var(--crm-accent);padding:6px 10px;">
                     </div>
                   </td>
@@ -790,58 +755,37 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
           <div class="ped-card-body">
 
             <?php
-              $pagos = json_decode($valuePedidos["pagos"], true);
-
-              // Show initial payment
-              if ($valuePedidos["pagoPedido"] != null && $valuePedidos["pagoPedido"] != "" && $valuePedidos["pagoPedido"] != 0):
-            ?>
-              <div class="ped-payment-item">
-                <div class="ped-payment-icon"><i class="fa-solid fa-coins"></i></div>
-                <div style="flex:1;">
-                  <div class="ped-info-label">Pago Inicial</div>
-                  <div class="ped-payment-amount">$<?php echo number_format((float)$valuePedidos["pagoPedido"], 2); ?></div>
-                </div>
-                <div class="ped-payment-date" style="font-size:11px; color:var(--crm-muted);">Primer pago</div>
-              </div>
-            <?php endif; ?>
-
-            <?php
-              // Abonos del formato antiguo (abonoUno…abonoCinco): se muestran y cuentan, pero no se reescriben.
+              // Pago inicial y abonos del formato antiguo: se muestran y cuentan, pero no se reescriben.
               foreach (PedidosPersistencia::pagosAnteriores($valuePedidos) as $pagoAnterior):
-                if ($pagoAnterior['campo'] === 'pagoPedido') continue;
+                $esPagoInicial = $pagoAnterior['campo'] === 'pagoPedido';
             ?>
               <div class="ped-payment-item">
                 <div class="ped-payment-icon"><i class="fa-solid fa-coins"></i></div>
                 <div style="flex:1;">
-                  <div class="ped-info-label">Abono anterior</div>
+                  <div class="ped-info-label"><?php echo $esPagoInicial ? 'Pago Inicial' : 'Abono anterior'; ?></div>
                   <div class="ped-payment-amount">$<?php echo number_format($pagoAnterior['pago'], 2); ?></div>
                 </div>
-                <div class="ped-payment-date" style="font-size:11px; color:var(--crm-muted);"><?php echo htmlspecialchars($pagoAnterior['fecha']); ?></div>
+                <div class="ped-payment-date" style="font-size:11px; color:var(--crm-muted);"><?php echo $esPagoInicial ? 'Primer pago' : pedTexto($pagoAnterior['fecha']); ?></div>
               </div>
             <?php endforeach; ?>
 
-            <!-- Existing payments list -->
-            <div class="agregarCamposPago">
+            <!-- Abonos guardados (solo lectura) y abonos nuevos sin guardar -->
+            <div class="ped-payments">
             <?php
-              if ($pagos != null && $pagos != ""):
-                $abonoNum = 1;
-                foreach ($pagos as $key => $valuePagos):
+              $abonoNum = 0;
+              foreach ($pagosPedido as $pago):
+                if (!is_array($pago)) continue;
+                $abonoNum++;
             ?>
               <div class="ped-payment-item">
                 <div class="ped-payment-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
                 <div style="flex:1;">
                   <div class="ped-info-label">Abono #<?php echo $abonoNum; ?></div>
-                  <input type="number" class="form-control pagoAbonado" value="<?php echo htmlspecialchars($valuePagos["pago"]); ?>" readonly style="border:none;background:transparent;font-size:14px;font-weight:700;padding:0;height:auto;color:var(--crm-text);box-shadow:none;">
+                  <div class="ped-payment-amount">$<?php echo number_format(PedidosPersistencia::importe(isset($pago["pago"]) ? $pago["pago"] : 0), 2); ?></div>
                 </div>
-                <div class="ped-payment-date">
-                  <input type="date" class="form-control fechaAbono" value="<?php echo htmlspecialchars($valuePagos["fecha"]); ?>" readonly style="border:none;background:transparent;font-size:12px;color:var(--crm-muted);box-shadow:none;text-align:right;">
-                </div>
+                <div class="ped-payment-date"><?php echo pedTexto(isset($pago["fecha"]) ? $pago["fecha"] : ''); ?></div>
               </div>
-            <?php
-                  $abonoNum++;
-                endforeach;
-              endif;
-            ?>
+            <?php endforeach; ?>
             </div>
 
             <!-- New payment inline form -->
@@ -852,35 +796,30 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
               </div>
               <div class="ped-new-payment-row">
                 <div class="ped-new-payment-field">
-                  <label>Monto del abono</label>
-                  <input type="number" class="pagoAbonado" placeholder="$0.00" min="0" step="any">
+                  <label for="pedNuevoAbonoMonto">Monto del abono</label>
+                  <input type="number" id="pedNuevoAbonoMonto" placeholder="0.00" min="0" step="any">
                 </div>
                 <div class="ped-new-payment-field">
-                  <label>Fecha del pago</label>
-                  <input type="date" class="fechaAbono">
+                  <label for="pedNuevoAbonoFecha">Fecha del pago</label>
+                  <input type="date" id="pedNuevoAbonoFecha" value="<?php echo date('Y-m-d'); ?>">
                 </div>
+                <button type="button" class="ped-btn ped-btn-primary btnAgregarAbono" style="padding:8px 16px;">
+                  <i class="fa-solid fa-plus"></i> Agregar
+                </button>
               </div>
+              <p style="margin:8px 0 0; font-size:11px; color:var(--crm-muted);">Los abonos agregados se guardan al presionar «Guardar Pedido».</p>
             </div>
             <?php endif; ?>
-
-            <!-- Hidden structure for legacy JS compatibility -->
-            <div class="nuevoCampoPagoPedido" style="display:none;"></div>
 
             <!-- Summary boxes -->
             <div class="ped-summary-box">
               <div class="ped-summary-item total">
                 <div class="ped-summary-label">Total Pagado</div>
-                <div class="ped-summary-value">
-                  <input type="number" class="form-control totalPagosPeiddoDinamico" readonly
-                    style="border:none;background:transparent;text-align:center;font-size:18px;font-weight:800;color:#1e40af;box-shadow:none;padding:0;height:auto;">
-                </div>
+                <div class="ped-summary-value ped-pagado">$<?php echo number_format($pagadoPedido, 2); ?></div>
               </div>
               <div class="ped-summary-item debt">
                 <div class="ped-summary-label">Adeudo</div>
-                <div class="ped-summary-value">
-                  <input type="number" class="form-control adeudoPedidoDinamico" name="adeudoPedidoDinamico" readonly value="<?php echo htmlspecialchars($valuePedidos["adeudo"]); ?>"
-                    style="border:none;background:transparent;text-align:center;font-size:18px;font-weight:800;color:#991b1b;box-shadow:none;padding:0;height:auto;">
-                </div>
+                <div class="ped-summary-value ped-adeudo">$<?php echo number_format(max(0, $totalPedido - $pagadoPedido), 2); ?></div>
               </div>
             </div>
 
@@ -905,18 +844,11 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
         <div class="ped-card">
           <div class="ped-card-head">
             <h4 class="ped-card-title"><i class="fa-solid fa-comments"></i> Observaciones</h4>
-            <span style="font-size:12px; color:var(--crm-muted); font-weight:500;">
-              <?php
-                $observaciones = json_decode($valuePedidos["observaciones"], true);
-                $obsCount = is_array($observaciones) ? count($observaciones) : 0;
-                echo $obsCount . ' comentario' . ($obsCount != 1 ? 's' : '');
-              ?>
+            <span class="ped-obs-count" style="font-size:12px; color:var(--crm-muted); font-weight:500;">
+              <?php echo count($observaciones) . ' comentario' . (count($observaciones) != 1 ? 's' : ''); ?>
             </span>
           </div>
           <div class="ped-card-body">
-
-            <?php echo '<input type="hidden" class="usuarioActualPedido" value="'.htmlspecialchars($_SESSION["nombre"]).'">'; ?>
-            <textarea class="form-control input-lg" id="fechaVista" style="display:none;"></textarea>
 
             <!-- Compose new observation (inline, always visible for authorized users) -->
             <?php if ($puedeAgregarObservaciones): ?>
@@ -925,9 +857,9 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
                 $sesGrad = pedGetGrad($_SESSION["nombre"], $_obsGrads);
               ?>
               <div class="ped-obs-compose" id="pedObsCompose">
-                <div class="ped-obs-avatar" style="background:<?php echo $sesGrad; ?>;"><?php echo $sesIni; ?></div>
+                <div class="ped-obs-avatar" style="background:<?php echo $sesGrad; ?>;"><?php echo pedTexto($sesIni); ?></div>
                 <div class="ped-obs-compose-body">
-                  <textarea id="pedNewObsText" class="form-control" placeholder="Escribe una observación..." rows="2"></textarea>
+                  <textarea id="pedNewObsText" class="form-control" placeholder="Escribe una observación..." rows="2" maxlength="5000"></textarea>
                   <div class="ped-obs-compose-actions">
                     <button type="button" class="ped-btn ped-btn-primary btnAgregarObservacionInfoPedido" style="padding:7px 16px; font-size:12px;">
                       <i class="fa-solid fa-paper-plane"></i> Agregar
@@ -937,39 +869,26 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
               </div>
             <?php endif; ?>
 
-            <!-- Hidden legacy container for JS serialization -->
-            <div class="cajaObervacionesPedidos" style="display:none;">
-              <div class="agregarcampoobervacionesPedidos"></div>
-            </div>
-
             <p class="ped-observation-status" role="status" aria-live="polite" style="margin:0 0 8px; font-size:12px; color:var(--crm-muted);"></p>
 
             <!-- Existing observations -->
-            <?php if (is_array($observaciones) && count($observaciones) > 0): ?>
-              <div class="ped-obs-list">
-                <?php foreach ($observaciones as $key => $valueObservaciones):
-                  if ($puedeAgregarObservaciones || $_SESSION["perfil"] == "tecnico"):
-                    $obsName = isset($valueObservaciones["creador"]) ? $valueObservaciones["creador"] : 'Usuario';
-                    $obsIni  = pedGetInitials($obsName);
-                    $obsGrad = pedGetGrad($obsName, $_obsGrads);
-                ?>
-                  <div class="ped-obs-item">
-                    <div class="ped-obs-avatar" style="background:<?php echo $obsGrad; ?>;"><?php echo $obsIni; ?></div>
-                    <div class="ped-obs-body">
-                      <div class="ped-obs-header">
-                        <span class="ped-obs-name"><?php echo htmlspecialchars($obsName); ?></span>
-                        <span class="ped-obs-date"><?php echo htmlspecialchars($valueObservaciones["fecha"]); ?></span>
-                      </div>
-                      <div class="ped-obs-content">
-                        <textarea class="nuevaObservacion" readonly data-creador="<?php echo htmlspecialchars($obsName); ?>" fecha="<?php echo htmlspecialchars($valueObservaciones["fecha"]); ?>"><?php echo htmlspecialchars($valueObservaciones["observacion"]); ?></textarea>
-                      </div>
+            <div class="ped-obs-list">
+              <?php foreach ($observaciones as $obs):
+                $obsName = isset($obs["creador"]) && is_scalar($obs["creador"]) && $obs["creador"] !== '' ? (string)$obs["creador"] : 'Usuario';
+              ?>
+                <div class="ped-obs-item">
+                  <div class="ped-obs-avatar" style="background:<?php echo pedGetGrad($obsName, $_obsGrads); ?>;"><?php echo pedTexto(pedGetInitials($obsName)); ?></div>
+                  <div class="ped-obs-body">
+                    <div class="ped-obs-header">
+                      <span class="ped-obs-name"><?php echo pedTexto($obsName); ?></span>
+                      <span class="ped-obs-date"><?php echo pedTexto(isset($obs["fecha"]) ? $obs["fecha"] : ''); ?></span>
                     </div>
+                    <div class="ped-obs-content"><?php echo pedTexto(isset($obs["observacion"]) ? $obs["observacion"] : ''); ?></div>
                   </div>
-                <?php
-                  endif;
-                endforeach; ?>
-              </div>
-            <?php else: ?>
+                </div>
+              <?php endforeach; ?>
+            </div>
+            <?php if (!$observaciones): ?>
               <div id="pedObsEmpty" style="text-align:center; padding:24px 0; color:var(--crm-muted);">
                 <i class="fa-solid fa-message" style="font-size:28px; opacity:.3; margin-bottom:8px;"></i>
                 <p style="margin:0; font-size:13px;">No hay observaciones registradas</p>

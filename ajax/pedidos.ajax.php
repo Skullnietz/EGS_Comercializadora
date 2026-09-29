@@ -2,7 +2,11 @@
 session_start();
 
 if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] == "tecnico") {
-	http_response_code(403);
+	http_response_code(isset($_SESSION["perfil"]) ? 403 : 401);
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode(['ok' => false, 'mensaje' => isset($_SESSION["perfil"])
+		? 'Tu usuario no tiene permiso para modificar pedidos.'
+		: 'Tu sesión expiró y el cambio no se guardó. Inicia sesión en otra pestaña y vuelve a guardar aquí; no cierres esta página para no perder lo capturado.']);
 	exit;
 }
 
@@ -10,22 +14,56 @@ require_once "../controladores/pedidos.controlador.php";
 require_once "../modelos/pedidos.modelo.php";
 
 /*=============================================
-GUARDAR DETALLE DEL PEDIDO (AJAX)
-Va antes del despachador: el formulario también envía "idPedido".
+DETALLE DEL PEDIDO (AJAX)
+Va antes del despachador: también se envía "idPedido".
 =============================================*/
-if (isset($_POST['guardarPedidoDetalle'])) {
+if (isset($_POST['accionPedido'])) {
     header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
     try {
-        $entrada = ['observaciones' => $_POST['listarObservacionesPedidos'] ?? ''];
-        if (in_array($_SESSION['perfil'], ['administrador', 'Super-Administrador'], true)) {
-            $entrada += ['productos' => $_POST['ListarPreciosActualizados'] ?? '', 'pagos' => $_POST['PagosListados'] ?? '', 'estado' => $_POST['EstadoPedidoDinamico'] ?? ''];
+        $id = $_POST['idPedido'] ?? 0;
+        $respuesta = [];
+        switch ($_POST['accionPedido']) {
+            case 'guardar':
+                $entrada = ['estado' => $_POST['estado'] ?? '', 'total' => $_POST['total'] ?? '', 'productos' => $_POST['productos'] ?? '', 'pagos' => $_POST['pagos'] ?? ''];
+                $respuesta['version'] = PedidosPersistencia::version(PedidosPersistencia::guardar($id, $entrada, $_POST['versionPedido'] ?? ''));
+                break;
+            case 'agregarObservacion':
+                $respuesta['observacion'] = PedidosPersistencia::agregarObservacion($id, $_POST['observacion'] ?? '', $_POST['ref'] ?? null);
+                break;
+            case 'quitarObservacion':
+                PedidosPersistencia::quitarObservacion($id, json_decode($_POST['observacion'] ?? '', true));
+                break;
+            default:
+                throw new InvalidArgumentException('La acción no es válida. Recarga la página.');
         }
-        $pedido = PedidosPersistencia::guardar($_POST['idPedido'] ?? 0, $entrada, $_POST['versionPedido'] ?? '', $_POST['versionObservaciones'] ?? '');
-        echo json_encode(['ok' => true, 'version' => PedidosPersistencia::version($pedido), 'versionObservaciones' => PedidosPersistencia::version($pedido, true)]);
+        echo json_encode(['ok' => true] + $respuesta);
     } catch (Throwable $e) {
-        http_response_code($e instanceof PDOException ? 500 : 409);
-        echo json_encode(['ok' => false, 'mensaje' => $e instanceof PDOException ? 'No se pudo guardar en la base de datos.' : $e->getMessage()]);
+        // El motivo queda en el error_log del servidor para soporte.
+        error_log('[pedidos] ' . $_POST['accionPedido'] . ' pedido ' . ($_POST['idPedido'] ?? '') . ' usuario ' . ($_SESSION['nombre'] ?? '') . ': ' . get_class($e) . ': ' . $e->getMessage());
+        if ($e instanceof PDOException) {
+            http_response_code(500);
+            $codigo = $e->errorInfo[1] ?? $e->getCode();
+            $mensaje = $codigo == 1406
+                ? 'El pedido llegó al límite de espacio para ese dato y el cambio no se guardó. Avisa a soporte (código 1406).'
+                : 'La base de datos rechazó el cambio (código ' . $codigo . '). Avisa a soporte con este código.';
+        } elseif ($e instanceof InvalidArgumentException || $e instanceof RuntimeException) {
+            http_response_code(409);
+            $mensaje = $e->getMessage();
+        } else {
+            http_response_code(500);
+            $mensaje = 'Ocurrió un error interno y el cambio no se guardó. Avisa a soporte.';
+        }
+        echo json_encode(['ok' => false, 'mensaje' => $mensaje]) ?: '{"ok":false,"mensaje":"No se pudo guardar."}';
     }
+    exit;
+}
+
+/* Pestañas abiertas antes de esta versión: sus datos ya no son compatibles. */
+if (isset($_POST['guardarPedidoDetalle']) || isset($_POST['idPedidoDinamicoAjax'])) {
+    http_response_code(409);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['ok' => false, 'mensaje' => 'Esta página es de una versión anterior y no puede guardar. Recarga la página (F5) y vuelve a capturar tus cambios.']);
     exit;
 }
 
@@ -165,22 +203,6 @@ class AjaxPedidos{
 
 	}	
 
-	/*=============================================
-	EDITAR SOLO OBSERVACIONES
-	=============================================*/
-	public $idPedidoDinamicoAjax;
-	public $observacionesDinamicoAjax;
-
-	public function ajaxEditarObservacionesDinamico(){
-        header('Content-Type: application/json; charset=utf-8');
-        try {
-            $pedido = PedidosPersistencia::guardar($this->idPedidoDinamicoAjax, ['observaciones' => $this->observacionesDinamicoAjax], null, $_POST['versionObservaciones'] ?? '');
-            echo json_encode(['ok' => true, 'version' => PedidosPersistencia::version($pedido, true)]);
-        } catch (Throwable $e) {
-            http_response_code($e instanceof PDOException ? 500 : 409);
-            echo json_encode(['ok' => false, 'mensaje' => $e instanceof PDOException ? 'No se pudo guardar. Inténtalo de nuevo.' : $e->getMessage()]);
-        }
-    }
 }
 #CREAR PEDIDO
 #-----------------------------------------------------------
@@ -255,14 +277,4 @@ if(isset($_POST["id"])){
 
 	$editarPedido -> ajaxEditarPedido();
 
-}
-
-/*=============================================
-EDITAR SOLO OBSERVACIONES (AJAX)
-=============================================*/
-if(isset($_POST["idPedidoDinamicoAjax"])){
-	$editarObservaciones = new AjaxPedidos();
-	$editarObservaciones -> idPedidoDinamicoAjax = $_POST["idPedidoDinamicoAjax"];
-	$editarObservaciones -> observacionesDinamicoAjax = $_POST["observacionesDinamicoAjax"];
-	$editarObservaciones -> ajaxEditarObservacionesDinamico();
 }
