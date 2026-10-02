@@ -798,37 +798,37 @@ class ModeloOrdenes{
 
 		$stmt->bindParam(":partidaUno", $datos["partida1"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioUno", $datos["precio1"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioUno", $datos["precio1"], PDO::PARAM_STR);
 
 
 
 		$stmt->bindParam(":partidaDos", $datos["partida2"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioDos", $datos["precio2"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioDos", $datos["precio2"], PDO::PARAM_STR);
 
 
 
 		$stmt->bindParam(":partidaTres", $datos["partida3"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioTres", $datos["precio3"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioTres", $datos["precio3"], PDO::PARAM_STR);
 
 		
 
 		$stmt->bindParam(":partidaCuatro", $datos["partida4"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioCuatro", $datos["precio4"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioCuatro", $datos["precio4"], PDO::PARAM_STR);
 
 
 
 		$stmt->bindParam(":partidaCinco", $datos["partida5"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioCinco", $datos["precio5"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioCinco", $datos["precio5"], PDO::PARAM_STR);
 
 		
 
 		$stmt->bindParam(":partidaSeis", $datos["partida6"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioSeis", $datos["precio6"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioSeis", $datos["precio6"], PDO::PARAM_STR);
 
 
 
@@ -836,25 +836,25 @@ class ModeloOrdenes{
 
 		$stmt->bindParam(":partidaSiete", $datos["partida7"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioSiete", $datos["precio7"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioSiete", $datos["precio7"], PDO::PARAM_STR);
 
 
 
 		$stmt->bindParam(":partidaOcho", $datos["partida8"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioOcho", $datos["precio8"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioOcho", $datos["precio8"], PDO::PARAM_STR);
 
 
 
 		$stmt->bindParam(":partidaNueve", $datos["partida9"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioNueve", $datos["precio9"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioNueve", $datos["precio9"], PDO::PARAM_STR);
 
 
 
 		$stmt->bindParam(":partidaDiez", $datos["partida10"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioDiez", $datos["precio10"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioDiez", $datos["precio10"], PDO::PARAM_STR);
 
 
 
@@ -868,7 +868,7 @@ class ModeloOrdenes{
 
 
 
-		$stmt->bindParam(":total", $datos["totalOrdenEditar"], PDO::PARAM_INT);
+		$stmt->bindParam(":total", $datos["totalOrdenEditar"], PDO::PARAM_STR);
 
 		$stmt -> bindParam(":id", $datos["id"], PDO::PARAM_INT);
 
@@ -2322,45 +2322,45 @@ class ModeloOrdenes{
 
 		$stmt->bindParam(":partidaUno", $datos["partidaUno"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioUno", $datos["precioUno"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioUno", $datos["precioUno"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaDos", $datos["partidaDos"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioDos", $datos["precioDos"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioDos", $datos["precioDos"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaTres", $datos["partidaTres"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioTres", $datos["precioTres"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioTres", $datos["precioTres"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaCuatro", $datos["partidaCuatro"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioCuatro", $datos["precioCuatro"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioCuatro", $datos["precioCuatro"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaCinco", $datos["partidaCinco"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioCinco", $datos["precioCinco"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioCinco", $datos["precioCinco"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaSeis", $datos["partidaSeis"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioSeis", $datos["precioSeis"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioSeis", $datos["precioSeis"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaSiete", $datos["partidaSiete"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioSiete", $datos["precioSiete"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioSiete", $datos["precioSiete"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaOcho", $datos["partidaOcho"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioOcho", $datos["precioOcho"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioOcho", $datos["precioOcho"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaNueve", $datos["partidaNueve"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioNueve", $datos["precioNueve"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioNueve", $datos["precioNueve"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":partidaDiez", $datos["partidaDiez"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":precioDiez", $datos["precioDiez"], PDO::PARAM_INT);
+		$stmt->bindParam(":precioDiez", $datos["precioDiez"], PDO::PARAM_STR);
 
-		$stmt->bindParam(":total", $datos["costoTotalDeOrden"], PDO::PARAM_INT);
+		$stmt->bindParam(":total", $datos["costoTotalDeOrden"], PDO::PARAM_STR);
 
 		
 
@@ -2464,15 +2464,13 @@ class ModeloOrdenes{
 
 
 
-		$stmt = ConexionWP::conectarWP()->prepare("UPDATE $tabla SET  inversiones = :inversiones, totalInversion = :totalInversion, estado = :estado WHERE id = :id");
+		$stmt = ConexionWP::conectarWP()->prepare("UPDATE $tabla SET inversiones = :inversiones, totalInversion = :totalInversion WHERE id = :id");
 
 
 
 		$stmt->bindParam(":inversiones", $datos["listarinversiones"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":totalInversion", $datos["totalInversiones"], PDO::PARAM_STR);
-
-		$stmt->bindParam(":estado", $datos["estado"], PDO::PARAM_STR);
 
 		$stmt->bindParam(":id", $datos["id"], PDO::PARAM_INT);
 

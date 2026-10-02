@@ -70,42 +70,14 @@ class ControladorRecompensas
 
     /*=============================================
     CANJEAR DINERO ELECTRÓNICO EN ORDEN
-    Validaciones: saldo suficiente, no duplicado.
-    Retorna array con auditoría completa o false si falla.
+    Entrada antigua deshabilitada: una orden debe consumirse junto con su entrega.
     =============================================*/
     static public function ctrCanjearEnOrden(
         $idCliente, $idOrden, $montoCanje,
         $idEmpresa = null, $idUsuario = null,
         $totalBruto = null, $totalNeto = null
     ) {
-        self::ctrCrearTablas();
-
-        if ($montoCanje <= 0) return false;
-
-        // Prevenir duplicado
-        if (ModeloRecompensas::mdlExisteCanje('orden', $idOrden)) return false;
-
-        $porcentaje        = self::ctrCalcularPorcentaje($idCliente);
-        $porcentajeHist    = self::ctrCalcularPorcentajeHistorico($idCliente);
-        $saldoAnterior     = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHist);
-
-        if ($montoCanje > $saldoAnterior) return false;
-
-        $descripcion = "Canje en Orden #" . $idOrden;
-        ModeloRecompensas::mdlCanjearRecompensa(
-            $idCliente, $idOrden, $montoCanje, $descripcion,
-            'orden', $idEmpresa, $idUsuario, $totalBruto, $totalNeto
-        );
-
-        $saldoNuevo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHist);
-
-        return array(
-            "monto_canjeado"  => $montoCanje,
-            "saldo_anterior"  => $saldoAnterior,
-            "saldo_nuevo"     => $saldoNuevo,
-            "referencia_tipo" => "orden",
-            "referencia_id"   => $idOrden
-        );
+        throw new RuntimeException('El monedero de una orden se aplica únicamente al guardar su entrega desde la sesión del administrador.');
     }
 
     /*=============================================
@@ -116,39 +88,14 @@ class ControladorRecompensas
         $idEmpresa = null, $idUsuario = null,
         $totalBruto = null, $totalNeto = null
     ) {
-        self::ctrCrearTablas();
-
-        if ($montoCanje <= 0) return false;
-
-        // Prevenir duplicado
-        if (ModeloRecompensas::mdlExisteCanje('venta', $idVenta)) return false;
-
-        $porcentaje     = self::ctrCalcularPorcentaje($idCliente);
-        $porcentajeHist = self::ctrCalcularPorcentajeHistorico($idCliente);
-        $saldoAnterior  = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHist);
-
-        if ($montoCanje > $saldoAnterior) return false;
-
-        $descripcion = "Canje en Venta #" . $idVenta;
-        ModeloRecompensas::mdlCanjearRecompensa(
-            $idCliente, $idVenta, $montoCanje, $descripcion,
-            'venta', $idEmpresa, $idUsuario, $totalBruto, $totalNeto
-        );
-
-        $saldoNuevo = ModeloRecompensas::mdlCalcularSaldoDinamico($idCliente, $porcentaje, $porcentajeHist);
-
-        return array(
-            "monto_canjeado"  => $montoCanje,
-            "saldo_anterior"  => $saldoAnterior,
-            "saldo_nuevo"     => $saldoNuevo,
-            "referencia_tipo" => "venta",
-            "referencia_id"   => $idVenta
-        );
+        require_once __DIR__ . '/../modelos/monedero.persistencia.php';
+        $movimiento = MonederoPersistencia::canjearVenta($idCliente, $idVenta, $montoCanje, $totalBruto, $totalNeto);
+        return ['monto_canjeado' => abs((float)$movimiento['monto']), 'saldo_anterior' => (float)$movimiento['saldo_anterior'],
+            'saldo_nuevo' => (float)$movimiento['saldo_nuevo'], 'referencia_tipo' => 'venta', 'referencia_id' => $idVenta];
     }
 
     /*=============================================
-    MÉTODOS LEGACY — mantienen compatibilidad con código existente
-    que todavía llame a ctrCanjearRecompensa / ctrCanjearRecompensaVenta
+    MÉTODOS LEGACY — el canje independiente de órdenes se rechaza explícitamente.
     =============================================*/
     static public function ctrCanjearRecompensa($idCliente, $idOrden, $montoCanje)
     {

@@ -18,6 +18,8 @@ class ModeloRecompensas
     static public function mdlCrearTablas()
     {
         $pdo = ConexionWP::conectarWP();
+        // CREATE/ALTER provocan commit implícito en MySQL; nunca dentro de un guardado.
+        if ($pdo->inTransaction()) return;
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS `dinero_electronico` (
             `id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -36,7 +38,7 @@ class ModeloRecompensas
             `id` INT(11) NOT NULL AUTO_INCREMENT,
             `id_cliente` INT(11) NOT NULL,
             `id_orden` INT(11) DEFAULT NULL,
-            `tipo` ENUM('acumulacion','canje','expiracion') NOT NULL,
+            `tipo` ENUM('acumulacion','canje','expiracion','reversion') NOT NULL,
             `monto` DECIMAL(10,2) NOT NULL,
             `porcentaje_aplicado` DECIMAL(5,2) DEFAULT NULL,
             `saldo_anterior` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
@@ -45,7 +47,15 @@ class ModeloRecompensas
             `expirado` TINYINT(1) NOT NULL DEFAULT 0,
             `fecha` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             `descripcion` VARCHAR(255) DEFAULT NULL,
+            `referencia_tipo` ENUM('orden','venta','pedido','reversion') DEFAULT NULL,
+            `referencia_id` INT(11) DEFAULT NULL,
+            `id_empresa` INT(11) DEFAULT NULL,
+            `id_usuario_aplico` INT(11) DEFAULT NULL,
+            `origen_total_bruto` DECIMAL(10,2) DEFAULT NULL,
+            `origen_total_neto` DECIMAL(10,2) DEFAULT NULL,
+            `monto_aplicado` DECIMAL(10,2) DEFAULT NULL,
             PRIMARY KEY (`id`),
+            UNIQUE KEY `uq_monedero_referencia` (`referencia_tipo`, `referencia_id`, `tipo`),
             KEY `idx_cliente` (`id_cliente`),
             KEY `idx_orden` (`id_orden`),
             KEY `idx_tipo` (`tipo`),
@@ -69,7 +79,10 @@ class ModeloRecompensas
 
         if (!$monedero) {
             $token = bin2hex(random_bytes(32));
-            $stmt2 = $pdo->prepare("INSERT INTO dinero_electronico (id_cliente, saldo, token) VALUES (:id_cliente, 0.00, :token)");
+            $sql = "INSERT INTO dinero_electronico (id_cliente, saldo, token) VALUES (:id_cliente, 0.00, :token)";
+            $sql .= $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'
+                ? ' ON DUPLICATE KEY UPDATE id_cliente = id_cliente' : ' ON CONFLICT(id_cliente) DO NOTHING';
+            $stmt2 = $pdo->prepare($sql);
             $stmt2->bindParam(":id_cliente", $idCliente, PDO::PARAM_INT);
             $stmt2->bindParam(":token", $token, PDO::PARAM_STR);
             $stmt2->execute();
@@ -154,7 +167,7 @@ class ModeloRecompensas
 
         // 1a) Órdenes antes del cambio (excluir las que vienen de pedidos)
         $stmt = $pdo->prepare("
-            SELECT COALESCE(SUM(total), 0) as suma_totales
+            SELECT COALESCE(SUM(CASE WHEN monto_monedero_aplicado > 0 THEN total_pagado_cliente ELSE total END), 0) as suma_totales
             FROM ordenes
             WHERE id_usuario = :id_cliente
               AND estado LIKE 'Entregado%'
@@ -192,7 +205,7 @@ class ModeloRecompensas
 
         // 2a) Órdenes desde el cambio (excluir las que vienen de pedidos)
         $stmt2 = $pdo->prepare("
-            SELECT COALESCE(SUM(total), 0) as suma_totales
+            SELECT COALESCE(SUM(CASE WHEN monto_monedero_aplicado > 0 THEN total_pagado_cliente ELSE total END), 0) as suma_totales
             FROM ordenes
             WHERE id_usuario = :id_cliente
               AND estado LIKE 'Entregado%'
@@ -245,7 +258,7 @@ class ModeloRecompensas
         $saldo = $acumulado - $totalCanjes + $totalReversiones;
         if ($saldo < 0) $saldo = 0;
 
-        return $saldo;
+        return round($saldo, 2);
     }
 
     /*=============================================
@@ -265,7 +278,7 @@ class ModeloRecompensas
 
         // Órdenes entregadas (excluir las que vienen de pedidos para no duplicar)
         $stmt = $pdo->prepare("
-            SELECT id, total, fecha_Salida
+            SELECT id, CASE WHEN monto_monedero_aplicado > 0 THEN total_pagado_cliente ELSE total END AS total, fecha_Salida
             FROM ordenes
             WHERE id_usuario = :id_cliente
               AND estado LIKE 'Entregado%'

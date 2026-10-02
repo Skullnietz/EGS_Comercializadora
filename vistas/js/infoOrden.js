@@ -33,7 +33,7 @@ $(document).ready(function(){
 	$(".precioPartidaGuardada").each(function(){
 		sum += +$(this).val();
 	});
-	$("#costoTotalDeOrden").val(sum);
+	$("#costoTotalDeOrden").val(sum.toFixed(2));
 
 	listarObservaciones();
 	listaPartidasTecncioDos();
@@ -50,7 +50,7 @@ $(document).on("change", ".precioPartidaGuardada", function() {
 	$(".precioPartidaGuardada").each(function(){
 		sum += +$(this).val();
 	});
-	$("#costoTotalDeOrden").val(sum);
+	$("#costoTotalDeOrden").val(sum.toFixed(2));
 
 	listaPartidas();
 	listaPartidasParaSumarlasAlasYaExistentes();
@@ -199,7 +199,7 @@ $(document).on("click", "button.quitarPartida", function(){
 	$(".precioPartidaGuardada").each(function(){
 		sum += +$(this).val();
 	});
-	$("#costoTotalDeOrden").val(sum);
+	$("#costoTotalDeOrden").val(sum.toFixed(2));
 
 	listaPartidas();
 	listaPartidasParaSumarlasAlasYaExistentes();

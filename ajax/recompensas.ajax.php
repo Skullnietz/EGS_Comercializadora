@@ -1,11 +1,40 @@
 <?php
 
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+header('Content-Type: application/json; charset=utf-8');
+if (empty($_SESSION['id']) || empty($_SESSION['empresa']) || empty($_SESSION['perfil'])) {
+    http_response_code(401);
+    echo json_encode(['status' => 'error', 'mensaje' => 'Inicia sesión para consultar el monedero.']);
+    exit;
+}
+// El consumo se registra junto con la entrega/venta, nunca en una llamada independiente.
+if (isset($_POST['idClienteCanje']) || isset($_POST['idClienteCanjePedido']) || isset($_POST['idClienteCanjeVenta'])) {
+    http_response_code(409);
+    echo json_encode(['status' => 'error', 'mensaje' => 'Aplica el monedero al guardar la entrega desde la sesión del administrador o al guardar la venta.']);
+    exit;
+}
+if (isset($_POST['toggleRecompensasVentas']) && $_SESSION['perfil'] !== 'administrador') {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'mensaje' => 'Solo el administrador puede cambiar esta configuración.']);
+    exit;
+}
+
 require_once "../config/Database.php";
 require_once "../modelos/recompensas.modelo.php";
 require_once "../controladores/recompensas.controlador.php";
 
 class AjaxRecompensas
 {
+    public $idCliente;
+    public $idClienteCanje;
+    public $idOrdenCanje;
+    public $montoCanje;
+    public $idClienteCanjePedido;
+    public $idPedidoCanje;
+    public $montoCanjePedido;
+    public $idClienteCanjeVenta;
+    public $idVentaCanje;
+    public $montoCanjeVenta;
     /*=============================================
     OBTENER INFO DE RECOMPENSAS DE UN CLIENTE
     =============================================*/

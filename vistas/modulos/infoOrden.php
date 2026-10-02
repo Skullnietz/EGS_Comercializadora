@@ -1505,7 +1505,7 @@ function _egsEstadoClass($estado) {
 						</div>
 
 						<!-- ═══ MONEDERO ELECTRÓNICO ══════════════════ -->
-						<?php if (!$isTecnico && !$isSecretaria && $_ord_idCliente > 0 && $estado !== "Entregado (Ent)"): ?>
+						<?php if ($isAdmin && $_ord_idCliente > 0 && $estado !== "Entregado (Ent)"): ?>
 						<div class="egs-field-row" id="egsMonederoWrap">
 							<div class="egs-monedero-panel" id="egsMonederoPanel" data-total-bruto="<?php echo number_format($_ord_totalBrutoVista, 2, '.', ''); ?>">
 								<div class="egs-monedero-title">
@@ -1518,13 +1518,13 @@ function _egsEstadoClass($estado) {
 									<div class="egs-monedero-saldo">$<?php echo number_format($_ord_saldoRec, 2); ?></div>
 								</div>
 								<div class="egs-field-row" style="margin-bottom:6px">
-									<label class="egs-lbl">Monto a aplicar</label>
+									<label class="egs-lbl">Monto solicitado por el cliente</label>
 									<div class="input-group">
 										<span class="input-group-addon" style="background:#3b82f6;color:#fff;border-color:#3b82f6">$</span>
 										<input type="number" id="egsMontoMonederoOrden"
 											class="form-control"
 											min="0"
-											max="<?php echo number_format($_ord_saldoRec, 2, '.', ''); ?>"
+											data-saldo="<?php echo number_format($_ord_saldoRec, 2, '.', ''); ?>"
 											step="0.01"
 											placeholder="0.00"
 											style="font-weight:700">
@@ -1552,6 +1552,8 @@ function _egsEstadoClass($estado) {
 								<?php endif; ?>
 
 								<!-- Inputs ocultos que van al form de la orden -->
+                                <?php if (empty($_SESSION['tokenMonederoOrden'])) $_SESSION['tokenMonederoOrden'] = bin2hex(random_bytes(32)); ?>
+                                <input type="hidden" name="tokenMonederoOrden" value="<?php echo htmlspecialchars($_SESSION['tokenMonederoOrden'], ENT_QUOTES, 'UTF-8'); ?>" form="formObservaciones">
 								<input type="hidden" id="egsMontoMonederoOrdenHidden" name="montoCanjeMonederoOrden" value="0" form="formObservaciones">
 								<input type="hidden" name="idClienteOrden" value="<?php echo intval($_ord_idCliente); ?>" form="formObservaciones">
 								<input type="hidden" id="egsTotalBrutoMonederoOrden" name="totalBrutoMonederoOrden" value="<?php echo number_format($_ord_totalBrutoVista, 2, '.', ''); ?>" form="formObservaciones">
@@ -2497,121 +2499,4 @@ $eliminarReporte = new controladorReporteEquipo();
 $eliminarReporte->ctrEliminarReporte();
 ?>
 
-<script>
-$(document).ready(function () {
-
-    // ── Monedero electrónico: show/hide panel when estado changes ──
-    function fmt(n) { return '$' + parseFloat(n).toFixed(2); }
-
-    function obtenerBrutoMonedero() {
-        var bruto = parseFloat($('#costoTotalDeOrden').val()) || 0;
-        if (bruto > 0) return bruto;
-
-        var brutoHidden = parseFloat($('#egsTotalBrutoMonederoOrden').val()) || 0;
-        if (brutoHidden > 0) return brutoHidden;
-
-        var brutoPanel = parseFloat($('#egsMonederoPanel').attr('data-total-bruto') || 0) || 0;
-        return brutoPanel;
-    }
-
-    function actualizarEstadoMonedero() {
-        var $montoInp = $('#egsMontoMonederoOrden');
-        var $btnTodo  = $('#egsMonederoUsarTodo');
-        if (!$montoInp.length) return;
-
-        var saldoMax = parseFloat($montoInp.attr('max') || 0);
-        var bruto    = obtenerBrutoMonedero();
-        var maxAplicable = saldoMax;
-
-        $('#egsMonederoMaxLabel').text('Máximo aplicable: ' + fmt(maxAplicable));
-
-        if (bruto <= 0) {
-            $montoInp.prop('disabled', false);
-            $btnTodo.prop('disabled', maxAplicable <= 0);
-            $('#egsMonederoHint').text('El saldo disponible del cliente es ' + fmt(saldoMax) + '. Si el total real de la orden resulta menor, el sistema lo validará al guardar.');
-            $('#egsMonederoDesglose').hide();
-            return;
-        }
-
-        $montoInp.prop('disabled', false);
-        $btnTodo.prop('disabled', maxAplicable <= 0);
-
-        if (maxAplicable <= 0) {
-            $('#egsMonederoHint').text('El saldo disponible ya no puede aplicarse a esta orden.');
-        } else {
-            $('#egsMonederoHint').text('Puedes aplicar hasta ' + fmt(maxAplicable) + ' en esta orden.');
-        }
-    }
-
-    function actualizarDesgloseMonedero() {
-        var $montoInp  = $('#egsMontoMonederoOrden');
-        var $hidden    = $('#egsMontoMonederoOrdenHidden');
-        var $desglose  = $('#egsMonederoDesglose');
-        if (!$montoInp.length) return;
-
-        var saldoMax = parseFloat($montoInp.attr('max') || 0);
-        var bruto    = obtenerBrutoMonedero();
-        var solicitado   = parseFloat($montoInp.val()) || 0;
-        var descto       = solicitado;
-
-        if (descto > saldoMax)      { descto = saldoMax; }
-        if (descto < 0)             { descto = 0; }
-
-        $hidden.val(descto.toFixed(2));
-        $('#egsTotalBrutoMonederoOrden').val(bruto.toFixed(2));
-        $('#egsTotalPagadoMonederoOrden').val(bruto > 0 ? Math.max(0, bruto - descto).toFixed(2) : '0.00');
-
-        if (solicitado !== descto) {
-            $('#egsMonederoHint').text('Capturaste ' + fmt(solicitado) + ', pero el saldo disponible del cliente es ' + fmt(descto) + '.');
-        }
-
-        if (descto > 0 && bruto > 0) {
-            $('#egsMondBruto').text(fmt(bruto));
-            $('#egsMondDescuento').text('-' + fmt(descto));
-            $('#egsMondTotal').text(fmt(Math.max(0, bruto - descto)));
-            $desglose.show();
-        } else {
-            $desglose.hide();
-        }
-    }
-
-    // Estado select change → show/hide panel
-    $(document).on('change', 'select[name="estado"]', function () {
-        var $panel = $('#egsMonederoPanel');
-        if (!$panel.length) return;
-
-        if ($(this).val() === 'Entregado (Ent)') {
-            $panel.addClass('visible');
-            actualizarEstadoMonedero();
-            actualizarDesgloseMonedero();
-        } else {
-            $panel.removeClass('visible');
-            $('#egsMontoMonederoOrden').val('');
-            $('#egsMontoMonederoOrdenHidden').val('0');
-            $('#egsMonederoDesglose').hide();
-        }
-    });
-
-    // Monto input → recalculate desglose
-    $(document).on('input change', '#egsMontoMonederoOrden', actualizarDesgloseMonedero);
-    $(document).on('input change', '#costoTotalDeOrden, .precioPartidaGuardada', function () {
-        actualizarEstadoMonedero();
-        actualizarDesgloseMonedero();
-    });
-
-    // "Todo" button
-    $(document).on('click', '#egsMonederoUsarTodo', function () {
-        var $montoInp = $('#egsMontoMonederoOrden');
-        if (!$montoInp.length) return;
-        var saldoMax = parseFloat($montoInp.attr('max') || 0) || 0;
-        $montoInp.val(saldoMax.toFixed(2));
-        actualizarDesgloseMonedero();
-    });
-
-    if ($('#egsMonederoPanel').hasClass('visible')) {
-        actualizarEstadoMonedero();
-        actualizarDesgloseMonedero();
-    }
-
-});
-</script>
+<script src="vistas/js/ordenes.monedero.js"></script>

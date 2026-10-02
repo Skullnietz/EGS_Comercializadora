@@ -1177,80 +1177,6 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				if (
-					$datos["estado"] == "Entregado (Ent)"
-					&& $_egs_estadoAnterior !== ''
-					&& $_egs_estadoAnterior !== "Entregado (Ent)"
-				) {
-
-
-
-					date_default_timezone_set("America/Mexico_City");
-
-
-
-					$fecha = date('Y-m-d');
-
-
-
-					$fechaActual = $fecha;
-
-
-
-					$respuesta = ModeloOrdenes::mdlActualizarFechaSalida(
-						"ordenes",
-						intval($datos["idOrden"]),
-						$fechaActual
-					);
-
-					// ── Recompensas: canjear monedero si se solicitó ──
-					$_egs_montoCanjeOrden  = isset($_POST["montoCanjeMonederoOrden"]) ? floatval($_POST["montoCanjeMonederoOrden"]) : 0;
-					$_egs_idClienteOrden   = isset($_POST["idClienteOrden"])          ? intval($_POST["idClienteOrden"])            : intval($datos["cliente"] ?? 0);
-					$_egs_totalBrutoOrden  = isset($_POST["totalBrutoMonederoOrden"]) ? floatval($_POST["totalBrutoMonederoOrden"]) : 0;
-					if ($_egs_totalBrutoOrden <= 0) {
-						$_egs_totalBrutoOrden = isset($_POST["costoTotalDeOrden"]) ? floatval($_POST["costoTotalDeOrden"]) : 0;
-					}
-
-					if ($_egs_totalBrutoOrden > 0 && $_egs_montoCanjeOrden > $_egs_totalBrutoOrden) {
-						$_egs_montoCanjeOrden = $_egs_totalBrutoOrden;
-					}
-
-					if ($_egs_montoCanjeOrden > 0 && $_egs_idClienteOrden > 0) {
-						try {
-							require_once __DIR__ . "/recompensas.controlador.php";
-							require_once __DIR__ . "/../modelos/recompensas.modelo.php";
-
-							$_egs_totalNetoOrden = max(0, $_egs_totalBrutoOrden - $_egs_montoCanjeOrden);
-							$_egs_idEmpresa      = isset($_SESSION["empresa"]) ? intval($_SESSION["empresa"]) : null;
-							$_egs_idUsuario      = isset($_SESSION["id"])      ? intval($_SESSION["id"])      : null;
-
-							$_egs_canjeResult = ControladorRecompensas::ctrCanjearEnOrden(
-								$_egs_idClienteOrden,
-								intval($datos["idOrden"]),
-								$_egs_montoCanjeOrden,
-								$_egs_idEmpresa,
-								$_egs_idUsuario,
-								$_egs_totalBrutoOrden,
-								$_egs_totalNetoOrden
-							);
-
-							if ($_egs_canjeResult !== false) {
-								ModeloOrdenes::mdlGuardarCanjeMonederoOrden(
-									intval($datos["idOrden"]),
-									$_egs_totalBrutoOrden,
-									$_egs_montoCanjeOrden,
-									$_egs_totalNetoOrden
-								);
-							}
-						} catch (Exception $e) {
-							// No bloquear la entrega si falla el canje
-						}
-					}
-
-				}
-
-
-
 				$actualizadPedido = ModeloOrdenes::mdlEditarPedidoEnOrden("pedidos", $datosOrden);
                 if ($actualizadPedido !== 'ok') return 'No se pudo guardar el estado del pedido. La orden no se actualizó; revisa el pedido y vuelve a intentar.';
 
@@ -1258,7 +1184,20 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				$respuesta = ModeloOrdenes::mdlEditarOrden("ordenes", $datosOrden);
+                try {
+                    require_once __DIR__ . '/../modelos/monedero.persistencia.php';
+                    $monto = $_POST['montoCanjeMonederoOrden'] ?? '0';
+                    if (MonederoPersistencia::esEntrega($datosOrden['estado']) || MonederoPersistencia::esEntrega($_egs_estadoAnterior) || (string)$monto !== '0') {
+                        MonederoPersistencia::guardarOrden($datosOrden['id'], $datosOrden['estado'], $datosOrden['totalOrdenEditar'], $monto,
+                            function () use ($datosOrden) { return ModeloOrdenes::mdlEditarOrden('ordenes', $datosOrden); }, $datosOrden['idCliente']);
+                        $respuesta = 'ok';
+                    } else {
+                        $respuesta = ModeloOrdenes::mdlEditarOrden('ordenes', $datosOrden);
+                    }
+                } catch (Throwable $e) {
+                    error_log('Entrega/monedero orden: ' . $e->getMessage());
+                    return $e instanceof PDOException ? 'No se pudo confirmar la entrega y el consumo. No se aplicaron cambios. Avisa a soporte.' : $e->getMessage();
+                }
 
 				// ── Notificación de cambio de estado ──
 				if (
@@ -2416,6 +2355,8 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 	function ctrEditarObservacionesYaExistentes()
 	{
+        // El formulario completo las guarda dentro de la misma transacción que la entrega.
+        if (isset($_POST['listatOrdenes'])) return;
 
 
 
@@ -2631,6 +2572,8 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 	public function ctrEditarInversiones()
 	{
+        // Evita un segundo UPDATE que marque entregada la orden tras fallar el canje.
+        if (isset($_POST['listatOrdenes'])) return;
 
 
 
@@ -3863,174 +3806,45 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			if (
-				$datosOrdenDinamica["estado"] == "Entregado (Ent)"
-				&& $_egs_dyn_estadoAnt !== ''
-				&& $_egs_dyn_estadoAnt !== "Entregado (Ent)"
-			) {
-
-
-
-				date_default_timezone_set("America/Mexico_City");
-
-
-
-				$fecha = date('Y-m-d H:i:s');
-
-
-
-				$fechaActual = $fecha;
-
-
-
-				$tabla = "ordenes";
-
-
-
-				$datosOrdenDinamicaFecha = array(
-
-					"id" => $_POST["idOrden"],
-
-					"asesor" => $_POST["asesorEditadoEnOrdenDianmica"],
-
-					"tecnico" => $_POST["tecnicoEditadoEnOrdenDianmica"],
-
-					"tecnicodos" => isset($_POST["tecnicodosEditadoEnOrdenDianmica"]) ? intval($_POST["tecnicodosEditadoEnOrdenDianmica"]) : 0,
-
-					"estado" => "Entregado (Ent)",
-
-					"partidaUno" => $_POST["partidaUno"],
-
-					"precioUno" => $_POST["precioUno"],
-
-					"partidaDos" => $_POST["partidaDos"],
-
-					"precioDos" => $_POST["precioDos"],
-
-					"partidaTres" => $_POST["partidaTres"],
-
-					"precioTres" => $_POST["precioTres"],
-
-					"partidaCuatro" => $_POST["partidaCuatro"],
-
-					"precioCuatro" => $_POST["precioCuatro"],
-
-					"partidaCinco" => $_POST["partidaCinco"],
-
-					"precioCinco" => $_POST["precioCinco"],
-
-					"partidaSeis" => $_POST["partidaSeis"],
-
-					"precioSeis" => $_POST["precioSeis"],
-
-					"partidaSiete" => $_POST["partidaSiete"],
-
-					"precioSiete" => $_POST["precioSiete"],
-
-					"partidaOcho" => $_POST["partidaOcho"],
-
-					"precioOcho" => $_POST["precioOcho"],
-
-					"partidaNueve" => $_POST["partidaNueve"],
-
-					"precioNueve" => $_POST["precioNueve"],
-
-					"partidaDiez" => $_POST["partidaDiez"],
-
-					"precioDiez" => $_POST["precioDiez"],
-
-					"listatOrdenes" => $_POST["listatOrdenes"],
-
-					"costoTotalDeOrden" => $_POST["costoTotalDeOrden"],
-
-					"listatOrdenesNuevas" => $_POST["listatOrdenesNuevas"],
-
-					"listarinversiones" => isset($_POST["listarinversiones"]) ? $_POST["listarinversiones"] : '',
-
-					"totalInversiones" => isset($_POST["totalInversiones"]) ? $_POST["totalInversiones"] : 0,
-
-					"fecha_Salida" => $fechaActual,
-
-					"marcaDelEquipo" => isset($_POST["marcaDelEquipo"]) ? $_POST["marcaDelEquipo"] : '',
-
-					"modeloDelEquipo" => isset($_POST["modeloDelEquipo"]) ? $_POST["modeloDelEquipo"] : '',
-
-					"numeroDeSerieDelEquipo" => isset($_POST["numeroDeSerieDelEquipo"]) ? $_POST["numeroDeSerieDelEquipo"] : ''
-
-				);
-
-
-
-
-
-				$respuestaUno = ModeloOrdenes::mdlActualizarFechaSalida(
-					$tabla,
-					intval($_POST["idOrden"]),
-					$fechaActual
-				);
-
-
-
-				echo '<!-- notifications-push -->	
-
-
-
-
-
-									<script>
-
-
-
-										Push.create("ENTREGADA",{
-
-
-
-											body:"ORDEN: ' . $_POST["idOrden"] . '",
-
-											icon:"' . $_SESSION["foto"] . '",
-
-											timeout:10000,
-
-											onClick: function(){
-
-												window.location="index.php?ruta=inicio";
-
-												this.close();
-
-											}
-
-
-
-											});
-
-									</script>';
-
-				// ── Recompensas: canjear dinero electrónico si se solicitó ──
-				// (la acumulación es dinámica, no requiere registro)
-				try {
-					$_egs_idClienteRecomp = isset($_egs_dyn_idCliente) ? $_egs_dyn_idCliente : 0;
-					$_egs_idOrdenRecomp = intval($_POST["idOrden"]);
-					$_egs_montoCanje = isset($_POST["montoCanjeElectronico"]) ? floatval($_POST["montoCanjeElectronico"]) : 0;
-
-					if ($_egs_montoCanje > 0 && $_egs_idClienteRecomp > 0) {
-						ControladorRecompensas::ctrCanjearRecompensa(
-							$_egs_idClienteRecomp,
-							$_egs_idOrdenRecomp,
-							$_egs_montoCanje
-						);
-					}
-				} catch (Exception $e) { /* no romper flujo */ }
-
-
-			}
-
-
-
-			$respuesta = ModeloOrdenes::mdlEditarOrdenDinamica($tabla, $datosOrdenDinamica);
+            try {
+                require_once __DIR__ . '/../modelos/monedero.persistencia.php';
+                $monto = $_POST['montoCanjeMonederoOrden'] ?? $_POST['montoCanjeElectronico'] ?? '0';
+                if (MonederoPersistencia::esEntrega($datosOrdenDinamica['estado']) || MonederoPersistencia::esEntrega($_egs_dyn_estadoAnt) || (string)$monto !== '0') {
+                    $_egs_guardadoMonedero = MonederoPersistencia::guardarOrden(
+                        $datosOrdenDinamica['id'], $datosOrdenDinamica['estado'], $datosOrdenDinamica['costoTotalDeOrden'], $monto,
+                        function () use ($tabla, $datosOrdenDinamica) {
+                            $guardado = ModeloOrdenes::mdlEditarOrdenDinamica($tabla, $datosOrdenDinamica);
+                            if ($guardado === 'ok' && isset($_POST['observaciones'])) {
+                                $guardado = ModeloOrdenes::mdlEditarObservacionesYaExistentes($tabla, [
+                                    'id' => $datosOrdenDinamica['id'], 'observaciones' => $_POST['observaciones'],
+                                    'listarObservaciones' => $_POST['listarObservaciones'] ?? '[]'
+                                ]);
+                            }
+                            return $guardado;
+                        },
+                        $_POST['idClienteOrden'] ?? null
+                    );
+                    $respuesta = 'ok';
+                } else {
+                    $respuesta = ModeloOrdenes::mdlEditarOrdenDinamica($tabla, $datosOrdenDinamica);
+                    if ($respuesta === 'ok' && isset($_POST['observaciones'])) {
+                        $respuesta = ModeloOrdenes::mdlEditarObservacionesYaExistentes($tabla, [
+                            'id' => $datosOrdenDinamica['id'], 'observaciones' => $_POST['observaciones'],
+                            'listarObservaciones' => $_POST['listarObservaciones'] ?? '[]'
+                        ]);
+                    }
+                }
+            } catch (Throwable $e) {
+                error_log('Entrega/monedero orden: ' . $e->getMessage());
+                $mensaje = $e instanceof PDOException
+                    ? 'No se pudo confirmar la entrega y el consumo. No se aplicaron cambios. Avisa a soporte.' : $e->getMessage();
+                echo '<script>swal({type:"error",title:"No se guardó la entrega",text:' . json_encode($mensaje, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . '});</script>';
+                return;
+            }
 
 			// ── Notificaciones de cambio de estado (dinámica) ──
 			if (
-				$respuesta == "ok" && !empty($_egs_dyn_estadoAnt)
+				$respuesta == "ok" && empty($_egs_guardadoMonedero['reintento']) && !empty($_egs_dyn_estadoAnt)
 				&& $_egs_dyn_estadoAnt !== $_POST["estado"]
 			) {
 				try {
@@ -4068,7 +3882,7 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 			// ── Notificación de traspaso de técnico (dinámica) ──
 			if (
-				$respuesta == "ok" && $_egs_dyn_tecnicoAnt > 0
+				$respuesta == "ok" && empty($_egs_guardadoMonedero['reintento']) && $_egs_dyn_tecnicoAnt > 0
 				&& $_egs_dyn_tecnicoAnt !== intval($_POST["tecnicoEditadoEnOrdenDianmica"])
 				&& intval($_POST["tecnicoEditadoEnOrdenDianmica"]) > 0
 			) {
@@ -4104,6 +3918,12 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 			}
 
 			if ($respuesta == "ok") {
+                $textoMonedero = '';
+                if (!empty($_egs_guardadoMonedero['movimiento'])) {
+                    $mov = $_egs_guardadoMonedero['movimiento'];
+                    $textoMonedero = 'Monedero aplicado: $' . number_format(abs((float)$mov['monto']), 2)
+                        . '. Total a cobrar: $' . number_format((float)$mov['origen_total_neto'], 2) . '.';
+                }
 
 
 
@@ -4124,6 +3944,7 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 						type: "success",
 
 						title: "¡La orden se ha guardado correctamente!",
+                        text: ' . json_encode($textoMonedero, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ',
 
 						showConfirmButton: true,
 
