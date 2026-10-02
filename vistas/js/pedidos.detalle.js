@@ -257,8 +257,8 @@ que los alteren.
         pending = null;
         $('#pedNewObsText').val('');
         draft.clear();
-        return swal({type: 'success', title: '¡El pedido se ha guardado correctamente!', confirmButtonText: 'Cerrar'})
-          .then(function () { window.location.reload(); });
+        return swal({type: 'success', title: '¡El pedido se ha guardado correctamente!', confirmButtonText: 'Volver a pedidos'})
+          .then(function () { window.location.href = 'index.php?ruta=pedidos'; });
       }) : addObservation().then(function (added) {
           return swal(added
             ? {type: 'success', title: '¡Observación guardada!', confirmButtonText: 'Cerrar'}
