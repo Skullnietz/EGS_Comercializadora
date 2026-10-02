@@ -418,14 +418,23 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
   $item = "id";
   $valor = $_GET["idPedido"];
   $pedidos = ControladorPedidos::ctrMostrarorpedidosParaValidar($item, $valor);
+  if (!$pedidos) {
+    echo '<div class="content-wrapper"><div class="alert alert-warning">El pedido ya no existe.</div></div>';
+    return;
+  }
   foreach ($pedidos as $key => $valuePedidos) {}
+  try { PedidosPersistencia::autorizar($valuePedidos); }
+  catch (RuntimeException $e) {
+    echo '<div class="content-wrapper"><div class="alert alert-warning">'.htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8').'</div></div>';
+    return;
+  }
 
   $item = "id";
-  $valor = $_GET["cliente"];
+  $valor = $valuePedidos['id_cliente'];
   $usuario = ControladorClientes::ctrMostrarClientesOrdenes($item, $valor);
 
   $item = "id";
-  $valor = $_GET["asesor"];
+  $valor = $valuePedidos['id_Asesor'];
   $asesor = Controladorasesores::ctrMostrarAsesoresEleg($item, $valor);
 
   $itemOrdenes = "id";
@@ -494,7 +503,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
   function pedTexto($valor) {
     return is_scalar($valor) ? htmlspecialchars((string)$valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : '';
   }
-  $historialClienteLink = 'index.php?ruta=Historialdecliente&idCliente='.(isset($_GET["cliente"]) ? intval($_GET["cliente"]) : 0)
+  $historialClienteLink = 'index.php?ruta=Historialdecliente&idCliente='.(int)$valuePedidos['id_cliente']
     .'&nombreCliente='.(isset($usuario["nombre"]) ? urlencode($usuario["nombre"]) : 'Cliente');
 ?>
 
@@ -527,7 +536,7 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
       </div>
     </div>
 
-    <form role="form" method="post" id="pedidoDetalleForm" novalidate data-pagado="<?php echo $pagadoPedido; ?>"<?php echo $puedeEditarPedidoCompleto ? ' data-finanzas="1"' : ''; ?>>
+    <form role="form" method="post" id="pedidoDetalleForm" onsubmit="return false;" novalidate data-usuario="<?php echo pedTexto((string)($_SESSION['id'] ?? $_SESSION['nombre'] ?? '') . ':' . (string)($_SESSION['empresa'] ?? '')); ?>" data-pagado="<?php echo $pagadoPedido; ?>"<?php echo $puedeEditarPedidoCompleto ? ' data-finanzas="1"' : ''; ?>>
       <input type="hidden" name="idPedido" value="<?php echo (int)$valuePedidos["id"]; ?>">
       <input type="hidden" name="versionPedido" value="<?php echo PedidosPersistencia::version($valuePedidos); ?>">
 
@@ -992,4 +1001,5 @@ if($_SESSION["perfil"] != "administrador" AND $_SESSION["perfil"]!= "vendedor" A
   ?>
 </div>
 
+<script src="vistas/js/pedidos.guardado.js?v=<?php echo filemtime(__DIR__ . '/../js/pedidos.guardado.js'); ?>"></script>
 <script src="vistas/js/pedidos.detalle.js?v=<?php echo filemtime(__DIR__ . '/../js/pedidos.detalle.js'); ?>"></script>

@@ -207,7 +207,8 @@ class ControladorPedidos{
 			$datos = $_GET["idpedido"];
 
 
-			$respuesta = ModeloPedidos::mdlEliminarPedido("pedidos", $datos);
+            try { $respuesta = ModeloPedidos::mdlEliminarPedido("pedidos", $datos); }
+            catch (Throwable $e) { self::ctrErrorPedido($e); return; }
 
 			if($respuesta == "ok"){
 

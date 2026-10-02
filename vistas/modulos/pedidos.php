@@ -1060,7 +1060,7 @@ MODAL AGREGAR PEDIDO
 ======================================-->
 <div id="modalAgregarPedido" class="modal fade" role="dialog"> 
 
-  <form role="form" method="post" class="formularioPedidosDinamicos">
+  <form role="form" method="post" onsubmit="return false;" class="formularioPedidosDinamicos" id="pedidoNuevoForm" data-usuario="<?php echo htmlspecialchars((string)($_SESSION['id'] ?? $_SESSION['nombre'] ?? '') . ':' . (string)($_SESSION['empresa'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
   
     <div class="modal-dialog modal-lg">
       
@@ -1132,7 +1132,7 @@ MODAL AGREGAR PEDIDO
                   <label class="pm-field-label">Pago del Cliente</label>
                   <div class="input-group">
                     <span class="input-group-addon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-                    <input type="number" class="form-control PagoClientePedidoDinamico">
+                    <input type="number" min="0" step="0.01" class="form-control PagoClientePedidoDinamico">
                   </div>
                 </div>
                 <div class="pm-col">
@@ -1207,10 +1207,7 @@ MODAL AGREGAR PEDIDO
       </div>
     </div>
 
-    <?php
-      $crearPedido = new controladorOrdenes();
-      $crearPedido -> ctrAgregarPedidoEnOrden();
-    ?>
+    <?php if (isset($_POST['ProductosPedidoListados'])) ControladorPedidos::ctrAvisoPedido('error', 'No se guardó el pedido', 'El formulario debe guardar sin salir de la página. Recarga para cargar el guardado seguro.'); ?>
 
   </form>
 
@@ -1302,7 +1299,7 @@ MODAL CONFIGURACIÓN MERCADOLIBRE
 /*=============================================
 SERIALIZAR PRODUCTOS ANTES DE ENVIAR EL FORMULARIO
 =============================================*/
-$(".formularioPedidosDinamicos").on("submit", function(){
+$("#pedidoNuevoForm").on("submit", function(){
   if(typeof listarProductosPedidos === "function"){
     listarProductosPedidos();
   }

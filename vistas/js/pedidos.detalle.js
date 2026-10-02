@@ -20,10 +20,18 @@ que los alteren.
     var busy = 0;
     var saving = false;
     var dirty = false;
+    var pending = null;
+    var observationPending = false;
+    var restoring = false;
+    var guardado = window.PedidosGuardado;
+    var draft = guardado.drafts($form.attr('data-usuario') + ':detalle:' + idPedido);
+    var lastDraft = null;
+    var draftTools = guardado.recovery($form.find('.ped-observation-status').parent(), function () { return lastDraft; },
+      function () { return !saving && !busy && !pending && !observationPending; }, function () { dirty = false; nuevosPagos = []; $('#pedNuevoAbonoMonto, #pedNewObsText').val(''); draft.clear(); window.location.reload(); });
 
     function money(n) { return Math.round((Number(n) + Number.EPSILON) * 100) / 100; }
     function currency(n) { return '$' + money(n).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
-    function ref() { return (Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(0, 24); }
+    function ref() { return guardado.ref(); }
     function badInput(input) { return !!(input && input.validity && input.validity.badInput); }
     function error(message, title) {
       return swal({type: 'error', title: title || 'No se guardaron los cambios', text: message, confirmButtonText: 'Cerrar'});
@@ -31,20 +39,30 @@ que los alteren.
     function request(data) {
       data.idPedido = idPedido;
       busy++;
-      return new Promise(function (resolve, reject) {
-        $.ajax({url: 'ajax/pedidos.ajax.php', method: 'POST', data: data, dataType: 'json', cache: false})
-          .done(function (r) {
-            if (r && r.ok) resolve(r);
-            else reject(new Error((r && r.mensaje) || 'El servidor no confirmó el guardado.'));
-          })
-          .fail(function (xhr) {
-            var r = xhr.responseJSON;
-            if (r && r.mensaje) reject(new Error(r.mensaje));
-            else if (!xhr.status) reject(new Error('No hubo respuesta del servidor. Revisa tu conexión y vuelve a intentar; lo capturado sigue en la página.'));
-            else reject(new Error('El servidor respondió con un error (HTTP ' + xhr.status + ') y no confirmó el guardado. Vuelve a intentar; si se repite, avisa a soporte con este código.'));
-          })
-          .always(function () { busy--; });
+      return guardado.request(data).then(function (r) { busy--; return r; }, function (e) { busy--; throw e; });
+    }
+
+    function saveDraft() {
+      if (restoring) return;
+      var products = [];
+      $form.find('.ped-dynamic-product[data-editado]').each(function () {
+        var $row = $(this);
+        products.push({indice: Number($row.attr('data-indice')), Descripcion: $row.find('.ped-prod-descripcion').val(), cantidad: $row.find('.ped-prod-cantidad').val(), precioUnitario: $row.find('.ped-prod-precio').val()});
       });
+      if (!dirty && !pending && !observationPending && !nuevosPagos.length && !$('#pedNuevoAbonoMonto').val() && !$('#pedNewObsText').val()) { draft.clear(); lastDraft = null; draftTools(false); return; }
+      lastDraft = {version: $form.find('[name=versionPedido]').val(), total: $total.val(), estado: $form.find('[name=estado]').val(), productos: products,
+        pagos: nuevosPagos, monto: $('#pedNuevoAbonoMonto').val(), fecha: $('#pedNuevoAbonoFecha').val(), observacion: $('#pedNewObsText').val(), obsRef: obsRef,
+        observationPending: observationPending, pending: pending, dirty: dirty};
+      draftTools(true);
+      if (!draft.write(lastDraft)) {
+        status('El navegador no permitió guardar una copia de recuperación. Mantén esta página abierta hasta confirmar el guardado.');
+      }
+    }
+    function lockFields(lock) {
+      $form.find('.ped-dynamic-product input, [name=total], [name=estado], #pedNewPaymentForm input, #pedNewObsText').prop('disabled', lock);
+      $form.find('button').prop('disabled', lock);
+      // Ante una respuesta incierta solo se permite reintentar el contenido original.
+      if (lock && !saving) $form.find('button[type=submit]').prop('disabled', false);
     }
 
     /* ---------- Totales ---------- */
@@ -97,6 +115,7 @@ que los alteren.
       $amount.val('');
       dirty = true;
       summary();
+      saveDraft();
       return true;
     }
     $form.on('click', '.btnToggleNewPayment', function () { $('#pedNewPaymentForm').toggleClass('active'); });
@@ -111,7 +130,9 @@ que los alteren.
       var index = nuevosPagos.indexOf($row.data('pago'));
       if (index >= 0) nuevosPagos.splice(index, 1);
       $row.remove();
+      dirty = true;
       summary();
+      saveDraft();
     });
 
     /* ---------- Observaciones: se guardan al agregarlas ---------- */
@@ -130,6 +151,7 @@ que los alteren.
       $item.find('.ped-obs-date').text(obs.fecha);
       $item.find('.ped-obs-content').text(obs.observacion);
       $item.data('observacion', obs);
+      $item.attr('data-ref', obs.ref || '');
       $form.find('.ped-obs-list').prepend($item);
       $('#pedObsEmpty').remove();
       updateCount();
@@ -140,37 +162,48 @@ que los alteren.
       if (!text) return Promise.resolve(false);
       var $button = $form.find('.btnAgregarObservacionInfoPedido');
       obsRef = obsRef || ref();
+      observationPending = true;
+      saveDraft();
       $input.prop('readonly', true);
       $button.prop('disabled', true);
       status('Guardando observación…');
       return request({accionPedido: 'agregarObservacion', observacion: text, ref: obsRef}).then(function (r) {
-        renderObservation(r.observacion);
+        var exists = false;
+        $form.find('.ped-obs-item').each(function () { if ($(this).attr('data-ref') === r.observacion.ref) exists = true; });
+        if (!exists) renderObservation(r.observacion);
         $input.val('');
         obsRef = null;
+        observationPending = false;
+        saveDraft();
         status('Observación guardada');
         return true;
       }, function (e) {
-        status('La observación no se guardó');
+        observationPending = !!e.uncertain;
+        saveDraft();
+        status(e.uncertain ? 'Guardado sin confirmar. Presiona Agregar para recuperar el resultado.' : 'La observación no se guardó');
         throw e;
       }).then(function (added) {
-        $input.prop('readonly', false);
+        $input.prop('readonly', observationPending);
         $button.prop('disabled', false);
         return added;
       }, function (e) {
-        $input.prop('readonly', false);
+        $input.prop('readonly', observationPending);
         $button.prop('disabled', false);
         throw e;
       });
     }
-    $('#pedNewObsText').on('input', function () { obsRef = null; });
+    $('#pedNewObsText').on('input', function () { if (!observationPending) obsRef = null; saveDraft(); });
     $form.on('click', '.btnAgregarObservacionInfoPedido', function () {
-      if (!$.trim($('#pedNewObsText').val() || '')) return;
+      if (busy || saving || pending || !$.trim($('#pedNewObsText').val() || '')) return;
       addObservation().catch(function (e) { error(e.message, 'No se guardó la observación'); });
     });
     $form.on('click', '.ped-remove-observation', function () {
+      if (busy || saving || pending) return;
       var $button = $(this).prop('disabled', true);
       var $item = $button.closest('.ped-obs-item');
-      request({accionPedido: 'quitarObservacion', observacion: JSON.stringify($item.data('observacion'))}).then(function () {
+      var removeRef = $item.data('removeRef') || ref();
+      $item.data('removeRef', removeRef);
+      request({accionPedido: 'quitarObservacion', observacion: JSON.stringify($item.data('observacion')), ref: removeRef}).then(function () {
         $item.remove();
         updateCount();
         status('Observación quitada');
@@ -199,39 +232,52 @@ que los alteren.
         estado: $form.find('[name=estado]').val() || '',
         total: $total.val(),
         productos: JSON.stringify(productos),
-        pagos: JSON.stringify(nuevosPagos)
+        pagos: JSON.stringify(nuevosPagos),
+        observacion: $.trim($('#pedNewObsText').val() || ''),
+        solicitud: ref()
       };
     }
     $form.on('submit', function (event) {
       event.preventDefault();
-      if (saving) return;
+      if (saving || busy) return;
       var data = null;
       try {
         if (finanzas) {
-          addPayment();
-          data = collect();
+          if (observationPending) { error('Primero presiona Agregar para confirmar la observación pendiente.'); return; }
+          if (!pending) { addPayment(); pending = collect(); }
+          data = pending;
         }
       } catch (e) { error(e.message); return; }
       saving = true;
-      var $buttons = $form.find('button').prop('disabled', true);
-      addObservation().then(function (added) {
-        if (!data) {
+      saveDraft();
+      lockFields(true);
+      var operation = data ? request(data).then(function () {
+        dirty = false;
+        nuevosPagos = [];
+        pending = null;
+        $('#pedNewObsText').val('');
+        draft.clear();
+        return swal({type: 'success', title: '¡El pedido se ha guardado correctamente!', confirmButtonText: 'Cerrar'})
+          .then(function () { window.location.reload(); });
+      }) : addObservation().then(function (added) {
           return swal(added
             ? {type: 'success', title: '¡Observación guardada!', confirmButtonText: 'Cerrar'}
             : {type: 'info', title: 'No hay observaciones pendientes', text: 'Escribe una observación; se guarda al presionar «Agregar».', confirmButtonText: 'Cerrar'});
-        }
-        return request(data).then(function () {
-          dirty = false;
-          nuevosPagos = [];
-          return swal({type: 'success', title: '¡El pedido se ha guardado correctamente!', confirmButtonText: 'Cerrar'})
-            .then(function () { window.location.reload(); });
-        });
-      }).catch(function (e) { error(e.message); }).then(function () {
+      });
+      operation.catch(function (e) {
+        if (!e.uncertain) pending = null;
+        saveDraft();
+        error(e.message);
+      }).then(function () {
         saving = false;
-        $buttons.prop('disabled', false);
+        lockFields(!!pending);
+        $('#pedNewObsText').prop('readonly', observationPending);
+        draftTools(!!lastDraft);
       });
     });
+    $form.on('input change', 'input, select, textarea', saveDraft);
     window.addEventListener('beforeunload', function (e) {
+      saveDraft();
       if (dirty || busy > 0 || nuevosPagos.length || $('#pedNuevoAbonoMonto').val() || $.trim($('#pedNewObsText').val() || '')) {
         e.preventDefault();
         e.returnValue = '';
@@ -239,6 +285,42 @@ que los alteren.
     });
 
     /* ---------- Inicio ---------- */
+    var recovered = draft.read();
+    if (recovered) {
+      restoring = true;
+      var changedVersion = $form.find('[name=versionPedido]').val() !== recovered.version;
+      pending = recovered.pending || null;
+      observationPending = !!recovered.observationPending;
+      dirty = !!recovered.dirty;
+      $form.find('[name=versionPedido]').val(recovered.version);
+      $total.val(recovered.total);
+      $form.find('[name=estado]').val(recovered.estado);
+      (recovered.productos || []).forEach(function (p) {
+        var $row = $form.find('.ped-dynamic-product[data-indice="' + Number(p.indice) + '"]');
+        $row.find('.ped-prod-descripcion').val(p.Descripcion);
+        $row.find('.ped-prod-cantidad').val(p.cantidad);
+        $row.find('.ped-prod-precio').val(p.precioUnitario);
+        var subtotal = money(Number(p.cantidad) * Number(p.precioUnitario));
+        $row.attr({'data-editado': '1', 'data-actual': subtotal});
+        $row.find('.ped-line-subtotal').text(currency(subtotal));
+      });
+      (recovered.pagos || []).forEach(function (p) {
+        $('#pedNuevoAbonoMonto').val(p.pago);
+        $('#pedNuevoAbonoFecha').val(p.fecha);
+        addPayment();
+        nuevosPagos[nuevosPagos.length - 1].ref = p.ref;
+      });
+      $('#pedNuevoAbonoMonto').val(recovered.monto);
+      $('#pedNuevoAbonoFecha').val(recovered.fecha);
+      $('#pedNewObsText').val(recovered.observacion).prop('readonly', observationPending);
+      obsRef = recovered.obsRef;
+      lockFields(!!pending);
+      status(pending ? 'Se recuperó un guardado sin confirmar. Presiona Guardar para obtener su resultado.' : changedVersion
+        ? 'El pedido cambió desde tu captura. Descarga el borrador para conservarlo; después descártalo y vuelve a capturar sobre el pedido actual.'
+        : 'Se recuperaron cambios pendientes de esta pestaña.');
+      restoring = false;
+      saveDraft();
+    }
     summary();
 
     var ordenChoices = null;

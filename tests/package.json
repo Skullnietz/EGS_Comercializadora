@@ -1,0 +1,6 @@
+{
+  "name": "egs-pedidos-regresion",
+  "private": true,
+  "scripts": {"test": "node pedidos.frontend.cjs", "test:ajax": "node pedidos.ajax.cjs"},
+  "devDependencies": {"jquery": "3.6.0", "jsdom": "26.1.0"}
+}

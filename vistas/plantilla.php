@@ -344,6 +344,10 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
   <?php if ($rutaActual !== "infopedido"): /* el detalle usa pedidos.detalle.js; este registraría cálculos duplicados */ ?>
   <script src="vistas/js/gestor.pedidos.js?v=<?= $jsVer ?>"></script>
   <?php endif; ?>
+  <?php if ($rutaActual === 'pedidos'): ?>
+  <script src="vistas/js/pedidos.guardado.js?v=<?= filemtime(__DIR__ . '/js/pedidos.guardado.js') ?>"></script>
+  <script src="vistas/js/pedidos.nuevo.js?v=<?= filemtime(__DIR__ . '/js/pedidos.nuevo.js') ?>"></script>
+  <?php endif; ?>
   <script src="vistas/js/gestor.comisiones.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestor.crm.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/almacenes.js?v=<?= $jsVer ?>"></script>

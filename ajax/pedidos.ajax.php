@@ -23,16 +23,29 @@ if (isset($_POST['accionPedido'])) {
     try {
         $id = $_POST['idPedido'] ?? 0;
         $respuesta = [];
+        if (in_array($_POST['accionPedido'], ['crear', 'guardar'], true) && empty($_POST['solicitud'])) {
+            throw new InvalidArgumentException('Esta página no incluye el identificador de guardado. Recarga antes de capturar cambios.');
+        }
         switch ($_POST['accionPedido']) {
+            case 'crear':
+                $entrada = [
+                    'empresa' => ($_SESSION['perfil'] ?? '') === 'Super-Administrador' ? ($_POST['empresa'] ?? 0) : ($_SESSION['empresa'] ?? 0),
+                    'asesor' => $_POST['asesor'] ?? 0, 'cliente' => $_POST['cliente'] ?? 0,
+                    'productos' => $_POST['productos'] ?? '', 'estado' => $_POST['estado'] ?? '',
+                    'pago' => $_POST['pago'] ?? '[]', 'id_orden' => $_POST['id_orden'] ?? 0
+                ];
+                $pedido = PedidosPersistencia::crearPedido($entrada, $_POST['solicitud']);
+                $respuesta = ['id' => (int)$pedido['id'], 'version' => PedidosPersistencia::version($pedido)];
+                break;
             case 'guardar':
-                $entrada = ['estado' => $_POST['estado'] ?? '', 'total' => $_POST['total'] ?? '', 'productos' => $_POST['productos'] ?? '', 'pagos' => $_POST['pagos'] ?? ''];
-                $respuesta['version'] = PedidosPersistencia::version(PedidosPersistencia::guardar($id, $entrada, $_POST['versionPedido'] ?? ''));
+                $entrada = ['estado' => $_POST['estado'] ?? '', 'total' => $_POST['total'] ?? '', 'productos' => $_POST['productos'] ?? '', 'pagos' => $_POST['pagos'] ?? '', 'observacion' => $_POST['observacion'] ?? ''];
+                $respuesta['version'] = PedidosPersistencia::version(PedidosPersistencia::guardar($id, $entrada, $_POST['versionPedido'] ?? '', $_POST['solicitud']));
                 break;
             case 'agregarObservacion':
                 $respuesta['observacion'] = PedidosPersistencia::agregarObservacion($id, $_POST['observacion'] ?? '', $_POST['ref'] ?? null);
                 break;
             case 'quitarObservacion':
-                PedidosPersistencia::quitarObservacion($id, json_decode($_POST['observacion'] ?? '', true));
+                PedidosPersistencia::quitarObservacion($id, json_decode($_POST['observacion'] ?? '', true), $_POST['ref'] ?? null);
                 break;
             default:
                 throw new InvalidArgumentException('La acción no es válida. Recarga la página.');
@@ -60,7 +73,7 @@ if (isset($_POST['accionPedido'])) {
 }
 
 /* Pestañas abiertas antes de esta versión: sus datos ya no son compatibles. */
-if (isset($_POST['guardarPedidoDetalle']) || isset($_POST['idPedidoDinamicoAjax'])) {
+if (isset($_POST['guardarPedidoDetalle']) || isset($_POST['idPedidoDinamicoAjax']) || isset($_POST['empresaPedido']) || isset($_POST['id'])) {
     http_response_code(409);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['ok' => false, 'mensaje' => 'Esta página es de una versión anterior y no puede guardar. Recarga la página (F5) y vuelve a capturar tus cambios.']);

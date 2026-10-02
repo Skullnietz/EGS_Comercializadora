@@ -1252,6 +1252,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 				$actualizadPedido = ModeloOrdenes::mdlEditarPedidoEnOrden("pedidos", $datosOrden);
+                if ($actualizadPedido !== 'ok') return 'No se pudo guardar el estado del pedido. La orden no se actualizó; revisa el pedido y vuelve a intentar.';
 
 
 
@@ -2741,6 +2742,10 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 	public function ctrAgregarPedidoEnOrden(){
         if (!isset($_POST['ProductosPedidoListados'])) return;
+        if (empty($_POST['solicitudPedido'])) {
+            ControladorPedidos::ctrAvisoPedido('error', 'No se guardó el pedido', 'Recarga la pantalla de pedidos para usar el guardado seguro.');
+            return;
+        }
         try {
             ModeloOrdenes::mdlIngresarPedidoDinamico('pedidos', [
                 'empresa' => ($_SESSION['perfil'] ?? '') === 'Super-Administrador' ? ($_POST['empresaPedioDinamico'] ?? 0) : ($_SESSION['empresa'] ?? 0),
@@ -2749,7 +2754,8 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
                 'productos' => $_POST['ProductosPedidoListados'],
                 'estado' => $_POST['EstadoPedidoDinamico'] ?? '',
                 'pago' => $_POST['PrimerPagolistado'] ?? '[]',
-                'id_orden' => $_POST['seleccionarOrdenPedidoDinamico'] ?? 0
+                'id_orden' => $_POST['seleccionarOrdenPedidoDinamico'] ?? 0,
+                'solicitud' => $_POST['solicitudPedido']
             ]);
             ControladorPedidos::ctrAvisoPedido('success', '¡El pedido se ha guardado correctamente!', '', 'index.php?ruta=pedidos');
         } catch (Throwable $e) { ControladorPedidos::ctrErrorPedido($e); }
