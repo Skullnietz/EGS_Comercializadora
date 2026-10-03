@@ -399,17 +399,42 @@ $_wa_tecnicoNombre = isset($_wa_tecnico["nombre"]) ? $_wa_tecnico["nombre"] : ""
 $_wa_total = number_format(floatval($value["total"] ?? 0), 2);
 $_wa_btns = array(); // cada elemento: ['label'=>'...','url'=>'...']
 
-// Link del portal del cliente (token del monedero) — botón disponible siempre
+// Link idéntico al QR del ticket. Se comparte solo en momentos donde el portal
+// aporta seguimiento útil: recepción/diagnóstico, reparación autorizada y recolección.
+$_portal_estados_recomendados = array(
+    'En revisión (REV)',
+    'Aceptado (ok)',
+    'Terminada (ter)'
+);
+$_portal_recomendado = in_array($estado, $_portal_estados_recomendados, true);
 $_portal_link = "";
-if ($_wa_phone !== "" && !empty($_GET["cliente"])) {
+$_portal_suffix = "";
+if ($_wa_phone !== "" && ($isAdmin || $isVendedor) && $_portal_recomendado) {
     try {
-        $_portal_info = ControladorRecompensas::ctrObtenerInfoRecompensas(intval($_GET["cliente"]));
-        if (is_array($_portal_info) && !empty($_portal_info["token"])) {
-            $_portal_link = "https://backend.comercializadoraegs.com/?ruta=portal-cliente&token=" . $_portal_info["token"] . "&orden=" . intval($_wa_orden);
+        $_portal_token_monedero = is_array($_ord_infoRec) && !empty($_ord_infoRec["token"])
+            ? trim((string) $_ord_infoRec["token"])
+            : "";
+        $_portal_token_orden = isset($value["token_cliente"])
+            ? trim((string) $value["token_cliente"])
+            : "";
+
+        if ($_portal_token_monedero !== "") {
+            $_portal_link = "https://backend.comercializadoraegs.com/?ruta=portal-cliente&token="
+                . rawurlencode($_portal_token_monedero)
+                . "&orden=" . intval($_wa_orden);
+        } else {
+            if ($_portal_token_orden === "" && intval($_wa_orden) > 0) {
+                $_portal_token_orden = controladorOrdenes::ctrAsegurarTokenCliente(intval($_wa_orden));
+            }
+            if ($_portal_token_orden !== "") {
+                $_portal_link = "https://backend.comercializadoraegs.com/?ruta=estado-orden-cliente&token="
+                    . rawurlencode($_portal_token_orden);
+            }
         }
     } catch (Exception $e) { $_portal_link = ""; }
 }
-if ($_wa_phone !== "" && $_portal_link !== "") {
+if ($_portal_link !== "") {
+    $_portal_suffix = "\n\nPuedes dar seguimiento a tu orden desde tu Portal EGS:\n" . $_portal_link;
     $msg = "Hola, te compartimos el acceso a tu Portal EGS donde puedes ver el estado de tus equipos, tu monedero electrónico, solicitar ayuda y el aviso de privacidad:\n\n" . $_portal_link . "\n\nOrden #" . $_wa_orden;
     $_wa_btns[] = array('label' => 'WhatsApp — Portal del cliente', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
 }
@@ -419,18 +444,18 @@ if ($_wa_phone !== "") {
         $msg = 'NOS DA GUSTO INFORMARTE QUE YA TENEMOS TU PRESUPUESTO PODRÁS COMUNICARTE POR FAVOR PARA EXPLICARTE MEJOR A LOS TELÉFONOS 7222831159/7221671684/7222144416/720-3321271 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN ' . $_wa_orden . ' ASESOR *' . $_wa_asesorNombre . '* ESTE NUMERO ES SOLO PARA MENSAJES';
         $_wa_btns[] = array('label' => 'WhatsApp — Presupuesto', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
     } elseif ($estado === 'Aceptado (ok)') {
-        $msg = "Buenos días soy su asesor " . $_wa_asesorNombre . " le comparto el  monto apagar  que acepto para la reparación de su equipo \xE2\x80\x8E\n\nOrden: " . $_wa_orden . "\n\nAceptada.\n\n$ " . $_wa_total . "\n\nGracias.";
+        $msg = "Buenos días soy su asesor " . $_wa_asesorNombre . " le comparto el  monto apagar  que acepto para la reparación de su equipo \xE2\x80\x8E\n\nOrden: " . $_wa_orden . "\n\nAceptada.\n\n$ " . $_wa_total . "\n\nGracias." . $_portal_suffix;
         $_wa_btns[] = array('label' => 'WhatsApp — Aceptado', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
     } elseif ($estado === 'Terminada (ter)') {
-        $msg1 = 'BUEN DIA LE INFORMAMOS QUE SU EQUIPO YA ESTA TERMINADO OJALÁ PODAMOS CONTAR CON SU RECOLECCIÓN PARA MAYOR INFORMACIÓN 7222831159/7221671684/7222144416 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN *' . $_wa_orden . '* ASESOR *' . $_wa_asesorNombre . '* TÉCNICO *' . $_wa_tecnicoNombre . '* https://comercializadoraegs.com';
-        $msg2 = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA CONFIRMAR SU CITA HOY O MAÑANA * PARA LA RECOLECCIÓN DE SU EQUIPO GRACIAS* https://comercializadoraegs.com SI USTED YA PASO POR EL EQUIPO O TIENE CITA PROGRAMADA POR FAVOR INFORMENOS POR ESTE MEDIO GRACIAS';
+        $msg1 = 'BUEN DIA LE INFORMAMOS QUE SU EQUIPO YA ESTA TERMINADO OJALÁ PODAMOS CONTAR CON SU RECOLECCIÓN PARA MAYOR INFORMACIÓN 7222831159/7221671684/7222144416 EN UN HORARIO DE LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 GRACIAS. ORDEN *' . $_wa_orden . '* ASESOR *' . $_wa_asesorNombre . '* TÉCNICO *' . $_wa_tecnicoNombre . '* https://comercializadoraegs.com' . $_portal_suffix;
+        $msg2 = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA CONFIRMAR SU CITA HOY O MAÑANA * PARA LA RECOLECCIÓN DE SU EQUIPO GRACIAS* https://comercializadoraegs.com SI USTED YA PASO POR EL EQUIPO O TIENE CITA PROGRAMADA POR FAVOR INFORMENOS POR ESTE MEDIO GRACIAS' . $_portal_suffix;
         $_wa_btns[] = array('label' => 'WhatsApp — Equipo listo',   'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg1));
         $_wa_btns[] = array('label' => 'WhatsApp — Confirmar cita', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg2));
     } elseif ($estado === 'Entregado (Ent)') {
         $msg = 'BUEN DIA PARA BRINDARLE UN MEJOR SERVICIO LE AGRADECERÍAMOS NOS PUEDA *COMENTAR COMO ESTA TRABAJANDO EL EQUIPO QUE NOS TRAJO A REPARACION, PARA NOSOTROS ES MUY IMPORTANTE SU SATISFACCION GRACIAS https://comercializadoraegs.com ORDEN *' . $_wa_orden . '* ASESOR *' . $_wa_asesorNombre . '*';
         $_wa_btns[] = array('label' => 'WhatsApp — Seguimiento', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
     } elseif ($estado === 'En revisión (REV)') {
-        $msg = 'Somos COMERCIALIZADORA EGS * *https://comercializadoraegs.com gracias por venir y permitirnos apoyarte en tu proyecto de REPARACION DE EQUIPOS DE COMPUTO recuerda que es importante seguir en comunicación por este medio en un horario de LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 o a los teléfonos 7222831159/7221671684/7222144416. ORDEN *' . $_wa_orden . '* ASESOR *' . $_wa_asesorNombre . '*';
+        $msg = 'Somos COMERCIALIZADORA EGS * *https://comercializadoraegs.com gracias por venir y permitirnos apoyarte en tu proyecto de REPARACION DE EQUIPOS DE COMPUTO recuerda que es importante seguir en comunicación por este medio en un horario de LUNES A VIERNES DE 10 A 2 Y DE 4 A 6:30 SÁBADOS DE 9 A 2 o a los teléfonos 7222831159/7221671684/7222144416. ORDEN *' . $_wa_orden . '* ASESOR *' . $_wa_asesorNombre . '*' . $_portal_suffix;
         $_wa_btns[] = array('label' => 'WhatsApp — Bienvenida', 'url' => 'https://api.whatsapp.com/send?phone=' . $_wa_phone . '&text=' . rawurlencode($msg));
     } else {
         $_wa_btns[] = array('label' => 'WhatsApp', 'url' => '//api.whatsapp.com/send?phone=521' . $_wa_tel1);
