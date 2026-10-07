@@ -7,7 +7,7 @@ const base = fs.mkdtempSync(path.join(os.tmpdir(), 'egs-pedidos-regresion-'));
 const dbFile = path.join(base, 'pedidos.sqlite');
 let checks = 0;
 function run(input) {
-  const result = spawnSync('php', [path.join(__dirname, 'pedidos.ajax.fixture.php')], {
+  const result = spawnSync('php', ['-d', 'display_startup_errors=0', path.join(__dirname, 'pedidos.ajax.fixture.php')], {
     input: JSON.stringify(input), encoding: 'utf8', windowsHide: true,
     env: {...process.env, EGS_PEDIDOS_TEST_DB: dbFile}
   });
@@ -19,6 +19,14 @@ function run(input) {
 function check(value, message) { assert.ok(value, message); checks++; }
 try {
   const create = {accionPedido: 'crear', solicitud: 'ajaxcrear001', empresa: 1, cliente: 2, asesor: 3, productos: '[{"Descripcion":"Equipo 💻","cantidad":2,"precioUnitario":50.25}]', pago: '[{"pago":20.5,"fecha":"2026-10-02"}]', estado: 'Pedido Pendiente', id_orden: 0};
+  for (const [tabla, comando, vinculada] of [['pedidos_guardados','INSERT',false], ['pedidos_guardados','UPDATE',false], ['ordenes','UPDATE',true], ['pedidos','INSERT',false]]) {
+    const permiso = run({rechazarTabla: tabla, rechazarComando: comando, post: {...create, id_orden: vinculada ? 101 : 0}});
+    check(permiso.status === 500 && permiso.body.ok === false && permiso.body.codigo === 1142 && permiso.body.reintentar === false, '1142 se clasifica como rechazo definitivo del servidor');
+    check(permiso.body.tipo === 'permisos_servidor' && !JSON.stringify(permiso.body).includes('cuenta_prueba'), 'Respuesta de permisos explica el fallo sin exponer la cuenta SQL');
+    const integridad = run({integridad: true}).body;
+    check(integridad.pedidos === 0 && integridad.confirmaciones === 0 && integridad.vinculos === 0, 'Permiso denegado revierte pedido, recibo y vínculo, incluso al confirmar o vincular');
+    if (vinculada) check(permiso.body.mensaje.includes('vincular la orden'), 'Diagnóstico de vínculo identifica el permiso de órdenes');
+  }
   const initial = run({post: create});
   check(initial.status === 200 && initial.body.ok === true && initial.body.id > 0 && initial.body.version.length === 64, 'Alta AJAX entrega ID y versión confirmados');
   assert.deepEqual(run({post: create}).body, initial.body); checks++;

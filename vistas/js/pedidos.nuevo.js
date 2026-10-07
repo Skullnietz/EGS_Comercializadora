@@ -71,7 +71,7 @@
         if (!error.uncertain) pending = null;
         persist();
         $status.text(error.uncertain ? 'Guardado sin confirmar. Presiona Guardar para recuperar el mismo intento.' : 'El pedido no se guardó. Lo capturado sigue aquí.');
-        swal({type: 'error', title: 'No se confirmó el guardado', text: error.message});
+        swal({type: 'error', title: error.type === 'permisos_servidor' ? 'Faltan permisos en el servidor' : 'No se confirmó el guardado', text: error.message});
       }).then(function () { saving = false; lock(!!pending); draftTools(!!lastDraft); });
     });
     window.addEventListener('beforeunload', function (e) {

@@ -48,7 +48,7 @@ async function app(html, script, stored = {}) {
   await tick();
   return {w, $, calls, alerts, close: () => dom.window.close(), storage: () => Object.fromEntries(Array.from({length: w.sessionStorage.length}, (_, i) => {const key = w.sessionStorage.key(i); return [key, w.sessionStorage.getItem(key)];}))};
 }
-function fail(call, status = 0, mensaje) { call.deferred.reject({status, responseJSON: mensaje ? {ok: false, mensaje} : undefined}); }
+function fail(call, status = 0, mensaje, extra = {}) { call.deferred.reject({status, responseJSON: mensaje ? {ok: false, mensaje, ...extra} : undefined}); }
 async function exhaust(a, offset = 0) { for (let i = 0; i < 3; i++) { fail(a.calls[offset + i]); await tick(); } }
 function fillNew(a) {
   const $ = a.$;
@@ -98,6 +98,12 @@ function fillNew(a) {
   fail(a.calls[0], 409, 'Otra persona modificó el pedido'); await tick();
   check(a.calls.length === 1 && a.$('[name=total]').val() === '120' && !a.$('[name=total]').prop('disabled'), 'Conflicto conserva captura y no se reintenta automáticamente'); a.close();
 
+  a = await app(detail, 'pedidos.detalle.js');
+  a.$('[name=total]').val('120.25').trigger('input'); a.$('#pedidoDetalleForm').trigger('submit');
+  fail(a.calls[0], 500, 'Faltan permisos del servidor (1142)', {reintentar: false, tipo: 'permisos_servidor', codigo: 1142}); await tick();
+  check(a.calls.length === 1 && !a.$('[name=total]').prop('disabled'), 'HTTP 500 por permisos no reintenta ni bloquea la captura');
+  check(a.alerts.some(x => x.title === 'Faltan permisos en el servidor') && a.$('[name=total]').val() === '120.25', 'Detalle identifica el permiso del servidor y conserva importes'); a.close();
+
   a = await app(nuevo, 'pedidos.nuevo.js'); fillNew(a); a.$('#pedidoNuevoForm').trigger('submit');
   const creation = a.calls[0].data;
   check(creation.accionPedido === 'crear' && JSON.parse(creation.productos)[0].precioUnitario === '50.25', 'Alta serializa precio unitario y centavos');
@@ -110,6 +116,17 @@ function fillNew(a) {
   a.$('#pedidoNuevoForm').trigger('submit'); assert.deepEqual(a.calls[0].data, creation); checks++;
   a.calls[0].deferred.resolve({ok: true, id: 42}); await tick();
   check(a.w.sessionStorage.length === 0 && a.alerts.some(x => x.title.includes('#42')), 'Alta confirmada identifica pedido y limpia borrador'); a.close();
+
+  a = await app(nuevo, 'pedidos.nuevo.js'); fillNew(a); a.$('#pedidoNuevoForm').trigger('submit');
+  const rechazado = a.calls[0].data;
+  fail(a.calls[0], 500, 'El servidor no permite vincular la orden (1142)', {reintentar: false, tipo: 'permisos_servidor', codigo: 1142}); await tick();
+  check(a.calls.length === 1 && !a.$('.descripcioProductoPedido').prop('disabled'), 'Alta no repite un rechazo 1142 como error temporal');
+  check(a.alerts.some(x => x.title === 'Faltan permisos en el servidor') && Object.keys(a.storage()).length > 0, 'Alta conserva el borrador ante permisos faltantes');
+  const denegadoBackup = a.storage(); a.close();
+  a = await app(nuevo, 'pedidos.nuevo.js', denegadoBackup);
+  check(a.$('.descripcioProductoPedido').val() === 'Equipo 💻' && a.$('.PagoClientePedidoDinamico').val() === '20.5', 'Recarga después de rechazo 1142 recupera productos y pago');
+  a.$('#pedidoNuevoForm').trigger('submit');
+  check(a.calls[0].data.solicitud !== rechazado.solicitud, 'Rechazo definitivo permite un intento nuevo después de corregir permisos'); a.close();
 
   a = await app(nuevo, 'pedidos.nuevo.js'); fillNew(a); a.$('#pedidoNuevoForm').trigger('submit');
   fail(a.calls[0], 401, 'Tu sesión expiró'); await tick();

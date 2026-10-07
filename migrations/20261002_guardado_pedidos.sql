@@ -17,5 +17,9 @@ CREATE TABLE IF NOT EXISTS pedidos_guardados (
 
 -- En la BD principal, verificar que ordenes sea InnoDB; convertirla durante mantenimiento si no lo es.
 -- La cuenta PDO de e-commerce necesita SELECT y UPDATE sobre <BD_PRINCIPAL>.ordenes.
+-- Necesita además SELECT, INSERT, UPDATE, DELETE sobre pedidos y SELECT, INSERT, UPDATE
+-- sobre pedidos_guardados. Crear las tablas con una cuenta de administración no concede
+-- acceso a la cuenta de la aplicación. Diagnosticar desde el hosting con:
+-- php scripts/diagnosticar_guardado_pedidos.php
 -- Ambos esquemas deben estar en el mismo servidor MySQL para un único commit.
 -- Conservar los recibos: borrarlos elimina la protección ante reintentos antiguos.

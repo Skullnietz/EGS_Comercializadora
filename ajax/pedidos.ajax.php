@@ -12,6 +12,7 @@ if (!isset($_SESSION["perfil"]) || $_SESSION["perfil"] == "tecnico") {
 
 require_once "../controladores/pedidos.controlador.php";
 require_once "../modelos/pedidos.modelo.php";
+require_once "../modelos/pedidos.errores.php";
 
 /*=============================================
 DETALLE DEL PEDIDO (AJAX)
@@ -54,20 +55,9 @@ if (isset($_POST['accionPedido'])) {
     } catch (Throwable $e) {
         // El motivo queda en el error_log del servidor para soporte.
         error_log('[pedidos] ' . $_POST['accionPedido'] . ' pedido ' . ($_POST['idPedido'] ?? '') . ' usuario ' . ($_SESSION['nombre'] ?? '') . ': ' . get_class($e) . ': ' . $e->getMessage());
-        if ($e instanceof PDOException) {
-            http_response_code(500);
-            $codigo = $e->errorInfo[1] ?? $e->getCode();
-            $mensaje = $codigo == 1406
-                ? 'El pedido llegó al límite de espacio para ese dato y el cambio no se guardó. Avisa a soporte (código 1406).'
-                : 'La base de datos rechazó el cambio (código ' . $codigo . '). Avisa a soporte con este código.';
-        } elseif ($e instanceof InvalidArgumentException || $e instanceof RuntimeException) {
-            http_response_code(409);
-            $mensaje = $e->getMessage();
-        } else {
-            http_response_code(500);
-            $mensaje = 'Ocurrió un error interno y el cambio no se guardó. Avisa a soporte.';
-        }
-        echo json_encode(['ok' => false, 'mensaje' => $mensaje]) ?: '{"ok":false,"mensaje":"No se pudo guardar."}';
+        $fallo = PedidosErrores::respuesta($e);
+        http_response_code($fallo['http']);
+        echo json_encode($fallo['body']) ?: '{"ok":false,"reintentar":false,"mensaje":"No se pudo guardar."}';
     }
     exit;
 }

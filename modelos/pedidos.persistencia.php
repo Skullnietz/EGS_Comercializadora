@@ -37,7 +37,7 @@ class PedidosPersistencia
         $huella = hash('sha256', self::json([$accion, $entrada]));
         $sql = 'INSERT INTO pedidos_guardados (clave, huella, resultado) VALUES (:clave, :huella, NULL)';
         $sql .= $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'
-            ? ' ON DUPLICATE KEY UPDATE clave = clave' : ' ON CONFLICT(clave) DO NOTHING';
+            ? ' ON DUPLICATE KEY UPDATE resultado = resultado' : ' ON CONFLICT(clave) DO NOTHING';
         $db->prepare($sql)->execute(['clave' => $clave, 'huella' => $huella]);
         $lock = $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql' ? ' FOR UPDATE' : '';
         $stmt = $db->prepare('SELECT huella, resultado FROM pedidos_guardados WHERE clave = :clave' . $lock);

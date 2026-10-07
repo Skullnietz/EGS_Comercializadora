@@ -267,7 +267,7 @@ que los alteren.
       operation.catch(function (e) {
         if (!e.uncertain) pending = null;
         saveDraft();
-        error(e.message);
+        error(e.message, e.type === 'permisos_servidor' ? 'Faltan permisos en el servidor' : undefined);
       }).then(function () {
         saving = false;
         lockFields(!!pending);

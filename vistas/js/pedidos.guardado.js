@@ -19,16 +19,20 @@
             if (r && r.ok === true) { resolve(r); return; }
             var error = new Error((r && r.mensaje) || 'El servidor no confirmó el guardado. Reintenta para comprobarlo.');
             error.uncertain = !r || r.ok !== false;
+            error.type = r && r.tipo;
             reject(error);
           })
           .fail(function (xhr) {
-            var uncertain = !xhr.status || xhr.status === 408 || xhr.status === 429 || xhr.status >= 500 || (xhr.status >= 200 && xhr.status < 300);
+            var response = xhr.responseJSON;
+            var rejected = response && response.ok === false && response.reintentar === false;
+            var uncertain = !rejected && (!xhr.status || xhr.status === 408 || xhr.status === 429 || xhr.status >= 500 || (xhr.status >= 200 && xhr.status < 300));
             if (uncertain && number < 2) { window.setTimeout(function () { attempt(number + 1); }, 700 * (number + 1)); return; }
             var message = xhr.responseJSON && xhr.responseJSON.mensaje;
             var error = new Error(message || (uncertain
               ? 'No se pudo confirmar el guardado. Lo capturado sigue aquí. Presiona Guardar para recuperar el resultado del mismo intento.'
               : 'No se guardó el cambio (HTTP ' + xhr.status + '). Lo capturado sigue aquí.'));
             error.uncertain = uncertain;
+            error.type = response && response.tipo;
             reject(error);
           });
       }

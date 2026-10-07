@@ -17,7 +17,7 @@ Se reforzó `PedidosPersistencia`, que ya reunía transacciones PDO, bloqueo de 
 
 1. Respaldar las tablas afectadas y reservar una ventana de mantenimiento: `ALTER TABLE` puede bloquear escrituras. Aplicar `migrations/20261002_guardado_pedidos.sql` en la base **ECOMMERCE**, que es la conexión utilizada por los modelos locales de pedidos. Esta migración convierte `pedidos` a InnoDB, amplía sus listas a MEDIUMTEXT y crea `pedidos_guardados`.
 2. Revisar el motor de `ordenes` en la base **WORDPRESS**. Debe ser InnoDB. Si es distinto, convertirlo en mantenimiento. Los modelos comprueban el motor antes de empezar; nunca convierten tablas ni crean esquema durante el guardado.
-3. Para asignar o eliminar pedidos, ambas bases deben estar en el mismo servidor MySQL. La cuenta de ECOMMERCE necesita **SELECT y UPDATE** sobre la tabla `ordenes` del esquema principal. No se requieren permisos generales de administración. Si faltan permisos o las bases están en servidores diferentes, la operación falla antes de escribir y conserva los datos anteriores.
+3. Verificar los permisos de la **cuenta efectiva de ECOMMERCE**, que guarda pedidos y confirmaciones: `SELECT, INSERT, UPDATE, DELETE` en `pedidos` y `SELECT, INSERT, UPDATE` en `pedidos_guardados`. Crear la tabla desde phpMyAdmin con otra cuenta no concede esos permisos a la aplicación. Para asignar o eliminar pedidos, ambas bases deben estar en el mismo servidor MySQL; esta misma cuenta necesita `SELECT` y `UPDATE` sobre `ordenes` del esquema principal. Que la cuenta de WORDPRESS pueda escribir en `ordenes` no concede acceso a la cuenta de ECOMMERCE. Ver `docs/ERROR_1142_PEDIDOS.md` para diagnosticar y obtener los GRANT de la cuenta real. No se requieren permisos globales ni de administración para el guardado.
 4. Verificar que los tipos de `total` y `adeudo` admitan los importes y centavos utilizados. La comparación detecta columnas que redondean, truncan o cambian esos valores. No se convierten columnas monetarias sin revisar los datos históricos y el esquema real.
 5. Desplegar backend, vistas y JavaScript juntos, y recargar las pestañas antiguas. Los archivos nuevos usan `filemtime` para invalidar caché. No borrar recibos para recuperar espacio sin acordar primero el plazo de retención: su eliminación pierde la protección contra reintentos antiguos.
 
@@ -29,6 +29,7 @@ Desde la raíz del proyecto:
 
 ```powershell
 php tests/pedidos.persistencia.php
+php tests/pedidos.diagnostico.php
 npm ci --prefix tests --ignore-scripts --no-audit --no-fund
 npm --prefix tests test
 npm --prefix tests run test:ajax
