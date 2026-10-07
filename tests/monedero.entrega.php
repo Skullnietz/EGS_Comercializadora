@@ -5,6 +5,7 @@ require_once __DIR__ . '/../modelos/monedero.persistencia.php';
 require_once __DIR__ . '/../modelos/ordenes.modelo.php';
 require_once __DIR__ . '/../controladores/ordenes.controlador.php';
 class ControladorNotificaciones { public static function ctrCrearTablaEstado() { throw new RuntimeException('Notificaciones externas deshabilitadas en pruebas'); } }
+class ControladorPedidos { public static $llamadas=0; public function ctrEditarPedidoEnEstado() { self::$llamadas++; } }
 $db = new PDO('sqlite::memory:', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 $pool = new ReflectionProperty('Database', 'instances');
 $pool->setAccessible(true);
@@ -16,6 +17,9 @@ $cols = ['id INTEGER PRIMARY KEY', 'id_usuario INTEGER', 'id_empresa INTEGER', '
 $nombres = ['Uno','Dos','Tres','Cuatro','Cinco','Seis','Siete','Ocho','Nueve','Diez'];
 foreach ($nombres as $nombre) { $cols[] = 'partida' . $nombre . ' TEXT'; $cols[] = 'precio' . $nombre . ' NUMERIC'; }
 $db->exec('CREATE TABLE ordenes (' . implode(',', $cols) . ')');
+$db->exec('ALTER TABLE ordenes ADD COLUMN tipoDeReparacion TEXT');
+$db->exec('ALTER TABLE ordenes ADD COLUMN partidasTecnicoDos TEXT');
+$db->exec('ALTER TABLE ordenes ADD COLUMN TotalTecnicoDos NUMERIC');
 $_SESSION = ['id' => 7, 'empresa' => 1, 'perfil' => 'administrador', 'tokenMonederoOrden' => 'prueba'];
 $_POST = ['tokenMonederoOrden' => 'prueba'];
 $checks = 0;
@@ -102,7 +106,7 @@ falla(function(){guardar(103,'1','Entregado (Ent)','200.75',3);},'No agrega cons
 orden(104);
 $_POST=datos(104)+['idOrden'=>104,'asesorEditadoEnOrdenDianmica'=>3,'tecnicoEditadoEnOrdenDianmica'=>4,'idClienteOrden'=>2,'montoCanjeMonederoOrden'=>'10.05','tokenMonederoOrden'=>'prueba','observaciones'=>'Entrega revisada','listarObservaciones'=>'[]'];
 function formularioCompleto() {
-    ob_start(); $c=new controladorOrdenes(); $c->ctrEditarObservacionesYaExistentes(); $c->ctrEditarOrdenDinamica(); $c->ctrEditarInversiones(); return ob_get_clean();
+    ob_start(); require __DIR__ . '/../vistas/modulos/infoOrden.guardado.php'; return ob_get_clean();
 }
 $salida=formularioCompleto();
 check(strpos($salida,'guardado correctamente')!==false && (float)fila(104)['monto_monedero_aplicado']===10.05,'Flujo de entrega activo lee y aplica el campo real del formulario');
@@ -110,12 +114,18 @@ check(cantidadCanjes()===2 && (float)fila(104)['total_pagado_cliente']===190.7,'
 check(fila(104)['descripcion']==='Entrega revisada' && substr_count($salida,'guardado correctamente')===1,'Formulario completo guarda observaciones e inversiones sin un segundo éxito');
 orden(105);
 $_POST['idOrden']=105; $_POST['montoCanjeMonederoOrden']='100';
+$_POST['Tipo-repearacion']='Servicio'; $_POST['partidasTecnicoDos']='[]'; $_POST['TotalPartidasTecnicoDos']='0';
+$llamadasPedido=ControladorPedidos::$llamadas;
 $salida=formularioCompleto();
+check(strpos($salida,'type: "success"')===false && strpos($salida,'agregada correctamente')===false,'Los avisos secundarios no ocultan un rechazo de entrega');
+check(ControladorPedidos::$llamadas===$llamadasPedido && fila(105)['tipoDeReparacion']===null && fila(105)['partidasTecnicoDos']===null,'Un rechazo de entrega detiene también pedido, tipo de reparación y segundo técnico');
 check(strpos($salida,'No se guardó la entrega')!==false && strpos($salida,'guardado correctamente')===false,'Controlador muestra error real sin mensaje de éxito');
+check(strpos($salida,'role="alert"')!==false && strpos($salida,'window.location')===false,'El motivo sigue visible aunque falle SweetAlert y no redirige como si se hubiera entregado');
 check(fila(105)['estado']==='Terminada (ter)' && cantidadCanjes()===2,'Controlador no entrega ni descuenta si no hay saldo');
 check(fila(105)['descripcion']===null && fila(105)['inversiones']===null,'Los otros controladores de la página no escriben tras fallar la entrega');
 ModeloOrdenes::mdlEditarInversiones('ordenes',['id'=>105,'estado'=>'Entregado (Ent)','listarinversiones'=>'[]','totalInversiones'=>'0']);
 check(fila(105)['estado']==='Terminada (ter)','Guardado independiente de inversiones no omite autorización de entrega');
+unset($_POST['Tipo-repearacion'],$_POST['partidasTecnicoDos'],$_POST['TotalPartidasTecnicoDos']);
 $_POST['tokenMonederoOrden']='prueba';
 $venta=ControladorRecompensas::ctrCanjearEnVenta(2,901,'1.25',1,7,'20.75','19.50');
 check($venta['monto_canjeado']===1.25 && $venta['saldo_anterior']>0,'Ventas también guardan auditoría del consumo bajo el bloqueo común');
@@ -128,4 +138,28 @@ for($i=1;$i<=10;$i++){ $legacy['partida'.$i]='Servicio'; $legacy['precio'.$i]=$i
 MonederoPersistencia::guardarOrden(106,'Entregado (Ent)','200.75','25.25',function()use($legacy){ return ModeloOrdenes::mdlEditarOrden('ordenes',$legacy); },4);
 check((float)fila(106)['precioUno']===200.75 && (float)fila(106)['total']===200.75,'Editor antiguo conserva precios y total decimal');
 check((float)fila(106)['monto_monedero_aplicado']===25.25 && (float)fila(106)['total_pagado_cliente']===175.5 && cantidadCanjes()===4,'Editor antiguo confirma entrega, descuento y consumo juntos');
+
+// Reproduce una instalación cuya fecha de salida es DATE y normaliza los UPDATE a día.
+$dbOriginal=$db;
+$db=new PDO('sqlite::memory:',null,null,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
+foreach ($dbOriginal->query("SELECT sql FROM sqlite_master WHERE type='table' AND name IN ('ordenes','dinero_electronico','dinero_electronico_movimientos','compras')")->fetchAll(PDO::FETCH_COLUMN) as $sql) {
+    $db->exec(str_replace('fecha_Salida TEXT','fecha_Salida DATE',$sql));
+}
+$db->exec('CREATE TRIGGER normalizar_fecha AFTER UPDATE OF fecha_Salida ON ordenes BEGIN UPDATE ordenes SET fecha_Salida=substr(NEW.fecha_Salida,1,10) WHERE id=NEW.id; END');
+$pool->setValue(null,['ecommerce'=>$db,'wordpress'=>$db]);
+orden(107);
+guardar(107,'0');
+check(fila(107)['estado']==='Entregado (Ent)' && fila(107)['fecha_Salida']===date('Y-m-d'),'Entrega sin monedero respeta fecha_Salida DATE sin rechazar el estado');
+check(cantidadCanjes()===0 && (float)fila(107)['total_pagado_cliente']===200.75,'Compatibilidad de fecha conserva importes y no crea consumos');
+$db->prepare("INSERT INTO ordenes(id,id_usuario,id_empresa,estado,total,fecha_Salida) VALUES(1,2,1,'Entregado (Ent)',10000,?)")->execute([date('Y-m-d')]);
+orden(108);
+$r=guardar(108,'10.05');
+check(fila(108)['estado']==='Entregado (Ent)' && strlen(fila(108)['fecha_Salida'])===10 && strlen(fila(108)['fecha_canje_monedero'])===19,'Fecha DATE de entrega y hora completa del consumo se guardan por separado');
+check(cantidadCanjes()===1 && (float)$r['movimiento']['monto']===-10.05 && (float)fila(108)['total_pagado_cliente']===190.7,'Entrega con fecha DATE conserva consumo y cobro atómicos');
+orden(109);
+$_POST=datos(109)+['idOrden'=>109,'asesorEditadoEnOrdenDianmica'=>3,'tecnicoEditadoEnOrdenDianmica'=>4,'idClienteOrden'=>2,'montoCanjeMonederoOrden'=>'0','Tipo-repearacion'=>'Servicio','partidasTecnicoDos'=>'[]','TotalPartidasTecnicoDos'=>'0'];
+$db->exec('ALTER TABLE dinero_electronico_movimientos RENAME COLUMN referencia_tipo TO referencia_temporal');
+$salida=formularioCompleto();
+check(strpos($salida,'role="alert"')!==false && strpos($salida,'código 1')!==false && strpos($salida,'type: "success"')===false,'Un fallo SQL de esquema queda visible con código y no se reemplaza por éxito');
+check(fila(109)['estado']==='Terminada (ter)' && fila(109)['tipoDeReparacion']===null && cantidadCanjes()===1,'Fallo SQL en entrega sin monedero deja estado, datos secundarios y consumos intactos');
 echo "OK: $checks comprobaciones de entrega y monedero\n";

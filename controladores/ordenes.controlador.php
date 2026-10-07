@@ -3834,12 +3834,14 @@ LISTAR ORDENES ASESOR MES ENTRADAS
                         ]);
                     }
                 }
+                if ($respuesta !== 'ok') throw new RuntimeException('No se pudo confirmar el cambio de estado. La orden no se guardó.');
             } catch (Throwable $e) {
                 error_log('Entrega/monedero orden: ' . $e->getMessage());
                 $mensaje = $e instanceof PDOException
-                    ? 'No se pudo confirmar la entrega y el consumo. No se aplicaron cambios. Avisa a soporte.' : $e->getMessage();
+                    ? 'No se pudo confirmar la entrega y el consumo. No se aplicaron cambios. Avisa a soporte (código ' . ($e->errorInfo[1] ?? $e->getCode()) . ').' : $e->getMessage();
+                echo '<div class="alert alert-danger" role="alert"><strong>No se guardó la entrega.</strong> ' . htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8') . '</div>';
                 echo '<script>swal({type:"error",title:"No se guardó la entrega",text:' . json_encode($mensaje, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . '});</script>';
-                return;
+                return false;
             }
 
 			// ── Notificaciones de cambio de estado (dinámica) ──

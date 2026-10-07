@@ -74,6 +74,26 @@ class MonederoPersistencia
         }
     }
 
+    /** Respeta el tipo existente de fecha_Salida; DATE no guarda la hora del canje. */
+    private static function fechaSalida($db, DateTimeImmutable $ahora)
+    {
+        $tipo = '';
+        $precision = 0;
+        if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
+            $fila = $db->query("SELECT DATA_TYPE,DATETIME_PRECISION FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='ordenes' AND COLUMN_NAME='fecha_Salida'")->fetch(PDO::FETCH_ASSOC);
+            $tipo = strtolower((string)($fila['DATA_TYPE'] ?? ''));
+            $precision = (int)($fila['DATETIME_PRECISION'] ?? 0);
+        } elseif ($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            foreach ($db->query('PRAGMA table_info(ordenes)')->fetchAll(PDO::FETCH_ASSOC) as $fila) {
+                if ($fila['name'] === 'fecha_Salida') $tipo = strtolower(trim($fila['type']));
+            }
+        }
+        if ($tipo === 'date') return $ahora->format('Y-m-d');
+        $fecha = $ahora->format('Y-m-d H:i:s');
+        if (in_array($tipo, ['datetime','timestamp'], true) && $precision > 0 && $precision <= 6) $fecha .= '.' . str_repeat('0', $precision);
+        return $fecha;
+    }
+
     private static function consumir($db, $cliente, $tipo, $id, $monto, $bruto, $neto)
     {
         $saldo = ModeloRecompensas::mdlCalcularSaldoDinamico($cliente, 1, ControladorRecompensas::ctrCalcularPorcentajeHistorico($cliente));
@@ -165,10 +185,12 @@ class MonederoPersistencia
                 }
             }
             if ($entregaNueva) {
-                $fecha = (new DateTimeImmutable('now', new DateTimeZone('America/Mexico_City')))->format('Y-m-d H:i:s');
+                $ahora = new DateTimeImmutable('now', new DateTimeZone('America/Mexico_City'));
+                $fecha = $ahora->format('Y-m-d H:i:s');
+                $fechaSalida = self::fechaSalida($db, $ahora);
                 $db->prepare('UPDATE ordenes SET fecha_Salida = ?, total_bruto_monedero = ?, monto_monedero_aplicado = ?, total_pagado_cliente = ?, fecha_canje_monedero = ? WHERE id = ?')
-                    ->execute([$fecha, $bruto / 100, $canje / 100, ($bruto - $canje) / 100, $canje > 0 ? $fecha : null, $id]);
-                $esperado += ['fecha_Salida' => $fecha, 'total_bruto_monedero' => $bruto / 100, 'monto_monedero_aplicado' => $canje / 100,
+                    ->execute([$fechaSalida, $bruto / 100, $canje / 100, ($bruto - $canje) / 100, $canje > 0 ? $fecha : null, $id]);
+                $esperado += ['fecha_Salida' => $fechaSalida, 'total_bruto_monedero' => $bruto / 100, 'monto_monedero_aplicado' => $canje / 100,
                     'total_pagado_cliente' => ($bruto - $canje) / 100, 'fecha_canje_monedero' => $canje > 0 ? $fecha : null];
             }
             self::comprobar(self::fila($db, 'SELECT * FROM ordenes WHERE id = ?', [$id]), $esperado,

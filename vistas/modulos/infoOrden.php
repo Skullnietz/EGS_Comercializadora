@@ -2016,32 +2016,7 @@ function _egsEstadoClass($estado) {
 							</div>
 
 							<?php
-							$observacionesDePartidas = new controladorOrdenes();
-							$observacionesDePartidas->ctrEditarObservacionesYaExistentes();
-
-							$objetoUno = new controladorOrdenes();
-							$objetoUno->ctrEditarOrdenDinamica();
-
-							$objetoDos = new controladorOrdenes();
-							$objetoDos->ctrEditarInversiones();
-
-							$editarEstadoOrden = new ControladorPedidos();
-							$editarEstadoOrden->ctrEditarPedidoEnEstado();
-
-							$ingresarTipoDeOrden = new controladorOrdenes();
-							$ingresarTipoDeOrden->ctrlAgregarTipoDeOrden();
-
-							$ingresarRecarga = new controladorOrdenes();
-							$ingresarRecarga->ctrlAgregarRecargaDeCartucho();
-
-							$ingresarPartidasTecnicoDos = new controladorOrdenes();
-							$ingresarPartidasTecnicoDos->ctrlAgregarNuevaPartidaTecnicoDos();
-
-							$ingresarTecnicoDos = new controladorOrdenes();
-							$ingresarTecnicoDos->ctrlAgregarTecnicoDos();
-
-							$marca = new controladorOrdenes();
-							$marca->ctrlEditarMarca();
+                            require __DIR__ . '/infoOrden.guardado.php';
 							?>
 
 						</form>
