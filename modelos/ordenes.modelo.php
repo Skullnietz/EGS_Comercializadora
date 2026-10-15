@@ -3,6 +3,7 @@
 
 
 require_once __DIR__ . "/conexionWordpress.php";
+require_once __DIR__ . "/../config/DriveStorage.php";
 require_once __DIR__ . "/pedidos.persistencia.php";
 
 
@@ -734,9 +735,12 @@ class ModeloOrdenes{
 
 
 
+			$idOrdenCreada = intval($pdo->lastInsertId());
+			try { EgsDriveStorage::queueOrder($idOrdenCreada, $datos); }
+			catch (Throwable $e) { error_log("[drive] No se pudo encolar la organización de imágenes de la orden " . $idOrdenCreada); }
 			return array(
 				"estado" => "ok",
-				"id" => intval($pdo->lastInsertId()),
+				"id" => $idOrdenCreada,
 				"token_cliente" => $tokenCliente
 			);
 
@@ -878,6 +882,8 @@ class ModeloOrdenes{
 
 
 
+			try { EgsDriveStorage::queueOrder(intval($datos["id"]), $datos); }
+			catch (Throwable $e) { error_log("[drive] No se pudo encolar la organización de imágenes de la orden editada"); }
 			return "ok";
 
 

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/../config/DriveStorage.php";
 
 class ControladorComercio{
 
@@ -43,7 +44,7 @@ class ControladorComercio{
 
 			if($item == "logo"){
 
-				unlink("../".$plantilla["logo"]);
+				EgsDriveStorage::remove("../".$plantilla["logo"]);
 
 				$nuevoAncho = 500;
 				$nuevoAlto = 100;
@@ -58,7 +59,7 @@ class ControladorComercio{
 
 					imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-					imagejpeg($destino, $ruta);
+					EgsDriveStorage::jpeg($destino, $ruta);
 
 				}
 
@@ -74,7 +75,7 @@ class ControladorComercio{
 
 					imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-					imagepng($destino, $ruta);
+					EgsDriveStorage::png($destino, $ruta);
 
 				}
 
@@ -86,7 +87,7 @@ class ControladorComercio{
 
 			if($item == "icono"){
 
-				unlink("../".$plantilla["icono"]);
+				EgsDriveStorage::remove("../".$plantilla["icono"]);
 
 				$nuevoAncho = 100;
 				$nuevoAlto = 100;
@@ -101,7 +102,7 @@ class ControladorComercio{
 
 					imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-					imagejpeg($destino, $ruta);
+					EgsDriveStorage::jpeg($destino, $ruta);
 			
 				}
 
@@ -117,7 +118,7 @@ class ControladorComercio{
 
 					imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-					imagepng($destino, $ruta);
+					EgsDriveStorage::png($destino, $ruta);
 			
 				}
 

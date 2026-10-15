@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/../config/DriveStorage.php";
 
 class ControladorBanner{
 
@@ -59,7 +60,7 @@ class ControladorBanner{
 
 					imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-					imagejpeg($destino, $rutaBanner);
+					EgsDriveStorage::jpeg($destino, $rutaBanner);
 
 				}
 
@@ -81,7 +82,7 @@ class ControladorBanner{
 
 					imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-					imagepng($destino, $rutaBanner);
+					EgsDriveStorage::png($destino, $rutaBanner);
 
 				}
 
@@ -91,7 +92,8 @@ class ControladorBanner{
 
 				if ($_FILES["fotoBanner"]["type"] == "image/gif") {
 					
-					$rutaBanner = "vistas/img/".$_FILES["fotoBanner"]["name"];
+					$rutaBanner = "vistas/img/banner-" . bin2hex(random_bytes(12)) . ".gif";
+					EgsDriveStorage::uploadedImage($_FILES["fotoBanner"], $rutaBanner);
 
 				
 				}
@@ -154,7 +156,7 @@ class ControladorBanner{
 
 			if($_GET["imgBanner"] != ""){
 
-				unlink($_GET["imgBanner"]);		
+				EgsDriveStorage::remove($_GET["imgBanner"]);
 
 			}
 

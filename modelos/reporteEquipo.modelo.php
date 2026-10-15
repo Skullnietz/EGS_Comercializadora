@@ -2,6 +2,7 @@
 
 require_once "conexion.php";
 
+require_once __DIR__.'/../config/DriveStorage.php';
 class ModeloReporteEquipo
 {
 
@@ -81,7 +82,9 @@ class ModeloReporteEquipo
 			$stmt->bindParam(":ruta", $datos["ruta"], PDO::PARAM_STR);
 			$stmt->bindParam(":fecha", $fecha, PDO::PARAM_STR);
 
-			return $stmt->execute() ? "ok" : "error";
+			$ok=$stmt->execute();
+			if($ok){try{EgsDriveStorage::queueOrderPhoto($datos["id_orden"],$datos["ruta"]);}catch(Throwable $e){error_log('EGS Drive: no se pudo encolar foto de reporte.');}}
+			return $ok ? "ok" : "error";
 		} catch (Exception $e) {
 			return "error";
 		}

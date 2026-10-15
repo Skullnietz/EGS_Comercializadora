@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/../config/DriveStorage.php";
 class controladorReporteEquipo
 {
 
@@ -186,8 +187,8 @@ class controladorReporteEquipo
 			if (is_array($rutasFotos)) {
 				foreach ($rutasFotos as $rutaFoto) {
 					$rutaFisica = __DIR__ . "/../" . ltrim($rutaFoto, "/");
-					if (!empty($rutaFoto) && file_exists($rutaFisica)) {
-						@unlink($rutaFisica);
+					if (!empty($rutaFoto) && EgsDriveStorage::exists($rutaFisica)) {
+						@EgsDriveStorage::remove($rutaFisica);
 					}
 				}
 			}

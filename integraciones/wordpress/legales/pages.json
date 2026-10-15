@@ -1,0 +1,17 @@
+[
+  {
+    "slug": "politica-de-privacidad",
+    "title": "Aviso y política de privacidad",
+    "content_file": "politica-de-privacidad.html"
+  },
+  {
+    "slug": "condiciones-de-servicio",
+    "title": "Condiciones de servicio",
+    "content_file": "condiciones-de-servicio.html"
+  },
+  {
+    "slug": "integracion-google-drive",
+    "title": "EGS Multimedia — integración con Google Drive",
+    "content_file": "integracion-google-drive.html"
+  }
+]

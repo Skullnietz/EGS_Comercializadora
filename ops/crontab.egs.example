@@ -1,0 +1,16 @@
+# Fragmento de tareas EGS del hosting actual. Agregar sin sustituir otras tareas.
+# EGS Drive: organizar imágenes por ID de orden
+*/5 * * * * /opt/cpanel/ea-php71/root/usr/bin/php /home/egsequip/backend.comercializadoraegs.com/scripts/drive-reconciliar.php >> /home/egsequip/.egs-drive/reconcile.log 2>&1
+# BEGIN EGS IMAGE MIGRATION
+* * * * * /opt/cpanel/ea-php71/root/usr/bin/php /home/egsequip/backend.comercializadoraegs.com/scripts/drive-migration-worker.php --run --slot=1 --limit=80 --seconds=50 --release-local --site=backend >> /home/egsequip/.egs-drive/migration-worker-1.log 2>&1
+* * * * * /opt/cpanel/ea-php71/root/usr/bin/php /home/egsequip/backend.comercializadoraegs.com/scripts/drive-migration-worker.php --run --slot=2 --limit=80 --seconds=50 --release-local --site=wordpress >> /home/egsequip/.egs-drive/migration-worker-2.log 2>&1
+* * * * * /opt/cpanel/ea-php71/root/usr/bin/php /home/egsequip/backend.comercializadoraegs.com/scripts/drive-migration-worker.php --run --slot=3 --limit=80 --seconds=50 --release-local >> /home/egsequip/.egs-drive/migration-worker-3.log 2>&1
+# END EGS IMAGE MIGRATION
+# BEGIN EGS DATABASE BACKUPS
+# Cada 15 minutos se comprueba si corresponde ejecutar a las 03:00 de CDMX; 7 diarios y 4 semanales.
+*/15 * * * * /opt/cpanel/ea-php71/root/usr/bin/php /home/egsequip/backend.comercializadoraegs.com/scripts/backup-drive.php --scheduled >> /home/egsequip/.egs-backup/backup.log 2>&1
+# END EGS DATABASE BACKUPS
+# BEGIN EGS LOG MAINTENANCE
+# Revisa cada 15 minutos los logs mayores de 10 MiB; una copia comprimida por archivo.
+*/15 * * * * /usr/bin/flock -n /home/egsequip/.egs-log-maintenance/rotate.lock /usr/sbin/logrotate -s /home/egsequip/.egs-log-maintenance/state /home/egsequip/.egs-log-maintenance/logrotate.conf >> /home/egsequip/.egs-log-maintenance/rotation.log 2>&1
+# END EGS LOG MAINTENANCE

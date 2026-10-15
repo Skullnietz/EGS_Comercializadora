@@ -34,3 +34,20 @@ test_db_log.txt
 *~
 .DS_Store
 Thumbs.db
+
+# Estado privado de Drive, respaldos y mantenimiento del hosting
+/.egs-*/
+.drive-media-enabled
+client_secret*.json
+client.json
+tokens.json
+owner_setup.json
+recovery.key
+llave-recuperacion.key
+*.key
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.wpress
+*.sql.gz
+*.tar.gz.gpg

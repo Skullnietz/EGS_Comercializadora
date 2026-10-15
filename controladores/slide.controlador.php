@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/../config/DriveStorage.php";
 
 class ControladorSlide{
 
@@ -68,7 +69,7 @@ class ControladorSlide{
 			=============================================*/	
 			if($datos["imgFondo"] != "vistas/img/slide/default/fondo.jpg"){	
 
-				unlink("../".$datos["imgFondo"]);
+				EgsDriveStorage::remove("../".$datos["imgFondo"]);
 
 			}
 			/*=============================================
@@ -77,9 +78,9 @@ class ControladorSlide{
 
 			$directorio = "../vistas/img/slide/slide".$datos["id"];
 
-			if(!file_exists($directorio)){
+			if(!EgsDriveStorage::exists($directorio)){
 
-				mkdir($directorio, 0755);
+				EgsDriveStorage::makeDirectory($directorio, 0755);
 
 			}
 
@@ -102,7 +103,7 @@ class ControladorSlide{
 
 				imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-				imagejpeg($destino, $ruta1);
+				EgsDriveStorage::jpeg($destino, $ruta1);
 		
 			}
 
@@ -118,7 +119,7 @@ class ControladorSlide{
 
 				imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-				imagepng($destino, $ruta1);
+				EgsDriveStorage::png($destino, $ruta1);
 		
 			}
 
@@ -159,9 +160,9 @@ class ControladorSlide{
 
 			$directorio = "../vistas/img/slide/slide".$datos["id"];
 
-			if(!file_exists($directorio)){
+			if(!EgsDriveStorage::exists($directorio)){
 
-				mkdir($directorio, 0755);
+				EgsDriveStorage::makeDirectory($directorio, 0755);
 
 			}
 
@@ -184,7 +185,7 @@ class ControladorSlide{
 
 				imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-				imagejpeg($destino, $ruta2);
+				EgsDriveStorage::jpeg($destino, $ruta2);
 		
 			}
 
@@ -200,7 +201,7 @@ class ControladorSlide{
 
 				imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-				imagepng($destino, $ruta2);
+				EgsDriveStorage::png($destino, $ruta2);
 		
 			}
 
@@ -229,17 +230,17 @@ class ControladorSlide{
 
 			if($_GET["imgFondo"] != "vistas/img/slide/default/fondo.jpg"){
 
-				unlink($_GET["imgFondo"]);
+				EgsDriveStorage::remove($_GET["imgFondo"]);
 
 			}
 
 			if($_GET["imgProducto"] != ""){
 
-				unlink($_GET["imgProducto"]);
+				EgsDriveStorage::remove($_GET["imgProducto"]);
 
 			}
 
-			rmdir('vistas/img/slide/slide'.$_GET["idSlide"]);
+			EgsDriveStorage::removeDirectory('vistas/img/slide/slide'.$_GET["idSlide"]);
 
 			$tabla = "slide";
 			$id = $_GET["idSlide"];

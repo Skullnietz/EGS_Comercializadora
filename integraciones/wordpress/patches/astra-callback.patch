@@ -1,0 +1,8 @@
+--- a/wp-content/themes/astra/functions.php
++++ b/wp-content/themes/astra/functions.php
+@@ -453 +453,4 @@
+-add_action("wp_enqueue_scripts", "dcms_insertar_js");
++// EGS: registrar el callback opcional solo si está disponible.
++if ( is_callable( 'dcms_insertar_js' ) ) {
++    add_action("wp_enqueue_scripts", "dcms_insertar_js");
++}

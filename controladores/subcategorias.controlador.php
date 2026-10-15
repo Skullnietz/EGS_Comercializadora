@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/../config/DriveStorage.php";
 
 class ControladorSubCategorias{
 
@@ -62,7 +63,7 @@ class ControladorSubCategorias{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagejpeg($destino, $rutaPortada);
+						EgsDriveStorage::jpeg($destino, $rutaPortada);
 
 					}
 
@@ -84,7 +85,7 @@ class ControladorSubCategorias{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagepng($destino, $rutaPortada);
+						EgsDriveStorage::png($destino, $rutaPortada);
 
 					}
 
@@ -127,7 +128,7 @@ class ControladorSubCategorias{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagejpeg($destino, $rutaOferta);
+						EgsDriveStorage::jpeg($destino, $rutaOferta);
 
 					}
 
@@ -150,7 +151,7 @@ class ControladorSubCategorias{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagepng($destino, $rutaOferta);
+						EgsDriveStorage::png($destino, $rutaOferta);
 
 					}
 
@@ -267,7 +268,7 @@ class ControladorSubCategorias{
 					BORRAMOS ANTIGUA FOTO PORTADA
 					=============================================*/
 
-					unlink($_POST["antiguaFotoPortada"]);
+					EgsDriveStorage::remove($_POST["antiguaFotoPortada"]);
 
 					/*=============================================
 					DEFINIMOS LAS MEDIDAS
@@ -299,7 +300,7 @@ class ControladorSubCategorias{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagejpeg($destino, $rutaPortada);
+						EgsDriveStorage::jpeg($destino, $rutaPortada);
 
 					}
 
@@ -323,7 +324,7 @@ class ControladorSubCategorias{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagepng($destino, $rutaPortada);
+						EgsDriveStorage::png($destino, $rutaPortada);
 
 					}
 
@@ -341,7 +342,7 @@ class ControladorSubCategorias{
 					BORRAMOS ANTIGUA FOTO OFERTA
 					=============================================*/
 
-					unlink($_POST["antiguaFotoOferta"]);
+					EgsDriveStorage::remove($_POST["antiguaFotoOferta"]);
 
 					/*=============================================
 					DEFINIMOS LAS MEDIDAS
@@ -372,7 +373,7 @@ class ControladorSubCategorias{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagejpeg($destino, $rutaOferta);
+						EgsDriveStorage::jpeg($destino, $rutaOferta);
 
 					}
 
@@ -395,7 +396,7 @@ class ControladorSubCategorias{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagepng($destino, $rutaOferta);
+						EgsDriveStorage::png($destino, $rutaOferta);
 
 					}
 
@@ -443,7 +444,7 @@ class ControladorSubCategorias{
 
 					if($_POST["antiguaFotoOferta"] != ""){
 
-						unlink($_POST["antiguaFotoOferta"]);
+						EgsDriveStorage::remove($_POST["antiguaFotoOferta"]);
 
 					}
 
@@ -544,7 +545,7 @@ class ControladorSubCategorias{
 
 			if($_GET["imgOferta"] != ""){
 
-				unlink($_GET["imgOferta"]);		
+				EgsDriveStorage::remove($_GET["imgOferta"]);
 
 			}
 
@@ -554,7 +555,7 @@ class ControladorSubCategorias{
 
 			if($_GET["imgPortada"] != "" && $_GET["imgPortada"] != "vistas/img/default/default.png"){
 
-				unlink($_GET["imgPortada"]);		
+				EgsDriveStorage::remove($_GET["imgPortada"]);
 
 			}
 

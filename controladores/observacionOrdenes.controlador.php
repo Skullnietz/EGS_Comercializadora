@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/../config/DriveStorage.php";
 class controladorObservaciones{
 	
 	/*=============================================
@@ -240,8 +241,8 @@ class controladorObservaciones{
 				foreach ($rutasFotos as $rutaFoto) {
 					// Ruta absoluta independiente del CWD (__DIR__ = /controladores)
 					$rutaFisica = __DIR__ . "/../" . ltrim($rutaFoto, "/");
-					if (!empty($rutaFoto) && file_exists($rutaFisica)) {
-						@unlink($rutaFisica);
+					if (!empty($rutaFoto) && EgsDriveStorage::exists($rutaFisica)) {
+						@EgsDriveStorage::remove($rutaFisica);
 					}
 				}
 			}

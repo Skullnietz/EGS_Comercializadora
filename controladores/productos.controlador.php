@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/../config/DriveStorage.php";
 
 
 
@@ -189,11 +190,11 @@ class ControladorProductos{
 
 
 
-			if (!file_exists($directorio)){
+			if (!EgsDriveStorage::exists($directorio)){
 
 
 
-				mkdir($directorio, 0755);
+				EgsDriveStorage::makeDirectory($directorio, 0755);
 
 			
 
@@ -237,7 +238,7 @@ class ControladorProductos{
 
 
 
-				imagejpeg($destino, $rutaMultimedia);
+				EgsDriveStorage::jpeg($destino, $rutaMultimedia);
 
 
 
@@ -283,7 +284,7 @@ class ControladorProductos{
 
 
 
-				imagepng($destino, $rutaMultimedia);
+				EgsDriveStorage::png($destino, $rutaMultimedia);
 
 
 
@@ -395,7 +396,7 @@ class ControladorProductos{
 
 
 
-						imagejpeg($destino, $rutaPortada);
+						EgsDriveStorage::jpeg($destino, $rutaPortada);
 
 
 
@@ -443,7 +444,7 @@ class ControladorProductos{
 
 
 
-						imagepng($destino, $rutaPortada);
+						EgsDriveStorage::png($destino, $rutaPortada);
 
 
 
@@ -529,7 +530,7 @@ class ControladorProductos{
 
 
 
-						imagejpeg($destino, $rutaFotoPrincipal);
+						EgsDriveStorage::jpeg($destino, $rutaFotoPrincipal);
 
 
 
@@ -577,7 +578,7 @@ class ControladorProductos{
 
 
 
-						imagepng($destino, $rutaFotoPrincipal);
+						EgsDriveStorage::png($destino, $rutaFotoPrincipal);
 
 
 
@@ -663,7 +664,7 @@ class ControladorProductos{
 
 
 
-						imagejpeg($destino, $rutaOferta);
+						EgsDriveStorage::jpeg($destino, $rutaOferta);
 
 
 
@@ -709,7 +710,7 @@ class ControladorProductos{
 
 
 
-						imagepng($destino, $rutaOferta);
+						EgsDriveStorage::png($destino, $rutaOferta);
 
 
 
@@ -1065,7 +1066,7 @@ class ControladorProductos{
 
 							
 
-							unlink("../".$value);
+							EgsDriveStorage::remove("../".$value);
 
 
 
@@ -1105,7 +1106,7 @@ class ControladorProductos{
 
 
 
-					unlink("../".$datos["antiguaFotoPortada"]);
+					EgsDriveStorage::remove("../".$datos["antiguaFotoPortada"]);
 
 
 
@@ -1167,7 +1168,7 @@ class ControladorProductos{
 
 
 
-						imagejpeg($destino, $rutaPortada);
+						EgsDriveStorage::jpeg($destino, $rutaPortada);
 
 
 
@@ -1215,7 +1216,7 @@ class ControladorProductos{
 
 
 
-						imagepng($destino, $rutaPortada);
+						EgsDriveStorage::png($destino, $rutaPortada);
 
 
 
@@ -1251,7 +1252,7 @@ class ControladorProductos{
 
 
 
-					unlink("../".$datos["antiguaFotoPrincipal"]);
+					EgsDriveStorage::remove("../".$datos["antiguaFotoPrincipal"]);
 
 
 
@@ -1315,7 +1316,7 @@ class ControladorProductos{
 
 
 
-						imagejpeg($destino, $rutaFotoPrincipal);
+						EgsDriveStorage::jpeg($destino, $rutaFotoPrincipal);
 
 
 
@@ -1363,7 +1364,7 @@ class ControladorProductos{
 
 
 
-						imagepng($destino, $rutaFotoPrincipal);
+						EgsDriveStorage::png($destino, $rutaFotoPrincipal);
 
 
 
@@ -1403,7 +1404,7 @@ class ControladorProductos{
 
 
 
-						unlink("../".$datos["antiguaFotoOferta"]);
+						EgsDriveStorage::remove("../".$datos["antiguaFotoOferta"]);
 
 
 
@@ -1469,7 +1470,7 @@ class ControladorProductos{
 
 
 
-						imagejpeg($destino, $rutaOferta);
+						EgsDriveStorage::jpeg($destino, $rutaOferta);
 
 
 
@@ -1515,7 +1516,7 @@ class ControladorProductos{
 
 
 
-						imagepng($destino, $rutaOferta);
+						EgsDriveStorage::png($destino, $rutaOferta);
 
 
 
@@ -1767,7 +1768,7 @@ class ControladorProductos{
 
 
 
-			$borrar = glob("vistas/img/multimedia/".$_GET["rutaCabecera"]."/*");
+			$borrar = EgsDriveStorage::matching("vistas/img/multimedia/".$_GET["rutaCabecera"]."/*");
 
 
 
@@ -1775,7 +1776,7 @@ class ControladorProductos{
 
 
 
-					unlink($file);
+					EgsDriveStorage::remove($file);
 
 
 
@@ -1783,7 +1784,7 @@ class ControladorProductos{
 
 
 
-			rmdir("vistas/img/multimedia/".$_GET["rutaCabecera"]);
+			EgsDriveStorage::removeDirectory("vistas/img/multimedia/".$_GET["rutaCabecera"]);
 
 
 
@@ -1799,7 +1800,7 @@ class ControladorProductos{
 
 
 
-				unlink($_GET["imgPrincipal"]);		
+				EgsDriveStorage::remove($_GET["imgPrincipal"]);
 
 
 
@@ -1819,7 +1820,7 @@ class ControladorProductos{
 
 
 
-				unlink($_GET["imgOferta"]);		
+				EgsDriveStorage::remove($_GET["imgOferta"]);
 
 
 
@@ -1839,7 +1840,7 @@ class ControladorProductos{
 
 
 
-				unlink($_GET["imgPortada"]);		
+				EgsDriveStorage::remove($_GET["imgPortada"]);
 
 
 

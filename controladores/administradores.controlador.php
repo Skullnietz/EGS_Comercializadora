@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/../config/DriveStorage.php";
 require_once __DIR__ . '/../modelos/tecnicos.modelo.php';
 require_once __DIR__ . '/../modelos/modelo.asesores.php';
 
@@ -204,7 +205,7 @@ class ControladorAdministradores{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagejpeg($destino, $ruta);
+						EgsDriveStorage::jpeg($destino, $ruta);
 
 					}
 
@@ -224,7 +225,7 @@ class ControladorAdministradores{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagepng($destino, $ruta);
+						EgsDriveStorage::png($destino, $ruta);
 
 					}
 
@@ -388,11 +389,11 @@ class ControladorAdministradores{
 
 					if(!empty($_POST["fotoActual"])){
 
-						unlink($_POST["fotoActual"]);
+						EgsDriveStorage::remove($_POST["fotoActual"]);
 
 					}else{
 
-						mkdir($directorio, 0755);
+						EgsDriveStorage::makeDirectory($directorio, 0755);
 
 					}	
 
@@ -416,7 +417,7 @@ class ControladorAdministradores{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagejpeg($destino, $ruta);
+						EgsDriveStorage::jpeg($destino, $ruta);
 
 					}
 
@@ -436,7 +437,7 @@ class ControladorAdministradores{
 
 						imagecopyresized($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
 
-						imagepng($destino, $ruta);
+						EgsDriveStorage::png($destino, $ruta);
 
 					}
 
@@ -655,7 +656,7 @@ class ControladorAdministradores{
 
 			if($_GET["fotoPerfil"] != ""){
 
-				unlink($_GET["fotoPerfil"]);
+				EgsDriveStorage::remove($_GET["fotoPerfil"]);
 			
 			}
 

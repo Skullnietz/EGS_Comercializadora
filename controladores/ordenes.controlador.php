@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/../config/DriveStorage.php";
 
 class controladorOrdenes
 {
@@ -116,7 +117,7 @@ class controladorOrdenes
 			!is_array($archivo) ||
 			!isset($archivo["tmp_name"]) ||
 			empty($archivo["tmp_name"]) ||
-			!file_exists($archivo["tmp_name"])
+			!EgsDriveStorage::exists($archivo["tmp_name"])
 		) {
 			return array("ok" => false, "mensaje" => "No se recibió ninguna imagen válida.");
 		}
@@ -214,11 +215,11 @@ class controladorOrdenes
 		if ($mimeSalida === 'image/png') {
 			imagealphablending($imagen, false);
 			imagesavealpha($imagen, true);
-			return imagepng($imagen, $rutaDestino, 8);
+			return EgsDriveStorage::png($imagen, $rutaDestino, 8);
 		}
 
 		imageinterlace($imagen, true);
-		return imagejpeg($imagen, $rutaDestino, 82);
+		return EgsDriveStorage::jpeg($imagen, $rutaDestino, 82);
 	}
 
 	static private function ctrPuedeEliminarArchivo($ruta)
@@ -233,7 +234,7 @@ class controladorOrdenes
 			$rutaFisica = '../' . ltrim($rutaFisica, '/');
 		}
 
-		return file_exists($rutaFisica);
+		return EgsDriveStorage::exists($rutaFisica);
 	}
 
 	static public function ctrOptimizarImagenSubida($archivo, $config = array())
@@ -264,7 +265,7 @@ class controladorOrdenes
 		$extensionSalida = $mimeSalida === 'image/png' ? 'png' : 'jpg';
 
 		$directorio = isset($config["directorio"]) ? rtrim($config["directorio"], '/') : '../vistas/img/multimedia';
-		if (!file_exists($directorio) && !mkdir($directorio, 0755, true)) {
+		if (!EgsDriveStorage::exists($directorio) && !EgsDriveStorage::makeDirectory($directorio, 0755, true)) {
 			imagedestroy($origen);
 			return array("ok" => false, "mensaje" => "No se pudo preparar el directorio de imágenes.");
 		}
@@ -1000,7 +1001,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 						if (self::ctrPuedeEliminarArchivo($value)) {
-							unlink("../" . $value);
+							EgsDriveStorage::remove("../" . $value);
 						}
 
 
@@ -1045,7 +1046,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 					}
 
 					if (self::ctrPuedeEliminarArchivo($datos["antiguaFotoPortada"])) {
-						unlink("../" . $datos["antiguaFotoPortada"]);
+						EgsDriveStorage::remove("../" . $datos["antiguaFotoPortada"]);
 					}
 
 					$rutaPortada = $portadaProcesada["ruta"];
@@ -1081,7 +1082,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 					}
 
 					if (self::ctrPuedeEliminarArchivo($datos["antiguaFotoPrincipal"])) {
-						unlink("../" . $datos["antiguaFotoPrincipal"]);
+						EgsDriveStorage::remove("../" . $datos["antiguaFotoPrincipal"]);
 					}
 
 					$rutaFotoPrincipal = $principalProcesada["ruta"];
@@ -1391,7 +1392,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				unlink($_GET["imgPrincipal"]);
+				EgsDriveStorage::remove($_GET["imgPrincipal"]);
 
 
 
@@ -1403,7 +1404,7 @@ MOSTRAR ORDENES PARA SUMAR DEL ASESOR
 
 
 
-				unlink($_GET["imgPortada"]);
+				EgsDriveStorage::remove($_GET["imgPortada"]);
 
 
 
