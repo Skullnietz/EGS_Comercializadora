@@ -1,44 +1,4 @@
-/*=============================================
-CARGAR LA TABLA DINÁMICA DE VENTAS
-=============================================*/
-if ($(".tablaPedidos").length) {
-$(".tablaPedidos").DataTable({
-  "ajax": "ajax/tablapedidos.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
-	 "deferRender": true,
-	 "retrieve": true,
-	 "processing": true,
-	 "language": {
-
-	 	"sProcessing":     "Procesando...",
-		"sLengthMenu":     "Mostrar _MENU_ registros",
-		"sZeroRecords":    "No se encontraron resultados",
-		"sEmptyTable":     "Ningún dato disponible en esta tabla",
-		"sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_",
-		"sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0",
-		"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-		"sInfoPostFix":    "",
-		"sSearch":         "Buscar:",
-		"sUrl":            "",
-		"sInfoThousands":  ",",
-		"sLoadingRecords": "Cargando...",
-		"oPaginate": {
-			"sFirst":    "Primero",
-			"sLast":     "Último",
-			"sNext":     "Siguiente",
-			"sPrevious": "Anterior"
-		},
-		"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-		}
-
-	 }
-
-});
-}
-/*=============================================
-AGREGAR CAMPOS DINAMICAMENTE OBSERVACION
-=============================================*/
+/* La lista y sus acciones se inicializan una sola vez en pedidos.lista.js. */
 var nextinput = 0;
 var nextinputPrecio = 0;
 var nextCantidad = 0;
@@ -295,51 +255,6 @@ function agregarMiPedido(){
         })
 
 }
-
-/*=============================================
-IMPRIMIR TICKET DE ORDEN
-=============================================*/
-$(".tablaPedidos").on("click", ".btnImprimirTicketPedido", function(){
-    //console.log("Editar");
-  var idPedido = $(this).attr("idPedido");
-  //console.log(idPedido);
-  var empresa = $(this).attr("empresa");
-  var asesor = $(this).attr("asesor");
-  var cliente = $(this).attr("cliente");
-  var datos = new FormData();
-  datos.append("idPedido", idPedido);
-  datos.append("empresa", empresa);
-  datos.append("asesor", asesor);
-  datos.append("cliente", cliente);
-  $.ajax({
-
-
-    url:"ajax/pedidos.ajax.php",
-    method: "POST",
-    data: datos,
-    cache: false,
-    contentType: false,
-    processData: false,
-    dataType: "json",
-    success: function(respuesta){ 
-
-         $("#printDetalles").val(respuesta["detalles"]);
-         $("#cantidad").val(respuesta["cantidad"]);
-         $("#cantidadPagada").val(respuesta["pago"]);
-         $("#idPedido").val(respuesta["id"]);
-         $("#empresa").val(respuesta["id_empresa"]);
-         $("#asesor").val(respuesta["id_Asesor"]);
-         $("#cliente").val(respuesta["id_usuario"]);
-    
-        //console.log("Datos usuario:", respuesta);
-
-    }
-
-  })
-  window.open("https://backend.comercializadoraegs.com/extensiones/tcpdf/pdf/ticketpedido.php/?idPedido="+idPedido+"&empresa="+empresa+"&asesor="+asesor+"&cliente="+cliente+"", "_blank");
-
-
-})
 
 /*=============================================
 EDITAR PEDIDO
@@ -708,36 +623,6 @@ $(document).on("change", function() {
 });
 
 /*=============================================
-ELIMINAR PEDIDO
-=============================================*/
-
-$('.tablaPedidos tbody').on("click", ".btnEliminarPedido", function(){
-
-  var idpedido = $(this).attr("idpedido");
-
-
-  swal({
-    title: '¿Está seguro de borrar el pedido?',
-    text: "¡Si no lo está puede cancelar la accíón!",
-    type: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      cancelButtonText: 'Cancelar',
-      confirmButtonText: 'Si, borrar Pedido!'
-  }).then(function(result){
-
-    if(result.value){
-
-      window.location = "index.php?ruta=pedidos&idpedido="+idpedido+"";
-
-    }
-
-  })
-
-})
-
-/*=============================================
 SELECTOR DE CLIENTE
 =============================================*/
 document.addEventListener('DOMContentLoaded', function() {
@@ -751,48 +636,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-
-/*=============================================
-VER INFORMACION DEL PEDIDO
-=============================================*/
-$(".tablaPedidos").on("click", ".btnVerInfoPedido", function(){
-    //console.log("Editar");
-  var idPedido = $(this).attr("idPedido");
- //console.log(idPedido);
-  var empresa = $(this).attr("empresa");
-  var asesor = $(this).attr("asesor");
-  var cliente = $(this).attr("cliente");
-  var datos = new FormData();
-  datos.append("idPedido", idPedido);
-  datos.append("empresa", empresa);
-  datos.append("asesor", asesor);
-  datos.append("cliente", cliente);
-  
-  $.ajax({
-
-
-    url:"ajax/pedidos.ajax.php",
-    method: "POST",
-    data: datos,
-    cache: false,
-    contentType: false,
-    processData: false,
-    dataType: "json",
-    success: function(respuesta){ 
-
-     
-    
-        //console.log("Datos Orden:", respuesta);
-
-    }
-
-  })
-  window.open("index.php?ruta=infopedido&idPedido="+idPedido+"&empresa="+empresa+"&asesor="+asesor+"&cliente="+cliente+"","_self");
-
-
-})
-
-
 
 /*=============================================
 AGREGAR CAMPOS PAGO PEDIDO DINAMICO

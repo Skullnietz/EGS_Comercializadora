@@ -1,0 +1,153 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const {spawnSync} = require('node:child_process');
+const {JSDOM} = require('jsdom');
+const jquery = require('jquery');
+const root = path.resolve(__dirname, '..');
+const source = file => fs.readFileSync(path.join(root, file), 'utf8');
+const view = source('vistas/modulos/pedidos.php');
+const tableStart = view.indexOf('<table id="tablepedidos"');
+const metadataStart = view.lastIndexOf('<?php', view.indexOf('id="tipoDePerfil"'));
+const metadataEnd = view.indexOf('?>', metadataStart) + 2;
+const metadataCode = view.slice(metadataStart, metadataEnd);
+const areaStart = view.lastIndexOf('<div class="ped-card-body">', tableStart);
+const area = view.slice(areaStart, view.indexOf('</table>', tableStart) + 8) + '</div></div>';
+function markup(company) {
+  const code = '<?php $_SESSION=["perfil"=>"administrador","id"=>7,"empresa"=>' + Number(company) + ']; ?>' + metadataCode;
+  const result = spawnSync('php',['-d','display_startup_errors=0'],{input:code,encoding:'utf8',windowsHide:true});
+  assert.equal(result.status,0,result.stderr);
+  return area.replace(metadataCode,result.stdout).replace(/<\?php[\s\S]*?\?>/g,'');
+}
+const tick = ms => new Promise(resolve => setTimeout(resolve, ms || 25));
+let checks = 0;
+function check(value, message) { assert.ok(value, message); checks++; }
+function row(id, index, client = 'José García', order = '777', fecha = '15/10/2026 09:10') {
+  const attrs = `idPedido="${id}" empresa="1" asesor="3" cliente="2"`;
+  return [String(index), 'EGS', `<b>${id}</b>`, `<span>${client}</span>`, '<span>Pedido Pendiente</span>', '$ 12,345.00', '#' + order, fecha, '—',
+    `<button class="btnEliminarPedido" ${attrs}>Eliminar</button><button class="btnImprimirTicketPedido" ${attrs}>Imprimir</button>`, `<button class="btnVerInfoPedido" ${attrs}>Detalle</button>`];
+}
+const rows = Array.from({length: 61}, (_, i) => row(1000 + i, i + 1));
+async function app(stored = {}, company = '1') {
+  const dom = new JSDOM(`${markup(company)}
+    <form id="pedidoNuevoForm"><input name="captura" value="Conservar captura"></form>`, {url:'https://egs.test/index.php?ruta=pedidos', runScripts:'outside-only'});
+  const w=dom.window, $=jquery(w), calls=[], opens=[], alerts=[];
+  w.$=w.jQuery=$; w.alert=message => { throw new Error(message); };
+  w.open=(...args)=>{opens.push(args);};
+  w.swal=options=>{const deferred=$.Deferred();alerts.push({options,deferred});return deferred.promise();};
+  Object.entries(stored).forEach(([key,value])=>w.sessionStorage.setItem(key,value));
+  w.eval(source('vistas/bower_components/datatables.net/js/jquery.dataTables.js'));
+  w.eval(source('vistas/bower_components/datatables.net-bs/js/dataTables.bootstrap.js'));
+  $.ajax=options=>{
+    const xhr={readyState:1,abort(){this.readyState=4;options.error({status:0,statusText:'abort'});}};
+    calls.push({...options,success(response){xhr.readyState=4;options.success(response);},error(error){xhr.readyState=4;options.error(error);}});
+    return xhr;
+  };
+  w.eval(source('vistas/js/pedidos.lista.js'));
+  w.eval(source('vistas/js/gestor.pedidos.js'));
+  w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+  await tick();
+  const table=$('#tablepedidos').DataTable();
+  return {w,$,calls,opens,alerts,table,input:$('#tablepedidos_filter input'),
+    storage:()=>Object.fromEntries(Array.from({length:w.sessionStorage.length},(_,i)=>{const k=w.sessionStorage.key(i);return[k,w.sessionStorage.getItem(k)];})),close:()=>dom.window.close()};
+}
+async function search(a, query, wait = true) { a.input.val(query).trigger('input'); if (wait) await tick(350); }
+function ids(a) { return a.table.rows({search:'applied',order:'applied'}).data().toArray().map(r=>Number(r[2].replace(/<[^>]*>/g,''))); }
+(async()=>{
+  let a=await app();
+  check(a.calls.length===1 && a.calls[0].url==='ajax/tablapedidos.ajax.php','La vista y el gestor realizan una sola carga inicial');
+  await search(a,'100',false);
+  check(a.input.val()==='100' && a.$('#tablepedidos tbody').text().includes('Cargando'),'Una carga lenta no borra la búsqueda ni anuncia una lista vacía');
+  a.calls[0].success({data:rows});
+  check(a.input.val()==='100' && ids(a).length===10,'La respuesta inicial aplica el último texto, incluso antes de terminar la pausa');
+  await tick(700);
+  check(a.input.val()==='100' && ids(a).length===10 && a.calls.length===1,'Una pausa no reinicia el filtro ni recarga pedidos');
+  await search(a,'José García');
+  check(ids(a).length===61,'Encuentra el nombre completo del cliente');
+  await search(a,'jose garcia');
+  check(ids(a).length===61,'La búsqueda admite mayúsculas y omisión de acentos');
+  await search(a,'pedido #001005');
+  check(ids(a).join(',')==='1005','Busca el folio real, con prefijo y ceros iniciales');
+  await search(a,'#1006');
+  check(ids(a).join(',')==='1006','El prefijo # busca un pedido');
+  await search(a,'12345');
+  check(ids(a).length===0,'Un número de pedido no coincide por el importe de otra fila');
+  await search(a,'61');
+  check(ids(a).length===0,'La numeración de las filas no se confunde con el folio');
+  await search(a,'orden 777');
+  check(ids(a).length===61,'Permite buscar expresamente una orden vinculada');
+  await search(a,'Pendiente');
+  check(ids(a).length===61,'Permite buscar por estado');
+  await search(a,'Imprimir');
+  check(ids(a).length===0,'Los textos de botones no producen coincidencias');
+  await search(a,'',false);
+  check(ids(a).length===61 && a.table.page.info().page===0,'Limpiar el campo restaura todas las filas sin filtros anteriores');
+  check(a.$('[name=captura]').val()==='Conservar captura','La búsqueda no modifica los datos del formulario');
+  a.$('#tablepedidos_length select').val('-1').trigger('change');
+  check(a.table.rows({page:'current'}).count()===61 && a.table.page.info().pages===1,'La opción Todos muestra la lista completa');
+  a.$('#tablepedidos_length select').val('10').trigger('change');
+  a.$('#tablepedidos_next a').trigger('click');
+  check(a.table.page.info().page===1 && a.table.page.len()===10,'Cantidad de registros y botón Siguiente funcionan');
+  check(a.$('#id_empresa').val()==='1' && a.$('#tipoidperfil').val()==='7','Redibujar la tabla conserva los datos de empresa y usuario');
+  a.$('#tablepedidos_previous a').trigger('click');
+  check(a.table.page.info().page===0,'El botón Anterior conserva la cantidad seleccionada');
+  a.$('#tablepedidos thead th').eq(2).trigger('click');
+  await tick();
+  check(a.table.order()[0][1]==='asc' && ids(a)[0]===1000,'Ordena numéricamente el folio mediante el encabezado');
+  a.$('#tablepedidos_next a').trigger('click');
+  const saved=a.storage(); a.close();
+  a=await app(saved); a.calls[0].success({data:rows});
+  check(a.table.page.info().page===1 && a.table.page.len()===10 && a.table.order()[0][1]==='asc','Volver o recargar conserva página, cantidad y orden');
+  a.w.eval(source('vistas/js/pedidos.lista.js')); await tick();
+  check(a.calls.length===1 && a.$('#tablepedidos_wrapper').length===1,'Un script repetido no reinicia la tabla ni duplica su carga');
+  const beforeRefresh=a.table.page.info().page;
+  a.table.ajax.reload(null,false);a.calls[1].success({data:rows});
+  check(a.table.page.info().page===beforeRefresh && a.table.page.len()===10,'Actualizar datos conserva la página y la cantidad de registros');
+  await search(a,'pedido 1005',false);
+  const typedBackup=a.storage(); a.close();
+  a=await app(typedBackup); a.calls[0].success({data:rows});
+  check(a.input.val()==='pedido 1005' && ids(a).join(',')==='1005','Recupera también una búsqueda escrita justo antes de salir');
+  a.table.ajax.reload(null,false);
+  a.calls[1].error({status:500});
+  check(a.input.val()==='pedido 1005' && ids(a).join(',')==='1005' && a.$('[role=status]').text().includes('No se pudo actualizar'),'Una respuesta fallida conserva filas y búsqueda con aviso visible');
+  a.$('[role=status] button').trigger('click');
+  a.calls[2].success({data:rows});
+  check(a.input.val()==='pedido 1005' && ids(a).join(',')==='1005' && a.$('[role=status]').css('display')==='none','Reintentar recupera la lista sin borrar el filtro');
+  a.table.ajax.reload(null,false); a.calls[3].success({data:[['respuesta incompleta']]});
+  check(ids(a).join(',')==='1005','Una respuesta malformada no reemplaza los pedidos por filas incompletas');
+  a.table.ajax.reload(null,false); a.calls[4].error({status:401});
+  check(ids(a).join(',')==='1005' && a.$('[role=status]').text().includes('sesión venció'),'La sesión vencida se informa sin borrar el estado de la lista');
+  a.$('.btnVerInfoPedido').first().trigger('click');
+  check(a.opens.length===1 && a.opens[0][0].includes('ruta=infopedido&idPedido=1005') && a.calls.length===5,'Detalle usa la fila visible y evita una petición que se cancelaba al navegar');
+  a.$('.btnImprimirTicketPedido').first().trigger('click');
+  check(a.opens.length===2 && a.opens[1][0].startsWith('extensiones/tcpdf/pdf/ticketpedido.php?') && a.opens[1][0].includes('idPedido=1005') && a.opens[1][1]==='_blank','Imprimir abre el ticket correcto en otra pestaña y en el mismo servidor');
+  a.$('.btnEliminarPedido').first().trigger('click'); a.$('.btnEliminarPedido').first().trigger('click');
+  check(a.alerts.length===1 && a.opens.length===2,'Eliminar pide una sola confirmación y no actúa antes de aceptarla');
+  a.alerts[0].deferred.resolve({value:false}); await tick();
+  check(a.opens.length===2 && !a.$('.btnEliminarPedido').first().prop('disabled'),'Cancelar conserva el pedido y habilita el botón');
+  a.$('.btnEliminarPedido').first().trigger('click'); a.alerts[1].deferred.resolve({value:true}); await tick();
+  check(a.opens.length===3 && a.opens[2][0]==='index.php?ruta=pedidos&idpedido=1005','Confirmar eliminación dirige únicamente al pedido seleccionado');
+  const otherCompany=a.storage();a.close();
+  a=await app(otherCompany,'2');a.calls[0].success({data:rows});
+  check(a.input.val()==='' && a.table.page.len()===25,'Los filtros de otra empresa no se mezclan');
+  a.table.clear().rows.add([row(3000,1,'Cliente','1','31/01/2026 10:00'),row(3001,2,'Cliente','2','01/02/2026 10:00')]).order([7,'asc']).draw();
+  check(ids(a).join(',')==='3000,3001','Las fechas se ordenan cronológicamente y no como texto');
+  const previousOrder=JSON.stringify(a.table.order());
+  a.$('#tablepedidos thead th').eq(9).trigger('click');a.$('#tablepedidos thead th').eq(10).trigger('click');await tick();
+  check(JSON.stringify(a.table.order())===previousOrder && a.table.settings()[0].aoColumns[9].bSearchable===false && a.table.settings()[0].aoColumns[10].bSearchable===false,'Los encabezados de botones quedan fuera de ordenación y búsqueda');
+  a.close();
+  a=await app(); a.calls[0].error({status:500});
+  await search(a,'1005');
+  a.$('[role=status] button').trigger('click');a.calls[1].success({data:rows});
+  check(ids(a).join(',')==='1005' && a.input.val()==='1005','Recupera una carga inicial fallida respetando lo escrito mientras esperaba');a.close();
+  a=await app();a.calls[0].success({data:rows});
+  a.table.ajax.reload(null,false);a.table.ajax.reload(null,false);
+  a.calls[2].success({data:[row(9000,1)]});a.calls[1].success({data:rows});
+  check(ids(a).join(',')==='9000','Una respuesta antigua no reemplaza datos más recientes');
+  a.table.page.len(10).draw();a.table.ajax.reload(null,false);a.calls[3].success({data:rows});
+  a.table.page('last').draw('page');a.table.ajax.reload(null,false);a.calls[4].success({data:rows.slice(0,5)});
+  check(a.table.page.info().page===0 && a.table.rows({page:'current'}).count()===5,'Si la última página desaparece al actualizar, muestra una página válida');
+  a.table.ajax.reload(null,false);a.calls[5].success({data:[]});
+  check(a.table.rows().count()===0 && a.$('#tablepedidos tbody').text().includes('No hay pedidos'),'Una lista vacía confirmada se distingue de un fallo de carga');a.close();
+  console.log(`OK: ${checks} comprobaciones de lista, búsqueda, carga lenta y botones de pedidos`);
+})().catch(error=>{console.error(error);process.exitCode=1;});

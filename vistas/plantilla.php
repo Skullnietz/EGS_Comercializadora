@@ -326,7 +326,7 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
   <?php endif; ?>
   <script src="vistas/js/gestorAsesores.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestorEmpresas.js?v=<?= $jsVer ?>"></script>
-  <script src="vistas/js/gestorOrdenes.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestorOrdenes.js?v=<?= filemtime(__DIR__ . '/js/gestorOrdenes.js') ?>"></script>
   <script src="vistas/js/gestorTecnicos.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/reporteGrafica.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/CorteTotal.js?v=<?= $jsVer ?>"></script>
@@ -342,7 +342,7 @@ if ($isTabletPublicRoute || $isClientePublicRoute) {
   <script src="vistas/js/gestorBanner.js?v=<?= $jsVer ?>"></script>
   <script src="vistas/js/gestor.ticket.stock.js?v=<?= $jsVer ?>"></script>
   <?php if ($rutaActual !== "infopedido"): /* el detalle usa pedidos.detalle.js; este registraría cálculos duplicados */ ?>
-  <script src="vistas/js/gestor.pedidos.js?v=<?= $jsVer ?>"></script>
+  <script src="vistas/js/gestor.pedidos.js?v=<?= filemtime(__DIR__ . '/js/gestor.pedidos.js') ?>"></script>
   <?php endif; ?>
   <?php if ($rutaActual === 'pedidos'): ?>
   <script src="vistas/js/pedidos.guardado.js?v=<?= filemtime(__DIR__ . '/js/pedidos.guardado.js') ?>"></script>

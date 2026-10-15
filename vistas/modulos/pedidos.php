@@ -680,6 +680,13 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
             </div>
           </div>
           <div class="ped-card-body">
+                  <?php
+                    echo'
+
+                    <input  type="hidden" id="tipoDePerfil" value="'.$_SESSION["perfil"].'"  placeholder="'.$_SESSION["perfil"].'">
+                    <input  type="hidden" id="tipoidperfil" value="'.$_SESSION["id"].'"  placeholder="'.$_SESSION["id"].'">
+                    <input  type="hidden" id="id_empresa" value="'.$_SESSION["empresa"].'">';
+                  ?>
             <div class="table-responsive-wrap">
               <table id="tablepedidos" class="table stripe ordenes order-table display compact cell-border hover row-border tablaPedidos" width="100%">
               
@@ -705,13 +712,7 @@ $mostrarMercadoLibre = ($_SESSION["perfil"] == "administrador" || $_SESSION["per
 
                 <tbody>
                   
-                  <?php
-                    echo'
 
-                    <input  type="hidden" id="tipoDePerfil" value="'.$_SESSION["perfil"].'"  placeholder="'.$_SESSION["perfil"].'">
-                    <input  type="hidden" id="tipoidperfil" value="'.$_SESSION["id"].'"  placeholder="'.$_SESSION["id"].'">
-                    <input  type="hidden" id="id_empresa" value="'.$_SESSION["empresa"].'">';
-                  ?>
                 
                 </tbody>
 
@@ -1295,6 +1296,8 @@ MODAL CONFIGURACIÓN MERCADOLIBRE
 </div>
 <?php } ?>
 
+<script src="vistas/js/pedidos.lista.js?v=<?= filemtime(__DIR__ . '/../js/pedidos.lista.js') ?>"></script>
+
 <script>
 /*=============================================
 SERIALIZAR PRODUCTOS ANTES DE ENVIAR EL FORMULARIO
@@ -1308,57 +1311,7 @@ $("#pedidoNuevoForm").on("submit", function(){
   }
 });
 
-    /*=============================================
-CARGAR LA TABLA DINÁMICA DE PEDIDOS
-=============================================*/
-$.ajax({
-  url:"ajax/tablapedidos.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
- 	success:function(respuesta){
-    // Carga previa para validar disponibilidad de datos
- 	}
- })
-
-$("#tablepedidos").DataTable({
-  "ajax": "ajax/tablapedidos.ajax.php?perfil="+$("#tipoDePerfil").val()+"&empresa="+$("#id_empresa").val(),
-	 "deferRender": true,
-	 "retrieve": true,
-	 "processing": true,
-	 "pageLength": 25,
-	 "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
-	 "autoWidth": false,
-	 "order": [[0, 'asc']],
-	 "columnDefs": [
-	   { "targets": [9, 10], "orderable": false },
-	   { "targets": [9, 10], "searchable": false }
-	 ],
-	 "language": {
-	 	"sProcessing":     "Procesando...",
-		"sLengthMenu":     "Mostrar _MENU_ registros",
-		"sZeroRecords":    "No se encontraron resultados",
-		"sEmptyTable":     "Ningún dato disponible en esta tabla",
-		"sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_",
-		"sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0",
-		"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-		"sInfoPostFix":    "",
-		"sSearch":         "Buscar:",
-		"sUrl":            "",
-		"sInfoThousands":  ",",
-		"sLoadingRecords": "Cargando...",
-		"oPaginate": {
-			"sFirst":    "Primero",
-			"sLast":     "Último",
-			"sNext":     "Siguiente",
-			"sPrevious": "Anterior"
-		},
-		"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-		}
-
-	 }
-
-});
-/* Los manejadores de pedidos viven en vistas/js/gestor.pedidos.js (cargado en plantilla.php). */
+/* La lista y sus acciones se inicializan en vistas/js/pedidos.lista.js. */
 
 <?php if ($mostrarMercadoLibre) { ?>
 /*=============================================
