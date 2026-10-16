@@ -1,5 +1,7 @@
 # Migración de EGS a otro hosting
 
+Para seguir los pasos en un panel, consulta la [guía visual de cPanel con capturas](guias/migracion-cpanel/GUIA_PASO_A_PASO.md). Sus imágenes son de referencia; el proveedor del destino aún debe confirmarse.
+
 Preparado el 16 de octubre de 2026. El servidor actual sigue atendiendo el negocio. Esta preparación no cambia DNS, no interrumpe pedidos y no activa tareas en un segundo servidor.
 
 ## Qué se entrega

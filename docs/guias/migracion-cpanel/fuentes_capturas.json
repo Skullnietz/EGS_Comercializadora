@@ -1,0 +1,114 @@
+[
+  {
+    "file": "archivos-ajustes.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/filemanager/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "09f03372e3b4a9b308cde77c1bdf3a029ba3bb9a3d6c005bd9e521bebee71553",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "archivos-inicio.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/filemanager/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "f8ec2f240071a19ae96b0fccb6bd7b50e4434e3a8c5b4d57f7166f1e9199589d",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "asistente-ayuda.png",
+    "source": "ops/migration/migrate.php help",
+    "kind": "local-document-view",
+    "captured_date": "2026-10-16",
+    "sha256": "c7f2819279e08b9b6f028ec9338233bd6f081d0ec9861723aa8ff7908460c919",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "bases-asignar.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/sql/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "b1d874a6d5369e6cb104feea4168a39caac4dfcd797cc6f7dbe607ead6ee7d07",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "bases-crear.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/sql/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "cffc0a33a015cf1c40174883e2bd6995111e4ea945920088bfd7a9f7549b370f",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "bases-usuario.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/sql/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "08f4ff6220e406a85ccb28acacb7d234f49a1656486c22918033789bbeb12f06",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "cloudflare-documentacion.png",
+    "source": "https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/",
+    "kind": "official-documentation",
+    "captured_date": "2026-10-16",
+    "sha256": "9e01a1e60a5c338847d2a6f169fc73062c4dff9b0b6e9ce892a09e486a00244f",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "configuracion-ejemplo.png",
+    "source": "ops/migration/hosting.example.json",
+    "kind": "local-document-view",
+    "captured_date": "2026-10-16",
+    "sha256": "1631d3ff670d488576d6cb8664d6291d38886df559b9cd056a9a0ef87d0c670c",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "correo-cuentas.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/email_accounts/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "7a15445d7dc40dfe7c53dea7f1b314652cf715a9c94a2cbf878f9624ffae0ab8",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "cron-formulario.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/cron/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "1e42298ae241f64ee7ca0f6b4796c1a1aca7f0bc467f73850caa3f81fcf19ae9",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "dominio-crear.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/domains/index.html#/create",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "3b97de6173b820c26bccd9978afd7a62d7e376e22048e38fc0050f3023a25194",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "panel-inicio.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "26e5747c289f7f5d21b166b13936e167cebbc0aef6d1f7b4d79e433590f7adaa",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "php-version.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/multiphp_manager/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "7525a9e9057204c6e78d6d047d2e97a3851fa41364e452c55e75aeddcb077c14",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  },
+  {
+    "file": "ssl-certificados.png",
+    "source": "https://trycpanel.net/cpsess0000000000/frontend/jupiter/security/tls_wizard/index.html",
+    "kind": "public-demo",
+    "captured_date": "2026-10-16",
+    "sha256": "932afeda511df95203077b79b12dea3af0cef6e33c085a354132c5d3fd4647d0",
+    "note": "Referencia; no muestra una cuenta de hosting del usuario."
+  }
+]
