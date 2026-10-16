@@ -9,7 +9,7 @@ if(empty($_SESSION['drive_csrf']))$_SESSION['drive_csrf']=bin2hex(random_bytes(3
 // application roles. GET shows a confirmation form; it never consumes the link.
 if(isset($_POST['owner_setup'])){
     if(!isset($_POST['csrf'])||!hash_equals($_SESSION['drive_csrf'],(string)$_POST['csrf'])){http_response_code(403);exit('No se pudo validar la sesión de configuración.');}
-    try{EgsDriveStorage::claimOwnerToken($_POST['owner_setup']);session_regenerate_id(true);$_SESSION['drive_owner_setup']=array('expires_at'=>time()+3600);header('Location: '.EgsDriveStorage::REDIRECT_URI,true,303);exit;}
+    try{EgsDriveStorage::claimOwnerToken($_POST['owner_setup']);session_regenerate_id(true);$_SESSION['drive_owner_setup']=array('expires_at'=>time()+3600);header('Location: '.EgsDriveStorage::redirectUri(),true,303);exit;}
     catch(Throwable $e){http_response_code(403);exit('Este acceso del propietario venció o ya fue utilizado.');}
 }
 if(isset($_GET['owner_setup'])&&EgsDriveStorage::ownerTokenValid($_GET['owner_setup'])){
@@ -30,7 +30,7 @@ try {
         try{EgsDriveStorage::exchangeCode((string)$_GET['code']);EgsDriveStorage::prepareLibrary();}
         catch(Throwable $e){EgsDriveStorage::saveJson('tokens',$previous);throw $e;}
         $_SESSION['drive_flash']='Google Drive quedó conectado. La carga automática aún no está activada.';
-        header('Location: '.EgsDriveStorage::REDIRECT_URI,true,303);exit;
+        header('Location: '.EgsDriveStorage::redirectUri(),true,303);exit;
     }
     if($_SERVER['REQUEST_METHOD']==='POST') {
         if(!isset($_POST['csrf']) || !hash_equals($_SESSION['drive_csrf'],(string)$_POST['csrf']))throw new RuntimeException('La sesión del formulario venció.');
@@ -72,7 +72,7 @@ $library=EgsDriveStorage::readJson('library');$ready=EgsDriveStorage::readJson('
 <style>body{font:16px system-ui;max-width:850px;margin:40px auto;padding:20px;color:#163045;background:#f5f8fa}section{background:white;border:1px solid #d9e2e8;border-radius:10px;padding:24px;margin:20px 0}textarea{width:100%;box-sizing:border-box;min-height:150px}button{padding:12px 18px;background:#165f91;color:white;border:0;border-radius:6px;font:inherit;cursor:pointer}code{overflow-wrap:anywhere}.success{background:#dff3e8;padding:15px}.error{background:#ffebe6;padding:15px}a{color:#165f91}</style>
 <h1>Almacenamiento de imágenes en Google Drive</h1><p>Conecta la cuenta propietaria de las imágenes del backend y del sitio público. Los archivos de Drive permanecen privados; el sitio seguirá mostrando sus imágenes mediante sus rutas actuales.</p>
 <?php if($message):?><p class="success"><?=drive_h($message)?></p><?php endif;?><?php if($error):?><p class="error"><?=drive_h($error)?></p><?php endif;?>
-<section><h2>1. Configurar la conexión</h2><p>En <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener">Google Cloud</a>, habilita Google Drive API y crea un cliente OAuth de tipo Aplicación web. Registra esta URL de retorno exacta:</p><p><code><?=drive_h(EgsDriveStorage::REDIRECT_URI)?></code></p><p>Selecciona el archivo JSON descargado del cliente. Las credenciales se guardan fuera del directorio público y no se muestran después de guardarlas.</p>
+<section><h2>1. Configurar la conexión</h2><p>En <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener">Google Cloud</a>, habilita Google Drive API y crea un cliente OAuth de tipo Aplicación web. Registra esta URL de retorno exacta:</p><p><code><?=drive_h(EgsDriveStorage::redirectUri())?></code></p><p>Selecciona el archivo JSON descargado del cliente. Las credenciales se guardan fuera del directorio público y no se muestran después de guardarlas.</p>
 <form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=drive_h($_SESSION['drive_csrf'])?>"><input type="hidden" name="action" value="client"><input type="file" name="client_file" accept=".json,application/json" required><p><button>Guardar configuración</button></p></form></section>
 <section><h2>2. Autorizar tu cuenta</h2><p>Se solicitará acceso a los archivos creados por esta integración, usando el permiso drive.file. La aplicación debe estar en modo Producción para que la conexión permanente no expire a los siete días.</p>
 <p>EGS Multimedia utiliza la cuenta que autorices para guardar, organizar y recuperar las imágenes y documentos de las órdenes y del sitio. Guarda el correo de la cuenta, identificadores y metadatos de los archivos, y la autorización OAuth necesaria para operar. El hosting conserva las relaciones con los registros y sirve los archivos; las URLs que ya eran públicas mantienen esa visibilidad. Los clientes no tienen que conectar su Drive personal.</p>

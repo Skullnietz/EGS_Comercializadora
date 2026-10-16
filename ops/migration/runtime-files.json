@@ -1,0 +1,19 @@
+[
+  "config/Hosting.php",
+  "config/env.php",
+  "config/Database.php",
+  "config/global.php",
+  "config/Conexion.php",
+  "config/Mail.php",
+  "config/DriveStorage.php",
+  "config/DriveBackup.php",
+  "config/DriveMigration.php",
+  "drive-media.php",
+  "drive-conectar.php",
+  "scripts/backup-drive.php",
+  "scripts/drive-reconciliar.php",
+  "scripts/drive-migration-worker.php",
+  "scripts/drive-wordpress-inventario.php",
+  "integraciones/wordpress/egs-drive-media.php",
+  "integraciones/wordpress/wp-content/mu-plugins/egs-drive-media.php"
+]

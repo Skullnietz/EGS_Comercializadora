@@ -11,7 +11,7 @@ try {
     $key=EgsDriveStorage::normalize($path,$site);$row=EgsDriveStorage::lookup($key);
     if($row){$etag='"'.$row['md5'].'"';$mime=$row['mime'];}
     else {
-        $root=$site==='wordpress'?dirname(EgsDriveStorage::root()).'/public_html':EgsDriveStorage::root();
+        $root=$site==='wordpress'?EgsHosting::wordpressRoot():EgsDriveStorage::root();
         $file=realpath($root.'/'.$path);$allowed=realpath($root.($site==='wordpress'?'/wp-content/uploads':'/vistas/img'));
         if(!$file||!$allowed||strpos($file,$allowed.'/')!==0||!is_file($file)){http_response_code(404);exit;}
         $mime=(new finfo(FILEINFO_MIME_TYPE))->file($file);

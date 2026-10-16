@@ -4,7 +4,9 @@
  */
 if(!defined('ABSPATH'))exit;
 if(!class_exists('EgsDriveStorage',false)){
-    $egsStorage=dirname(rtrim(ABSPATH,'/')).'/backend.comercializadoraegs.com/config/DriveStorage.php';
+    $bridge=rtrim(ABSPATH,'/').'/egs-hosting.php';if(is_file($bridge))require_once $bridge;
+    $backend=defined('EGS_BACKEND_ROOT')?EGS_BACKEND_ROOT:(getenv('EGS_BACKEND_ROOT') ?: dirname(rtrim(ABSPATH,'/')).'/backend.comercializadoraegs.com');
+    $egsStorage=$backend.'/config/DriveStorage.php';
     if(!is_file($egsStorage))return;
     require_once $egsStorage;
 }

@@ -15,7 +15,7 @@
 Options +FollowSymLinks
 RewriteEngine On
 # BEGIN EGS Drive Media
-RewriteCond /home/egsequip/backend.comercializadoraegs.com/.drive-media-enabled -f
+RewriteCond %{DOCUMENT_ROOT}/.drive-media-enabled -f
 RewriteRule ^vistas/img/.+\.(?:jpe?g|jpe|png|gif|webp|avif|bmp|ico|svg|tiff?|heic|heif|jp2|jpx|j2k|psd|orig|pdf|mp3|mp2|m4a|m4b|aac|aif|aiff|ra|ram|wav|ogg|oga|flac|opus|mp4|m4v|mov|qt|webm|mpeg|mpg|mpe|avi|wmv|flv|asf|divx|ogv|3gp|3g2|mkv)$ drive-media.php [END,NC]
 # END EGS Drive Media
 

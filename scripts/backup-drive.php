@@ -16,6 +16,7 @@ if(isset($options['test'])){
     $drop=EgsDriveBackup::retentionCandidates($folders,4,'id1');$assert(!in_array('id1',array_column($drop,'id'),true),'Nunca retirar el respaldo protegido.');
     echo "OK: horario CDMX, domingo, idempotencia y retención limitada.\n";exit;
 }
+if(isset($options['scheduled'])&&!EgsHosting::writesAllowed())exit;
 $backup=new EgsDriveBackup();
 $lock=fopen($backup->directory().'/run.lock','c');chmod($backup->directory().'/run.lock',0600);
 if(!$lock||!flock($lock,LOCK_EX|LOCK_NB)){EgsDriveBackup::log('already_running');exit;}

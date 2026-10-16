@@ -2,7 +2,7 @@
 if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
 $options=getopt('',array('output:','wordpress-root:'));
 if(empty($options['output']))throw new RuntimeException('Indica --output con la ruta privada del manifiesto CSV.');
-$wpRoot=isset($options['wordpress-root'])?realpath($options['wordpress-root']):dirname(dirname(__DIR__)).'/public_html';
+$wpRoot=isset($options['wordpress-root'])?realpath($options['wordpress-root']):EgsHosting::wordpressRoot();
 if(!$wpRoot||!is_file($wpRoot.'/wp-load.php'))throw new RuntimeException('La raíz de WordPress no es válida.');
 define('SHORTINIT',true);require $wpRoot.'/wp-load.php';
 global $wpdb;$wpdb->query('SET SESSION TRANSACTION READ ONLY');$wpdb->query('START TRANSACTION');

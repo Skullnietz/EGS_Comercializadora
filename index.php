@@ -3,7 +3,7 @@
 /* ── Cargar variables de entorno (.env) PRIMERO que cualquier otra cosa ──────
  * Esto garantiza que Database.php, global.php y todo el sistema
  * tengan acceso a las credenciales antes de usarlas.
- * Si .env no existe, el sistema usa los valores de fallback de Database.php.
+ * Las credenciales se configuran en el entorno privado del hosting.
  */
 require_once "config/env.php";
 

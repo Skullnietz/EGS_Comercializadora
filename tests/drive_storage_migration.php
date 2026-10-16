@@ -2,6 +2,7 @@
 $state=sys_get_temp_dir().'/egs-drive-test-'.bin2hex(random_bytes(5));putenv('EGS_DRIVE_STATE_DIR='.$state);
 $sourceRoot=dirname(__DIR__);$testApp=$state.'/app';mkdir($testApp.'/config',0700,true);mkdir($testApp.'/controladores',0700,true);
 copy($sourceRoot.'/config/DriveStorage.php',$testApp.'/config/DriveStorage.php');copy($sourceRoot.'/controladores/ordenes.controlador.php',$testApp.'/controladores/ordenes.controlador.php');
+foreach(array('Hosting.php','env.php') as $support)copy($sourceRoot.'/config/'.$support,$testApp.'/config/'.$support);
 require $testApp.'/config/DriveStorage.php';
 class ConexionWP { public static $testPdo; public static function conectarWP(){return self::$testPdo;} }
 ConexionWP::$testPdo=new PDO('sqlite::memory:');ConexionWP::$testPdo->exec("CREATE TABLE ordenes(id INTEGER,titulo TEXT,fecha_ingreso TEXT); INSERT INTO ordenes VALUES(777,'Equipo de prueba','2020-06-15 12:00:00')");

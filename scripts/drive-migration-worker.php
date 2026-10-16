@@ -5,7 +5,7 @@ $options=getopt('',array('init','status','run','release-local','site:','slot:','
 if(isset($options['init'])){$result=EgsDriveMigration::initialize(EgsDriveStorage::stateDir().'/manifests');echo json_encode($result)."\n";exit;}
 if(isset($options['status'])){$result=EgsDriveMigration::progress();if(isset($options['publish']))EgsDriveMigration::publishProgress($result,true);echo json_encode($result)."\n";exit;}
 if(!isset($options['run']))throw new RuntimeException('Indica --init, --run o --status.');
-if(is_file(EgsDriveStorage::stateDir().'/migration-pause'))exit;
+if(!EgsHosting::writesAllowed()||is_file(EgsDriveStorage::stateDir().'/migration-pause'))exit;
 $ready=EgsDriveStorage::readJson('integration_ready');if(!EgsDriveStorage::enabled()||!is_file(EgsDriveStorage::root().'/.drive-media-enabled')||empty($ready['backend_ready'])||empty($ready['wordpress_ready']))throw new RuntimeException('Los sitios deben estar activos y verificados antes de trasladar.');
 $slot=isset($options['slot'])?max(1,min(3,(int)$options['slot'])):1;$lock=fopen(EgsDriveStorage::stateDir().'/migration-worker-'.$slot.'.lock','c');if(!$lock||!flock($lock,LOCK_EX|LOCK_NB))exit;
 $release=isset($options['release-local'])&&EgsDriveStorage::productionReady();

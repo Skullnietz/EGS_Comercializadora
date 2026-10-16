@@ -3,8 +3,7 @@
  * Database — Configuración centralizada de las tres conexiones PDO del sistema EGS.
  *
  * Lee credenciales desde variables de entorno (.env cargado por config/env.php).
- * Si una variable no está definida, usa el valor de fallback hardcodeado
- * para garantizar compatibilidad sin .env (útil en desarrollo local).
+ * Las credenciales deben configurarse en un .env privado o en el entorno del servidor.
  *
  * Uso directo:
  *   $pdo = Database::conectar(Database::SISTEMA);
@@ -29,37 +28,42 @@ class Database
 
     /**
      * Devuelve la configuración de credenciales para la clave dada.
-     * Prioridad: variable de entorno → valor de fallback.
+     * Credenciales de entorno; sólo el host y puerto tienen valores predeterminados.
      *
      * @param  string $key
      * @return array
      * @throws RuntimeException
      */
+    private static function env($name, $default='')
+    {
+        $value=getenv($name);return $value===false?$default:$value;
+    }
+
     private static function config($key)
     {
         $map = [
             /* ── Sistema de ventas (egsequip_dbsistema) ── */
             self::SISTEMA => [
-                'host'    => getenv('DB_SISTEMA_HOST') ?: 'localhost',
-                'dbname'  => getenv('DB_SISTEMA_NAME') ?: 'egsequip_dbsistema',
-                'user'    => getenv('DB_SISTEMA_USER') ?: 'egsequip_sistema',
-                'pass'    => getenv('DB_SISTEMA_PASS') ?: '{#k%ER.PJD0?',
+                'host'    => self::env('DB_SISTEMA_HOST', 'localhost'),
+                'dbname'  => self::env('DB_SISTEMA_NAME', ''),
+                'user'    => self::env('DB_SISTEMA_USER', ''),
+                'pass'    => self::env('DB_SISTEMA_PASS', ''),
                 'charset' => 'utf8',
             ],
             /* ── E-commerce / productos (egsequip_ecomerce) ── */
             self::ECOMMERCE => [
-                'host'    => getenv('DB_ECOMMERCE_HOST') ?: 'localhost',
-                'dbname'  => getenv('DB_ECOMMERCE_NAME') ?: 'egsequip_ecomerce',
-                'user'    => getenv('DB_ECOMMERCE_USER') ?: 'egsequip_bdecome',
-                'pass'    => getenv('DB_ECOMMERCE_PASS') ?: 'Qlf24011607',
+                'host'    => self::env('DB_ECOMMERCE_HOST', 'localhost'),
+                'dbname'  => self::env('DB_ECOMMERCE_NAME', ''),
+                'user'    => self::env('DB_ECOMMERCE_USER', ''),
+                'pass'    => self::env('DB_ECOMMERCE_PASS', ''),
                 'charset' => 'utf8',
             ],
             /* ── Órdenes / pedidos / comisiones (egsequip_respaldo) ── */
             self::WORDPRESS => [
-                'host'    => getenv('DB_WORDPRESS_HOST') ?: 'localhost',
-                'dbname'  => getenv('DB_WORDPRESS_NAME') ?: 'egsequip_respaldo',
-                'user'    => getenv('DB_WORDPRESS_USER') ?: 'egsequip_wp54331',
-                'pass'    => getenv('DB_WORDPRESS_PASS') ?: 'Qlf24011607',
+                'host'    => self::env('DB_WORDPRESS_HOST', 'localhost'),
+                'dbname'  => self::env('DB_WORDPRESS_NAME', ''),
+                'user'    => self::env('DB_WORDPRESS_USER', ''),
+                'pass'    => self::env('DB_WORDPRESS_PASS', ''),
                 'charset' => 'utf8',
             ],
         ];
@@ -68,6 +72,9 @@ class Database
             throw new RuntimeException("Database: identificador de conexión desconocido '$key'.");
         }
 
+        if($map[$key]['dbname']==='' || $map[$key]['user']==='')throw new RuntimeException('Faltan las variables DB_ de la conexión '.$key.'.');
+        $prefix='DB_'.strtoupper($key);$map[$key]['port']=(int)(getenv($prefix.'_PORT') ?: 3306);
+        if($map[$key]['port']<1 || $map[$key]['port']>65535)throw new RuntimeException('Puerto de base de datos inválido.');
         return $map[$key];
     }
 
@@ -82,7 +89,7 @@ class Database
     {
         if (!isset(self::$instances[$key])) {
             $c   = self::config($key);
-            $dsn = "mysql:host={$c['host']};dbname={$c['dbname']};charset={$c['charset']}";
+            $dsn = "mysql:host={$c['host']};port={$c['port']};dbname={$c['dbname']};charset={$c['charset']}";
 
             self::$instances[$key] = new PDO(
                 $dsn,

@@ -9,7 +9,7 @@ class EgsDriveBackup
     private $config;
     public function __construct($dir=null)
     {
-        $this->dir=$dir?:dirname(EgsDriveStorage::root()).'/.egs-backup';
+        $this->dir=$dir?:EgsHosting::backupDir();
         umask(0077);
         if(!is_dir($this->dir)&&!mkdir($this->dir,0700,true))throw new RuntimeException('No se pudo crear el directorio privado de respaldos.');
         chmod($this->dir,0700);
@@ -25,9 +25,9 @@ class EgsDriveBackup
     public static function log($event,$data=array()){echo json_encode(array_merge(array('at'=>gmdate('c'),'event'=>$event),$data),JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)."\n";flush();}
     public static function due($now,$lastDaily,$lastWeekly)
     {
-        $local=(new DateTimeImmutable('@'.$now))->setTimezone(new DateTimeZone('America/Mexico_City'));
-        $day=$local->format('Y-m-d');$after=(int)$local->format('H')>=3;
-        return array('day'=>$day,'daily'=>$after&&$lastDaily!==$day,'weekly'=>$after&&$local->format('N')==='7'&&$lastWeekly!==$day);
+        $local=(new DateTimeImmutable('@'.$now))->setTimezone(new DateTimeZone(getenv('EGS_BACKUP_TIMEZONE') ?: 'America/Mexico_City'));
+        $day=$local->format('Y-m-d');$after=(int)$local->format('H')>=(int)(getenv('EGS_BACKUP_HOUR')===false?3:getenv('EGS_BACKUP_HOUR'));
+        return array('day'=>$day,'daily'=>$after&&$lastDaily!==$day,'weekly'=>$after&&$local->format('N')===(getenv('EGS_BACKUP_WEEKDAY') ?: '7')&&$lastWeekly!==$day);
     }
     public static function retentionCandidates($folders,$keep,$protectedId)
     {
@@ -65,6 +65,7 @@ class EgsDriveBackup
     }
     public function initialize()
     {
+        EgsHosting::requireWrites();
         $root=EgsDriveStorage::folder('Respaldos_EGS');
         $this->config=array_merge($this->config,array('owner'=>self::OWNER,'root_id'=>$root,'daily_id'=>$this->folder($root,'Bases_de_datos_diarios','daily_root'),'weekly_id'=>$this->folder($root,'Bases_de_datos_semanales','weekly_root'),'sites_id'=>$this->folder($root,'Sitios_actualizados','sites_root'),'daily_keep'=>7,'weekly_keep'=>4,'timezone'=>'America/Mexico_City','daily_hour'=>3,'weekly_day'=>'Sunday'));
         if(!is_file($this->dir.'/recovery.key')){file_put_contents($this->dir.'/recovery.key',bin2hex(random_bytes(32))."\n");chmod($this->dir.'/recovery.key',0600);}
@@ -90,18 +91,22 @@ class EgsDriveBackup
     {
         $this->ensureAgent();
         $target=$file.'.gpg';
-        $this->command(array('/usr/bin/gpg','--no-options','--homedir',$this->dir.'/gnupg','--batch','--yes','--passphrase-file',$this->dir.'/recovery.key','--symmetric','--cipher-algo','AES256','--compress-algo','none','--force-mdc','--s2k-digest-algo','SHA256','--output',$target,$file));
+        $this->command(array_merge(EgsHosting::gpgArguments($this->dir.'/gnupg',$this->dir.'/recovery.key'),array('--symmetric','--cipher-algo','AES256','--compress-algo','none','--force-mdc','--s2k-digest-algo','SHA256','--output',$target,$file)));
         $check=$file.'.decrypt-check';
-        $this->command(array('/usr/bin/gpg','--no-options','--homedir',$this->dir.'/gnupg','--batch','--yes','--passphrase-file',$this->dir.'/recovery.key','--output',$check,'--decrypt',$target));
+        $this->command(array_merge(EgsHosting::gpgArguments($this->dir.'/gnupg',$this->dir.'/recovery.key'),array('--output',$check,'--decrypt',$target)));
         if(hash_file('sha256',$check)!==hash_file('sha256',$file))throw new RuntimeException('La comprobación de cifrado no coincide.');
         unlink($check);return $target;
     }
     private function ensureAgent()
     {
-        $check=array('/usr/bin/timeout','10','/usr/bin/gpg-connect-agent','--homedir',$this->dir.'/gnupg','/bye');
+        if(!is_dir($this->dir.'/gnupg')&&!mkdir($this->dir.'/gnupg',0700,true))throw new RuntimeException('No se pudo preparar GnuPG.');
+        chmod($this->dir.'/gnupg',0700);
+        $version=array();exec(escapeshellarg(EgsHosting::binary('gpg')).' --version 2>/dev/null',$version);
+        if(isset($version[0])&&preg_match('/(\d+\.\d+(?:\.\d+)?)/',$version[0],$m)&&version_compare($m[1],'2.1','>='))return;
+        $check=array(EgsHosting::binary('timeout'),'10',EgsHosting::binary('gpg-connect-agent'),'--homedir',$this->dir.'/gnupg','/bye');
         try{$this->command($check);return;}catch(Throwable $e){}
         // File-backed descriptors let the daemon detach without keeping a PHP pipe open.
-        $this->command(array('/usr/bin/timeout','20','/usr/bin/gpg-agent','--homedir',$this->dir.'/gnupg','--use-standard-socket','--daemon'));
+        $this->command(array(EgsHosting::binary('timeout'),'20',EgsHosting::binary('gpg-agent'),'--homedir',$this->dir.'/gnupg','--use-standard-socket','--daemon'));
         $this->command($check);
     }
     private function upload($path,$parent,$kind)
@@ -158,18 +163,21 @@ class EgsDriveBackup
     {
         $configs=array();$method=new ReflectionMethod('Database','config');$method->setAccessible(true);
         foreach(array(Database::ECOMMERCE,Database::WORDPRESS) as $key){$c=$method->invoke(null,$key);$configs[$key]=$c;}
-        $schemas=array('egsequip_ecomerce'=>Database::ECOMMERCE,'egsequip_respaldo'=>Database::WORDPRESS,'egsequip_wp54331'=>Database::WORDPRESS,'egsequip_sisanweb'=>Database::WORDPRESS);
+        $schemas=array();foreach($configs as $key=>$c)$schemas[$c['dbname']]=$key;
+        if(getenv('EGS_BACKUP_DATABASES')){$schemas=json_decode(getenv('EGS_BACKUP_DATABASES'),true);if(!is_array($schemas)||!$schemas)throw new RuntimeException('EGS_BACKUP_DATABASES debe ser un mapa JSON de esquema a conexión.');}
+        $extra=json_decode(getenv('EGS_BACKUP_CONNECTIONS') ?: '{}',true);if(!is_array($extra))throw new RuntimeException('EGS_BACKUP_CONNECTIONS inválido.');$configs=array_merge($configs,$extra);
         $out=array();
         foreach($schemas as $schema=>$key){
+            if(!preg_match('/^[A-Za-z0-9_]+$/',$schema)||!isset($configs[$key]))throw new RuntimeException('Mapa de respaldos inválido.');
             self::log('database_dump_start',array('database'=>$schema));$c=$configs[$key];$cnf=$work.'/mysql-'.$key.'.cnf';
             $quote=function($v){return '"'.str_replace(array('\\','"',"\n","\r"),array('\\\\','\\"','\\n','\\r'),$v).'"';};
-            file_put_contents($cnf,"[client]\nhost=".$quote($c['host'])."\nuser=".$quote($c['user'])."\npassword=".$quote($c['pass'])."\n");chmod($cnf,0600);
+            file_put_contents($cnf,"[client]\nhost=".$quote($c['host'])."\nport=".(isset($c['port'])?(int)$c['port']:3306)."\nuser=".$quote($c['user'])."\npassword=".$quote($c['pass'])."\n");chmod($cnf,0600);
             $sql=$work.'/'.$schema.'.sql';
-            try{$this->command(array('/usr/bin/mysqldump','--defaults-extra-file='.$cnf,'--lock-tables','--quick','--hex-blob','--routines','--events','--triggers','--set-gtid-purged=OFF','--default-character-set=utf8mb4','--databases',$schema),$sql);}finally{if(is_file($cnf))unlink($cnf);}
-            $pdo=Database::conectar($key);$countQuery=$pdo->prepare('SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=? AND TABLE_TYPE=\'BASE TABLE\'');$countQuery->execute(array($schema));$expected=(int)$countQuery->fetchColumn();
+            try{$this->command(array_merge(array(EgsHosting::binary('mysqldump'),'--defaults-extra-file='.$cnf,'--lock-tables','--quick','--no-tablespaces','--hex-blob','--routines','--events','--triggers','--default-character-set=utf8mb4'),EgsHosting::dumpOptions(),array('--databases',$schema)),$sql);}finally{if(is_file($cnf))unlink($cnf);}
+            $pdo=isset($extra[$key])?new PDO('mysql:host='.$c['host'].';port='.(isset($c['port'])?(int)$c['port']:3306).';dbname='.$schema,$c['user'],$c['pass'],array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION)):Database::conectar($key);$countQuery=$pdo->prepare('SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=? AND TABLE_TYPE=\'BASE TABLE\'');$countQuery->execute(array($schema));$expected=(int)$countQuery->fetchColumn();
             $fh=fopen($sql,'rb');$actual=0;$completed=false;while(($line=fgets($fh))!==false){if(strpos($line,'CREATE TABLE ')===0)$actual++;if(strpos($line,'-- Dump completed on ')===0)$completed=true;}fclose($fh);
             if(!$completed||$actual!==$expected)throw new RuntimeException('El dump no está completo: '.$schema.' (tablas '.$actual.'/'.$expected.').');
-            $this->command(array('/usr/bin/gzip','-n','-6',$sql));$gz=$sql.'.gz';$this->command(array('/usr/bin/gzip','-t',$gz));
+            $this->command(array(EgsHosting::binary('gzip'),'-n','-6',$sql));$gz=$sql.'.gz';$this->command(array(EgsHosting::binary('gzip'),'-t',$gz));
             $encrypted=$this->encrypt($gz);$out[]=array('schema'=>$schema,'tables'=>$expected,'path'=>$encrypted,'plain_sha256'=>hash_file('sha256',$gz));unlink($gz);
         }return $out;
     }
@@ -237,6 +245,7 @@ class EgsDriveBackup
     }
     public function backupDatabases($seedWeekly=false,$scheduled=false)
     {
+        EgsHosting::requireWrites();
         $this->requireReady();$state=$this->read('state');$due=self::due(time(),isset($state['last_daily_day'])?$state['last_daily_day']:null,isset($state['last_weekly_day'])?$state['last_weekly_day']:null);$day=$due['day'];
         if($scheduled&&!$due['daily']&&!$due['weekly'])return array('status'=>'not_due');
         $work=$this->work('database');
@@ -264,15 +273,16 @@ class EgsDriveBackup
     }
     private function archive($root,$items,$exclude,$target)
     {
-        $args=array('/usr/bin/tar','--warning=no-file-changed','--ignore-failed-read','-czf',$target,'-C',$root);
+        $args=array(EgsHosting::binary('tar'),'--warning=no-file-changed','--ignore-failed-read','-czf',$target,'-C',$root);
         foreach($exclude as $pattern)$args[]='--exclude='.$pattern;foreach($items as $item)$args[]=$item;
-        $this->command($args);$this->command(array('/usr/bin/gzip','-t',$target));
-        $listing=$target.'.listing';$this->command(array('/usr/bin/tar','-tzf',$target),$listing);if(filesize($listing)===0)throw new RuntimeException('El respaldo de archivos está vacío.');
+        $this->command($args);$this->command(array(EgsHosting::binary('gzip'),'-t',$target));
+        $listing=$target.'.listing';$this->command(array(EgsHosting::binary('tar'),'-tzf',$target),$listing);if(filesize($listing)===0)throw new RuntimeException('El respaldo de archivos está vacío.');
         return $listing;
     }
     public function snapshotSites()
     {
-        $this->requireReady();$work=$this->work('sites');$stamp=(new DateTimeImmutable('now',new DateTimeZone('America/Mexico_City')))->format('Y-m-d_His');$folder=$this->folder($this->config['sites_id'],$stamp,'sites');$home=dirname(EgsDriveStorage::root());$mediaState=$work.'/drive-state';mkdir($mediaState,0700);
+        EgsHosting::requireWrites();
+        $this->requireReady();$work=$this->work('sites');$stamp=(new DateTimeImmutable('now',new DateTimeZone(getenv('EGS_BACKUP_TIMEZONE') ?: 'America/Mexico_City')))->format('Y-m-d_His');$folder=$this->folder($this->config['sites_id'],$stamp,'sites');$home=dirname(EgsDriveStorage::root());$backendName=basename(EgsDriveStorage::root());$wpRoot=EgsHosting::wordpressRoot();$wpName=basename($wpRoot);$mediaState=$work.'/drive-state';mkdir($mediaState,0700);
         $state=$this->read('state');
         $manifest=array('version'=>1,'kind'=>'sites','created_utc'=>gmdate('c'),'database_daily_folder'=>isset($state['last_daily_folder'])?$state['last_daily_folder']:null,'database_daily_manifest'=>isset($state['last_daily_manifest'])?$state['last_daily_manifest']:null,'files'=>array(),'media_storage'=>'Live media are in the EGS Drive library. This snapshot includes the path-to-Drive index; it does not make a second independent copy of all media.');
         $manifest['local_legacy_archives']=array();
@@ -283,15 +293,15 @@ class EgsDriveBackup
             foreach(array('library.json','client.json','tokens.json','oauth_production.json','enabled','integration_ready.json') as $name)if(is_file(EgsDriveStorage::stateDir().'/'.$name))copy(EgsDriveStorage::stateDir().'/'.$name,$mediaState.'/'.$name);
             $mapping=new PDO('sqlite:'.$mediaState.'/media.sqlite');$manifest['media_alias_count']=(int)$mapping->query('SELECT COUNT(*) FROM media')->fetchColumn();$manifest['media_library']=EgsDriveStorage::readJson('library');
             $jobs=array(
-                array('name'=>'wordpress','root'=>$home,'items'=>array('public_html'),'exclude'=>array('public_html/.git','public_html/wp-content/ai1wm-backups','public_html/wp-content/cache','public_html/wp-content/wpo-cache','public_html/wp-content/upgrade','public_html/error_log','public_html/wp-content/debug.log')),
-                array('name'=>'administracion','root'=>$home,'items'=>array('backend.comercializadoraegs.com'),'exclude'=>array('backend.comercializadoraegs.com/.git','backend.comercializadoraegs.com/storage/cache','backend.comercializadoraegs.com/error_log')),
+                array('name'=>'wordpress','root'=>dirname($wpRoot),'items'=>array($wpName),'exclude'=>array($wpName.'/.git',$wpName.'/wp-content/ai1wm-backups',$wpName.'/wp-content/cache',$wpName.'/wp-content/wpo-cache',$wpName.'/wp-content/upgrade',$wpName.'/error_log',$wpName.'/wp-content/debug.log')),
+                array('name'=>'administracion','root'=>$home,'items'=>array($backendName),'exclude'=>array($backendName.'/.git',$backendName.'/storage/cache',$backendName.'/error_log')),
                 array('name'=>'integracion-drive','root'=>$work,'items'=>array('drive-state'),'exclude'=>array())
             );
             if(is_file($home.'/backend_respaldo_antes_main/vistas/img/cabeceras.zip'))$jobs[]=array('name'=>'legado-cabeceras','root'=>$home.'/backend_respaldo_antes_main','items'=>array('vistas/img/cabeceras.zip'),'exclude'=>array());
             foreach($jobs as $job){
                 self::log('site_archive_start',array('site'=>$job['name']));$path=$work.'/'.$job['name'].'-'.$stamp.'.tar.gz';$listing=$this->archive($job['root'],$job['items'],$job['exclude'],$path);
-                if($job['name']==='wordpress'&&strpos(file_get_contents($listing),'public_html/wp-config.php')===false)throw new RuntimeException('Falta wp-config.php en el respaldo.');
-                if($job['name']==='administracion'&&strpos(file_get_contents($listing),'backend.comercializadoraegs.com/index.php')===false)throw new RuntimeException('Falta index.php en el respaldo.');
+                if($job['name']==='wordpress'&&strpos(file_get_contents($listing),$wpName.'/wp-config.php')===false)throw new RuntimeException('Falta wp-config.php en el respaldo.');
+                if($job['name']==='administracion'&&strpos(file_get_contents($listing),$backendName.'/index.php')===false)throw new RuntimeException('Falta index.php en el respaldo.');
                 $plainSha=hash_file('sha256',$path);$encrypted=$this->encrypt($path);$remote=$this->upload($encrypted,$folder,'site_archive');$manifest['files'][]=array('name'=>$job['name'],'plain_sha256'=>$plainSha,'drive'=>$remote);unlink($path);unlink($encrypted);unlink($listing);
             }
             $restore="RESTAURAR EGS\nEstos archivos están cifrados con OpenPGP/AES256. Conserva recovery.key fuera del hosting.\nDescifra: gpg --batch --passphrase-file recovery.key --output archivo.tar.gz --decrypt archivo.tar.gz.gpg\nComprueba: gzip -t archivo.tar.gz; tar -tzf archivo.tar.gz\nRestaura los archivos en un servidor separado, restaura los SQL en MySQL y adapta las credenciales y los dominios.\nEl índice drive-state/media.sqlite y library.json son necesarios para las imágenes alojadas en Drive. Conserva la biblioteca de multimedia: no es una copia independiente dentro de estos tar.\nLos archivos client.json y tokens.json contienen autorizaciones; deben permanecer privados. Puede ser necesario autorizar de nuevo Google.\nLos SQL diarios y semanales contienen las cuatro bases de la cuenta, cifrados individualmente. Descifra, descomprime e importa en un entorno aislado primero.\nLos respaldos de sitios excluyen Git, cachés y respaldos antiguos. El archivo de legado conserva el ZIP histórico de cabeceras antes de eliminar la copia local anterior.\n";

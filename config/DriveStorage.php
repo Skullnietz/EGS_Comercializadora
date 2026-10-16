@@ -1,5 +1,6 @@
 <?php
 /** Google Drive storage for EGS. Compatible with PHP 7.1; secrets and metadata live outside the web root. */
+require_once __DIR__.'/Hosting.php';
 class EgsDriveStorage
 {
     const REDIRECT_URI = 'https://backend.comercializadoraegs.com/drive-conectar.php';
@@ -9,6 +10,7 @@ class EgsDriveStorage
     private static $curl;
     public static function root() { return dirname(__DIR__); }
     public static function stateDir() { return getenv('EGS_DRIVE_STATE_DIR') ?: dirname(self::root()).'/.egs-drive'; }
+    public static function redirectUri() { return EgsHosting::redirectUri(); }
     public static function enabled() { return is_file(self::stateDir().'/enabled'); }
     public static function setTransportForTests($callback) { self::$transport=$callback; }
     public static function init()
@@ -35,7 +37,7 @@ class EgsDriveStorage
     {
         $v=json_decode($input,true);$v=isset($v['web'])?$v['web']:$v;
         if (!is_array($v) || empty($v['client_id']) || empty($v['client_secret']) || !preg_match('/^[A-Za-z0-9._-]+\.apps\.googleusercontent\.com$/',$v['client_id'])) throw new InvalidArgumentException('Se necesita un cliente OAuth de tipo Aplicación web.');
-        if (isset($v['redirect_uris']) && !in_array(self::REDIRECT_URI,$v['redirect_uris'],true)) throw new InvalidArgumentException('El cliente OAuth debe incluir la URL de retorno indicada en esta página.');
+        if (isset($v['redirect_uris']) && !in_array(self::redirectUri(),$v['redirect_uris'],true)) throw new InvalidArgumentException('El cliente OAuth debe incluir la URL de retorno indicada en esta página.');
         $existing=self::readJson('client');
         if (!empty(self::readJson('tokens')) && (!isset($existing['client_id']) || $existing['client_id']!==$v['client_id'])) throw new RuntimeException('No se puede cambiar el cliente de una biblioteca conectada.');
         self::saveJson('client',array('client_id'=>$v['client_id'],'client_secret'=>$v['client_secret']));
@@ -44,7 +46,7 @@ class EgsDriveStorage
     {
         if(PHP_SAPI!=='cli')throw new RuntimeException('El acceso del propietario solo se puede generar desde la terminal del servidor.');
         $token=bin2hex(random_bytes(32));self::saveJson('owner_setup',array('sha256'=>hash('sha256',$token),'expires_at'=>time()+86400));
-        return self::REDIRECT_URI.'?owner_setup='.$token;
+        return self::redirectUri().'?owner_setup='.$token;
     }
     public static function ownerTokenValid($token)
     {
@@ -61,7 +63,7 @@ class EgsDriveStorage
     public static function authorizationUrl($state)
     {
         $client=self::readJson('client');if(empty($client['client_id']))throw new RuntimeException('Primero configura el cliente OAuth.');
-        return 'https://accounts.google.com/o/oauth2/v2/auth?'.http_build_query(array('client_id'=>$client['client_id'],'redirect_uri'=>self::REDIRECT_URI,'response_type'=>'code','scope'=>self::SCOPE,'access_type'=>'offline','prompt'=>'consent','state'=>$state), '', '&', PHP_QUERY_RFC3986);
+        return 'https://accounts.google.com/o/oauth2/v2/auth?'.http_build_query(array('client_id'=>$client['client_id'],'redirect_uri'=>self::redirectUri(),'response_type'=>'code','scope'=>self::SCOPE,'access_type'=>'offline','prompt'=>'consent','state'=>$state), '', '&', PHP_QUERY_RFC3986);
     }
     public static function rawRequest($method,$url,$headers=array(),$body=null)
     {
@@ -91,7 +93,7 @@ class EgsDriveStorage
     }
     public static function exchangeCode($code)
     {
-        $v=self::tokenRequest(array('grant_type'=>'authorization_code','code'=>$code,'redirect_uri'=>self::REDIRECT_URI));
+        $v=self::tokenRequest(array('grant_type'=>'authorization_code','code'=>$code,'redirect_uri'=>self::redirectUri()));
         if(empty($v['refresh_token']) || empty($v['access_token']))throw new RuntimeException('Google no entregó autorización permanente. Vuelve a conectar con consentimiento.');
         $v['expires_at']=time()+(int)$v['expires_in'];$v['authorized_at']=time();self::saveJson('tokens',$v);
     }
@@ -115,6 +117,7 @@ class EgsDriveStorage
     }
     public static function api($method,$path,$body=null)
     {
+        if(strtoupper($method)!=='GET')EgsHosting::requireWrites();
         $headers=array('Authorization: Bearer '.self::token());
         if($body!==null){$headers[]='Content-Type: application/json';$body=json_encode($body);}
         return self::checkedJson(self::rawRequest($method,'https://www.googleapis.com/drive/v3/'.$path,$headers,$body));
@@ -140,7 +143,7 @@ class EgsDriveStorage
         // Four legacy folders contain a literal tab. Accept only an existing,
         // contained original or its registered alias, including after migration.
         if(strpos($path,"\t")!==false&&!self::lookup($site.'/'.$path)){
-            $root=$site==='wordpress'?dirname(self::root()).'/public_html':self::root();$actual=realpath($root.'/'.$path);$allowed=realpath($root.'/'.rtrim($prefix,'/'));
+            $root=$site==='wordpress'?EgsHosting::wordpressRoot():self::root();$actual=realpath($root.'/'.$path);$allowed=realpath($root.'/'.rtrim($prefix,'/'));
             if(!$actual||!$allowed||!is_file($actual)||strpos($actual,$allowed.'/')!==0)throw new InvalidArgumentException('La ruta especial no corresponde a una imagen existente.');
         }
         return $site.'/'.$path;
@@ -191,6 +194,7 @@ class EgsDriveStorage
     }
     public static function put($key,$content,$mime,$context=array())
     {
+        EgsHosting::requireWrites();
         $key=self::normalize($key,strpos($key,'wordpress/')===0?'wordpress':'backend');self::init();
         $name='/upload-'.substr(hash('sha256',$key),0,2).'.lock';$lock=fopen(self::stateDir().$name,'c');chmod(self::stateDir().$name,0600);
         if(!$lock||!flock($lock,LOCK_EX))throw new RuntimeException('No se pudo confirmar la carga de la imagen.');
@@ -243,8 +247,9 @@ class EgsDriveStorage
     /** Serialize migration against live uploads of the same path. */
     public static function migrateFile($key,$context=array(),$releaseLocal=false)
     {
+        EgsHosting::requireWrites();
         $site=strpos($key,'wordpress/')===0?'wordpress':'backend';$key=self::normalize($key,$site);self::init();
-        $root=$site==='wordpress'?dirname(self::root()).'/public_html':self::root();
+        $root=$site==='wordpress'?EgsHosting::wordpressRoot():self::root();
         $file=$root.'/'.substr($key,strlen($site)+1);
         $lock=fopen(self::stateDir().'/upload-'.substr(hash('sha256',$key),0,2).'.lock','c');
         if(!$lock||!flock($lock,LOCK_EX))throw new RuntimeException('No se pudo bloquear la imagen para trasladarla.');
@@ -341,6 +346,7 @@ class EgsDriveStorage
     }
     public static function reconcileOrders($limit=25)
     {
+        EgsHosting::requireWrites();
         $jobs=self::database()->query('SELECT * FROM order_jobs ORDER BY created_at LIMIT '.max(1,(int)$limit))->fetchAll(PDO::FETCH_ASSOC);$done=0;
         foreach($jobs as $job){$context=json_decode($job['context'],true);
             foreach($context['paths'] as $path){$key=self::normalize($path);if(strpos($key,'backend/vistas/img/default/')===0||strpos($key,'backend/vistas/img/productos/default/')===0)continue;$row=self::lookup($key);if(!$row)continue;

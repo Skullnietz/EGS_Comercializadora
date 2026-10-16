@@ -1,0 +1,70 @@
+{
+  "mode": "staging",
+  "paths": {
+    "backend": "/home/USUARIO/backend.comercializadoraegs.com",
+    "wordpress": "/home/USUARIO/public_html",
+    "drive": "/home/USUARIO/.egs-drive",
+    "backup": "/home/USUARIO/.egs-backup",
+    "work": "/home/USUARIO/.egs-migration",
+    "mail": "/home/USUARIO/mail",
+    "mail_config": "/home/USUARIO/etc"
+  },
+  "urls": {
+    "backend": "https://backend.comercializadoraegs.com",
+    "wordpress": "https://comercializadoraegs.com"
+  },
+  "binaries": {},
+  "databases": [
+    {
+      "key": "ecommerce",
+      "host": "localhost",
+      "port": 3306,
+      "name": "USUARIO_ecommerce",
+      "user": "USUARIO_app",
+      "password": "CAMBIAR"
+    },
+    {
+      "key": "wordpress",
+      "host": "localhost",
+      "port": 3306,
+      "name": "USUARIO_ordenes",
+      "user": "USUARIO_app",
+      "password": "CAMBIAR"
+    },
+    {
+      "key": "site",
+      "host": "localhost",
+      "port": 3306,
+      "name": "USUARIO_ordenes",
+      "user": "USUARIO_wp",
+      "password": "CAMBIAR"
+    },
+    {
+      "key": "legacy",
+      "host": "localhost",
+      "port": 3306,
+      "name": "USUARIO_wordpress_anterior",
+      "user": "USUARIO_wp",
+      "password": "CAMBIAR"
+    },
+    {
+      "key": "archive",
+      "host": "localhost",
+      "port": 3306,
+      "name": "USUARIO_sisanweb",
+      "user": "USUARIO_app",
+      "password": "CAMBIAR"
+    }
+  ],
+  "environment": {
+    "APP_ENV": "production",
+    "MAIL_HOST": "mail.comercializadoraegs.com",
+    "MAIL_PORT": "465",
+    "MAIL_ENCRYPTION": "ssl",
+    "MAIL_USERNAME": "contacto@comercializadoraegs.com",
+    "MAIL_PASSWORD": "CAMBIAR",
+    "MAIL_FROM_ADDRESS": "contacto@comercializadoraegs.com",
+    "MAIL_FROM_NAME": "EGS Comercializadora",
+    "MAIL_REPLY_TO": "contacto@comercializadoraegs.com"
+  }
+}

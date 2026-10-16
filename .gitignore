@@ -51,3 +51,10 @@ llave-recuperacion.key
 *.wpress
 *.sql.gz
 *.tar.gz.gpg
+
+# Configuración privada del hosting y paquetes de migración
+/config/environment.php
+/ops/migration/*.json
+!/ops/migration/hosting.example.json
+!/ops/migration/runtime-files.json
+/ops/migration/work/

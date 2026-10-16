@@ -3271,19 +3271,8 @@ LISTAR ORDENES ASESOR MES ENTRADAS
 
 
 
-			$mail->SMTPSecure = 'tls';
-
-
-
-			$mail->isMail();
-
-
-
-			$mail->setFrom('noreplay.ordenes@backend.comercializadoraegs.com');
-
-
-
-			$mail->addReplyTo('noreplay.ordenes@backend.comercializadoraegs.com');
+			require_once dirname(__DIR__).'/config/Mail.php';
+            EgsMail::configure($mail);
 
 
 

@@ -11,7 +11,7 @@
  *   - Soporta comillas simples y dobles en los valores
  *   - No sobreescribe variables que ya existan en el entorno del servidor
  *     (las del cPanel / virtualhost tienen prioridad)
- *   - Si .env no existe, no lanza error — el sistema usa los fallbacks de Database.php
+ *   - Si .env no existe, no lanza error — las conexiones requieren configuración explícita
  *
  * Uso: require_once __DIR__ . '/../config/env.php';  (se llama en index.php)
  *
@@ -26,10 +26,11 @@
  */
 
 (static function () {
-    $envPath = __DIR__ . '/../.env';
+    $pointer=__DIR__.'/environment.php';
+    $envPath = getenv('EGS_ENV_FILE') ?: (is_file($pointer)?require $pointer:__DIR__.'/../.env');
 
     if (!file_exists($envPath) || !is_readable($envPath)) {
-        return; // Sin .env: el sistema usa valores de fallback en Database.php
+        return; // Sin .env: configura las conexiones antes de utilizarlas
     }
 
     $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -61,7 +62,7 @@
         }
 
         // Solo registrar si el nombre es válido y no existe ya
-        if ($name !== '' && getenv($name) === false) {
+        if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $name) && getenv($name) === false) {
             putenv("$name=$value");
             $_ENV[$name]    = $value;
             $_SERVER[$name] = $value;

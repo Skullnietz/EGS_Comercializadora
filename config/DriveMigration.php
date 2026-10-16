@@ -17,7 +17,7 @@ class EgsDriveMigration
             $manifest=array();$csv=$manifestDir.'/'.$site.'.csv';$fh=fopen($csv,'r');if(!$fh)throw new RuntimeException('Falta el inventario de relaciones: '.$site);
             $header=fgetcsv($fh);$header[0]=preg_replace('/^\xEF\xBB\xBF/','',$header[0]);
             while(($r=fgetcsv($fh))!==false){if(count($r)!==count($header))throw new RuntimeException('El inventario contiene una fila inválida.');$m=array_combine($header,$r);$manifest[$m['archivo']]=$m;}fclose($fh);
-            $root=$site==='backend'?EgsDriveStorage::root():dirname(EgsDriveStorage::root()).'/public_html';$media=$site==='backend'?'/vistas/img':'/wp-content/uploads';
+            $root=$site==='backend'?EgsDriveStorage::root():EgsHosting::wordpressRoot();$media=$site==='backend'?'/vistas/img':'/wp-content/uploads';
             $it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root.$media,FilesystemIterator::SKIP_DOTS));$count=0;$db->beginTransaction();
             try{foreach($it as $f){if(!$f->isFile()||$f->isLink()||!EgsDriveStorage::mediaPath($f->getFilename()))continue;
                 if(!EgsDriveStorage::mediaMime((new finfo(FILEINFO_MIME_TYPE))->file($f->getPathname())))continue;
